@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: lslb-cms-user-service
+
+  #jackson:
+    #time-zone: GMT
+management:
+  endpoint:
+  enabled-by-default: false
+  shutdown:
+    enabled: true
+
+
+eureka:
+  instance:
+    #hostname: localhost
+    preferIpAddress: true
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:2000/eureka/
+
+server:
+  port: ${APPLICATIONPORT:2002}
+security:
+  enable-csrf: false
+  ignored: /resources/**
+  basic:
+    enabled: false
+
+mongodb:
+  host: db2.mlnx.staging.vggdev.com
+  username: finatech-user
+  password: ${DB_PASSWORD}
+  database: LslbCmsUserDB
+  port: 27017
+logging:
+  level:
+    ROOT: INFO
+
+sso:
+  baseIdentityURL: https://sso.test.vggdev.com/identity
+  baseAPIURL: http://ssoapi.test.vggdev.com
+  apiUsername: lslb-cms-api
+  apiPassword: ${SSO_API_PASSWORD}
+  clientId: lslb-cms
+  clientSecret:  ${SSO_CLIENT_SECRET}
+  baseLogoutURL: https://sso.test.vggdev.com
+  publicKeyURL: https://sso.test.vggdev.com/identity/.well-known/jwks
+  applicationName: lslb-cms
+
+jwt:
+  header: Authorization
+
+racs:
+  ui:
+    host: ldap.test.vggdev.com
+    port:
+
+    
+email-host: smtp.gmail.com
+email-username: lslbcms@gmail.com
+email-password: password@123456
+email-port: 587
