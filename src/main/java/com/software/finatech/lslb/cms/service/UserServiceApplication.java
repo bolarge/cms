@@ -28,6 +28,8 @@ public class UserServiceApplication {
 
         ApplicationContext ctx = app.run(args);
 
+
+
         // Our global app context
         GlobalApplicationContext.ctx = ctx;
 
