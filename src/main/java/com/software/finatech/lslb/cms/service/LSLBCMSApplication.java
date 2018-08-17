@@ -1,33 +1,29 @@
-package com.software.finatech.lslb.cms.userservice;
-
-import java.util.Arrays;
+package com.software.finatech.lslb.cms.service;
 
 import com.software.finatech.lslb.cms.userservice.util.DatabaseLoaderUtils;
 import com.software.finatech.lslb.cms.userservice.util.GlobalApplicationContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 
-@SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
-@EnableDiscoveryClient
-public class UserServiceApplication {
+import java.util.Arrays;
 
-    private static Logger logger = LoggerFactory.getLogger(UserServiceApplication.class);
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
+public class LSLBCMSApplication {
+
+    private static Logger logger = LoggerFactory.getLogger(LSLBCMSApplication.class);
 
     public static void main(String[] args) {
-        SpringApplication app = new SpringApplication(UserServiceApplication.class);
+        SpringApplication app = new SpringApplication(LSLBCMSApplication.class);
         app.setBannerMode(Banner.Mode.OFF);
         logger.info("");
 
         ApplicationContext ctx = app.run(args);
-
 
 
         // Our global app context
@@ -38,7 +34,7 @@ public class UserServiceApplication {
 
         DatabaseLoaderUtils databaseLoaderUtils = (DatabaseLoaderUtils) ctx.getBean("databaseLoaderUtils");
         databaseLoaderUtils.runSeedData();
-        Environment env=  ctx.getBean(Environment.class);
+        Environment env = ctx.getBean(Environment.class);
         if (Arrays.asList(env.getActiveProfiles()).contains("development")) {
             databaseLoaderUtils.runLoadTestData();
         }

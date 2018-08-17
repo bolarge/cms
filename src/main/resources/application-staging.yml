@@ -1,7 +1,6 @@
 spring:
   application:
-    name: lslb-cms-user-service
-
+    name: lslb-cms
   #jackson:
     #time-zone: GMT
 management:
@@ -10,17 +9,8 @@ management:
   shutdown:
     enabled: true
 
-
-eureka:
-  instance:
-    #hostname: localhost
-    preferIpAddress: true
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:2000/eureka/
-
 server:
-  port: ${APPLICATIONPORT:2002}
+  port: ${APPLICATIONPORT:2001}
 security:
   enable-csrf: false
   ignored: /resources/**
@@ -31,7 +21,7 @@ mongodb:
   host: db2.mlnx.staging.vggdev.com
   username: finatech-user
   password: ${DB_PASSWORD}
-  database: LslbCmsUserDB
+  database: LslbCMSDb
   port: 27017
 logging:
   level:
