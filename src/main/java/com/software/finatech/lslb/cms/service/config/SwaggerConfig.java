@@ -33,7 +33,7 @@ public class SwaggerConfig {//extends WebMvcConfigurationSupport{
     }*/
 
     @Bean
-    public Docket racsUserServiceApi() {
+    public Docket lslbCmsServiceApi() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("com.software.finatech.lslb.cms.service.controller"))
@@ -45,7 +45,7 @@ public class SwaggerConfig {//extends WebMvcConfigurationSupport{
 
     private ApiInfo metaData() {
         return new ApiInfoBuilder()
-                .title("User Service API")
+                .title("LSLB CMS Service API")
                 //.description("\"REST API for HealthPay\"")
                 .version("1.0.0")
                 .build();

@@ -1,11 +1,9 @@
 package com.software.finatech.lslb.cms.service.util;
 
-import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.domain.AuthPermission;
-import com.software.finatech.lslb.cms.service.domain.AuthRole;
-import com.software.finatech.lslb.cms.service.domain.FactObject;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.GameTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import org.slf4j.Logger;
@@ -50,9 +48,7 @@ public class DatabaseLoaderUtils {
         AuthRoleReferenceData.load(mongoRepositoryReactive);
         LSLBAuthPermissionReferenceData.load(mongoRepositoryReactive);
         LSLBAuthRoleReferenceData.load(mongoRepositoryReactive);
-
-
-
+        GameTypeReferenceData.load(mongoRepositoryReactive);
     }
 
    // @Profile("test")
@@ -72,6 +68,7 @@ public class DatabaseLoaderUtils {
         factEnums.put("AuthRole",AuthRole.class);
 
         factEnums.put("AuthPermission",AuthPermission.class);
+        factEnums.put("GameType", GameType.class);
 
         for (Map.Entry<String, Class> entry : factEnums.entrySet()) {
             logger.info("Importing ReferenceMasterData for > "+ entry.getKey());

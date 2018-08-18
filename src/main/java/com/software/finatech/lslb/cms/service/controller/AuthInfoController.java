@@ -290,23 +290,15 @@ public class AuthInfoController extends BaseController {
             if (authInfoExists != null) {
                 return Mono.just(new ResponseEntity("Email already registered", HttpStatus.BAD_REQUEST));
             }
-
             /*String appUrl =
                     "http://" + request.getServerName() +
                             ":" + request.getServerPort() +
                             request.getContextPath();*/
-
             String appUrl = appHostPort + request.getContextPath();
-
-
-            AuthInfo authInfo = authInfoService.createAuthInfo(authInfoCreateDto, appUrl);
-
-            return Mono.just(new ResponseEntity(authInfo.convertToDto(), HttpStatus.OK));
-
+            return authInfoService.createAuthInfo(authInfoCreateDto, appUrl);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return null;
     }
 

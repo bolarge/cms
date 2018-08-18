@@ -13,8 +13,7 @@ import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 public interface AuthInfoService {
-    AuthInfo createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl);
-    AuthInfo createGameOperatorAuthInfo(CreateGameOperatorAuthInfoDto createGameOperatorAuthInfoDto, String appUrl);
+    Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl);
     Mono<String> updateAuthInfo();
     String resetPasswordToken(String email);
     Mono<ResponseEntity> resetPassword(SSOPasswordResetModel ssoPasswordResetModel);

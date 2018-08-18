@@ -10,6 +10,7 @@ import com.software.finatech.lslb.cms.service.dto.sso.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import io.advantageous.boon.json.JsonFactory;
 import io.advantageous.boon.json.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -26,6 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -33,6 +36,7 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
@@ -73,8 +77,14 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public AuthInfo createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl) {
+    public Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl) {
 
+        if (!StringUtils.isEmpty(authInfoCreateDto.getInstitutionId())) {
+            Mono<ResponseEntity> validateCreateAuthInfo = validateCreateGamingOperatorAuthInfo(authInfoCreateDto);
+            if (validateCreateAuthInfo != null) {
+                return validateCreateAuthInfo;
+            }
+        }
         AuthInfo authInfo = new AuthInfo();
         authInfo.setId(UUID.randomUUID().toString());
         authInfo.setEnabled(false);
@@ -148,14 +158,14 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
             }
 
-            return authInfo;
+            return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
-            logger.error("An error occured when trying to confirm if user exists", e);
-            return null;
+            String errorMsg = "An error occured when trying to create user";
+            return logAndReturnError(logger, errorMsg, e);
         }
     }
 
-    @Override
+    //  @Override
     public AuthInfo createGameOperatorAuthInfo(CreateGameOperatorAuthInfoDto createGameOperatorAuthInfoDto, String appUrl) {
         AuthInfo authInfo = new AuthInfo();
         authInfo.setId(UUID.randomUUID().toString());
@@ -578,6 +588,27 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             }
         } catch (Throwable e) {
             e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    private Mono<ResponseEntity> validateCreateGamingOperatorAuthInfo(AuthInfoCreateDto authInfoCreateDto) {
+        int maxNumberOfGamingOperatorUsers = 3;
+        String gamingOperatorAdminRoleId = "6";
+        String gamingOperatorUserRoleId = "7";
+        ArrayList<String> gamingOperatorLimitedRoles = new ArrayList<>();
+        gamingOperatorLimitedRoles.add(gamingOperatorAdminRoleId);
+        gamingOperatorLimitedRoles.add(gamingOperatorUserRoleId);
+        if (gamingOperatorLimitedRoles.contains(authInfoCreateDto.getAuthRoleId())) {
+            Query query = new Query();
+            query.addCriteria(Criteria.where("institutionId").is(authInfoCreateDto.getInstitutionId()));
+            query.addCriteria(Criteria.where("authRoleId").in(gamingOperatorLimitedRoles));
+
+            ArrayList<AuthInfo> authInfoListWithGamingOperator = (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
+            if (authInfoListWithGamingOperator.size() >= maxNumberOfGamingOperatorUsers) {
+                return Mono.just(new ResponseEntity<>("Number of users for gaming operator exceeded", HttpStatus.BAD_REQUEST));
+            }
         }
         return null;
     }
