@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.userservice.exception;
+package com.software.finatech.lslb.cms.service.exception;
 
 @SuppressWarnings("serial")
 public class FactNotFoundException extends Exception {

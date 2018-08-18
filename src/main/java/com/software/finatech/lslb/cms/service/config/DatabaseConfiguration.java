@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.userservice.config;
+package com.software.finatech.lslb.cms.service.config;
 
 
 import com.mongodb.ConnectionString;

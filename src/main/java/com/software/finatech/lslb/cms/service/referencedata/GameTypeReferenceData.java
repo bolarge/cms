@@ -1,7 +1,7 @@
-package com.software.finatech.lslb.cms.userservice.referencedata;
+package com.software.finatech.lslb.cms.service.referencedata;
 
-import com.software.finatech.lslb.cms.userservice.domain.GameType;
-import com.software.finatech.lslb.cms.userservice.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.domain.GameType;
+import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 
 public class GameTypeReferenceData {
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive){

@@ -1,8 +1,6 @@
-package com.software.finatech.lslb.cms.userservice.domain;
+package com.software.finatech.lslb.cms.service.domain;
 
-import com.software.finatech.lslb.cms.userservice.dto.AuthInfoDto;
-import com.software.finatech.lslb.cms.userservice.dto.FactObjectDto;
-import com.software.finatech.lslb.cms.userservice.util.PersistenceModification;
+import com.software.finatech.lslb.cms.service.util.PersistenceModification;
 import java.io.Serializable;
 
 public interface FactObject extends Serializable, Cloneable {

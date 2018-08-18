@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.userservice.persistence;
+package com.software.finatech.lslb.cms.service.persistence;
 
 import org.springframework.data.mongodb.core.query.Query;
 import reactor.core.publisher.Flux;

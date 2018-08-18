@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.userservice.dto.sso;
+package com.software.finatech.lslb.cms.service.dto.sso;
 
 public class SSOUserUpdate {
     protected String FirstName ;

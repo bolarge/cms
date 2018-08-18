@@ -1,7 +1,7 @@
-package com.software.finatech.lslb.cms.userservice.referencedata;
+package com.software.finatech.lslb.cms.service.referencedata;
 
-import com.software.finatech.lslb.cms.userservice.domain.AuthRole;
-import com.software.finatech.lslb.cms.userservice.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.domain.AuthRole;
+import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 
 import java.util.Arrays;
 

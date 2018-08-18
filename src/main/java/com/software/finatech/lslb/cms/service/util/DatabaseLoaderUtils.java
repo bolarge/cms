@@ -1,13 +1,13 @@
-package com.software.finatech.lslb.cms.userservice.util;
+package com.software.finatech.lslb.cms.service.util;
 
-import com.software.finatech.lslb.cms.userservice.domain.AuthInfo;
-import com.software.finatech.lslb.cms.userservice.domain.AuthPermission;
-import com.software.finatech.lslb.cms.userservice.domain.AuthRole;
-import com.software.finatech.lslb.cms.userservice.domain.FactObject;
-import com.software.finatech.lslb.cms.userservice.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.userservice.referencedata.AuthRoleReferenceData;
-import com.software.finatech.lslb.cms.userservice.referencedata.LSLBAuthPermissionReferenceData;
-import com.software.finatech.lslb.cms.userservice.referencedata.LSLBAuthRoleReferenceData;
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.AuthPermission;
+import com.software.finatech.lslb.cms.service.domain.AuthRole;
+import com.software.finatech.lslb.cms.service.domain.FactObject;
+import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

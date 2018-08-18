@@ -1,12 +1,12 @@
-package com.software.finatech.lslb.cms.userservice.service;
+package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.userservice.domain.AuthInfo;
-import com.software.finatech.lslb.cms.userservice.domain.VerificationToken;
-import com.software.finatech.lslb.cms.userservice.dto.AuthInfoCompleteDto;
-import com.software.finatech.lslb.cms.userservice.dto.AuthInfoCreateDto;
-import com.software.finatech.lslb.cms.userservice.dto.CreateGameOperatorAuthInfoDto;
-import com.software.finatech.lslb.cms.userservice.dto.sso.SSOChangePasswordModel;
-import com.software.finatech.lslb.cms.userservice.dto.sso.SSOPasswordResetModel;
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.VerificationToken;
+import com.software.finatech.lslb.cms.service.dto.AuthInfoCompleteDto;
+import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
+import com.software.finatech.lslb.cms.service.dto.CreateGameOperatorAuthInfoDto;
+import com.software.finatech.lslb.cms.service.dto.sso.SSOChangePasswordModel;
+import com.software.finatech.lslb.cms.service.dto.sso.SSOPasswordResetModel;
 
 import org.springframework.http.ResponseEntity;
 

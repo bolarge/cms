@@ -1,7 +1,7 @@
 package com.software.finatech.lslb.cms.service;
 
-import com.software.finatech.lslb.cms.userservice.util.DatabaseLoaderUtils;
-import com.software.finatech.lslb.cms.userservice.util.GlobalApplicationContext;
+import com.software.finatech.lslb.cms.service.util.DatabaseLoaderUtils;
+import com.software.finatech.lslb.cms.service.util.GlobalApplicationContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.Banner;

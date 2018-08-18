@@ -1,14 +1,13 @@
-package com.software.finatech.lslb.cms.userservice.service;
+package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.userservice.domain.AuthInfo;
-import com.software.finatech.lslb.cms.userservice.domain.AuthRole;
-import com.software.finatech.lslb.cms.userservice.domain.VerificationToken;
-import com.software.finatech.lslb.cms.userservice.dto.AuthInfoCompleteDto;
-import com.software.finatech.lslb.cms.userservice.dto.AuthInfoCreateDto;
-import com.software.finatech.lslb.cms.userservice.dto.CreateGameOperatorAuthInfoDto;
-import com.software.finatech.lslb.cms.userservice.dto.sso.*;
-import com.software.finatech.lslb.cms.userservice.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.userservice.util.ErrorResponseUtil;
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.AuthRole;
+import com.software.finatech.lslb.cms.service.domain.VerificationToken;
+import com.software.finatech.lslb.cms.service.dto.AuthInfoCompleteDto;
+import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
+import com.software.finatech.lslb.cms.service.dto.CreateGameOperatorAuthInfoDto;
+import com.software.finatech.lslb.cms.service.dto.sso.*;
+import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import io.advantageous.boon.json.JsonFactory;
 import io.advantageous.boon.json.ObjectMapper;
 import org.apache.http.HttpResponse;
@@ -35,7 +34,7 @@ import reactor.core.publisher.Mono;
 import javax.annotation.PostConstruct;
 import java.util.*;
 
-import static com.software.finatech.lslb.cms.userservice.util.ErrorResponseUtil.logAndReturnError;
+import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Service("authInfoService")
 public class AuthInfoServiceImpl implements AuthInfoService {

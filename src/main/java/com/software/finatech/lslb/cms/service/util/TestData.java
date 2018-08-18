@@ -1,8 +1,8 @@
-package com.software.finatech.lslb.cms.userservice.util;
+package com.software.finatech.lslb.cms.service.util;
 
 
-import com.software.finatech.lslb.cms.userservice.domain.AuthInfo;
-import com.software.finatech.lslb.cms.userservice.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

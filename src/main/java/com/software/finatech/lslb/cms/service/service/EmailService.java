@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.userservice.service;
+package com.software.finatech.lslb.cms.service.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;

@@ -1,16 +1,15 @@
-package com.software.finatech.lslb.cms.userservice.controller;
+package com.software.finatech.lslb.cms.service.controller;
 
-import com.software.finatech.lslb.cms.userservice.domain.AuthInfo;
-import com.software.finatech.lslb.cms.userservice.domain.VerificationToken;
-import com.software.finatech.lslb.cms.userservice.dto.*;
-import com.software.finatech.lslb.cms.userservice.dto.sso.SSOChangePasswordModel;
-import com.software.finatech.lslb.cms.userservice.dto.sso.SSOPasswordResetModel;
-import com.software.finatech.lslb.cms.userservice.dto.sso.SSOToken;
-import com.software.finatech.lslb.cms.userservice.dto.sso.SSOUserConfirmResetPasswordRequest;
-import com.software.finatech.lslb.cms.userservice.exception.FactNotFoundException;
-import com.software.finatech.lslb.cms.userservice.service.AuthInfoServiceImpl;
-import com.software.finatech.lslb.cms.userservice.service.MailContentBuilderService;
-import com.software.finatech.lslb.cms.userservice.util.ErrorResponseUtil;
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.VerificationToken;
+import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.dto.sso.SSOChangePasswordModel;
+import com.software.finatech.lslb.cms.service.dto.sso.SSOPasswordResetModel;
+import com.software.finatech.lslb.cms.service.dto.sso.SSOToken;
+import com.software.finatech.lslb.cms.service.dto.sso.SSOUserConfirmResetPasswordRequest;
+import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
+import com.software.finatech.lslb.cms.service.service.AuthInfoServiceImpl;
+import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -39,7 +38,7 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.software.finatech.lslb.cms.userservice.util.ErrorResponseUtil.logAndReturnError;
+import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Api(value = "AuthInfo", description = "", tags = "")
 @RestController

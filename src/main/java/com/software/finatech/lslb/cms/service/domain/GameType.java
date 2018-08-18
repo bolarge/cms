@@ -1,6 +1,6 @@
-package com.software.finatech.lslb.cms.userservice.domain;
+package com.software.finatech.lslb.cms.service.domain;
 
-import com.software.finatech.lslb.cms.userservice.dto.GameTypeDto;
+import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @SuppressWarnings("serial")

@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.userservice.dto;
+package com.software.finatech.lslb.cms.service.dto;
 
 public class AuthInfoDto {
     protected String id;

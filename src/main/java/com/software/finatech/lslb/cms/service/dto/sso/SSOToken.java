@@ -1,7 +1,7 @@
-package com.software.finatech.lslb.cms.userservice.dto.sso;
+package com.software.finatech.lslb.cms.service.dto.sso;
 
 
-import com.software.finatech.lslb.cms.userservice.dto.AuthInfoDto;
+import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
 
 public class SSOToken {
 
