@@ -2,10 +2,7 @@ package com.software.finatech.lslb.cms.service.util;
 
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.GameTypeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +46,7 @@ public class DatabaseLoaderUtils {
         LSLBAuthPermissionReferenceData.load(mongoRepositoryReactive);
         LSLBAuthRoleReferenceData.load(mongoRepositoryReactive);
         GameTypeReferenceData.load(mongoRepositoryReactive);
+        StatusReferenceData.load(mongoRepositoryReactive);
     }
 
    // @Profile("test")
@@ -69,6 +67,7 @@ public class DatabaseLoaderUtils {
 
         factEnums.put("AuthPermission",AuthPermission.class);
         factEnums.put("GameType", GameType.class);
+        factEnums.put("Status", Status.class);
 
         for (Map.Entry<String, Class> entry : factEnums.entrySet()) {
             logger.info("Importing ReferenceMasterData for > "+ entry.getKey());
