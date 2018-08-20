@@ -1,8 +1,8 @@
-package com.software.finatech.lslb.cms.userservice.domain;
+package com.software.finatech.lslb.cms.service.domain;
 
-import com.software.finatech.lslb.cms.userservice.dto.AuthInfoDto;
-import com.software.finatech.lslb.cms.userservice.exception.FactNotFoundException;
-import com.software.finatech.lslb.cms.userservice.util.Mapstore;
+import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
+import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
+import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.joda.time.DateTime;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;

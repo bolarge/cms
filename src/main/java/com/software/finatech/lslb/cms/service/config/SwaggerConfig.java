@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.userservice.config;
+package com.software.finatech.lslb.cms.service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,10 +33,10 @@ public class SwaggerConfig {//extends WebMvcConfigurationSupport{
     }*/
 
     @Bean
-    public Docket racsUserServiceApi() {
+    public Docket lslbCmsServiceApi() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.software.finatech.lslb.cms.userservice.controller"))
+                .apis(RequestHandlerSelectors.basePackage("com.software.finatech.lslb.cms.service.controller"))
                 //.paths(PathSelectors.regex("/api.*"))
                 .paths(PathSelectors.any())
                 .build()
@@ -45,7 +45,7 @@ public class SwaggerConfig {//extends WebMvcConfigurationSupport{
 
     private ApiInfo metaData() {
         return new ApiInfoBuilder()
-                .title("User Service API")
+                .title("LSLB CMS Service API")
                 //.description("\"REST API for HealthPay\"")
                 .version("1.0.0")
                 .build();

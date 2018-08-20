@@ -20,17 +20,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-dependencies</artifactId>
-        <version>Finchley.RELEASE</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+
 
     <repositories>
         <repository>
@@ -45,10 +35,7 @@
           <artifactId>jjwt-library</artifactId>
           <version>3.0.0</version>
       </dependency>
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-    </dependency>
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -189,7 +176,7 @@
           </execution>
         </executions>
         <configuration>
-          <mainClass>com.software.finatech.lslb.cms.userservice.UserServiceApplication</mainClass>
+          <mainClass>com.software.finatech.lslb.cms.service.LSLBCMSApplication</mainClass>
         </configuration>
       </plugin>
     </plugins>

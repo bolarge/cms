@@ -1,8 +1,8 @@
-package com.software.finatech.lslb.cms.userservice.domain;
+package com.software.finatech.lslb.cms.service.domain;
 
-import com.software.finatech.lslb.cms.userservice.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.userservice.util.GlobalApplicationContext;
-import com.software.finatech.lslb.cms.userservice.util.PersistenceModification;
+import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.util.GlobalApplicationContext;
+import com.software.finatech.lslb.cms.service.util.PersistenceModification;
 import io.advantageous.boon.json.annotations.JsonIgnore;
 import org.joda.time.DateTime;
 import org.springframework.data.annotation.*;

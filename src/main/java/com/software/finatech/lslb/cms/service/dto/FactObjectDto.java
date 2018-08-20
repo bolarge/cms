@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.userservice.dto;
+package com.software.finatech.lslb.cms.service.dto;
 
 public interface FactObjectDto {
      FactObjectDto getFactObjectDto();

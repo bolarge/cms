@@ -1,8 +1,8 @@
-package com.software.finatech.lslb.cms.userservice.config;
+package com.software.finatech.lslb.cms.service.config;
 
-import com.software.finatech.lslb.cms.userservice.dto.LoginDto;
-import com.software.finatech.lslb.cms.userservice.dto.sso.SSOChangePasswordModel;
-import com.software.finatech.lslb.cms.userservice.dto.sso.SSOPasswordResetModel;
+import com.software.finatech.lslb.cms.service.dto.LoginDto;
+import com.software.finatech.lslb.cms.service.dto.sso.SSOChangePasswordModel;
+import com.software.finatech.lslb.cms.service.dto.sso.SSOPasswordResetModel;
 import io.advantageous.boon.json.JsonFactory;
 import io.advantageous.boon.json.ObjectMapper;
 import org.apache.commons.io.IOUtils;

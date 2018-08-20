@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.userservice.config;
+package com.software.finatech.lslb.cms.service.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;

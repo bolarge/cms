@@ -1,7 +1,7 @@
-package com.software.finatech.lslb.cms.userservice.domain;
+package com.software.finatech.lslb.cms.service.domain;
 
 
-import com.software.finatech.lslb.cms.userservice.dto.EnumeratedFactDto;
+import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 
 /**
  * Created by davidjaiyeola on 3/6/16.

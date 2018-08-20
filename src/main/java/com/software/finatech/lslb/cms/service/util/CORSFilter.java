@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.userservice.util;
+package com.software.finatech.lslb.cms.service.util;
 
 import org.springframework.stereotype.Component;
 

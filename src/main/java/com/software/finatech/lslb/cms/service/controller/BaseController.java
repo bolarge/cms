@@ -1,8 +1,8 @@
-package com.software.finatech.lslb.cms.userservice.controller;
+package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.jjwt.JwtHeaderTokenExtractor;
-import com.software.finatech.lslb.cms.userservice.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.userservice.service.EmailService;
+import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.service.EmailService;
 import io.advantageous.boon.json.JsonFactory;
 import io.advantageous.boon.json.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;

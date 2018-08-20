@@ -1,9 +1,8 @@
-package com.software.finatech.lslb.cms.userservice.controller;
+package com.software.finatech.lslb.cms.service.controller;
 
 
-import com.software.finatech.lslb.cms.userservice.domain.FactObject;
-import com.software.finatech.lslb.cms.userservice.domain.GameType;
-import com.software.finatech.lslb.cms.userservice.dto.GameTypeDto;
+import com.software.finatech.lslb.cms.service.domain.GameType;
+import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Api(value = "GameType", description = "", tags = "")
