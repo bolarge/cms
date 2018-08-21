@@ -13,6 +13,7 @@ public class License extends AbstractFact {
     protected DateTime startDate;
     protected DateTime endDate;
     protected String parentLicenseId;
+    protected String gameTypeId;
 
     public String getPaymentRecordId() {
         return paymentRecordId;
@@ -61,6 +62,15 @@ public class License extends AbstractFact {
     public void setParentLicenseId(String parentLicenseId) {
         this.parentLicenseId = parentLicenseId;
     }
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
+
 
     @Override
     public String getFactName() {
