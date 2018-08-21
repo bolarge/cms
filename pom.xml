@@ -12,7 +12,7 @@
   <artifactId>lslb-cms</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <name>lslb-cms-user-service</name>
+  <name>lslb-cms-service</name>
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
 

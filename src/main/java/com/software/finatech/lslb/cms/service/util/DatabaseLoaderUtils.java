@@ -23,10 +23,10 @@ public class DatabaseLoaderUtils {
     protected MongoRepositoryReactiveImpl mongoRepositoryReactive;
     protected io.advantageous.boon.json.ObjectMapper mapper;
 
-    public void runSeedData(){
+    public void runSeedData() {
         //Seed AuthInfo
-        AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById("1",AuthInfo.class).block();
-        if(authInfo==null){
+        AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById("1", AuthInfo.class).block();
+        if (authInfo == null) {
             authInfo = new AuthInfo();
             authInfo.setId("1");
         }
@@ -47,43 +47,45 @@ public class DatabaseLoaderUtils {
         LSLBAuthRoleReferenceData.load(mongoRepositoryReactive);
         GameTypeReferenceData.load(mongoRepositoryReactive);
         StatusReferenceData.load(mongoRepositoryReactive);
+        LicenseStatusReferenceData.load(mongoRepositoryReactive);
     }
 
-   // @Profile("test")
-    public void runLoadTestData(){
+    // @Profile("test")
+    public void runLoadTestData() {
         //TestData.generateInvoices(mongoRepositoryReactive,auditLogHelper,TestData.generateHealthInstitution(mongoRepositoryReactive),1000);
     }
 
-    public void generateAuthTestData(){
+    public void generateAuthTestData() {
         TestData.generateAuthTestData(mongoRepositoryReactive);
     }
 
     // @PostConstruct
-    public void runLoadData(){
+    public void runLoadData() {
 
         ConcurrentHashMap<String, Class> factEnums = new ConcurrentHashMap<>();
         //factEnums.put("AccountRole",AccountRole.class);
-        factEnums.put("AuthRole",AuthRole.class);
+        factEnums.put("AuthRole", AuthRole.class);
 
-        factEnums.put("AuthPermission",AuthPermission.class);
+        factEnums.put("AuthPermission", AuthPermission.class);
         factEnums.put("GameType", GameType.class);
         factEnums.put("Status", Status.class);
+        factEnums.put("LicenseStatus", LicenseStatus.class);
 
         for (Map.Entry<String, Class> entry : factEnums.entrySet()) {
-            logger.info("Importing ReferenceMasterData for > "+ entry.getKey());
+            logger.info("Importing ReferenceMasterData for > " + entry.getKey());
             Long startTime = System.nanoTime();
-            HashSet<FactObject> factObjects  =
+            HashSet<FactObject> factObjects =
                     (HashSet<FactObject>) mongoRepositoryReactive.findAll(entry.getValue()).toStream().collect(Collectors.toSet());
 
-            ConcurrentHashMap<String, FactObject> facts =  new ConcurrentHashMap<>();
-            factObjects.forEach(fact-> {
-                facts.put(fact.getId(),fact);
+            ConcurrentHashMap<String, FactObject> facts = new ConcurrentHashMap<>();
+            factObjects.forEach(fact -> {
+                facts.put(fact.getId(), fact);
             });
 
-            Mapstore.STORE.put(entry.getKey(),facts);
+            Mapstore.STORE.put(entry.getKey(), facts);
             Long endTime = System.nanoTime() - startTime;
-            Double timeMills = (double) (Double.valueOf(endTime)/Double.valueOf(1000000));
-            logger.info("Importing took "+" -> "+ endTime + "ns" + " >>> " + timeMills +"ms");
+            Double timeMills = (double) (Double.valueOf(endTime) / Double.valueOf(1000000));
+            logger.info("Importing took " + " -> " + endTime + "ns" + " >>> " + timeMills + "ms");
         }
 
     }
