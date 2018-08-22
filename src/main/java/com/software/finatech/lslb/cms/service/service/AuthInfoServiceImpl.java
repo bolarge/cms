@@ -8,6 +8,7 @@ import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
 import com.software.finatech.lslb.cms.service.dto.CreateGameOperatorAuthInfoDto;
 import com.software.finatech.lslb.cms.service.dto.sso.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import io.advantageous.boon.json.JsonFactory;
 import io.advantageous.boon.json.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;

@@ -46,8 +46,11 @@ public class DatabaseLoaderUtils {
         LSLBAuthPermissionReferenceData.load(mongoRepositoryReactive);
         LSLBAuthRoleReferenceData.load(mongoRepositoryReactive);
         GameTypeReferenceData.load(mongoRepositoryReactive);
-        StatusReferenceData.load(mongoRepositoryReactive);
+        ApplicationFormStatusReferenceData.load(mongoRepositoryReactive);
+        ApplicationFromTypeReferenceData.load(mongoRepositoryReactive);
+        PaymentStatusReferenceData.load(mongoRepositoryReactive);
         LicenseStatusReferenceData.load(mongoRepositoryReactive);
+        FeePaymentTypeReferenceData.load(mongoRepositoryReactive);
     }
 
     // @Profile("test")
@@ -65,11 +68,13 @@ public class DatabaseLoaderUtils {
         ConcurrentHashMap<String, Class> factEnums = new ConcurrentHashMap<>();
         //factEnums.put("AccountRole",AccountRole.class);
         factEnums.put("AuthRole", AuthRole.class);
-
         factEnums.put("AuthPermission", AuthPermission.class);
         factEnums.put("GameType", GameType.class);
-        factEnums.put("Status", Status.class);
+        factEnums.put("ApplicationFormStatus", ApplicationFormStatus.class);
         factEnums.put("LicenseStatus", LicenseStatus.class);
+        factEnums.put("ApplicationFormType", ApplicationFormType.class);
+        factEnums.put("PaymentStatus", PaymentStatus.class);
+        factEnums.put("FeePaymentType", FeePaymentType.class);
 
         for (Map.Entry<String, Class> entry : factEnums.entrySet()) {
             logger.info("Importing ReferenceMasterData for > " + entry.getKey());
@@ -87,6 +92,5 @@ public class DatabaseLoaderUtils {
             Double timeMills = (double) (Double.valueOf(endTime) / Double.valueOf(1000000));
             logger.info("Importing took " + " -> " + endTime + "ns" + " >>> " + timeMills + "ms");
         }
-
     }
 }

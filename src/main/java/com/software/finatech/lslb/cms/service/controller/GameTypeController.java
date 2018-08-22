@@ -29,9 +29,7 @@ public class GameTypeController extends BaseController {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 404, message = "Not Found")
-    }
-    )
+            @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> gameTypeDtos() {
         try {
             //@TODO validate request params
@@ -52,5 +50,4 @@ public class GameTypeController extends BaseController {
         }
         return null;
     }
-
 }
