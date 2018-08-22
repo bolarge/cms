@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.service.service;
+package com.software.finatech.lslb.cms.service.service.contracts;
 
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.VerificationToken;
