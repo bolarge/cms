@@ -17,6 +17,7 @@ public class ApplicationForm extends AbstractFact {
     protected Set<String> paymentRecordIds;
     protected String applicationFormTypeId;
     protected String formName;
+    protected String approverId;
 
     public String getInstitutionId() {
         return institutionId;
@@ -64,6 +65,18 @@ public class ApplicationForm extends AbstractFact {
 
     public void setFormName(String formName) {
         this.formName = formName;
+    }
+
+    public String getApproverId() {
+        return approverId;
+    }
+
+    public void setApproverId(String approverId) {
+        this.approverId = approverId;
+    }
+
+    public AuthInfo getApprover() {
+        return (AuthInfo) mongoRepositoryReactive.findById(approverId, AuthInfo.class).block();
     }
 
     private GameType getGameType() {
@@ -134,6 +147,11 @@ public class ApplicationForm extends AbstractFact {
         if (institution != null) {
             applicationFormDto.setInstitutionName(institution.getInstitutionName());
             applicationFormDto.setInstitutionId(institutionId);
+        }
+        AuthInfo approver = getApprover();
+        if (approver != null){
+            applicationFormDto.setApproverId(approverId);
+            applicationFormDto.setApproverName(approver.getFullName());
         }
         return applicationFormDto;
     }
