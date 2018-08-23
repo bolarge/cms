@@ -12,6 +12,8 @@ public class ApplicationFormDto {
     private String formName;
     private String institutionId;
     private String institutionName;
+    private String approverId;
+    private String approverName;
 
     public GameTypeDto getGameType() {
         return gameType;
@@ -67,5 +69,21 @@ public class ApplicationFormDto {
 
     public void setInstitutionName(String institutionName) {
         this.institutionName = institutionName;
+    }
+
+    public String getApproverId() {
+        return approverId;
+    }
+
+    public void setApproverId(String approverId) {
+        this.approverId = approverId;
+    }
+
+    public String getApproverName() {
+        return approverName;
+    }
+
+    public void setApproverName(String approverName) {
+        this.approverName = approverName;
     }
 }

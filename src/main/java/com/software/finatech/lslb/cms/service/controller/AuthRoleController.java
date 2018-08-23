@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @Api(value = "AuthRole", description = "", tags = "")
 @RestController
 @RequestMapping("/api/v1/authrole")
-public class AuthRoleController extends BaseController{
+public class AuthRoleController extends BaseController {
 
 
    /* @Autowired
@@ -39,7 +39,7 @@ public class AuthRoleController extends BaseController{
      * @param id AuthInfo id
      * @return AuthInfo full information
      */
-    @ApiOperation(value = "Get AuthRole By Id", response = AuthRoleDto.class, consumes="application/json")
+    @ApiOperation(value = "Get AuthRole By Id", response = AuthRoleDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -47,11 +47,11 @@ public class AuthRoleController extends BaseController{
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    @RequestMapping(method= RequestMethod.GET, value="/{id}", produces ="application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}", produces = "application/json")
     public Mono<ResponseEntity> getById(@PathVariable String id) {
-        AuthRole authRole = (AuthRole) mongoRepositoryReactive.findById(id,AuthRole.class).block();
-        if(authRole == null){
-            return  Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
+        AuthRole authRole = (AuthRole) mongoRepositoryReactive.findById(id, AuthRole.class).block();
+        if (authRole == null) {
+            return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
         }
 
         return Mono.just(new ResponseEntity(authRole.convertToDto(), HttpStatus.OK));
@@ -65,16 +65,14 @@ public class AuthRoleController extends BaseController{
      */
 
 
-
     /**
-     *
      * @param authRoleCreateDto
      * @param request
      * @return
      */
-    @RequestMapping(value = "/role/new", method = RequestMethod.POST, produces ="application/json" )
+    @RequestMapping(value = "/role/new", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
-    @ApiOperation(value = "Creates a new role", response = AuthRoleDto.class, consumes="application/json")
+    @ApiOperation(value = "Creates a new role", response = AuthRoleDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -85,16 +83,16 @@ public class AuthRoleController extends BaseController{
     public Mono<ResponseEntity> createAuthRole(@Valid @RequestBody AuthRoleCreateDto authRoleCreateDto, HttpServletRequest request) {
         try {
             // Lookup AuthIRole in database by name
-            AuthRole authRoleExists = (AuthRole) mongoRepositoryReactive.find(new Query(Criteria.where("name").is(authRoleCreateDto.getName())),AuthRole.class).block();
-            if(authRoleExists != null){
-                return  Mono.just(new ResponseEntity("Role Name Already Exist", HttpStatus.BAD_REQUEST));
+            AuthRole authRoleExists = (AuthRole) mongoRepositoryReactive.find(new Query(Criteria.where("name").is(authRoleCreateDto.getName())), AuthRole.class).block();
+            if (authRoleExists != null) {
+                return Mono.just(new ResponseEntity("Role Name Already Exist", HttpStatus.BAD_REQUEST));
             }
-                AuthRole authRole = new AuthRole();
+            AuthRole authRole = new AuthRole();
 
-                authRole.setId(UUID.randomUUID().toString());
-                authRole.setDescription(authRoleCreateDto.getDescription());
-                authRole.setName(authRoleCreateDto.getName());
-                authRole.getAuthPermissionIds().addAll(authRoleCreateDto.getAuthPermissionIds());
+            authRole.setId(UUID.randomUUID().toString());
+            authRole.setDescription(authRoleCreateDto.getDescription());
+            authRole.setName(authRoleCreateDto.getName());
+            authRole.getAuthPermissionIds().addAll(authRoleCreateDto.getAuthPermissionIds());
 
 
             mongoRepositoryReactive.saveOrUpdate(authRole);
@@ -111,25 +109,25 @@ public class AuthRoleController extends BaseController{
 
         return null;
     }
+
     /**
-     *
      * @param
      * @return
      */
-    @RequestMapping(value = "/role/update", method = RequestMethod.POST, produces ="application/json" )
+    @RequestMapping(value = "/role/update", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
-    @ApiOperation(value = "Update an authRole", response = AuthInfoDto.class, consumes="application/json")
+    @ApiOperation(value = "Update an authRole", response = AuthInfoDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request")
     }
     )
-    public Mono<ResponseEntity> updateAuthRole(@Valid  @RequestBody AuthRoleUpdateDto authRoleUpdateDto) {
+    public Mono<ResponseEntity> updateAuthRole(@Valid @RequestBody AuthRoleUpdateDto authRoleUpdateDto) {
         try {
             AuthRole authRole = (AuthRole) Mapstore.STORE.get("AuthRole").get(authRoleUpdateDto.getId());
-            if(authRole == null){
-                return  Mono.just(new ResponseEntity("Role does not exist", HttpStatus.BAD_REQUEST));
+            if (authRole == null) {
+                return Mono.just(new ResponseEntity("Role does not exist", HttpStatus.BAD_REQUEST));
             }
             authRole.getAuthPermissionIds().clear();
             authRole.getAuthPermissions().clear();
@@ -162,8 +160,8 @@ public class AuthRoleController extends BaseController{
     /**
      * @return All role full information
      */
-    @RequestMapping(method= RequestMethod.GET, value="/role/allroles")
-    @ApiOperation(value = "Get AuthRoles", response = AuthRoleDto.class, consumes="application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "/role/allroles")
+    @ApiOperation(value = "Get AuthRoles", response = AuthRoleDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -172,13 +170,13 @@ public class AuthRoleController extends BaseController{
     }
     )
     public Mono<ResponseEntity> authRoles() {
-        try{
+        try {
             //@TODO validate request params
             List<FactObject> authRoles = Mapstore.STORE.get("AuthRole").values().stream().collect(Collectors.toList());
             //ArrayList<FactObject> authRoles = (ArrayList<FactObject>) mongoRepositoryReactive.findAll(AuthRole.class).toStream().collect(Collectors.toList());
-            ArrayList<AuthRoleDto> authRoleDtos =  authRoleDtoListFromAuthRoleList(authRoles);
-            if(authRoleDtos.size() == 0){
-                return  Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
+            ArrayList<AuthRoleDto> authRoleDtos = authRoleDtoListFromAuthRoleList(authRoles);
+            if (authRoleDtos.size() == 0) {
+                return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
             }
 
             return Mono.just(new ResponseEntity(authRoleDtos, HttpStatus.OK));
@@ -192,8 +190,8 @@ public class AuthRoleController extends BaseController{
     /**
      * @return All permission full information
      */
-    @RequestMapping(method= RequestMethod.GET, value="/permission/all")
-        @ApiOperation(value = "Get AuthPermisions", response = AuthPermissionDto.class, consumes="application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "/permission/all")
+    @ApiOperation(value = "Get AuthPermisions", response = AuthPermissionDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -202,17 +200,17 @@ public class AuthRoleController extends BaseController{
     }
     )
     public Mono<ResponseEntity> authPermissions() {
-        try{
+        try {
             //@TODO validate request params
             List<FactObject> authPermissions = Mapstore.STORE.get("AuthPermission").values().stream().collect(Collectors.toList());
             //ArrayList<FactObject> authRoles = (ArrayList<FactObject>) mongoRepositoryReactive.findAll(AuthRole.class).toStream().collect(Collectors.toList());
-            ArrayList<AuthPermissionDto> authPermissionDtos =  new ArrayList<>();
-            authPermissions.forEach(entry->{
-                authPermissionDtos.add(((AuthPermission)entry).convertToDto());
+            ArrayList<AuthPermissionDto> authPermissionDtos = new ArrayList<>();
+            authPermissions.forEach(entry -> {
+                authPermissionDtos.add(((AuthPermission) entry).convertToDto());
             });
 
-            if(authPermissionDtos.size() == 0){
-                return  Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
+            if (authPermissionDtos.size() == 0) {
+                return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
             }
 
             return Mono.just(new ResponseEntity(authPermissionDtos, HttpStatus.OK));
@@ -224,14 +222,13 @@ public class AuthRoleController extends BaseController{
     }
 
     /**
-     *
      * @param authPermissionCreateDto
      * @param request
      * @return
      */
-    @RequestMapping(value = "/permission/new", method = RequestMethod.POST, produces ="application/json" )
+    @RequestMapping(value = "/permission/new", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
-    @ApiOperation(value = "Creates a new permission", response = AuthPermissionDto.class, consumes="application/json")
+    @ApiOperation(value = "Creates a new permission", response = AuthPermissionDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -241,9 +238,9 @@ public class AuthRoleController extends BaseController{
     public Mono<ResponseEntity> createAuthPermission(@Valid @RequestBody AuthPermissionCreateDto authPermissionCreateDto, HttpServletRequest request) {
         try {
             // Lookup AuthIRole in database by name
-            AuthPermission authPermissionExists = (AuthPermission) mongoRepositoryReactive.find(new Query(Criteria.where("name").is(authPermissionCreateDto.getName())),AuthPermission.class).block();
-            if(authPermissionExists != null){
-                return  Mono.just(new ResponseEntity("Role Name Already Exist", HttpStatus.BAD_REQUEST));
+            AuthPermission authPermissionExists = (AuthPermission) mongoRepositoryReactive.find(new Query(Criteria.where("name").is(authPermissionCreateDto.getName())), AuthPermission.class).block();
+            if (authPermissionExists != null) {
+                return Mono.just(new ResponseEntity("Role Name Already Exist", HttpStatus.BAD_REQUEST));
             }
             AuthPermission authPermission = new AuthPermission();
 
@@ -268,29 +265,28 @@ public class AuthRoleController extends BaseController{
     }
 
     /**
-     *
      * @param
      * @return
      */
-    @RequestMapping(value = "/permission/update", method = RequestMethod.POST, produces ="application/json" )
+    @RequestMapping(value = "/permission/update", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
-    @ApiOperation(value = "Update an authRole", response = AuthInfoDto.class, consumes="application/json")
+    @ApiOperation(value = "Update an authRole", response = AuthInfoDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request")
     }
     )
-    public Mono<ResponseEntity> updateAuthRole(@Valid  @RequestBody AuthPermissionUpdateDto authPermissionUpdateDto) {
+    public Mono<ResponseEntity> updateAuthRole(@Valid @RequestBody AuthPermissionUpdateDto authPermissionUpdateDto) {
         try {
-            AuthPermission authPermission = (AuthPermission) mongoRepositoryReactive.findById(authPermissionUpdateDto.getId(),AuthRole.class).block();
-            if(authPermission == null){
-                return  Mono.just(new ResponseEntity("Bad Request", HttpStatus.BAD_REQUEST));
+            AuthPermission authPermission = (AuthPermission) mongoRepositoryReactive.findById(authPermissionUpdateDto.getId(), AuthRole.class).block();
+            if (authPermission == null) {
+                return Mono.just(new ResponseEntity("Bad Request", HttpStatus.BAD_REQUEST));
             }
 
-            if(authPermissionUpdateDto.getId() != null && !authPermissionUpdateDto.getId().isEmpty()){
+            if (authPermissionUpdateDto.getId() != null && !authPermissionUpdateDto.getId().isEmpty()) {
                 authPermission.setId(authPermissionUpdateDto.getId());
-            }else if(authPermissionUpdateDto.getName() != null && !authPermissionUpdateDto.getName().isEmpty()){
+            } else if (authPermissionUpdateDto.getName() != null && !authPermissionUpdateDto.getName().isEmpty()) {
                 authPermission.setDescription(authPermissionUpdateDto.getDescription());
             }
 
@@ -307,7 +303,6 @@ public class AuthRoleController extends BaseController{
     }
 
     /**
-     *
      * @param userRoleId
      * @return
      */
@@ -320,10 +315,32 @@ public class AuthRoleController extends BaseController{
             @ApiResponse(code = 400, message = "Bad request")
     }
     )
-    public Mono<ResponseEntity> getElibleRolesForCreation(@PathVariable(name = "userRoleId") long userRoleId) {
-        List<FactObject> authRoles = Mapstore.STORE.get("AuthRole").values()
-                .stream().filter(factObject -> Long.valueOf(factObject.getId()) > userRoleId ).collect(Collectors.toList());
-        ArrayList<AuthRoleDto> authRoleDtos = authRoleDtoListFromAuthRoleList(authRoles);
+    public Mono<ResponseEntity> getEligibleRolesForCreation(@PathVariable(name = "userRoleId") long userRoleId) {
+        Collection<FactObject> authRoles = Mapstore.STORE.get("AuthRole").values();
+        List<AuthRole> eligibleRoles = new ArrayList<>();
+        for (FactObject factObject : authRoles) {
+            AuthRole authRole = (AuthRole) factObject;
+            try {
+                long id = Long.valueOf(authRole.getId());
+                if (id > userRoleId) {
+                    eligibleRoles.add(authRole);
+                }
+            } catch (Exception e) {
+                logger.error(String.format("Error parsing Id %s", authRole.getId()));
+            }
+        }
+
+        ArrayList<AuthRoleDto> authRoleDtos = new ArrayList<>();
+        eligibleRoles.forEach(authRole -> {
+            try {
+                authRole.setAssociatedProperties();
+            } catch (FactNotFoundException e) {
+                logger.error(String.format("Error setting associated properties of role %s", authRole.getId()));
+            }
+            authRole.convertToDto();
+        });
+        //.stream().filter(factObject -> Long.valueOf(factObject.getId()) > userRoleId ).collect(Collectors.toList());
+        //   ArrayList<AuthRoleDto> authRoleDtos = authRoleDtoListFromAuthRoleList(authRoles);
         if (authRoleDtos.size() == 0) {
             return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
         }
@@ -332,7 +349,7 @@ public class AuthRoleController extends BaseController{
     }
 
 
-    private ArrayList<AuthRoleDto> authRoleDtoListFromAuthRoleList(List<FactObject> authRoles){
+    private ArrayList<AuthRoleDto> authRoleDtoListFromAuthRoleList(List<FactObject> authRoles) {
         ArrayList<AuthRoleDto> authRoleDtos = new ArrayList<>();
         authRoles.forEach(entry -> {
             try {
