@@ -9,7 +9,18 @@ public class FeeCreateDto {
     protected String gameTyeId;
     @NotEmpty(message = "Please provide fee payment type id")
     protected String feePaymentTypeId;
+    @NotEmpty(message = "Please provide payment type duration")
+    protected int duration;
+
     protected String revenueName;
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
 
     public double getAmount() {
         return amount;

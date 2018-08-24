@@ -6,6 +6,15 @@ public class FeeDto {
     protected EnumeratedFactDto feePaymentType;
     protected String revenueName;
     protected String id;
+    protected int duration;
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
 
     public String getId() {
         return id;

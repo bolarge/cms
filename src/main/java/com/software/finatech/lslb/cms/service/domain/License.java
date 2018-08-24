@@ -3,6 +3,8 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Map;
@@ -14,10 +16,11 @@ public class License extends AbstractFact {
     protected String paymentRecordId;
     protected String licenseStatusId;
     protected String institutionId;
-    protected DateTime startDate;
-    protected DateTime endDate;
+    protected LocalDateTime startDate;
+    protected LocalDateTime endDate;
     protected String parentLicenseId;
     protected String gameTypeId;
+
 
     public String getPaymentRecordId() {
         return paymentRecordId;
@@ -43,19 +46,19 @@ public class License extends AbstractFact {
         this.institutionId = institutionId;
     }
 
-    public DateTime getStartDate() {
+    public LocalDateTime getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(DateTime startDate) {
+    public void setStartDate(LocalDateTime startDate) {
         this.startDate = startDate;
     }
 
-    public DateTime getEndDate() {
+    public LocalDateTime getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(DateTime endDate) {
+    public void setEndDate(LocalDateTime endDate) {
         this.endDate = endDate;
     }
 
@@ -116,24 +119,25 @@ public class License extends AbstractFact {
 
     public LicenseDto convertToDto() {
         LicenseDto licenseDto = new LicenseDto();
+        licenseDto.setId(getId());
         Institution institution = getInstitution();
         if (institution != null) {
             licenseDto.setInstitutionId(institutionId);
-            licenseDto.setInstitutionName(institution.getInstitutionName());
+            licenseDto.getLicenseRecordDto().setInstitutionName(institution.getInstitutionName());
         }
         GameType gameType = getGameType();
         if (gameType != null) {
-            licenseDto.setGameType(gameType.convertToDto());
+            licenseDto.getLicenseRecordDto().setGameType(gameType.convertToDto());
         }
         LicenseStatus licenseStatus = getLicenseStatus();
         if (licenseStatus != null) {
             licenseDto.setLicenseStatus(licenseStatus.convertToDto());
         }
-        licenseDto.setStartDate(startDate.toString("dd/MM/yyyy HH:mm:ss"));
-        licenseDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
+        licenseDto.getLicenseRecordDto().setStartDate(startDate.toString("dd/MM/yyyy HH:mm:ss"));
+        licenseDto.getLicenseRecordDto().setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
         PaymentRecord paymentRecord = getPaymentRecord();
         if (paymentRecord != null) {
-            licenseDto.setPaymentRecord(paymentRecord.convertToDto());
+            licenseDto.getLicenseRecordDto().setPaymentRecord(paymentRecord.convertToDto());
         }
         return licenseDto;
     }

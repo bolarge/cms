@@ -153,6 +153,7 @@ public class ApplicationForm extends AbstractFact {
             applicationFormDto.setApproverId(approverId);
             applicationFormDto.setApproverName(approver.getFullName());
         }
+        applicationFormDto.setId(getId());
         return applicationFormDto;
     }
 

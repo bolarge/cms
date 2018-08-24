@@ -6,25 +6,25 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 public class PaymentStatusReferenceData {
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
-        PaymentStatus paymentStatus1 = (PaymentStatus) mongoRepositoryReactive.findById("1", PaymentStatus.class).block();
+        PaymentStatus paymentStatus1 = (PaymentStatus) mongoRepositoryReactive.findById("01", PaymentStatus.class).block();
         if (paymentStatus1 == null) {
             paymentStatus1 = new PaymentStatus();
-            paymentStatus1.setId("1");
+            paymentStatus1.setId("01");
         }
         paymentStatus1.setName("CONFIRMED");
 
 
-        PaymentStatus paymentStatus2 = (PaymentStatus) mongoRepositoryReactive.findById("2", PaymentStatus.class).block();
+        PaymentStatus paymentStatus2 = (PaymentStatus) mongoRepositoryReactive.findById("02", PaymentStatus.class).block();
         if (paymentStatus2 == null) {
             paymentStatus2 = new PaymentStatus();
-            paymentStatus2.setId("2");
+            paymentStatus2.setId("02");
         }
         paymentStatus1.setName("PENDING");
 
-        PaymentStatus paymentStatus3 = (PaymentStatus) mongoRepositoryReactive.findById("3", PaymentStatus.class).block();
+        PaymentStatus paymentStatus3 = (PaymentStatus) mongoRepositoryReactive.findById("03", PaymentStatus.class).block();
         if (paymentStatus3 == null) {
             paymentStatus3 = new PaymentStatus();
-            paymentStatus3.setId("3");
+            paymentStatus3.setId("03");
         }
         paymentStatus3.setName("FAILED");
 

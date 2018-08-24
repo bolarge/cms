@@ -114,6 +114,7 @@ public class PaymentRecord extends AbstractFact {
         if (feePaymentType != null) {
             paymentRecordDto.setFeePaymentType(feePaymentType.convertToDto());
         }
+        paymentRecordDto.setId(getId());
         return paymentRecordDto;
     }
 
