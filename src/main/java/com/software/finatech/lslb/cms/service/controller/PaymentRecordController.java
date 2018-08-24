@@ -59,7 +59,7 @@ public class PaymentRecordController extends BaseController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-approvers")
-    @ApiOperation(value = "Create Fee Configuration", response = EnumeratedFactDto.class,responseContainer = "List",consumes = "application/json")
+    @ApiOperation(value = "Get all approvers", response = EnumeratedFactDto.class,responseContainer = "List",consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),

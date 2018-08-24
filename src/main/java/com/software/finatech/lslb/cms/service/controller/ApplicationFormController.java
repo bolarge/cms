@@ -89,7 +89,7 @@ public class ApplicationFormController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-approvers")
-    @ApiOperation(value = "Get all application form approver Ids", response = AuthInfoDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiOperation(value = "Get all application form approvers", response = AuthInfoDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
