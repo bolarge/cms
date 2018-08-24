@@ -5,9 +5,9 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 
 public class LicenseStatusReferenceData {
 
-    private static final String ONE = "1";
-    private static  final String TWO = "2";
-    private static final String THREE = "3";
+    private static final String ONE = "01";
+    private static  final String TWO = "02";
+    private static final String THREE = "03";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive){
         LicenseStatus licenseStatus1 = (LicenseStatus)mongoRepositoryReactive.findById(ONE, LicenseStatus.class).block();

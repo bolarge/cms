@@ -50,6 +50,7 @@ public class FeeServiceImpl implements FeeService {
             Fee fee = new Fee();
             fee.setId(UUID.randomUUID().toString());
             fee.setAmount(feeCreateDto.getAmount());
+            fee.setDuration(feeCreateDto.getDuration());
             fee.setFeePaymentTypeId(feePaymentTypeId);
             fee.setGameTypeId(gameTypeId);
             mongoRepositoryReactive.saveOrUpdate(fee);
