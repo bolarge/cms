@@ -57,4 +57,15 @@ public class PaymentRecordController extends BaseController {
     public Mono<ResponseEntity> getAllPaymentStatus() {
         return paymentRecordService.getAllPaymentStatus();
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/all-approvers")
+    @ApiOperation(value = "Create Fee Configuration", response = EnumeratedFactDto.class,responseContainer = "List",consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllApprovers() {
+        return paymentRecordService.getAllApprovers();
+    }
 }
