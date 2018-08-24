@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.dto;
 
 public class PaymentRecordDto {
     private String approverName;
+    private String institutionId;
     private EnumeratedFactDto paymentStatus;
     private FeeDto fee;
     private EnumeratedFactDto feePaymentType;
@@ -17,6 +18,14 @@ public class PaymentRecordDto {
 
     public EnumeratedFactDto getFeePaymentType() {
         return feePaymentType;
+    }
+
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
     }
 
     public String getApproverName() {

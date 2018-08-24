@@ -15,6 +15,15 @@ public class Fee extends AbstractFact {
     protected String gameTypeId;
     protected String feePaymentTypeId;
     protected String revenueName;
+    protected int duration;
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
 
     public double getAmount() {
         return amount;
@@ -82,6 +91,7 @@ public class Fee extends AbstractFact {
         FeeDto feeDto = new FeeDto();
         feeDto.setAmount(getAmount());
         feeDto.setId(getId());
+        feeDto.setDuration(getDuration());
         feeDto.setRevenueName(getRevenueName());
         GameType gameType = getGameType();
         if (gameType != null) {
