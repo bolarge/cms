@@ -1,6 +1,5 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.domain.PaymentStatus;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
@@ -96,13 +95,13 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
     @Override
     public Mono<ResponseEntity> getAllPaymentStatus() {
         try {
-            List<FactObject> factObjectList = (List<FactObject>) mongoRepositoryReactive.findAll(PaymentStatus.class).collect(Collectors.toList());
-            if (factObjectList == null || factObjectList.isEmpty()) {
+            ArrayList<PaymentStatus> paymentStatuses = (ArrayList<PaymentStatus>) mongoRepositoryReactive
+                    .findAll(new Query(), PaymentStatus.class).toStream().collect(Collectors.toList());
+            if (paymentStatuses == null || paymentStatuses.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record found", HttpStatus.NOT_FOUND));
             }
             List<EnumeratedFactDto> paymentStatusDtoList = new ArrayList<>();
-            factObjectList.forEach(factObject -> {
-                PaymentStatus paymentStatus = (PaymentStatus) factObject;
+            paymentStatuses.forEach(paymentStatus -> {
                 paymentStatusDtoList.add(paymentStatus.convertToDto());
             });
             return Mono.just(new ResponseEntity<>(paymentStatusDtoList, HttpStatus.OK));

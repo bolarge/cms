@@ -5,6 +5,19 @@ public class PaymentRecordDto {
     private EnumeratedFactDto paymentStatus;
     private FeeDto fee;
     private EnumeratedFactDto feePaymentType;
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public EnumeratedFactDto getFeePaymentType() {
+        return feePaymentType;
+    }
 
     public String getApproverName() {
         return approverName;

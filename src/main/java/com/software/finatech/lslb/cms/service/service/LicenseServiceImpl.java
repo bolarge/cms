@@ -110,13 +110,13 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public Mono<ResponseEntity> getAllLicenseStatus() {
         try {
-            List<FactObject> factObjectList = (List<FactObject>) mongoRepositoryReactive.findAll(LicenseStatus.class).collect(Collectors.toList());
-            if (factObjectList == null || factObjectList.isEmpty()) {
+            ArrayList<LicenseStatus> licenseStatuses = (ArrayList<LicenseStatus>) mongoRepositoryReactive
+                    .findAll(new Query(), LicenseStatus.class).toStream().collect(Collectors.toList());
+            if (licenseStatuses == null || licenseStatuses.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record found", HttpStatus.NOT_FOUND));
             }
             List<EnumeratedFactDto> licenseStatusDtoList = new ArrayList<>();
-            factObjectList.forEach(factObject -> {
-                LicenseStatus licenseStatus = (LicenseStatus) factObject;
+            licenseStatuses.forEach(licenseStatus -> {
                 licenseStatusDtoList.add(licenseStatus.convertToDto());
             });
             return Mono.just(new ResponseEntity<>(licenseStatusDtoList, HttpStatus.OK));

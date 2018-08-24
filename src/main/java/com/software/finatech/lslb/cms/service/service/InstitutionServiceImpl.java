@@ -42,14 +42,10 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public Mono<ResponseEntity> createInstitution(InstitutionCreateDto institutionCreateDto) {
-        Query query = new Query();
-        String institutionName = institutionCreateDto.getInstitutionName();
-        query.addCriteria(Criteria.where("institutionName").is(institutionName));
-        Institution existingInstitution = (Institution) mongoRepositoryReactive.find(query, Institution.class).block();
-        if (existingInstitution != null) {
-            return Mono.just(new ResponseEntity<>(String.format("Institution with name %s already exists", institutionName), HttpStatus.BAD_REQUEST));
+        Mono<ResponseEntity> validateInstitutionResponse = validateInstitutionCreateInstitution(institutionCreateDto);
+        if (validateInstitutionResponse != null) {
+            return validateInstitutionResponse;
         }
-
         Institution newInstitution = fromCreateInstitutionDto(institutionCreateDto);
         try {
             mongoRepositoryReactive.saveOrUpdate(newInstitution);
@@ -140,6 +136,30 @@ public class InstitutionServiceImpl implements InstitutionService {
             String errorMsg = "An error occurred while fetching all institutions";
             return logAndReturnError(logger, errorMsg, e);
         }
+    }
+
+    private Mono<ResponseEntity> validateInstitutionCreateInstitution(InstitutionCreateDto institutionCreateDto) {
+        String institutionName = institutionCreateDto.getInstitutionName();
+        Query queryForName = Query.query(Criteria.where("institutionName").is(institutionName));
+        Institution existingInstitutionWithName = (Institution) mongoRepositoryReactive.find(queryForName, Institution.class).block();
+        if (existingInstitutionWithName != null) {
+            return Mono.just(new ResponseEntity<>(String.format("An institution already exist with name %s", institutionName), HttpStatus.BAD_REQUEST));
+        }
+
+        String emailAddress = institutionCreateDto.getEmailAddress();
+        Query queryForEmail = Query.query(Criteria.where("emailAddress").is(emailAddress));
+        Institution existingInstitutionWithEmail = (Institution) mongoRepositoryReactive.find(queryForEmail, Institution.class).block();
+        if (existingInstitutionWithEmail != null) {
+            return Mono.just(new ResponseEntity<>(String.format("An institution already exist with email %s", emailAddress), HttpStatus.BAD_REQUEST));
+        }
+
+        String phoneNumber = institutionCreateDto.getPhoneNumber();
+        Query queryForPhone = Query.query(Criteria.where("phoneNumber").is(phoneNumber));
+        Institution existingInstitutionWithPhone = (Institution) mongoRepositoryReactive.find(queryForPhone, Institution.class).block();
+        if (existingInstitutionWithPhone != null) {
+            return Mono.just(new ResponseEntity<>(String.format("An institution already exist with phone %s", phoneNumber), HttpStatus.BAD_REQUEST));
+        }
+        return null;
     }
 
     private Institution fromCreateInstitutionDto(InstitutionCreateDto institutionCreateDto) {

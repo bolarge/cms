@@ -14,6 +14,15 @@ public class ApplicationFormDto {
     private String institutionName;
     private String approverId;
     private String approverName;
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public GameTypeDto getGameType() {
         return gameType;

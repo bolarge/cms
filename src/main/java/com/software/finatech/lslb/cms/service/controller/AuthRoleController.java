@@ -337,10 +337,8 @@ public class AuthRoleController extends BaseController {
             } catch (FactNotFoundException e) {
                 logger.error(String.format("Error setting associated properties of role %s", authRole.getId()));
             }
-            authRole.convertToDto();
+            authRoleDtos.add(authRole.convertToDto());
         });
-        //.stream().filter(factObject -> Long.valueOf(factObject.getId()) > userRoleId ).collect(Collectors.toList());
-        //   ArrayList<AuthRoleDto> authRoleDtos = authRoleDtoListFromAuthRoleList(authRoles);
         if (authRoleDtos.size() == 0) {
             return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
         }

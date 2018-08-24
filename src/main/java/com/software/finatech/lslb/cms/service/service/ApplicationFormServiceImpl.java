@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
 import com.software.finatech.lslb.cms.service.domain.ApplicationFormType;
+import com.software.finatech.lslb.cms.service.domain.EnumeratedFact;
 import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormCreateDto;
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
@@ -121,14 +122,15 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     @Override
     public Mono<ResponseEntity> getAllApplicationFormTypes() {
         try {
-            List<FactObject> applicationFormTypes = (List<FactObject>) mongoRepositoryReactive.findAll(ApplicationFormType.class).collect(Collectors.toList());
+            ArrayList<ApplicationFormType> applicationFormTypes = (ArrayList<ApplicationFormType>) mongoRepositoryReactive
+                    .findAll(new Query(), ApplicationFormType.class).toStream().collect(Collectors.toList());
+
             if (applicationFormTypes == null || applicationFormTypes.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));
             }
             List<EnumeratedFactDto> applicationFormTypeDtos = new ArrayList<>();
             applicationFormTypes.forEach(applicationFormType -> {
-                ApplicationFormType applicationFormTypeConc = (ApplicationFormType) applicationFormType;
-                applicationFormTypeDtos.add(applicationFormTypeConc.convertToDto());
+                applicationFormTypeDtos.add(applicationFormType.convertToDto());
             });
 
             return Mono.just(new ResponseEntity<>(applicationFormTypeDtos, HttpStatus.OK));

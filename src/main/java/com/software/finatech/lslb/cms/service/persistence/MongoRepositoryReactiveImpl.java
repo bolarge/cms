@@ -109,8 +109,6 @@ public class MongoRepositoryReactiveImpl implements MongoRepositoryReactive<Fact
 		return reactiveMongoTemplate.find(query, fact);
 	}
 
-
-
 	@Override
 	public Mono<Long> count(Query query, Class<?> fact) {
 		return reactiveMongoTemplate.count(query, fact);

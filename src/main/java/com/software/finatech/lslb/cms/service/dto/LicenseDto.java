@@ -9,6 +9,15 @@ public class LicenseDto {
     private String endDate;
     private String parentLicenseId;
     private GameTypeDto gameType;
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public PaymentRecordDto getPaymentRecord() {
         return paymentRecord;

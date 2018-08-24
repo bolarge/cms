@@ -116,6 +116,7 @@ public class License extends AbstractFact {
 
     public LicenseDto convertToDto() {
         LicenseDto licenseDto = new LicenseDto();
+        licenseDto.setId(getId());
         Institution institution = getInstitution();
         if (institution != null) {
             licenseDto.setInstitutionId(institutionId);
