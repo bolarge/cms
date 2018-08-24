@@ -1,6 +1,5 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.domain.FeePaymentType;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;

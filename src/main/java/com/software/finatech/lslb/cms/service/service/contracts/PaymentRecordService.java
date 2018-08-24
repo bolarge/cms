@@ -17,4 +17,5 @@ public interface PaymentRecordService {
                                               HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getAllPaymentStatus();
+    Mono<ResponseEntity> getAllApprovers();
 }
