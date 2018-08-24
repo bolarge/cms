@@ -1,9 +1,12 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.domain.PaymentStatus;
+import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
+import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
@@ -110,5 +113,31 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             return logAndReturnError(logger, errorMsg, e);
         }
     }
+
+    //TODO: find way to get all approverID distinct in application form table
+    @Override
+    public Mono<ResponseEntity> getAllApprovers() {
+        String lslbAdminAuthRoleId = "4";
+        Query query = new Query();
+        query.addCriteria(Criteria.where("authRoleId").is(lslbAdminAuthRoleId));
+        ArrayList<AuthInfo> authInfos = (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
+        if (authInfos == null || authInfos.isEmpty()) {
+            return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
+        }
+        List<AuthInfoDto> authInfoDtos = new ArrayList<>();
+        authInfos.forEach(authInfo -> {
+            try {
+                authInfo.setAssociatedProperties();
+                AuthInfoDto authInfoDto = new AuthInfoDto();
+                authInfoDto.setId(authInfo.getId());
+                authInfoDto.setFullName(authInfo.getFullName());
+                authInfoDtos.add(authInfoDto);
+            } catch (FactNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+        return Mono.just(new ResponseEntity<>(authInfoDtos, HttpStatus.OK));
+    }
+
 }
 

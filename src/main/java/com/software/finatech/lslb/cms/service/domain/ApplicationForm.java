@@ -1,6 +1,13 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
+import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
+import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
+import com.software.finatech.lslb.cms.service.model.contactDetails.ApplicantContactDetails;
+import com.software.finatech.lslb.cms.service.model.criminalityDetails.ApplicantCriminalityDetails;
+import com.software.finatech.lslb.cms.service.model.declaration.ApplicantDeclarationDetails;
+import com.software.finatech.lslb.cms.service.model.otherInformation.ApplicantOtherInformation;
+import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantOutletInformation;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -18,6 +25,69 @@ public class ApplicationForm extends AbstractFact {
     protected String applicationFormTypeId;
     protected String formName;
     protected String approverId;
+    protected ApplicantDetails applicantDetails;
+    protected ApplicantMemberDetails applicantMemberDetails;
+    protected ApplicantCriminalityDetails applicantCriminalityDetails;
+    protected ApplicantDeclarationDetails applicantDeclarationDetails;
+    protected ApplicantOutletInformation applicantOutletInformation;
+    protected ApplicantOtherInformation applicantOtherInformation;
+    protected ApplicantContactDetails applicantContactDetails;
+
+    public ApplicantDetails getApplicantDetails() {
+        return applicantDetails;
+    }
+
+    public void setApplicantDetails(ApplicantDetails applicantDetails) {
+        this.applicantDetails = applicantDetails;
+    }
+
+    public ApplicantMemberDetails getApplicantMemberDetails() {
+        return applicantMemberDetails;
+    }
+
+    public void setApplicantMemberDetails(ApplicantMemberDetails applicantMemberDetails) {
+        this.applicantMemberDetails = applicantMemberDetails;
+    }
+
+    public ApplicantCriminalityDetails getApplicantCriminalityDetails() {
+        return applicantCriminalityDetails;
+    }
+
+    public void setApplicantCriminalityDetails(ApplicantCriminalityDetails applicantCriminalityDetails) {
+        this.applicantCriminalityDetails = applicantCriminalityDetails;
+    }
+
+    public ApplicantDeclarationDetails getApplicantDeclarationDetails() {
+        return applicantDeclarationDetails;
+    }
+
+    public void setApplicantDeclarationDetails(ApplicantDeclarationDetails applicantDeclarationDetails) {
+        this.applicantDeclarationDetails = applicantDeclarationDetails;
+    }
+
+    public ApplicantOutletInformation getApplicantOutletInformation() {
+        return applicantOutletInformation;
+    }
+
+    public void setApplicantOutletInformation(ApplicantOutletInformation applicantOutletInformation) {
+        this.applicantOutletInformation = applicantOutletInformation;
+    }
+
+    public ApplicantOtherInformation getApplicantOtherInformation() {
+        return applicantOtherInformation;
+    }
+
+    public void setApplicantOtherInformation(ApplicantOtherInformation applicantOtherInformation) {
+        this.applicantOtherInformation = applicantOtherInformation;
+    }
+
+    public ApplicantContactDetails getApplicantContactDetails() {
+        return applicantContactDetails;
+    }
+
+    public void setApplicantContactDetails(ApplicantContactDetails applicantContactDetails) {
+        this.applicantContactDetails = applicantContactDetails;
+    }
 
     public String getInstitutionId() {
         return institutionId;
@@ -149,7 +219,7 @@ public class ApplicationForm extends AbstractFact {
             applicationFormDto.setInstitutionId(institutionId);
         }
         AuthInfo approver = getApprover();
-        if (approver != null){
+        if (approver != null) {
             applicationFormDto.setApproverId(approverId);
             applicationFormDto.setApproverName(approver.getFullName());
         }
