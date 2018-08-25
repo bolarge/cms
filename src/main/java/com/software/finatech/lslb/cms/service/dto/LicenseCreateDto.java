@@ -4,24 +4,42 @@ import javax.validation.constraints.NotEmpty;
 
 public class LicenseCreateDto {
 
-    private String licenseStatusId;
-    private Boolean renewalCheck;
+    protected String licenseStatusId;
+    @NotEmpty(message = "Please provide renewalCheckStatus")
+    protected String renewalCheck;
     @NotEmpty(message = "Please provide institutionId")
-    private String institutionId;
-    @NotEmpty(message = "Please provide startDate")
-    private String startDate;
+    protected String institutionId;
      @NotEmpty(message = "Please provide institutionId")
-    private String gameTypeId;
+     protected String gameTypeId;
+     protected String paymentRecordId;
+
+    private String id;
+
+    public String getPaymentRecordId() {
+        return paymentRecordId;
+    }
+
+    public void setPaymentRecordId(String paymentRecordId) {
+        this.paymentRecordId = paymentRecordId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getGameTypeId() {
         return gameTypeId;
     }
 
-    public Boolean getRenewalCheck() {
+    public String getRenewalCheck() {
         return renewalCheck;
     }
 
-    public void setRenewalCheck(Boolean renewalCheck) {
+    public void setRenewalCheck(String renewalCheck) {
         this.renewalCheck = renewalCheck;
     }
 
@@ -46,13 +64,6 @@ public class LicenseCreateDto {
         this.institutionId = institutionId;
     }
 
-    public String getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
-    }
 
 
 }

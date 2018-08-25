@@ -103,7 +103,7 @@ public class DatabaseConfiguration{
     }
 
     @Bean
-    public com.mongodb.MongoClient mongo() throws Exception {
+    public com.mongodb.MongoClient mongo() {
         //mongodb://cloud:Jdk19Version@54.191.139.8:27017
         StringBuffer uri = new StringBuffer();
         uri.append("mongodb://");
@@ -125,7 +125,7 @@ public class DatabaseConfiguration{
     }
 
     @Bean
-    public MongoTemplate mongoTemplate() throws Exception {
+    public MongoTemplate mongoTemplate() {
         return new MongoTemplate(mongo(), mongoDatabase);
     }
 

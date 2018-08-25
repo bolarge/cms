@@ -1,32 +1,61 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import com.software.finatech.lslb.cms.service.domain.*;
 public class LicenseDto {
-    private LicenseRecordDto licenseRecordDto;
-    private EnumeratedFactDto licenseStatus;
-    private String institutionId;
+    protected PaymentRecordDto paymentRecordDto;
+    protected LicenseStatusDto licenseStatus;
+    protected Institution institution;
+    protected String id;
+    protected PaymentRecordDto paymentRecord;
+    protected Fee fee;
 
-    public LicenseRecordDto getLicenseRecordDto() {
-        return licenseRecordDto;
+    public PaymentRecordDto getPaymentRecordDto() {
+        return paymentRecordDto;
     }
 
-    public void setLicenseRecordDto(LicenseRecordDto licenseRecordDto) {
-        this.licenseRecordDto = licenseRecordDto;
+    public void setPaymentRecordDto(PaymentRecordDto paymentRecordDto) {
+        this.paymentRecordDto = paymentRecordDto;
     }
 
-    public EnumeratedFactDto getLicenseStatus() {
+
+    public LicenseStatusDto getLicenseStatus() {
         return licenseStatus;
     }
 
-    public void setLicenseStatus(EnumeratedFactDto licenseStatus) {
+    public void setLicenseStatus(LicenseStatusDto licenseStatus) {
         this.licenseStatus = licenseStatus;
     }
 
-    public String getInstitutionId() {
-        return institutionId;
+    public Institution getInstitution() {
+        return institution;
     }
 
-    public void setInstitutionId(String institutionId) {
-        this.institutionId = institutionId;
+    public void setInstitution(Institution institution) {
+        this.institution = institution;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public PaymentRecordDto getPaymentRecord() {
+        return paymentRecord;
+    }
+
+    public void setPaymentRecord(PaymentRecordDto paymentRecord) {
+        this.paymentRecord = paymentRecord;
+    }
+
+    public Fee getFee() {
+        return fee;
+    }
+
+    public void setFee(Fee fee) {
+        this.fee = fee;
     }
 
 }

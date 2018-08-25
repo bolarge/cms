@@ -1,11 +1,61 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 public class PaymentRecordDto {
-    private String approverName;
+    private String institutionName;
     private String institutionId;
+    private String startDate;
+    private String endDate;
+    private String approverName;
     private EnumeratedFactDto paymentStatus;
     private FeeDto fee;
+    private String id;
     private EnumeratedFactDto feePaymentType;
+    private String parentLicenseId;
+
+
+    public String getInstitutionName() {
+        return institutionName;
+    }
+
+    public void setInstitutionName(String institutionName) {
+        this.institutionName = institutionName;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
+
+    public String getParentLicenseId() {
+        return parentLicenseId;
+    }
+
+    public void setParentLicenseId(String parentLicenseId) {
+        this.parentLicenseId = parentLicenseId;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public EnumeratedFactDto getFeePaymentType() {
+        return feePaymentType;
+    }
 
     public String getInstitutionId() {
         return institutionId;

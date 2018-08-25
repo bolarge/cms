@@ -15,13 +15,13 @@ public class Fee extends AbstractFact {
     protected String gameTypeId;
     protected String feePaymentTypeId;
     protected String revenueName;
-    protected int duration;
+    protected String duration;
 
-    public int getDuration() {
+    public String getDuration() {
         return duration;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(String duration) {
         this.duration = duration;
     }
 

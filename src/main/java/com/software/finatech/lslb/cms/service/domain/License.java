@@ -2,25 +2,24 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.mapping.Document;
-
+import java.beans.Transient;
 import java.util.Map;
+
 
 @SuppressWarnings("serial")
 @Document(collection = "Licenses")
 public class License extends AbstractFact {
 
-    protected String paymentRecordId;
     protected String licenseStatusId;
     protected String institutionId;
+    protected String gameTypeId;
+    protected String paymentRecordId;
     protected LocalDateTime startDate;
     protected LocalDateTime endDate;
-    protected String parentLicenseId;
-    protected String gameTypeId;
-
 
     public String getPaymentRecordId() {
         return paymentRecordId;
@@ -28,6 +27,32 @@ public class License extends AbstractFact {
 
     public void setPaymentRecordId(String paymentRecordId) {
         this.paymentRecordId = paymentRecordId;
+    }
+
+    protected GameType getGameType() {
+        Map gameTypeMap = Mapstore.STORE.get("GameType");
+        GameType gameType = null;
+        if (gameTypeMap != null) {
+            gameType = (GameType) gameTypeMap.get(gameTypeId);
+        }
+        if (gameType == null) {
+            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
+            if (gameType != null && gameTypeMap != null) {
+                gameTypeMap.put(gameTypeId, gameType);
+            }
+        }
+        return gameType;
+    }
+    private static final Logger logger = LoggerFactory.getLogger(License.class);
+
+    @Transient
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate;
+    }
+
+    @Transient
+    public void setEndDate(LocalDateTime endDate) {
+        this.endDate = endDate;
     }
 
     public String getLicenseStatusId() {
@@ -46,30 +71,6 @@ public class License extends AbstractFact {
         this.institutionId = institutionId;
     }
 
-    public LocalDateTime getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDateTime startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDateTime getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDateTime endDate) {
-        this.endDate = endDate;
-    }
-
-    public String getParentLicenseId() {
-        return parentLicenseId;
-    }
-
-    public void setParentLicenseId(String parentLicenseId) {
-        this.parentLicenseId = parentLicenseId;
-    }
-
     public String getGameTypeId() {
         return gameTypeId;
     }
@@ -78,29 +79,12 @@ public class License extends AbstractFact {
         this.gameTypeId = gameTypeId;
     }
 
-    private GameType getGameType() {
-        Map gameTypeMap = Mapstore.STORE.get("GameType");
-        GameType gameType = null;
-        if (gameTypeMap != null) {
-            gameType = (GameType) gameTypeMap.get(gameTypeId);
-        }
-        if (gameType == null) {
-            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
-            if (gameType != null && gameTypeMap != null) {
-                gameTypeMap.put(gameTypeId, gameType);
-            }
-        }
-        return gameType;
-    }
 
-    public Institution getInstitution() {
-        return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
-    }
+
 
     public PaymentRecord getPaymentRecord() {
         return (PaymentRecord) mongoRepositoryReactive.findById(paymentRecordId, PaymentRecord.class).block();
     }
-
     private LicenseStatus getLicenseStatus() {
         Map licenseStatusMap = Mapstore.STORE.get("LicenseStatus");
         LicenseStatus licenseStatus = null;
@@ -116,29 +100,14 @@ public class License extends AbstractFact {
         return licenseStatus;
     }
 
-
     public LicenseDto convertToDto() {
         LicenseDto licenseDto = new LicenseDto();
-        Institution institution = getInstitution();
-        if (institution != null) {
-            licenseDto.setInstitutionId(institutionId);
-            licenseDto.getLicenseRecordDto().setInstitutionName(institution.getInstitutionName());
-        }
-        GameType gameType = getGameType();
-        if (gameType != null) {
-            licenseDto.getLicenseRecordDto().setGameType(gameType.convertToDto());
-        }
-        LicenseStatus licenseStatus = getLicenseStatus();
-        if (licenseStatus != null) {
-            licenseDto.setLicenseStatus(licenseStatus.convertToDto());
-        }
-        licenseDto.getLicenseRecordDto().setStartDate(startDate.toString("dd/MM/yyyy HH:mm:ss"));
-        licenseDto.getLicenseRecordDto().setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
-        PaymentRecord paymentRecord = getPaymentRecord();
-        if (paymentRecord != null) {
-            licenseDto.getLicenseRecordDto().setPaymentRecord(paymentRecord.convertToDto());
-        }
-        return licenseDto;
+        licenseDto.setId(getId());
+        licenseDto.setLicenseStatus(getLicenseStatus().convertToDto());
+        licenseDto.setPaymentRecord(getPaymentRecord().convertToDto());
+        licenseDto.setId(id);
+        logger.error(licenseDto.toString());
+   return licenseDto;
     }
 
 

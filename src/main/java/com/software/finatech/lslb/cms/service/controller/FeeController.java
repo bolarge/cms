@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.controller;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.FeeCreateDto;
 import com.software.finatech.lslb.cms.service.dto.FeeDto;
+import com.software.finatech.lslb.cms.service.service.FeeServiceImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -19,9 +20,11 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/v1/fees")
 public class FeeController extends BaseController {
-    private FeeService feeService;
-
+    //private FeeService feeService;
     @Autowired
+    public FeeServiceImpl feeService;
+
+    /*@Autowired
     public FeeService getFeeService() {
         return feeService;
     }
@@ -29,7 +32,7 @@ public class FeeController extends BaseController {
     public void setFeeService(FeeService feeService) {
         this.feeService = feeService;
     }
-
+    */
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"feePaymentTypeId", "gameTypeId"})
     @ApiOperation(value = "Get all Fees", response = FeeDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {

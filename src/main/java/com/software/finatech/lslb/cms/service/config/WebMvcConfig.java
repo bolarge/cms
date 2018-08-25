@@ -24,7 +24,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     }
 
     @Override
-    public void configureMessageConverters(final List<HttpMessageConverter<?>> messageConverters) { ;
+    public void configureMessageConverters(final List<HttpMessageConverter<?>> messageConverters) {
         messageConverters.add(boonHttpMessageConverter());
     }
 

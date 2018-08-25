@@ -17,6 +17,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -25,7 +27,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
-
+@Service
 public class FeeServiceImpl implements FeeService {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private static final Logger logger = LoggerFactory.getLogger(FeeServiceImpl.class);
@@ -35,10 +37,9 @@ public class FeeServiceImpl implements FeeService {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
     }
 
-    @Override
     public Mono<ResponseEntity> createFee(FeeCreateDto feeCreateDto) {
         try {
-            String gameTypeId = feeCreateDto.getGameTyeId();
+            String gameTypeId = feeCreateDto.getGameTypeId();
             String feePaymentTypeId = feeCreateDto.getFeePaymentTypeId();
             Query query = new Query();
             query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
@@ -49,7 +50,7 @@ public class FeeServiceImpl implements FeeService {
             }
             Fee fee = new Fee();
             fee.setId(UUID.randomUUID().toString());
-            fee.setAmount(feeCreateDto.getAmount());
+            fee.setAmount(Double.valueOf(feeCreateDto.getAmount()));
             fee.setDuration(feeCreateDto.getDuration());
             fee.setFeePaymentTypeId(feePaymentTypeId);
             fee.setGameTypeId(gameTypeId);

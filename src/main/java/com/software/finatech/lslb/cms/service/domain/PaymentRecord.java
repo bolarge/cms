@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.joda.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Map;
@@ -10,11 +11,47 @@ import java.util.Map;
 @Document(collection = "PaymentRecords")
 public class PaymentRecord extends AbstractFact {
 
-    protected String feeId;
-    protected String approverId;
-    protected String paymentStatusId;
-    protected String institutionId;
-    protected String feePaymentTypeId;
+    private String institutionId;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
+    private String approverId;
+    private String paymentStatusId;
+    private String feeId;
+    private String feePaymentTypeId;
+    private String parentLicenseId;
+    private String gameTypeId;
+
+    public LocalDateTime getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDateTime getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDateTime endDate) {
+        this.endDate = endDate;
+    }
+
+    public String getParentLicenseId() {
+        return parentLicenseId;
+    }
+
+    public void setParentLicenseId(String parentLicenseId) {
+        this.parentLicenseId = parentLicenseId;
+    }
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
 
     public String getFeeId() {
         return feeId;
@@ -55,7 +92,23 @@ public class PaymentRecord extends AbstractFact {
     public void setFeePaymentTypeId(String feePaymentTypeId) {
         this.feePaymentTypeId = feePaymentTypeId;
     }
-
+    public Institution getInstitution() {
+        return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+    }
+    private GameType getGameType() {
+        Map gameTypeMap = Mapstore.STORE.get("GameType");
+        GameType gameType = null;
+        if (gameTypeMap != null) {
+            gameType = (GameType) gameTypeMap.get(gameTypeId);
+        }
+        if (gameType == null) {
+            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
+            if (gameType != null && gameTypeMap != null) {
+                gameTypeMap.put(gameTypeId, gameType);
+            }
+        }
+        return gameType;
+    }
     private PaymentStatus getPaymentStatus() {
         Map paymentStatusMap = Mapstore.STORE.get("PaymentStatus");
         PaymentStatus paymentStatus = null;
@@ -102,6 +155,9 @@ public class PaymentRecord extends AbstractFact {
     public PaymentRecordDto convertToDto() {
         PaymentRecordDto paymentRecordDto = new PaymentRecordDto();
         Fee fee = getFee();
+        paymentRecordDto.setId(getId());
+        paymentRecordDto.setStartDate(startDate.toString("dd/MM/yyyy HH:mm:ss"));
+        paymentRecordDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
         if (fee != null) {
             paymentRecordDto.setFee(fee.convertToDto());
         }
@@ -114,6 +170,12 @@ public class PaymentRecord extends AbstractFact {
         if (feePaymentType != null) {
             paymentRecordDto.setFeePaymentType(feePaymentType.convertToDto());
         }
+        paymentRecordDto.setInstitutionId(getInstitutionId());
+        paymentRecordDto.setInstitutionName(getInstitution().institutionName);
+
+
+
+
         return paymentRecordDto;
     }
 
