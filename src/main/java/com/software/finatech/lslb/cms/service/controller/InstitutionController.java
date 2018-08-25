@@ -64,7 +64,7 @@ public class InstitutionController extends BaseController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/update")
-    @ApiOperation(value = "Updates an exisiting Institution", response = Institution.class, consumes = "application/json")
+    @ApiOperation(value = "Updates an existing Institution", response = Institution.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),

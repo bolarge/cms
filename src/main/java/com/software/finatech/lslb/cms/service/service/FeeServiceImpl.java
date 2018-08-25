@@ -1,6 +1,5 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.domain.FeePaymentType;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
@@ -96,13 +95,13 @@ public class FeeServiceImpl implements FeeService {
     @Override
     public Mono<ResponseEntity> getAllFeePaymentType() {
         try {
-            List<FactObject> feePaymentTypes = (List<FactObject>) mongoRepositoryReactive.findAll(FeePaymentType.class).collect(Collectors.toList());
+            ArrayList<FeePaymentType> feePaymentTypes = (ArrayList<FeePaymentType>) mongoRepositoryReactive
+                    .findAll(new Query(), FeePaymentType.class).toStream().collect(Collectors.toList());
             if (feePaymentTypes == null || feePaymentTypes.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record found", HttpStatus.NOT_FOUND));
             }
             List<EnumeratedFactDto> feePaymentTypeDtoList = new ArrayList<>();
-            feePaymentTypes.forEach(factObject -> {
-                FeePaymentType feePaymentType = (FeePaymentType) factObject;
+            feePaymentTypes.forEach(feePaymentType -> {
                 feePaymentTypeDtoList.add(feePaymentType.convertToDto());
             });
             return Mono.just(new ResponseEntity<>(feePaymentTypeDtoList, HttpStatus.OK));

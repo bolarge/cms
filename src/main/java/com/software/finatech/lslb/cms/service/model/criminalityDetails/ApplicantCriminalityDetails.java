@@ -1,0 +1,24 @@
+package com.software.finatech.lslb.cms.service.model.criminalityDetails;
+
+import java.util.List;
+
+public class ApplicantCriminalityDetails {
+    private List<MemberCriminalityDetail> memberCriminalityDetailList;
+    private ApplicantPendingInvestigation applicantPendingInvestigation;
+
+    public List<MemberCriminalityDetail> getMemberCriminalityDetailList() {
+        return memberCriminalityDetailList;
+    }
+
+    public void setMemberCriminalityDetailList(List<MemberCriminalityDetail> memberCriminalityDetailList) {
+        this.memberCriminalityDetailList = memberCriminalityDetailList;
+    }
+
+    public ApplicantPendingInvestigation getApplicantPendingInvestigation() {
+        return applicantPendingInvestigation;
+    }
+
+    public void setApplicantPendingInvestigation(ApplicantPendingInvestigation applicantPendingInvestigation) {
+        this.applicantPendingInvestigation = applicantPendingInvestigation;
+    }
+}

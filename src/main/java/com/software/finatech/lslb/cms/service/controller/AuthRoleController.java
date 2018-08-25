@@ -140,7 +140,11 @@ public class AuthRoleController extends BaseController {
             mongoRepositoryReactive.saveOrUpdate(authRole);
             Mapstore.STORE.get("AuthRole").put(authRole.getId(), authRole);
 
-            authRole.setAssociatedProperties();
+            try {
+                authRole.setAssociatedProperties();
+            } catch (FactNotFoundException e) {
+                e.printStackTrace();
+            }
 
             return Mono.just(new ResponseEntity(authRole.convertToDto(), HttpStatus.OK));
 
@@ -328,11 +332,13 @@ public class AuthRoleController extends BaseController {
 
         ArrayList<AuthRoleDto> authRoleDtos = new ArrayList<>();
         eligibleRoles.forEach(authRole -> {
-            authRole.setAssociatedProperties();
-            authRole.convertToDto();
+            try {
+                authRole.setAssociatedProperties();
+            } catch (FactNotFoundException e) {
+                logger.error(String.format("Error setting associated properties of role %s", authRole.getId()));
+            }
+            authRoleDtos.add(authRole.convertToDto());
         });
-        //.stream().filter(factObject -> Long.valueOf(factObject.getId()) > userRoleId ).collect(Collectors.toList());
-        //   ArrayList<AuthRoleDto> authRoleDtos = authRoleDtoListFromAuthRoleList(authRoles);
         if (authRoleDtos.size() == 0) {
             return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
         }
@@ -343,10 +349,14 @@ public class AuthRoleController extends BaseController {
 
     private ArrayList<AuthRoleDto> authRoleDtoListFromAuthRoleList(List<FactObject> authRoles) {
         ArrayList<AuthRoleDto> authRoleDtos = new ArrayList<>();
-        for (FactObject entry : authRoles) {
-            ((AuthRole) entry).setAssociatedProperties();
+        authRoles.forEach(entry -> {
+            try {
+                ((AuthRole) entry).setAssociatedProperties();
+            } catch (FactNotFoundException e) {
+                e.printStackTrace();
+            }
             authRoleDtos.add(((AuthRole) entry).convertToDto());
-        }
+        });
         return authRoleDtos;
     }
 }
