@@ -143,7 +143,34 @@ public class LicenseServiceImpl implements LicenseService {
                 return Mono.just(new ResponseEntity<>("No Valid Payment Record", HttpStatus.BAD_REQUEST));
 
             }
+
             license=licenseCheck;
+            LocalDateTime fromDate;
+            String startDate=licenseUpdateDto.getStartDate();
+            if ((startDate != "" && !startDate.isEmpty())) {
+                if (!startDate.matches("([0-9]{4})-([0-9]{2})-([0-9]{2})") ) {
+                    return Mono.just(new ResponseEntity("Invalid Date format. " +
+                            "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
+                }
+                fromDate = new LocalDateTime(startDate);
+
+            } else {
+                return Mono.just(new ResponseEntity("Invalid Date format. " +
+                        "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
+
+            }
+            license.setStartDate(fromDate);
+            Query queryFee= new Query();
+            queryFee.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
+            Fee fee = (Fee) mongoRepositoryReactive.find(queryFee,Fee.class).block();
+            int duration = Integer.parseInt(fee.getDuration());
+            if(licenseUpdateDto.getLicenseStatusId()!="03" &&
+                    licenseUpdateDto.getLicenseStatusId()!="04"){
+                license.setEndDate(fromDate.plusDays(duration));
+            }else{
+                //license.setEndDate("");
+            }
+
             license.setLicenseStatusId(licenseUpdateDto.getLicenseStatusId());
            /*int result = DateTimeComparator.getInstance().compare(lastLicense.getEndDate().toLocalDate(), new LocalDateTime().toLocalDate());
             if(lastLicense==null || result!=1){

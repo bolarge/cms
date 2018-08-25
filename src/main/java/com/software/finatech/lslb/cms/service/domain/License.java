@@ -45,12 +45,10 @@ public class License extends AbstractFact {
     }
     private static final Logger logger = LoggerFactory.getLogger(License.class);
 
-    @Transient
     public void setStartDate(LocalDateTime startDate) {
         this.startDate = startDate;
     }
 
-    @Transient
     public void setEndDate(LocalDateTime endDate) {
         this.endDate = endDate;
     }
@@ -105,6 +103,9 @@ public class License extends AbstractFact {
         licenseDto.setId(getId());
         licenseDto.setLicenseStatus(getLicenseStatus().convertToDto());
         licenseDto.setPaymentRecord(getPaymentRecord().convertToDto());
+        licenseDto.setStartDate(startDate.toString("dd/MM/yyyy HH:mm:ss"));
+        licenseDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
+
         licenseDto.setId(id);
         logger.error(licenseDto.toString());
    return licenseDto;

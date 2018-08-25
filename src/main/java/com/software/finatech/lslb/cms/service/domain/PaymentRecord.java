@@ -12,29 +12,12 @@ import java.util.Map;
 public class PaymentRecord extends AbstractFact {
 
     private String institutionId;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
-    private String approverId;
+     private String approverId;
     private String paymentStatusId;
     private String feeId;
     private String parentLicenseId;
     private String gameTypeId;
 
-    public LocalDateTime getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDateTime startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDateTime getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDateTime endDate) {
-        this.endDate = endDate;
-    }
 
     public String getParentLicenseId() {
         return parentLicenseId;
@@ -133,8 +116,6 @@ public class PaymentRecord extends AbstractFact {
         PaymentRecordDto paymentRecordDto = new PaymentRecordDto();
         Fee fee = getFee();
         paymentRecordDto.setId(getId());
-        paymentRecordDto.setStartDate(startDate.toString("dd/MM/yyyy HH:mm:ss"));
-        paymentRecordDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
         if (fee != null) {
             paymentRecordDto.setFee(fee.convertToDto());
         }

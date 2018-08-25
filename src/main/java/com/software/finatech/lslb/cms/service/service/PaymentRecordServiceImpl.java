@@ -168,35 +168,16 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         paymentRecord.setInstitutionId(paymentRecordCreateDto.getInstitutionId());
         paymentRecord.setPaymentStatusId(paymentRecordCreateDto.getPaymentStatusId());
         paymentRecord.setGameTypeId(paymentRecordCreateDto.getGameTypeId());
-        LocalDateTime fromDate;
-        String startDate=paymentRecordCreateDto.getStartDate();
-        if ((startDate != "" && !startDate.isEmpty())) {
-            if (!startDate.matches("([0-9]{4})-([0-9]{2})-([0-9]{2})") ) {
-                return Mono.just(new ResponseEntity("Invalid Date format. " +
-                        "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
-            }
-            fromDate = new LocalDateTime(startDate);
 
-        } else {
-            return Mono.just(new ResponseEntity("Invalid Date format. " +
-                    "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
-
-        }
-          paymentRecord.setStartDate(fromDate);
           if(paymentRecordCreateDto.getRenewalCheck()=="true"){
             List<PaymentRecord> previousLicenses=
-                    (List<PaymentRecord>)findLicenses(paymentRecordCreateDto.getInstitutionId(), paymentRecordCreateDto.getGameTypeId(),"LicenseRecord",startDate,"");
+                    (List<PaymentRecord>)findLicenses(paymentRecordCreateDto.getInstitutionId(), paymentRecordCreateDto.getGameTypeId(),"LicenseRecord","","");
             if(previousLicenses.size()==0){
             }
               PaymentRecord lastLicense= previousLicenses.get(previousLicenses.size()-1);
 
               paymentRecord.setParentLicenseId(lastLicense.getId());
         }
-        Query queryFee= new Query();
-        queryFee.addCriteria(Criteria.where("gameTypeId").is(paymentRecordCreateDto.getGameTypeId()));
-        Fee fee = (Fee) mongoRepositoryReactive.find(queryFee,Fee.class).block();
-        int duration = Integer.parseInt(fee.getDuration());
-        paymentRecord.setEndDate(fromDate.plusDays(duration));
         License license;
         Query queryLicence= new Query();
         queryLicence.addCriteria(Criteria.where("gameTypeId").is(paymentRecordCreateDto.getGameTypeId()));

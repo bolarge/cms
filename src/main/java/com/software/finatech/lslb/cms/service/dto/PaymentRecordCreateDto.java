@@ -10,9 +10,6 @@ public class PaymentRecordCreateDto {
     private String paymentStatusId;
     @NotEmpty(message = "Please provide Fee ID")
     private String feeId;
-   @NotEmpty(message = "Please a start Date")
-     private String startDate;
-    private String endDate;
     private String parentLicenseId;
     @NotEmpty(message = "Please provide Game Type")
     private String gameTypeId;
@@ -24,22 +21,6 @@ public class PaymentRecordCreateDto {
 
     public void setRenewalCheck(String renewalCheck) {
         this.renewalCheck = renewalCheck;
-    }
-
-    public String getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
-    }
-
-    public String getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(String endDate) {
-        this.endDate = endDate;
     }
 
 
