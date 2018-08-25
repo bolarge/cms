@@ -17,7 +17,6 @@ public class PaymentRecord extends AbstractFact {
     private String approverId;
     private String paymentStatusId;
     private String feeId;
-    private String feePaymentTypeId;
     private String parentLicenseId;
     private String gameTypeId;
 
@@ -85,13 +84,6 @@ public class PaymentRecord extends AbstractFact {
         this.institutionId = institutionId;
     }
 
-    public String getFeePaymentTypeId() {
-        return feePaymentTypeId;
-    }
-
-    public void setFeePaymentTypeId(String feePaymentTypeId) {
-        this.feePaymentTypeId = feePaymentTypeId;
-    }
     public Institution getInstitution() {
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
@@ -137,21 +129,6 @@ public class PaymentRecord extends AbstractFact {
         }
     }
 
-    private FeePaymentType getFeePaymentType() {
-        Map feePaymentTypeMap = Mapstore.STORE.get("FeePaymentType");
-        FeePaymentType feePaymentType = null;
-        if (feePaymentTypeMap != null) {
-            feePaymentType = (FeePaymentType) feePaymentTypeMap.get(feePaymentTypeId);
-        }
-        if (feePaymentType == null) {
-            feePaymentType = (FeePaymentType) mongoRepositoryReactive.findById(feePaymentTypeId, FeePaymentType.class).block();
-            if (feePaymentType != null && feePaymentTypeMap != null) {
-                feePaymentTypeMap.put(feePaymentTypeId, feePaymentType);
-            }
-        }
-        return feePaymentType;
-    }
-
     public PaymentRecordDto convertToDto() {
         PaymentRecordDto paymentRecordDto = new PaymentRecordDto();
         Fee fee = getFee();
@@ -166,10 +143,6 @@ public class PaymentRecord extends AbstractFact {
             paymentRecordDto.setPaymentStatus(paymentStatus.convertToDto());
         }
         paymentRecordDto.setApproverName(getApproverFullName());
-        FeePaymentType feePaymentType = getFeePaymentType();
-        if (feePaymentType != null) {
-            paymentRecordDto.setFeePaymentType(feePaymentType.convertToDto());
-        }
         paymentRecordDto.setInstitutionId(getInstitutionId());
         paymentRecordDto.setInstitutionName(getInstitution().institutionName);
 

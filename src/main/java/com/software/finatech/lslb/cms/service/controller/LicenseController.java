@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseCreateDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
+import com.software.finatech.lslb.cms.service.dto.LicenseUpdateDto;
 import com.software.finatech.lslb.cms.service.service.LicenseServiceImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import io.swagger.annotations.Api;
@@ -72,14 +73,14 @@ public class LicenseController {
         return licenseService.getAllLicenseStatus();
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/create")
-    @ApiOperation(value = "Create Fee License", response = License.class, consumes = "application/json")
+    @RequestMapping(method = RequestMethod.POST, value = "/update")
+    @ApiOperation(value = "Update License", response = License.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createFee(@RequestBody @Valid LicenseCreateDto licenseCreateDto) {
-        return licenseService.createLicense(licenseCreateDto);
+    public Mono<ResponseEntity> updateLicense(@RequestBody @Valid LicenseUpdateDto licenseUpdateDto) {
+        return licenseService.updateLicense(licenseUpdateDto);
     }
 }

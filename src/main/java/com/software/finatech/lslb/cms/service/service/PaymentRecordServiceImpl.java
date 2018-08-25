@@ -1,9 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.service.domain.FactObject;
-import com.software.finatech.lslb.cms.service.domain.Fee;
-import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
-import com.software.finatech.lslb.cms.service.domain.PaymentStatus;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordCreateDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
@@ -12,6 +9,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordSer
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import io.advantageous.boon.HTTP;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTimeComparator;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,7 +165,6 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         paymentRecord.setId(UUID.randomUUID().toString());
         paymentRecord.setApproverId(paymentRecordCreateDto.getApproverId());
         paymentRecord.setFeeId(paymentRecordCreateDto.getFeeId());
-        paymentRecord.setFeePaymentTypeId(paymentRecordCreateDto.getFeePaymentTypeId());
         paymentRecord.setInstitutionId(paymentRecordCreateDto.getInstitutionId());
         paymentRecord.setPaymentStatusId(paymentRecordCreateDto.getPaymentStatusId());
         paymentRecord.setGameTypeId(paymentRecordCreateDto.getGameTypeId());
@@ -200,8 +197,28 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         Fee fee = (Fee) mongoRepositoryReactive.find(queryFee,Fee.class).block();
         int duration = Integer.parseInt(fee.getDuration());
         paymentRecord.setEndDate(fromDate.plusDays(duration));
+        License license;
+        Query queryLicence= new Query();
+        queryLicence.addCriteria(Criteria.where("gameTypeId").is(paymentRecordCreateDto.getGameTypeId()));
+        queryLicence.addCriteria(Criteria.where("institutionId").is(paymentRecordCreateDto.getInstitutionId()));
+        License licenseCheck = (License) mongoRepositoryReactive.find(queryLicence,License.class).block();
+            if(licenseCheck==null){
+                license=new License();
+            license.setId(UUID.randomUUID().toString());
 
+            }else{
+                license=licenseCheck;
+            }
+        license.setGameTypeId(paymentRecordCreateDto.getGameTypeId());
+            license.setLicenseStatusId("04");
+        license.setInstitutionId(paymentRecordCreateDto.getInstitutionId());
+        /*int result = DateTimeComparator.getInstance().compare(paymentRecord.getEndDate().toLocalDate(), new LocalDateTime().toLocalDate());
+        if( result!=1){
+            return Mono.just(new ResponseEntity<>("No Valid Payment Record", HttpStatus.BAD_REQUEST));
+        }*/
+        license.setPaymentRecordId(paymentRecord.getId());
         mongoRepositoryReactive.saveOrUpdate(paymentRecord);
+        mongoRepositoryReactive.saveOrUpdate(license);
         return Mono.just(new ResponseEntity<>(paymentRecord.convertToDto(), HttpStatus.OK));
 
     }

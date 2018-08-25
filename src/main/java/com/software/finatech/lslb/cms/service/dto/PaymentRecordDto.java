@@ -9,7 +9,6 @@ public class PaymentRecordDto {
     private EnumeratedFactDto paymentStatus;
     private FeeDto fee;
     private String id;
-    private EnumeratedFactDto feePaymentType;
     private String parentLicenseId;
 
 
@@ -53,10 +52,6 @@ public class PaymentRecordDto {
         this.id = id;
     }
 
-    public EnumeratedFactDto getFeePaymentType() {
-        return feePaymentType;
-    }
-
     public String getInstitutionId() {
         return institutionId;
     }
@@ -79,10 +74,6 @@ public class PaymentRecordDto {
 
     public void setPaymentStatus(EnumeratedFactDto paymentStatus) {
         this.paymentStatus = paymentStatus;
-    }
-
-    public void setFeePaymentType(EnumeratedFactDto feePaymentType) {
-        this.feePaymentType = feePaymentType;
     }
 
     public FeeDto getFee() {

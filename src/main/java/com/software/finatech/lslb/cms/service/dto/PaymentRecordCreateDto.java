@@ -10,9 +10,7 @@ public class PaymentRecordCreateDto {
     private String paymentStatusId;
     @NotEmpty(message = "Please provide Fee ID")
     private String feeId;
-    @NotEmpty(message = "Please provide Fee Payment TypeId")
-    private String feePaymentTypeId;
-    @NotEmpty(message = "Please a start Date")
+   @NotEmpty(message = "Please a start Date")
      private String startDate;
     private String endDate;
     private String parentLicenseId;
@@ -85,13 +83,6 @@ public class PaymentRecordCreateDto {
         this.feeId = feeId;
     }
 
-    public String getFeePaymentTypeId() {
-        return feePaymentTypeId;
-    }
-
-    public void setFeePaymentTypeId(String feePaymentTypeId) {
-        this.feePaymentTypeId = feePaymentTypeId;
-    }
 
     public String getInstitutionId() {
         return institutionId;
