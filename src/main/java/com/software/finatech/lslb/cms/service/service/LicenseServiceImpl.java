@@ -10,6 +10,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.ExpirationList;
 import com.software.finatech.lslb.cms.service.util.MapValues;
+import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeComparator;
 import org.joda.time.Days;
@@ -29,6 +30,7 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -123,10 +125,19 @@ public class LicenseServiceImpl implements LicenseService {
           return Mono.just(new ResponseEntity<>(license.convertToDto(), HttpStatus.OK));
     }
 
-
+    public List<EnumeratedFactDto> getLicenseStatus() {
+        Map licenseMap =Mapstore.STORE.get("LicenseStatus");
+        ArrayList<LicenseStatus> licenseStatuses = new ArrayList<LicenseStatus> (licenseMap.values());
+        List<EnumeratedFactDto> licenseStatusDtoLists = new ArrayList<>();
+        licenseStatuses.forEach(factObject -> {
+            LicenseStatus licenseStatus = factObject;
+            licenseStatusDtoLists.add(licenseStatus.convertToDto());
+        });
+        return licenseStatusDtoLists;
+    }
 
     public Mono<ResponseEntity> getAllLicenseStatus() {
-        return Mono.just(new ResponseEntity<>(mapValues.getLicenseStatus(), HttpStatus.OK));
+        return Mono.just(new ResponseEntity<>(getLicenseStatus(), HttpStatus.OK));
 
     }
     public Mono<ResponseEntity> getExpiringLicenses() {

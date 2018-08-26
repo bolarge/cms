@@ -52,7 +52,7 @@ public class LicenseController {
         return licenseService.findAllLicense(page, pageSize, sortType, sortParam, institutionId, licenseStatusId, paymentRecordId, httpServletResponse);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{licenseId}")
+    @RequestMapping(method = RequestMethod.GET, value = "/get-by-licenseId")
     @ApiOperation(value = "Get License by Id", response = LicenseDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),

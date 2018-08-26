@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordSer
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.ExpirationList;
 import com.software.finatech.lslb.cms.service.util.MapValues;
+import com.software.finatech.lslb.cms.service.util.Mapstore;
 import io.advantageous.boon.HTTP;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeComparator;
@@ -22,12 +23,14 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -101,10 +104,19 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         }
     }
 
-
+    public List<EnumeratedFactDto> getPaymentStatus() {
+        Map paymentStatusMap = Mapstore.STORE.get("PaymentStatus");
+        ArrayList<PaymentStatus> paymentStatus = new ArrayList<PaymentStatus> (paymentStatusMap.values());
+        List<EnumeratedFactDto> paymentStatusDtoList = new ArrayList<>();
+        paymentStatus.forEach(factObject -> {
+            PaymentStatus paymentStat =  factObject;
+            paymentStatusDtoList.add(paymentStat.convertToDto());
+        });
+        return paymentStatusDtoList;
+    }
     public Mono<ResponseEntity> getAllPaymentStatus() {
 
-        return Mono.just(new ResponseEntity<>(mapValues.getPaymentStatus(), HttpStatus.NOT_FOUND));
+        return Mono.just(new ResponseEntity<>(getPaymentStatus(), HttpStatus.NOT_FOUND));
 
     }
 
