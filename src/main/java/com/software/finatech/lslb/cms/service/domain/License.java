@@ -1,10 +1,12 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
+import com.software.finatech.lslb.cms.service.util.MapValues;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.beans.Transient;
 import java.util.Map;
@@ -14,12 +16,27 @@ import java.util.Map;
 @Document(collection = "Licenses")
 public class License extends AbstractFact {
 
+
+
     protected String licenseStatusId;
     protected String institutionId;
     protected String gameTypeId;
     protected String paymentRecordId;
     protected LocalDateTime startDate;
     protected LocalDateTime endDate;
+    protected String renewalStatus;
+
+    @Autowired
+    MapValues mapValues;
+
+    public String getRenewalStatus() {
+        return renewalStatus;
+    }
+
+    @Transient
+    public void setRenewalStatus(String renewalStatus) {
+        this.renewalStatus = renewalStatus;
+    }
 
     public String getPaymentRecordId() {
         return paymentRecordId;
@@ -29,20 +46,15 @@ public class License extends AbstractFact {
         this.paymentRecordId = paymentRecordId;
     }
 
-    protected GameType getGameType() {
-        Map gameTypeMap = Mapstore.STORE.get("GameType");
-        GameType gameType = null;
-        if (gameTypeMap != null) {
-            gameType = (GameType) gameTypeMap.get(gameTypeId);
-        }
-        if (gameType == null) {
-            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
-            if (gameType != null && gameTypeMap != null) {
-                gameTypeMap.put(gameTypeId, gameType);
-            }
-        }
-        return gameType;
+    public LocalDateTime getStartDate() {
+        return startDate;
     }
+
+    public LocalDateTime getEndDate() {
+        return endDate;
+    }
+
+
     private static final Logger logger = LoggerFactory.getLogger(License.class);
 
     public void setStartDate(LocalDateTime startDate) {
@@ -83,28 +95,16 @@ public class License extends AbstractFact {
     public PaymentRecord getPaymentRecord() {
         return (PaymentRecord) mongoRepositoryReactive.findById(paymentRecordId, PaymentRecord.class).block();
     }
-    private LicenseStatus getLicenseStatus() {
-        Map licenseStatusMap = Mapstore.STORE.get("LicenseStatus");
-        LicenseStatus licenseStatus = null;
-        if (licenseStatusMap != null) {
-            licenseStatus = (LicenseStatus) licenseStatusMap.get(licenseStatusId);
-        }
-        if (licenseStatus == null) {
-            licenseStatus = (LicenseStatus) mongoRepositoryReactive.findById(licenseStatusId, LicenseStatus.class).block();
-            if (licenseStatus != null && licenseStatusMap != null) {
-                licenseStatusMap.put(licenseStatusId, licenseStatus);
-            }
-        }
-        return licenseStatus;
-    }
+
 
     public LicenseDto convertToDto() {
         LicenseDto licenseDto = new LicenseDto();
         licenseDto.setId(getId());
-        licenseDto.setLicenseStatus(getLicenseStatus().convertToDto());
+        licenseDto.setLicenseStatus(mapValues.getLicenseStatus(licenseStatusId).convertToDto());
         licenseDto.setPaymentRecord(getPaymentRecord().convertToDto());
         licenseDto.setStartDate(startDate.toString("dd/MM/yyyy HH:mm:ss"));
         licenseDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
+        licenseDto.setRenewalStatus(getRenewalStatus());
 
         licenseDto.setId(id);
         logger.error(licenseDto.toString());

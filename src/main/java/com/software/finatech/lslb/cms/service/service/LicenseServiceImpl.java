@@ -8,8 +8,11 @@ import com.software.finatech.lslb.cms.service.dto.LicenseUpdateDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
+import com.software.finatech.lslb.cms.service.util.ExpirationList;
+import com.software.finatech.lslb.cms.service.util.MapValues;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeComparator;
+import org.joda.time.Days;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +44,10 @@ public class LicenseServiceImpl implements LicenseService {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
     }
 
+    @Autowired
+    MapValues mapValues;
+    @Autowired
+    ExpirationList expirationList;
     @Override
     public Mono<ResponseEntity> findAllLicense(int page,
                                                int pageSize,
@@ -100,27 +107,38 @@ public class LicenseServiceImpl implements LicenseService {
         return null;
     }
 
+    public Mono<ResponseEntity> findLicenseByInstitutionId(String institutionId) {
+          LocalDateTime dateTime = new LocalDateTime();
+          dateTime.plusDays(90);
+          Query queryLicence= new Query();
 
-
-    public Mono<ResponseEntity> getAllLicenseStatus() {
-        try {
-            ArrayList<LicenseStatus> licenseStatuses = (ArrayList<LicenseStatus>) mongoRepositoryReactive
-                    .findAll(new Query(), LicenseStatus.class).toStream().collect(Collectors.toList());
-            if (licenseStatuses == null || licenseStatuses.isEmpty()) {
-                return Mono.just(new ResponseEntity<>("No Record found", HttpStatus.NOT_FOUND));
-            }
-            List<EnumeratedFactDto> licenseStatusDtoList = new ArrayList<>();
-            licenseStatuses.forEach(licenseStatus -> {
-                licenseStatusDtoList.add(licenseStatus.convertToDto());
-            });
-            return Mono.just(new ResponseEntity<>(licenseStatusDtoList, HttpStatus.OK));
-        } catch (Exception e) {
-            String errorMsg = "An error occurred while trying to get all license status";
-            return logAndReturnError(logger, errorMsg, e);
-        }
+          queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
+          License license= (License) mongoRepositoryReactive.find(queryLicence,License.class).block();
+          int days= Days.daysBetween(dateTime,license.getEndDate()).getDays();
+          if(days>0){
+              license.setRenewalStatus("true");
+          }else{
+              license.setRenewalStatus("false");
+          }
+          return Mono.just(new ResponseEntity<>(license.convertToDto(), HttpStatus.OK));
     }
 
 
+
+    public Mono<ResponseEntity> getAllLicenseStatus() {
+        return Mono.just(new ResponseEntity<>(mapValues.getPaymentStatus(), HttpStatus.OK));
+
+    }
+    public Mono<ResponseEntity> getExpiringLicenses() {
+
+        return Mono.just(new ResponseEntity<>(expirationList.getExpiringLicences("controllerClass"), HttpStatus.NOT_FOUND));
+    }
+
+    public Mono<ResponseEntity> getExpiredLicenses() {
+
+        return Mono.just(new ResponseEntity<>(expirationList.getExpiredLicences("controllerClass"), HttpStatus.NOT_FOUND));
+
+    }
     public Mono<ResponseEntity> updateLicense(LicenseUpdateDto licenseUpdateDto) {
         try {
             String gameTypeId = licenseUpdateDto.getGameTypeId();
@@ -128,11 +146,6 @@ public class LicenseServiceImpl implements LicenseService {
             Query query = new Query();
             query.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
             query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-           /* License existingFeeWithGameTypeAndFeePaymentType = (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
-            if (existingFeeWithGameTypeAndFeePaymentType != null) {
-                return Mono.just(new ResponseEntity<>("A fee setting already exist with the Fee Type and Game Type please update it", HttpStatus.BAD_REQUEST));
-            }*/
-
             License license;
             Query queryLicence= new Query();
             queryLicence.addCriteria(Criteria.where("gameTypeId").is(licenseUpdateDto.getGameTypeId()));
@@ -172,11 +185,6 @@ public class LicenseServiceImpl implements LicenseService {
             }
 
             license.setLicenseStatusId(licenseUpdateDto.getLicenseStatusId());
-           /*int result = DateTimeComparator.getInstance().compare(lastLicense.getEndDate().toLocalDate(), new LocalDateTime().toLocalDate());
-            if(lastLicense==null || result!=1){
-                return Mono.just(new ResponseEntity<>("No Valid Payment Record", HttpStatus.BAD_REQUEST));
-            }
-            license.setPaymentRecordId(lastLicense.getId());*/
 
 
             mongoRepositoryReactive.saveOrUpdate(license);

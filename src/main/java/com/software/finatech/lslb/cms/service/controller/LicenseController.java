@@ -62,6 +62,18 @@ public class LicenseController {
         return licenseService.findLicenseById(licenseId);
     }
 
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{institutionId}")
+    @ApiOperation(value = "Get License by InstitutionId", response = LicenseDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getLicenseByInstitutionId(@PathVariable("institutionId") String institutionId) {
+        return licenseService.findLicenseByInstitutionId(institutionId);
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = "/all-license-status")
     @ApiOperation(value = "Get all license status", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
@@ -71,6 +83,27 @@ public class LicenseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllLicenseStatus() {
         return licenseService.getAllLicenseStatus();
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/all-expiring-licenses")
+    @ApiOperation(value = "Get all Expiring license", response = License.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllExpiringLicenseStatus() {
+        return licenseService.getExpiringLicenses();
+    }
+    @RequestMapping(method = RequestMethod.GET, value = "/all-expired-licenses")
+    @ApiOperation(value = "Get all Expired license", response = License.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllExpiredLicenseStatus() {
+        return licenseService.getExpiredLicenses();
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/update")

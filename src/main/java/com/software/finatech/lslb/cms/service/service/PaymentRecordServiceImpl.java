@@ -7,6 +7,8 @@ import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
+import com.software.finatech.lslb.cms.service.util.ExpirationList;
+import com.software.finatech.lslb.cms.service.util.MapValues;
 import io.advantageous.boon.HTTP;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeComparator;
@@ -42,6 +44,9 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
     public void setMongoRepositoryReactive(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
     }
+    @Autowired
+    MapValues mapValues;
+
 
     @Override
     public Mono<ResponseEntity> findAllPaymentRecords(int page,
@@ -96,45 +101,19 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         }
     }
 
-    @Override
+
     public Mono<ResponseEntity> getAllPaymentStatus() {
-        try {
-            List<FactObject> factObjectList = (List<FactObject>) mongoRepositoryReactive.findAll(PaymentStatus.class).collect(Collectors.toList());
-            if (factObjectList == null || factObjectList.isEmpty()) {
-                return Mono.just(new ResponseEntity<>("No Record found", HttpStatus.NOT_FOUND));
-            }
-            List<EnumeratedFactDto> paymentStatusDtoList = new ArrayList<>();
-            factObjectList.forEach(factObject -> {
-                PaymentStatus paymentStatus = (PaymentStatus) factObject;
-                paymentStatusDtoList.add(paymentStatus.convertToDto());
-            });
-            return Mono.just(new ResponseEntity<>(paymentStatusDtoList, HttpStatus.OK));
-        } catch (Exception e) {
-            String errorMsg = "An error occurred while trying to get all payment types";
-            return logAndReturnError(logger, errorMsg, e);
-        }
+
+        return Mono.just(new ResponseEntity<>(mapValues.getPaymentStatus(), HttpStatus.NOT_FOUND));
+
     }
 
-    public Mono<ResponseEntity> findLicenses(String institutionId, String gameTypeId,String objectType, String startDate, String endDate) {
-        try {
-            LocalDateTime fromDate=null;
-            LocalDateTime toDate=null;
-            if ((startDate != "" && !startDate.isEmpty()) ||(endDate != "" && !endDate.isEmpty())) {
-                if (!startDate.matches("([0-9]{4})-([0-9]{2})-([0-9]{2})")||!endDate.matches("([0-9]{4})-([0-9]{2})-([0-9]{2})") ) {
-                    return Mono.just(new ResponseEntity("Invalid Date format. " +
-                            "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
-                }
-                fromDate = new LocalDateTime(startDate);
-                toDate = new LocalDateTime(endDate);
 
-            }
+    public Mono<ResponseEntity> findPaymentRecords(String institutionId, String gameTypeId,String objectType) {
+        try {
+
             Query query = new Query();
-            if(!StringUtils.isEmpty(startDate)&&!StringUtils.isEmpty(endDate) ){
-                query.addCriteria(Criteria.where("endDate").lte(toDate));
-                query.addCriteria(Criteria.where("startDate").gte(fromDate));
-            }else if(!StringUtils.isEmpty(endDate)||StringUtils.isEmpty(startDate)){
-                query.addCriteria(Criteria.where("endDate").lte(fromDate));
-            }
+
             if(!StringUtils.isEmpty(institutionId)){
                 query.addCriteria(Criteria.where("institutionId").is(institutionId));
             }
@@ -171,7 +150,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
 
           if(paymentRecordCreateDto.getRenewalCheck()=="true"){
             List<PaymentRecord> previousLicenses=
-                    (List<PaymentRecord>)findLicenses(paymentRecordCreateDto.getInstitutionId(), paymentRecordCreateDto.getGameTypeId(),"LicenseRecord","","");
+                    (List<PaymentRecord>)findPaymentRecords(paymentRecordCreateDto.getInstitutionId(), paymentRecordCreateDto.getGameTypeId(),"LicenseRecord");
             if(previousLicenses.size()==0){
             }
               PaymentRecord lastLicense= previousLicenses.get(previousLicenses.size()-1);
@@ -185,13 +164,15 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         License licenseCheck = (License) mongoRepositoryReactive.find(queryLicence,License.class).block();
             if(licenseCheck==null){
                 license=new License();
-            license.setId(UUID.randomUUID().toString());
+                license.setId(UUID.randomUUID().toString());
+                license.setLicenseStatusId("01");
 
             }else{
                 license=licenseCheck;
+                license.setLicenseStatusId("04");
             }
         license.setGameTypeId(paymentRecordCreateDto.getGameTypeId());
-            license.setLicenseStatusId("04");
+
         license.setInstitutionId(paymentRecordCreateDto.getInstitutionId());
         /*int result = DateTimeComparator.getInstance().compare(paymentRecord.getEndDate().toLocalDate(), new LocalDateTime().toLocalDate());
         if( result!=1){

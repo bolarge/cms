@@ -2,7 +2,9 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.FeeDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
+import com.software.finatech.lslb.cms.service.util.MapValues;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Map;
@@ -10,6 +12,8 @@ import java.util.Map;
 @SuppressWarnings("serial")
 @Document(collection = "Fees")
 public class Fee extends AbstractFact {
+    @Autowired
+    MapValues mapValues;
 
     protected double amount;
     protected String gameTypeId;
@@ -57,35 +61,8 @@ public class Fee extends AbstractFact {
         this.revenueName = revenueName;
     }
 
-    public GameType getGameType() {
-        Map gameTypeMap = Mapstore.STORE.get("GameType");
-        GameType gameType = null;
-        if (gameTypeMap != null) {
-            gameType = (GameType) gameTypeMap.get(gameTypeId);
-        }
-        if (gameType == null) {
-            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
-            if (gameType != null && gameTypeMap != null) {
-                gameTypeMap.put(gameTypeId, gameType);
-            }
-        }
-        return gameType;
-    }
 
-    public FeePaymentType getFeePaymentType() {
-        Map feePaymentTypeMap = Mapstore.STORE.get("FeePaymentType");
-        FeePaymentType feePaymentType = null;
-        if (feePaymentTypeMap != null) {
-            feePaymentType = (FeePaymentType) feePaymentTypeMap.get(feePaymentTypeId);
-        }
-        if (feePaymentType == null) {
-            feePaymentType = (FeePaymentType) mongoRepositoryReactive.findById(feePaymentTypeId, FeePaymentType.class).block();
-            if (feePaymentType != null && feePaymentTypeMap != null) {
-                feePaymentTypeMap.put(feePaymentTypeId, feePaymentType);
-            }
-        }
-        return feePaymentType;
-    }
+
 
     public FeeDto convertToDto() {
         FeeDto feeDto = new FeeDto();
@@ -93,11 +70,11 @@ public class Fee extends AbstractFact {
         feeDto.setId(getId());
         feeDto.setDuration(getDuration());
         feeDto.setRevenueName(getRevenueName());
-        GameType gameType = getGameType();
+        GameType gameType = mapValues.getGameType(gameTypeId);
         if (gameType != null) {
             feeDto.setGameType(gameType.convertToDto());
         }
-        FeePaymentType feePaymentType = getFeePaymentType();
+        FeePaymentType feePaymentType = mapValues.getFeePaymentType(feePaymentTypeId);
         if (feePaymentType != null) {
             feeDto.setFeePaymentType(feePaymentType.convertToDto());
         }

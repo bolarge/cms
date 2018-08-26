@@ -1,8 +1,10 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
+import com.software.finatech.lslb.cms.service.util.MapValues;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.joda.time.LocalDateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Map;
@@ -17,7 +19,8 @@ public class PaymentRecord extends AbstractFact {
     private String feeId;
     private String parentLicenseId;
     private String gameTypeId;
-
+    @Autowired
+    MapValues mapValues;
 
     public String getParentLicenseId() {
         return parentLicenseId;
@@ -70,34 +73,7 @@ public class PaymentRecord extends AbstractFact {
     public Institution getInstitution() {
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
-    private GameType getGameType() {
-        Map gameTypeMap = Mapstore.STORE.get("GameType");
-        GameType gameType = null;
-        if (gameTypeMap != null) {
-            gameType = (GameType) gameTypeMap.get(gameTypeId);
-        }
-        if (gameType == null) {
-            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
-            if (gameType != null && gameTypeMap != null) {
-                gameTypeMap.put(gameTypeId, gameType);
-            }
-        }
-        return gameType;
-    }
-    private PaymentStatus getPaymentStatus() {
-        Map paymentStatusMap = Mapstore.STORE.get("PaymentStatus");
-        PaymentStatus paymentStatus = null;
-        if (paymentStatusMap != null) {
-            paymentStatus = (PaymentStatus) paymentStatusMap.get(paymentStatusId);
-        }
-        if (paymentStatus == null) {
-            paymentStatus = (PaymentStatus) mongoRepositoryReactive.findById(paymentStatusId, PaymentStatus.class).block();
-            if (paymentStatus != null && paymentStatusMap != null) {
-                paymentStatusMap.put(paymentStatusId, paymentStatus);
-            }
-        }
-        return paymentStatus;
-    }
+
 
     private Fee getFee() {
         return (Fee) mongoRepositoryReactive.findById(feeId, Fee.class).block();
@@ -119,7 +95,7 @@ public class PaymentRecord extends AbstractFact {
         if (fee != null) {
             paymentRecordDto.setFee(fee.convertToDto());
         }
-        PaymentStatus paymentStatus = getPaymentStatus();
+        PaymentStatus paymentStatus = mapValues.getPaymentStatus(paymentStatusId);
         if (paymentStatus != null) {
             paymentRecordDto.setPaymentStatus(paymentStatus.convertToDto());
         }
