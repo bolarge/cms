@@ -8,6 +8,7 @@ import com.software.finatech.lslb.cms.service.dto.FeeDto;
 import com.software.finatech.lslb.cms.service.dto.FeeUpdateDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
+import com.software.finatech.lslb.cms.service.util.MapValues;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,8 @@ public class FeeServiceImpl implements FeeService {
     public void setMongoRepositoryReactive(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
     }
+    @Autowired
+    MapValues mapValues;
 
     public Mono<ResponseEntity> createFee(FeeCreateDto feeCreateDto) {
         try {
@@ -95,19 +98,12 @@ public class FeeServiceImpl implements FeeService {
     @Override
     public Mono<ResponseEntity> getAllFeePaymentType() {
         try {
-            ArrayList<FeePaymentType> feePaymentTypes = (ArrayList<FeePaymentType>) mongoRepositoryReactive
-                    .findAll(new Query(), FeePaymentType.class).toStream().collect(Collectors.toList());
-            if (feePaymentTypes == null || feePaymentTypes.isEmpty()) {
-                return Mono.just(new ResponseEntity<>("No Record found", HttpStatus.NOT_FOUND));
-            }
-            List<EnumeratedFactDto> feePaymentTypeDtoList = new ArrayList<>();
-            feePaymentTypes.forEach(feePaymentType -> {
-                feePaymentTypeDtoList.add(feePaymentType.convertToDto());
-            });
-            return Mono.just(new ResponseEntity<>(feePaymentTypeDtoList, HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(mapValues.getFeePaymentType(), HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while trying to get all payment types";
             return logAndReturnError(logger, errorMsg, e);
         }
+
+
     }
 }

@@ -126,7 +126,7 @@ public class LicenseServiceImpl implements LicenseService {
 
 
     public Mono<ResponseEntity> getAllLicenseStatus() {
-        return Mono.just(new ResponseEntity<>(mapValues.getPaymentStatus(), HttpStatus.OK));
+        return Mono.just(new ResponseEntity<>(mapValues.getLicenseStatus(), HttpStatus.OK));
 
     }
     public Mono<ResponseEntity> getExpiringLicenses() {

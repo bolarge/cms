@@ -84,7 +84,7 @@ public class MapValues {
     }
 
     public List<EnumeratedFactDto> getFeePaymentType() {
-        List<FeePaymentType> feePaymentTypes = (List<FeePaymentType>) Mapstore.STORE.get("PaymentStatus");
+        List<FeePaymentType> feePaymentTypes = (List<FeePaymentType>) Mapstore.STORE.get("FeePaymentType");
         List<EnumeratedFactDto> feePaymentTypeDtoList = new ArrayList<>();
         feePaymentTypes.forEach(factObject -> {
             FeePaymentType feePaymentType = factObject;
@@ -94,7 +94,7 @@ public class MapValues {
     }
 
     public List<EnumeratedFactDto> getLicenseStatus() {
-        List<LicenseStatus> licenseStatuses = (List<LicenseStatus>) Mapstore.STORE.get("LicenceStatus");
+        List<LicenseStatus> licenseStatuses = (List<LicenseStatus>) Mapstore.STORE.get("LicenseStatus");
         List<EnumeratedFactDto> licenseStatusDtoLists = new ArrayList<>();
         licenseStatuses.forEach(factObject -> {
             LicenseStatus licenseStatus = factObject;
