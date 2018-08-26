@@ -17,6 +17,7 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
@@ -253,5 +254,16 @@ public class ApplicationFormController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> saveApplicantOutletInformation(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantOutletInformation applicantOutletInformation) {
         return applicationFormService.saveApplicantOutletInformation(applicationFormId, applicantOutletInformation);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/{applicationFormId}/upload-file")
+    @ApiOperation(value = "Save applicant outlet information", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> uploadMultipleFiles(@RequestParam("files") MultipartFile[] multipartFile) {
+      return null;
     }
 }
