@@ -1,10 +1,66 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import com.software.finatech.lslb.cms.service.domain.*;
 public class LicenseDto {
-    private LicenseRecordDto licenseRecord;
-    private EnumeratedFactDto licenseStatus;
-    private String institutionId;
-    private String id;
+    protected PaymentRecordDto paymentRecordDto;
+    protected LicenseStatusDto licenseStatus;
+    protected Institution institution;
+    protected String id;
+    protected PaymentRecordDto paymentRecord;
+    protected Fee fee;
+    protected String startDate;
+    protected String endDate;
+    protected String renewalStatus;
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
+
+    public void setRenewalStatus(String renewalStatus) {
+        this.renewalStatus = renewalStatus;
+    }
+
+    public String getRenewalStatus() {
+        return renewalStatus;
+    }
+
+
+    public PaymentRecordDto getPaymentRecordDto() {
+        return paymentRecordDto;
+    }
+
+    public void setPaymentRecordDto(PaymentRecordDto paymentRecordDto) {
+        this.paymentRecordDto = paymentRecordDto;
+    }
+
+
+    public LicenseStatusDto getLicenseStatus() {
+        return licenseStatus;
+    }
+
+    public void setLicenseStatus(LicenseStatusDto licenseStatus) {
+        this.licenseStatus = licenseStatus;
+    }
+
+    public Institution getInstitution() {
+        return institution;
+    }
+
+    public void setInstitution(Institution institution) {
+        this.institution = institution;
+    }
 
     public String getId() {
         return id;
@@ -14,27 +70,20 @@ public class LicenseDto {
         this.id = id;
     }
 
-    public LicenseRecordDto getLicenseRecordDto() {
-        return licenseRecord;
+    public PaymentRecordDto getPaymentRecord() {
+        return paymentRecord;
     }
 
-    public void setLicenseRecordDto(LicenseRecordDto licenseRecordDto) {
-        this.licenseRecord = licenseRecordDto;
+    public void setPaymentRecord(PaymentRecordDto paymentRecord) {
+        this.paymentRecord = paymentRecord;
     }
 
-    public EnumeratedFactDto getLicenseStatus() {
-        return licenseStatus;
+    public Fee getFee() {
+        return fee;
     }
 
-    public void setLicenseStatus(EnumeratedFactDto licenseStatus) {
-        this.licenseStatus = licenseStatus;
+    public void setFee(Fee fee) {
+        this.fee = fee;
     }
 
-    public String getInstitutionId() {
-        return institutionId;
-    }
-
-    public void setInstitutionId(String institutionId) {
-        this.institutionId = institutionId;
-    }
 }

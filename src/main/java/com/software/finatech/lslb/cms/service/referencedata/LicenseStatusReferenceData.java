@@ -8,6 +8,7 @@ public class LicenseStatusReferenceData {
     private static final String ONE = "01";
     private static  final String TWO = "02";
     private static final String THREE = "03";
+    private static final String FOUR = "04";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive){
         LicenseStatus licenseStatus1 = (LicenseStatus)mongoRepositoryReactive.findById(ONE, LicenseStatus.class).block();
@@ -32,9 +33,17 @@ public class LicenseStatusReferenceData {
         }
         licenseStatus3.setName("LICENSE REVOKED");
 
+        LicenseStatus licenseStatus4 = (LicenseStatus)mongoRepositoryReactive.findById(FOUR, LicenseStatus.class).block();
+        if (licenseStatus4 == null){
+            licenseStatus4 = new LicenseStatus();
+            licenseStatus4.setId(FOUR);
+        }
+        licenseStatus4.setName("LICENSE IN PROGRESS");
+
         mongoRepositoryReactive.saveOrUpdate(licenseStatus1);
         mongoRepositoryReactive.saveOrUpdate(licenseStatus2);
         mongoRepositoryReactive.saveOrUpdate(licenseStatus3);
+        mongoRepositoryReactive.saveOrUpdate(licenseStatus4);
 
     }
 }

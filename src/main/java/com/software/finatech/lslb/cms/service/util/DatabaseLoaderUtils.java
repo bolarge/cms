@@ -89,7 +89,7 @@ public class DatabaseLoaderUtils {
 
             Mapstore.STORE.put(entry.getKey(), facts);
             Long endTime = System.nanoTime() - startTime;
-            Double timeMills = (double) (Double.valueOf(endTime) / Double.valueOf(1000000));
+            Double timeMills = Double.valueOf(endTime) / Double.valueOf(1000000);
             logger.info("Importing took " + " -> " + endTime + "ns" + " >>> " + timeMills + "ms");
         }
     }

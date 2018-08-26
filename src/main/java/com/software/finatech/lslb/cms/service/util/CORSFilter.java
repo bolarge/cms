@@ -16,7 +16,7 @@ public class CORSFilter implements Filter {
     //static Logger logger = LoggerFactory.getLogger(CORSFilter.class);
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
     }
 
     @Override

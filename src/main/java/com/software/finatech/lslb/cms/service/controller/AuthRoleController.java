@@ -123,7 +123,7 @@ public class AuthRoleController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request")
     }
     )
-    public Mono<ResponseEntity> updateAuthRole(@Valid @RequestBody AuthRoleUpdateDto authRoleUpdateDto) {
+    public Mono<ResponseEntity> updateAuthRole(@Valid @RequestBody AuthRoleUpdateDto authRoleUpdateDto) throws FactNotFoundException {
         try {
             AuthRole authRole = (AuthRole) Mapstore.STORE.get("AuthRole").get(authRoleUpdateDto.getId());
             if (authRole == null) {
@@ -140,11 +140,7 @@ public class AuthRoleController extends BaseController {
             mongoRepositoryReactive.saveOrUpdate(authRole);
             Mapstore.STORE.get("AuthRole").put(authRole.getId(), authRole);
 
-            try {
-                authRole.setAssociatedProperties();
-            } catch (FactNotFoundException e) {
-                e.printStackTrace();
-            }
+            authRole.setAssociatedProperties();
 
             return Mono.just(new ResponseEntity(authRole.convertToDto(), HttpStatus.OK));
 
@@ -332,11 +328,7 @@ public class AuthRoleController extends BaseController {
 
         ArrayList<AuthRoleDto> authRoleDtos = new ArrayList<>();
         eligibleRoles.forEach(authRole -> {
-            try {
-                authRole.setAssociatedProperties();
-            } catch (FactNotFoundException e) {
-                logger.error(String.format("Error setting associated properties of role %s", authRole.getId()));
-            }
+            authRole.setAssociatedProperties();
             authRoleDtos.add(authRole.convertToDto());
         });
         if (authRoleDtos.size() == 0) {
@@ -350,11 +342,7 @@ public class AuthRoleController extends BaseController {
     private ArrayList<AuthRoleDto> authRoleDtoListFromAuthRoleList(List<FactObject> authRoles) {
         ArrayList<AuthRoleDto> authRoleDtos = new ArrayList<>();
         authRoles.forEach(entry -> {
-            try {
-                ((AuthRole) entry).setAssociatedProperties();
-            } catch (FactNotFoundException e) {
-                e.printStackTrace();
-            }
+            ((AuthRole) entry).setAssociatedProperties();
             authRoleDtos.add(((AuthRole) entry).convertToDto());
         });
         return authRoleDtos;

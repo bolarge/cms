@@ -55,7 +55,7 @@ public class AuthRole  extends EnumeratedFact  {
 		return super.clone();
 	}
 
-	public void setAssociatedProperties() throws FactNotFoundException {
+	public void setAssociatedProperties() {
 		if (authPermissionIds.size()>0) {
 			authPermissionIds.stream().forEach(authPermissionId->{
 				AuthPermission authPermission = (AuthPermission) Mapstore.STORE.get("AuthPermission").get(authPermissionId);

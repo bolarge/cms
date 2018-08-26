@@ -18,8 +18,8 @@ public class AuthInfo extends AbstractFact {
 	protected String firstName ;
 	protected String lastName ;
 	protected String phoneNumber ;
-	protected String verificationTokenId;;
-	protected String fullName;
+	protected String verificationTokenId;
+    protected String fullName;
 	protected Boolean enabled;
 	protected Boolean accountLocked;
 	protected DateTime accountExpirationTime;
