@@ -73,7 +73,7 @@ public class Fee extends AbstractFact {
         Map gameTypeMap = Mapstore.STORE.get("GameType");
         GameType gameType = null;
         if (gameTypeMap != null) {
-            gameType = (GameType) gameTypeMap.get(feePaymentTypeId);
+            gameType = (GameType) gameTypeMap.get(gameTypeId);
         }
         if (gameType == null) {
             gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
