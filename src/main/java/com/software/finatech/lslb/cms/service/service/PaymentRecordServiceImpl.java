@@ -122,7 +122,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             }
             List<PaymentRecord> licenseRecords;
             List<PaymentRecordDto> licenseDtos =new ArrayList<>();
-            licenseRecords= (List<PaymentRecord>)mongoRepositoryReactive.findAll(query, PaymentRecord.class);
+            licenseRecords= (List<PaymentRecord>)mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
             if (licenseRecords == null) {
                 return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
             } else {
@@ -165,19 +165,12 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             if(licenseCheck==null){
                 license=new License();
                 license.setId(UUID.randomUUID().toString());
-                license.setLicenseStatusId("01");
-
             }else{
                 license=licenseCheck;
-                license.setLicenseStatusId("04");
             }
-        license.setGameTypeId(paymentRecordCreateDto.getGameTypeId());
-
-        license.setInstitutionId(paymentRecordCreateDto.getInstitutionId());
-        /*int result = DateTimeComparator.getInstance().compare(paymentRecord.getEndDate().toLocalDate(), new LocalDateTime().toLocalDate());
-        if( result!=1){
-            return Mono.just(new ResponseEntity<>("No Valid Payment Record", HttpStatus.BAD_REQUEST));
-        }*/
+            license.setLicenseStatusId("04");
+            license.setGameTypeId(paymentRecordCreateDto.getGameTypeId());
+            license.setInstitutionId(paymentRecordCreateDto.getInstitutionId());
         license.setPaymentRecordId(paymentRecord.getId());
         mongoRepositoryReactive.saveOrUpdate(paymentRecord);
         mongoRepositoryReactive.saveOrUpdate(license);

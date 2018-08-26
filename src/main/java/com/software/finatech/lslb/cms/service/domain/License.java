@@ -100,7 +100,18 @@ public class License extends AbstractFact {
     public LicenseDto convertToDto() {
         LicenseDto licenseDto = new LicenseDto();
         licenseDto.setId(getId());
-        licenseDto.setLicenseStatus(mapValues.getLicenseStatus(licenseStatusId).convertToDto());
+        Map licenseStatusMap = Mapstore.STORE.get("LicenseStatus");
+        LicenseStatus licenseStatus = null;
+        if (licenseStatusMap != null) {
+            licenseStatus = (LicenseStatus) licenseStatusMap.get(licenseStatusId);
+        }
+        if (licenseStatus == null) {
+            licenseStatus = (LicenseStatus) mongoRepositoryReactive.findById(licenseStatusId, LicenseStatus.class).block();
+            if (licenseStatus != null && licenseStatusMap != null) {
+                licenseStatusMap.put(licenseStatusId, licenseStatus);
+            }
+        }
+        licenseDto.setLicenseStatus(licenseStatus.convertToDto());
         licenseDto.setPaymentRecord(getPaymentRecord().convertToDto());
         licenseDto.setStartDate(startDate.toString("dd/MM/yyyy HH:mm:ss"));
         licenseDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));

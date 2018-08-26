@@ -12,14 +12,6 @@ public class LicenseDto {
     protected String endDate;
     protected String renewalStatus;
 
-    public String getRenewalStatus() {
-        return renewalStatus;
-    }
-
-    public void setRenewalStatus(String renewalStatus) {
-        this.renewalStatus = renewalStatus;
-    }
-
     public String getStartDate() {
         return startDate;
     }
@@ -35,6 +27,15 @@ public class LicenseDto {
     public void setEndDate(String endDate) {
         this.endDate = endDate;
     }
+
+    public void setRenewalStatus(String renewalStatus) {
+        this.renewalStatus = renewalStatus;
+    }
+
+    public String getRenewalStatus() {
+        return renewalStatus;
+    }
+
 
     public PaymentRecordDto getPaymentRecordDto() {
         return paymentRecordDto;

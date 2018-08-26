@@ -70,11 +70,31 @@ public class Fee extends AbstractFact {
         feeDto.setId(getId());
         feeDto.setDuration(getDuration());
         feeDto.setRevenueName(getRevenueName());
-        GameType gameType = mapValues.getGameType(gameTypeId);
+        Map gameTypeMap = Mapstore.STORE.get("GameType");
+        GameType gameType = null;
+        if (gameTypeMap != null) {
+            gameType = (GameType) gameTypeMap.get(feePaymentTypeId);
+        }
+        if (gameType == null) {
+            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
+            if (gameType != null && gameTypeMap != null) {
+                gameTypeMap.put(gameTypeId, gameType);
+            }
+        }
         if (gameType != null) {
             feeDto.setGameType(gameType.convertToDto());
         }
-        FeePaymentType feePaymentType = mapValues.getFeePaymentType(feePaymentTypeId);
+        Map feePaymentTypeMap = Mapstore.STORE.get("FeePaymentType");
+        FeePaymentType feePaymentType = null;
+        if (feePaymentTypeMap != null) {
+            feePaymentType = (FeePaymentType) feePaymentTypeMap.get(feePaymentTypeId);
+        }
+        if (feePaymentType == null) {
+            feePaymentType = (FeePaymentType) mongoRepositoryReactive.findById(feePaymentTypeId, FeePaymentType.class).block();
+            if (feePaymentType != null && feePaymentTypeMap != null) {
+                feePaymentTypeMap.put(feePaymentTypeId, feePaymentType);
+            }
+        }
         if (feePaymentType != null) {
             feeDto.setFeePaymentType(feePaymentType.convertToDto());
         }

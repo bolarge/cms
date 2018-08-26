@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -63,14 +64,14 @@ public class LicenseController {
     }
 
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{institutionId}")
+    @RequestMapping(method = RequestMethod.GET, value = "/get-by-institutionId")
     @ApiOperation(value = "Get License by InstitutionId", response = LicenseDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getLicenseByInstitutionId(@PathVariable("institutionId") String institutionId) {
+    public Mono<ResponseEntity> getLicenseByInstitutionId(@RequestParam("institutionId") String institutionId) {
         return licenseService.findLicenseByInstitutionId(institutionId);
     }
 

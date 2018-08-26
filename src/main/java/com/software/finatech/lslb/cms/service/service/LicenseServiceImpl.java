@@ -109,12 +109,12 @@ public class LicenseServiceImpl implements LicenseService {
 
     public Mono<ResponseEntity> findLicenseByInstitutionId(String institutionId) {
           LocalDateTime dateTime = new LocalDateTime();
-          dateTime.plusDays(90);
+          dateTime=dateTime.plusDays(90);
           Query queryLicence= new Query();
 
           queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
           License license= (License) mongoRepositoryReactive.find(queryLicence,License.class).block();
-          int days= Days.daysBetween(dateTime,license.getEndDate()).getDays();
+          int days= Days.daysBetween(license.getEndDate(),dateTime).getDays();
           if(days>0){
               license.setRenewalStatus("true");
           }else{
@@ -131,12 +131,12 @@ public class LicenseServiceImpl implements LicenseService {
     }
     public Mono<ResponseEntity> getExpiringLicenses() {
 
-        return Mono.just(new ResponseEntity<>(expirationList.getExpiringLicences("controllerClass"), HttpStatus.NOT_FOUND));
+        return expirationList.getExpiringLicences("controllerClass");
     }
 
     public Mono<ResponseEntity> getExpiredLicenses() {
 
-        return Mono.just(new ResponseEntity<>(expirationList.getExpiredLicences("controllerClass"), HttpStatus.NOT_FOUND));
+        return expirationList.getExpiredLicences("controllerClass");
 
     }
     public Mono<ResponseEntity> updateLicense(LicenseUpdateDto licenseUpdateDto) {
@@ -155,6 +155,15 @@ public class LicenseServiceImpl implements LicenseService {
 
                 return Mono.just(new ResponseEntity<>("No Valid Payment Record", HttpStatus.BAD_REQUEST));
 
+            }
+            Query queryPaymenrRecord= new Query();
+            queryPaymenrRecord.addCriteria(Criteria.where("id").is(licenseCheck.getPaymentRecordId()));
+            queryPaymenrRecord.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
+            PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.find(queryPaymenrRecord,PaymentRecord.class).block();
+            if(paymentRecord.convertToDto().getFee().getFeePaymentType().getId()=="01" ){
+                if(licenseUpdateDto.getLicenseStatusId()!="01"){
+                    return Mono.just(new ResponseEntity<>("Invalid License Status Selected", HttpStatus.BAD_REQUEST));
+                }
             }
 
             license=licenseCheck;
@@ -180,13 +189,9 @@ public class LicenseServiceImpl implements LicenseService {
             if(licenseUpdateDto.getLicenseStatusId()!="03" &&
                     licenseUpdateDto.getLicenseStatusId()!="04"){
                 license.setEndDate(fromDate.plusDays(duration));
-            }else{
-                //license.setEndDate("");
             }
 
             license.setLicenseStatusId(licenseUpdateDto.getLicenseStatusId());
-
-
             mongoRepositoryReactive.saveOrUpdate(license);
             return Mono.just(new ResponseEntity<>(license.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {

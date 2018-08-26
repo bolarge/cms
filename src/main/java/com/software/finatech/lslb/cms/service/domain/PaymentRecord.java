@@ -95,8 +95,17 @@ public class PaymentRecord extends AbstractFact {
         if (fee != null) {
             paymentRecordDto.setFee(fee.convertToDto());
         }
-        PaymentStatus paymentStatus = mapValues.getPaymentStatus(paymentStatusId);
-        if (paymentStatus != null) {
+        Map paymentStatusMap = Mapstore.STORE.get("PaymentStatus");
+        PaymentStatus paymentStatus = null;
+        if (paymentStatusMap != null) {
+            paymentStatus = (PaymentStatus) paymentStatusMap.get(paymentStatusId);
+        }
+        if (paymentStatus == null) {
+            paymentStatus = (PaymentStatus) mongoRepositoryReactive.findById(paymentStatusId, PaymentStatus.class).block();
+            if (paymentStatus != null && paymentStatusMap != null) {
+                paymentStatusMap.put(paymentStatusId, paymentStatus);
+            }
+        } if (paymentStatus != null) {
             paymentRecordDto.setPaymentStatus(paymentStatus.convertToDto());
         }
         paymentRecordDto.setApproverName(getApproverFullName());
