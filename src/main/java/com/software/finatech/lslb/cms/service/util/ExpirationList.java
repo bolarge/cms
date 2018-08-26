@@ -24,7 +24,7 @@ public class ExpirationList {
         LocalDateTime dateTime = new LocalDateTime();
         dateTime.plusDays(90);
         Query queryLicence= new Query();
-        queryLicence.addCriteria(Criteria.where("endDate").lte(dateTime));
+        queryLicence.addCriteria(Criteria.where("endDate").lt(dateTime));
         queryLicence.addCriteria(Criteria.where("licenseStatusId").is("01"));
         List<License> licenses= (List<License>) mongoRepositoryReactive.findAll(queryLicence,License.class);
        List<LicenseDto> licenseDtos = new ArrayList<>();
