@@ -96,6 +96,18 @@ public class LicenseController {
     public Mono<ResponseEntity> getAllExpiringLicenseStatus() {
         return licenseService.getExpiringLicenses();
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/all-expiring-aips")
+    @ApiOperation(value = "Get all Expiring AIPs", response = License.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllExpiringAIPStatus() {
+        return licenseService.getExpiringAIPs();
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = "/all-expired-licenses")
     @ApiOperation(value = "Get all Expired license", response = License.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
@@ -106,6 +118,18 @@ public class LicenseController {
     public Mono<ResponseEntity> getAllExpiredLicenseStatus() {
         return licenseService.getExpiredLicenses();
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/all-expired-aips")
+    @ApiOperation(value = "Get all Expired AIPs", response = License.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllExpiredAIPStatus() {
+        return licenseService.getExpiredAIPs();
+    }
+
 
     @RequestMapping(method = RequestMethod.POST, value = "/update")
     @ApiOperation(value = "Update License", response = License.class, consumes = "application/json")

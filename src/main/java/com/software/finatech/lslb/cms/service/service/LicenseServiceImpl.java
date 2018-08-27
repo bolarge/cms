@@ -142,12 +142,21 @@ public class LicenseServiceImpl implements LicenseService {
     }
     public Mono<ResponseEntity> getExpiringLicenses() {
 
-        return expirationList.getExpiringLicences("controllerClass");
+        return expirationList.getExpiringLicences("controllerClass",90,"02");
+    }
+    public Mono<ResponseEntity> getExpiringAIPs() {
+
+        return expirationList.getExpiringLicences("controllerClass",14,"01");
     }
 
     public Mono<ResponseEntity> getExpiredLicenses() {
 
-        return expirationList.getExpiredLicences("controllerClass");
+        return expirationList.getExpiredLicences("controllerClass","02");
+
+    }
+    public Mono<ResponseEntity> getExpiredAIPs() {
+
+        return expirationList.getExpiredLicences("controllerClass","01");
 
     }
     public Mono<ResponseEntity> updateLicense(LicenseUpdateDto licenseUpdateDto) {

@@ -158,30 +158,35 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         paymentRecord.setFeeId(paymentRecordCreateDto.getFeeId());
         paymentRecord.setInstitutionId(paymentRecordCreateDto.getInstitutionId());
         paymentRecord.setPaymentStatusId(paymentRecordCreateDto.getPaymentStatusId());
-        paymentRecord.setGameTypeId(paymentRecordCreateDto.getGameTypeId());
+        Fee fee = (Fee) mongoRepositoryReactive.findById(paymentRecordCreateDto.getFeeId(),Fee.class).block();
 
-          if(paymentRecordCreateDto.getRenewalCheck()=="true"){
+        if(paymentRecordCreateDto.getRenewalCheck()=="true"){
             List<PaymentRecord> previousLicenses=
-                    (List<PaymentRecord>)findPaymentRecords(paymentRecordCreateDto.getInstitutionId(), paymentRecordCreateDto.getGameTypeId(),"LicenseRecord");
+                    (List<PaymentRecord>)findPaymentRecords(paymentRecordCreateDto.getInstitutionId(), fee.getGameTypeId(),"LicenseRecord");
             if(previousLicenses.size()==0){
             }
               PaymentRecord lastLicense= previousLicenses.get(previousLicenses.size()-1);
 
               paymentRecord.setParentLicenseId(lastLicense.getId());
         }
-        License license;
+        if(fee.getFeePaymentTypeId().equals("01")){
+            mongoRepositoryReactive.saveOrUpdate(paymentRecord);
+            return Mono.just(new ResponseEntity<>(paymentRecord.convertToDto(), HttpStatus.OK));
+        }
+       License license;
         Query queryLicence= new Query();
-        queryLicence.addCriteria(Criteria.where("gameTypeId").is(paymentRecordCreateDto.getGameTypeId()));
+        queryLicence.addCriteria(Criteria.where("gameTypeId").is(fee.getGameTypeId()));
         queryLicence.addCriteria(Criteria.where("institutionId").is(paymentRecordCreateDto.getInstitutionId()));
         License licenseCheck = (License) mongoRepositoryReactive.find(queryLicence,License.class).block();
-            if(licenseCheck==null){
+
+        if(licenseCheck==null){
                 license=new License();
                 license.setId(UUID.randomUUID().toString());
             }else{
                 license=licenseCheck;
             }
             license.setLicenseStatusId("04");
-            license.setGameTypeId(paymentRecordCreateDto.getGameTypeId());
+            license.setGameTypeId(fee.getGameTypeId());
             license.setInstitutionId(paymentRecordCreateDto.getInstitutionId());
         license.setPaymentRecordId(paymentRecord.getId());
         mongoRepositoryReactive.saveOrUpdate(paymentRecord);
