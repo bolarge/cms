@@ -23,12 +23,12 @@ import javax.validation.Valid;
 @RequestMapping("/api/v1/payment-records")
 public class PaymentRecordController extends BaseController {
     @Autowired
-    private PaymentRecordServiceImpl paymentRecordService;
+    private PaymentRecordService paymentRecordService;
 
-//    @Autowired
-//    public void setPaymentRecordService(PaymentRecordService paymentRecordService) {
-//        this.paymentRecordService = paymentRecordService;
-//    }
+    @Autowired
+    public void setPaymentRecordService(PaymentRecordService paymentRecordService) {
+        this.paymentRecordService = paymentRecordService;
+    }
 
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "gameTypeIds", "approverId"})

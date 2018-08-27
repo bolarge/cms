@@ -11,8 +11,9 @@ public class FeeCreateDto {
     protected String feePaymentTypeId;
     @NotEmpty(message = "Please provide payment type duration")
     protected String duration;
+    @NotEmpty(message = "Please provide payment revenueName")
 
-    protected String revenueName;
+
 
     public String getDuration() {
         return duration;
@@ -46,11 +47,4 @@ public class FeeCreateDto {
         this.feePaymentTypeId = feePaymentTypeId;
     }
 
-    public String getRevenueName() {
-        return revenueName;
-    }
-
-    public void setRevenueName(String revenueName) {
-        this.revenueName = revenueName;
-    }
 }

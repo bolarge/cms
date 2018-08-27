@@ -58,12 +58,16 @@ public class ExpirationList {
         LocalDateTime dateTime = new LocalDateTime();
         Query queryLicence= new Query();
         queryLicence.addCriteria(Criteria.where("endDate").lte(dateTime));
-        queryLicence.addCriteria(Criteria.where("licenseStatusId").is(licenseStatusId));
-        List<License> licenses= (List<License>) mongoRepositoryReactive.findAll(queryLicence,License.class).toStream().collect(Collectors.toList());
-        if(licenses.size()==0){
-            return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+        if(licenseStatusId=="02"){
+            queryLicence.addCriteria(Criteria.where("licenseStatusId").is(licenseStatusId));//orOperator(Criteria.where("licenseStatusId").is("03")));
+        }else{
+            queryLicence.addCriteria(Criteria.where("licenseStatusId").is(licenseStatusId));
         }
-        if(licenseStatusId.equals("01")){
+         List<License> licenses= (List<License>) mongoRepositoryReactive.findAll(queryLicence,License.class).toStream().collect(Collectors.toList());
+        if(licenses.size()==0){
+        //    return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+        }
+        if(licenseStatusId.equals("02")){
             for(License license: licenses){
                 license.setLicenseStatusId("03");
                 license.setRenewalStatus("true");
@@ -73,8 +77,13 @@ public class ExpirationList {
 
         Query queryExpiredLicence= new Query();
         queryExpiredLicence.addCriteria(Criteria.where("endDate").lte(dateTime));
-        queryExpiredLicence.addCriteria(Criteria.where("licenseStatusId").is(licenseStatusId));
-        List<License> expiredLicenses= (List<License>) mongoRepositoryReactive.findAll(queryExpiredLicence,License.class).toStream().collect(Collectors.toList());
+        if(licenseStatusId=="02"){
+            queryExpiredLicence.addCriteria(Criteria.where("licenseStatusId").is("03"));
+
+        }else{
+            queryExpiredLicence.addCriteria(Criteria.where("licenseStatusId").is("01"));
+        }
+         List<License> expiredLicenses= (List<License>) mongoRepositoryReactive.findAll(queryExpiredLicence,License.class).toStream().collect(Collectors.toList());
         List<LicenseDto> licenseDtos = new ArrayList<>();
         expiredLicenses.stream().forEach(license -> {
             licenseDtos.add(license.convertToDto());
