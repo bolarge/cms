@@ -58,14 +58,4 @@ public class SwaggerConfig {//extends WebMvcConfigurationSupport{
         registry.addResourceHandler("/webjars/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }*/
-
-
-    @Bean
-    public SecurityConfiguration securityInfo() {
-        return new SecurityConfiguration(null, null, null, null, "", ApiKeyVehicle.HEADER, "Authorization", "");
-    }
-
-    private ApiKey apiKey() {
-        return new ApiKey("Authorization", "Authorization", "header");
-    }
 }
