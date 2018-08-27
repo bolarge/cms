@@ -46,9 +46,7 @@ public class LicenseServiceImpl implements LicenseService {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
     }
 
-    @Autowired
-    MapValues mapValues;
-    @Autowired
+     @Autowired
     ExpirationList expirationList;
     @Override
     public Mono<ResponseEntity> findAllLicense(int page,
