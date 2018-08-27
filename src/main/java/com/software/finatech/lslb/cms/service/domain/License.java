@@ -26,8 +26,6 @@ public class License extends AbstractFact {
     protected LocalDateTime endDate;
     protected String renewalStatus;
 
-    @Autowired
-    MapValues mapValues;
 
     public String getRenewalStatus() {
         return renewalStatus;
