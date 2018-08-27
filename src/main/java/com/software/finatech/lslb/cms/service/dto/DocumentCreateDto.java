@@ -7,10 +7,9 @@ public class DocumentCreateDto {
     protected String description;
     @NotEmpty(message = "Role ID field can not be empty")
     protected String filename;
-    protected String entryDate;
-    @NotEmpty(message = "ValidFrom field can not be empty")
+    //@NotEmpty(message = "ValidFrom field can not be empty")
     protected String validFrom;
-    @NotEmpty(message = "ValidTo field can not be empty")
+    //@NotEmpty(message = "ValidTo field can not be empty")
     protected String validTo;
     @NotEmpty(message = "DocumentType ID field can not be empty")
     protected String documentTypeId;
@@ -35,13 +34,6 @@ public class DocumentCreateDto {
         this.filename = filename;
     }
 
-    public String getEntryDate() {
-        return entryDate;
-    }
-
-    public void setEntryDate(String entryDate) {
-        this.entryDate = entryDate;
-    }
 
     public String getValidFrom() {
         return validFrom;

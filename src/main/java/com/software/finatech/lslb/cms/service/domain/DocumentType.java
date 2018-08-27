@@ -16,6 +16,24 @@ public class DocumentType extends EnumeratedFact{
     protected String documentPurposeId;
     @Transient
     protected DocumentPurpose documentPurpose;
+    protected boolean active;
+    protected boolean required;
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
 
     public String getDocumentPurposeId() {
         return documentPurposeId;
@@ -66,6 +84,8 @@ public class DocumentType extends EnumeratedFact{
         dto.setDocumentPurposeId(getDocumentPurposeId());
         dto.setDescription(getDescription());
         dto.setDocumentPurpose(getDocumentPurpose()==null?null:getDocumentPurpose().convertToDto());
+        dto.setActive(isActive());
+        dto.setRequired(isRequired());
         return dto;
     }
 }
