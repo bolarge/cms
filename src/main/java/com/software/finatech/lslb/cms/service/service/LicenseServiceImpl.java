@@ -108,7 +108,7 @@ public class LicenseServiceImpl implements LicenseService {
     public Mono<ResponseEntity> findLicenseById(String licenseId) {
         return null;
     }
-
+    @Override
     public Mono<ResponseEntity> findLicenseByInstitutionId(String institutionId) {
           LocalDateTime dateTime = new LocalDateTime();
           dateTime=dateTime.plusDays(90);
@@ -116,6 +116,9 @@ public class LicenseServiceImpl implements LicenseService {
 
           queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
           License license= (License) mongoRepositoryReactive.find(queryLicence,License.class).block();
+          if(license==null){
+              return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));
+          }
           int days= Days.daysBetween(license.getEndDate(),dateTime).getDays();
           if(days>0){
               license.setRenewalStatus("true");
@@ -135,30 +138,34 @@ public class LicenseServiceImpl implements LicenseService {
         });
         return licenseStatusDtoLists;
     }
-
+    @Override
     public Mono<ResponseEntity> getAllLicenseStatus() {
         return Mono.just(new ResponseEntity<>(getLicenseStatus(), HttpStatus.OK));
 
     }
+    @Override
     public Mono<ResponseEntity> getExpiringLicenses() {
 
         return expirationList.getExpiringLicences("controllerClass",90,"02");
     }
+    @Override
     public Mono<ResponseEntity> getExpiringAIPs() {
 
         return expirationList.getExpiringLicences("controllerClass",14,"01");
     }
-
+@Override
     public Mono<ResponseEntity> getExpiredLicenses() {
 
         return expirationList.getExpiredLicences("controllerClass","02");
 
     }
+    @Override
     public Mono<ResponseEntity> getExpiredAIPs() {
 
         return expirationList.getExpiredLicences("controllerClass","01");
 
     }
+    @Override
     public Mono<ResponseEntity> updateLicense(LicenseUpdateDto licenseUpdateDto) {
         try {
             String gameTypeId = licenseUpdateDto.getGameTypeId();

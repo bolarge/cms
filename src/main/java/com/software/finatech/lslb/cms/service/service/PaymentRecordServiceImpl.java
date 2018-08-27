@@ -1,19 +1,18 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.Fee;
+import com.software.finatech.lslb.cms.service.domain.License;
+import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
+import com.software.finatech.lslb.cms.service.domain.PaymentStatus;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordCreateDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
-import com.software.finatech.lslb.cms.service.util.ExpirationList;
 import com.software.finatech.lslb.cms.service.util.MapValues;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
-import io.advantageous.boon.HTTP;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTimeComparator;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -114,13 +112,14 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         });
         return paymentStatusDtoList;
     }
+    @Override
     public Mono<ResponseEntity> getAllPaymentStatus() {
 
         return Mono.just(new ResponseEntity<>(getPaymentStatus(), HttpStatus.NOT_FOUND));
 
     }
 
-
+    @Override
     public Mono<ResponseEntity> findPaymentRecords(String institutionId, String gameTypeId,String objectType) {
         try {
 
@@ -151,6 +150,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             return logAndReturnError(logger, errorMsg, e);
         }
     }
+    @Override
     public Mono<ResponseEntity> createPaymentRecord(PaymentRecordCreateDto paymentRecordCreateDto) {
         PaymentRecord paymentRecord = new PaymentRecord();
         paymentRecord.setId(UUID.randomUUID().toString());

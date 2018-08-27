@@ -26,12 +26,12 @@ import javax.validation.Valid;
 @RequestMapping("/api/v1/license")
 public class LicenseController {
 @Autowired
-    private LicenseServiceImpl licenseService;
+    private LicenseService licenseService;
 
-//    @Autowired
-//    public void setLicenseService(LicenseService licenseService) {
-//        this.licenseService = licenseService;
-//    }
+    @Autowired
+    public void setLicenseService(LicenseService licenseService) {
+        this.licenseService = licenseService;
+    }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize",
             "sortType", "sortProperty", "institutionId", "licenseStatusId", "paymentRecordId"})

@@ -4,7 +4,6 @@ public class FeeDto {
     protected double amount;
     protected GameTypeDto gameType;
     protected EnumeratedFactDto feePaymentType;
-    protected String revenueName;
     protected String id;
     protected String duration;
 
@@ -48,11 +47,4 @@ public class FeeDto {
         this.feePaymentType = feePaymentType;
     }
 
-    public String getRevenueName() {
-        return revenueName;
     }
-
-    public void setRevenueName(String revenueName) {
-        this.revenueName = revenueName;
-    }
-}
