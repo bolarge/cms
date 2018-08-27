@@ -51,6 +51,7 @@ public class DatabaseLoaderUtils {
         PaymentStatusReferenceData.load(mongoRepositoryReactive);
         LicenseStatusReferenceData.load(mongoRepositoryReactive);
         FeePaymentTypeReferenceData.load(mongoRepositoryReactive);
+        ScheduledMeetingStatusReferenceData.load(mongoRepositoryReactive);
     }
 
     // @Profile("test")
@@ -75,6 +76,7 @@ public class DatabaseLoaderUtils {
         factEnums.put("ApplicationFormType", ApplicationFormType.class);
         factEnums.put("PaymentStatus", PaymentStatus.class);
         factEnums.put("FeePaymentType", FeePaymentType.class);
+        factEnums.put("ScheduledMeetingStatus", ScheduledMeetingStatus.class);
 
         for (Map.Entry<String, Class> entry : factEnums.entrySet()) {
             logger.info("Importing ReferenceMasterData for > " + entry.getKey());

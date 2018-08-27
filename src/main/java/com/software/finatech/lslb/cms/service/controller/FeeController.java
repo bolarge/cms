@@ -20,11 +20,9 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/v1/fees")
 public class FeeController extends BaseController {
-    //private FeeService feeService;
-    @Autowired
-    public FeeServiceImpl feeService;
+    private FeeService feeService;
 
-    /*@Autowired
+    @Autowired
     public FeeService getFeeService() {
         return feeService;
     }
@@ -32,7 +30,7 @@ public class FeeController extends BaseController {
     public void setFeeService(FeeService feeService) {
         this.feeService = feeService;
     }
-    */
+
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"feePaymentTypeId", "gameTypeId"})
     @ApiOperation(value = "Get all Fees", response = FeeDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {

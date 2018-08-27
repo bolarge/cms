@@ -9,7 +9,7 @@ public class ApplicantDetails {
     private String registrationNumber;
     private String shareCapital;
     private String emailAddress;
-    private String PhoneNumber;
+    private String phoneNumber;
     private ApplicantPreviousName applicantPreviousName;
     private ApplicantPreviousApplication applicantPreviousApplication;
     private ApplicantMemberPreviousApplication applicantMemberPreviousApplication;
@@ -81,11 +81,11 @@ public class ApplicantDetails {
     }
 
     public String getPhoneNumber() {
-        return PhoneNumber;
+        return phoneNumber;
     }
 
     public void setPhoneNumber(String phoneNumber) {
-        PhoneNumber = phoneNumber;
+        this.phoneNumber = phoneNumber;
     }
 
     public ApplicantPreviousName getApplicantPreviousName() {

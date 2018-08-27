@@ -52,4 +52,10 @@ public interface ApplicationFormService {
 
     Mono<ResponseEntity> getApplicantOutletInformation(String applicationFormId);
     Mono<ResponseEntity> saveApplicantOutletInformation(String applicationFormId, ApplicantOutletInformation applicantOutletInformation);
+
+    Mono<ResponseEntity> approveApplicationForm(String applicationFormId, String  approverId);
+    Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, String rejectorId);
+    Mono<ResponseEntity> completeApplicationForm(String applicationFormId);
+    Mono<ResponseEntity> getPaymentRecordsForApplicationForm(String applicationFormId);
+
 }

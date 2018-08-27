@@ -20,5 +20,6 @@ public interface PaymentRecordService {
                                               HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getAllPaymentStatus();
-    //Mono<ResponseEntity> createPaymentRecord(PaymentRecordCreateDto paymentRecordCreateDto);
+
+    Mono<ResponseEntity> createPaymentRecord(PaymentRecordCreateDto paymentRecordCreateDto);
 }

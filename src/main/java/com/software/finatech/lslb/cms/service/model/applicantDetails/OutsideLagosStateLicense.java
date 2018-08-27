@@ -1,7 +1,7 @@
 package com.software.finatech.lslb.cms.service.model.applicantDetails;
 
 public class OutsideLagosStateLicense {
-    private String namOfLicense;
+    private String nameOfLicense;
     private String nameOfIssuingBody;
     private String typeOfLicense;
     private String licenseNumber;
@@ -10,12 +10,12 @@ public class OutsideLagosStateLicense {
     private String dateOfExpiry;
     private String reasonLicenseIsNoLongerHeld;
 
-    public String getNamOfLicense() {
-        return namOfLicense;
+    public String getNameOfLicense() {
+        return nameOfLicense;
     }
 
-    public void setNamOfLicense(String namOfLicense) {
-        this.namOfLicense = namOfLicense;
+    public void setNameOfLicense(String nameOfLicense) {
+        this.nameOfLicense = nameOfLicense;
     }
 
     public String getNameOfIssuingBody() {

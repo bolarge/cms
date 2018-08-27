@@ -25,13 +25,8 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/v1/license")
 public class LicenseController {
-@Autowired
+    @Autowired
     private LicenseServiceImpl licenseService;
-
-//    @Autowired
-//    public void setLicenseService(LicenseService licenseService) {
-//        this.licenseService = licenseService;
-//    }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize",
             "sortType", "sortProperty", "institutionId", "licenseStatusId", "paymentRecordId"})
@@ -96,6 +91,7 @@ public class LicenseController {
     public Mono<ResponseEntity> getAllExpiringLicenseStatus() {
         return licenseService.getExpiringLicenses();
     }
+
     @RequestMapping(method = RequestMethod.GET, value = "/all-expired-licenses")
     @ApiOperation(value = "Get all Expired license", response = License.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
