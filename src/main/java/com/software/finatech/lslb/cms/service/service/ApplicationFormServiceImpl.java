@@ -3,10 +3,7 @@ package com.software.finatech.lslb.cms.service.service;
 import ch.qos.logback.core.pattern.util.RegularEscapeUtil;
 import com.mongodb.client.DistinctIterable;
 import com.software.finatech.lslb.cms.service.domain.*;
-import com.software.finatech.lslb.cms.service.dto.ApplicationFormCreateDto;
-import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
-import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
-import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
 import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
@@ -17,6 +14,7 @@ import com.software.finatech.lslb.cms.service.model.otherInformation.ApplicantOt
 import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantOutletInformation;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
+import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +33,7 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -47,9 +46,6 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
 
     @Autowired
-    private MongoTemplate mongoTemplate;
-
-    @Autowired
     public void setMongoRepositoryReactive(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
     }
@@ -57,18 +53,11 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     @Override
     public Mono<ResponseEntity> createApplicationForm(ApplicationFormCreateDto applicationFormCreateDto) {
         try {
-            String institutionId = applicationFormCreateDto.getInstitutionId();
-            String gameTypeId = applicationFormCreateDto.getGameTypeId();
-            String applicationFormTypeId = applicationFormCreateDto.getApplicationFormTypeId();
-            Query query = new Query();
-            query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-            query.addCriteria(Criteria.where("institutionId").is(institutionId));
-            query.addCriteria(Criteria.where("applicationFormTypeId").is(applicationFormTypeId));
-
-            ApplicationForm existingApplicationFormForInstitutionWithGameTypeAndApplicationType = (ApplicationForm) mongoRepositoryReactive.find(query, ApplicationForm.class).block();
-            if (existingApplicationFormForInstitutionWithGameTypeAndApplicationType != null) {
-                return Mono.just(new ResponseEntity<>("An application form already exists for the institution with the same game type and application type", HttpStatus.BAD_REQUEST));
+            Mono<ResponseEntity> validateCreateApplicationFormResponse = validateCreateApplicationForm(applicationFormCreateDto);
+            if (validateCreateApplicationFormResponse != null) {
+                return validateCreateApplicationFormResponse;
             }
+
             ApplicationForm applicationForm = fromCreateDto(applicationFormCreateDto);
             applicationForm.setApplicationFormStatusId("1");
             saveApplicationForm(applicationForm);
@@ -230,6 +219,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
             }
             applicationForm.setApplicantDetails(applicantDetails);
+            applicationForm.setApplicationFormStatusId("2");
             saveApplicationForm(applicationForm);
             return Mono.just(new ResponseEntity<>("Saved successfully", HttpStatus.OK));
         } catch (Exception e) {
@@ -264,6 +254,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
             }
             applicationForm.setApplicantMemberDetails(applicantMemberDetails);
+            applicationForm.setApplicationFormStatusId("2");
             saveApplicationForm(applicationForm);
             return Mono.just(new ResponseEntity<>("Saved successfully", HttpStatus.OK));
         } catch (Exception e) {
@@ -299,6 +290,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
             }
             applicationForm.setApplicantContactDetails(applicantContactDetails);
+            applicationForm.setApplicationFormStatusId("2");
             saveApplicationForm(applicationForm);
             return Mono.just(new ResponseEntity<>("Saved successfully", HttpStatus.OK));
         } catch (Exception e) {
@@ -315,7 +307,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             } else {
                 ApplicantCriminalityDetails applicantCriminalityDetails = applicationForm.getApplicantCriminalityDetails();
                 if (applicantCriminalityDetails == null) {
-                    return Mono.just(new ResponseEntity<>("No applicant details found for application form", HttpStatus.NOT_FOUND));
+                    return Mono.just(new ResponseEntity<>("No criminality details found for application form", HttpStatus.NOT_FOUND));
                 } else {
                     return Mono.just(new ResponseEntity<>(applicantCriminalityDetails, HttpStatus.OK));
                 }
@@ -333,6 +325,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
             }
             applicationForm.setApplicantCriminalityDetails(applicantCriminalityDetails);
+            applicationForm.setApplicationFormStatusId("2");
             saveApplicationForm(applicationForm);
             return Mono.just(new ResponseEntity<>("Saved successfully", HttpStatus.OK));
         } catch (Exception e) {
@@ -367,6 +360,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
             }
             applicationForm.setApplicantDeclarationDetails(applicantDeclarationDetails);
+            applicationForm.setApplicationFormStatusId("2");
             saveApplicationForm(applicationForm);
             return Mono.just(new ResponseEntity<>("Saved successfully", HttpStatus.OK));
         } catch (Exception e) {
@@ -401,6 +395,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
             }
             applicationForm.setApplicantOtherInformation(applicantOtherInformation);
+            applicationForm.setApplicationFormStatusId("2");
             saveApplicationForm(applicationForm);
             return Mono.just(new ResponseEntity<>("Saved successfully", HttpStatus.OK));
         } catch (Exception e) {
@@ -435,10 +430,97 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
             }
             applicationForm.setApplicantOutletInformation(applicantOutletInformation);
+            applicationForm.setApplicationFormStatusId("2");
             saveApplicationForm(applicationForm);
             return Mono.just(new ResponseEntity<>("Saved successfully", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant outlet details", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> approveApplicationForm(String applicationFormId, String approverId) {
+        try {
+            AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(approverId, AuthInfo.class).block();
+            if (authInfo == null) {
+                return Mono.just(new ResponseEntity<>("Approver does not exist on the system", HttpStatus.BAD_REQUEST));
+            }
+
+            ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
+            if (applicationForm == null) {
+                return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
+            }
+            applicationForm.setApproverId(approverId);
+            String approvedApplicationFormStatusId = "4";
+            applicationForm.setApplicationFormStatusId(approvedApplicationFormStatusId);
+            saveApplicationForm(applicationForm);
+            return Mono.just(new ResponseEntity<>("Application form approved successfully", HttpStatus.OK));
+
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while approving application form", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> completeApplicationForm(String applicationFormId) {
+        try {
+            ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
+            if (applicationForm == null) {
+                return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
+            }
+            String inReviewApplicationFormStatusId = "3";
+            applicationForm.setApplicationFormStatusId(inReviewApplicationFormStatusId);
+            saveApplicationForm(applicationForm);
+            return Mono.just(new ResponseEntity<>("Application completed successfully and now in review", HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while completing application form", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> getPaymentRecordsForApplicationForm(String applicationFormId) {
+        try {
+            ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
+            if (applicationForm == null) {
+                return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
+            }
+            Set<String> paymentRecordIds = applicationForm.getPaymentRecordIds();
+            if (paymentRecordIds == null || paymentRecordIds.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
+            }
+            List<PaymentRecordDto> paymentRecordDtoList = new ArrayList<>();
+            for (String paymentRecordId : paymentRecordIds) {
+                PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById(paymentRecordId, PaymentRecord.class).block();
+                if (paymentRecord != null) {
+                    paymentRecordDtoList.add(paymentRecord.convertToDto());
+                }
+            }
+            return Mono.just(new ResponseEntity<>(paymentRecordDtoList, HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while getting payment records for application form", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, String rejectorId) {
+        try {
+            AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(rejectorId, AuthInfo.class).block();
+            if (authInfo == null) {
+                return Mono.just(new ResponseEntity<>("Approver does not exist on the system", HttpStatus.BAD_REQUEST));
+            }
+
+            ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
+            if (applicationForm == null) {
+                return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
+            }
+            applicationForm.setRejectorId(rejectorId);
+            String rejectedApplicationFormStatusId = "5";
+            applicationForm.setApplicationFormStatusId(rejectedApplicationFormStatusId);
+            saveApplicationForm(applicationForm);
+            return Mono.just(new ResponseEntity<>("Application form rejected successfully", HttpStatus.OK));
+
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while rejecting application form", e);
         }
     }
 
@@ -455,5 +537,44 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
     public void saveApplicationForm(ApplicationForm applicationForm) {
         mongoRepositoryReactive.saveOrUpdate(applicationForm);
+    }
+
+    private Mono<ResponseEntity> validateCreateApplicationForm(ApplicationFormCreateDto applicationFormCreateDto) {
+        String institutionId = applicationFormCreateDto.getInstitutionId();
+        String gameTypeId = applicationFormCreateDto.getGameTypeId();
+        String applicationFormTypeId = applicationFormCreateDto.getApplicationFormTypeId();
+        Query query = new Query();
+        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        query.addCriteria(Criteria.where("institutionId").is(institutionId));
+        query.addCriteria(Criteria.where("applicationFormTypeId").is(applicationFormTypeId));
+
+        ApplicationForm existingApplicationFormForInstitutionWithGameTypeAndApplicationType = (ApplicationForm) mongoRepositoryReactive.find(query, ApplicationForm.class).block();
+        if (existingApplicationFormForInstitutionWithGameTypeAndApplicationType != null) {
+            return Mono.just(new ResponseEntity<>("An application form already exists for the institution with the same game type and application type", HttpStatus.BAD_REQUEST));
+        }
+
+        String applicationFeeTypeId = "1";
+        Query queryForExistingFee = new Query();
+        queryForExistingFee.addCriteria(Criteria.where("feePaymentTypeId").is(applicationFeeTypeId));
+        queryForExistingFee.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+
+        Fee applicationFeeForGameType = (Fee) mongoRepositoryReactive.find(queryForExistingFee, Fee.class).block();
+        if (applicationFeeForGameType == null) {
+            return Mono.just(new ResponseEntity<>("No Application fee found for Game Type", HttpStatus.EXPECTATION_FAILED));
+        }
+
+        Query queryForExistingConfirmedPaymentRecord = new Query();
+        String confirmedPaymentStatusId = "1";
+        queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("feeId").is(applicationFeeForGameType.getId()));
+        queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("institutionId").is(institutionId));
+        queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("paymentStatusId").is(confirmedPaymentStatusId));
+
+        PaymentRecord existingConfirmedPaymentRecord = (PaymentRecord) mongoRepositoryReactive.find(queryForExistingConfirmedPaymentRecord, PaymentRecord.class).block();
+
+        if (existingConfirmedPaymentRecord == null) {
+            return Mono.just(new ResponseEntity<>("There is no confirmed application fee payment record for game type", HttpStatus.BAD_REQUEST));
+        }
+        return null;
     }
 }

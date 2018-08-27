@@ -25,6 +25,7 @@ public class ApplicationForm extends AbstractFact {
     protected String applicationFormTypeId;
     protected String formName;
     protected String approverId;
+    protected String rejectorId;
     protected ApplicantDetails applicantDetails;
     protected ApplicantMemberDetails applicantMemberDetails;
     protected ApplicantCriminalityDetails applicantCriminalityDetails;
@@ -33,6 +34,15 @@ public class ApplicationForm extends AbstractFact {
     protected ApplicantOtherInformation applicantOtherInformation;
     protected ApplicantContactDetails applicantContactDetails;
     protected Set<String> attachmentIds;
+
+
+    public String getRejectorId() {
+        return rejectorId;
+    }
+
+    public void setRejectorId(String rejectorId) {
+        this.rejectorId = rejectorId;
+    }
 
     public Set<String> getAttachmentIds() {
         return attachmentIds;
@@ -154,8 +164,8 @@ public class ApplicationForm extends AbstractFact {
         this.approverId = approverId;
     }
 
-    public AuthInfo getApprover() {
-        return (AuthInfo) mongoRepositoryReactive.findById(approverId, AuthInfo.class).block();
+    public AuthInfo getAuthInfo(String authInfoId) {
+        return (AuthInfo) mongoRepositoryReactive.findById(authInfoId, AuthInfo.class).block();
     }
 
     private GameType getGameType() {
@@ -227,12 +237,18 @@ public class ApplicationForm extends AbstractFact {
             applicationFormDto.setInstitutionName(institution.getInstitutionName());
             applicationFormDto.setInstitutionId(institutionId);
         }
-        AuthInfo approver = getApprover();
+        AuthInfo approver = getAuthInfo(approverId);
         if (approver != null) {
             applicationFormDto.setApproverId(approverId);
             applicationFormDto.setApproverName(approver.getFullName());
         }
+        AuthInfo rejector = getAuthInfo(rejectorId);
+        if (rejector != null){
+            applicationFormDto.setRejectorId(rejectorId);
+            applicationFormDto.setRejectorName(rejector.getFullName());
+        }
         applicationFormDto.setId(getId());
+        applicationFormDto.setFormName(getFormName());
         return applicationFormDto;
     }
 

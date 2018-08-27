@@ -101,7 +101,6 @@ public class LicenseServiceImpl implements LicenseService {
             String errorMsg = "An error occurred while trying to get all licenses";
             return ErrorResponseUtil.logAndReturnError(logger, errorMsg, e);
         }
-
     }
 
     @Override

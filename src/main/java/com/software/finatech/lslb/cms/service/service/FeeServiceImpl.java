@@ -115,7 +115,5 @@ public class FeeServiceImpl implements FeeService {
             String errorMsg = "An error occurred while trying to get all payment types";
             return logAndReturnError(logger, errorMsg, e);
         }
-
-
     }
 }

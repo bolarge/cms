@@ -19,15 +19,7 @@ public class FeePaymentTypeReferenceData {
         }
         feePaymentType2.setName("Licensing Fees");
 
-        /*FeePaymentType feePaymentType3 = (FeePaymentType) mongoRepositoryReactive.findById("03", FeePaymentType.class).block();
-        if (feePaymentType3 == null) {
-            feePaymentType3 = new FeePaymentType();
-            feePaymentType3.setId("03");
-        }
-        feePaymentType3.setName("Licensing Renewal Fees");*/
-
         mongoRepositoryReactive.saveOrUpdate(feePaymentType1);
         mongoRepositoryReactive.saveOrUpdate(feePaymentType2);
-        //mongoRepositoryReactive.saveOrUpdate(feePaymentType3);
     }
 }
