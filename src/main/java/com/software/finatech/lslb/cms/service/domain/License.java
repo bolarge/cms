@@ -16,8 +16,6 @@ import java.util.Map;
 @Document(collection = "Licenses")
 public class License extends AbstractFact {
 
-
-
     protected String licenseStatusId;
     protected String institutionId;
     protected String gameTypeId;

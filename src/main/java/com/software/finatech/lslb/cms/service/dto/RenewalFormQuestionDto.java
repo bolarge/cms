@@ -1,9 +1,18 @@
-package com.software.finatech.lslb.cms.service.domain;
+package com.software.finatech.lslb.cms.service.dto;
 
-public class RenewalForm {
+public class RenewalFormQuestionDto {
     protected String questionId;
     protected String question;
     protected String gameTypeId;
+    protected String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getQuestionId() {
         return questionId;
