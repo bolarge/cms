@@ -11,8 +11,6 @@ public class PaymentRecordCreateDto {
     @NotEmpty(message = "Please provide Fee ID")
     private String feeId;
     private String parentLicenseId;
-    @NotEmpty(message = "Please provide Game Type")
-    private String gameTypeId;
     private String renewalCheck;
 
     public String getRenewalCheck() {
@@ -30,14 +28,6 @@ public class PaymentRecordCreateDto {
 
     public void setParentLicenseId(String parentLicenseId) {
         this.parentLicenseId = parentLicenseId;
-    }
-
-    public String getGameTypeId() {
-        return gameTypeId;
-    }
-
-    public void setGameTypeId(String gameTypeId) {
-        this.gameTypeId = gameTypeId;
     }
 
     public String getApproverId() {

@@ -18,7 +18,7 @@ public class PaymentRecord extends AbstractFact {
     private String paymentStatusId;
     private String feeId;
     private String parentLicenseId;
-    private String gameTypeId;
+
     @Autowired
     MapValues mapValues;
 
@@ -28,14 +28,6 @@ public class PaymentRecord extends AbstractFact {
 
     public void setParentLicenseId(String parentLicenseId) {
         this.parentLicenseId = parentLicenseId;
-    }
-
-    public String getGameTypeId() {
-        return gameTypeId;
-    }
-
-    public void setGameTypeId(String gameTypeId) {
-        this.gameTypeId = gameTypeId;
     }
 
     public String getFeeId() {

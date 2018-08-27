@@ -1,19 +1,18 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.Fee;
+import com.software.finatech.lslb.cms.service.domain.License;
+import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
+import com.software.finatech.lslb.cms.service.domain.PaymentStatus;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordCreateDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
-import com.software.finatech.lslb.cms.service.util.ExpirationList;
 import com.software.finatech.lslb.cms.service.util.MapValues;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
-import io.advantageous.boon.HTTP;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTimeComparator;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -114,13 +112,14 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         });
         return paymentStatusDtoList;
     }
+    @Override
     public Mono<ResponseEntity> getAllPaymentStatus() {
 
         return Mono.just(new ResponseEntity<>(getPaymentStatus(), HttpStatus.NOT_FOUND));
 
     }
 
-
+    @Override
     public Mono<ResponseEntity> findPaymentRecords(String institutionId, String gameTypeId,String objectType) {
         try {
 
@@ -151,6 +150,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             return logAndReturnError(logger, errorMsg, e);
         }
     }
+    @Override
     public Mono<ResponseEntity> createPaymentRecord(PaymentRecordCreateDto paymentRecordCreateDto) {
         PaymentRecord paymentRecord = new PaymentRecord();
         paymentRecord.setId(UUID.randomUUID().toString());
@@ -158,30 +158,35 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         paymentRecord.setFeeId(paymentRecordCreateDto.getFeeId());
         paymentRecord.setInstitutionId(paymentRecordCreateDto.getInstitutionId());
         paymentRecord.setPaymentStatusId(paymentRecordCreateDto.getPaymentStatusId());
-        paymentRecord.setGameTypeId(paymentRecordCreateDto.getGameTypeId());
+        Fee fee = (Fee) mongoRepositoryReactive.findById(paymentRecordCreateDto.getFeeId(),Fee.class).block();
 
-          if(paymentRecordCreateDto.getRenewalCheck()=="true"){
+        if(paymentRecordCreateDto.getRenewalCheck()=="true"){
             List<PaymentRecord> previousLicenses=
-                    (List<PaymentRecord>)findPaymentRecords(paymentRecordCreateDto.getInstitutionId(), paymentRecordCreateDto.getGameTypeId(),"LicenseRecord");
+                    (List<PaymentRecord>)findPaymentRecords(paymentRecordCreateDto.getInstitutionId(), fee.getGameTypeId(),"LicenseRecord");
             if(previousLicenses.size()==0){
             }
               PaymentRecord lastLicense= previousLicenses.get(previousLicenses.size()-1);
 
               paymentRecord.setParentLicenseId(lastLicense.getId());
         }
-        License license;
+        if(fee.getFeePaymentTypeId().equals("01")){
+            mongoRepositoryReactive.saveOrUpdate(paymentRecord);
+            return Mono.just(new ResponseEntity<>(paymentRecord.convertToDto(), HttpStatus.OK));
+        }
+       License license;
         Query queryLicence= new Query();
-        queryLicence.addCriteria(Criteria.where("gameTypeId").is(paymentRecordCreateDto.getGameTypeId()));
+        queryLicence.addCriteria(Criteria.where("gameTypeId").is(fee.getGameTypeId()));
         queryLicence.addCriteria(Criteria.where("institutionId").is(paymentRecordCreateDto.getInstitutionId()));
         License licenseCheck = (License) mongoRepositoryReactive.find(queryLicence,License.class).block();
-            if(licenseCheck==null){
+
+        if(licenseCheck==null){
                 license=new License();
                 license.setId(UUID.randomUUID().toString());
             }else{
                 license=licenseCheck;
             }
             license.setLicenseStatusId("04");
-            license.setGameTypeId(paymentRecordCreateDto.getGameTypeId());
+            license.setGameTypeId(fee.getGameTypeId());
             license.setInstitutionId(paymentRecordCreateDto.getInstitutionId());
         license.setPaymentRecordId(paymentRecord.getId());
         mongoRepositoryReactive.saveOrUpdate(paymentRecord);

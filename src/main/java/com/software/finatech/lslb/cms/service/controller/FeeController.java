@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.controller;
 
+import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.FeeCreateDto;
 import com.software.finatech.lslb.cms.service.dto.FeeDto;
@@ -20,7 +21,9 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/v1/fees")
 public class FeeController extends BaseController {
-    private FeeService feeService;
+    //private FeeService feeService;
+    @Autowired
+    public FeeService feeService;
 
     @Autowired
     public FeeService getFeeService() {

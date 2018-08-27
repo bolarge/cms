@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
+import com.software.finatech.lslb.cms.service.dto.LicenseUpdateDto;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
@@ -19,4 +20,12 @@ public interface LicenseService {
     Mono<ResponseEntity> findLicenseById(String licenseId);
 
     Mono<ResponseEntity> getAllLicenseStatus();
+    Mono<ResponseEntity> findLicenseByInstitutionId(String institutionId);
+    Mono<ResponseEntity> getExpiringLicenses();
+    Mono<ResponseEntity> getExpiringAIPs();
+    Mono<ResponseEntity> getExpiredLicenses();
+    Mono<ResponseEntity> getExpiredAIPs();
+    Mono<ResponseEntity> updateLicense(LicenseUpdateDto licenseUpdateDto);
+
+
 }
