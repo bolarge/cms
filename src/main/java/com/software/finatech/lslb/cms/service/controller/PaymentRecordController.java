@@ -75,5 +75,4 @@ public class PaymentRecordController extends BaseController {
     public Mono<ResponseEntity> createPaymentRecord(@RequestBody @Valid PaymentRecordCreateDto paymentRecordCreateDto) {
         return paymentRecordService.createPaymentRecord(paymentRecordCreateDto);
     }
-
 }

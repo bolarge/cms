@@ -104,9 +104,6 @@ public class PaymentRecord extends AbstractFact {
         paymentRecordDto.setInstitutionId(getInstitutionId());
         paymentRecordDto.setInstitutionName(getInstitution().institutionName);
 
-
-
-
         return paymentRecordDto;
     }
 

@@ -1,7 +1,10 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
-import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.dto.ApplicationFormCreateDto;
+import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
+import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
+import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
 import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
 import com.software.finatech.lslb.cms.service.model.contactDetails.ApplicantContactDetails;
@@ -53,7 +56,7 @@ public class ApplicationFormController {
                                                        @RequestParam("applicationFormStatusId") String applicationFormStatusId,
                                                        @RequestParam("approverId") String approverId,
                                                        HttpServletResponse httpServletResponse) {
-        return applicationFormService.findAllApplicationForm(page, pageSize, sortType, sortParam, institutionId, applicationFormTypeId, applicationFormStatusId,approverId, httpServletResponse);
+        return applicationFormService.findAllApplicationForm(page, pageSize, sortType, sortParam, institutionId, applicationFormTypeId, applicationFormStatusId, approverId, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create")
@@ -99,7 +102,6 @@ public class ApplicationFormController {
     public Mono<ResponseEntity> getAllApplicationFormApprovers() {
         return applicationFormService.getAllApprovers();
     }
-
 
 
     @RequestMapping(method = RequestMethod.GET, value = "/get-applicant-details", params = {"applicationFormId"})
@@ -235,7 +237,7 @@ public class ApplicationFormController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/get-applicant-outlet-information", params = {"applicationFormId"})
-    @ApiOperation(value = "Get applicant criminality details", response = ApplicantOutletInformation.class, consumes = "application/json")
+    @ApiOperation(value = "Get applicant outlet information", response = ApplicantOutletInformation.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -264,6 +266,50 @@ public class ApplicationFormController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> uploadMultipleFiles(@RequestParam("files") MultipartFile[] multipartFile) {
-      return null;
+        return null;
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/approve-application-form", params = {"applicationFormId", "userId"})
+    @ApiOperation(value = "Approve application form", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> approveApplicationForm(@RequestParam("applicationFormId") String applicationFormId, @RequestParam("userId") String approverId) {
+        return applicationFormService.approveApplicationForm(applicationFormId, approverId);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/reject-application-form", params = {"applicationFormId", "userId"})
+    @ApiOperation(value = "Reject application form", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> rejectApplicationForm(@RequestParam("applicationFormId") String applicationFormId, @RequestParam("userId") String rejectorId) {
+        return applicationFormService.rejectApplicationForm(applicationFormId, rejectorId);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/complete-application-form", params = {"applicationFormId"})
+    @ApiOperation(value = "complete filling application form", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> completeApplicationForm(@RequestParam("applicationFormId") String applicationFormId) {
+        return applicationFormService.completeApplicationForm(applicationFormId);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/payment-records", params = {"applicationFormId"})
+    @ApiOperation(value = "Get payment records for application form", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getPaymentRecordsApplicationForm(@RequestParam("applicationFormId") String applicationFormId) {
+        return applicationFormService.getPaymentRecordsForApplicationForm(applicationFormId);
     }
 }

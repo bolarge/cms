@@ -15,6 +15,16 @@ public class ApplicationFormDto {
     private String approverId;
     private String approverName;
     private String id;
+    private String rejectorId;
+    private String rejectorName;
+
+    public String getRejectorId() {
+        return rejectorId;
+    }
+
+    public String getRejectorName() {
+        return rejectorName;
+    }
 
     public String getId() {
         return id;
@@ -94,5 +104,11 @@ public class ApplicationFormDto {
 
     public void setApproverName(String approverName) {
         this.approverName = approverName;
+    }
+
+    public void setRejectorId(String rejectorId) {
+    }
+
+    public void setRejectorName(String fullName) {
     }
 }
