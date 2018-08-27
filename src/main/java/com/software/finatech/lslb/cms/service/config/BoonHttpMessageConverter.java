@@ -31,13 +31,13 @@ public class BoonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
     }
 
     @Override
-    protected Object readInternal(Class<? extends Object> clazz, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
+    protected Object readInternal(Class<? extends Object> clazz, HttpInputMessage inputMessage) throws HttpMessageNotReadableException {
         try{
             Long startTime5 = System.nanoTime();
             String result = IOUtils.toString(inputMessage.getBody(), StandardCharsets.UTF_8);
             Object object =  mapper.readValue(result, clazz );
             Long endTime5 = System.nanoTime() - startTime5;
-            Double timeMills5 = (double) (Double.valueOf(endTime5)/Double.valueOf(1000000));
+            Double timeMills5 = Double.valueOf(endTime5)/Double.valueOf(1000000);
             logger.info("Time taken to parse from http"+" ->"+ endTime5 + "ns" + " >>> " + timeMills5 +"ms");
             if(object instanceof LoginDto || object instanceof SSOChangePasswordModel || object instanceof SSOPasswordResetModel){
 
@@ -67,7 +67,7 @@ public class BoonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
         }
 
         Long endTime5 = System.nanoTime() - startTime5;
-        Double timeMills5 = (double) (Double.valueOf(endTime5)/Double.valueOf(1000000));
+        Double timeMills5 = Double.valueOf(endTime5)/Double.valueOf(1000000);
         logger.info("Time taken to write to http"+" ->"+ endTime5 + "ns" + " >>> " + timeMills5 +"ms");
         logger.info("Outbound Message ::: " + json);
         outputMessage.getBody().write(json.getBytes());

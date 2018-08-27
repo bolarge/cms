@@ -19,7 +19,7 @@ public class PaymentStatusReferenceData {
             paymentStatus2 = new PaymentStatus();
             paymentStatus2.setId("02");
         }
-        paymentStatus1.setName("PENDING");
+        paymentStatus2.setName("PENDING");
 
         PaymentStatus paymentStatus3 = (PaymentStatus) mongoRepositoryReactive.findById("03", PaymentStatus.class).block();
         if (paymentStatus3 == null) {

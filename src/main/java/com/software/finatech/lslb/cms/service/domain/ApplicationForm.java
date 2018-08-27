@@ -32,6 +32,15 @@ public class ApplicationForm extends AbstractFact {
     protected ApplicantOutletInformation applicantOutletInformation;
     protected ApplicantOtherInformation applicantOtherInformation;
     protected ApplicantContactDetails applicantContactDetails;
+    protected Set<String> attachmentIds;
+
+    public Set<String> getAttachmentIds() {
+        return attachmentIds;
+    }
+
+    public void setAttachmentIds(Set<String> attachmentIds) {
+        this.attachmentIds = attachmentIds;
+    }
 
     public ApplicantDetails getApplicantDetails() {
         return applicantDetails;

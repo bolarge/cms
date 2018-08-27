@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 public interface FeeService {
-    Mono<ResponseEntity> createFee(FeeCreateDto feeCreateDto);
+    //Mono<ResponseEntity> createFee(FeeCreateDto feeCreateDto);
     Mono<ResponseEntity> updateFee(FeeUpdateDto feeUpdateDto);
     Mono<ResponseEntity> getAllFees(String feePaymentTypeId, String gameTypeId);
     Mono<ResponseEntity> getAllFeePaymentType();

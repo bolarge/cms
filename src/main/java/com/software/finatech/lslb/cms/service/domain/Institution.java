@@ -133,7 +133,7 @@ public class Institution extends AbstractFact {
         return institutionDto;
     }
 
-    public void setAssociatedProperties() throws FactNotFoundException {
+    public void setAssociatedProperties() {
 
         if (gameTypeIds.size() > 0) {
             gameTypeIds.stream().forEach(gameTypeId -> {

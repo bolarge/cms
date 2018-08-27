@@ -4,18 +4,27 @@ import javax.validation.constraints.NotEmpty;
 
 public class FeeUpdateDto {
     @NotEmpty(message = "Please provide amount")
-    protected double amount;
+    protected String amount;
     @NotEmpty(message = "Please provide gameTypeId")
     protected String gameTyeId;
     @NotEmpty(message = "Please provide fee payment type id")
     protected String feePaymentTypeId;
     protected String revenueName;
+    protected String duration;
 
-    public double getAmount() {
+    public String getDuration() {
+        return duration;
+    }
+
+    public void setDuration(String duration) {
+        this.duration = duration;
+    }
+
+    public String getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(String amount) {
         this.amount = amount;
     }
 

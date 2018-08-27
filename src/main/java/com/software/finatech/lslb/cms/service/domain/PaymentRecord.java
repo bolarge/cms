@@ -1,7 +1,10 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
+import com.software.finatech.lslb.cms.service.util.MapValues;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.joda.time.LocalDateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Map;
@@ -10,11 +13,22 @@ import java.util.Map;
 @Document(collection = "PaymentRecords")
 public class PaymentRecord extends AbstractFact {
 
-    protected String feeId;
-    protected String approverId;
-    protected String paymentStatusId;
-    protected String institutionId;
-    protected String feePaymentTypeId;
+    private String institutionId;
+     private String approverId;
+    private String paymentStatusId;
+    private String feeId;
+    private String parentLicenseId;
+
+    @Autowired
+    MapValues mapValues;
+
+    public String getParentLicenseId() {
+        return parentLicenseId;
+    }
+
+    public void setParentLicenseId(String parentLicenseId) {
+        this.parentLicenseId = parentLicenseId;
+    }
 
     public String getFeeId() {
         return feeId;
@@ -48,28 +62,10 @@ public class PaymentRecord extends AbstractFact {
         this.institutionId = institutionId;
     }
 
-    public String getFeePaymentTypeId() {
-        return feePaymentTypeId;
+    public Institution getInstitution() {
+        return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
 
-    public void setFeePaymentTypeId(String feePaymentTypeId) {
-        this.feePaymentTypeId = feePaymentTypeId;
-    }
-
-    private PaymentStatus getPaymentStatus() {
-        Map paymentStatusMap = Mapstore.STORE.get("PaymentStatus");
-        PaymentStatus paymentStatus = null;
-        if (paymentStatusMap != null) {
-            paymentStatus = (PaymentStatus) paymentStatusMap.get(paymentStatusId);
-        }
-        if (paymentStatus == null) {
-            paymentStatus = (PaymentStatus) mongoRepositoryReactive.findById(paymentStatusId, PaymentStatus.class).block();
-            if (paymentStatus != null && paymentStatusMap != null) {
-                paymentStatusMap.put(paymentStatusId, paymentStatus);
-            }
-        }
-        return paymentStatus;
-    }
 
     private Fee getFee() {
         return (Fee) mongoRepositoryReactive.findById(feeId, Fee.class).block();
@@ -84,37 +80,33 @@ public class PaymentRecord extends AbstractFact {
         }
     }
 
-    private FeePaymentType getFeePaymentType() {
-        Map feePaymentTypeMap = Mapstore.STORE.get("FeePaymentType");
-        FeePaymentType feePaymentType = null;
-        if (feePaymentTypeMap != null) {
-            feePaymentType = (FeePaymentType) feePaymentTypeMap.get(feePaymentTypeId);
-        }
-        if (feePaymentType == null) {
-            feePaymentType = (FeePaymentType) mongoRepositoryReactive.findById(feePaymentTypeId, FeePaymentType.class).block();
-            if (feePaymentType != null && feePaymentTypeMap != null) {
-                feePaymentTypeMap.put(feePaymentTypeId, feePaymentType);
-            }
-        }
-        return feePaymentType;
-    }
-
     public PaymentRecordDto convertToDto() {
         PaymentRecordDto paymentRecordDto = new PaymentRecordDto();
         Fee fee = getFee();
+        paymentRecordDto.setId(getId());
         if (fee != null) {
             paymentRecordDto.setFee(fee.convertToDto());
         }
-        PaymentStatus paymentStatus = getPaymentStatus();
-        if (paymentStatus != null) {
+        Map paymentStatusMap = Mapstore.STORE.get("PaymentStatus");
+        PaymentStatus paymentStatus = null;
+        if (paymentStatusMap != null) {
+            paymentStatus = (PaymentStatus) paymentStatusMap.get(paymentStatusId);
+        }
+        if (paymentStatus == null) {
+            paymentStatus = (PaymentStatus) mongoRepositoryReactive.findById(paymentStatusId, PaymentStatus.class).block();
+            if (paymentStatus != null && paymentStatusMap != null) {
+                paymentStatusMap.put(paymentStatusId, paymentStatus);
+            }
+        } if (paymentStatus != null) {
             paymentRecordDto.setPaymentStatus(paymentStatus.convertToDto());
         }
         paymentRecordDto.setApproverName(getApproverFullName());
-        FeePaymentType feePaymentType = getFeePaymentType();
-        if (feePaymentType != null) {
-            paymentRecordDto.setFeePaymentType(feePaymentType.convertToDto());
-        }
-        paymentRecordDto.setId(getId());
+        paymentRecordDto.setInstitutionId(getInstitutionId());
+        paymentRecordDto.setInstitutionName(getInstitution().institutionName);
+
+
+
+
         return paymentRecordDto;
     }
 
