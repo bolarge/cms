@@ -1,10 +1,7 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
-import com.software.finatech.lslb.cms.service.dto.ApplicationFormCreateDto;
-import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
-import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
-import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
 import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
 import com.software.finatech.lslb.cms.service.model.contactDetails.ApplicantContactDetails;
@@ -303,7 +300,7 @@ public class ApplicationFormController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/payment-records", params = {"applicationFormId"})
-    @ApiOperation(value = "Get payment records for application form", response = String.class, consumes = "application/json")
+    @ApiOperation(value = "Get payment records for application form", response = PaymentRecordDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
