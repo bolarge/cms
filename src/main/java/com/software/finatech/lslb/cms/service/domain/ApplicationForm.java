@@ -11,6 +11,7 @@ import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantO
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,7 +34,7 @@ public class ApplicationForm extends AbstractFact {
     protected ApplicantOutletInformation applicantOutletInformation;
     protected ApplicantOtherInformation applicantOtherInformation;
     protected ApplicantContactDetails applicantContactDetails;
-    protected Set<String> attachmentIds;
+    protected Set<String> documentIds ;
 
 
     public String getRejectorId() {
@@ -44,16 +45,17 @@ public class ApplicationForm extends AbstractFact {
         this.rejectorId = rejectorId;
     }
 
-    public Set<String> getAttachmentIds() {
-        return attachmentIds;
-    }
-
-    public void setAttachmentIds(Set<String> attachmentIds) {
-        this.attachmentIds = attachmentIds;
-    }
 
     public ApplicantDetails getApplicantDetails() {
         return applicantDetails;
+    }
+
+    public Set<String> getDocumentIds() {
+        return documentIds;
+    }
+
+    public void setDocumentIds(Set<String> documentIds) {
+        this.documentIds = documentIds;
     }
 
     public void setApplicantDetails(ApplicantDetails applicantDetails) {

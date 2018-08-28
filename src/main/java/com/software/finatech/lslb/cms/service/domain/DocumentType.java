@@ -9,15 +9,28 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 
 @Document(collection = "DocumentTypes")
 public class DocumentType extends EnumeratedFact{
 
+    protected Set<String> gameTypeIds;
     protected String documentPurposeId;
     @Transient
     protected DocumentPurpose documentPurpose;
     protected boolean active;
     protected boolean required;
+
+    public Set<String> getGameTypeIds() {
+        return gameTypeIds;
+    }
+
+    public void setGameTypeIds(Set<String> gameTypeIds) {
+        this.gameTypeIds = gameTypeIds;
+    }
 
     public boolean isActive() {
         return active;
@@ -62,6 +75,33 @@ public class DocumentType extends EnumeratedFact{
         return super.clone();
     }
 
+    private GameType getGameType(String gameTypeId){
+        Map gameTypeMap = Mapstore.STORE.get("GameType");
+        GameType gameType = null;
+        if (gameTypeMap != null) {
+            gameType = (GameType) gameTypeMap.get(gameTypeId);
+        }
+        if (gameType == null) {
+            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
+            if (gameType != null && gameTypeMap != null) {
+                gameTypeMap.put(gameTypeId, gameType);
+            }
+        }
+        return gameType;
+    }
+
+    private Set<String> getGameTypeNames(){
+       Set<String> gameTypeNames = new HashSet<>();
+        for (String gameTypeId : gameTypeIds) {
+            GameType gameType = getGameType(gameTypeId);
+            if (gameType != null){
+                gameTypeNames.add(gameType.getName());
+            }
+        }
+        return gameTypeNames;
+    }
+
+
     public void setAssociatedProperties() throws FactNotFoundException {
         if (documentPurposeId != null) {
             DocumentPurpose DocumentPurpose = (DocumentPurpose) Mapstore.STORE.get("DocumentPurpose").get(documentPurposeId);
@@ -86,6 +126,7 @@ public class DocumentType extends EnumeratedFact{
         dto.setDocumentPurpose(getDocumentPurpose()==null?null:getDocumentPurpose().convertToDto());
         dto.setActive(isActive());
         dto.setRequired(isRequired());
+        dto.setGameTypeNames(getGameTypeNames());
         return dto;
     }
 }

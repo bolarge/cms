@@ -219,6 +219,10 @@ public class AuthInfo extends AbstractFact {
 		authInfoDto.setGameTypeId(getGameTypeId());
 		authInfoDto.setGameTypeName(getGameTypeName());
 		authInfoDto.setAuthRole(getAuthRole()==null?null:getAuthRole().convertToDto());
+		Institution userInstitution= getInstition();
+		if (userInstitution != null){
+			authInfoDto.setInstitutionName(userInstitution.getInstitutionName());
+		}
 		return authInfoDto;
 	}
 
@@ -242,6 +246,10 @@ public class AuthInfo extends AbstractFact {
 				gameTypeName = gameType.name;
 			}
 		}
+	}
+
+	private Institution getInstition(){
+		return (Institution)mongoRepositoryReactive.findById(institutionId,Institution.class).block();
 	}
 
 	@Override

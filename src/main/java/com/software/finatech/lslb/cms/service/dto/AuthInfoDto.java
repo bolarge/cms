@@ -16,6 +16,15 @@ public class AuthInfoDto {
     protected AuthRoleDto authRole;
     protected  String gameTypeId;
     protected String gameTypeName;
+    protected String institutionName;
+
+    public String getInstitutionName() {
+        return institutionName;
+    }
+
+    public void setInstitutionName(String institutionName) {
+        this.institutionName = institutionName;
+    }
 
     public String getGameTypeId() {
         return gameTypeId;

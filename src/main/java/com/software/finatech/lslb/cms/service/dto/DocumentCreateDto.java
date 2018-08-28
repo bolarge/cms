@@ -1,6 +1,8 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 
+import org.apache.commons.lang3.StringUtils;
+
 import javax.validation.constraints.NotEmpty;
 
 public class DocumentCreateDto {
@@ -60,6 +62,9 @@ public class DocumentCreateDto {
         this.documentTypeId = documentTypeId;
     }
 
+    public boolean isApplicationFormDocument() {
+        return StringUtils.equals("applicationForm", entity);
+    }
 
     public String getEntity() {
         return entity;

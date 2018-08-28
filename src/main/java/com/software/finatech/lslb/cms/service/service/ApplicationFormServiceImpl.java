@@ -1,7 +1,5 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import ch.qos.logback.core.pattern.util.RegularEscapeUtil;
-import com.mongodb.client.DistinctIterable;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
@@ -13,8 +11,10 @@ import com.software.finatech.lslb.cms.service.model.declaration.ApplicantDeclara
 import com.software.finatech.lslb.cms.service.model.otherInformation.ApplicantOtherInformation;
 import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantOutletInformation;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
-import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
@@ -524,6 +523,58 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         }
     }
 
+    @Override
+    public Mono<ResponseEntity> getDocumentTypesForApplicationForm(String applicationFormId) {
+        try {
+            ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
+            if (applicationForm == null) {
+                return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
+            }
+
+            Query queryForApplicationFormDocumentTypes = new Query();
+            String applicationFormDocumentPurposeId = DocumentPurposeReferenceData.APPLICATION_FORM_DOCUMENT_PURPOSE_ID;
+            String gameTypeId = applicationForm.getGameTypeId();
+
+            queryForApplicationFormDocumentTypes.addCriteria(Criteria.where("documentPurposeId").is(applicationFormDocumentPurposeId));
+            queryForApplicationFormDocumentTypes.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
+            queryForApplicationFormDocumentTypes.addCriteria(Criteria.where("active").is(true));
+
+            ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(queryForApplicationFormDocumentTypes, DocumentType.class).toStream().collect(Collectors.toList());
+            if (documentTypes == null || documentTypes.isEmpty()){
+                return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
+            }
+            ArrayList<ApplicationFormDocumentDto> applicationFormDocumentDtos = new ArrayList<>();
+            documentTypes.forEach(documentType -> {
+                applicationFormDocumentDtos.add(getApplicationFormDocumentDto(applicationForm, documentType));
+            });
+            return Mono.just(new ResponseEntity<>(applicationFormDocumentDtos, HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while getting documents for application form", e);
+        }
+    }
+
+    private ApplicationFormDocumentDto getApplicationFormDocumentDto(ApplicationForm applicationForm, DocumentType documentType) {
+        ApplicationFormDocumentDto applicationFormDocumentDto = new ApplicationFormDocumentDto();
+        applicationFormDocumentDto.setRequired(documentType.isRequired());
+        applicationFormDocumentDto.setActive(documentType.isActive());
+        applicationFormDocumentDto.setName(documentType.getName());
+        applicationFormDocumentDto.setDescription(documentType.getDescription());
+        applicationFormDocumentDto.setId(documentType.getId());
+
+        Query queryForDocumentWithTypeAndApplicationForm = new Query();
+        queryForDocumentWithTypeAndApplicationForm.addCriteria(Criteria.where("applicationFormId").is(applicationForm.getId()));
+        queryForDocumentWithTypeAndApplicationForm.addCriteria(Criteria.where("documentTypeId").is(documentType.getId()));
+
+        Document document = (Document) mongoRepositoryReactive.find(queryForDocumentWithTypeAndApplicationForm, Document.class).block();
+
+        if (document != null) {
+            String documentId = document.getId();
+            Set<String> applicationFormDocumentIds = applicationForm.getDocumentIds();
+            applicationFormDocumentDto.setUploaded(applicationFormDocumentIds.contains(documentId));
+        }
+        return applicationFormDocumentDto;
+    }
+
     private ApplicationForm fromCreateDto(ApplicationFormCreateDto applicationFormCreateDto) {
         ApplicationForm applicationForm = new ApplicationForm();
         applicationForm.setId(UUID.randomUUID().toString());
@@ -553,18 +604,18 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             return Mono.just(new ResponseEntity<>("An application form already exists for the institution with the same game type and application type", HttpStatus.BAD_REQUEST));
         }
 
-        String applicationFeeTypeId = "1";
+        String applicationFeeTypeId = FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID;
         Query queryForExistingFee = new Query();
         queryForExistingFee.addCriteria(Criteria.where("feePaymentTypeId").is(applicationFeeTypeId));
         queryForExistingFee.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
 
         Fee applicationFeeForGameType = (Fee) mongoRepositoryReactive.find(queryForExistingFee, Fee.class).block();
         if (applicationFeeForGameType == null) {
-            return Mono.just(new ResponseEntity<>("No Application fee found for Game Type", HttpStatus.EXPECTATION_FAILED));
+            return Mono.just(new ResponseEntity<>("No Application fee configured for Game Type", HttpStatus.EXPECTATION_FAILED));
         }
 
         Query queryForExistingConfirmedPaymentRecord = new Query();
-        String confirmedPaymentStatusId = "1";
+        String confirmedPaymentStatusId = PaymentStatusReferenceData.CONFIRMED_PAYMENT_STATUS_ID;
         queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("feeId").is(applicationFeeForGameType.getId()));
         queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("institutionId").is(institutionId));
         queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
@@ -576,5 +627,18 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             return Mono.just(new ResponseEntity<>("There is no confirmed application fee payment record for game type", HttpStatus.BAD_REQUEST));
         }
         return null;
+    }
+
+    private List<DocumentTypeDto> getDocumentTypesFromDocumentIds(Set<String> documentIds) throws FactNotFoundException {
+        List<DocumentTypeDto> documentTypeDtos = new ArrayList<>();
+        for (String documentId : documentIds) {
+            Document document = (Document) mongoRepositoryReactive.findById(documentId, Document.class).block();
+            if (document != null) {
+                document.setAssociatedProperties();
+                DocumentType documentType = document.getDocumentType();
+                documentTypeDtos.add(documentType.convertToDto());
+            }
+        }
+        return documentTypeDtos;
     }
 }
