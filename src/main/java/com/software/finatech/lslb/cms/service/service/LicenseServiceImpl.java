@@ -46,9 +46,7 @@ public class LicenseServiceImpl implements LicenseService {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
     }
 
-    @Autowired
-    MapValues mapValues;
-    @Autowired
+     @Autowired
     ExpirationList expirationList;
     @Override
     public Mono<ResponseEntity> findAllLicense(int page,
@@ -201,19 +199,27 @@ public class LicenseServiceImpl implements LicenseService {
                             "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
                 }
                 fromDate = new LocalDateTime(startDate);
+                license.setStartDate(fromDate);
 
             } else {
-                return Mono.just(new ResponseEntity("Invalid Date format. " +
-                        "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
+                if((licenseUpdateDto.getLicenseStatusId()=="03") || (licenseUpdateDto.getLicenseStatusId()=="04")){
+                    fromDate=null;
+                }else{
+                    return Mono.just(new ResponseEntity("Invalid Date format. " +
+                            "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
+
+                }
+
 
             }
-            license.setStartDate(fromDate);
+
             Query queryFee= new Query();
             queryFee.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
             Fee fee = (Fee) mongoRepositoryReactive.find(queryFee,Fee.class).block();
             int duration = Integer.parseInt(fee.getDuration());
             if(licenseUpdateDto.getLicenseStatusId()!="03" &&
                     licenseUpdateDto.getLicenseStatusId()!="04"){
+
                 license.setEndDate(fromDate.plusDays(duration));
             }
 

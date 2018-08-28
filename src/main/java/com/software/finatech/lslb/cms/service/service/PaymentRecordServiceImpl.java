@@ -114,9 +114,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
     }
     @Override
     public Mono<ResponseEntity> getAllPaymentStatus() {
-
-        return Mono.just(new ResponseEntity<>(getPaymentStatus(), HttpStatus.NOT_FOUND));
-
+        return Mono.just(new ResponseEntity<>(getPaymentStatus(), HttpStatus.OK));
     }
 
     @Override

@@ -16,8 +16,6 @@ import java.util.Map;
 @Document(collection = "Licenses")
 public class License extends AbstractFact {
 
-
-
     protected String licenseStatusId;
     protected String institutionId;
     protected String gameTypeId;
@@ -26,8 +24,6 @@ public class License extends AbstractFact {
     protected LocalDateTime endDate;
     protected String renewalStatus;
 
-    @Autowired
-    MapValues mapValues;
 
     public String getRenewalStatus() {
         return renewalStatus;

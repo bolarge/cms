@@ -12,8 +12,6 @@ import java.util.Map;
 @SuppressWarnings("serial")
 @Document(collection = "Fees")
 public class Fee extends AbstractFact {
-    @Autowired
-    MapValues mapValues;
 
     protected double amount;
     protected String gameTypeId;

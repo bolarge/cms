@@ -19,9 +19,6 @@ public class PaymentRecord extends AbstractFact {
     private String feeId;
     private String parentLicenseId;
 
-    @Autowired
-    MapValues mapValues;
-
     public String getParentLicenseId() {
         return parentLicenseId;
     }
