@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.util.PersistenceModification;
+
 import java.io.Serializable;
 
 public interface FactObject extends Serializable, Cloneable {

@@ -1,9 +1,6 @@
 package com.software.finatech.lslb.cms.service.controller;
 
-import com.software.finatech.lslb.cms.service.domain.Fee;
-import com.software.finatech.lslb.cms.service.domain.FeePaymentType;
 import com.software.finatech.lslb.cms.service.dto.*;
-import com.software.finatech.lslb.cms.service.service.FeeServiceImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

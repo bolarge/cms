@@ -1,7 +1,5 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import java.util.Set;
-
 public class ApplicationFormDocumentDto {
     protected boolean active;
     protected boolean required;

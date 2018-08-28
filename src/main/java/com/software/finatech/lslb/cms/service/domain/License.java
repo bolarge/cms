@@ -1,13 +1,12 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
-import com.software.finatech.lslb.cms.service.util.MapValues;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.beans.Transient;
 import java.util.Map;
 
@@ -17,8 +16,6 @@ import java.util.Map;
 public class License extends AbstractFact {
 
     protected String licenseStatusId;
-    protected String institutionId;
-    protected String gameTypeId;
     protected String paymentRecordId;
     protected LocalDateTime startDate;
     protected LocalDateTime endDate;
@@ -68,23 +65,6 @@ public class License extends AbstractFact {
     public void setLicenseStatusId(String licenseStatusId) {
         this.licenseStatusId = licenseStatusId;
     }
-
-    public String getInstitutionId() {
-        return institutionId;
-    }
-
-    public void setInstitutionId(String institutionId) {
-        this.institutionId = institutionId;
-    }
-
-    public String getGameTypeId() {
-        return gameTypeId;
-    }
-
-    public void setGameTypeId(String gameTypeId) {
-        this.gameTypeId = gameTypeId;
-    }
-
 
 
 

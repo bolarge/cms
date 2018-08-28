@@ -1,8 +1,8 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.Fee;
+import com.software.finatech.lslb.cms.service.domain.Institution;
 public class LicenseDto {
-    protected PaymentRecordDto paymentRecordDto;
     protected LicenseStatusDto licenseStatus;
     protected Institution institution;
     protected String id;
@@ -35,16 +35,6 @@ public class LicenseDto {
     public String getRenewalStatus() {
         return renewalStatus;
     }
-
-
-    public PaymentRecordDto getPaymentRecordDto() {
-        return paymentRecordDto;
-    }
-
-    public void setPaymentRecordDto(PaymentRecordDto paymentRecordDto) {
-        this.paymentRecordDto = paymentRecordDto;
-    }
-
 
     public LicenseStatusDto getLicenseStatus() {
         return licenseStatus;
