@@ -1,11 +1,9 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.domain.Document;
+import com.software.finatech.lslb.cms.service.domain.DocumentType;
 import com.software.finatech.lslb.cms.service.domain.FactObject;
-import com.software.finatech.lslb.cms.service.dto.ApplicationFormCreateDto;
-import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
-import com.software.finatech.lslb.cms.service.dto.DocumentCreateDto;
-import com.software.finatech.lslb.cms.service.dto.DocumentDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -142,6 +140,30 @@ public class DocumentController extends BaseController{
 
         return Mono.just(new ResponseEntity(documentsDto, HttpStatus.OK));
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/type/{purposeId}")
+    @ApiOperation(value = "Get Document Type By Purpose", response = DocumentTypeDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getDocumentTypeByPurpose(@PathVariable("purposeId") String purposeId) {
+
+        ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(new Query(Criteria.where("documentPurposeId").is(purposeId)), DocumentType.class).toStream().collect(Collectors.toList());
+
+        ArrayList<DocumentTypeDto> documentTypesDto = new ArrayList<>();
+        documentTypes.forEach(entry -> {
+            documentTypesDto.add(entry.convertToDto());
+        });
+
+        if (documentTypesDto.size() == 0) {
+            return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
+        }
+
+        return Mono.just(new ResponseEntity(documentTypesDto, HttpStatus.OK));
+    }
+
 
     @RequestMapping(method = RequestMethod.GET, value = "/downloadById/{id}")
     @ApiOperation(value = "Download Bytes By Id")

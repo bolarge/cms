@@ -5,7 +5,24 @@ public class DocumentTypeDto extends EnumeratedFactDto{
 
     protected String documentPurposeId;
     protected DocumentPurposeDto documentPurpose;
+    protected boolean active;
+    protected boolean required;
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
     public String getDocumentPurposeId() {
         return documentPurposeId;
     }
