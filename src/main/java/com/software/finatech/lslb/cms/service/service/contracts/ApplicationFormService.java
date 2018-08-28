@@ -57,5 +57,5 @@ public interface ApplicationFormService {
     Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, String rejectorId);
     Mono<ResponseEntity> completeApplicationForm(String applicationFormId);
     Mono<ResponseEntity> getPaymentRecordsForApplicationForm(String applicationFormId);
-
+    Mono<ResponseEntity> getDocumentTypesForApplicationForm(String applicationFormId);
 }

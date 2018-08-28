@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.DocumentDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.Binary;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -12,7 +13,7 @@ import org.springframework.data.annotation.Transient;
 
 @SuppressWarnings("serial")
 @org.springframework.data.mongodb.core.mapping.Document(collection = "Documents")
-public class Document extends  AbstractFact {
+public class Document extends AbstractFact {
 
     protected String description;
     protected String filename;
@@ -29,7 +30,15 @@ public class Document extends  AbstractFact {
     protected String entityId;
     protected String previousDocument;
     protected String originalFilename;
+    private String applicationFormId;
 
+    public String getApplicationFormId() {
+        return applicationFormId;
+    }
+
+    public void setApplicationFormId(String applicationFormId) {
+        this.applicationFormId = applicationFormId;
+    }
 
     public Binary getFile() {
         return file;
@@ -175,15 +184,15 @@ public class Document extends  AbstractFact {
         dto.setCurrent(getCurrent());
         dto.setDescription(getDescription());
         dto.setDocumentTypeId(getDocumentTypeId());
-        dto.setDocumentType(getDocumentType()==null?null:getDocumentType().convertToDto());
+        dto.setDocumentType(getDocumentType() == null ? null : getDocumentType().convertToDto());
         dto.setEntity(getEntity());
-        dto.setEntryDate(getEntryDate()==null?null:getEntryDate().toString(DateTimeFormat.longDateTime()));
+        dto.setEntryDate(getEntryDate() == null ? null : getEntryDate().toString(DateTimeFormat.longDateTime()));
         dto.setFilename(getFilename());
         dto.setOriginalFilename(getOriginalFilename());
         dto.setMimeType(getMimeType());
         dto.setPreviousDocument(getPreviousDocument());
-        dto.setValidFrom(getValidFrom()==null?null:getValidFrom().toString("dd-MM-yyyy"));
-        dto.setValidTo(getValidTo()==null?null:getValidTo().toString("dd-MM-yyyy"));
+        dto.setValidFrom(getValidFrom() == null ? null : getValidFrom().toString("dd-MM-yyyy"));
+        dto.setValidTo(getValidTo() == null ? null : getValidTo().toString("dd-MM-yyyy"));
 
         return dto;
     }

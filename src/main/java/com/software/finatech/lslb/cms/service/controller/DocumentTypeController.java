@@ -112,5 +112,4 @@ public class DocumentTypeController extends BaseController{
         return Mono.just(new ResponseEntity(documentType.convertToDto(), HttpStatus.OK));
 
     }
-
 }

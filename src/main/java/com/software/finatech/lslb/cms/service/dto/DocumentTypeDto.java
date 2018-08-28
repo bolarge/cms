@@ -1,12 +1,23 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 
+import java.util.Set;
+
 public class DocumentTypeDto extends EnumeratedFactDto{
 
     protected String documentPurposeId;
     protected DocumentPurposeDto documentPurpose;
     protected boolean active;
     protected boolean required;
+    protected Set<String> gameTypeNames;
+
+    public Set<String> getGameTypeNames() {
+        return gameTypeNames;
+    }
+
+    public void setGameTypeNames(Set<String> gameTypeNames) {
+        this.gameTypeNames = gameTypeNames;
+    }
 
     public boolean isActive() {
         return active;
