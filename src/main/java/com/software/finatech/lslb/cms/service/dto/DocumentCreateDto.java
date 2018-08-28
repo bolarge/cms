@@ -15,6 +15,7 @@ public class DocumentCreateDto {
     protected String documentTypeId;
     @NotEmpty(message = "Entity field can not be empty")
     protected String entity;
+    @NotEmpty(message = "Entity field ID can not be empty")
     protected String entityId;
 
 

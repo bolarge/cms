@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Api(value = "Document", description = "For everything related to documents", tags = "")
@@ -75,9 +76,13 @@ public class DocumentTypeController extends BaseController{
 
         }
         DocumentType documentType = new DocumentType();
+
+        documentType.setId(UUID.randomUUID().toString());
         documentType.setDocumentPurposeId(documentTypeCreateDto.getDocumentPurposeId());
         documentType.setActive(documentTypeCreateDto.isActive());
         documentType.setRequired(documentTypeCreateDto.isRequired());
+        documentType.setName(documentTypeCreateDto.getName());
+        documentType.setDescription(documentTypeCreateDto.getDescription());
         mongoRepositoryReactive.saveOrUpdate(documentType);
         return Mono.just(new ResponseEntity(documentType.convertToDto(), HttpStatus.OK));
 
@@ -101,6 +106,8 @@ public class DocumentTypeController extends BaseController{
         documentType.setDocumentPurposeId(documentTypeUpdateDto.getDocumentPurposeId());
         documentType.setActive(documentTypeUpdateDto.isActive());
         documentType.setRequired(documentTypeUpdateDto.isRequired());
+        documentType.setName(documentTypeUpdateDto.getName());
+        documentType.setDescription(documentTypeUpdateDto.getDescription());
         mongoRepositoryReactive.saveOrUpdate(documentType);
         return Mono.just(new ResponseEntity(documentType.convertToDto(), HttpStatus.OK));
 

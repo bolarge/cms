@@ -3,7 +3,7 @@ package com.software.finatech.lslb.cms.service.dto;
 
 import javax.validation.constraints.NotEmpty;
 
-public class DocumentTypeUpdateDto{
+public class DocumentTypeUpdateDto extends EnumeratedFactDto{
     @NotEmpty(message = "Enter a valid document purpose ID")
     protected String documentPurposeId;
     @NotEmpty(message = "Enter a valid status")
