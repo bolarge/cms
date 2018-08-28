@@ -1,13 +1,12 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
-import com.software.finatech.lslb.cms.service.util.MapValues;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.beans.Transient;
 import java.util.Map;
 

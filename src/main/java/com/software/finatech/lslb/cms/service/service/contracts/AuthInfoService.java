@@ -4,12 +4,9 @@ import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.VerificationToken;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoCompleteDto;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
-import com.software.finatech.lslb.cms.service.dto.CreateGameOperatorAuthInfoDto;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOChangePasswordModel;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOPasswordResetModel;
-
 import org.springframework.http.ResponseEntity;
-
 import reactor.core.publisher.Mono;
 
 public interface AuthInfoService {

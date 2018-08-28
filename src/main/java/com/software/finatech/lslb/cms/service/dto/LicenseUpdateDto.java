@@ -1,7 +1,6 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 import javax.validation.constraints.NotEmpty;
-import java.beans.Transient;
 
 public class LicenseUpdateDto {
 

@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.Fee;
+import com.software.finatech.lslb.cms.service.domain.Institution;
 public class LicenseDto {
     protected LicenseStatusDto licenseStatus;
     protected Institution institution;

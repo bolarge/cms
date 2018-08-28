@@ -1,7 +1,5 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import com.software.finatech.lslb.cms.service.domain.ApplicationFormStatus;
-
 import java.util.Set;
 
 public class ApplicationFormDto {

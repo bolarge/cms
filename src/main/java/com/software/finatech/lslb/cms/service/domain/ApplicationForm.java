@@ -11,7 +11,6 @@ import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantO
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
