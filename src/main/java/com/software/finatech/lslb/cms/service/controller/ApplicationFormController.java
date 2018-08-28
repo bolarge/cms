@@ -299,7 +299,7 @@ public class ApplicationFormController {
         return applicationFormService.getPaymentRecordsForApplicationForm(applicationFormId);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{applicationFormId}/get-document-types", params = {"applicationFormId"})
+    /*@RequestMapping(method = RequestMethod.GET, value = "/{applicationFormId}/get-document-types", params = {"applicationFormId"})
     @ApiOperation(value = "Get document types for application form (Shows the files that are uploaded)",response = ApplicationFormDocumentDto.class,responseContainer = "List",consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -308,5 +308,5 @@ public class ApplicationFormController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getDocumentTypesForApplicationForm(@PathVariable("applicationFormId") String applicationFormId) {
         return applicationFormService.getDocumentTypesForApplicationForm(applicationFormId);
-    }
+    }*/
 }

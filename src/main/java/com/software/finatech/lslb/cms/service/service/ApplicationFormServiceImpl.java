@@ -523,7 +523,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         }
     }
 
-    @Override
+    /*@Override
     public Mono<ResponseEntity> getDocumentTypesForApplicationForm(String applicationFormId) {
         try {
             ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
@@ -551,7 +551,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while getting documents for application form", e);
         }
-    }
+    }*/
 
     private ApplicationFormDocumentDto getApplicationFormDocumentDto(ApplicationForm applicationForm, DocumentType documentType) {
         ApplicationFormDocumentDto applicationFormDocumentDto = new ApplicationFormDocumentDto();
