@@ -1,15 +1,24 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 import javax.validation.constraints.NotEmpty;
+import java.beans.Transient;
 
 public class LicenseUpdateDto {
 
     @NotEmpty(message = "Please provide License Status Id")
     private String licenseStatusId;
-    @NotEmpty(message = "Please provide institutionId")
-    private String institutionId;
     private String startDate;
-    private String gameTypeId;
+    @NotEmpty(message = "Please provide Payment Record Id")
+    private String paymentRecordId;
+
+
+    public String getPaymentRecordId() {
+        return paymentRecordId;
+    }
+
+    public void setPaymentRecordId(String paymentRecordId) {
+        this.paymentRecordId = paymentRecordId;
+    }
 
     public String getStartDate() {
         return startDate;
@@ -26,24 +35,6 @@ public class LicenseUpdateDto {
     public void setLicenseStatusId(String licenseStatusId) {
         this.licenseStatusId = licenseStatusId;
     }
-
-    public String getGameTypeId() {
-        return gameTypeId;
-    }
-
-    public void setGameTypeId(String gameTypeId) {
-        this.gameTypeId = gameTypeId;
-    }
-
-
-    public String getInstitutionId() {
-        return institutionId;
-    }
-
-    public void setInstitutionId(String institutionId) {
-        this.institutionId = institutionId;
-    }
-
 
 
 
