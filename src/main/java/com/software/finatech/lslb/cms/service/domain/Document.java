@@ -22,15 +22,23 @@ public class Document extends AbstractFact {
     protected LocalDateTime entryDate;
     protected LocalDate validFrom;
     protected LocalDate validTo;
-    protected Boolean isCurrent;
+    protected boolean isCurrent;
     protected String documentTypeId;
     @Transient
     protected DocumentType documentType;
     protected String entity;
     protected String entityId;
-    protected String previousDocument;
+    protected String previousDocumentId;
     protected String originalFilename;
     private String applicationFormId;
+
+    public String getPreviousDocumentId() {
+        return previousDocumentId;
+    }
+
+    public void setPreviousDocumentId(String previousDocumentId) {
+        this.previousDocumentId = previousDocumentId;
+    }
 
     public String getApplicationFormId() {
         return applicationFormId;
@@ -106,11 +114,11 @@ public class Document extends AbstractFact {
         this.validTo = validTo;
     }
 
-    public Boolean getCurrent() {
+    public boolean getCurrent() {
         return isCurrent;
     }
 
-    public void setCurrent(Boolean current) {
+    public void setCurrent(boolean current) {
         isCurrent = current;
     }
 
@@ -144,14 +152,6 @@ public class Document extends AbstractFact {
 
     public void setEntityId(String entityId) {
         this.entityId = entityId;
-    }
-
-    public String getPreviousDocument() {
-        return previousDocument;
-    }
-
-    public void setPreviousDocument(String previousDocument) {
-        this.previousDocument = previousDocument;
     }
 
     public String getOriginalFilename() {
@@ -190,7 +190,7 @@ public class Document extends AbstractFact {
         dto.setFilename(getFilename());
         dto.setOriginalFilename(getOriginalFilename());
         dto.setMimeType(getMimeType());
-        dto.setPreviousDocument(getPreviousDocument());
+        dto.setPreviousDocumentId(getPreviousDocumentId());
         dto.setValidFrom(getValidFrom() == null ? null : getValidFrom().toString("dd-MM-yyyy"));
         dto.setValidTo(getValidTo() == null ? null : getValidTo().toString("dd-MM-yyyy"));
 

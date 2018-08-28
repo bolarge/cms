@@ -10,12 +10,12 @@ public class DocumentDto {
     protected String entryDate;
     protected String validFrom;
     protected String validTo;
-    protected Boolean isCurrent;
+    protected boolean isCurrent;
     protected String documentTypeId;
     protected DocumentTypeDto documentType;
     protected String entity;
     protected String entityId;
-    protected String previousDocument;
+    protected String previousDocumentId;
     protected String originalFilename;
 
     public String getDescription() {
@@ -66,11 +66,11 @@ public class DocumentDto {
         this.validTo = validTo;
     }
 
-    public Boolean getCurrent() {
+    public boolean getCurrent() {
         return isCurrent;
     }
 
-    public void setCurrent(Boolean current) {
+    public void setCurrent(boolean current) {
         isCurrent = current;
     }
 
@@ -115,12 +115,12 @@ public class DocumentDto {
         this.entityId = entityId;
     }
 
-    public String getPreviousDocument() {
-        return previousDocument;
+    public String getPreviousDocumentId() {
+        return previousDocumentId;
     }
 
-    public void setPreviousDocument(String previousDocument) {
-        this.previousDocument = previousDocument;
+    public void setPreviousDocumentId(String previousDocumentId) {
+        this.previousDocumentId = previousDocumentId;
     }
 
     public String getOriginalFilename() {

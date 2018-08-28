@@ -78,27 +78,20 @@ public class DocumentController extends BaseController {
                     document.setFilename(documentDto.getFilename());
                     document.setOriginalFilename(file.getOriginalFilename());
                     document.setMimeType(file.getContentType());
-                    document.setPreviousDocument(null);
+                    document.setPreviousDocumentId(documentDto.getPreviousDocumentId());
                     document.setValidFrom(new LocalDate(documentDto.getValidFrom()));
                     document.setValidTo(new LocalDate(documentDto.getValidTo()));
                     document.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
-                    if (documentDto.isApplicationFormDocument()){
-                        document.setApplicationFormId(document.getEntityId());
-                    }
                     mongoRepositoryReactive.saveOrUpdate(document);
-
-                    if (documentDto.isApplicationFormDocument()) {
-                        ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.findById(documentDto.getEntityId(), ApplicationForm.class).block();
-                        if (applicationForm != null) {
-                            Set<String> applicationFormDocumentIds = applicationForm.getDocumentIds();
-                            if (applicationFormDocumentIds == null) {
-                                applicationFormDocumentIds = new HashSet<>();
-                            }
-                            applicationFormDocumentIds.add(document.getId());
-                            applicationForm.setDocumentIds(applicationFormDocumentIds);
-                            mongoRepositoryReactive.saveOrUpdate(applicationForm);
+                    //If there is an existing doc we set it to false
+                    if(documentDto.getPreviousDocumentId() != null){
+                        Document oldDocument = (Document) mongoRepositoryReactive.findById((documentDto.getPreviousDocumentId()), Document.class).block();
+                        if (oldDocument != null) {
+                            oldDocument.setCurrent(false);
+                            mongoRepositoryReactive.saveOrUpdate(oldDocument);
                         }
                     }
+
                 } catch (Exception e) {
                     logger.error("An error occurred while saving document", e);
                 }
@@ -123,13 +116,14 @@ public class DocumentController extends BaseController {
         if (entityId != null && !entityId.isEmpty()) {
             //Here for each entity type we call its Id field for lookup
             query.addCriteria(Criteria.where("entityId").is(entityId));
-
         }
 
-        ArrayList<Document> invoiceDetails = (ArrayList<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
+        query.addCriteria(Criteria.where("isCurrent").is(true));
+
+        ArrayList<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
 
         ArrayList<DocumentDto> documentsDto = new ArrayList<>();
-        invoiceDetails.forEach(entry -> {
+        documents.forEach(entry -> {
             documentsDto.add(entry.convertToDto());
         });
 

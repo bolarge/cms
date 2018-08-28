@@ -34,7 +34,6 @@ public class ApplicationForm extends AbstractFact {
     protected ApplicantOutletInformation applicantOutletInformation;
     protected ApplicantOtherInformation applicantOtherInformation;
     protected ApplicantContactDetails applicantContactDetails;
-    protected Set<String> documentIds ;
 
 
     public String getRejectorId() {
@@ -48,14 +47,6 @@ public class ApplicationForm extends AbstractFact {
 
     public ApplicantDetails getApplicantDetails() {
         return applicantDetails;
-    }
-
-    public Set<String> getDocumentIds() {
-        return documentIds;
-    }
-
-    public void setDocumentIds(Set<String> documentIds) {
-        this.documentIds = documentIds;
     }
 
     public void setApplicantDetails(ApplicantDetails applicantDetails) {

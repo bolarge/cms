@@ -19,7 +19,15 @@ public class DocumentCreateDto {
     protected String entity;
     @NotEmpty(message = "Entity field ID can not be empty")
     protected String entityId;
+    protected String previousDocumentId;
 
+    public String getPreviousDocumentId() {
+        return previousDocumentId;
+    }
+
+    public void setPreviousDocumentId(String previousDocumentId) {
+        this.previousDocumentId = previousDocumentId;
+    }
 
     public String getDescription() {
         return description;
@@ -60,10 +68,6 @@ public class DocumentCreateDto {
 
     public void setDocumentTypeId(String documentTypeId) {
         this.documentTypeId = documentTypeId;
-    }
-
-    public boolean isApplicationFormDocument() {
-        return StringUtils.equals("applicationForm", entity);
     }
 
     public String getEntity() {
