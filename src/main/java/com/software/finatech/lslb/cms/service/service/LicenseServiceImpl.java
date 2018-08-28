@@ -1,19 +1,20 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.Fee;
+import com.software.finatech.lslb.cms.service.domain.License;
+import com.software.finatech.lslb.cms.service.domain.LicenseStatus;
+import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
-import com.software.finatech.lslb.cms.service.dto.LicenseCreateDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseUpdateDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.ExpirationList;
-import com.software.finatech.lslb.cms.service.util.MapValues;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTimeComparator;
 import org.joda.time.Days;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
@@ -32,7 +33,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -148,26 +148,26 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public Mono<ResponseEntity> getExpiringLicenses() {
 
-        return expirationList.getExpiringLicences("controllerClass", 90, "02");
+        return expirationList.getExpiringLicences("controllerClass", 90, LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
     }
 
     @Override
     public Mono<ResponseEntity> getExpiringAIPs() {
 
-        return expirationList.getExpiringLicences("controllerClass", 14, "01");
+        return expirationList.getExpiringLicences("controllerClass", 14, LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
     }
 
     @Override
     public Mono<ResponseEntity> getExpiredLicenses() {
 
-        return expirationList.getExpiredLicences("controllerClass", "02");
+        return expirationList.getExpiredLicences("controllerClass", LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
 
     }
 
     @Override
     public Mono<ResponseEntity> getExpiredAIPs() {
 
-        return expirationList.getExpiredLicences("controllerClass", "01");
+        return expirationList.getExpiredLicences("controllerClass", LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
 
     }
 
@@ -193,7 +193,7 @@ public class LicenseServiceImpl implements LicenseService {
             queryPaymenrRecord.addCriteria(Criteria.where("id").is(licenseCheck.getPaymentRecordId()));
             queryPaymenrRecord.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
             PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.find(queryPaymenrRecord, PaymentRecord.class).block();
-            if (paymentRecord.convertToDto().getFee().getFeePaymentType().getId() == "01") {
+            if (paymentRecord.convertToDto().getFee().getFeePaymentType().getId() == PaymentStatusReferenceData.CONFIRMED_PAYMENT_STATUS_ID) {
                 if (licenseUpdateDto.getLicenseStatusId() != LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID) {
                     return Mono.just(new ResponseEntity<>("Invalid License Status Selected", HttpStatus.BAD_REQUEST));
                 }
@@ -208,13 +208,20 @@ public class LicenseServiceImpl implements LicenseService {
                             "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
                 }
                 fromDate = new LocalDateTime(startDate);
+                license.setStartDate(fromDate);
 
             } else {
-                return Mono.just(new ResponseEntity("Invalid Date format. " +
-                        "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
+                if ((licenseUpdateDto.getLicenseStatusId() == LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID) || (licenseUpdateDto.getLicenseStatusId() == LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID)) {
+                    fromDate = null;
+                } else {
+                    return Mono.just(new ResponseEntity("Invalid Date format. " +
+                            "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
+
+                }
+
 
             }
-            license.setStartDate(fromDate);
+
             Query queryFee = new Query();
             queryFee.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
             Fee fee = (Fee) mongoRepositoryReactive.find(queryFee, Fee.class).block();

@@ -1,6 +1,8 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 
+import org.apache.commons.lang3.StringUtils;
+
 import javax.validation.constraints.NotEmpty;
 
 public class DocumentCreateDto {
@@ -15,7 +17,8 @@ public class DocumentCreateDto {
     protected String documentTypeId;
     @NotEmpty(message = "Entity field can not be empty")
     protected String entity;
-    protected String applicationFormId;
+    @NotEmpty(message = "Entity field ID can not be empty")
+    protected String entityId;
 
 
     public String getDescription() {
@@ -59,6 +62,9 @@ public class DocumentCreateDto {
         this.documentTypeId = documentTypeId;
     }
 
+    public boolean isApplicationFormDocument() {
+        return StringUtils.equals("applicationForm", entity);
+    }
 
     public String getEntity() {
         return entity;
@@ -68,12 +74,11 @@ public class DocumentCreateDto {
         this.entity = entity;
     }
 
-    public String getApplicationFormId() {
-        return applicationFormId;
+    public String getEntityId() {
+        return entityId;
     }
 
-    public void setApplicationFormId(String applicationFormId) {
-        this.applicationFormId = applicationFormId;
+    public void setEntityId(String entityId) {
+        this.entityId = entityId;
     }
-
 }

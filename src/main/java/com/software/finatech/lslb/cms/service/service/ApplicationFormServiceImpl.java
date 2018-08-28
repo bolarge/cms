@@ -530,12 +530,15 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             if (applicationForm == null) {
                 return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
             }
+
             Query queryForApplicationFormDocumentTypes = new Query();
             String applicationFormDocumentPurposeId = DocumentPurposeReferenceData.APPLICATION_FORM_DOCUMENT_PURPOSE_ID;
             String gameTypeId = applicationForm.getGameTypeId();
+
             queryForApplicationFormDocumentTypes.addCriteria(Criteria.where("documentPurposeId").is(applicationFormDocumentPurposeId));
             queryForApplicationFormDocumentTypes.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
             queryForApplicationFormDocumentTypes.addCriteria(Criteria.where("active").is(true));
+
             ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(queryForApplicationFormDocumentTypes, DocumentType.class).toStream().collect(Collectors.toList());
             if (documentTypes == null || documentTypes.isEmpty()){
                 return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));

@@ -2,18 +2,17 @@ package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
 import com.software.finatech.lslb.cms.service.domain.Document;
-import com.software.finatech.lslb.cms.service.domain.DocumentType;
 import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
 import com.software.finatech.lslb.cms.service.dto.DocumentCreateDto;
 import com.software.finatech.lslb.cms.service.dto.DocumentDto;
-import com.software.finatech.lslb.cms.service.dto.DocumentTypeDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.BsonBinarySubType;
 import org.bson.types.Binary;
 import org.joda.time.LocalDate;
@@ -35,15 +34,12 @@ import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
-
 @Api(value = "Document", description = "For everything related to documents", tags = "")
 @RestController
 @RequestMapping("/api/v1/document")
 public class DocumentController extends BaseController {
 
     private static Logger logger = LoggerFactory.getLogger(DocumentController.class);
-
 
     @RequestMapping(method = RequestMethod.POST, value = "/upload")
     @ApiOperation(value = "Upload Document", response = DocumentCreateDto.class, consumes = "application/json")
@@ -55,6 +51,7 @@ public class DocumentController extends BaseController {
     public Mono<ResponseEntity> upload(@RequestBody @Valid List<DocumentCreateDto> documentDtos, @RequestParam("files") @NotNull MultipartFile[] files) {
 
         //@TODO If its a file replace we have to validate that the old id comes with the json
+
         try {
             //Put the files in a map
             HashMap<String, MultipartFile> fileMap = new HashMap<>();
@@ -69,10 +66,10 @@ public class DocumentController extends BaseController {
                     logger.info("Creating file : " + documentDto.getFilename());
 
                     MultipartFile file = fileMap.get(documentDto.getFilename());
-                    String applicationFormId = documentDto.getApplicationFormId();
+
                     Document document = new Document();
                     document.setId(UUID.randomUUID().toString().replace("-", ""));
-                    document.setApplicationFormId(applicationFormId);
+                    document.setEntity(documentDto.getEntityId());
                     document.setCurrent(true);
                     document.setDescription(documentDto.getDescription());
                     document.setDocumentTypeId(documentDto.getDocumentTypeId());
@@ -85,25 +82,30 @@ public class DocumentController extends BaseController {
                     document.setValidFrom(new LocalDate(documentDto.getValidFrom()));
                     document.setValidTo(new LocalDate(documentDto.getValidTo()));
                     document.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
-
-                    mongoRepositoryReactive.saveOrUpdate(document);
-                    ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
-                    if (applicationForm != null) {
-                        Set<String> documentIdsForApplicationForm = applicationForm.getDocumentIds();
-                        if (documentIdsForApplicationForm == null){
-                            documentIdsForApplicationForm = new HashSet<>();
-                        }
-                        documentIdsForApplicationForm.add(document.getId());
-                        mongoRepositoryReactive.saveOrUpdate(applicationForm);
+                    if (documentDto.isApplicationFormDocument()){
+                        document.setApplicationFormId(document.getEntityId());
                     }
-                    documents.add(document);
+                    mongoRepositoryReactive.saveOrUpdate(document);
+
+                    if (documentDto.isApplicationFormDocument()) {
+                        ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.findById(documentDto.getEntityId(), ApplicationForm.class).block();
+                        if (applicationForm != null) {
+                            Set<String> applicationFormDocumentIds = applicationForm.getDocumentIds();
+                            if (applicationFormDocumentIds == null) {
+                                applicationFormDocumentIds = new HashSet<>();
+                            }
+                            applicationFormDocumentIds.add(document.getId());
+                            applicationForm.setDocumentIds(applicationFormDocumentIds);
+                            mongoRepositoryReactive.saveOrUpdate(applicationForm);
+                        }
+                    }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("An error occurred while saving document", e);
                 }
             });
-            return Mono.just(new ResponseEntity("Success", HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>("Success", HttpStatus.OK));
         } catch (Exception e) {
-            return logAndReturnError(logger, "An error occured while uploading documents", e);
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occured while uploading the documents", e);
         }
     }
 
@@ -118,17 +120,9 @@ public class DocumentController extends BaseController {
 
         Query query = new Query();
 
-        if (entity != null && !entity.isEmpty()) {
-            query.addCriteria(Criteria.where("entity").is(entity));
-        }
-
         if (entityId != null && !entityId.isEmpty()) {
             //Here for each entity type we call its Id field for lookup
-            if (entity.equalsIgnoreCase("ApplicationForm")) {
-                query.addCriteria(Criteria.where("applicationFormId").is(entityId));
-            }//else if(){
-
-            //}
+            query.addCriteria(Criteria.where("entityId").is(entityId));
 
         }
 
@@ -145,30 +139,6 @@ public class DocumentController extends BaseController {
 
         return Mono.just(new ResponseEntity(documentsDto, HttpStatus.OK));
     }
-
-    @RequestMapping(method = RequestMethod.GET, value = "/type/{purposeId}")
-    @ApiOperation(value = "Get Document Type By Purpose", response = DocumentTypeDto.class, responseContainer = "List", consumes = "application/json")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getDocumentTypeByPurpose(@PathVariable("purposeId") String purposeId) {
-
-        ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(new Query(Criteria.where("documentPurposeId").is(purposeId)), DocumentType.class).toStream().collect(Collectors.toList());
-
-        ArrayList<DocumentTypeDto> documentTypesDto = new ArrayList<>();
-        documentTypes.forEach(entry -> {
-            documentTypesDto.add(entry.convertToDto());
-        });
-
-        if (documentTypesDto.size() == 0) {
-            return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
-        }
-
-        return Mono.just(new ResponseEntity(documentTypesDto, HttpStatus.OK));
-    }
-
 
     @RequestMapping(method = RequestMethod.GET, value = "/downloadById/{id}")
     @ApiOperation(value = "Download Bytes By Id")
