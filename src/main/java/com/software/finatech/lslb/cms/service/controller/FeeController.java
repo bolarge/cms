@@ -1,9 +1,8 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.domain.Fee;
-import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
-import com.software.finatech.lslb.cms.service.dto.FeeCreateDto;
-import com.software.finatech.lslb.cms.service.dto.FeeDto;
+import com.software.finatech.lslb.cms.service.domain.FeePaymentType;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.service.FeeServiceImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
 import io.swagger.annotations.Api;
@@ -65,5 +64,35 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> createFee(@RequestBody @Valid FeeCreateDto feeCreateDto) {
         return feeService.createFee(feeCreateDto);
+    }
+    @RequestMapping(method = RequestMethod.POST, value = "/update")
+    @ApiOperation(value = "Update Fee Configuration", response = FeeDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> updateFee(@RequestBody @Valid FeeUpdateDto feeUpdateDto) {
+        return feeService.updateFee(feeUpdateDto);
+    }
+    @RequestMapping(method = RequestMethod.POST, value = "/updateFeePaymentType")
+    @ApiOperation(value = "Update FeePaymentType Configuration", response = FeePaymentTypeDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> updateFeePaymentType(@RequestBody @Valid FeePaymentTypeDto feeUpdateDto) {
+        return feeService.updateFeePaymentType(feeUpdateDto);
+    }
+    @RequestMapping(method = RequestMethod.POST, value = "/createFeePayment")
+    @ApiOperation(value = "Create Fee Payment Configuration", response = FeePaymentTypeDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> createFee(@RequestBody @Valid FeePaymentTypeDto feeCreateDto) {
+        return feeService.createFeePaymentType(feeCreateDto);
     }
 }

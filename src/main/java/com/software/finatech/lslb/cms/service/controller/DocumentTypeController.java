@@ -30,7 +30,7 @@ public class DocumentTypeController extends BaseController{
 
     private static Logger logger = LoggerFactory.getLogger(DocumentTypeController.class);
 
-    @RequestMapping(method = RequestMethod.GET, value = "/type/{purposeId}/status/{status}")
+    @RequestMapping(method = RequestMethod.GET, value = "/{purposeId}/{status}")
     @ApiOperation(value = "Get Document Type By Purpose, Status", response = DocumentTypeDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),

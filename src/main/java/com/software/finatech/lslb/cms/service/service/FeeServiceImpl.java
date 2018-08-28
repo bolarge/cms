@@ -3,10 +3,7 @@ package com.software.finatech.lslb.cms.service.service;
 import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.domain.FeePaymentType;
 import com.software.finatech.lslb.cms.service.domain.PaymentStatus;
-import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
-import com.software.finatech.lslb.cms.service.dto.FeeCreateDto;
-import com.software.finatech.lslb.cms.service.dto.FeeDto;
-import com.software.finatech.lslb.cms.service.dto.FeeUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
 import com.software.finatech.lslb.cms.service.util.MapValues;
@@ -69,7 +66,66 @@ public class FeeServiceImpl implements FeeService {
 
     @Override
     public Mono<ResponseEntity> updateFee(FeeUpdateDto feeUpdateDto) {
-        return null;
+        try {
+            String feeId = feeUpdateDto.getId();
+            Query query = new Query();
+            query.addCriteria(Criteria.where("id").is(feeId));
+            Fee existingFeeWithGameTypeAndFeePaymentType = (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
+            if (existingFeeWithGameTypeAndFeePaymentType == null) {
+                return Mono.just(new ResponseEntity<>("This Fee setting does not exist", HttpStatus.BAD_REQUEST));
+            }
+            Fee fee = new Fee();
+            fee.setAmount(Double.valueOf(feeUpdateDto.getAmount()));
+            fee.setDuration(feeUpdateDto.getDuration());
+            fee.setFeePaymentTypeId(feeUpdateDto.getFeePaymentTypeId());
+            fee.setGameTypeId(feeUpdateDto.getGameTyeId());
+            mongoRepositoryReactive.saveOrUpdate(fee);
+            return Mono.just(new ResponseEntity<>(fee.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            String errorMsg = "An error occurred while creating the fee setting";
+            return logAndReturnError(logger, errorMsg, e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> updateFeePaymentType(FeePaymentTypeDto feeTypeUpdateDto) {
+        try {
+            String feePaymentTypeId = feeTypeUpdateDto.getId();
+            Query query = new Query();
+            query.addCriteria(Criteria.where("id").is(feePaymentTypeId));
+            FeePaymentType existingFeeWithGameTypeAndFeePaymentType = (FeePaymentType) mongoRepositoryReactive.find(query, FeePaymentType.class).block();
+            if (existingFeeWithGameTypeAndFeePaymentType == null) {
+                return Mono.just(new ResponseEntity<>("This FeePayment setting does not exist", HttpStatus.BAD_REQUEST));
+            }
+            FeePaymentType feePaymentType = new FeePaymentType();
+            feePaymentType.setDescription(feeTypeUpdateDto.getDescription());
+            feePaymentType.setName(feeTypeUpdateDto.getName());
+            mongoRepositoryReactive.saveOrUpdate(feePaymentType);
+            return Mono.just(new ResponseEntity<>(feePaymentType.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            String errorMsg = "An error occurred while creating the fee setting";
+            return logAndReturnError(logger, errorMsg, e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> createFeePaymentType(FeePaymentTypeDto feeTypeCreateDto) {
+        try {
+            Query query = new Query();
+            query.addCriteria(Criteria.where("id").is(feeTypeCreateDto.getName()));
+            FeePaymentType existingFeeWithGameTypeAndFeePaymentType = (FeePaymentType) mongoRepositoryReactive.find(query, FeePaymentType.class).block();
+            if (existingFeeWithGameTypeAndFeePaymentType != null) {
+                return Mono.just(new ResponseEntity<>("This FeePayment setting exist", HttpStatus.BAD_REQUEST));
+            }
+            FeePaymentType feePaymentType = new FeePaymentType();
+            feePaymentType.setDescription(feeTypeCreateDto.getDescription());
+            feePaymentType.setName(feeTypeCreateDto.getName());
+            mongoRepositoryReactive.saveOrUpdate(feePaymentType);
+            return Mono.just(new ResponseEntity<>(feePaymentType.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            String errorMsg = "An error occurred while creating the fee setting";
+            return logAndReturnError(logger, errorMsg, e);
+        }
     }
 
     @Override

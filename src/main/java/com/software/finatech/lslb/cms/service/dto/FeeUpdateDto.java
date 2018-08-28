@@ -10,6 +10,15 @@ public class FeeUpdateDto {
     @NotEmpty(message = "Please provide fee payment type id")
     protected String feePaymentTypeId;
     protected String duration;
+    protected String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getDuration() {
         return duration;
