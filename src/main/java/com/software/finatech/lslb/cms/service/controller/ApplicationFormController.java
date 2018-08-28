@@ -255,17 +255,6 @@ public class ApplicationFormController {
         return applicationFormService.saveApplicantOutletInformation(applicationFormId, applicantOutletInformation);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/{applicationFormId}/upload-file")
-    @ApiOperation(value = "Save applicant outlet information", response = String.class, consumes = "application/json")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> uploadMultipleFiles(@RequestParam("files") MultipartFile[] multipartFile) {
-        return null;
-    }
-
     @RequestMapping(method = RequestMethod.POST, value = "/approve-application-form", params = {"applicationFormId", "userId"})
     @ApiOperation(value = "Approve application form", response = String.class, consumes = "application/json")
     @ApiResponses(value = {
@@ -300,7 +289,7 @@ public class ApplicationFormController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/payment-records", params = {"applicationFormId"})
-    @ApiOperation(value = "Get payment records for application form", response = PaymentRecordDto.class, consumes = "application/json")
+    @ApiOperation(value = "Get payment records for application form", response = PaymentRecordDto.class,responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -308,5 +297,16 @@ public class ApplicationFormController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getPaymentRecordsApplicationForm(@RequestParam("applicationFormId") String applicationFormId) {
         return applicationFormService.getPaymentRecordsForApplicationForm(applicationFormId);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{applicationFormId}/get-document-types", params = {"applicationFormId"})
+    @ApiOperation(value = "Get document types for application form (Shows the files that are uploaded)",response = ApplicationFormDocumentDto.class,responseContainer = "List",consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getDocumentTypesForApplicationForm(@PathVariable("applicationFormId") String applicationFormId) {
+        return applicationFormService.getDocumentTypesForApplicationForm(applicationFormId);
     }
 }

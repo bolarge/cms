@@ -1,10 +1,15 @@
 package com.software.finatech.lslb.cms.service.controller;
 
+import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
 import com.software.finatech.lslb.cms.service.domain.Document;
 import com.software.finatech.lslb.cms.service.domain.DocumentType;
 import com.software.finatech.lslb.cms.service.domain.FactObject;
-import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
+import com.software.finatech.lslb.cms.service.dto.DocumentCreateDto;
+import com.software.finatech.lslb.cms.service.dto.DocumentDto;
+import com.software.finatech.lslb.cms.service.dto.DocumentTypeDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
+import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -13,7 +18,6 @@ import org.bson.BsonBinarySubType;
 import org.bson.types.Binary;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -28,19 +32,15 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Api(value = "Document", description = "For everything related to documents", tags = "")
 @RestController
 @RequestMapping("/api/v1/document")
-public class DocumentController extends BaseController{
+public class DocumentController extends BaseController {
 
     private static Logger logger = LoggerFactory.getLogger(DocumentController.class);
 
@@ -55,51 +55,56 @@ public class DocumentController extends BaseController{
     public Mono<ResponseEntity> upload(@RequestBody @Valid List<DocumentCreateDto> documentDtos, @RequestParam("files") @NotNull MultipartFile[] files) {
 
         //@TODO If its a file replace we have to validate that the old id comes with the json
-
-
-        //Put the files in a map
-        HashMap<String,MultipartFile> fileMap = new HashMap<>();
-        for(MultipartFile file : files){
-            fileMap.put(file.getName(),file);
-        }
-
-        //We then reconcile it with the document objects
-        ArrayList<FactObject> documents = new ArrayList<>();
-        documentDtos.stream().forEach(documentDto->{
-            try {
-                logger.info("Creating file : " + documentDto.getFilename() );
-
-                MultipartFile file = fileMap.get(documentDto.getFilename());
-
-                Document document = new Document();
-                document.setId(UUID.randomUUID().toString().replace("-",""));
-                document.setApplicationFormId(documentDto.getApplicationFormId());
-                document.setCurrent(true);
-                document.setDescription(documentDto.getDescription());
-                document.setDocumentTypeId(documentDto.getDocumentTypeId());
-                document.setEntity(documentDto.getEntity());
-                document.setEntryDate(LocalDateTime.now());
-                document.setFilename(documentDto.getFilename());
-                document.setOriginalFilename(file.getOriginalFilename());
-                document.setMimeType(file.getContentType());
-                document.setPreviousDocument(null);
-                document.setValidFrom(new LocalDate(documentDto.getValidFrom()));
-                document.setValidTo(new LocalDate(documentDto.getValidTo()));
-                document.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
-                documents.add(document);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-
         try {
-            mongoRepositoryReactive.saveAll(documents);
-        }catch (Exception e) {
-            e.printStackTrace();
-            return  Mono.just(new ResponseEntity("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR));
-        }
+            //Put the files in a map
+            HashMap<String, MultipartFile> fileMap = new HashMap<>();
+            for (MultipartFile file : files) {
+                fileMap.put(file.getName(), file);
+            }
 
-        return  Mono.just(new ResponseEntity("Success", HttpStatus.OK));
+            //We then reconcile it with the document objects
+            ArrayList<FactObject> documents = new ArrayList<>();
+            documentDtos.stream().forEach(documentDto -> {
+                try {
+                    logger.info("Creating file : " + documentDto.getFilename());
+
+                    MultipartFile file = fileMap.get(documentDto.getFilename());
+                    String applicationFormId = documentDto.getApplicationFormId();
+                    Document document = new Document();
+                    document.setId(UUID.randomUUID().toString().replace("-", ""));
+                    document.setApplicationFormId(applicationFormId);
+                    document.setCurrent(true);
+                    document.setDescription(documentDto.getDescription());
+                    document.setDocumentTypeId(documentDto.getDocumentTypeId());
+                    document.setEntity(documentDto.getEntity());
+                    document.setEntryDate(LocalDateTime.now());
+                    document.setFilename(documentDto.getFilename());
+                    document.setOriginalFilename(file.getOriginalFilename());
+                    document.setMimeType(file.getContentType());
+                    document.setPreviousDocument(null);
+                    document.setValidFrom(new LocalDate(documentDto.getValidFrom()));
+                    document.setValidTo(new LocalDate(documentDto.getValidTo()));
+                    document.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
+
+                    mongoRepositoryReactive.saveOrUpdate(document);
+                    ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
+                    if (applicationForm != null) {
+                        Set<String> documentIdsForApplicationForm = applicationForm.getDocumentIds();
+                        if (documentIdsForApplicationForm == null){
+                            documentIdsForApplicationForm = new HashSet<>();
+                        }
+                        documentIdsForApplicationForm.add(document.getId());
+                        mongoRepositoryReactive.saveOrUpdate(applicationForm);
+                    }
+                    documents.add(document);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            return Mono.just(new ResponseEntity("Success", HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occured while uploading documents", e);
+        }
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/getByEntity", params = {"entityId", "entity"})
@@ -119,7 +124,7 @@ public class DocumentController extends BaseController{
 
         if (entityId != null && !entityId.isEmpty()) {
             //Here for each entity type we call its Id field for lookup
-            if(entity.equalsIgnoreCase("ApplicationForm")){
+            if (entity.equalsIgnoreCase("ApplicationForm")) {
                 query.addCriteria(Criteria.where("applicationFormId").is(entityId));
             }//else if(){
 
@@ -172,21 +177,21 @@ public class DocumentController extends BaseController{
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public void downloadById(@PathVariable("id") String id, HttpServletResponse httpServletResponse)  throws FactNotFoundException{
+    public void downloadById(@PathVariable("id") String id, HttpServletResponse httpServletResponse) throws FactNotFoundException {
 
-        Document document = (Document) mongoRepositoryReactive.findById((id),Document.class).block();
+        Document document = (Document) mongoRepositoryReactive.findById((id), Document.class).block();
 
-        if(document == null){
+        if (document == null) {
             throw new FactNotFoundException("document", id);
         }
 
         Binary binary = document.getFile();
-        if(binary != null) {
+        if (binary != null) {
             try {
 
                 String filename = document.getFilename();
-                httpServletResponse.setHeader("filename",filename);
-                httpServletResponse.setHeader("Content-Disposition", String.format("inline; filename=\"" + filename +"\""));
+                httpServletResponse.setHeader("filename", filename);
+                httpServletResponse.setHeader("Content-Disposition", String.format("inline; filename=\"" + filename + "\""));
                 httpServletResponse.setContentType(document.getMimeType());
                 httpServletResponse.setContentLength(binary.getData().length);
 
