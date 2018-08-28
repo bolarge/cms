@@ -220,7 +220,7 @@ public class LicenseServiceImpl implements LicenseService {
             if(licenseUpdateDto.getLicenseStatusId()!="03" &&
                     licenseUpdateDto.getLicenseStatusId()!="04"){
 
-                license.setEndDate(fromDate.plusDays(duration));
+                license.setEndDate(fromDate.plusMonths(duration));
             }
 
             license.setLicenseStatusId(licenseUpdateDto.getLicenseStatusId());

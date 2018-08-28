@@ -28,7 +28,7 @@ public class ExpirationList {
 
     public Mono<ResponseEntity> getExpiringLicences(String check, int duration,String licenseStatusId ){
         LocalDateTime dateTime = new LocalDateTime();
-        dateTime=dateTime.plusDays(duration);
+        dateTime=dateTime.plusMonths(duration);
         Query queryLicence= new Query();
         queryLicence.addCriteria(Criteria.where("endDate").lt(dateTime));
         queryLicence.addCriteria(Criteria.where("licenseStatusId").is(licenseStatusId));

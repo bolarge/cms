@@ -44,10 +44,10 @@ public class Scheduler {
 
     @Scheduled(cron = "0 0 12 * * ?")
     protected void checkForLicensesCloseToExpirations(){
-        List<License> licenses= (List<License>)expirationList.getExpiringLicences("schedulerClass",90,"02");
+        List<License> licenses= (List<License>)expirationList.getExpiringLicences("schedulerClass",3,"02");
        List<NotificationDto> notificationDtos= new ArrayList<>();
         LocalDateTime endDate;
-        dateTime=dateTime.plusDays(90);
+        dateTime=dateTime.plusMonths(3);
         for(License license: licenses){
             int days=0;
             NotificationDto notificationDto= new NotificationDto();

@@ -8,7 +8,6 @@ public class LicenseUpdateDto {
     private String licenseStatusId;
     @NotEmpty(message = "Please provide institutionId")
     private String institutionId;
-    @NotEmpty(message = "Please provide startDate")
     private String startDate;
     private String gameTypeId;
 
