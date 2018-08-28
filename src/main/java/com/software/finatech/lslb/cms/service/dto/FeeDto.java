@@ -7,6 +7,7 @@ public class FeeDto {
     protected String id;
     protected String duration;
 
+
     public String getDuration() {
         return duration;
     }

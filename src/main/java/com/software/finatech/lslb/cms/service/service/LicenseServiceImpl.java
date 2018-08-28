@@ -226,9 +226,11 @@ public class LicenseServiceImpl implements LicenseService {
             queryFee.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
             Fee fee = (Fee) mongoRepositoryReactive.find(queryFee, Fee.class).block();
             int duration = Integer.parseInt(fee.getDuration());
+
             if (licenseUpdateDto.getLicenseStatusId() != LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID &&
                     licenseUpdateDto.getLicenseStatusId() != LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID) {
-                license.setEndDate(fromDate.plusDays(duration));
+                license.setEndDate(fromDate.plusMonths(duration));
+
             }
 
             license.setLicenseStatusId(licenseUpdateDto.getLicenseStatusId());
