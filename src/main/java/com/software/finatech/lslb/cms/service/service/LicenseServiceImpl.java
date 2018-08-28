@@ -174,15 +174,9 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public Mono<ResponseEntity> updateLicense(LicenseUpdateDto licenseUpdateDto) {
         try {
-            String gameTypeId = licenseUpdateDto.getGameTypeId();
-            // String paymentRecordId = licenseCreateDto.getPaymentRecordId();
-            Query query = new Query();
-            query.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
-            query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-            License license;
+              License license;
             Query queryLicence = new Query();
-            queryLicence.addCriteria(Criteria.where("gameTypeId").is(licenseUpdateDto.getGameTypeId()));
-            queryLicence.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
+            queryLicence.addCriteria(Criteria.where("paymentRecordId").is(licenseUpdateDto.getPaymentRecordId()));
             License licenseCheck = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
             if (licenseCheck == null) {
 
@@ -191,7 +185,6 @@ public class LicenseServiceImpl implements LicenseService {
             }
             Query queryPaymenrRecord = new Query();
             queryPaymenrRecord.addCriteria(Criteria.where("id").is(licenseCheck.getPaymentRecordId()));
-            queryPaymenrRecord.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
             PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.find(queryPaymenrRecord, PaymentRecord.class).block();
             if (paymentRecord.convertToDto().getFee().getFeePaymentType().getId() == PaymentStatusReferenceData.CONFIRMED_PAYMENT_STATUS_ID) {
                 if (licenseUpdateDto.getLicenseStatusId() != LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID) {
@@ -223,7 +216,7 @@ public class LicenseServiceImpl implements LicenseService {
             }
 
             Query queryFee = new Query();
-            queryFee.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
+            queryFee.addCriteria(Criteria.where("gameTypeId").is(license.getPaymentRecord().convertToDto().getFee().getGameType().getId()));
             Fee fee = (Fee) mongoRepositoryReactive.find(queryFee, Fee.class).block();
             int duration = Integer.parseInt(fee.getDuration());
 

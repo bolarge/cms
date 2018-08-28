@@ -7,11 +7,7 @@ public class LicenseCreateDto {
     protected String licenseStatusId;
     @NotEmpty(message = "Please provide renewalCheckStatus")
     protected String renewalCheck;
-    @NotEmpty(message = "Please provide institutionId")
-    protected String institutionId;
-     @NotEmpty(message = "Please provide institutionId")
-     protected String gameTypeId;
-     protected String paymentRecordId;
+    protected String paymentRecordId;
 
     private String id;
 
@@ -31,9 +27,6 @@ public class LicenseCreateDto {
         this.id = id;
     }
 
-    public String getGameTypeId() {
-        return gameTypeId;
-    }
 
     public String getRenewalCheck() {
         return renewalCheck;
@@ -41,10 +34,6 @@ public class LicenseCreateDto {
 
     public void setRenewalCheck(String renewalCheck) {
         this.renewalCheck = renewalCheck;
-    }
-
-    public void setGameTypeId(String gameTypeId) {
-        this.gameTypeId = gameTypeId;
     }
 
 
@@ -55,15 +44,6 @@ public class LicenseCreateDto {
     public void setLicenseStatusId(String licenseStatusId) {
         this.licenseStatusId = licenseStatusId;
     }
-
-    public String getInstitutionId() {
-        return institutionId;
-    }
-
-    public void setInstitutionId(String institutionId) {
-        this.institutionId = institutionId;
-    }
-
 
 
 }
