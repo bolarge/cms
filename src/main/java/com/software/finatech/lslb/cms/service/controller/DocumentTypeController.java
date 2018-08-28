@@ -30,20 +30,23 @@ public class DocumentTypeController extends BaseController{
 
     private static Logger logger = LoggerFactory.getLogger(DocumentTypeController.class);
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{purposeId}/{status}")
+    @RequestMapping(method = RequestMethod.GET, value = "/documentTypes", params = {"purposeId","active","gameTypeId"})
     @ApiOperation(value = "Get Document Type By Purpose, Status", response = DocumentTypeDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getDocumentTypeByPurpose(@PathVariable("purposeId") String purposeId, String status) {
+    public Mono<ResponseEntity> getDocumentTypeByPurpose(@RequestParam("purposeId") String purposeId, @RequestParam("active") String active, @RequestParam("gameTypeId") String gameTypeId) {
         Query query = new Query();
         if(!StringUtils.isEmpty(purposeId)){
             query.addCriteria(Criteria.where("documentPurposeId").is(purposeId));
         }
-        if(!StringUtils.isEmpty(status)){
-            query.addCriteria(Criteria.where("status").is(status));
+        if(!StringUtils.isEmpty(active)){
+            query.addCriteria(Criteria.where("status").is(active));
+        }
+        if(!StringUtils.isEmpty(gameTypeId)){
+            query.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
         }
 
         ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(query, DocumentType.class).toStream().collect(Collectors.toList());
