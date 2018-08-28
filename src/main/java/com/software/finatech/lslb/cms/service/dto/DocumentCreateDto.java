@@ -15,7 +15,7 @@ public class DocumentCreateDto {
     protected String documentTypeId;
     @NotEmpty(message = "Entity field can not be empty")
     protected String entity;
-    protected String applicationFormId;
+    protected String entityId;
 
 
     public String getDescription() {
@@ -68,12 +68,11 @@ public class DocumentCreateDto {
         this.entity = entity;
     }
 
-    public String getApplicationFormId() {
-        return applicationFormId;
+    public String getEntityId() {
+        return entityId;
     }
 
-    public void setApplicationFormId(String applicationFormId) {
-        this.applicationFormId = applicationFormId;
+    public void setEntityId(String entityId) {
+        this.entityId = entityId;
     }
-
 }

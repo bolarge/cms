@@ -26,7 +26,7 @@ public class Document extends  AbstractFact {
     @Transient
     protected DocumentType documentType;
     protected String entity;
-    protected String applicationFormId;
+    protected String entityId;
     protected String previousDocument;
     protected String originalFilename;
 
@@ -129,12 +129,12 @@ public class Document extends  AbstractFact {
         this.entity = entity;
     }
 
-    public String getApplicationFormId() {
-        return applicationFormId;
+    public String getEntityId() {
+        return entityId;
     }
 
-    public void setApplicationFormId(String applicationFormId) {
-        this.applicationFormId = applicationFormId;
+    public void setEntityId(String entityId) {
+        this.entityId = entityId;
     }
 
     public String getPreviousDocument() {
@@ -170,7 +170,7 @@ public class Document extends  AbstractFact {
 
     public DocumentDto convertToDto() {
         DocumentDto dto = new DocumentDto();
-        dto.setApplicationFormId(getApplicationFormId());
+        dto.setEntityId(getEntityId());
         dto.setId(getId());
         dto.setCurrent(getCurrent());
         dto.setDescription(getDescription());

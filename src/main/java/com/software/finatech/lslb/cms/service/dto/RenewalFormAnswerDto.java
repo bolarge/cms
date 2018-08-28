@@ -1,7 +1,5 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import com.software.finatech.lslb.cms.service.domain.RenewalFormQuestion;
-
 public class RenewalFormAnswerDto {
 
     protected RenewalFormQuestion renewalFormQuestion;
