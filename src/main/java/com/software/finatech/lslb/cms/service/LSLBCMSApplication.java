@@ -30,9 +30,6 @@ public class LSLBCMSApplication {
         // Our global app context
         GlobalApplicationContext.ctx = ctx;
 
-        //DateUtil.parseDate("2017-21-09 09:11:00.000000");
-
-
         DatabaseLoaderUtils databaseLoaderUtils = (DatabaseLoaderUtils) ctx.getBean("databaseLoaderUtils");
         databaseLoaderUtils.runSeedData();
         Environment env = ctx.getBean(Environment.class);
