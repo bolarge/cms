@@ -46,7 +46,7 @@ public class DocumentTypeController extends BaseController{
             query.addCriteria(Criteria.where("status").is(active));
         }
         if(!StringUtils.isEmpty(gameTypeId)){
-            query.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
+            query.addCriteria(Criteria.where("gameTypeIds").all(gameTypeId));
         }
 
         ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(query, DocumentType.class).toStream().collect(Collectors.toList());
