@@ -1,6 +1,5 @@
 package com.software.finatech.lslb.cms.service.util;
 
-import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.domain.GameType;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.domain.License;
@@ -9,7 +8,6 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.PaymentRecordServiceImpl;
-import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -17,8 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.ArrayList;
@@ -57,18 +53,18 @@ public class Scheduler {
             Map gameTypeMap = Mapstore.STORE.get("GameType");
             GameType gameType = null;
             if (gameTypeMap != null) {
-                gameType = (GameType) gameTypeMap.get(license.getGameTypeId());
+                gameType = (GameType) gameTypeMap.get(license.getPaymentRecord().convertToDto().getFee().getGameType().getId());
             }
             if (gameType == null) {
-                gameType = (GameType) mongoRepositoryReactive.findById(license.getGameTypeId(), GameType.class).block();
+                gameType = (GameType) mongoRepositoryReactive.findById(license.getPaymentRecord().convertToDto().getFee().getGameType().getId(), GameType.class).block();
                 if (gameType != null && gameTypeMap != null) {
-                    gameTypeMap.put(license.getGameTypeId(), gameType);
+                    gameTypeMap.put(license.getPaymentRecord().convertToDto().getFee().getGameType().getId(), gameType);
                 }
             }
             notificationDto.setGameType(gameType.getName());
-            notificationDto.setInstitutionId(license.getInstitutionId());
+            notificationDto.setInstitutionId(license.getPaymentRecord().convertToDto().getFee().getGameType().getId());
             notificationDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
-            Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),
+            Institution institution=(Institution) mongoRepositoryReactive.findById(license.getPaymentRecord().getInstitutionId(),
                     Institution.class).block();
             notificationDto.setInstitutionName(institution.getInstitutionName());
             notificationDto.setInstitutionEmail(institution.getEmailAddress());
@@ -91,18 +87,18 @@ public class Scheduler {
             Map gameTypeMap = Mapstore.STORE.get("GameType");
             GameType gameType = null;
             if (gameTypeMap != null) {
-                gameType = (GameType) gameTypeMap.get(license.getGameTypeId());
+                gameType = (GameType) gameTypeMap.get(license.getPaymentRecord().convertToDto().getFee().getGameType().getId());
             }
             if (gameType == null) {
-                gameType = (GameType) mongoRepositoryReactive.findById(license.getGameTypeId(), GameType.class).block();
+                gameType = (GameType) mongoRepositoryReactive.findById(license.getPaymentRecord().convertToDto().getFee().getGameType().getId(), GameType.class).block();
                 if (gameType != null && gameTypeMap != null) {
-                    gameTypeMap.put(license.getGameTypeId(), gameType);
+                    gameTypeMap.put(license.getPaymentRecord().convertToDto().getFee().getGameType().getId(), gameType);
                 }
             }
             notificationDto.setGameType(gameType.getName());
-            notificationDto.setInstitutionId(license.getInstitutionId());
+            notificationDto.setInstitutionId(license.getPaymentRecord().getInstitutionId());
             notificationDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
-            Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),
+            Institution institution=(Institution) mongoRepositoryReactive.findById(license.getPaymentRecord().getInstitutionId(),
                     Institution.class).block();
             notificationDto.setInstitutionName(institution.getInstitutionName());
             notificationDto.setInstitutionEmail(institution.getEmailAddress());
@@ -153,17 +149,17 @@ public class Scheduler {
             GameType gameType = null;
             Map gameTypeMap = Mapstore.STORE.get("GameType");
             if (gameTypeMap != null) {
-                gameType = (GameType) gameTypeMap.get(license.getGameTypeId());
+                gameType = (GameType) gameTypeMap.get(license.getPaymentRecord().convertToDto().getFee().getGameType().getId());
             }
             if (gameType == null) {
-                gameType = (GameType) mongoRepositoryReactive.findById(license.getGameTypeId(), GameType.class).block();
+                gameType = (GameType) mongoRepositoryReactive.findById(license.getPaymentRecord().convertToDto().getFee().getGameType().getId(), GameType.class).block();
                 if (gameType != null && gameTypeMap != null) {
-                    gameTypeMap.put(license.getGameTypeId(), gameType);
+                    gameTypeMap.put(license.getPaymentRecord().convertToDto().getFee().getGameType().getId(), gameType);
                 }
             } notificationDto.setGameType(gameType.getName());
-            notificationDto.setInstitutionId(license.getInstitutionId());
+            notificationDto.setInstitutionId(license.getPaymentRecord().getInstitutionId());
             notificationDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
-            Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),
+            Institution institution=(Institution) mongoRepositoryReactive.findById(license.getPaymentRecord().getInstitutionId(),
                     Institution.class).block();
             notificationDto.setInstitutionName(institution.getInstitutionName());
             notificationDto.setInstitutionEmail(institution.getEmailAddress());
@@ -187,17 +183,17 @@ public class Scheduler {
             GameType gameType = null;
             Map gameTypeMap = Mapstore.STORE.get("GameType");
             if (gameTypeMap != null) {
-                gameType = (GameType) gameTypeMap.get(license.getGameTypeId());
+                gameType = (GameType) gameTypeMap.get(license.getPaymentRecord().convertToDto().getFee().getGameType().getId());
             }
             if (gameType == null) {
-                gameType = (GameType) mongoRepositoryReactive.findById(license.getGameTypeId(), GameType.class).block();
+                gameType = (GameType) mongoRepositoryReactive.findById(license.getPaymentRecord().convertToDto().getFee().getGameType().getId(), GameType.class).block();
                 if (gameType != null && gameTypeMap != null) {
-                    gameTypeMap.put(license.getGameTypeId(), gameType);
+                    gameTypeMap.put(license.getPaymentRecord().convertToDto().getFee().getGameType().getId(), gameType);
                 }
             } notificationDto.setGameType(gameType.getName());
-            notificationDto.setInstitutionId(license.getInstitutionId());
+            notificationDto.setInstitutionId(license.getPaymentRecord().getInstitutionId());
             notificationDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
-            Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),
+            Institution institution=(Institution) mongoRepositoryReactive.findById(license.getPaymentRecord().getInstitutionId(),
                     Institution.class).block();
             notificationDto.setInstitutionName(institution.getInstitutionName());
             notificationDto.setInstitutionEmail(institution.getEmailAddress());

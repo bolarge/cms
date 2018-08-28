@@ -4,7 +4,6 @@ package com.software.finatech.lslb.cms.service.controller;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordCreateDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
-import com.software.finatech.lslb.cms.service.service.PaymentRecordServiceImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

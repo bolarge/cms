@@ -1,6 +1,5 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
-import com.software.finatech.lslb.cms.service.domain.FeePaymentType;
 import com.software.finatech.lslb.cms.service.dto.FeeCreateDto;
 import com.software.finatech.lslb.cms.service.dto.FeePaymentTypeDto;
 import com.software.finatech.lslb.cms.service.dto.FeeUpdateDto;

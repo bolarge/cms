@@ -4,7 +4,6 @@ import com.software.finatech.jjwt.JwtAuthenticationEntryPoint;
 import com.software.finatech.jjwt.JwtAuthenticationProvider;
 import com.software.finatech.jjwt.JwtHeaderTokenExtractor;
 import com.software.finatech.jjwt.JwtTokenValidator;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
