@@ -17,7 +17,7 @@ public class DocumentTypeReferenceData {
             documentType1 = new DocumentType();
             documentType1.setId("1");
         }
-        documentType1.setName("Certificate of incorporation");
+        documentType1.setName("Certificate of Incorporation");
         documentType1.setDocumentPurposeId(applicationFormDocumentPurposeId);
         documentType1.setGameTypeIds(getOSbAndPolGameTypeIdSet());
         documentType1.setActive(true);
@@ -29,7 +29,7 @@ public class DocumentTypeReferenceData {
             documentType2 = new DocumentType();
             documentType2.setId("2");
         }
-        documentType2.setName("CAC Form CO 2 reflecting a minimum share capital of ₦20,000,000");
+        documentType2.setName("CAC Form CO 2");
         documentType2.setActive(true);
         documentType2.setRequired(true);
         documentType2.setGameTypeIds(getOSbAndPolGameTypeIdSet());
@@ -52,7 +52,7 @@ public class DocumentTypeReferenceData {
             documentType4 = new DocumentType();
             documentType4.setId("4");
         }
-        documentType4.setName("Detailed business plan");
+        documentType4.setName("Detailed Business Plan");
         documentType4.setDescription("Detailed business plan/proposal to include \n1) Address of registered office, branches and planned locations. \n2) Name and profile of directors. \n3) Tax clearance of all directors in the preceding 3 years. \n4) Description of operations and management structure. \n5)Online sports betting industry analysis in Lagos state.");
         documentType4.setActive(true);
         documentType4.setDocumentPurposeId(applicationFormDocumentPurposeId);
@@ -64,7 +64,7 @@ public class DocumentTypeReferenceData {
             documentType5 = new DocumentType();
             documentType5.setId("5");
         }
-        documentType5.setName("Details of planned games ");
+        documentType5.setName("Details of Planned Games ");
         documentType5.setDescription("Details of planned games to include \n1) Relevant games/sport activity. \n2) Approximate odds to be used. \n3) Prizes and price structure. \n4) Number and frequency of games/sports. \n5) Operator game rules and participants code of practise");
         documentType5.setActive(true);
         documentType5.setDocumentPurposeId(applicationFormDocumentPurposeId);
@@ -76,7 +76,7 @@ public class DocumentTypeReferenceData {
             documentType6 = new DocumentType();
             documentType6.setId("6");
         }
-        documentType6.setName("Financial information /projections");
+        documentType6.setName("Financial Information/Projections");
         documentType6.setDescription("Financial details including \n1) Company's bank statement for the preceding 12months(for existing companies) or evidence of financial capability to operate business (for new companies). \n2) Capital budgets.\n3) Business plan. \n4) Financing plan and marketing plan. \n5) 5 year financial projection and the assumption made in considering the figures. \n6) Management accounts.");
         documentType6.setActive(true);
         documentType6.setDocumentPurposeId(applicationFormDocumentPurposeId);
@@ -88,7 +88,7 @@ public class DocumentTypeReferenceData {
             documentType7 = new DocumentType();
             documentType7.setId("7");
         }
-        documentType7.setName("Information on proposed technical topography");
+        documentType7.setName("Information on Proposed Technical Topography");
         documentType7.setDescription("Detailed information on proposed technical topography including \n1) Architectural  illustration of the platform. \n2) Detailed information abput all the technical solution providers.");
         documentType7.setActive(true);
         documentType7.setDocumentPurposeId(applicationFormDocumentPurposeId);
@@ -100,7 +100,7 @@ public class DocumentTypeReferenceData {
             documentType8 = new DocumentType();
             documentType8.setId("8");
         }
-        documentType8.setName("Process and systems quality assurance");
+        documentType8.setName("Process and Systems Quality Assurance");
         documentType8.setDocumentPurposeId(applicationFormDocumentPurposeId);
         documentType8.setGameTypeIds(getOSbAndPolGameTypeIdSet());
         documentType8.setActive(true);
