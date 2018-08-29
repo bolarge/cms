@@ -43,10 +43,10 @@ public class DocumentTypeController extends BaseController{
             query.addCriteria(Criteria.where("documentPurposeId").is(purposeId));
         }
         if(!StringUtils.isEmpty(active)){
-            query.addCriteria(Criteria.where("status").is(active));
+            query.addCriteria(Criteria.where("active").is(active));
         }
         if(!StringUtils.isEmpty(gameTypeId)){
-            query.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
+            query.addCriteria(Criteria.where("gameTypeIds").all(gameTypeId));
         }
 
         ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(query, DocumentType.class).toStream().collect(Collectors.toList());

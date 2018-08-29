@@ -550,7 +550,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while getting documents for application form", e);
         }
-    }*/
+    }
 
     private ApplicationFormDocumentDto getApplicationFormDocumentDto(ApplicationForm applicationForm, DocumentType documentType) {
         ApplicationFormDocumentDto applicationFormDocumentDto = new ApplicationFormDocumentDto();
@@ -572,7 +572,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationFormDocumentDto.setUploaded(applicationFormDocumentIds.contains(documentId));
         }
         return applicationFormDocumentDto;
-    }
+    }*/
 
     private ApplicationForm fromCreateDto(ApplicationFormCreateDto applicationFormCreateDto) {
         ApplicationForm applicationForm = new ApplicationForm();

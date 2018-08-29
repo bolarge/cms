@@ -8,6 +8,7 @@ import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseUpdateDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
@@ -183,36 +184,37 @@ public class LicenseServiceImpl implements LicenseService {
                 return Mono.just(new ResponseEntity<>("No Valid Payment Record", HttpStatus.BAD_REQUEST));
 
             }
-            Query queryPaymenrRecord = new Query();
-            queryPaymenrRecord.addCriteria(Criteria.where("id").is(licenseCheck.getPaymentRecordId()));
-            PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.find(queryPaymenrRecord, PaymentRecord.class).block();
-            if (paymentRecord.convertToDto().getFee().getFeePaymentType().getId() == PaymentStatusReferenceData.CONFIRMED_PAYMENT_STATUS_ID) {
-                if (licenseUpdateDto.getLicenseStatusId() != LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID) {
+            Query queryPaymentRecord = new Query();
+            queryPaymentRecord.addCriteria(Criteria.where("id").is(licenseCheck.getPaymentRecordId()));
+            PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.find(queryPaymentRecord, PaymentRecord.class).block();
+            /*if (paymentRecord.convertToDto().getFee().getFeePaymentType().getId().equals(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID)) {
+                if (!licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID)) {
                     return Mono.just(new ResponseEntity<>("Invalid License Status Selected", HttpStatus.BAD_REQUEST));
                 }
-            }
+            }*/
 
             license = licenseCheck;
             LocalDateTime fromDate;
-            String startDate = licenseUpdateDto.getStartDate();
-            if ((startDate != "" && !startDate.isEmpty())) {
-                if (!startDate.matches("([0-9]{4})-([0-9]{2})-([0-9]{2})")) {
-                    return Mono.just(new ResponseEntity("Invalid Date format. " +
-                            "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
-                }
-                fromDate = new LocalDateTime(startDate);
-                license.setStartDate(fromDate);
+            if(licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID)){
+                fromDate=null;
+            }
 
-            } else {
-                if ((licenseUpdateDto.getLicenseStatusId() == LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID) || (licenseUpdateDto.getLicenseStatusId() == LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID)) {
-                    fromDate = null;
+            else {
+                String startDate = licenseUpdateDto.getStartDate();
+                if ((startDate != "" && !startDate.isEmpty())) {
+                    if (!startDate.matches("([0-9]{4})-([0-9]{2})-([0-9]{2})")) {
+                        return Mono.just(new ResponseEntity("Invalid Date format. " +
+                                "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
+                    }
+                    fromDate = new LocalDateTime(startDate);
+                    license.setStartDate(fromDate);
+
                 } else {
+
                     return Mono.just(new ResponseEntity("Invalid Date format. " +
                             "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
 
                 }
-
-
             }
 
             Query queryFee = new Query();
@@ -220,8 +222,8 @@ public class LicenseServiceImpl implements LicenseService {
             Fee fee = (Fee) mongoRepositoryReactive.find(queryFee, Fee.class).block();
             int duration = Integer.parseInt(fee.getDuration());
 
-            if (licenseUpdateDto.getLicenseStatusId() != LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID &&
-                    licenseUpdateDto.getLicenseStatusId() != LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID) {
+            if (!licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID) &&
+                    !licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID)) {
                 license.setEndDate(fromDate.plusMonths(duration));
 
             }
