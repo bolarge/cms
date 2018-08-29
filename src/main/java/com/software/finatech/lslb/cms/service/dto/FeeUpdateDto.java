@@ -6,7 +6,7 @@ public class FeeUpdateDto {
     @NotEmpty(message = "Please provide amount")
     protected String amount;
     @NotEmpty(message = "Please provide gameTypeId")
-    protected String gameTyeId;
+    protected String gameTypeId;
     @NotEmpty(message = "Please provide fee payment type id")
     protected String feePaymentTypeId;
     protected String duration;
@@ -36,12 +36,12 @@ public class FeeUpdateDto {
         this.amount = amount;
     }
 
-    public String getGameTyeId() {
-        return gameTyeId;
+    public String getGameTypeId() {
+        return gameTypeId;
     }
 
-    public void setGameTyeId(String gameTyeId) {
-        this.gameTyeId = gameTyeId;
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
     }
 
     public String getFeePaymentTypeId() {

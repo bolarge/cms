@@ -45,7 +45,7 @@ public class DocumentTypeController extends BaseController{
             query.addCriteria(Criteria.where("documentPurposeId").is(purposeId));
         }
         if(!StringUtils.isEmpty(active)){
-            query.addCriteria(Criteria.where("status").is(active));
+            query.addCriteria(Criteria.where("active").is(active));
         }
         if(!StringUtils.isEmpty(gameTypeIds)){
             List<String> gameTypeIdList = Arrays.asList(gameTypeIds.split("-"));
