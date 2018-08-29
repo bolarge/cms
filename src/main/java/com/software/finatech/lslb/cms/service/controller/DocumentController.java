@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,14 +40,14 @@ public class DocumentController extends BaseController {
 
     private static Logger logger = LoggerFactory.getLogger(DocumentController.class);
 
-    @RequestMapping(method = RequestMethod.POST, value = "/upload")
+    @RequestMapping(method = RequestMethod.POST, value = "/upload", produces ="application/json")
     @ApiOperation(value = "Upload Document", response = DocumentCreateDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> upload(@RequestBody @Valid List<DocumentCreateDto> documentDtos, @RequestParam("files") @NotNull MultipartFile[] files) {
+    public Mono<ResponseEntity> upload(@RequestBody @Valid List<DocumentCreateDto> documentDtos, @RequestParam("files") @NotEmpty MultipartFile[] files) {
 
         //@TODO If its a file replace we have to validate that the old id comes with the json
 
