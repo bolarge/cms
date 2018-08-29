@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class DocumentTypeReferenceData {
 
-    private static String applicationFormDocumentPurposeId = "1";
+    private static String applicationFormDocumentPurposeId = DocumentPurposeReferenceData.APPLICATION_FORM_DOCUMENT_PURPOSE_ID;
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
 
@@ -30,6 +30,7 @@ public class DocumentTypeReferenceData {
             documentType2.setId("2");
         }
         documentType2.setName("CAC Form CO 2");
+        documentType2.setDescription("CAC Form CO 2 reflecting a minimum share capital of N20,000,000");
         documentType2.setActive(true);
         documentType2.setRequired(true);
         documentType2.setGameTypeIds(getOSbAndPolGameTypeIdSet());

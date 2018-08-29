@@ -116,7 +116,6 @@ public class InstitutionServiceImpl implements InstitutionService {
             if (!StringUtils.isEmpty(gameTypeIds)) {
                 List<String> gameTypeIdList = Arrays.asList(gameTypeIds.split("-"));
                 query.addCriteria(Criteria.where("gameTypeIds").in(gameTypeIdList));
-
             }
             if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, Institution.class).block();
@@ -146,6 +145,11 @@ public class InstitutionServiceImpl implements InstitutionService {
             String errorMsg = "An error occurred while fetching all institutions";
             return logAndReturnError(logger, errorMsg, e);
         }
+    }
+
+    @Override
+    public Institution findById(String institutionId) {
+        return (Institution)mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
 
     private Mono<ResponseEntity> validateInstitutionCreateInstitution(InstitutionCreateDto institutionCreateDto) {

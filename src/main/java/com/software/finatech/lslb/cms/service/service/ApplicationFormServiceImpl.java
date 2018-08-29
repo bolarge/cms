@@ -11,6 +11,7 @@ import com.software.finatech.lslb.cms.service.model.declaration.ApplicantDeclara
 import com.software.finatech.lslb.cms.service.model.otherInformation.ApplicantOtherInformation;
 import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantOutletInformation;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
@@ -466,7 +467,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             if (applicationForm == null) {
                 return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
             }
-            String inReviewApplicationFormStatusId = "3";
+            String inReviewApplicationFormStatusId = ApplicationFormStatusReferenceData.IN_REVIEW_STATUS_ID;
             applicationForm.setApplicationFormStatusId(inReviewApplicationFormStatusId);
             saveApplicationForm(applicationForm);
             return Mono.just(new ResponseEntity<>("Application completed successfully and now in review", HttpStatus.OK));
@@ -504,7 +505,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         try {
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(rejectorId, AuthInfo.class).block();
             if (authInfo == null) {
-                return Mono.just(new ResponseEntity<>("Approver does not exist on the system", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Rejecting user does not exist on the system", HttpStatus.BAD_REQUEST));
             }
 
             ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
@@ -512,7 +513,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
             }
             applicationForm.setRejectorId(rejectorId);
-            String rejectedApplicationFormStatusId = "5";
+            String rejectedApplicationFormStatusId = ApplicationFormStatusReferenceData.REJECTED_STATUS_ID;
             applicationForm.setApplicationFormStatusId(rejectedApplicationFormStatusId);
             saveApplicationForm(applicationForm);
             return Mono.just(new ResponseEntity<>("Application form rejected successfully", HttpStatus.OK));

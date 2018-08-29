@@ -1,5 +1,7 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.ScheduledMeeting;
 import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingCreateDto;
 import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingUpdateDto;
 import org.springframework.http.ResponseEntity;
@@ -24,5 +26,9 @@ public interface ScheduledMeetingService {
                                                   String creatorId,
                                                   String cancelerId,
                                                   HttpServletResponse httpServletResponse);
+
+    void sendMeetingNotificationEmailToAttendee(String mailSubject,String templateName, AuthInfo invitee, ScheduledMeeting scheduledMeeting);
+
+    void sendMeetingNotificationEmailToMeetingCreator(String mailSubject,String templateName, ScheduledMeeting scheduledMeeting);
 }
 
