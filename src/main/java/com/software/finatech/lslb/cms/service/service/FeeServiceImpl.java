@@ -68,11 +68,10 @@ public class FeeServiceImpl implements FeeService {
             String feeId = feeUpdateDto.getId();
             Query query = new Query();
             query.addCriteria(Criteria.where("id").is(feeId));
-            Fee existingFeeWithGameTypeAndFeePaymentType = (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
-            if (existingFeeWithGameTypeAndFeePaymentType == null) {
+            Fee fee = (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
+            if (fee == null) {
                 return Mono.just(new ResponseEntity<>("This Fee setting does not exist", HttpStatus.BAD_REQUEST));
             }
-            Fee fee = new Fee();
             fee.setAmount(Double.valueOf(feeUpdateDto.getAmount()));
             fee.setDuration(feeUpdateDto.getDuration());
             fee.setFeePaymentTypeId(feeUpdateDto.getFeePaymentTypeId());
@@ -91,11 +90,10 @@ public class FeeServiceImpl implements FeeService {
             String feePaymentTypeId = feeTypeUpdateDto.getId();
             Query query = new Query();
             query.addCriteria(Criteria.where("id").is(feePaymentTypeId));
-            FeePaymentType existingFeeWithGameTypeAndFeePaymentType = (FeePaymentType) mongoRepositoryReactive.find(query, FeePaymentType.class).block();
-            if (existingFeeWithGameTypeAndFeePaymentType == null) {
+            FeePaymentType feePaymentType = (FeePaymentType) mongoRepositoryReactive.find(query, FeePaymentType.class).block();
+            if (feePaymentType == null) {
                 return Mono.just(new ResponseEntity<>("This FeePayment setting does not exist", HttpStatus.BAD_REQUEST));
             }
-            FeePaymentType feePaymentType = new FeePaymentType();
             feePaymentType.setDescription(feeTypeUpdateDto.getDescription());
             feePaymentType.setName(feeTypeUpdateDto.getName());
             mongoRepositoryReactive.saveOrUpdate(feePaymentType);
@@ -116,6 +114,7 @@ public class FeeServiceImpl implements FeeService {
                 return Mono.just(new ResponseEntity<>("This FeePayment setting exist", HttpStatus.BAD_REQUEST));
             }
             FeePaymentType feePaymentType = new FeePaymentType();
+            feePaymentType.setId(UUID.randomUUID().toString());
             feePaymentType.setDescription(feeTypeCreateDto.getDescription());
             feePaymentType.setName(feeTypeCreateDto.getName());
             mongoRepositoryReactive.saveOrUpdate(feePaymentType);
