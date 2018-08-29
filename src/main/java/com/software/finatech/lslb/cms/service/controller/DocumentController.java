@@ -47,47 +47,61 @@ public class DocumentController extends BaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> upload(@RequestBody @Valid List<DocumentCreateDto> documentDtos, @RequestParam("files") @NotEmpty MultipartFile[] files) {
+    public Mono<ResponseEntity> upload(@RequestParam("json") String json, @RequestParam("files") @NotEmpty MultipartFile[] files) {
 
         //@TODO If its a file replace we have to validate that the old id comes with the json
+        if (json == null || json.isEmpty()) {
+            return Mono.just(new ResponseEntity<>("Please specify a json body", HttpStatus.BAD_REQUEST));
+        }
 
+        List<DocumentCreateDto> documentDtos;
+
+        try{
+            documentDtos = mapper.readValue(json, List.class,DocumentCreateDto.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Mono.just(new ResponseEntity<>("Invalid Json", HttpStatus.BAD_REQUEST));
+        }
         try {
             //Put the files in a map
             HashMap<String, MultipartFile> fileMap = new HashMap<>();
             for (MultipartFile file : files) {
-                fileMap.put(file.getName(), file);
+                fileMap.put(file.getOriginalFilename(), file);
             }
 
             //We then reconcile it with the document objects
-            ArrayList<FactObject> documents = new ArrayList<>();
+            //ArrayList<FactObject> documents = new ArrayList<>();
             documentDtos.stream().forEach(documentDto -> {
                 try {
                     logger.info("Creating file : " + documentDto.getFilename());
 
                     MultipartFile file = fileMap.get(documentDto.getFilename());
 
-                    Document document = new Document();
-                    document.setId(UUID.randomUUID().toString().replace("-", ""));
-                    document.setEntity(documentDto.getEntityId());
-                    document.setCurrent(true);
-                    document.setDescription(documentDto.getDescription());
-                    document.setDocumentTypeId(documentDto.getDocumentTypeId());
-                    document.setEntity(documentDto.getEntity());
-                    document.setEntryDate(LocalDateTime.now());
-                    document.setFilename(documentDto.getFilename());
-                    document.setOriginalFilename(file.getOriginalFilename());
-                    document.setMimeType(file.getContentType());
-                    document.setPreviousDocumentId(documentDto.getPreviousDocumentId());
-                    document.setValidFrom(new LocalDate(documentDto.getValidFrom()));
-                    document.setValidTo(new LocalDate(documentDto.getValidTo()));
-                    document.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
-                    mongoRepositoryReactive.saveOrUpdate(document);
-                    //If there is an existing doc we set it to false
-                    if(documentDto.getPreviousDocumentId() != null){
-                        Document oldDocument = (Document) mongoRepositoryReactive.findById((documentDto.getPreviousDocumentId()), Document.class).block();
-                        if (oldDocument != null) {
-                            oldDocument.setCurrent(false);
-                            mongoRepositoryReactive.saveOrUpdate(oldDocument);
+                    if(file != null) {
+                        String originalFilename = file.getOriginalFilename();
+                        Document document = new Document();
+                        document.setId(UUID.randomUUID().toString().replace("-", ""));
+                        document.setEntity(documentDto.getEntityId());
+                        document.setCurrent(true);
+                        document.setDescription(documentDto.getDescription());
+                        document.setDocumentTypeId(documentDto.getDocumentTypeId());
+                        document.setEntity(documentDto.getEntity());
+                        document.setEntryDate(LocalDateTime.now());
+                        document.setFilename(originalFilename);
+                        document.setOriginalFilename(originalFilename);
+                        document.setMimeType(file.getContentType());
+                        document.setPreviousDocumentId(documentDto.getPreviousDocumentId());
+                        document.setValidFrom(new LocalDate(documentDto.getValidFrom()));
+                        document.setValidTo(new LocalDate(documentDto.getValidTo()));
+                        document.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
+                        mongoRepositoryReactive.saveOrUpdate(document);
+                        //If there is an existing doc we set it to false
+                        if (documentDto.getPreviousDocumentId() != null) {
+                            Document oldDocument = (Document) mongoRepositoryReactive.findById((documentDto.getPreviousDocumentId()), Document.class).block();
+                            if (oldDocument != null) {
+                                oldDocument.setCurrent(false);
+                                mongoRepositoryReactive.saveOrUpdate(oldDocument);
+                            }
                         }
                     }
 
