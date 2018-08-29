@@ -75,7 +75,7 @@ public class FeeServiceImpl implements FeeService {
             fee.setAmount(Double.valueOf(feeUpdateDto.getAmount()));
             fee.setDuration(feeUpdateDto.getDuration());
             fee.setFeePaymentTypeId(feeUpdateDto.getFeePaymentTypeId());
-            fee.setGameTypeId(feeUpdateDto.getGameTyeId());
+            fee.setGameTypeId(feeUpdateDto.getGameTypeId());
             mongoRepositoryReactive.saveOrUpdate(fee);
             return Mono.just(new ResponseEntity<>(fee.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
