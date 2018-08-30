@@ -1,9 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.service.domain.Fee;
-import com.software.finatech.lslb.cms.service.domain.License;
-import com.software.finatech.lslb.cms.service.domain.LicenseStatus;
-import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseUpdateDto;
@@ -217,10 +214,15 @@ public class LicenseServiceImpl implements LicenseService {
                 }
             }
 
-            Query queryFee = new Query();
-            queryFee.addCriteria(Criteria.where("gameTypeId").is(license.getPaymentRecord().convertToDto().getFee().getGameType().getId()));
-            Fee fee = (Fee) mongoRepositoryReactive.find(queryFee, Fee.class).block();
-            int duration = Integer.parseInt(fee.getDuration());
+            Query queryGameType = new Query();
+            queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().convertToDto().getFee().getGameType().getId()));
+            GameType gameType = (GameType) mongoRepositoryReactive.find(queryGameType, GameType.class).block();
+            int duration=0;
+            if(licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID)){
+                duration = Integer.parseInt(gameType.convertToDto().getAipDuration());
+            }else if(licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
+                duration = Integer.parseInt(gameType.convertToDto().getLicenseDuration());
+            }
 
             if (!licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID) &&
                     !licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID)) {

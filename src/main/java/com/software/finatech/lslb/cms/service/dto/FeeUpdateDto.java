@@ -9,7 +9,6 @@ public class FeeUpdateDto {
     protected String gameTypeId;
     @NotEmpty(message = "Please provide fee payment type id")
     protected String feePaymentTypeId;
-    protected String duration;
     protected String id;
 
     public String getId() {
@@ -18,14 +17,6 @@ public class FeeUpdateDto {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getDuration() {
-        return duration;
-    }
-
-    public void setDuration(String duration) {
-        this.duration = duration;
     }
 
     public String getAmount() {

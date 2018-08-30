@@ -14,15 +14,6 @@ public class Fee extends AbstractFact {
     protected String gameTypeId;
     protected String feePaymentTypeId;
     protected String revenueName;
-    protected String duration;
-
-    public String getDuration() {
-        return duration;
-    }
-
-    public void setDuration(String duration) {
-        this.duration = duration;
-    }
 
     public double getAmount() {
         return amount;
@@ -63,7 +54,6 @@ public class Fee extends AbstractFact {
         FeeDto feeDto = new FeeDto();
         feeDto.setAmount(getAmount());
         feeDto.setId(getId());
-        feeDto.setDuration(getDuration());
         Map gameTypeMap = Mapstore.STORE.get("GameType");
         GameType gameType = null;
         if (gameTypeMap != null) {
