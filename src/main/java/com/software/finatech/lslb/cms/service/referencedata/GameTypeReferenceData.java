@@ -16,6 +16,8 @@ public class GameTypeReferenceData {
         }
         gameType1.setDescription("Public Online Lottery");
         gameType1.setName("Pol");
+        gameType1.setAipDuration("3");
+        gameType1.setLicenseDuration("12");
 
 
 
@@ -27,6 +29,8 @@ public class GameTypeReferenceData {
         }
         gameType2.setDescription("Online Sport Betting");
         gameType2.setName("Osb");
+        gameType2.setAipDuration("3");
+        gameType2.setLicenseDuration("12");
 
         mongoRepositoryReactive.saveOrUpdate(gameType1);
         mongoRepositoryReactive.saveOrUpdate(gameType2);
