@@ -51,7 +51,6 @@ public class FeeServiceImpl implements FeeService {
             Fee fee = new Fee();
             fee.setId(UUID.randomUUID().toString());
             fee.setAmount(Double.valueOf(feeCreateDto.getAmount()));
-            fee.setDuration(feeCreateDto.getDuration());
             fee.setFeePaymentTypeId(feePaymentTypeId);
             fee.setGameTypeId(gameTypeId);
             mongoRepositoryReactive.saveOrUpdate(fee);
@@ -73,9 +72,8 @@ public class FeeServiceImpl implements FeeService {
                 return Mono.just(new ResponseEntity<>("This Fee setting does not exist", HttpStatus.BAD_REQUEST));
             }
             fee.setAmount(Double.valueOf(feeUpdateDto.getAmount()));
-            fee.setDuration(feeUpdateDto.getDuration());
             fee.setFeePaymentTypeId(feeUpdateDto.getFeePaymentTypeId());
-            fee.setGameTypeId(feeUpdateDto.getGameTyeId());
+            fee.setGameTypeId(feeUpdateDto.getGameTypeId());
             mongoRepositoryReactive.saveOrUpdate(fee);
             return Mono.just(new ResponseEntity<>(fee.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {

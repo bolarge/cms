@@ -5,16 +5,7 @@ public class FeeDto {
     protected GameTypeDto gameType;
     protected EnumeratedFactDto feePaymentType;
     protected String id;
-    protected String duration;
 
-
-    public String getDuration() {
-        return duration;
-    }
-
-    public void setDuration(String duration) {
-        this.duration = duration;
-    }
 
     public String getId() {
         return id;

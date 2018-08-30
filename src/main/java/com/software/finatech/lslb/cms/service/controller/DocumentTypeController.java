@@ -20,6 +20,8 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -30,14 +32,14 @@ public class DocumentTypeController extends BaseController{
 
     private static Logger logger = LoggerFactory.getLogger(DocumentTypeController.class);
 
-    @RequestMapping(method = RequestMethod.GET, value = "/documentTypes", params = {"purposeId","active","gameTypeId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/documentTypes", params = {"purposeId","active","gameTypeIds"})
     @ApiOperation(value = "Get Document Type By Purpose, Status", response = DocumentTypeDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getDocumentTypeByPurpose(@RequestParam("purposeId") String purposeId, @RequestParam("active") String active, @RequestParam("gameTypeId") String gameTypeId) {
+    public Mono<ResponseEntity> getDocumentTypeByPurpose(@RequestParam("purposeId") String purposeId, @RequestParam("active") String active, @RequestParam("gameTypeIds") String gameTypeIds) {
         Query query = new Query();
         if(!StringUtils.isEmpty(purposeId)){
             query.addCriteria(Criteria.where("documentPurposeId").is(purposeId));
@@ -45,8 +47,9 @@ public class DocumentTypeController extends BaseController{
         if(!StringUtils.isEmpty(active)){
             query.addCriteria(Criteria.where("active").is(active));
         }
-        if(!StringUtils.isEmpty(gameTypeId)){
-            query.addCriteria(Criteria.where("gameTypeIds").all(gameTypeId));
+        if(!StringUtils.isEmpty(gameTypeIds)){
+            List<String> gameTypeIdList = Arrays.asList(gameTypeIds.split("-"));
+            query.addCriteria(Criteria.where("gameTypeIds").in(gameTypeIdList));
         }
 
         ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(query, DocumentType.class).toStream().collect(Collectors.toList());
@@ -113,6 +116,5 @@ public class DocumentTypeController extends BaseController{
         documentType.setDescription(documentTypeUpdateDto.getDescription());
         mongoRepositoryReactive.saveOrUpdate(documentType);
         return Mono.just(new ResponseEntity(documentType.convertToDto(), HttpStatus.OK));
-
     }
 }

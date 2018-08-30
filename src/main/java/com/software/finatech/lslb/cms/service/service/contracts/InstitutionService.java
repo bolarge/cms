@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
+import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.dto.InstitutionCreateDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionUpdateDto;
@@ -21,4 +22,6 @@ public interface InstitutionService {
                                              String sortProperty,
                                              String gameTypeIds,
                                              HttpServletResponse httpServletResponse);
+
+    Institution findById(String institutionId);
 }

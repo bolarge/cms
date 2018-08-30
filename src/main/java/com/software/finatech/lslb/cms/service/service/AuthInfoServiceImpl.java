@@ -8,6 +8,7 @@ import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
 import com.software.finatech.lslb.cms.service.dto.CreateGameOperatorAuthInfoDto;
 import com.software.finatech.lslb.cms.service.dto.sso.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import io.advantageous.boon.json.JsonFactory;
 import io.advantageous.boon.json.ObjectMapper;
@@ -596,21 +597,40 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
     private Mono<ResponseEntity> validateCreateGamingOperatorAuthInfo(AuthInfoCreateDto authInfoCreateDto) {
         int maxNumberOfGamingOperatorUsers = 3;
-        String gamingOperatorAdminRoleId = "6";
-        String gamingOperatorUserRoleId = "7";
-        ArrayList<String> gamingOperatorLimitedRoles = new ArrayList<>();
-        gamingOperatorLimitedRoles.add(gamingOperatorAdminRoleId);
-        gamingOperatorLimitedRoles.add(gamingOperatorUserRoleId);
+        ArrayList<String> gamingOperatorLimitedRoles = getAllGamingOperatorAdminAndUserRoles();
         if (gamingOperatorLimitedRoles.contains(authInfoCreateDto.getAuthRoleId())) {
-            Query query = new Query();
-            query.addCriteria(Criteria.where("institutionId").is(authInfoCreateDto.getInstitutionId()));
-            query.addCriteria(Criteria.where("authRoleId").in(gamingOperatorLimitedRoles));
-
-            ArrayList<AuthInfo> authInfoListWithGamingOperator = (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
-            if (authInfoListWithGamingOperator.size() >= maxNumberOfGamingOperatorUsers) {
+            ArrayList<AuthInfo> authInfoListWithGamingOperatorLimitedRoles = getAllGamingOperatorAdminsAndUsersForInstitution(authInfoCreateDto.getInstitutionId());
+            if (authInfoListWithGamingOperatorLimitedRoles.size() >= maxNumberOfGamingOperatorUsers) {
                 return Mono.just(new ResponseEntity<>("Number of users for gaming operator exceeded", HttpStatus.BAD_REQUEST));
             }
         }
         return null;
+    }
+
+    @Override
+    public ArrayList<AuthInfo> getAllGamingOperatorAdminsAndUsersForInstitution(String institutionId) {
+        ArrayList<String> gamingOperatorAdminAndUserRoles = getAllGamingOperatorAdminAndUserRoles();
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(institutionId));
+        query.addCriteria(Criteria.where("authRoleId").in(gamingOperatorAdminAndUserRoles));
+        return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
+    }
+
+    @Override
+    public ArrayList<AuthInfo> getAllGamingOperatorAdminsForInstitution(String institutionId) {
+        String gamingOperatorAdminRoleId = LSLBAuthRoleReferenceData.GAMING_OPERATOR_ADMIN_ROLE_ID;
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(institutionId));
+        query.addCriteria(Criteria.where("authRoleId").is(gamingOperatorAdminRoleId));
+        return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
+    }
+
+    private ArrayList<String> getAllGamingOperatorAdminAndUserRoles() {
+        String gamingOperatorAdminRoleId = LSLBAuthRoleReferenceData.GAMING_OPERATOR_ADMIN_ROLE_ID;
+        String gamingOperatorUserRoleId = LSLBAuthRoleReferenceData.GAMING_OPERATOR_USER_ROLE_ID;
+        ArrayList<String> gamingOperatorLimitedRoles = new ArrayList<>();
+        gamingOperatorLimitedRoles.add(gamingOperatorAdminRoleId);
+        gamingOperatorLimitedRoles.add(gamingOperatorUserRoleId);
+        return gamingOperatorLimitedRoles;
     }
 }
