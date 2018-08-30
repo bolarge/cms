@@ -42,7 +42,7 @@ public class DocumentPurposeReferenceData {
         DocumentPurpose purpose4 = (DocumentPurpose) mongoRepositoryReactive.findById(RENEWAL_LICENSE_ID, DocumentPurpose.class).block();
         if (purpose4 == null) {
             purpose4 = new DocumentPurpose();
-            purpose4.setId(AIP_LICENSE_ID);
+            purpose4.setId(RENEWAL_LICENSE_ID);
 
         }
         purpose4.setDescription("RENEWAL LICENSE Documents");
