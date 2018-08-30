@@ -55,6 +55,7 @@ public class LicenseServiceImpl implements LicenseService {
                                                String sortProperty,
                                                String institutionId,
                                                String licenseStatusId,
+                                               String gameTypeId,
                                                String paymentRecordId, HttpServletResponse httpServletResponse) {
 
         try {
@@ -67,6 +68,8 @@ public class LicenseServiceImpl implements LicenseService {
             }
             if (!StringUtils.isEmpty(paymentRecordId)) {
                 query.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));
+            }if (!StringUtils.isEmpty(gameTypeId)) {
+                query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             }
 
             if (page == 0) {
@@ -107,12 +110,15 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
     @Override
-    public Mono<ResponseEntity> findLicenseByInstitutionId(String institutionId) {
+    public Mono<ResponseEntity> findLicenseByInstitutionId(String institutionId, String gameTypeId) {
         LocalDateTime dateTime = new LocalDateTime();
         dateTime = dateTime.plusDays(90);
         Query queryLicence = new Query();
 
         queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
+        if(!StringUtils.isEmpty(gameTypeId)){
+            queryLicence.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        }
         License license = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
         if (license == null) {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));
@@ -227,10 +233,12 @@ public class LicenseServiceImpl implements LicenseService {
             if (!licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID) &&
                     !licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID)) {
                 license.setEndDate(fromDate.plusMonths(duration));
+                license.setRenewalStatus("false");
 
             }
 
             license.setLicenseStatusId(licenseUpdateDto.getLicenseStatusId());
+
             mongoRepositoryReactive.saveOrUpdate(license);
             return Mono.just(new ResponseEntity<>(license.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {

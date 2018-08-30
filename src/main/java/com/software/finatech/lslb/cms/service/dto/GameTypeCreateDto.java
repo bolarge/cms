@@ -9,8 +9,27 @@ public class GameTypeCreateDto  {
     protected String licenseDuration;
     @NotEmpty(message = "Please enter GameType Name")
     protected String name;
-    @NotEmpty(message = "Please enter GameType ID")
-    protected String id;
+    @NotEmpty(message = "Please enter Agent License Duration")
+    protected String agentLicenseDuration;
+    @NotEmpty(message = "Please enter Gaming Machine License Duration")
+    protected String gamingMachineLicenseDuration;
+
+    public String getAgentLicenseDuration() {
+        return agentLicenseDuration;
+    }
+
+    public void setAgentLicenseDuration(String agentLicenseDuration) {
+        this.agentLicenseDuration = agentLicenseDuration;
+    }
+
+    public String getGamingMachineLicenseDuration() {
+        return gamingMachineLicenseDuration;
+    }
+
+    public void setGamingMachineLicenseDuration(String gamingMachineLicenseDuration) {
+        this.gamingMachineLicenseDuration = gamingMachineLicenseDuration;
+    }
+
 
     protected String description;
 
@@ -28,14 +47,6 @@ public class GameTypeCreateDto  {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getAipDuration() {

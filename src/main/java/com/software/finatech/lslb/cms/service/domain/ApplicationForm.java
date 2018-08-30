@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.domain;
 
+import com.software.finatech.lslb.cms.service.dto.ApplicationFormCommentDto;
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
 import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
@@ -35,6 +36,13 @@ public class ApplicationForm extends AbstractFact {
     protected ApplicantContactDetails applicantContactDetails;
     protected LslbAdminComment lslbAdminComment;
 
+    public LslbAdminComment getLslbAdminComment() {
+        return lslbAdminComment;
+    }
+
+    public void setLslbAdminComment(LslbAdminComment lslbAdminComment) {
+        this.lslbAdminComment = lslbAdminComment;
+    }
 
     public String getRejectorId() {
         return rejectorId;
@@ -176,6 +184,24 @@ public class ApplicationForm extends AbstractFact {
         return gameType;
     }
 
+    public String getGameTypeName(){
+        GameType gameType = getGameType();
+        if (gameType == null){
+            return null;
+        }else {
+            return gameType.getName();
+        }
+    }
+
+    public String getGameTypeDesciption(){
+        GameType gameType = getGameType();
+        if (gameType == null){
+            return null;
+        }else {
+            return gameType.getDescription();
+        }
+    }
+
     private ApplicationFormStatus getStatus() {
         Map applicationFormStatusMap = Mapstore.STORE.get("ApplicationFormStatus");
         ApplicationFormStatus applicationFormStatus = null;
@@ -242,6 +268,17 @@ public class ApplicationForm extends AbstractFact {
         }
         applicationFormDto.setId(getId());
         applicationFormDto.setFormName(getFormName());
+
+        LslbAdminComment lslbAdminComment = getLslbAdminComment();
+        if (lslbAdminComment != null){
+            ApplicationFormCommentDto applicationFormCommentDto = new ApplicationFormCommentDto();
+            applicationFormCommentDto.setComment(lslbAdminComment.getComment());
+            AuthInfo admin = getAuthInfo(lslbAdminComment.getUserId());
+            if (admin!= null){
+                applicationFormCommentDto.setLslbAdminName(admin.getFullName());
+            }
+            applicationFormDto.setApplicationFormCommentDto(applicationFormCommentDto);
+        }
         return applicationFormDto;
     }
 

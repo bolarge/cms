@@ -29,7 +29,6 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -202,9 +201,9 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                 return Mono.just(new ResponseEntity<>("Scheduled meeting does not exist", HttpStatus.BAD_REQUEST));
             }
             existingScheduledMeeting.setCreatorId(scheduledMeetingUpdateDto.getCreatorId());
-            existingScheduledMeeting.setMeetingTitle(scheduledMeetingUpdateDto.getMeetingTitle());
+            existingScheduledMeeting.setMeetingSubject(scheduledMeetingUpdateDto.getMeetingTitle());
             existingScheduledMeeting.setVenue(scheduledMeetingUpdateDto.getVenue());
-            existingScheduledMeeting.setAdditionalNotes(scheduledMeetingUpdateDto.getAdditionalNotes());
+            existingScheduledMeeting.setMeetingDescription(scheduledMeetingUpdateDto.getAdditionalNotes());
             existingScheduledMeeting.setInstitutionId(scheduledMeetingUpdateDto.getInstitutionId());
             existingScheduledMeeting.setMeetingDate(FORMATTER.parseDateTime(scheduledMeetingUpdateDto.getMeetingDate()));
             return Mono.just(new ResponseEntity<>("Meeting updated successfully", HttpStatus.OK));
@@ -240,7 +239,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
         scheduledMeeting.setInstitutionId(scheduledMeetingCreateDto.getInstitutionId());
         scheduledMeeting.setId(UUID.randomUUID().toString());
         scheduledMeeting.setVenue(scheduledMeetingCreateDto.getVenue());
-        scheduledMeeting.setMeetingTitle(scheduledMeetingCreateDto.getMeetingTitle());
+        scheduledMeeting.setMeetingSubject(scheduledMeetingCreateDto.getMeetingTitle());
         scheduledMeeting.setCreatorId(scheduledMeetingCreateDto.getCreatorId());
         String pendingScheduledMeetingStatusId = ScheduledMeetingStatusReferenceData.PENDING_STATUS_ID;
         scheduledMeeting.setScheduledMeetingStatusId(pendingScheduledMeetingStatusId);
@@ -286,9 +285,9 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             model.put("name", invitee.getFullName());
             model.put("inviterName", inviter.getFullName());
             model.put("meetingDate", meetingDateString);
-            model.put("meetingTitle", scheduledMeeting.getMeetingTitle());
+            model.put("meetingTitle", scheduledMeeting.getMeetingSubject());
             model.put("meetingVenue", scheduledMeeting.getVenue());
-            model.put("additionalNotes", scheduledMeeting.getAdditionalNotes());
+            model.put("additionalNotes", scheduledMeeting.getMeetingDescription());
             model.put("date", presentDateString);
 
             String content = mailContentBuilderService.build(model, templateName);
@@ -313,9 +312,9 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             model.put("name", inviter.getFullName());
             model.put("institutionName", institutionName);
             model.put("meetingDate", meetingDateString);
-            model.put("meetingTitle", scheduledMeeting.getMeetingTitle());
+            model.put("meetingTitle", scheduledMeeting.getMeetingSubject());
             model.put("meetingVenue", scheduledMeeting.getVenue());
-            model.put("additionalNotes", scheduledMeeting.getAdditionalNotes());
+            model.put("additionalNotes", scheduledMeeting.getMeetingDescription());
             model.put("date", presentDateString);
 
             String content = mailContentBuilderService.build(model, templateName);

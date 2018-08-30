@@ -625,6 +625,11 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
     }
 
+    @Override
+    public AuthInfo getUserById(String userId) {
+        return (AuthInfo)mongoRepositoryReactive.findById(userId, AuthInfo.class).block();
+    }
+
     private ArrayList<String> getAllGamingOperatorAdminAndUserRoles() {
         String gamingOperatorAdminRoleId = LSLBAuthRoleReferenceData.GAMING_OPERATOR_ADMIN_ROLE_ID;
         String gamingOperatorUserRoleId = LSLBAuthRoleReferenceData.GAMING_OPERATOR_USER_ROLE_ID;

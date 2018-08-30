@@ -98,6 +98,8 @@ public class GameTypeController extends BaseController {
         gameType.setLicenseDuration(gameTypeUpdateDto.getLicenseDuration());
         gameType.setName(gameTypeUpdateDto.getName());
         gameType.setDescription(gameTypeUpdateDto.getDescription());
+        gameType.setAgentLicenseDuration(gameTypeUpdateDto.getAgentLicenseDuration());
+        gameType.setGamingMachineLicenseDuration(gameTypeUpdateDto.getGamingMachineLicenseDuration());
         mongoRepositoryReactive.saveOrUpdate(gameType);
         return Mono.just(new ResponseEntity<>(gameType.convertToDto(), HttpStatus.OK));
     }

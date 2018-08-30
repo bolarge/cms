@@ -184,6 +184,8 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                 license=licenseCheck;
             }
             license.setLicenseStatusId("04");
+        license.setInstitutionId(paymentRecord.getInstitutionId());
+        license.setGameTypeId(paymentRecord.convertToDto().getFee().getGameType().getId());
         license.setPaymentRecordId(paymentRecord.getId());
         mongoRepositoryReactive.saveOrUpdate(paymentRecord);
         mongoRepositoryReactive.saveOrUpdate(license);

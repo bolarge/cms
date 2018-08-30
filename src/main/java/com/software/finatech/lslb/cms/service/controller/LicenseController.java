@@ -31,7 +31,7 @@ public class LicenseController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize",
-            "sortType", "sortProperty", "institutionId", "licenseStatusId", "paymentRecordId"})
+            "sortType", "sortProperty", "institutionId", "licenseStatusId","gameTypeId", "paymentRecordId"})
     @ApiOperation(value = "Get all licenses", response = LicenseDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -44,9 +44,10 @@ public class LicenseController {
                                                @RequestParam("sortProperty") String sortParam,
                                                @RequestParam("institutionId") String institutionId,
                                                @RequestParam("licenseStatusId") String licenseStatusId,
+                                               @RequestParam("gameTypeId") String gameTypeId,
                                                @RequestParam("paymentRecordId") String paymentRecordId,
                                                HttpServletResponse httpServletResponse) {
-        return licenseService.findAllLicense(page, pageSize, sortType, sortParam, institutionId, licenseStatusId, paymentRecordId, httpServletResponse);
+        return licenseService.findAllLicense(page, pageSize, sortType, sortParam, institutionId, licenseStatusId, gameTypeId,paymentRecordId, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/get-by-licenseId")
@@ -68,8 +69,8 @@ public class LicenseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getLicenseByInstitutionId(@RequestParam("institutionId") String institutionId) {
-        return licenseService.findLicenseByInstitutionId(institutionId);
+    public Mono<ResponseEntity> getLicenseByInstitutionId(@RequestParam("institutionId") String institutionId, @RequestParam("gameTypeId")String gameTypeId) {
+        return licenseService.findLicenseByInstitutionId(institutionId, gameTypeId);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-license-status")

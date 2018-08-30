@@ -10,18 +10,8 @@ public class FeeCreateDto {
     @NotEmpty(message = "Please provide fee payment type id")
     protected String feePaymentTypeId;
     @NotEmpty(message = "Please provide payment type duration")
-    protected String duration;
-    @NotEmpty(message = "Please provide payment revenueName")
 
 
-
-    public String getDuration() {
-        return duration;
-    }
-
-    public void setDuration(String duration) {
-        this.duration = duration;
-    }
 
     public String getAmount() {
         return amount;

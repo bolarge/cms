@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.util;
 import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactive;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public class ExpirationList {
         LocalDateTime dateTime = new LocalDateTime();
         Query queryLicence= new Query();
         queryLicence.addCriteria(Criteria.where("endDate").lte(dateTime));
-        if(licenseStatusId=="02"){
+        if(licenseStatusId==LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID){
             queryLicence.addCriteria(Criteria.where("licenseStatusId").is(licenseStatusId));//orOperator(Criteria.where("licenseStatusId").is("03")));
         }else{
             queryLicence.addCriteria(Criteria.where("licenseStatusId").is(licenseStatusId));
@@ -65,9 +66,9 @@ public class ExpirationList {
         if(licenses.size()==0){
         //    return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
         }
-        if(licenseStatusId.equals("02")){
+        if(licenseStatusId.equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
             for(License license: licenses){
-                license.setLicenseStatusId("03");
+                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID);
                 license.setRenewalStatus("true");
                 mongoRepositoryReactive.saveOrUpdate(license);
             }
@@ -75,11 +76,11 @@ public class ExpirationList {
 
         Query queryExpiredLicence= new Query();
         queryExpiredLicence.addCriteria(Criteria.where("endDate").lte(dateTime));
-        if(licenseStatusId=="02"){
-            queryExpiredLicence.addCriteria(Criteria.where("licenseStatusId").is("03"));
+        if(licenseStatusId==LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID){
+            queryExpiredLicence.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID));
 
         }else{
-            queryExpiredLicence.addCriteria(Criteria.where("licenseStatusId").is("01"));
+            queryExpiredLicence.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID));
         }
          List<License> expiredLicenses= (List<License>) mongoRepositoryReactive.findAll(queryExpiredLicence,License.class).toStream().collect(Collectors.toList());
         List<LicenseDto> licenseDtos = new ArrayList<>();
