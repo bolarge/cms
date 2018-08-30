@@ -283,12 +283,12 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> completeApplicationForm(@RequestParam("applicationFormId") String applicationFormId) {
-        return applicationFormService.completeApplicationForm(applicationFormId);
+    public Mono<ResponseEntity> completeApplicationForm(@RequestParam("applicationFormId") String applicationFormId, @RequestParam("isResubmit") boolean isResubmit) {
+        return applicationFormService.completeApplicationForm(applicationFormId,isResubmit);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/payment-records", params = {"applicationFormId"})
-    @ApiOperation(value = "Get payment records for application form", response = PaymentRecordDto.class,responseContainer = "List", consumes = "application/json")
+    @ApiOperation(value = "Get payment records for application form", response = PaymentRecordDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -296,6 +296,17 @@ public class ApplicationFormController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getPaymentRecordsApplicationForm(@RequestParam("applicationFormId") String applicationFormId) {
         return applicationFormService.getPaymentRecordsForApplicationForm(applicationFormId);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/create-comment")
+    @ApiOperation(value = "Create comment for application form from LSLB Admin", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> createApplciationFormComment(@RequestParam("applicationFormId") String applicationFormId, @RequestBody ApplicationFormCreateCommentDto applicationFormCreateCommentDto) {
+        return applicationFormService.addCommentsToFormFromLslbAdmin(applicationFormId, applicationFormCreateCommentDto);
     }
 
     /*@RequestMapping(method = RequestMethod.GET, value = "/{applicationFormId}/get-document-types", params = {"applicationFormId"})

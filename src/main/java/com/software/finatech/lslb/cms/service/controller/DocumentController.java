@@ -6,17 +6,20 @@ import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
 import com.software.finatech.lslb.cms.service.dto.DocumentCreateDto;
 import com.software.finatech.lslb.cms.service.dto.DocumentDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
+import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.BsonBinarySubType;
 import org.bson.types.Binary;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
@@ -40,14 +43,15 @@ public class DocumentController extends BaseController {
 
     private static Logger logger = LoggerFactory.getLogger(DocumentController.class);
 
-    @RequestMapping(method = RequestMethod.POST, value = "/upload", produces ="application/json")
+    @RequestMapping(method = RequestMethod.POST, value = "/upload", produces = "application/json")
     @ApiOperation(value = "Upload Document", response = DocumentCreateDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> upload(@RequestParam("json") String json, @RequestParam("files") @NotEmpty MultipartFile[] files) {
+    public Mono<ResponseEntity> upload(@RequestParam("json") String json,
+                                       @RequestParam("files") @NotEmpty MultipartFile[] files) {
 
         //@TODO If its a file replace we have to validate that the old id comes with the json
         if (json == null || json.isEmpty()) {
@@ -56,8 +60,8 @@ public class DocumentController extends BaseController {
 
         List<DocumentCreateDto> documentDtos;
 
-        try{
-            documentDtos = mapper.readValue(json, List.class,DocumentCreateDto.class);
+        try {
+            documentDtos = mapper.readValue(json, List.class, DocumentCreateDto.class);
         } catch (Exception e) {
             e.printStackTrace();
             return Mono.just(new ResponseEntity<>("Invalid Json", HttpStatus.BAD_REQUEST));
@@ -77,7 +81,7 @@ public class DocumentController extends BaseController {
 
                     MultipartFile file = fileMap.get(documentDto.getFilename());
 
-                    if(file != null) {
+                    if (file != null) {
                         String originalFilename = file.getOriginalFilename();
                         Document document = new Document();
                         document.setId(UUID.randomUUID().toString().replace("-", ""));
@@ -111,10 +115,10 @@ public class DocumentController extends BaseController {
             });
 
             //This has to be equal. The only time its not is because a file name does not match
-            if(documents.size() != files.length){
+            if (documents.size() != files.length) {
                 return Mono.just(new ResponseEntity<>("Json & file length do not match. Please make sure the each file has a corresponding filename in the json.", HttpStatus.BAD_REQUEST));
             }
-            documents.stream().forEach(doc->{
+            documents.stream().forEach(doc -> {
                 mongoRepositoryReactive.saveOrUpdate(doc);
             });
 

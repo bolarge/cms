@@ -4,6 +4,11 @@ public class LslbAdminComment {
     private String userId;
     private String comment;
 
+    public LslbAdminComment(String userId, String comment) {
+        this.userId = userId;
+        this.comment = comment;
+    }
+
     public String getUserId() {
         return userId;
     }

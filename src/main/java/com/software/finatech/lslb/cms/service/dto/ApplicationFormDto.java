@@ -15,6 +15,16 @@ public class ApplicationFormDto {
     private String id;
     private String rejectorId;
     private String rejectorName;
+    private ApplicationFormCommentDto applicationFormCommentDto;
+
+
+    public ApplicationFormCommentDto getApplicationFormCommentDto() {
+        return applicationFormCommentDto;
+    }
+
+    public void setApplicationFormCommentDto(ApplicationFormCommentDto applicationFormCommentDto) {
+        this.applicationFormCommentDto = applicationFormCommentDto;
+    }
 
     public String getRejectorId() {
         return rejectorId;

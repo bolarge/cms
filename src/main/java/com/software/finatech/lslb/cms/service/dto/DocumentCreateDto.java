@@ -45,7 +45,6 @@ public class DocumentCreateDto {
         this.filename = filename;
     }
 
-
     public String getValidFrom() {
         return validFrom;
     }
