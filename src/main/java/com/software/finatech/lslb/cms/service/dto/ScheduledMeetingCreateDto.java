@@ -10,7 +10,6 @@ public class ScheduledMeetingCreateDto {
     @NotEmpty(message = "Please provide meeting title")
     private String meetingTitle;
     private String additionalNotes;
-    @NotEmpty(message = "Please provide venue")
     private String venue;
     @NotEmpty(message = "Please provide meeting date")
     private String meetingDate;
@@ -62,5 +61,4 @@ public class ScheduledMeetingCreateDto {
     public void setVenue(String venue) {
         this.venue = venue;
     }
-
 }

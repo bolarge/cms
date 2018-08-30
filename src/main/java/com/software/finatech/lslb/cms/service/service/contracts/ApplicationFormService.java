@@ -10,6 +10,7 @@ import com.software.finatech.lslb.cms.service.model.declaration.ApplicantDeclara
 import com.software.finatech.lslb.cms.service.model.otherInformation.ApplicantOtherInformation;
 import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantOutletInformation;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
@@ -55,8 +56,8 @@ public interface ApplicationFormService {
 
     Mono<ResponseEntity> approveApplicationForm(String applicationFormId, String  approverId);
     Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, String rejectorId);
-    Mono<ResponseEntity> completeApplicationForm(String applicationFormId);
+    Mono<ResponseEntity> completeApplicationForm(String applicationFormId, boolean isResubmit);
     Mono<ResponseEntity> getPaymentRecordsForApplicationForm(String applicationFormId);
 
-    Mono<ResponseEntity> addCommentsToForm(ApplicationFormCreateCommentDto applicationFormCreateCommentDto);
+    Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String applicationFormId,ApplicationFormCreateCommentDto applicationFormCreateCommentDto);
 }

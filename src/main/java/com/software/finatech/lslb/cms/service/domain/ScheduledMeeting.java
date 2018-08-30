@@ -14,8 +14,8 @@ public class ScheduledMeeting extends AbstractFact {
 
     private String creatorId;
     private DateTime meetingDate;
-    private String additionalNotes;
-    private String meetingTitle;
+    private String meetingDescription;
+    private String meetingSubject;
     private String institutionId;
     private String scheduledMeetingStatusId;
     private String venue;
@@ -97,20 +97,20 @@ public class ScheduledMeeting extends AbstractFact {
         this.meetingDate = meetingDate;
     }
 
-    public String getAdditionalNotes() {
-        return additionalNotes;
+    public String getMeetingDescription() {
+        return meetingDescription;
     }
 
-    public void setAdditionalNotes(String additionalNotes) {
-        this.additionalNotes = additionalNotes;
+    public void setMeetingDescription(String meetingDescription) {
+        this.meetingDescription = meetingDescription;
     }
 
-    public String getMeetingTitle() {
-        return meetingTitle;
+    public String getMeetingSubject() {
+        return meetingSubject;
     }
 
-    public void setMeetingTitle(String meetingTitle) {
-        this.meetingTitle = meetingTitle;
+    public void setMeetingSubject(String meetingSubject) {
+        this.meetingSubject = meetingSubject;
     }
 
     public String getInstitutionId() {
@@ -152,8 +152,8 @@ public class ScheduledMeeting extends AbstractFact {
     public ScheduledMeetingDto convertToDto() {
         ScheduledMeetingDto scheduledMeetingDto = new ScheduledMeetingDto();
         scheduledMeetingDto.setId(getId());
-        scheduledMeetingDto.setMeetingTitle(getMeetingTitle());
-        scheduledMeetingDto.setAdditionalNotes(getAdditionalNotes());
+        scheduledMeetingDto.setMeetingTitle(getMeetingSubject());
+        scheduledMeetingDto.setAdditionalNotes(getMeetingDescription());
         scheduledMeetingDto.setMeetingDate(getMeetingDate().toString("dd/MM/yyyy HH:mm:ss"));
         ScheduledMeetingStatus scheduledMeetingStatus = getMeetingStatus();
         if (scheduledMeetingStatus != null) {

@@ -13,9 +13,13 @@ import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantO
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
+import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
+import io.advantageous.boon.core.Str;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -30,10 +34,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -43,6 +44,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationFormServiceImpl.class);
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
+    private MailContentBuilderService mailContentBuilderService;
+    private EmailService emailService;
+    private AuthInfoService authInfoService;
 
     @Autowired
     public void setMongoRepositoryReactive(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
@@ -169,7 +173,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     //TODO: find way to get all approverID distinct in application form table
     @Override
     public Mono<ResponseEntity> getAllApprovers() {
-        String lslbAdminAuthRoleId = "4";
+        String lslbAdminAuthRoleId = LSLBAuthRoleReferenceData.LSLB_ADMIN_ROLE_ID;
         Query query = new Query();
         query.addCriteria(Criteria.where("authRoleId").is(lslbAdminAuthRoleId));
         ArrayList<AuthInfo> authInfos = (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
@@ -461,7 +465,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> completeApplicationForm(String applicationFormId) {
+    public Mono<ResponseEntity> completeApplicationForm(String applicationFormId, boolean isResubmit) {
         try {
             ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
             if (applicationForm == null) {
@@ -470,6 +474,10 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String inReviewApplicationFormStatusId = ApplicationFormStatusReferenceData.IN_REVIEW_STATUS_ID;
             applicationForm.setApplicationFormStatusId(inReviewApplicationFormStatusId);
             saveApplicationForm(applicationForm);
+
+            if (isResubmit){
+                sendCompleteApplicationNotificationToLslbAdmin(applicationForm);
+            }
             return Mono.just(new ResponseEntity<>("Application completed successfully and now in review", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while completing application form", e);
@@ -574,6 +582,76 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         }
         return applicationFormDocumentDto;
     }*/
+
+    @Override
+    public Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String applicationFormId, ApplicationFormCreateCommentDto applicationFormCreateCommentDto) {
+        ApplicationForm applicationForm = getApplicationFormById(applicationFormId);
+        if (applicationForm == null) {
+            return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
+        }
+        AuthInfo lslbAdmin = authInfoService.getUserById(applicationFormCreateCommentDto.getUserId());
+        if (lslbAdmin == null) {
+            return Mono.just(new ResponseEntity<>("Commenting user does not exist", HttpStatus.BAD_REQUEST));
+        }
+        LslbAdminComment lslbAdminComment = new LslbAdminComment(applicationFormCreateCommentDto.getUserId(), applicationFormCreateCommentDto.getComment());
+        applicationForm.setLslbAdminComment(lslbAdminComment);
+        applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.PENDING_RESUBMISSON_ID);
+        saveApplicationForm(applicationForm);
+        sendAdminCommentNotificationToInstitutionAdmins(applicationForm, lslbAdminComment.getComment());
+        return Mono.just(new ResponseEntity<>("Comment added successfully", HttpStatus.OK));
+    }
+
+    public void sendCompleteApplicationNotificationToLslbAdmin(ApplicationForm applicationForm) {
+        LslbAdminComment lslbAdminComment = applicationForm.getLslbAdminComment();
+        if (lslbAdminComment == null) {
+            return;
+        }
+        sendCompletionNotificationToLslbAdmin(applicationForm, lslbAdminComment.getUserId());
+    }
+
+    private void sendCompletionNotificationToLslbAdmin(ApplicationForm applicationForm, String lslbAdminId) {
+        Institution institution = applicationForm.getInstitution();
+        AuthInfo lslbAdmin = authInfoService.getUserById(lslbAdminId);
+        String presentDate = DateTime.now().toString("dd/MM/yyyy");
+        String gameTypeName = applicationForm.getGameTypeName();
+        String institutionName = institution.getInstitutionName();
+
+
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("name", lslbAdmin.getFullName());
+        model.put("institutionName", institutionName);
+        model.put("date", presentDate);
+        model.put("gameType", gameTypeName);
+
+        String content = mailContentBuilderService.build(model, "ApplicationFormCompleteUploadNotificationLslbAdmin");
+        String mailSubject = String.format("%s has re application form for %s", institutionName, gameTypeName);
+
+        emailService.sendEmail(content, mailSubject, lslbAdmin.getEmailAddress());
+    }
+
+    private void sendAdminCommentNotificationToInstitutionAdmins(ApplicationForm applicationForm, String comment) {
+        ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllGamingOperatorAdminsForInstitution(applicationForm.getInstitutionId());
+        for (AuthInfo institutionAdmin : institutionAdmins) {
+            sendCommentNotificationToInstitutionUser(institutionAdmin, comment, applicationForm);
+        }
+    }
+
+    private void sendCommentNotificationToInstitutionUser(AuthInfo institutionAdmin, String comment, ApplicationForm applicationForm) {
+        String institutionAdminName = institutionAdmin.getFullName();
+        String presentDate = DateTime.now().toString("dd/MM/yyyy ");
+        String gameTypeName = applicationForm.getGameTypeName();
+
+
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("name", institutionAdminName);
+        model.put("comment", comment);
+        model.put("date", presentDate);
+        model.put("gameType", gameTypeName);
+
+        String mailSubject = String.format("Notification on your application for %s license", gameTypeName);
+        String content = mailContentBuilderService.build(model, "ApplicationFormPendingUploadGAadmin");
+        emailService.sendEmail(content, mailSubject, institutionAdmin.getEmailAddress());
+    }
 
     private ApplicationForm fromCreateDto(ApplicationFormCreateDto applicationFormCreateDto) {
         ApplicationForm applicationForm = new ApplicationForm();
