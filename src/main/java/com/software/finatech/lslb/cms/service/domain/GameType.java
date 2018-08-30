@@ -6,11 +6,34 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @SuppressWarnings("serial")
 @Document(collection = "GameType")
 public class GameType extends EnumeratedFact {
+
+
+    protected String aipDuration;
+    protected String licenseDuration;
+
+    public String getAipDuration() {
+        return aipDuration;
+    }
+
+    public void setAipDuration(String aipDuration) {
+        this.aipDuration = aipDuration;
+    }
+
+    public String getLicenseDuration() {
+        return licenseDuration;
+    }
+
+    public void setLicenseDuration(String licenseDuration) {
+        this.licenseDuration = licenseDuration;
+    }
+
     public GameTypeDto convertToDto() {
         GameTypeDto gameType = new GameTypeDto();
         gameType.setName(getName());
         gameType.setId(getId());
         gameType.setDescription(getDescription());
+        gameType.setAipDuration(getAipDuration());
+        gameType.setLicenseDuration(getLicenseDuration());
         return gameType;
     }
 
