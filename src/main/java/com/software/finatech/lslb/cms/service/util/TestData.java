@@ -165,7 +165,6 @@ public class TestData {
         fee.setFeePaymentTypeId("02");
         fee.setGameTypeId("01");
         fee.setRevenueName("Revenue Name");
-
         mongoRepositoryReactive.saveOrUpdate(fee);
         for(int i=1; i<6; i++) {
 
@@ -188,7 +187,7 @@ public class TestData {
             }
             paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.CONFIRMED_PAYMENT_STATUS_ID);
             paymentRecord.setInstitutionId(""+i);
-            paymentRecord.setFeeId("");
+            paymentRecord.setFeeId(fee.getId());
             paymentRecord.setApproverId("1");
             License license = (License) mongoRepositoryReactive.findById(paymentRecord.getId(), License.class).block();
             if(license==null){
