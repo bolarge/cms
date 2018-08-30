@@ -56,15 +56,15 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                                                       String sortProperty,
                                                       String institutionId,
                                                       String approverId,
-                                                      String feePaymentTypeId,
+                                                      String feeId,
                                                       HttpServletResponse httpServletResponse) {
         try {
             Query query = new Query();
             if (!StringUtils.isEmpty(institutionId)) {
                 query.addCriteria(Criteria.where("institutionId").is(institutionId));
             }
-            if (!StringUtils.isEmpty(feePaymentTypeId)) {
-                query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
+            if (!StringUtils.isEmpty(feeId)) {
+                query.addCriteria(Criteria.where("feeId").is(feeId));
             }
             if (!StringUtils.isEmpty(approverId)) {
                 query.addCriteria(Criteria.where("approverId").is(approverId));

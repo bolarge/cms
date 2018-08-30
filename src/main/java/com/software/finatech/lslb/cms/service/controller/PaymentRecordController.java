@@ -41,12 +41,12 @@ public class PaymentRecordController extends BaseController {
                                                    @RequestParam("pageSize") int pageSize,
                                                    @RequestParam("sortType") String sortType,
                                                    @RequestParam("sortProperty") String sortParam,
-                                                   @RequestParam("feePaymentTypeId") String feePaymentTypeId,
+                                                   @RequestParam("feeId") String feeId,
                                                    @RequestParam("institutionId") String institutionId,
                                                    @RequestParam("approverId") String approverId,
 
                                                    HttpServletResponse httpServletResponse) {
-        return paymentRecordService.findAllPaymentRecords(page, pageSize, sortType, sortParam, approverId, institutionId,  feePaymentTypeId, httpServletResponse);
+        return paymentRecordService.findAllPaymentRecords(page, pageSize, sortType, sortParam, approverId, institutionId,  feeId, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-payment-status")
