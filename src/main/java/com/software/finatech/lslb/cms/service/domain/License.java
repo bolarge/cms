@@ -16,11 +16,28 @@ import java.util.Map;
 public class License extends AbstractFact {
 
     protected String licenseStatusId;
+    protected String institutionId;
+    protected String gameTypeId;
     protected String paymentRecordId;
     protected LocalDateTime startDate;
     protected LocalDateTime endDate;
     protected String renewalStatus;
 
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
 
     public String getRenewalStatus() {
         return renewalStatus;

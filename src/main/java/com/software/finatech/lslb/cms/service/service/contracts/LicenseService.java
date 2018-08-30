@@ -14,13 +14,14 @@ public interface LicenseService {
                                         String sortParam,
                                         String institutionId,
                                         String licenseStatusId,
+                                        String gameTypeId,
                                         String paymentRecordId,
                                         HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> findLicenseById(String licenseId);
 
     Mono<ResponseEntity> getAllLicenseStatus();
-    Mono<ResponseEntity> findLicenseByInstitutionId(String institutionId);
+    Mono<ResponseEntity> findLicenseByInstitutionId(String institutionId, String gameType);
     Mono<ResponseEntity> getExpiringLicenses();
     Mono<ResponseEntity> getExpiringAIPs();
     Mono<ResponseEntity> getExpiredLicenses();

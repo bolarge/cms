@@ -18,6 +18,24 @@ public class RenewalFormDto {
     protected String changeInGamingMachines;
     protected Boolean checkNewInvestors;
     protected String newInvestors;
+    protected String institutionId;
+    protected String gameTypeId;
+
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
 
     public PaymentRecordDto getPaymentRecord() {
         return paymentRecord;

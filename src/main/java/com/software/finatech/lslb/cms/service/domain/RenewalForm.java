@@ -7,6 +7,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "RenewalForm")
 public class RenewalForm extends AbstractFact {
     protected String paymentRecordId;
+    protected String institutionId;
+    protected String gameTypeId;
     protected Boolean checkStakeHoldersChange;
     protected String stakeHoldersChange;
     protected Boolean checkSharesAquisition;
@@ -23,6 +25,23 @@ public class RenewalForm extends AbstractFact {
     protected String changeInGamingMachines;
     protected Boolean checkNewInvestors;
     protected String newInvestors;
+
+
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
 
     public String getPaymentRecordId() {
         return paymentRecordId;

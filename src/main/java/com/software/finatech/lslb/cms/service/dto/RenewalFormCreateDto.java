@@ -5,6 +5,10 @@ import javax.validation.constraints.NotEmpty;
 public class RenewalFormCreateDto {
     @NotEmpty(message = "Please enter payment Record")
     protected String paymentRecordId;
+    @NotEmpty(message = "Please enter InstitutionId")
+    protected String institutionId;
+    @NotEmpty(message = "Please enter game Type")
+    protected String gameTypeId;
     @NotEmpty(message = "Please enter checkStakeHoldersChange")
     protected Boolean checkStakeHoldersChange;
     protected String stakeHoldersChange;
@@ -29,6 +33,22 @@ public class RenewalFormCreateDto {
     @NotEmpty(message = "Please enter checkNewInvestors")
     protected Boolean checkNewInvestors;
     protected String newInvestors;
+
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
 
     public String getPaymentRecordId() {
         return paymentRecordId;

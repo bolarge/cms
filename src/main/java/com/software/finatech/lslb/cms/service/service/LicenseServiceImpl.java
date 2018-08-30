@@ -68,6 +68,8 @@ public class LicenseServiceImpl implements LicenseService {
             }
             if (!StringUtils.isEmpty(paymentRecordId)) {
                 query.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));
+            }if (!StringUtils.isEmpty(gameTypeId)) {
+                query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             }
 
             if (page == 0) {
@@ -108,12 +110,15 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
     @Override
-    public Mono<ResponseEntity> findLicenseByInstitutionId(String institutionId) {
+    public Mono<ResponseEntity> findLicenseByInstitutionId(String institutionId, String gameTypeId) {
         LocalDateTime dateTime = new LocalDateTime();
         dateTime = dateTime.plusDays(90);
         Query queryLicence = new Query();
 
         queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
+        if(!StringUtils.isEmpty(gameTypeId)){
+            queryLicence.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        }
         License license = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
         if (license == null) {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));

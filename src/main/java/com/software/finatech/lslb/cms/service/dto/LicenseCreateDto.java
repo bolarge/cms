@@ -8,6 +8,24 @@ public class LicenseCreateDto {
     @NotEmpty(message = "Please provide renewalCheckStatus")
     protected String renewalCheck;
     protected String paymentRecordId;
+    protected String institutionId;
+    protected String gameTypeId;
+
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
 
     private String id;
 
