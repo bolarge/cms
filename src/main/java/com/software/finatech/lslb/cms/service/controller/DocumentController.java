@@ -68,9 +68,9 @@ public class DocumentController extends BaseController {
             for (MultipartFile file : files) {
                 fileMap.put(file.getOriginalFilename(), file);
             }
-
+            Boolean filenameValidationCheckFailed = false;
             //We then reconcile it with the document objects
-            //ArrayList<FactObject> documents = new ArrayList<>();
+            ArrayList<FactObject> documents = new ArrayList<>();
             documentDtos.stream().forEach(documentDto -> {
                 try {
                     logger.info("Creating file : " + documentDto.getFilename());
@@ -81,7 +81,7 @@ public class DocumentController extends BaseController {
                         String originalFilename = file.getOriginalFilename();
                         Document document = new Document();
                         document.setId(UUID.randomUUID().toString().replace("-", ""));
-                        document.setEntity(documentDto.getEntityId());
+                        document.setEntityId(documentDto.getEntityId());
                         document.setCurrent(true);
                         document.setDescription(documentDto.getDescription());
                         document.setDocumentTypeId(documentDto.getDocumentTypeId());
@@ -91,24 +91,33 @@ public class DocumentController extends BaseController {
                         document.setOriginalFilename(originalFilename);
                         document.setMimeType(file.getContentType());
                         document.setPreviousDocumentId(documentDto.getPreviousDocumentId());
-                        document.setValidFrom(new LocalDate(documentDto.getValidFrom()));
-                        document.setValidTo(new LocalDate(documentDto.getValidTo()));
+                        //document.setValidFrom(new LocalDate(documentDto.getValidFrom()));
+                        //document.setValidTo(new LocalDate(documentDto.getValidTo()));
                         document.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
-                        mongoRepositoryReactive.saveOrUpdate(document);
+                        documents.add(document);
                         //If there is an existing doc we set it to false
                         if (documentDto.getPreviousDocumentId() != null) {
                             Document oldDocument = (Document) mongoRepositoryReactive.findById((documentDto.getPreviousDocumentId()), Document.class).block();
                             if (oldDocument != null) {
                                 oldDocument.setCurrent(false);
-                                mongoRepositoryReactive.saveOrUpdate(oldDocument);
+                                //mongoRepositoryReactive.saveOrUpdate(oldDocument);
+                                documents.add(oldDocument);
                             }
                         }
                     }
-
                 } catch (Exception e) {
                     logger.error("An error occurred while saving document", e);
                 }
             });
+
+            //This has to be equal. The only time its not is because a file name does not match
+            if(documents.size() != files.length){
+                return Mono.just(new ResponseEntity<>("Json & file length do not match. Please make sure the each file has a corresponding filename in the json.", HttpStatus.BAD_REQUEST));
+            }
+            documents.stream().forEach(doc->{
+                mongoRepositoryReactive.saveOrUpdate(doc);
+            });
+
             return Mono.just(new ResponseEntity<>("Success", HttpStatus.OK));
         } catch (Exception e) {
             return ErrorResponseUtil.logAndReturnError(logger, "An error occured while uploading the documents", e);
