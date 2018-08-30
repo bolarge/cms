@@ -33,6 +33,7 @@ public class ApplicationForm extends AbstractFact {
     protected ApplicantOutletInformation applicantOutletInformation;
     protected ApplicantOtherInformation applicantOtherInformation;
     protected ApplicantContactDetails applicantContactDetails;
+    protected LslbAdminComment lslbAdminComment;
 
 
     public String getRejectorId() {
@@ -235,7 +236,7 @@ public class ApplicationForm extends AbstractFact {
             applicationFormDto.setApproverName(approver.getFullName());
         }
         AuthInfo rejector = getAuthInfo(rejectorId);
-        if (rejector != null){
+        if (rejector != null) {
             applicationFormDto.setRejectorId(rejectorId);
             applicationFormDto.setRejectorName(rejector.getFullName());
         }

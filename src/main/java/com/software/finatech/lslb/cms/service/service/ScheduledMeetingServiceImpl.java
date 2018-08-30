@@ -121,13 +121,33 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
     @Override
     public Mono<ResponseEntity> createScheduledMeeting(ScheduledMeetingCreateDto scheduledMeetingCreateDto) {
         try {
-            Mono<ResponseEntity> validateCreateMeeting = validateCreateScheduledMeeting(scheduledMeetingCreateDto);
-            if (validateCreateMeeting != null) {
-                return validateCreateMeeting;
+            HttpStatus badRequestStatus = HttpStatus.BAD_REQUEST;
+            AuthInfo creator = getUser(scheduledMeetingCreateDto.getCreatorId());
+            if (creator == null) {
+                return Mono.just(new ResponseEntity<>("Creating user does not exist", badRequestStatus));
             }
+
+            String institutionId = scheduledMeetingCreateDto.getInstitutionId();
+            Institution invitedInstitution = getInstitution(institutionId);
+            if (invitedInstitution == null) {
+                return Mono.just(new ResponseEntity<>("Invited institution does not exist", badRequestStatus));
+            }
+            ArrayList<AuthInfo> gamingOperatorAdminsForInstitution = authInfoService.getAllGamingOperatorAdminsForInstitution(institutionId);
+            ;
+            if (gamingOperatorAdminsForInstitution == null || gamingOperatorAdminsForInstitution.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("There is no user with role gaming operator admin for institution", badRequestStatus));
+            }
+
 
             ScheduledMeeting scheduledMeeting = fromCreateDto(scheduledMeetingCreateDto);
             saveScheduledMeeting(scheduledMeeting);
+            String creatorMailSubject = String.format("Scheduled meeting with %s", invitedInstitution.getInstitutionName());
+            sendMeetingNotificationEmailToMeetingCreator(creatorMailSubject, "ScheduledMeetingInitialNotificationForLslbAdmin", scheduledMeeting);
+
+            for (AuthInfo gamingOperatorAdmin : gamingOperatorAdminsForInstitution) {
+                sendMeetingNotificationEmailToAttendee("Meeting Invite With Lagos State Lotteries Board", "ScheduledMeetingInitialNotificationForGamingOperator", gamingOperatorAdmin, scheduledMeeting);
+            }
+
             sendInitialNotificationToMeetingParticipants(scheduledMeeting);
             return Mono.just(new ResponseEntity<>("Scheduled meeting created successfully", HttpStatus.OK));
         } catch (IllegalArgumentException e) {

@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
+import com.software.finatech.lslb.cms.service.dto.ApplicationFormCreateCommentDto;
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormCreateDto;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
 import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
@@ -56,4 +57,6 @@ public interface ApplicationFormService {
     Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, String rejectorId);
     Mono<ResponseEntity> completeApplicationForm(String applicationFormId);
     Mono<ResponseEntity> getPaymentRecordsForApplicationForm(String applicationFormId);
+
+    Mono<ResponseEntity> addCommentsToForm(ApplicationFormCreateCommentDto applicationFormCreateCommentDto);
 }

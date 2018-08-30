@@ -9,6 +9,7 @@ import java.util.Set;
 public class DocumentTypeReferenceData {
 
     private static String applicationFormDocumentPurposeId = DocumentPurposeReferenceData.APPLICATION_FORM_DOCUMENT_PURPOSE_ID;
+    private static String AIPDocumentPurposeId = DocumentPurposeReferenceData.AIP_LICENSE_ID;
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
 
@@ -107,6 +108,39 @@ public class DocumentTypeReferenceData {
         documentType8.setActive(true);
         documentType8.setRequired(true);
 
+        DocumentType documentType9 = (DocumentType) mongoRepositoryReactive.findById("9", DocumentType.class).block();
+        if (documentType9 == null) {
+            documentType9 = new DocumentType();
+            documentType9.setId("9");
+        }
+        documentType9.setName("Agent Passport");
+        documentType9.setDocumentPurposeId(DocumentPurposeReferenceData.AGENT_REGISTRATION_ID);
+        documentType9.setActive(true);
+        documentType9.setRequired(true);
+
+
+        DocumentType documentType10 = (DocumentType) mongoRepositoryReactive.findById("10", DocumentType.class).block();
+        if (documentType10 == null) {
+            documentType10 = new DocumentType();
+            documentType10.setId("10");
+        }
+        documentType10.setName("AIP DOC 1");
+        documentType10.setDocumentPurposeId(AIPDocumentPurposeId);
+        documentType10.setGameTypeIds(getOSbAndPolGameTypeIdSet());
+        documentType10.setActive(true);
+        documentType10.setRequired(true);
+
+        DocumentType documentType11 = (DocumentType) mongoRepositoryReactive.findById("11", DocumentType.class).block();
+        if (documentType11 == null) {
+            documentType11 = new DocumentType();
+            documentType11.setId("11");
+        }
+        documentType11.setName("AIP DOC 2");
+        documentType11.setDocumentPurposeId(AIPDocumentPurposeId);
+        documentType11.setGameTypeIds(getOSbAndPolGameTypeIdSet());
+        documentType11.setActive(true);
+        documentType11.setRequired(true);
+
         mongoRepositoryReactive.saveOrUpdate(documentType1);
         mongoRepositoryReactive.saveOrUpdate(documentType2);
         mongoRepositoryReactive.saveOrUpdate(documentType3);
@@ -115,6 +149,9 @@ public class DocumentTypeReferenceData {
         mongoRepositoryReactive.saveOrUpdate(documentType6);
         mongoRepositoryReactive.saveOrUpdate(documentType7);
         mongoRepositoryReactive.saveOrUpdate(documentType8);
+        mongoRepositoryReactive.saveOrUpdate(documentType9);
+        mongoRepositoryReactive.saveOrUpdate(documentType10);
+        mongoRepositoryReactive.saveOrUpdate(documentType11);
 
     }
 
