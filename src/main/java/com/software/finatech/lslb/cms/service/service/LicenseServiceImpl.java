@@ -55,6 +55,7 @@ public class LicenseServiceImpl implements LicenseService {
                                                String sortProperty,
                                                String institutionId,
                                                String licenseStatusId,
+                                               String gameTypeId,
                                                String paymentRecordId, HttpServletResponse httpServletResponse) {
 
         try {

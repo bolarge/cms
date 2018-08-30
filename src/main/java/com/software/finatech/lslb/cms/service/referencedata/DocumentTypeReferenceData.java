@@ -10,6 +10,7 @@ public class DocumentTypeReferenceData {
 
     private static String applicationFormDocumentPurposeId = DocumentPurposeReferenceData.APPLICATION_FORM_DOCUMENT_PURPOSE_ID;
     private static String AIPDocumentPurposeId = DocumentPurposeReferenceData.AIP_LICENSE_ID;
+    private static String RENEWALDocumentPurposeId = DocumentPurposeReferenceData.RENEWAL_LICENSE_ID;
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
 
@@ -141,6 +142,28 @@ public class DocumentTypeReferenceData {
         documentType11.setActive(true);
         documentType11.setRequired(true);
 
+        DocumentType documentType12 = (DocumentType) mongoRepositoryReactive.findById("12", DocumentType.class).block();
+        if (documentType12 == null) {
+            documentType12 = new DocumentType();
+            documentType12.setId("12");
+        }
+        documentType12.setName("RENWAL DOC 1");
+        documentType12.setDocumentPurposeId(RENEWALDocumentPurposeId);
+        documentType12.setGameTypeIds(getOSbAndPolGameTypeIdSet());
+        documentType12.setActive(true);
+        documentType12.setRequired(true);
+
+        DocumentType documentType13 = (DocumentType) mongoRepositoryReactive.findById("13", DocumentType.class).block();
+        if (documentType13 == null) {
+            documentType13 = new DocumentType();
+            documentType13.setId("13");
+        }
+        documentType13.setName("RENWAL DOC 2");
+        documentType13.setDocumentPurposeId(RENEWALDocumentPurposeId);
+        documentType13.setGameTypeIds(getOSbAndPolGameTypeIdSet());
+        documentType13.setActive(true);
+        documentType13.setRequired(true);
+
         mongoRepositoryReactive.saveOrUpdate(documentType1);
         mongoRepositoryReactive.saveOrUpdate(documentType2);
         mongoRepositoryReactive.saveOrUpdate(documentType3);
@@ -152,6 +175,8 @@ public class DocumentTypeReferenceData {
         mongoRepositoryReactive.saveOrUpdate(documentType9);
         mongoRepositoryReactive.saveOrUpdate(documentType10);
         mongoRepositoryReactive.saveOrUpdate(documentType11);
+        mongoRepositoryReactive.saveOrUpdate(documentType12);
+        mongoRepositoryReactive.saveOrUpdate(documentType13);
 
     }
 

@@ -8,6 +8,7 @@ public class DocumentPurposeReferenceData {
     public static final String APPLICATION_FORM_DOCUMENT_PURPOSE_ID = "1";
     public static final String AGENT_REGISTRATION_ID = "2";
     public static final String AIP_LICENSE_ID = "3";
+    public static final String RENEWAL_LICENSE_ID = "4";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         DocumentPurpose purpose1 = (DocumentPurpose) mongoRepositoryReactive.findById(APPLICATION_FORM_DOCUMENT_PURPOSE_ID, DocumentPurpose.class).block();
@@ -38,8 +39,18 @@ public class DocumentPurposeReferenceData {
         purpose3.setDescription("AIP Documents");
         purpose3.setName("AIP Documents");
 
+        DocumentPurpose purpose4 = (DocumentPurpose) mongoRepositoryReactive.findById(RENEWAL_LICENSE_ID, DocumentPurpose.class).block();
+        if (purpose4 == null) {
+            purpose4 = new DocumentPurpose();
+            purpose4.setId(AIP_LICENSE_ID);
+
+        }
+        purpose4.setDescription("RENEWAL LICENSE Documents");
+        purpose4.setName("RENEWAL LICENSE Documents");
+
         mongoRepositoryReactive.saveOrUpdate(purpose1);
         mongoRepositoryReactive.saveOrUpdate(purpose2);
         mongoRepositoryReactive.saveOrUpdate(purpose3);
+        mongoRepositoryReactive.saveOrUpdate(purpose4);
     }
 }
