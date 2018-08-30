@@ -107,6 +107,16 @@ public class DocumentTypeReferenceData {
         documentType8.setActive(true);
         documentType8.setRequired(true);
 
+        DocumentType documentType9 = (DocumentType) mongoRepositoryReactive.findById("9", DocumentType.class).block();
+        if (documentType9 == null) {
+            documentType9 = new DocumentType();
+            documentType9.setId("9");
+        }
+        documentType9.setName("Agent Passport");
+        documentType9.setDocumentPurposeId(DocumentPurposeReferenceData.AGENT_REGISTRATION_ID);
+        documentType9.setActive(true);
+        documentType9.setRequired(true);
+
         mongoRepositoryReactive.saveOrUpdate(documentType1);
         mongoRepositoryReactive.saveOrUpdate(documentType2);
         mongoRepositoryReactive.saveOrUpdate(documentType3);
@@ -115,6 +125,7 @@ public class DocumentTypeReferenceData {
         mongoRepositoryReactive.saveOrUpdate(documentType6);
         mongoRepositoryReactive.saveOrUpdate(documentType7);
         mongoRepositoryReactive.saveOrUpdate(documentType8);
+        mongoRepositoryReactive.saveOrUpdate(documentType9);
 
     }
 
