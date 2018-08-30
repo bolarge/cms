@@ -233,10 +233,12 @@ public class LicenseServiceImpl implements LicenseService {
             if (!licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID) &&
                     !licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID)) {
                 license.setEndDate(fromDate.plusMonths(duration));
+                license.setRenewalStatus("false");
 
             }
 
             license.setLicenseStatusId(licenseUpdateDto.getLicenseStatusId());
+
             mongoRepositoryReactive.saveOrUpdate(license);
             return Mono.just(new ResponseEntity<>(license.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
