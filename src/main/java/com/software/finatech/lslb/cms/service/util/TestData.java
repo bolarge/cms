@@ -179,6 +179,10 @@ public class TestData {
                 institution.setEmailAddress("samelikzra@gmail.com");
 
             }
+            if(i==5){
+                institution.setEmailAddress("azy@qa.team");
+
+            }
              institution.setActive(true);
             institution.getGameTypeIds().addAll(Arrays.asList("01"));
             institution.setInstitutionName("Test Institution " + i);
