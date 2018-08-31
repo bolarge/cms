@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class ExpirationList {
     MongoRepositoryReactive mongoRepositoryReactive;
     private static Logger logger = LoggerFactory.getLogger(ExpirationList.class);
 
-    public Mono<ResponseEntity> getExpiringLicences(String check, int duration,String licenseStatusId ){
+    public List<License> getExpiringLicences(int duration, String licenseStatusId ){
         LocalDateTime dateTime = new LocalDateTime();
         dateTime=dateTime.plusMonths(duration);
         Query queryLicence= new Query();
@@ -33,27 +34,21 @@ public class ExpirationList {
         queryLicence.addCriteria(Criteria.where("licenseStatusId").is(licenseStatusId));
         List<License> licenses= (List<License>) mongoRepositoryReactive.findAll(queryLicence,License.class).toStream().collect(Collectors.toList());
         if(licenses.size()==0){
-            return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+            return null;
         }
-       ArrayList<LicenseDto> licenseDtos = new ArrayList<>();
-
         for(License license: licenses) {
             if(licenseStatusId.equals("02")){
                 license.setRenewalStatus("true");
+                mongoRepositoryReactive.saveOrUpdate(license);
             }
-              licenseDtos.add(license.convertToDto());
-        }
-
-        if(check=="schedulerClass"){
-            return Mono.just(new ResponseEntity<>(licenses, HttpStatus.OK));
-
-        }else {
-            return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
 
         }
 
-    }
-    public Mono<ResponseEntity>  getExpiredLicences(String check, String licenseStatusId){
+        return licenses;
+
+        }
+
+    public List<License> getExpiredLicences( String licenseStatusId){
         LocalDateTime dateTime = new LocalDateTime();
         Query queryLicence= new Query();
         queryLicence.addCriteria(Criteria.where("endDate").lte(dateTime));
@@ -64,7 +59,7 @@ public class ExpirationList {
         }
          List<License> licenses= (List<License>) mongoRepositoryReactive.findAll(queryLicence,License.class).toStream().collect(Collectors.toList());
         if(licenses.size()==0){
-        //    return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+        return  null;
         }
         if(licenseStatusId.equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
             for(License license: licenses){
@@ -83,17 +78,9 @@ public class ExpirationList {
             queryExpiredLicence.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID));
         }
          List<License> expiredLicenses= (List<License>) mongoRepositoryReactive.findAll(queryExpiredLicence,License.class).toStream().collect(Collectors.toList());
-        List<LicenseDto> licenseDtos = new ArrayList<>();
-        expiredLicenses.stream().forEach(license -> {
-            licenseDtos.add(license.convertToDto());
-        });
 
-        if(check=="schedulerClass"){
-            return Mono.just(new ResponseEntity<>(expiredLicenses, HttpStatus.OK));
-
-        }else {
-            return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
+            return expiredLicenses;
 
         }
     }
-}
+

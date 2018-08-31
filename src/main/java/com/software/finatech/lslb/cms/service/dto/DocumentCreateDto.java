@@ -20,6 +20,16 @@ public class DocumentCreateDto {
     @NotEmpty(message = "Entity field ID can not be empty")
     protected String entityId;
     protected String previousDocumentId;
+    @NotEmpty(message = "Institution ID can not be empty")
+    protected String institutionId;
+
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
 
     public String getPreviousDocumentId() {
         return previousDocumentId;

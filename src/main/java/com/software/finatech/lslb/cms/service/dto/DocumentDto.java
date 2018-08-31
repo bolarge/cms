@@ -1,6 +1,8 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 
+import com.software.finatech.lslb.cms.service.domain.Institution;
+
 public class DocumentDto {
     protected String id;
     protected String description;
@@ -17,6 +19,33 @@ public class DocumentDto {
     protected String entityId;
     protected String previousDocumentId;
     protected String originalFilename;
+    protected boolean archive;
+    protected InstitutionDto institution;
+    protected String institutionId;
+
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
+
+    public InstitutionDto getInstitution() {
+        return institution;
+    }
+
+    public void setInstitution(InstitutionDto institution) {
+        this.institution = institution;
+    }
+
+    public boolean isArchive() {
+        return archive;
+    }
+
+    public void setArchive(boolean archive) {
+        this.archive = archive;
+    }
 
     public String getDescription() {
         return description;

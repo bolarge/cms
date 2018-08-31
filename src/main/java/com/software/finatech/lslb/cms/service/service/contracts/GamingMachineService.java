@@ -1,14 +1,14 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
-import com.software.finatech.lslb.cms.service.dto.CreateGamingMachineDto;
+import com.software.finatech.lslb.cms.service.dto.GamingMachineCreateDto;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
 
-public interface GamingOperatorMachineService {
+public interface GamingMachineService {
 
-    Mono<ResponseEntity> findAllAgents(int page,
+    Mono<ResponseEntity> findAllGamingMachines(int page,
                                        int pageSize,
                                        String sortDirection,
                                        String sortProperty,
@@ -16,5 +16,5 @@ public interface GamingOperatorMachineService {
                                        String agentId,
                                        HttpServletResponse httpServletResponse);
 
-    Mono<ResponseEntity> createGamingMachine(CreateGamingMachineDto createGamingMachineDto);
+    Mono<ResponseEntity> createGamingMachine(GamingMachineCreateDto gamingMachineCreateDto);
 }
