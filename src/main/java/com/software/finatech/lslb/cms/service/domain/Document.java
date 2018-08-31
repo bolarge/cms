@@ -30,6 +30,25 @@ public class Document extends AbstractFact {
     protected String previousDocumentId;
     protected String originalFilename;
     private String applicationFormId;
+    protected String institutionId;
+
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
+
+    protected boolean archive;
+
+    public boolean isArchive() {
+        return archive;
+    }
+
+    public void setArchive(boolean archive) {
+        this.archive = archive;
+    }
 
     public String getPreviousDocumentId() {
         return previousDocumentId;
@@ -160,7 +179,9 @@ public class Document extends AbstractFact {
     public void setOriginalFilename(String originalFilename) {
         this.originalFilename = originalFilename;
     }
-
+    public Institution getInstitution() {
+        return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+    }
     public void setAssociatedProperties() throws FactNotFoundException {
         if (documentTypeId != null) {
             DocumentType DocumentType = (DocumentType) Mapstore.STORE.get("DocumentType").get(documentTypeId);
@@ -187,6 +208,8 @@ public class Document extends AbstractFact {
         dto.setEntity(getEntity());
         dto.setEntryDate(getEntryDate() == null ? null : getEntryDate().toString(DateTimeFormat.longDateTime()));
         dto.setFilename(getFilename());
+        dto.setInstitutionId(getInstitutionId());
+        dto.setInstitution(getInstitution().convertToDto());
         dto.setOriginalFilename(getOriginalFilename());
         dto.setMimeType(getMimeType());
         dto.setPreviousDocumentId(getPreviousDocumentId());
