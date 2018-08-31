@@ -14,7 +14,7 @@ public interface PaymentRecordService {
                                               String sortProperty,
                                               String institutionId,
                                               String approverId,
-                                              String feePaymentTypeId,
+                                              String feeId,
                                               HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getAllPaymentStatus();

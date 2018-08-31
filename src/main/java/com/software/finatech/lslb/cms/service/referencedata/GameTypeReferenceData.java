@@ -18,6 +18,8 @@ public class GameTypeReferenceData {
         gameType1.setName("POL");
         gameType1.setAipDuration("3");
         gameType1.setLicenseDuration("12");
+        gameType1.setGamingMachineLicenseDuration("12");
+        gameType1.setAgentLicenseDuration("12");
 
 
 
@@ -31,6 +33,8 @@ public class GameTypeReferenceData {
         gameType2.setName("OSB");
         gameType2.setAipDuration("3");
         gameType2.setLicenseDuration("12");
+        gameType2.setGamingMachineLicenseDuration("12");
+        gameType2.setAgentLicenseDuration("12");
 
         mongoRepositoryReactive.saveOrUpdate(gameType1);
         mongoRepositoryReactive.saveOrUpdate(gameType2);

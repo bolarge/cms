@@ -13,7 +13,26 @@ public class GameTypeUpdateDto  {
     @NotEmpty(message = "Please enter GameType Name")
     protected String name;
     protected String description;
+    @NotEmpty(message = "Please enter Agent License Duration")
+    protected String agentLicenseDuration;
+    @NotEmpty(message = "Please enter Gaming Machine License Duration")
+    protected String gamingMachineLicenseDuration;
 
+    public String getAgentLicenseDuration() {
+        return agentLicenseDuration;
+    }
+
+    public void setAgentLicenseDuration(String agentLicenseDuration) {
+        this.agentLicenseDuration = agentLicenseDuration;
+    }
+
+    public String getGamingMachineLicenseDuration() {
+        return gamingMachineLicenseDuration;
+    }
+
+    public void setGamingMachineLicenseDuration(String gamingMachineLicenseDuration) {
+        this.gamingMachineLicenseDuration = gamingMachineLicenseDuration;
+    }
     public String getId() {
         return id;
     }

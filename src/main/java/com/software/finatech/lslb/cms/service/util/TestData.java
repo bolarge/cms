@@ -1,10 +1,15 @@
 package com.software.finatech.lslb.cms.service.util;
 
 
-import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
 
 public class TestData {
 
@@ -146,6 +151,62 @@ public class TestData {
             authInfo.setInstitutionId(null);
             mongoRepositoryReactive.saveOrUpdate(authInfo);
 
+
+
+    }
+
+    public static void generateTestData(MongoRepositoryReactiveImpl mongoRepositoryReactive){
+        Fee fee = (Fee)mongoRepositoryReactive.findById("1",Fee.class).block();
+        if(fee==null){
+            fee= new Fee();
+            fee.setId("1");
+        }
+        fee.setAmount(200000);
+        fee.setFeePaymentTypeId("02");
+        fee.setGameTypeId("01");
+        fee.setRevenueName("Revenue Name");
+        mongoRepositoryReactive.saveOrUpdate(fee);
+        for(int i=1; i<6; i++) {
+
+            Institution institution = (Institution) mongoRepositoryReactive.findById("" + i, Institution.class).block();
+            if (institution == null) {
+                institution = new Institution();
+                institution.setId("" + i);
+            }
+            institution.setEmailAddress("ldapcmstest_" + i + "@gmail.com");
+            institution.setActive(true);
+            institution.getGameTypeIds().addAll(Arrays.asList("01"));
+            institution.setInstitutionName("Test Institution " + i);
+            institution.setPhoneNumber("12345" + i);
+            institution.setStatus(true);
+            mongoRepositoryReactive.saveOrUpdate(institution);
+            PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById("" + i, PaymentRecord.class).block();
+            if (paymentRecord == null) {
+                paymentRecord = new PaymentRecord();
+                paymentRecord.setId("" + i);
+            }
+            paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.CONFIRMED_PAYMENT_STATUS_ID);
+            paymentRecord.setInstitutionId(""+i);
+            paymentRecord.setFeeId(fee.getId());
+            paymentRecord.setApproverId("1");
+            License license = (License) mongoRepositoryReactive.findById(paymentRecord.getId(), License.class).block();
+            if(license==null){
+                license = new License();
+                license.setId(""+i);
+            }
+            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+            license.setInstitutionId(paymentRecord.getInstitutionId());
+            license.setGameTypeId("01");
+            license.setPaymentRecordId(paymentRecord.getId());
+            license.setStartDate(LocalDateTime.now());
+            LocalDateTime startDate= new LocalDateTime();
+            //startDate=
+            license.setEndDate(startDate.plusMonths(12));
+            mongoRepositoryReactive.saveOrUpdate(paymentRecord);
+            mongoRepositoryReactive.saveOrUpdate(license);
+
+
+        }
     }
 
 }

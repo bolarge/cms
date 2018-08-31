@@ -33,7 +33,7 @@ public class LSLBCMSApplication {
         DatabaseLoaderUtils databaseLoaderUtils = (DatabaseLoaderUtils) ctx.getBean("databaseLoaderUtils");
         databaseLoaderUtils.runSeedData();
         Environment env = ctx.getBean(Environment.class);
-        if (Arrays.asList(env.getActiveProfiles()).contains("development")) {
+        if (Arrays.asList(env.getActiveProfiles()).contains("development")|| Arrays.asList(env.getActiveProfiles()).contains("test")) {
             databaseLoaderUtils.runLoadTestData();
         }
 

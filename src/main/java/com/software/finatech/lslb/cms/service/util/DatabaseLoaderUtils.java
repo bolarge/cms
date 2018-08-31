@@ -58,7 +58,7 @@ public class DatabaseLoaderUtils {
 
     // @Profile("test")
     public void runLoadTestData() {
-        //TestData.generateInvoices(mongoRepositoryReactive,auditLogHelper,TestData.generateHealthInstitution(mongoRepositoryReactive),1000);
+        TestData.generateTestData(mongoRepositoryReactive);
     }
 
     public void generateAuthTestData() {

@@ -10,6 +10,24 @@ public class GameType extends EnumeratedFact {
 
     protected String aipDuration;
     protected String licenseDuration;
+    protected String agentLicenseDuration;
+    protected String gamingMachineLicenseDuration;
+
+    public String getAgentLicenseDuration() {
+        return agentLicenseDuration;
+    }
+
+    public void setAgentLicenseDuration(String agentLicenseDuration) {
+        this.agentLicenseDuration = agentLicenseDuration;
+    }
+
+    public String getGamingMachineLicenseDuration() {
+        return gamingMachineLicenseDuration;
+    }
+
+    public void setGamingMachineLicenseDuration(String gamingMachineLicenseDuration) {
+        this.gamingMachineLicenseDuration = gamingMachineLicenseDuration;
+    }
 
     public String getAipDuration() {
         return aipDuration;
@@ -34,6 +52,8 @@ public class GameType extends EnumeratedFact {
         gameType.setDescription(getDescription());
         gameType.setAipDuration(getAipDuration());
         gameType.setLicenseDuration(getLicenseDuration());
+        gameType.setAgentLicenseDuration(getAgentLicenseDuration());
+        gameType.setGamingMachineLicenseDuration(getGamingMachineLicenseDuration());
         return gameType;
     }
 
