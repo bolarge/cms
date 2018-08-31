@@ -20,6 +20,15 @@ public class DocumentType extends EnumeratedFact{
     protected DocumentPurpose documentPurpose;
     protected boolean active;
     protected boolean required;
+    protected String institutionId;
+
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
 
     public Set<String> getGameTypeIds() {
         return gameTypeIds;

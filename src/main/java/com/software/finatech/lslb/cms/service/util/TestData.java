@@ -174,7 +174,12 @@ public class TestData {
                 institution.setId("" + i);
             }
             institution.setEmailAddress("ldapcmstest_" + i + "@gmail.com");
-            institution.setActive(true);
+
+            if(i==1){
+                institution.setEmailAddress("samelikzra@gmail.com");
+
+            }
+             institution.setActive(true);
             institution.getGameTypeIds().addAll(Arrays.asList("01"));
             institution.setInstitutionName("Test Institution " + i);
             institution.setPhoneNumber("12345" + i);
