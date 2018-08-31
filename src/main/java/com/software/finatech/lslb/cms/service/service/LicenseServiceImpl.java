@@ -119,7 +119,7 @@ public class LicenseServiceImpl implements LicenseService {
         if(!StringUtils.isEmpty(gameTypeId)){
             queryLicence.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         }
-        List<License> licenses = (List<License>) mongoRepositoryReactive.find(queryLicence, License.class);
+        List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicence, License.class).toStream().collect(Collectors.toList());
         List<LicenseDto> licenseDtos= new ArrayList<>();
         for(License license: licenses){
 
