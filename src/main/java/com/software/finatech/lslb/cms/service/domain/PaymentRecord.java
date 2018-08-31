@@ -11,7 +11,7 @@ import java.util.Map;
 public class PaymentRecord extends AbstractFact {
 
     private String institutionId;
-     private String approverId;
+    private String approverId;
     private String paymentStatusId;
     private String feeId;
     private String parentLicenseId;
@@ -91,7 +91,8 @@ public class PaymentRecord extends AbstractFact {
             if (paymentStatus != null && paymentStatusMap != null) {
                 paymentStatusMap.put(paymentStatusId, paymentStatus);
             }
-        } if (paymentStatus != null) {
+        }
+        if (paymentStatus != null) {
             paymentRecordDto.setPaymentStatus(paymentStatus.convertToDto());
         }
         paymentRecordDto.setApproverName(getApproverFullName());

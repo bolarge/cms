@@ -696,7 +696,6 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         String confirmedPaymentStatusId = PaymentStatusReferenceData.CONFIRMED_PAYMENT_STATUS_ID;
         queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("feeId").is(applicationFeeForGameType.getId()));
         queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("institutionId").is(institutionId));
-        queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("paymentStatusId").is(confirmedPaymentStatusId));
 
         PaymentRecord existingConfirmedPaymentRecord = (PaymentRecord) mongoRepositoryReactive.find(queryForExistingConfirmedPaymentRecord, PaymentRecord.class).block();
