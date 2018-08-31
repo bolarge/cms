@@ -88,7 +88,7 @@ public class LicenseServiceImpl implements LicenseService {
             query.with(sort);
 
             ArrayList<License> licenses = (ArrayList<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
-            if (licenses == null || licenses.isEmpty()) {
+            if (licenses.size() == 0 || licenses.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
             }
             ArrayList<LicenseDto> licenseDtos = new ArrayList<>();
@@ -121,7 +121,7 @@ public class LicenseServiceImpl implements LicenseService {
         }
         List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicence, License.class).toStream().collect(Collectors.toList());
         List<LicenseDto> licenseDtos= new ArrayList<>();
-        if (licenses == null) {
+        if (licenses.size() == 0) {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
 
         }
@@ -158,12 +158,18 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Override
     public Mono<ResponseEntity> getExpiringLicenses() {
+
         List<License> licenses=expirationList.getExpiringLicences( 90, LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
-       List<LicenseDto> licenseDtos = new ArrayList<>();
+        if(licenses.size()==0){
+            return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+
+        }
+        List<LicenseDto> licenseDtos = new ArrayList<>();
         licenses.stream().forEach(license -> {
             licenseDtos.add(license.convertToDto());
         });
-     return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.BAD_REQUEST));
+
+     return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
 
     }
 
@@ -193,7 +199,10 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public Mono<ResponseEntity> getExpiredAIPs() {
         List<License> licenses=expirationList.getExpiredLicences(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
+        if(licenses.size()==0){
+            return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
 
+        }
         List<LicenseDto> licenseDtos = new ArrayList<>();
         licenses.stream().forEach(license -> {
             licenseDtos.add(license.convertToDto());
