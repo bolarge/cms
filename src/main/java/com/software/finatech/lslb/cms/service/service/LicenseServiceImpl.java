@@ -121,11 +121,12 @@ public class LicenseServiceImpl implements LicenseService {
         }
         List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicence, License.class).toStream().collect(Collectors.toList());
         List<LicenseDto> licenseDtos= new ArrayList<>();
+        if (licenses == null) {
+            return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+
+        }
         for(License license: licenses){
 
-            if (license == null) {
-                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
-            }
             int days = Days.daysBetween(dateTime,license.getEndDate()).getDays();
             if (days > 0) {
                 license.setRenewalStatus("true");
