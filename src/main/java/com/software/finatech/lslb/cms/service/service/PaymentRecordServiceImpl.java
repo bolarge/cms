@@ -8,6 +8,7 @@ import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordCreateDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.MapValues;
@@ -86,7 +87,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             query.with(sort);
 
             ArrayList<PaymentRecord> paymentRecords = (ArrayList<PaymentRecord>) mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
-            if (paymentRecords == null || paymentRecords.isEmpty()) {
+            if (paymentRecords.size() == 0 || paymentRecords.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
             }
             ArrayList<PaymentRecordDto> paymentRecordDtos = new ArrayList<>();
@@ -132,8 +133,8 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             List<PaymentRecord> licenseRecords;
             List<PaymentRecordDto> licenseDtos =new ArrayList<>();
             licenseRecords= (List<PaymentRecord>)mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
-            if (licenseRecords == null) {
-                return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
+            if (licenseRecords.size()==0) {
+                return Mono.just(new ResponseEntity<>("No record found", HttpStatus.BAD_REQUEST));
             } else {
                 for(PaymentRecord licenseRecord: licenseRecords){
                     licenseDtos.add(licenseRecord.convertToDto());
@@ -183,7 +184,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             }else{
                 license=licenseCheck;
             }
-            license.setLicenseStatusId("04");
+            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID);
         license.setInstitutionId(paymentRecord.getInstitutionId());
         license.setGameTypeId(paymentRecord.convertToDto().getFee().getGameType().getId());
         license.setPaymentRecordId(paymentRecord.getId());
