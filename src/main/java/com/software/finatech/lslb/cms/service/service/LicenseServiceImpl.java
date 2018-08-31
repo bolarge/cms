@@ -119,17 +119,24 @@ public class LicenseServiceImpl implements LicenseService {
         if(!StringUtils.isEmpty(gameTypeId)){
             queryLicence.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         }
-        License license = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
-        if (license == null) {
-            return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));
+        List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicence, License.class).toStream().collect(Collectors.toList());
+        List<LicenseDto> licenseDtos= new ArrayList<>();
+        if (licenses == null) {
+            return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+
         }
-        int days = Days.daysBetween(license.getEndDate(), dateTime).getDays();
-        if (days > 0) {
-            license.setRenewalStatus("true");
-        } else {
-            license.setRenewalStatus("false");
+        for(License license: licenses){
+
+            int days = Days.daysBetween(dateTime,license.getEndDate()).getDays();
+            if (days > 0) {
+                license.setRenewalStatus("true");
+            } else {
+                license.setRenewalStatus("false");
+            }
+            licenseDtos.add(license.convertToDto());
         }
-        return Mono.just(new ResponseEntity<>(license.convertToDto(), HttpStatus.OK));
+
+        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
     }
 
     public List<EnumeratedFactDto> getLicenseStatus() {
@@ -151,28 +158,49 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Override
     public Mono<ResponseEntity> getExpiringLicenses() {
+        List<License> licenses=expirationList.getExpiringLicences( 90, LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+       List<LicenseDto> licenseDtos = new ArrayList<>();
+        licenses.stream().forEach(license -> {
+            licenseDtos.add(license.convertToDto());
+        });
+     return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.BAD_REQUEST));
 
-        return expirationList.getExpiringLicences("controllerClass", 90, LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
     }
 
     @Override
     public Mono<ResponseEntity> getExpiringAIPs() {
-
-        return expirationList.getExpiringLicences("controllerClass", 14, LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
+        List<License> licenses=expirationList.getExpiringLicences( 14, LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
+        List<LicenseDto> licenseDtos = new ArrayList<>();
+        licenses.stream().forEach(license -> {
+            licenseDtos.add(license.convertToDto());
+        });
+        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.BAD_REQUEST));
+       // return ;
     }
 
     @Override
     public Mono<ResponseEntity> getExpiredLicenses() {
+        List<License> licenses=expirationList.getExpiredLicences(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+        List<LicenseDto> licenseDtos = new ArrayList<>();
+        licenses.stream().forEach(license -> {
+            licenseDtos.add(license.convertToDto());
+        });
+        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.BAD_REQUEST));
 
-        return expirationList.getExpiredLicences("controllerClass", LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
 
     }
 
     @Override
     public Mono<ResponseEntity> getExpiredAIPs() {
+        List<License> licenses=expirationList.getExpiredLicences(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
 
-        return expirationList.getExpiredLicences("controllerClass", LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
+        List<LicenseDto> licenseDtos = new ArrayList<>();
+        licenses.stream().forEach(license -> {
+            licenseDtos.add(license.convertToDto());
+        });
+        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.BAD_REQUEST));
 
+       // return
     }
 
     @Override
