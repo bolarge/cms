@@ -32,13 +32,13 @@ public class GamingMachineController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "institutionId", "agentId"})
-    @ApiOperation(value = "Get all payment records", response = GamingMachineDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiOperation(value = "Get all gaming machines", response = GamingMachineDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getAllPaymentRecords(@RequestParam("page") int page,
+    public Mono<ResponseEntity> getAllGamingMachines(@RequestParam("page") int page,
                                                      @RequestParam("pageSize") int pageSize,
                                                      @RequestParam("sortType") String sortType,
                                                      @RequestParam("sortProperty") String sortParam,
@@ -55,7 +55,7 @@ public class GamingMachineController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createApplicationForm(@RequestBody @Valid GamingMachineCreateDto gamingMachineCreateDto) {
+    public Mono<ResponseEntity> createGamingMachine(@RequestBody @Valid GamingMachineCreateDto gamingMachineCreateDto) {
         return gamingMachineService.createGamingMachine(gamingMachineCreateDto);
     }
 }

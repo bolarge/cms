@@ -657,4 +657,9 @@ public class AuthInfoController extends BaseController {
 
         return Mono.just(new ResponseEntity("Token Resent", HttpStatus.CREATED));
     }
+
+
+    public String getAppHostPort(){
+        return  this.appHostPort;
+    }
 }
