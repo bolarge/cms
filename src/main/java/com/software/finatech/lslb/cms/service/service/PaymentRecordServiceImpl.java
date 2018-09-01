@@ -8,6 +8,7 @@ import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordCreateDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
@@ -117,36 +118,39 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
     public Mono<ResponseEntity> getAllPaymentStatus() {
         return Mono.just(new ResponseEntity<>(getPaymentStatus(), HttpStatus.OK));
     }
-
     @Override
-    public Mono<ResponseEntity> findPaymentRecords(String institutionId, String gameTypeId,String objectType) {
+    public List<PaymentRecord> findPayments(String institutionId, String gameTypeId,boolean isMostRecent) {
+        List<PaymentRecord> findPaymentRecords=findPaymentRecords(institutionId, gameTypeId, isMostRecent);
+        return findPaymentRecords;
+
+    }
+
+    public List<PaymentRecord> findPaymentRecords(String institutionId, String gameTypeId,boolean isMostRecent) {
         try {
 
             Query query = new Query();
 
+            if(isMostRecent==true){
+                query.limit(1);
+                query.with(new Sort(Sort.Direction.DESC, "createdAt"));
+
+            }
             if(!StringUtils.isEmpty(institutionId)){
                 query.addCriteria(Criteria.where("institutionId").is(institutionId));
             }
             if(!StringUtils.isEmpty(gameTypeId)){
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             }
-            List<PaymentRecord> licenseRecords;
-            List<PaymentRecordDto> licenseDtos =new ArrayList<>();
-            licenseRecords= (List<PaymentRecord>)mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
-            if (licenseRecords.size()==0) {
-                return Mono.just(new ResponseEntity<>("No record found", HttpStatus.BAD_REQUEST));
-            } else {
-                for(PaymentRecord licenseRecord: licenseRecords){
-                    licenseDtos.add(licenseRecord.convertToDto());
-                }
-                if(objectType=="LicenseRecord"){
-                    return Mono.just(new ResponseEntity<>(licenseRecords, HttpStatus.OK));
-                }
-                return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
+            List<PaymentRecord> paymentRecords= (List<PaymentRecord>)mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
+            if (paymentRecords.size()==0) {
+                return null;
             }
+
+                return paymentRecords;
+
         } catch (Exception e) {
             String errorMsg = "An error occurred while fetching license with id";
-            return logAndReturnError(logger, errorMsg, e);
+            return null;
         }
     }
     @Override
@@ -161,14 +165,13 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
 
         if(paymentRecordCreateDto.getRenewalCheck()=="true"){
             List<PaymentRecord> previousLicenses=
-                    (List<PaymentRecord>)findPaymentRecords(paymentRecordCreateDto.getInstitutionId(), fee.getGameTypeId(),"LicenseRecord");
-            if(previousLicenses.size()==0){
-            }
-              PaymentRecord lastLicense= previousLicenses.get(previousLicenses.size()-1);
+                    (List<PaymentRecord>)findPaymentRecords(paymentRecordCreateDto.getInstitutionId(), fee.getGameTypeId(),true);
+
+             PaymentRecord lastLicense= previousLicenses.get(previousLicenses.size()-1);
 
               paymentRecord.setParentLicenseId(lastLicense.getId());
         }
-        if(fee.getFeePaymentTypeId().equals("01")){
+        if(fee.getFeePaymentTypeId().equals(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID)){
             mongoRepositoryReactive.saveOrUpdate(paymentRecord);
             return Mono.just(new ResponseEntity<>(paymentRecord.convertToDto(), HttpStatus.OK));
         }
