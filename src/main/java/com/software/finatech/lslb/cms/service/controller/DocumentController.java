@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.controller;
 import com.software.finatech.lslb.cms.service.domain.Document;
 import com.software.finatech.lslb.cms.service.domain.DocumentType;
 import com.software.finatech.lslb.cms.service.domain.FactObject;
+import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
 import com.software.finatech.lslb.cms.service.dto.DocumentCreateDto;
 import com.software.finatech.lslb.cms.service.dto.DocumentDto;
@@ -22,6 +23,8 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
@@ -229,16 +232,23 @@ public class DocumentController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"id", "documentTypeId","institutionId"}, produces = "application/json")
-    public Mono<ResponseEntity> getById(@RequestParam String id, @RequestParam String documetTypeId, @RequestParam String institutionId) {
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page","pageSize","sortType","sortProperty","id", "documentTypeId","institutionId"}, produces = "application/json")
+    public Mono<ResponseEntity> getById(@RequestParam("page") int page,
+                                        @RequestParam("pageSize") int pageSize,
+                                        @RequestParam("sortType") String sortType,
+                                        @RequestParam("sortProperty") String sortParam,
+                                        @RequestParam("id") String id,
+                                        @RequestParam("documentTypeId") String documentTypeId,
+                                        @RequestParam("institutionId") String institutionId,
+                                        HttpServletResponse httpServletResponse) {
 
         Query query = new Query();
         if(!StringUtils.isEmpty(institutionId)){
             query.addCriteria(Criteria.where("institutionId").is(institutionId));
 
         }
-        if(!StringUtils.isEmpty(documetTypeId)){
-            query.addCriteria(Criteria.where("documentTypeId").is(documetTypeId));
+        if(!StringUtils.isEmpty(documentTypeId)){
+            query.addCriteria(Criteria.where("documentTypeId").is(documentTypeId));
 
         }
         if(!StringUtils.isEmpty(id)){
@@ -246,7 +256,20 @@ public class DocumentController extends BaseController {
 
         }
          query.addCriteria(Criteria.where("archive").is(false));
+        if (page == 0) {
+            long count = mongoRepositoryReactive.count(query, License.class).block();
+            httpServletResponse.setHeader("TotalCount", String.valueOf(count));
+        }
 
+        Sort sort;
+        if (!StringUtils.isEmpty(sortType) && !StringUtils.isEmpty(sortParam)) {
+            sort = new Sort((sortType.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC),
+                    sortParam);
+        } else {
+            sort = new Sort(Sort.Direction.DESC, "id");
+        }
+        query.with(PageRequest.of(page, pageSize, sort));
+        query.with(sort);
 
         List<Document> documents = (List<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
         if (documents.size() == 0) {
