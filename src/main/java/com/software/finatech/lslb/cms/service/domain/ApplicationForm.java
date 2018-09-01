@@ -1,6 +1,5 @@
 package com.software.finatech.lslb.cms.service.domain;
 
-import com.software.finatech.lslb.cms.service.dto.ApplicationFormCommentDto;
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
 import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
@@ -184,20 +183,20 @@ public class ApplicationForm extends AbstractFact {
         return gameType;
     }
 
-    public String getGameTypeName(){
+    public String getGameTypeName() {
         GameType gameType = getGameType();
-        if (gameType == null){
+        if (gameType == null) {
             return null;
-        }else {
+        } else {
             return gameType.getName();
         }
     }
 
-    public String getGameTypeDesciption(){
+    public String getGameTypeDesciption() {
         GameType gameType = getGameType();
-        if (gameType == null){
+        if (gameType == null) {
             return null;
-        }else {
+        } else {
             return gameType.getDescription();
         }
     }
@@ -240,16 +239,18 @@ public class ApplicationForm extends AbstractFact {
         ApplicationFormDto applicationFormDto = new ApplicationFormDto();
         GameType gameType = getGameType();
         if (gameType != null) {
-            applicationFormDto.setGameType(gameType.convertToDto());
+            applicationFormDto.setGameTypeDescription(gameType.getDescription());
+            applicationFormDto.setGameTypeName(gameType.getName());
+            applicationFormDto.setGameTypeId(gameTypeId);
         }
         ApplicationFormStatus applicationFormStatus = getStatus();
         if (applicationFormStatus != null) {
-            applicationFormDto.setStatus(applicationFormStatus.convertToDto());
+            applicationFormDto.setStatusName(applicationFormStatus.getName());
         }
 
         ApplicationFormType applicationFormType = getApplicationFormType();
         if (applicationFormType != null) {
-            applicationFormDto.setApplicationFormType(applicationFormType.convertToDto());
+            applicationFormDto.setApplicationFormTypeName(applicationFormType.getName());
         }
         Institution institution = getInstitution();
         if (institution != null) {
@@ -270,15 +271,21 @@ public class ApplicationForm extends AbstractFact {
         applicationFormDto.setFormName(getFormName());
 
         LslbAdminComment lslbAdminComment = getLslbAdminComment();
-        if (lslbAdminComment != null){
-            ApplicationFormCommentDto applicationFormCommentDto = new ApplicationFormCommentDto();
-            applicationFormCommentDto.setComment(lslbAdminComment.getComment());
+        if (lslbAdminComment != null) {
+            applicationFormDto.setLslbAdminComment(lslbAdminComment.getComment());
+            applicationFormDto.setLslbAdminCommented(true);
             AuthInfo admin = getAuthInfo(lslbAdminComment.getUserId());
-            if (admin!= null){
-                applicationFormCommentDto.setLslbAdminName(admin.getFullName());
+            if (admin != null) {
+                applicationFormDto.setLslbAdminName(admin.getFullName());
             }
-            applicationFormDto.setApplicationFormCommentDto(applicationFormCommentDto);
         }
+        applicationFormDto.setFilledApplicantContactDetails(getApplicantContactDetails() != null);
+        applicationFormDto.setFilledApplicantCriminalityDetails(getApplicantCriminalityDetails() != null);
+        applicationFormDto.setFilledApplicantDeclarationDetails(getApplicantDeclarationDetails() != null);
+        applicationFormDto.setFilledApplicantDetails(getApplicantDetails() != null);
+        applicationFormDto.setFilledApplicantOtherInformation(getApplicantOtherInformation() != null);
+        applicationFormDto.setFilledApplicantOutletInformation(getApplicantOutletInformation() != null);
+        applicationFormDto.setFilledApplicantDetails(getApplicantDetails() != null);
         return applicationFormDto;
     }
 

@@ -7,7 +7,7 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 public class ApplicationFormStatusReferenceData {
 
     public static final String CREATED_STATUS_ID = "1";
-    public static final String FORM_IN_PROGRESS_STATUS_ID = "2";
+    public static final String IN_PROGRESS_STATUS_ID = "2";
     public static final String IN_REVIEW_STATUS_ID = "3";
     public static final String APPROVED_STATUS_ID = "4";
     public static final String REJECTED_STATUS_ID = "5";
@@ -23,13 +23,13 @@ public class ApplicationFormStatusReferenceData {
         status1.setName("CREATED");
         status1.setDescription("Application form has been created ");
 
-        ApplicationFormStatus status2 = (ApplicationFormStatus) mongoRepositoryReactive.findById(FORM_IN_PROGRESS_STATUS_ID, ApplicationFormStatus.class).block();
+        ApplicationFormStatus status2 = (ApplicationFormStatus) mongoRepositoryReactive.findById(IN_PROGRESS_STATUS_ID, ApplicationFormStatus.class).block();
 
         if (status2 == null) {
             status2 = new ApplicationFormStatus();
-            status2.setId(FORM_IN_PROGRESS_STATUS_ID);
+            status2.setId(IN_PROGRESS_STATUS_ID);
         }
-        status2.setName("FORM IN PROGRESS");
+        status2.setName("IN PROGRESS");
         status2.setDescription("A form in the application form has been filled and submitted");
 
         ApplicationFormStatus status3 = (ApplicationFormStatus) mongoRepositoryReactive.findById(IN_REVIEW_STATUS_ID, ApplicationFormStatus.class).block();

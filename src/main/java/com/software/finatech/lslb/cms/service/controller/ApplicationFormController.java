@@ -112,7 +112,7 @@ public class ApplicationFormController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{applicationFormId}/save-applicant-details")
-    @ApiOperation(value = "Save Applicant details", response = String.class, consumes = "application/json")
+    @ApiOperation(value = "Save Applicant details", response = ApplicationFormDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -134,7 +134,7 @@ public class ApplicationFormController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{applicationFormId}/save-applicant-members-details")
-    @ApiOperation(value = "Save applicant members details ", response = String.class, consumes = "application/json")
+    @ApiOperation(value = "Save applicant members details ", response = ApplicationFormDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -156,7 +156,7 @@ public class ApplicationFormController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{applicationFormId}/save-applicant-contact-details")
-    @ApiOperation(value = "Save applicant contact details", response = String.class, consumes = "application/json")
+    @ApiOperation(value = "Save applicant contact details", response = ApplicationFormDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -178,7 +178,7 @@ public class ApplicationFormController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{applicationFormId}/save-applicant-criminality-details")
-    @ApiOperation(value = "Save applicant criminality details", response = String.class, consumes = "application/json")
+    @ApiOperation(value = "Save applicant criminality details", response = ApplicationFormDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -200,7 +200,7 @@ public class ApplicationFormController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{applicationFormId}/save-applicant-declaration-details")
-    @ApiOperation(value = "Save applicant declaration details", response = String.class, consumes = "application/json")
+    @ApiOperation(value = "Save applicant declaration details", response = ApplicationFormDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -222,7 +222,7 @@ public class ApplicationFormController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{applicationFormId}/save-applicant-other-information")
-    @ApiOperation(value = "Save applicant other information", response = String.class, consumes = "application/json")
+    @ApiOperation(value = "Save applicant other information", response = ApplicationFormDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -244,7 +244,7 @@ public class ApplicationFormController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{applicationFormId}/save-applicant-outlet-information")
-    @ApiOperation(value = "Save applicant outlet information", response = String.class, consumes = "application/json")
+    @ApiOperation(value = "Save applicant outlet information", response = ApplicationFormDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -284,7 +284,7 @@ public class ApplicationFormController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> completeApplicationForm(@RequestParam("applicationFormId") String applicationFormId, @RequestParam("isResubmit") boolean isResubmit) {
-        return applicationFormService.completeApplicationForm(applicationFormId,isResubmit);
+        return applicationFormService.completeApplicationForm(applicationFormId, isResubmit);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/payment-records", params = {"applicationFormId"})
@@ -305,7 +305,7 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createApplciationFormComment(@RequestParam("applicationFormId") String applicationFormId, @RequestBody ApplicationFormCreateCommentDto applicationFormCreateCommentDto) {
+    public Mono<ResponseEntity> createApplciationFormComment(@RequestParam("applicationFormId") String applicationFormId, @RequestBody @Valid ApplicationFormCreateCommentDto applicationFormCreateCommentDto) {
         return applicationFormService.addCommentsToFormFromLslbAdmin(applicationFormId, applicationFormCreateCommentDto);
     }
 

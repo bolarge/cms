@@ -17,7 +17,6 @@ import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenc
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
-import io.advantageous.boon.core.Str;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -49,8 +48,14 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     private AuthInfoService authInfoService;
 
     @Autowired
-    public void setMongoRepositoryReactive(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
+    public ApplicationFormServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
+                                      MailContentBuilderService mailContentBuilderService,
+                                      EmailService emailService,
+                                      AuthInfoService authInfoService) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
+        this.mailContentBuilderService = mailContentBuilderService;
+        this.emailService = emailService;
+        this.authInfoService = authInfoService;
     }
 
     @Override
@@ -222,9 +227,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
             }
             applicationForm.setApplicantDetails(applicantDetails);
-            applicationForm.setApplicationFormStatusId("2");
+            applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.IN_PROGRESS_STATUS_ID);
             saveApplicationForm(applicationForm);
-            return Mono.just(new ResponseEntity<>("Saved successfully", HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant details", e);
         }
@@ -257,9 +262,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
             }
             applicationForm.setApplicantMemberDetails(applicantMemberDetails);
-            applicationForm.setApplicationFormStatusId("2");
+            applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.IN_PROGRESS_STATUS_ID);
             saveApplicationForm(applicationForm);
-            return Mono.just(new ResponseEntity<>("Saved successfully", HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant members details", e);
         }
@@ -293,9 +298,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
             }
             applicationForm.setApplicantContactDetails(applicantContactDetails);
-            applicationForm.setApplicationFormStatusId("2");
+            applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.IN_PROGRESS_STATUS_ID);
             saveApplicationForm(applicationForm);
-            return Mono.just(new ResponseEntity<>("Saved successfully", HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant contact details", e);
         }
@@ -328,9 +333,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
             }
             applicationForm.setApplicantCriminalityDetails(applicantCriminalityDetails);
-            applicationForm.setApplicationFormStatusId("2");
+            applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.IN_PROGRESS_STATUS_ID);
             saveApplicationForm(applicationForm);
-            return Mono.just(new ResponseEntity<>("Saved successfully", HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant criminality details", e);
         }
@@ -363,9 +368,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
             }
             applicationForm.setApplicantDeclarationDetails(applicantDeclarationDetails);
-            applicationForm.setApplicationFormStatusId("2");
+            applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.IN_PROGRESS_STATUS_ID);
             saveApplicationForm(applicationForm);
-            return Mono.just(new ResponseEntity<>("Saved successfully", HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant declaration details", e);
         }
@@ -398,9 +403,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
             }
             applicationForm.setApplicantOtherInformation(applicantOtherInformation);
-            applicationForm.setApplicationFormStatusId("2");
+            applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.IN_PROGRESS_STATUS_ID);
             saveApplicationForm(applicationForm);
-            return Mono.just(new ResponseEntity<>("Saved successfully", HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant other details", e);
         }
@@ -433,9 +438,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
             }
             applicationForm.setApplicantOutletInformation(applicantOutletInformation);
-            applicationForm.setApplicationFormStatusId("2");
+            applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.IN_PROGRESS_STATUS_ID);
             saveApplicationForm(applicationForm);
-            return Mono.just(new ResponseEntity<>("Saved successfully", HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant outlet details", e);
         }
@@ -454,7 +459,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
             }
             applicationForm.setApproverId(approverId);
-            String approvedApplicationFormStatusId = "4";
+            String approvedApplicationFormStatusId = ApplicationFormStatusReferenceData.APPROVED_STATUS_ID;
             applicationForm.setApplicationFormStatusId(approvedApplicationFormStatusId);
             saveApplicationForm(applicationForm);
             return Mono.just(new ResponseEntity<>("Application form approved successfully", HttpStatus.OK));
@@ -475,7 +480,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationForm.setApplicationFormStatusId(inReviewApplicationFormStatusId);
             saveApplicationForm(applicationForm);
 
-            if (isResubmit){
+            if (isResubmit) {
                 sendCompleteApplicationNotificationToLslbAdmin(applicationForm);
             }
             return Mono.just(new ResponseEntity<>("Application completed successfully and now in review", HttpStatus.OK));
@@ -585,20 +590,24 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
     @Override
     public Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String applicationFormId, ApplicationFormCreateCommentDto applicationFormCreateCommentDto) {
-        ApplicationForm applicationForm = getApplicationFormById(applicationFormId);
-        if (applicationForm == null) {
-            return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
+        try {
+            ApplicationForm applicationForm = getApplicationFormById(applicationFormId);
+            if (applicationForm == null) {
+                return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo lslbAdmin = authInfoService.getUserById(applicationFormCreateCommentDto.getUserId());
+            if (lslbAdmin == null) {
+                return Mono.just(new ResponseEntity<>("Commenting user does not exist", HttpStatus.BAD_REQUEST));
+            }
+            LslbAdminComment lslbAdminComment = new LslbAdminComment(applicationFormCreateCommentDto.getUserId(), applicationFormCreateCommentDto.getComment());
+            applicationForm.setLslbAdminComment(lslbAdminComment);
+            applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.PENDING_RESUBMISSON_ID);
+            saveApplicationForm(applicationForm);
+            sendAdminCommentNotificationToInstitutionAdmins(applicationForm, lslbAdminComment.getComment());
+            return Mono.just(new ResponseEntity<>("Comment added successfully", HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding comment to application form", e);
         }
-        AuthInfo lslbAdmin = authInfoService.getUserById(applicationFormCreateCommentDto.getUserId());
-        if (lslbAdmin == null) {
-            return Mono.just(new ResponseEntity<>("Commenting user does not exist", HttpStatus.BAD_REQUEST));
-        }
-        LslbAdminComment lslbAdminComment = new LslbAdminComment(applicationFormCreateCommentDto.getUserId(), applicationFormCreateCommentDto.getComment());
-        applicationForm.setLslbAdminComment(lslbAdminComment);
-        applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.PENDING_RESUBMISSON_ID);
-        saveApplicationForm(applicationForm);
-        sendAdminCommentNotificationToInstitutionAdmins(applicationForm, lslbAdminComment.getComment());
-        return Mono.just(new ResponseEntity<>("Comment added successfully", HttpStatus.OK));
     }
 
     public void sendCompleteApplicationNotificationToLslbAdmin(ApplicationForm applicationForm) {

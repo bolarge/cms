@@ -3,10 +3,12 @@ package com.software.finatech.lslb.cms.service.dto;
 import java.util.Set;
 
 public class ApplicationFormDto {
-    private GameTypeDto gameType;
-    private EnumeratedFactDto status;
-    private Set<PaymentRecordDto> paymentRecordDtoSet;
-    private EnumeratedFactDto applicationFormType;
+
+    private String gameTypeName;
+    private String gameTypeDescription;
+    private String gameTypeId;
+    private String statusName;
+    private String applicationFormTypeName;
     private String formName;
     private String institutionId;
     private String institutionName;
@@ -15,15 +17,127 @@ public class ApplicationFormDto {
     private String id;
     private String rejectorId;
     private String rejectorName;
-    private ApplicationFormCommentDto applicationFormCommentDto;
+    private Boolean filledApplicantDetails;
+    private Boolean filledApplicantCriminalityDetails;
+    private Boolean filledApplicantDeclarationDetails;
+    private Boolean filledApplicantOutletInformation;
+    private Boolean filledApplicantOtherInformation;
+    private Boolean filledApplicantContactDetails;
+    private Boolean lslbAdminCommented;
+    private String lslbAdminName;
+    private String lslbAdminComment;
 
 
-    public ApplicationFormCommentDto getApplicationFormCommentDto() {
-        return applicationFormCommentDto;
+    public String getGameTypeName() {
+        return gameTypeName;
     }
 
-    public void setApplicationFormCommentDto(ApplicationFormCommentDto applicationFormCommentDto) {
-        this.applicationFormCommentDto = applicationFormCommentDto;
+    public void setGameTypeName(String gameTypeName) {
+        this.gameTypeName = gameTypeName;
+    }
+
+    public String getGameTypeDescription() {
+        return gameTypeDescription;
+    }
+
+    public void setGameTypeDescription(String gameTypeDescription) {
+        this.gameTypeDescription = gameTypeDescription;
+    }
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
+
+    public String getStatusName() {
+        return statusName;
+    }
+
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
+    }
+
+    public String getApplicationFormTypeName() {
+        return applicationFormTypeName;
+    }
+
+    public void setApplicationFormTypeName(String applicationFormTypeName) {
+        this.applicationFormTypeName = applicationFormTypeName;
+    }
+
+    public Boolean getFilledApplicantDetails() {
+        return filledApplicantDetails;
+    }
+
+    public void setFilledApplicantDetails(Boolean filledApplicantDetails) {
+        this.filledApplicantDetails = filledApplicantDetails;
+    }
+
+    public Boolean getFilledApplicantCriminalityDetails() {
+        return filledApplicantCriminalityDetails;
+    }
+
+    public void setFilledApplicantCriminalityDetails(Boolean filledApplicantCriminalityDetails) {
+        this.filledApplicantCriminalityDetails = filledApplicantCriminalityDetails;
+    }
+
+    public Boolean getFilledApplicantDeclarationDetails() {
+        return filledApplicantDeclarationDetails;
+    }
+
+    public void setFilledApplicantDeclarationDetails(Boolean filledApplicantDeclarationDetails) {
+        this.filledApplicantDeclarationDetails = filledApplicantDeclarationDetails;
+    }
+
+    public Boolean getFilledApplicantOutletInformation() {
+        return filledApplicantOutletInformation;
+    }
+
+    public void setFilledApplicantOutletInformation(Boolean filledApplicantOutletInformation) {
+        this.filledApplicantOutletInformation = filledApplicantOutletInformation;
+    }
+
+    public Boolean getFilledApplicantOtherInformation() {
+        return filledApplicantOtherInformation;
+    }
+
+    public void setFilledApplicantOtherInformation(Boolean filledApplicantOtherInformation) {
+        this.filledApplicantOtherInformation = filledApplicantOtherInformation;
+    }
+
+    public Boolean getFilledApplicantContactDetails() {
+        return filledApplicantContactDetails;
+    }
+
+    public void setFilledApplicantContactDetails(Boolean filledApplicantContactDetails) {
+        this.filledApplicantContactDetails = filledApplicantContactDetails;
+    }
+
+    public Boolean getLslbAdminCommented() {
+        return lslbAdminCommented;
+    }
+
+    public void setLslbAdminCommented(Boolean lslbAdminCommented) {
+        this.lslbAdminCommented = lslbAdminCommented;
+    }
+
+    public String getLslbAdminName() {
+        return lslbAdminName;
+    }
+
+    public void setLslbAdminName(String lslbAdminName) {
+        this.lslbAdminName = lslbAdminName;
+    }
+
+    public String getLslbAdminComment() {
+        return lslbAdminComment;
+    }
+
+    public void setLslbAdminComment(String lslbAdminComment) {
+        this.lslbAdminComment = lslbAdminComment;
     }
 
     public String getRejectorId() {
@@ -40,38 +154,6 @@ public class ApplicationFormDto {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public GameTypeDto getGameType() {
-        return gameType;
-    }
-
-    public void setGameType(GameTypeDto gameType) {
-        this.gameType = gameType;
-    }
-
-    public EnumeratedFactDto getStatus() {
-        return status;
-    }
-
-    public void setStatus(EnumeratedFactDto status) {
-        this.status = status;
-    }
-
-    public Set<PaymentRecordDto> getPaymentRecordDtoSet() {
-        return paymentRecordDtoSet;
-    }
-
-    public void setPaymentRecordDtoSet(Set<PaymentRecordDto> paymentRecordDtoSet) {
-        this.paymentRecordDtoSet = paymentRecordDtoSet;
-    }
-
-    public EnumeratedFactDto getApplicationFormType() {
-        return applicationFormType;
-    }
-
-    public void setApplicationFormType(EnumeratedFactDto applicationFormType) {
-        this.applicationFormType = applicationFormType;
     }
 
     public String getFormName() {
