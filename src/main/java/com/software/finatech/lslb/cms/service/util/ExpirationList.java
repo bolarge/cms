@@ -1,8 +1,11 @@
 package com.software.finatech.lslb.cms.service.util;
 
+import com.software.finatech.lslb.cms.service.domain.Document;
+import com.software.finatech.lslb.cms.service.domain.DocumentType;
 import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactive;
+import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
@@ -66,6 +69,34 @@ public class ExpirationList {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID);
                 license.setRenewalStatus("true");
                 mongoRepositoryReactive.saveOrUpdate(license);
+
+                Query queryRenewalDocuments= new Query();
+                queryRenewalDocuments.addCriteria(Criteria.where("institutionId").is(license.getInstitutionId()));
+                queryRenewalDocuments.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
+                List<Document> documents = (List<Document>)mongoRepositoryReactive.findAll(queryRenewalDocuments, Document.class).toStream().collect(Collectors.toList());
+                if(documents.size()!=0) {
+
+                    List<DocumentType> documentTypes = new ArrayList<>();
+                    documents.stream().forEach(document -> {
+                        documentTypes.add(document.getDocumentType());
+                    });
+                    for (DocumentType documentType : documentTypes) {
+                        if (documentType != null && documentType.getDocumentPurposeId().equals(DocumentPurposeReferenceData.RENEWAL_LICENSE_ID)) {
+
+                            org.springframework.data.mongodb.core.query.Query queryPreviousDocuments = new org.springframework.data.mongodb.core.query.Query();
+                            queryPreviousDocuments.addCriteria(Criteria.where("institutionId").is(license.getInstitutionId()));
+                            queryPreviousDocuments.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
+                            queryPreviousDocuments.addCriteria(Criteria.where("documentTypeId").is(documentType.getId()));
+                            Document previousDocument = (Document) mongoRepositoryReactive.find(queryPreviousDocuments, Document.class).block();
+                            if(previousDocument.isArchive()==false){
+                                previousDocument.setArchive(true);
+                            }
+                            mongoRepositoryReactive.saveOrUpdate(previousDocument);
+
+                        }
+                    }
+                }
+
             }
         }
 

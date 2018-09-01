@@ -5,7 +5,15 @@ public class FeeDto {
     protected GameTypeDto gameType;
     protected EnumeratedFactDto feePaymentType;
     protected String id;
+    protected boolean active;
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
     public String getId() {
         return id;

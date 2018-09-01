@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.referencedata;
 import com.software.finatech.lslb.cms.service.domain.DocumentType;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -125,7 +126,7 @@ public class DocumentTypeReferenceData {
             documentType10 = new DocumentType();
             documentType10.setId("10");
         }
-        documentType10.setName("AIP DOC 1");
+        documentType10.setName("Certificate of Registration obtained from Special Control Unit on Money Laundering of the Federal Ministry of Trade & Investment");
         documentType10.setDocumentPurposeId(AIPDocumentPurposeId);
         documentType10.setGameTypeIds(getOSbAndPolGameTypeIdSet());
         documentType10.setActive(true);
@@ -136,7 +137,7 @@ public class DocumentTypeReferenceData {
             documentType11 = new DocumentType();
             documentType11.setId("11");
         }
-        documentType11.setName("AIP DOC 2");
+        documentType11.setName("Photo frame of your brand");
         documentType11.setDocumentPurposeId(AIPDocumentPurposeId);
         documentType11.setGameTypeIds(getOSbAndPolGameTypeIdSet());
         documentType11.setActive(true);
@@ -147,22 +148,40 @@ public class DocumentTypeReferenceData {
             documentType12 = new DocumentType();
             documentType12.setId("12");
         }
-        documentType12.setName("RENWAL DOC 1");
+        documentType12.setName("Certificate of Incorporation");
         documentType12.setDocumentPurposeId(RENEWALDocumentPurposeId);
         documentType12.setGameTypeIds(getOSbAndPolGameTypeIdSet());
         documentType12.setActive(true);
         documentType12.setRequired(true);
 
-        DocumentType documentType13 = (DocumentType) mongoRepositoryReactive.findById("13", DocumentType.class).block();
-        if (documentType13 == null) {
-            documentType13 = new DocumentType();
-            documentType13.setId("13");
+
+        String[] documentNames = {
+                "Certificate of Incorporation",
+                "Form CAC 2",
+                "Form CAC 7",
+                "Memorandum and Articles of Association",
+                "Directors tax clearance certificate for the preceding year",
+                "Copies of Anti-Money Laundering Training Certificate for key staff",
+                "Copy of audited account and management account for the previous year",
+                "Details of key management staff",
+                "Details of casino staff"
+        };
+        //documentNames.
+        for(int i=0; i<documentNames.length; i++){
+            int id= i+13;
+            DocumentType documentType13 = (DocumentType) mongoRepositoryReactive.findById(String.valueOf(id), DocumentType.class).block();
+            if (documentType13 == null) {
+                documentType13 = new DocumentType();
+                documentType13.setId(String.valueOf(id));
+            }
+            documentType13.setName(documentNames[i]);
+            documentType13.setDocumentPurposeId(RENEWALDocumentPurposeId);
+            documentType13.setGameTypeIds(getOSbAndPolGameTypeIdSet());
+            documentType13.setActive(true);
+            documentType13.setRequired(true);
+            mongoRepositoryReactive.saveOrUpdate(documentType13);
+
         }
-        documentType13.setName("RENWAL DOC 2");
-        documentType13.setDocumentPurposeId(RENEWALDocumentPurposeId);
-        documentType13.setGameTypeIds(getOSbAndPolGameTypeIdSet());
-        documentType13.setActive(true);
-        documentType13.setRequired(true);
 
         mongoRepositoryReactive.saveOrUpdate(documentType1);
         mongoRepositoryReactive.saveOrUpdate(documentType2);
@@ -176,7 +195,7 @@ public class DocumentTypeReferenceData {
         mongoRepositoryReactive.saveOrUpdate(documentType10);
         mongoRepositoryReactive.saveOrUpdate(documentType11);
         mongoRepositoryReactive.saveOrUpdate(documentType12);
-        mongoRepositoryReactive.saveOrUpdate(documentType13);
+
 
     }
 
