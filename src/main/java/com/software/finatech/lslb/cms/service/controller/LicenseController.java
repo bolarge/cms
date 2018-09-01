@@ -43,11 +43,13 @@ public class LicenseController {
                                                @RequestParam("sortType") String sortType,
                                                @RequestParam("sortProperty") String sortParam,
                                                @RequestParam("institutionId") String institutionId,
+                                               @RequestParam("agentId") String agentId,
+                                               @RequestParam("gamingMachineId") String gamingMachineId,
                                                @RequestParam("licenseStatusId") String licenseStatusId,
                                                @RequestParam("gameTypeId") String gameTypeId,
                                                @RequestParam("paymentRecordId") String paymentRecordId,
                                                HttpServletResponse httpServletResponse) {
-        return licenseService.findAllLicense(page, pageSize, sortType, sortParam, institutionId, licenseStatusId, gameTypeId,paymentRecordId, httpServletResponse);
+        return licenseService.findAllLicense(page, pageSize, sortType, sortParam, institutionId,agentId,gamingMachineId, licenseStatusId, gameTypeId,paymentRecordId, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/get-by-licenseId")
@@ -69,8 +71,12 @@ public class LicenseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getLicenseByInstitutionId(@RequestParam("institutionId") String institutionId, @RequestParam("gameTypeId")String gameTypeId) {
-        return licenseService.findLicenseByInstitutionId(institutionId, gameTypeId);
+    public Mono<ResponseEntity> getLicenseByInstitutionId(
+            @RequestParam("institutionId") String institutionId,
+            @RequestParam("agentId") String agentId,
+            @RequestParam("gamingMachineId") String gamingMachineId,
+            @RequestParam("gameTypeId")String gameTypeId) {
+        return licenseService.findLicense(institutionId, agentId, gamingMachineId,gameTypeId);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-license-status")

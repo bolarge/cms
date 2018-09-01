@@ -54,6 +54,7 @@ public class FeeServiceImpl implements FeeService {
             fee.setAmount(Double.valueOf(feeCreateDto.getAmount()));
             fee.setFeePaymentTypeId(feePaymentTypeId);
             fee.setGameTypeId(gameTypeId);
+            fee.setRevenueName(feeCreateDto.getRevenueName());
             fee.setActive(true);
             mongoRepositoryReactive.saveOrUpdate(fee);
             return Mono.just(new ResponseEntity<>(fee.convertToDto(), HttpStatus.OK));
@@ -77,6 +78,7 @@ public class FeeServiceImpl implements FeeService {
             fee.setFeePaymentTypeId(feeUpdateDto.getFeePaymentTypeId());
             fee.setGameTypeId(feeUpdateDto.getGameTypeId());
             fee.setActive(feeUpdateDto.isActive());
+            fee.setRevenueName(feeUpdateDto.getRevenueName());
             mongoRepositoryReactive.saveOrUpdate(fee);
             return Mono.just(new ResponseEntity<>(fee.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {

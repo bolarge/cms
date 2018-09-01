@@ -119,13 +119,13 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         return Mono.just(new ResponseEntity<>(getPaymentStatus(), HttpStatus.OK));
     }
     @Override
-    public List<PaymentRecord> findPayments(String institutionId, String gameTypeId,boolean isMostRecent) {
-        List<PaymentRecord> findPaymentRecords=findPaymentRecords(institutionId, gameTypeId, isMostRecent);
+    public List<PaymentRecord> findPayments(String institutionId,String agentId, String gamingMachineId, String gameTypeId,boolean isMostRecent) {
+        List<PaymentRecord> findPaymentRecords=findPaymentRecords(institutionId, agentId, gamingMachineId,gameTypeId, isMostRecent);
         return findPaymentRecords;
 
     }
 
-    public List<PaymentRecord> findPaymentRecords(String institutionId, String gameTypeId,boolean isMostRecent) {
+    public List<PaymentRecord> findPaymentRecords(String institutionId,String agentId, String gamingMachineId, String gameTypeId,boolean isMostRecent) {
         try {
 
             Query query = new Query();
@@ -135,8 +135,23 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                 query.with(new Sort(Sort.Direction.DESC, "createdAt"));
 
             }
-            if(!StringUtils.isEmpty(institutionId)){
+            if(StringUtils.isEmpty(agentId)&&StringUtils.isEmpty(gamingMachineId)&&!StringUtils.isEmpty(institutionId)){
                 query.addCriteria(Criteria.where("institutionId").is(institutionId));
+
+                if(!StringUtils.isEmpty(agentId)){
+                    query.addCriteria(Criteria.where("agentId").is(""));
+                }
+                if(!StringUtils.isEmpty(gamingMachineId)){
+                    query.addCriteria(Criteria.where("gamingMachineId").is(""));
+                }
+            }else{
+                if(!StringUtils.isEmpty(agentId)){
+                    query.addCriteria(Criteria.where("agentId").is(agentId));
+                }
+                if(!StringUtils.isEmpty(gamingMachineId)){
+                    query.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
+                }
+
             }
             if(!StringUtils.isEmpty(gameTypeId)){
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
@@ -161,20 +176,23 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         paymentRecord.setFeeId(paymentRecordCreateDto.getFeeId());
         paymentRecord.setInstitutionId(paymentRecordCreateDto.getInstitutionId());
         paymentRecord.setPaymentStatusId(paymentRecordCreateDto.getPaymentStatusId());
+        paymentRecord.setAgentId(paymentRecordCreateDto.getAgentId());
+        paymentRecord.setGamingMachineId(paymentRecordCreateDto.getGamingMachineId());
+
         Fee fee = (Fee) mongoRepositoryReactive.findById(paymentRecordCreateDto.getFeeId(),Fee.class).block();
 
         if(paymentRecordCreateDto.getRenewalCheck()=="true"){
             List<PaymentRecord> previousLicenses=
-                    (List<PaymentRecord>)findPaymentRecords(paymentRecordCreateDto.getInstitutionId(), fee.getGameTypeId(),true);
+                    findPaymentRecords(paymentRecordCreateDto.getInstitutionId(), paymentRecordCreateDto.getAgentId(),paymentRecordCreateDto.getGamingMachineId(), fee.getGameTypeId(),true);
 
-             PaymentRecord lastLicense= previousLicenses.get(previousLicenses.size()-1);
-
+              PaymentRecord lastLicense= previousLicenses.get(previousLicenses.size()-1);
               paymentRecord.setParentLicenseId(lastLicense.getId());
         }
         if(fee.getFeePaymentTypeId().equals(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID)){
             mongoRepositoryReactive.saveOrUpdate(paymentRecord);
             return Mono.just(new ResponseEntity<>(paymentRecord.convertToDto(), HttpStatus.OK));
         }
+
        License license;
         Query queryLicence= new Query();
         queryLicence.addCriteria(Criteria.where("gameTypeId").is(fee.getGameTypeId()));
@@ -187,7 +205,35 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             }else{
                 license=licenseCheck;
             }
-            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID);
+        if(fee.getFeePaymentTypeId().equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID)) {
+           /* if(fee.getRevenueName()){
+
+            }*/
+            if (!StringUtils.isEmpty(paymentRecord.getAgentId())
+                    &&!StringUtils.isEmpty(paymentRecord.getInstitutionId())) {
+                license.setLicenceType("Agent");
+                license.setAgentId(paymentRecord.getAgentId());
+                license.setInstitutionId(paymentRecord.getInstitutionId());
+
+            } else if (!StringUtils.isEmpty(paymentRecord.getInstitutionId())
+                    &&StringUtils.isEmpty(paymentRecord.getAgentId())&&
+                    StringUtils.isEmpty(paymentRecord.getGamingMachineId()) ) {
+                license.setLicenceType("Institution");
+                license.setInstitutionId(paymentRecord.getInstitutionId());
+
+            } else if (!StringUtils.isEmpty(paymentRecord.getGamingMachineId())
+                    &&!StringUtils.isEmpty(paymentRecord.getInstitutionId())) {
+                license.setLicenceType("GamingMachine");
+                license.setGameMachineId(paymentRecord.getGamingMachineId());
+                license.setInstitutionId(paymentRecord.getInstitutionId());
+
+            }else{
+                return Mono.just(new ResponseEntity<>("Invalid Payment Record", HttpStatus.OK));
+
+
+            }
+        }
+        license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID);
         license.setInstitutionId(paymentRecord.getInstitutionId());
         license.setGameTypeId(paymentRecord.convertToDto().getFee().getGameType().getId());
         license.setPaymentRecordId(paymentRecord.getId());

@@ -188,6 +188,7 @@ public class TestData {
             institution.setInstitutionName("Test Institution " + i);
             institution.setPhoneNumber("12345" + i);
             institution.setStatus(true);
+
             mongoRepositoryReactive.saveOrUpdate(institution);
             PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById("" + i, PaymentRecord.class).block();
             if (paymentRecord == null) {
@@ -198,6 +199,7 @@ public class TestData {
             paymentRecord.setInstitutionId(""+i);
             paymentRecord.setFeeId(fee.getId());
             paymentRecord.setApproverId("1");
+
             License license = (License) mongoRepositoryReactive.findById(paymentRecord.getId(), License.class).block();
             if(license==null){
                 license = new License();
@@ -209,11 +211,24 @@ public class TestData {
             license.setPaymentRecordId(paymentRecord.getId());
             license.setStartDate(LocalDateTime.now());
             LocalDateTime startDate= new LocalDateTime();
-            //startDate=
-            license.setEndDate(startDate.plusMonths(12));
+            license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getLicenseDuration())));
+            license.setLicenceType("institution");
+            if(i==3){
+                paymentRecord.setGamingMachineId(String.valueOf(i));
+                license.setGameMachineId(paymentRecord.getGamingMachineId());
+                license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getGamingMachineLicenseDuration())));
+                license.setLicenceType("gamingMachine");
+
+            }
+            if(i==4){
+                paymentRecord.setAgentId(String.valueOf(i));
+                license.setAgentId(paymentRecord.getAgentId());
+                license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getAgentLicenseDuration())));
+                license.setLicenceType("agent");
+            }
+            license.setRenewalStatus("false");
             mongoRepositoryReactive.saveOrUpdate(paymentRecord);
             mongoRepositoryReactive.saveOrUpdate(license);
-
 
         }
     }

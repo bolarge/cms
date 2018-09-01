@@ -11,17 +11,18 @@ public interface LicenseService {
     Mono<ResponseEntity> findAllLicense(int page,
                                         int pageSize,
                                         String sortDirection,
-                                        String sortParam,
+                                        String sortProperty,
                                         String institutionId,
+                                        String agentId,
+                                        String gamingMachineId,
                                         String licenseStatusId,
                                         String gameTypeId,
-                                        String paymentRecordId,
-                                        HttpServletResponse httpServletResponse);
+                                        String paymentRecordId, HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> findLicenseById(String licenseId);
 
     Mono<ResponseEntity> getAllLicenseStatus();
-    Mono<ResponseEntity> findLicenseByInstitutionId(String institutionId, String gameType);
+    Mono<ResponseEntity> findLicense(String institutionId, String agentId, String gamingMachineId,String gameTypeId);
     Mono<ResponseEntity> getExpiringLicenses();
     Mono<ResponseEntity> getExpiringAIPs();
     Mono<ResponseEntity> getExpiredLicenses();

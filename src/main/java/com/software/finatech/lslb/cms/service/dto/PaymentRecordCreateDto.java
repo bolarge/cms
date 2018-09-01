@@ -12,6 +12,25 @@ public class PaymentRecordCreateDto {
     private String feeId;
     private String parentLicenseId;
     private String renewalCheck;
+    private String agentId;
+    private String gamingMachineId;
+
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
+
+    public String getGamingMachineId() {
+        return gamingMachineId;
+    }
+
+    public void setGamingMachineId(String gamingMachineId) {
+        this.gamingMachineId = gamingMachineId;
+    }
 
     public String getRenewalCheck() {
         return renewalCheck;

@@ -8,6 +8,51 @@ public class NotificationDto {
     protected String endDate;
     protected int daysToExpiration;
     protected String institutionEmail;
+    protected String agentId;
+    protected String gamingMachineId;
+    protected String agentFullName;
+    protected String agentEmailAddress;
+    protected String machineNumber;
+
+    public String getAgentEmailAddress() {
+        return agentEmailAddress;
+    }
+
+    public void setAgentEmailAddress(String agentEmailAddress) {
+        this.agentEmailAddress = agentEmailAddress;
+    }
+
+    public String getMachineNumber() {
+        return machineNumber;
+    }
+
+    public void setMachineNumber(String machineNumber) {
+        this.machineNumber = machineNumber;
+    }
+
+    public String getAgentFullName() {
+        return agentFullName;
+    }
+
+    public void setAgentFullName(String agentFullName) {
+        this.agentFullName = agentFullName;
+    }
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
+
+    public String getGamingMachineId() {
+        return gamingMachineId;
+    }
+
+    public void setGamingMachineId(String gamingMachineId) {
+        this.gamingMachineId = gamingMachineId;
+    }
 
     public String getInstitutionId() {
         return institutionId;

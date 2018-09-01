@@ -6,6 +6,15 @@ public class FeeDto {
     protected EnumeratedFactDto feePaymentType;
     protected String id;
     protected boolean active;
+    protected String revenueName;
+
+    public String getRevenueName() {
+        return revenueName;
+    }
+
+    public void setRevenueName(String revenueName) {
+        this.revenueName = revenueName;
+    }
 
     public boolean isActive() {
         return active;

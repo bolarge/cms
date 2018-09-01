@@ -64,6 +64,7 @@ public class Fee extends AbstractFact {
         feeDto.setAmount(getAmount());
         feeDto.setId(getId());
         feeDto.setActive(isActive());
+        feeDto.setRevenueName(getRevenueName());
         Map gameTypeMap = Mapstore.STORE.get("GameType");
         GameType gameType = null;
         if (gameTypeMap != null) {

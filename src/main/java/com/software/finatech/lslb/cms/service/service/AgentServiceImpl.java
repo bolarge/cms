@@ -157,7 +157,7 @@ public class AgentServiceImpl implements AgentService {
             String institutionId = agentInstitution.getInstitutionId();
             String gameTypeId = agentInstitution.getGameTypeId();
 
-            Object licenseDtoEntity = licenseService.findLicenseByInstitutionId(institutionId, gameTypeId).block().getBody();
+            Object licenseDtoEntity = licenseService.findLicense(institutionId,"","", gameTypeId).block().getBody();
             if (licenseDtoEntity instanceof List) {
                 List<LicenseDto> licenseDtosList = (List<LicenseDto>) licenseDtoEntity;
                 GameType gameType = gameTypeService.findById(gameTypeId);

@@ -15,6 +15,25 @@ public class PaymentRecord extends AbstractFact {
     private String paymentStatusId;
     private String feeId;
     private String parentLicenseId;
+    private String agentId;
+    private String gamingMachineId;
+
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
+
+    public String getGamingMachineId() {
+        return gamingMachineId;
+    }
+
+    public void setGamingMachineId(String gamingMachineId) {
+        this.gamingMachineId = gamingMachineId;
+    }
 
     public String getParentLicenseId() {
         return parentLicenseId;
@@ -95,6 +114,8 @@ public class PaymentRecord extends AbstractFact {
         if (paymentStatus != null) {
             paymentRecordDto.setPaymentStatus(paymentStatus.convertToDto());
         }
+        paymentRecordDto.setAgentId(getAgentId());
+        paymentRecordDto.setGamingMachineId(getGamingMachineId());
         paymentRecordDto.setApproverName(getApproverFullName());
         paymentRecordDto.setInstitutionId(getInstitutionId());
         paymentRecordDto.setInstitutionName(getInstitution().institutionName);
