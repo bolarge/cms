@@ -22,6 +22,16 @@ public class DocumentCreateDto {
     protected String previousDocumentId;
     @NotEmpty(message = "Institution ID can not be empty")
     protected String institutionId;
+    @NotEmpty(message = "GameType ID can not be empty")
+    protected String gameTypeId;
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
 
     public String getInstitutionId() {
         return institutionId;

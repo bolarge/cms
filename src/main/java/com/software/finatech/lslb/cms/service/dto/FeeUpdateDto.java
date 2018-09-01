@@ -9,7 +9,18 @@ public class FeeUpdateDto {
     protected String gameTypeId;
     @NotEmpty(message = "Please provide fee payment type id")
     protected String feePaymentTypeId;
+    @NotEmpty(message = "Please provide Id")
     protected String id;
+    @NotEmpty(message = "Please fee status")
+    protected boolean active;
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
     public String getId() {
         return id;

@@ -66,8 +66,8 @@ public class GamingMachineServiceImpl implements GamingMachineService {
             }
             ArrayList<GamingMachineDto> gamingMachineDtos = new ArrayList<>();
 
-            gamingMachines.forEach(paymentRecord -> {
-                gamingMachineDtos.add(paymentRecord.convertToDto());
+            gamingMachines.forEach(gamingMachine -> {
+                gamingMachineDtos.add(gamingMachine.convertToDto());
             });
 
             return Mono.just(new ResponseEntity<>(gamingMachineDtos, HttpStatus.OK));

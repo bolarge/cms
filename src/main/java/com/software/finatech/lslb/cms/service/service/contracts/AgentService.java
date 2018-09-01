@@ -12,8 +12,8 @@ public interface AgentService {
                                        int pageSize,
                                        String sortDirection,
                                        String sortProperty,
-                                       String institutionId,
-                                       String gameTypeId,
+                                       String institutionIds,
+                                       String gameTypeIds,
                                        HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> createAgent(AgentCreateDto agentCreateDto);

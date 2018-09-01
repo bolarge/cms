@@ -9,11 +9,20 @@ import java.util.Map;
 @SuppressWarnings("serial")
 @Document(collection = "Fees")
 public class Fee extends AbstractFact {
+    protected boolean active;
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
     protected double amount;
     protected String gameTypeId;
     protected String feePaymentTypeId;
     protected String revenueName;
+
 
     public double getAmount() {
         return amount;
@@ -54,6 +63,7 @@ public class Fee extends AbstractFact {
         FeeDto feeDto = new FeeDto();
         feeDto.setAmount(getAmount());
         feeDto.setId(getId());
+        feeDto.setActive(isActive());
         Map gameTypeMap = Mapstore.STORE.get("GameType");
         GameType gameType = null;
         if (gameTypeMap != null) {

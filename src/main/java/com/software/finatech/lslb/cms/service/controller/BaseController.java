@@ -34,6 +34,4 @@ public class BaseController {
         appHostPort = "http://" + frontendHost +((frontendPort!=null && !frontendPort.isEmpty())? ":"+frontendPort:"");
         //mapperAnnotation =  JsonFactory.createUseAnnotations(true);
     }
-
-
 }

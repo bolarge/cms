@@ -137,6 +137,8 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 model.put("name", authInfo.getFirstName() + " " + authInfo.getLastName());
                 String content = mailContentBuilderService.build(model, "ExistingUserRegistrationEmail");
                 emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
+                authInfo.setEnabled(true);
+                mongoRepositoryReactive.saveOrUpdate(authInfo);
 
             } else {
 
