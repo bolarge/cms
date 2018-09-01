@@ -48,11 +48,13 @@ public class FeeServiceImpl implements FeeService {
             if (existingFeeWithGameTypeAndFeePaymentType != null) {
                 return Mono.just(new ResponseEntity<>("A fee setting already exist with the Fee Type and Game Type please update it", HttpStatus.BAD_REQUEST));
             }
+
             Fee fee = new Fee();
             fee.setId(UUID.randomUUID().toString());
             fee.setAmount(Double.valueOf(feeCreateDto.getAmount()));
             fee.setFeePaymentTypeId(feePaymentTypeId);
             fee.setGameTypeId(gameTypeId);
+            fee.setActive(true);
             mongoRepositoryReactive.saveOrUpdate(fee);
             return Mono.just(new ResponseEntity<>(fee.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -74,6 +76,7 @@ public class FeeServiceImpl implements FeeService {
             fee.setAmount(Double.valueOf(feeUpdateDto.getAmount()));
             fee.setFeePaymentTypeId(feeUpdateDto.getFeePaymentTypeId());
             fee.setGameTypeId(feeUpdateDto.getGameTypeId());
+            fee.setActive(feeUpdateDto.isActive());
             mongoRepositoryReactive.saveOrUpdate(fee);
             return Mono.just(new ResponseEntity<>(fee.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -133,6 +136,7 @@ public class FeeServiceImpl implements FeeService {
             if (!StringUtils.isEmpty(gameTypeId)) {
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             }
+            query.addCriteria(Criteria.where("active").is(true));
 
             ArrayList<Fee> fees = (ArrayList<Fee>) mongoRepositoryReactive.findAll(query, Fee.class).toStream().collect(Collectors.toList());
             if (fees == null || fees.isEmpty()) {

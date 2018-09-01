@@ -31,6 +31,15 @@ public class Document extends AbstractFact {
     protected String originalFilename;
     private String applicationFormId;
     protected String institutionId;
+    protected String gameTypeId;
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
 
     public String getInstitutionId() {
         return institutionId;
