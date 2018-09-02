@@ -11,6 +11,32 @@ public class LicenseDto {
     protected String startDate;
     protected String endDate;
     protected String renewalStatus;
+    protected String licenseType;
+    protected String agentId;
+    protected String gamingMachineId;
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
+
+    public String getGamingMachineId() {
+        return gamingMachineId;
+    }
+
+    public void setGamingMachineId(String gamingMachineId) {
+        this.gamingMachineId = gamingMachineId;
+    }
+    public String getLicenseType() {
+        return licenseType;
+    }
+
+    public void setLicenseType(String licenseType) {
+        this.licenseType = licenseType;
+    }
 
     public String getStartDate() {
         return startDate;

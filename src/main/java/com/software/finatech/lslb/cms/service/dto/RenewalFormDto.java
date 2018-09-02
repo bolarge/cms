@@ -20,6 +20,15 @@ public class RenewalFormDto {
     protected String newInvestors;
     protected String institutionId;
     protected String gameTypeId;
+    protected String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getInstitutionId() {
         return institutionId;

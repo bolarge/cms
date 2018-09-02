@@ -22,6 +22,33 @@ public class License extends AbstractFact {
     protected LocalDateTime startDate;
     protected LocalDateTime endDate;
     protected String renewalStatus;
+    protected String licenceType;
+    protected String agentId;
+    protected String gamingMachineId;
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
+
+    public String getGamingMachineId() {
+        return gamingMachineId;
+    }
+
+    public void setGamingMachineId(String gamingMachineId) {
+        this.gamingMachineId = gamingMachineId;
+    }
+
+    public String getLicenceType() {
+        return licenceType;
+    }
+
+    public void setLicenceType(String licenceType) {
+        this.licenceType = licenceType;
+    }
 
     public String getInstitutionId() {
         return institutionId;
@@ -105,6 +132,9 @@ public class License extends AbstractFact {
             }
         }
         licenseDto.setLicenseStatus(licenseStatus.convertToDto());
+        licenseDto.setLicenseType(getLicenceType());
+        //licenseDto.setGamingMachineId(getGamingMachineId());
+       // licenseDto.setAgentId(getAgentId());
         licenseDto.setPaymentRecord(getPaymentRecord().convertToDto());
         licenseDto.setStartDate(startDate.toString("dd/MM/yyyy HH:mm:ss"));
         licenseDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));

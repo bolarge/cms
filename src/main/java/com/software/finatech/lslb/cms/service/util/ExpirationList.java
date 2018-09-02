@@ -31,7 +31,7 @@ public class ExpirationList {
 
     public List<License> getExpiringLicences(int duration, String licenseStatusId ){
         LocalDateTime dateTime = new LocalDateTime();
-        dateTime=dateTime.plusMonths(duration);
+        dateTime=dateTime.plusDays(duration);
         Query queryLicence= new Query();
         queryLicence.addCriteria(Criteria.where("endDate").lt(dateTime));
         queryLicence.addCriteria(Criteria.where("licenseStatusId").is(licenseStatusId));
@@ -69,13 +69,11 @@ public class ExpirationList {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID);
                 license.setRenewalStatus("true");
                 mongoRepositoryReactive.saveOrUpdate(license);
-
                 Query queryRenewalDocuments= new Query();
                 queryRenewalDocuments.addCriteria(Criteria.where("institutionId").is(license.getInstitutionId()));
                 queryRenewalDocuments.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
                 List<Document> documents = (List<Document>)mongoRepositoryReactive.findAll(queryRenewalDocuments, Document.class).toStream().collect(Collectors.toList());
                 if(documents.size()!=0) {
-
                     List<DocumentType> documentTypes = new ArrayList<>();
                     documents.stream().forEach(document -> {
                         documentTypes.add(document.getDocumentType());
