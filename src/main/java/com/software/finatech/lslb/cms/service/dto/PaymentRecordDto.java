@@ -11,23 +11,23 @@ public class PaymentRecordDto {
     private FeeDto fee;
     private String id;
     private String parentLicenseId;
-    private Agent agent;
-    private GamingMachine gamingMachine;
+    private AgentDto agent;
+    private GamingMachineDto gamingMachine;
 
 
-    public Agent getAgent() {
+    public AgentDto getAgent() {
         return agent;
     }
 
-    public void setAgent(Agent agent) {
+    public void setAgent(AgentDto agent) {
         this.agent = agent;
     }
 
-    public GamingMachine getGamingMachine() {
+    public GamingMachineDto getGamingMachine() {
         return gamingMachine;
     }
 
-    public void setGamingMachine(GamingMachine gamingMachine) {
+    public void setGamingMachine(GamingMachineDto gamingMachine) {
         this.gamingMachine = gamingMachine;
     }
 
