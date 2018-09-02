@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.util;
 
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.GameTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import org.joda.time.LocalDateTime;
@@ -168,10 +169,10 @@ public class TestData {
         mongoRepositoryReactive.saveOrUpdate(fee);
         for(int i=1; i<6; i++) {
 
-            Institution institution = (Institution) mongoRepositoryReactive.findById("" + i, Institution.class).block();
+            Institution institution = (Institution) mongoRepositoryReactive.findById(String.valueOf(i), Institution.class).block();
             if (institution == null) {
                 institution = new Institution();
-                institution.setId("" + i);
+                institution.setId(String.valueOf(i));
             }
             institution.setEmailAddress("ldapcmstest_" + i + "@gmail.com");
 
@@ -190,10 +191,32 @@ public class TestData {
             institution.setStatus(true);
 
             mongoRepositoryReactive.saveOrUpdate(institution);
-            PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById("" + i, PaymentRecord.class).block();
+            
+            Agent agent = (Agent) mongoRepositoryReactive.findById(String.valueOf(i), Agent.class).block();
+            if(agent==null){
+                agent= new Agent();
+                agent.setId(String.valueOf(i));
+            }
+            agent.setFirstName("Agent");
+            agent.setLastName(String.valueOf(i));
+            agent.setFullName(agent.getFirstName()+" "+agent.getLastName());
+            agent.setEmailAddress("testcms "+i+"@gmail.com");
+            agent.getInstitutionIds().addAll(Arrays.asList(String.valueOf(i)));
+            agent.getGameTypeIds().addAll(Arrays.asList(GameTypeReferenceData.POL_GAME_TYPE_ID));
+
+            GamingMachine gamingMachine = (GamingMachine) mongoRepositoryReactive.findById(String.valueOf(i), GamingMachine.class).block();
+            if(gamingMachine==null){
+                gamingMachine= new GamingMachine();
+                gamingMachine.setId(String.valueOf(i));
+            }
+            gamingMachine.setMachineNumber(String.valueOf(i));
+            gamingMachine.setAgentId(String.valueOf(i));
+            gamingMachine.setInstitutionId(String.valueOf(i));
+
+            PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById(String.valueOf(i), PaymentRecord.class).block();
             if (paymentRecord == null) {
                 paymentRecord = new PaymentRecord();
-                paymentRecord.setId("" + i);
+                paymentRecord.setId(String.valueOf(i));
             }
             paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.CONFIRMED_PAYMENT_STATUS_ID);
             paymentRecord.setInstitutionId(""+i);
@@ -214,19 +237,23 @@ public class TestData {
             license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getLicenseDuration())));
             license.setLicenceType("institution");
             if(i==3){
-                paymentRecord.setGamingMachineId(String.valueOf(i));
-                license.setGameMachineId(paymentRecord.getGamingMachineId());
+                paymentRecord.setGamingMachineId(gamingMachine.getId());
+                license.setGamingMachineId(paymentRecord.getGamingMachineId());
                 license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getGamingMachineLicenseDuration())));
                 license.setLicenceType("gamingMachine");
 
             }
             if(i==4){
-                paymentRecord.setAgentId(String.valueOf(i));
+                paymentRecord.setAgentId(agent.getId());
                 license.setAgentId(paymentRecord.getAgentId());
                 license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getAgentLicenseDuration())));
                 license.setLicenceType("agent");
+                agent.setEmailAddress("samelikzra@gmail.com");
+
             }
             license.setRenewalStatus("false");
+            mongoRepositoryReactive.saveOrUpdate(gamingMachine);
+            mongoRepositoryReactive.saveOrUpdate(agent);
             mongoRepositoryReactive.saveOrUpdate(paymentRecord);
             mongoRepositoryReactive.saveOrUpdate(license);
 

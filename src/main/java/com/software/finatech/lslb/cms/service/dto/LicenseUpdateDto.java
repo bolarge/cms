@@ -11,24 +11,24 @@ public class LicenseUpdateDto {
     private String paymentRecordId;
     @NotEmpty(message = "Please provide license Type")
     private String licenseType;
-    protected String agentId;
-    protected String gameMachineId;
-
-    public String getAgentId() {
-        return agentId;
-    }
-
-    public void setAgentId(String agentId) {
-        this.agentId = agentId;
-    }
-
-    public String getGameMachineId() {
-        return gameMachineId;
-    }
-
-    public void setGameMachineId(String gameMachineId) {
-        this.gameMachineId = gameMachineId;
-    }
+//    protected String agentId;
+//    protected String gamingMachineId;
+//
+//    public String getAgentId() {
+//        return agentId;
+//    }
+//
+//    public void setAgentId(String agentId) {
+//        this.agentId = agentId;
+//    }
+//
+//    public String getGamingMachineId() {
+//        return gamingMachineId;
+//    }
+//
+//    public void setGamingMachineId(String gamingMachineId) {
+//        this.gamingMachineId = gamingMachineId;
+//    }
 
     public String getLicenseType() {
         return licenseType;

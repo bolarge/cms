@@ -85,7 +85,7 @@ public class Scheduler {
                     notificationDto.setAgentEmailAddress(agent.getEmailAddress());
 
                 }
-                GamingMachine gamingMachine=(GamingMachine) mongoRepositoryReactive.findById(license.getGameMachineId(),GamingMachine.class).block();
+                GamingMachine gamingMachine=(GamingMachine) mongoRepositoryReactive.findById(license.convertToDto().getGamingMachineId(),GamingMachine.class).block();
                 if(gamingMachine!=null){
                     notificationDto.setMachineNumber(gamingMachine.getMachineNumber());
 
@@ -222,7 +222,7 @@ public class Scheduler {
                     notificationDto.setAgentEmailAddress(agent.getEmailAddress());
 
                 }
-                GamingMachine gamingMachine=(GamingMachine) mongoRepositoryReactive.findById(license.getGameMachineId(),GamingMachine.class).block();
+                GamingMachine gamingMachine=(GamingMachine) mongoRepositoryReactive.findById(license.convertToDto().getGamingMachineId(),GamingMachine.class).block();
                 if(gamingMachine!=null){
                     notificationDto.setMachineNumber(gamingMachine.getMachineNumber());
 

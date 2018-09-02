@@ -13,7 +13,7 @@ public class LicenseDto {
     protected String renewalStatus;
     protected String licenseType;
     protected String agentId;
-    protected String gameMachineId;
+    protected String gamingMachineId;
 
     public String getAgentId() {
         return agentId;
@@ -23,12 +23,12 @@ public class LicenseDto {
         this.agentId = agentId;
     }
 
-    public String getGameMachineId() {
-        return gameMachineId;
+    public String getGamingMachineId() {
+        return gamingMachineId;
     }
 
-    public void setGameMachineId(String gameMachineId) {
-        this.gameMachineId = gameMachineId;
+    public void setGamingMachineId(String gamingMachineId) {
+        this.gamingMachineId = gamingMachineId;
     }
     public String getLicenseType() {
         return licenseType;

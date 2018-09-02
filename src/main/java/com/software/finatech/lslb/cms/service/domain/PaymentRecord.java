@@ -114,8 +114,16 @@ public class PaymentRecord extends AbstractFact {
         if (paymentStatus != null) {
             paymentRecordDto.setPaymentStatus(paymentStatus.convertToDto());
         }
-        paymentRecordDto.setAgentId(getAgentId());
-        paymentRecordDto.setGamingMachineId(getGamingMachineId());
+        //paymentRecordDto.setAgentId(getAgentId());
+        Agent agent =(Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
+        if(agent!=null){
+            paymentRecordDto.setAgent(agent);
+        }
+        GamingMachine gamingMachine =(GamingMachine) mongoRepositoryReactive.findById(getGamingMachineId(), GamingMachine.class).block();
+        if(gamingMachine!=null){
+            paymentRecordDto.setGamingMachine(gamingMachine);
+        }
+        //paymentRecordDto.setGamingMachineId(getGamingMachineId());
         paymentRecordDto.setApproverName(getApproverFullName());
         paymentRecordDto.setInstitutionId(getInstitutionId());
         paymentRecordDto.setInstitutionName(getInstitution().institutionName);

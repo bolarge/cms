@@ -68,6 +68,8 @@ public class GameTypeController extends BaseController {
         GameType gameType = new GameType();
         gameType.setId(UUID.randomUUID().toString());
         gameType.setAipDuration(gameTypeCreateDto.getAipDuration());
+        gameType.setAgentLicenseDuration(gameTypeCreateDto.getAgentLicenseDuration());
+        gameType.setGamingMachineLicenseDuration(gameTypeCreateDto.getGamingMachineLicenseDuration());
         gameType.setLicenseDuration(gameTypeCreateDto.getLicenseDuration());
         gameType.setName(gameTypeCreateDto.getName());
         gameType.setDescription(gameTypeCreateDto.getDescription());

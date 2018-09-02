@@ -1,5 +1,8 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import com.software.finatech.lslb.cms.service.domain.Agent;
+import com.software.finatech.lslb.cms.service.domain.GamingMachine;
+
 public class PaymentRecordDto {
     private String institutionName;
     private String institutionId;
@@ -8,26 +11,25 @@ public class PaymentRecordDto {
     private FeeDto fee;
     private String id;
     private String parentLicenseId;
-    private String agentId;
-    private String gamingMachineId;
+    private Agent agent;
+    private GamingMachine gamingMachine;
 
 
-    public String getAgentId() {
-        return agentId;
+    public Agent getAgent() {
+        return agent;
     }
 
-    public void setAgentId(String agentId) {
-        this.agentId = agentId;
+    public void setAgent(Agent agent) {
+        this.agent = agent;
     }
 
-    public String getGamingMachineId() {
-        return gamingMachineId;
+    public GamingMachine getGamingMachine() {
+        return gamingMachine;
     }
 
-    public void setGamingMachineId(String gamingMachineId) {
-        this.gamingMachineId = gamingMachineId;
+    public void setGamingMachine(GamingMachine gamingMachine) {
+        this.gamingMachine = gamingMachine;
     }
-
 
     public String getInstitutionName() {
         return institutionName;

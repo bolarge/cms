@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordCreateDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
+import com.software.finatech.lslb.cms.service.dto.PaymentRecordUpdateDto;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -101,7 +102,7 @@ public class PaymentRecordController extends BaseController {
 
 
     @RequestMapping(method = RequestMethod.POST, value = "/new")
-    @ApiOperation(value = "Create new Payment Record", response = PaymentRecordCreateDto.class, consumes = "application/json")
+    @ApiOperation(value = "Create new Payment Record", response = PaymentRecord.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -111,5 +112,17 @@ public class PaymentRecordController extends BaseController {
     )
     public Mono<ResponseEntity> createPaymentRecord(@RequestBody @Valid PaymentRecordCreateDto paymentRecordCreateDto) {
         return paymentRecordService.createPaymentRecord(paymentRecordCreateDto);
+    }
+    @RequestMapping(method = RequestMethod.POST, value = "/update")
+    @ApiOperation(value = "Update Payment Status", response = PaymentRecord.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")
+    }
+    )
+    public Mono<ResponseEntity> updatePaymentRecord(@RequestBody @Valid PaymentRecordUpdateDto paymentRecordUpdateDto) {
+        return paymentRecordService.updatePaymentRecord(paymentRecordUpdateDto);
     }
 }
