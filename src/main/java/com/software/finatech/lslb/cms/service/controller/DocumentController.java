@@ -268,7 +268,7 @@ public class DocumentController extends BaseController {
         query.with(PageRequest.of(page, pageSize, sort));
         query.with(sort);
 
-        List<Document> documents = (List<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
+        List<Document> documents = (List<Document>)mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
         if (documents.size() == 0) {
             return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
         }
