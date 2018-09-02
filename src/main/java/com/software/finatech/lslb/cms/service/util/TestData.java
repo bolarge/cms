@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TestData {
 
@@ -201,14 +203,19 @@ public class TestData {
             agent.setLastName(String.valueOf(i));
             agent.setFullName(agent.getFirstName()+" "+agent.getLastName());
             agent.setEmailAddress("testcms "+i+"@gmail.com");
-            agent.getInstitutionIds().addAll(Arrays.asList(String.valueOf(i)));
-            agent.getGameTypeIds().addAll(Arrays.asList(GameTypeReferenceData.POL_GAME_TYPE_ID));
+            Set<String> institutionIds = new HashSet<>();
+            institutionIds.add(String.valueOf(i));
+            Set<String> gameTypes = new HashSet<>();
+            gameTypes.add(GameTypeReferenceData.POL_GAME_TYPE_ID);
+            agent.setInstitutionIds(institutionIds);
+            agent.setGameTypeIds(gameTypes);
 
             GamingMachine gamingMachine = (GamingMachine) mongoRepositoryReactive.findById(String.valueOf(i), GamingMachine.class).block();
             if(gamingMachine==null){
                 gamingMachine= new GamingMachine();
                 gamingMachine.setId(String.valueOf(i));
             }
+
             gamingMachine.setMachineNumber(String.valueOf(i));
             gamingMachine.setAgentId(String.valueOf(i));
             gamingMachine.setInstitutionId(String.valueOf(i));
