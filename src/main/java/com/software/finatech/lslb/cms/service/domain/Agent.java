@@ -4,6 +4,7 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.AgentDto;
 import com.software.finatech.lslb.cms.service.dto.AgentInstitutionDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -153,7 +154,9 @@ public class Agent extends AbstractFact {
 
     public AgentDto convertToDto() {
         AgentDto agentDto = new AgentDto();
-        agentDto.setDateOfBirth(getDateOfBirth().toString("dd/MM/yyyy"));
+        if(getDateOfBirth()!=null) {
+            agentDto.setDateOfBirth(getDateOfBirth().toString("dd/MM/yyyy"));
+        }
         agentDto.setEmailAddress(getEmailAddress());
         agentDto.setResidentialAddress(getResidentialAddress());
         agentDto.setBusinessAddresses(getBusinessAddresses());

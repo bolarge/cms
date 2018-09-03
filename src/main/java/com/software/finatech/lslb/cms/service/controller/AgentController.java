@@ -7,7 +7,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,14 +35,15 @@ public class AgentController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllAgents(@RequestParam("page") int page,
-                                                     @RequestParam("pageSize") int pageSize,
-                                                     @RequestParam("sortType") String sortType,
-                                                     @RequestParam("sortProperty") String sortParam,
-                                                     @RequestParam("gameTypeIds") String gameTypeIds,
-                                                     @RequestParam("institutionIds") String institutionIds,
-                                                     HttpServletResponse httpServletResponse) {
-        return agentService.findAllAgents(page, pageSize, sortType, sortParam,  institutionIds, gameTypeIds, httpServletResponse);
+                                             @RequestParam("pageSize") int pageSize,
+                                             @RequestParam("sortType") String sortType,
+                                             @RequestParam("sortProperty") String sortParam,
+                                             @RequestParam("gameTypeIds") String gameTypeIds,
+                                             @RequestParam("institutionIds") String institutionIds,
+                                             HttpServletResponse httpServletResponse) {
+        return agentService.findAllAgents(page, pageSize, sortType, sortParam, institutionIds, gameTypeIds, httpServletResponse);
     }
+
     @RequestMapping(method = RequestMethod.POST, value = "/create")
     @ApiOperation(value = "Create an Agent", response = AgentDto.class, consumes = "application/json")
     @ApiResponses(value = {

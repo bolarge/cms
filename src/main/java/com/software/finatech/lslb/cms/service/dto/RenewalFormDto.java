@@ -20,14 +20,14 @@ public class RenewalFormDto {
     protected String newInvestors;
     protected String institutionId;
     protected String gameTypeId;
-    protected String id;
+    protected String renewalFormId;
 
-    public String getId() {
-        return id;
+    public String getRenewalFormId() {
+        return renewalFormId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setRenewalFormId(String renewalFormId) {
+        this.renewalFormId = renewalFormId;
     }
 
     public String getInstitutionId() {

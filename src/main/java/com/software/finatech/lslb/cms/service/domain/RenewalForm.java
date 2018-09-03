@@ -181,6 +181,7 @@ public class RenewalForm extends AbstractFact {
 
     public RenewalFormDto convertToDto(){
         RenewalFormDto renewalFormDto = new RenewalFormDto();
+        renewalFormDto.setRenewalFormId(getId());
         renewalFormDto.setCheckChangeInGamingMachines(getCheckChangeInGamingMachines());
         renewalFormDto.setCheckConvictedCrime(getCheckConvictedCrime());
         renewalFormDto.setCheckNewInvestors(getCheckNewInvestors());
@@ -189,7 +190,6 @@ public class RenewalForm extends AbstractFact {
         renewalFormDto.setCheckSharesAquisition(getCheckSharesAquisition());
         renewalFormDto.setCheckStakeHoldersChange(getCheckStakeHoldersChange());
         renewalFormDto.setCheckTechnicalPartner(getCheckTechnicalPartner());
-
         renewalFormDto.setChangeInGamingMachines(getChangeInGamingMachines());
         renewalFormDto.setNewInvestors(getNewInvestors());
         renewalFormDto.setPoliticalParty(getPoliticalParty());
@@ -200,7 +200,7 @@ public class RenewalForm extends AbstractFact {
         renewalFormDto.setTechnicalPartner(getTechnicalPartner());
         PaymentRecord paymentRecord= (PaymentRecord) mongoRepositoryReactive.findById(getPaymentRecordId(),PaymentRecord.class).block();
         renewalFormDto.setPaymentRecord(paymentRecord.convertToDto());
-        renewalFormDto.setId(getId());
+
         return renewalFormDto;
 
     }

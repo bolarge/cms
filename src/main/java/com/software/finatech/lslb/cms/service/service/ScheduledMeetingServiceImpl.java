@@ -132,7 +132,6 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                 return Mono.just(new ResponseEntity<>("Invited institution does not exist", badRequestStatus));
             }
             ArrayList<AuthInfo> gamingOperatorAdminsForInstitution = authInfoService.getAllGamingOperatorAdminsForInstitution(institutionId);
-            ;
             if (gamingOperatorAdminsForInstitution == null || gamingOperatorAdminsForInstitution.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("There is no user with role gaming operator admin for institution", badRequestStatus));
             }
@@ -227,7 +226,6 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             return Mono.just(new ResponseEntity<>("Invited institution does not exist", badRequestStatus));
         }
         ArrayList<AuthInfo> gamingOperatorAdminsForInstitution = authInfoService.getAllGamingOperatorAdminsForInstitution(institutionId);
-        ;
         if (gamingOperatorAdminsForInstitution == null || gamingOperatorAdminsForInstitution.isEmpty()) {
             return Mono.just(new ResponseEntity<>("There is no user with role gaming operator admin for institution", badRequestStatus));
         }

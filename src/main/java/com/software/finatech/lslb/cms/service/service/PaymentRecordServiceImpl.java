@@ -36,8 +36,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
-
 
 @Service
 public class PaymentRecordServiceImpl implements PaymentRecordService {
@@ -158,7 +156,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             if(!StringUtils.isEmpty(gameTypeId)){
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             }
-            List<PaymentRecord> paymentRecords= (List<PaymentRecord>)mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
+            List<PaymentRecord> paymentRecords=(List<PaymentRecord>) mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
             if (paymentRecords.size()==0) {
                 return null;
             }

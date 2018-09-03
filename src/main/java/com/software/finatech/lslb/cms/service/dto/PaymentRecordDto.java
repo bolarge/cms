@@ -1,8 +1,5 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import com.software.finatech.lslb.cms.service.domain.Agent;
-import com.software.finatech.lslb.cms.service.domain.GamingMachine;
-
 public class PaymentRecordDto {
     private String institutionName;
     private String institutionId;

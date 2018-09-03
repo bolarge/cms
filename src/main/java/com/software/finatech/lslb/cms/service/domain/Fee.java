@@ -21,8 +21,15 @@ public class Fee extends AbstractFact {
     protected double amount;
     protected String gameTypeId;
     protected String feePaymentTypeId;
-    protected String revenueName;
+    protected String revenueNameId;
 
+    public String getRevenueNameId() {
+        return revenueNameId;
+    }
+
+    public void setRevenueNameId(String revenueNameId) {
+        this.revenueNameId = revenueNameId;
+    }
 
     public double getAmount() {
         return amount;
@@ -48,15 +55,6 @@ public class Fee extends AbstractFact {
         this.feePaymentTypeId = feePaymentTypeId;
     }
 
-    public String getRevenueName() {
-        return revenueName;
-    }
-
-    public void setRevenueName(String revenueName) {
-        this.revenueName = revenueName;
-    }
-
-
 
 
     public FeeDto convertToDto() {
@@ -64,8 +62,24 @@ public class Fee extends AbstractFact {
         feeDto.setAmount(getAmount());
         feeDto.setId(getId());
         feeDto.setActive(isActive());
-        feeDto.setRevenueName(getRevenueName());
+      //  feeDto.setRevenueName(getRevenueName());
+        Map revenueNameMap = Mapstore.STORE.get("RevenueName");
+
+        RevenueName revenueName = null;
+        if (revenueNameMap != null) {
+            revenueName = (RevenueName) revenueNameMap.get(revenueNameId);
+        }
+        if (revenueName == null) {
+            revenueName = (RevenueName) mongoRepositoryReactive.findById(revenueNameId, RevenueName.class).block();
+            if (revenueName != null && revenueNameMap != null) {
+                revenueNameMap.put(revenueNameId, revenueName);
+            }
+        }
+        if (revenueName != null) {
+            feeDto.setRevenueName(revenueName);
+        }
         Map gameTypeMap = Mapstore.STORE.get("GameType");
+
         GameType gameType = null;
         if (gameTypeMap != null) {
             gameType = (GameType) gameTypeMap.get(gameTypeId);

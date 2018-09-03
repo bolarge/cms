@@ -1,8 +1,6 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 
-import com.software.finatech.lslb.cms.service.domain.Institution;
-
 public class DocumentDto {
     protected String id;
     protected String description;

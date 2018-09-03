@@ -1,13 +1,13 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.GameType;
+import com.software.finatech.lslb.cms.service.domain.License;
+import com.software.finatech.lslb.cms.service.domain.LicenseStatus;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseUpdateDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.ExpirationList;
@@ -58,7 +58,7 @@ public class LicenseServiceImpl implements LicenseService {
                                                String gamingMachineId,
                                                String licenseStatusId,
                                                String gameTypeId,
-                                               String paymentRecordId, HttpServletResponse httpServletResponse) {
+                                               String paymentRecordId, String licenseType, HttpServletResponse httpServletResponse) {
 
         try {
             Query query = new Query();
@@ -78,6 +78,9 @@ public class LicenseServiceImpl implements LicenseService {
                 query.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));
             }if (!StringUtils.isEmpty(gameTypeId)) {
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+            }
+            if (!StringUtils.isEmpty(licenseType)) {
+                query.addCriteria(Criteria.where("licenseType").is(licenseType));
             }
 
             if (page == 0) {
@@ -112,38 +115,55 @@ public class LicenseServiceImpl implements LicenseService {
         }
     }
 
-    @Override
-    public Mono<ResponseEntity> findLicenseById(String licenseId) {
-        return null;
-    }
 
     @Override
-    public Mono<ResponseEntity> findLicense(String institutionId, String agentId, String gamingMachineId,String gameTypeId) {
+    public Mono<ResponseEntity> findLicense(String licenseId, String institutionId, String agentId, String gamingMachineId,String gameTypeId) {
         LocalDateTime dateTime = new LocalDateTime();
         dateTime = dateTime.plusDays(90);
         Query queryLicence = new Query();
 
-        if(StringUtils.isEmpty(agentId)&&StringUtils.isEmpty(gamingMachineId)&&!StringUtils.isEmpty(institutionId)){
-            queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
-
-            if(!StringUtils.isEmpty(agentId)){
+            if(!StringUtils.isEmpty(institutionId)&&StringUtils.isEmpty(agentId)&&
+                    StringUtils.isEmpty(gamingMachineId)){
+                queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
+                queryLicence.addCriteria(Criteria.where("gamingMachineId").is(""));
                 queryLicence.addCriteria(Criteria.where("agentId").is(""));
+
             }
-            if(!StringUtils.isEmpty(gamingMachineId)){
+            if(!StringUtils.isEmpty(agentId)&&StringUtils.isEmpty(institutionId)&&StringUtils.isEmpty(gamingMachineId)){
+                queryLicence.addCriteria(Criteria.where("agentId").is(agentId));
+                queryLicence.addCriteria(Criteria.where("institutionId").is(""));
                 queryLicence.addCriteria(Criteria.where("gamingMachineId").is(""));
             }
-        }else{
-            if(!StringUtils.isEmpty(agentId)){
-                queryLicence.addCriteria(Criteria.where("agentId").is(agentId));
-            }
-            if(!StringUtils.isEmpty(gamingMachineId)){
+            if(!StringUtils.isEmpty(gamingMachineId)&&StringUtils.isEmpty(institutionId)&&StringUtils.isEmpty(agentId)){
                 queryLicence.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
+                queryLicence.addCriteria(Criteria.where("institutionId").is(""));
+                queryLicence.addCriteria(Criteria.where("agentId").is(""));
             }
+        if(!StringUtils.isEmpty(gamingMachineId)&&!StringUtils.isEmpty(institutionId)
+                &&StringUtils.isEmpty(institutionId)){
+            queryLicence.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
+            queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
+            queryLicence.addCriteria(Criteria.where("institutionId").is(""));
+        }
+        if(!StringUtils.isEmpty(agentId)&&!StringUtils.isEmpty(institutionId)
+                &&StringUtils.isEmpty(institutionId)){
+            queryLicence.addCriteria(Criteria.where("agentId").is(agentId));
+            queryLicence.addCriteria(Criteria.where("institutionId").is(""));
+            queryLicence.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
+
+        }if(!StringUtils.isEmpty(agentId)&&!StringUtils.isEmpty(gamingMachineId)
+                &&!StringUtils.isEmpty(institutionId)){
+            queryLicence.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
+            queryLicence.addCriteria(Criteria.where("agentId").is(agentId));
+            queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
 
         }
-        if(!StringUtils.isEmpty(agentId)&&!StringUtils.isEmpty(gamingMachineId)){
-            return Mono.just(new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST));
-        }
+
+
+            if(!StringUtils.isEmpty(licenseId)){
+                queryLicence.addCriteria(Criteria.where("id").is(licenseId));
+            }
+
         if(!StringUtils.isEmpty(gameTypeId)){
             queryLicence.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         }
@@ -167,7 +187,7 @@ public class LicenseServiceImpl implements LicenseService {
 
         return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
     }
-
+    @Override
     public List<EnumeratedFactDto> getLicenseStatus() {
         Map licenseMap = Mapstore.STORE.get("LicenseStatus");
         ArrayList<LicenseStatus> licenseStatuses = new ArrayList<LicenseStatus>(licenseMap.values());
@@ -248,6 +268,8 @@ public class LicenseServiceImpl implements LicenseService {
             Query queryLicence = new Query();
             queryLicence.addCriteria(Criteria.where("paymentRecordId").is(licenseUpdateDto.getPaymentRecordId()));
             License licenseCheck = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
+
+
             if (licenseCheck == null) {
 
                 return Mono.just(new ResponseEntity<>("No Valid Payment Record", HttpStatus.BAD_REQUEST));
@@ -276,6 +298,7 @@ public class LicenseServiceImpl implements LicenseService {
 
                 }
             }
+            
 
             Query queryGameType = new Query();
             queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().convertToDto().getFee().getGameType().getId()));

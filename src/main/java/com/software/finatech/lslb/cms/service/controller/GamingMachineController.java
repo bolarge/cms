@@ -21,12 +21,7 @@ import javax.validation.Valid;
 public class GamingMachineController {
 
     private GamingMachineService gamingMachineService;
-
     @Autowired
-    public GamingMachineService getGamingMachineService() {
-        return gamingMachineService;
-    }
-
     public void setGamingMachineService(GamingMachineService gamingMachineService) {
         this.gamingMachineService = gamingMachineService;
     }

@@ -3,7 +3,6 @@ package com.software.finatech.lslb.cms.service.referencedata;
 import com.software.finatech.lslb.cms.service.domain.DocumentType;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -182,6 +181,16 @@ public class DocumentTypeReferenceData {
             mongoRepositoryReactive.saveOrUpdate(documentType13);
 
         }
+        DocumentType documentType22 = (DocumentType) mongoRepositoryReactive.findById("22", DocumentType.class).block();
+        if (documentType22 == null) {
+            documentType22 = new DocumentType();
+            documentType22.setId("22");
+        }
+        documentType22.setName("IMAGE FROM AGENT");
+        documentType22.setDocumentPurposeId(DocumentPurposeReferenceData.AGENT_UPLOADS);
+        documentType22.setGameTypeIds(getOSbAndPolGameTypeIdSet());
+        documentType22.setActive(true);
+        documentType22.setRequired(true);
 
         mongoRepositoryReactive.saveOrUpdate(documentType1);
         mongoRepositoryReactive.saveOrUpdate(documentType2);
@@ -195,6 +204,7 @@ public class DocumentTypeReferenceData {
         mongoRepositoryReactive.saveOrUpdate(documentType10);
         mongoRepositoryReactive.saveOrUpdate(documentType11);
         mongoRepositoryReactive.saveOrUpdate(documentType12);
+        mongoRepositoryReactive.saveOrUpdate(documentType22);
 
 
     }

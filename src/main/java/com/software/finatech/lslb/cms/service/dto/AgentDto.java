@@ -1,6 +1,5 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import javax.xml.soap.SAAJResult;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,7 +15,8 @@ public class AgentDto {
     private String meansOfId;
     private String passportId;
     private String fullName;
-private String idNumber;
+    private String idNumber;
+
     public Set<AgentInstitutionDto> getAgentInstitutions() {
         return agentInstitutions;
     }
