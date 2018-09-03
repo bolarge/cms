@@ -1,10 +1,12 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
+import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseUpdateDto;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface LicenseService {
 
@@ -26,6 +28,7 @@ public interface LicenseService {
     Mono<ResponseEntity> getExpiredLicenses();
     Mono<ResponseEntity> getExpiredAIPs();
     Mono<ResponseEntity> updateLicense(LicenseUpdateDto licenseUpdateDto);
+    List<EnumeratedFactDto> getLicenseStatus();
 
 
 }

@@ -1,18 +1,20 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import com.software.finatech.lslb.cms.service.domain.RevenueName;
+
 public class FeeDto {
     protected double amount;
     protected GameTypeDto gameType;
     protected EnumeratedFactDto feePaymentType;
     protected String id;
     protected boolean active;
-    protected String revenueName;
+    protected RevenueName revenueName;
 
-    public String getRevenueName() {
+    public RevenueName getRevenueName() {
         return revenueName;
     }
 
-    public void setRevenueName(String revenueName) {
+    public void setRevenueName(RevenueName revenueName) {
         this.revenueName = revenueName;
     }
 

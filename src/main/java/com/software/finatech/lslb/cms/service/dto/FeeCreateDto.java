@@ -9,15 +9,15 @@ public class FeeCreateDto {
     protected String gameTypeId;
     @NotEmpty(message = "Please provide fee payment type id")
     protected String feePaymentTypeId;
-    @NotEmpty(message = "Please provide a revenue name")
-    protected String revenueName;
+    @NotEmpty(message = "Please provide a revenue id")
+    protected String revenueNameId;
 
-    public String getRevenueName() {
-        return revenueName;
+    public String getRevenueNameId() {
+        return revenueNameId;
     }
 
-    public void setRevenueName(String revenueName) {
-        this.revenueName = revenueName;
+    public void setRevenueNameId(String revenueNameId) {
+        this.revenueNameId = revenueNameId;
     }
 
     public String getAmount() {

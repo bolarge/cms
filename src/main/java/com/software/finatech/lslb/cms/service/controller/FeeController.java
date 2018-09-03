@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.controller;
 
+import com.software.finatech.lslb.cms.service.domain.EnumeratedFact;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
 import io.swagger.annotations.Api;
@@ -7,11 +8,13 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Api(value = "Fees", description = "For everything related to fees configurations", tags = "")
 @RestController
@@ -92,4 +95,21 @@ public class FeeController extends BaseController {
     public Mono<ResponseEntity> createFee(@RequestBody @Valid FeePaymentTypeDto feeCreateDto) {
         return feeService.createFeePaymentType(feeCreateDto);
     }
+    @RequestMapping(method = RequestMethod.GET, value = "/all-revenue-names")
+    @ApiOperation(value = "Get all Revenue Names", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllRevenueNames() {
+        List<EnumeratedFactDto> revenueNames= feeService.getRevenueNames();
+        if(revenueNames==null){
+            return Mono.just(new ResponseEntity<>("No Revenue Name Record", HttpStatus.OK));
+
+        }
+        return Mono.just(new ResponseEntity<>(revenueNames, HttpStatus.OK));
+
+    }
+
 }

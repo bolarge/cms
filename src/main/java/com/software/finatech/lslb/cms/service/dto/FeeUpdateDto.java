@@ -13,15 +13,15 @@ public class FeeUpdateDto {
     protected String id;
     @NotEmpty(message = "Please fee status")
     protected boolean active;
-    @NotEmpty(message = "Please provide a revenue name")
-    protected String revenueName;
+    @NotEmpty(message = "Please provide a revenue id")
+    protected String revenueNameId;
 
-    public String getRevenueName() {
-        return revenueName;
+    public String getRevenueNameId() {
+        return revenueNameId;
     }
 
-    public void setRevenueName(String revenueName) {
-        this.revenueName = revenueName;
+    public void setRevenueNameId(String revenueNameId) {
+        this.revenueNameId = revenueNameId;
     }
 
     public boolean isActive() {
