@@ -167,6 +167,11 @@ public class DocumentController extends BaseController {
 
         ArrayList<DocumentDto> documentsDto = new ArrayList<>();
         documents.forEach(entry -> {
+            try {
+                entry.setAssociatedProperties();
+            } catch (FactNotFoundException e) {
+                e.printStackTrace();
+            }
             documentsDto.add(entry.convertToDto());
         });
 
@@ -277,6 +282,11 @@ public class DocumentController extends BaseController {
         }
         List<DocumentDto> documentDtos= new ArrayList<>();
         documents.stream().forEach(document -> {
+            try {
+                document.setAssociatedProperties();
+            } catch (FactNotFoundException e) {
+                e.printStackTrace();
+            }
             documentDtos.add(document.convertToDto());
         });
 
