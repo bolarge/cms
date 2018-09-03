@@ -55,8 +55,8 @@ public class PaymentRecordController extends BaseController {
         return paymentRecordService.findAllPaymentRecords(page, pageSize, sortType, sortParam, approverId, institutionId,  feeId, httpServletResponse);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/by-institutionId-gameTypeId", params={"institutionId","agentId","gamingMachineId","gameTypeId","mostRecent"})
-    @ApiOperation(value = "Get specific payment Status", response = EnumeratedFactDto.class,responseContainer = "List",consumes = "application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "/specific-payment", params={"institutionId","agentId","gamingMachineId","gameTypeId","mostRecent"})
+    @ApiOperation(value = "Get specific payment Status", response = PaymentRecord.class,responseContainer = "List",consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
