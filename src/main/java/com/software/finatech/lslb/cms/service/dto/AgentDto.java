@@ -1,6 +1,5 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import javax.xml.soap.SAAJResult;
 import java.util.HashSet;
 import java.util.Set;
 

@@ -1,6 +1,5 @@
 package com.software.finatech.lslb.cms.service.domain;
 
-import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
 import com.software.finatech.lslb.cms.service.dto.GamingMachineDto;
 import com.software.finatech.lslb.cms.service.model.GamingMachineGameDetails;
 import org.springframework.data.mongodb.core.mapping.Document;

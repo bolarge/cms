@@ -8,7 +8,6 @@ import com.software.finatech.lslb.cms.service.dto.DocumentCreateDto;
 import com.software.finatech.lslb.cms.service.dto.DocumentDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeReferenceData;
-import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -17,11 +16,11 @@ import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.BsonBinarySubType;
 import org.bson.types.Binary;
-import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
@@ -32,10 +31,11 @@ import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Api(value = "Document", description = "For everything related to documents", tags = "")
@@ -229,16 +229,23 @@ public class DocumentController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"id", "documentTypeId","institutionId"}, produces = "application/json")
-    public Mono<ResponseEntity> getById(@RequestParam String id, @RequestParam String documetTypeId, @RequestParam String institutionId) {
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page","pageSize","sortType","sortProperty","id", "documentTypeId","institutionId"}, produces = "application/json")
+    public Mono<ResponseEntity> getById(@RequestParam("page") int page,
+                                        @RequestParam("pageSize") int pageSize,
+                                        @RequestParam("sortType") String sortType,
+                                        @RequestParam("sortProperty") String sortParam,
+                                        @RequestParam("id") String id,
+                                        @RequestParam("documentTypeId") String documentTypeId,
+                                        @RequestParam("institutionId") String institutionId,
+                                        HttpServletResponse httpServletResponse) {
 
         Query query = new Query();
         if(!StringUtils.isEmpty(institutionId)){
             query.addCriteria(Criteria.where("institutionId").is(institutionId));
 
         }
-        if(!StringUtils.isEmpty(documetTypeId)){
-            query.addCriteria(Criteria.where("documentTypeId").is(documetTypeId));
+        if(!StringUtils.isEmpty(documentTypeId)){
+            query.addCriteria(Criteria.where("documentTypeId").is(documentTypeId));
 
         }
         if(!StringUtils.isEmpty(id)){
@@ -246,9 +253,22 @@ public class DocumentController extends BaseController {
 
         }
          query.addCriteria(Criteria.where("archive").is(false));
+        if (page == 0) {
+            long count = mongoRepositoryReactive.count(query, Document.class).block();
+            httpServletResponse.setHeader("TotalCount", String.valueOf(count));
+        }
 
+        Sort sort;
+        if (!StringUtils.isEmpty(sortType) && !StringUtils.isEmpty(sortParam)) {
+            sort = new Sort((sortType.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC),
+                    sortParam);
+        } else {
+            sort = new Sort(Sort.Direction.DESC, "id");
+        }
+        query.with(PageRequest.of(page, pageSize, sort));
+        query.with(sort);
 
-        List<Document> documents = (List<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
+        List<Document> documents = (List<Document>)mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
         if (documents.size() == 0) {
             return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
         }

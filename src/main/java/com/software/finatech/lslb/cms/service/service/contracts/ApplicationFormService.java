@@ -10,7 +10,6 @@ import com.software.finatech.lslb.cms.service.model.declaration.ApplicantDeclara
 import com.software.finatech.lslb.cms.service.model.otherInformation.ApplicantOtherInformation;
 import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantOutletInformation;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;

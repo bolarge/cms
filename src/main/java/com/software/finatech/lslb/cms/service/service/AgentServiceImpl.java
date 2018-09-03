@@ -1,7 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.controller.AuthInfoController;
-import com.software.finatech.lslb.cms.service.controller.BaseController;
 import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
 import com.software.finatech.lslb.cms.service.domain.GameType;
@@ -157,7 +156,7 @@ public class AgentServiceImpl implements AgentService {
             String institutionId = agentInstitution.getInstitutionId();
             String gameTypeId = agentInstitution.getGameTypeId();
 
-            Object licenseDtoEntity = licenseService.findLicenseByInstitutionId(institutionId, gameTypeId).block().getBody();
+            Object licenseDtoEntity = licenseService.findLicense("",institutionId,"","", gameTypeId).block().getBody();
             if (licenseDtoEntity instanceof List) {
                 List<LicenseDto> licenseDtosList = (List<LicenseDto>) licenseDtoEntity;
                 GameType gameType = gameTypeService.findById(gameTypeId);

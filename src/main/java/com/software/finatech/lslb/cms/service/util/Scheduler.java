@@ -3,13 +3,11 @@ package com.software.finatech.lslb.cms.service.util;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.NotificationDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeReferenceData;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.PaymentRecordServiceImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -17,16 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 public class Scheduler {
@@ -53,7 +48,7 @@ public class Scheduler {
     @Scheduled(cron = "0 0 4 * * ?")
     protected void checkForLicensesCloseToExpirations(){
         List<License> licenses=
-                expirationList.getExpiringLicences(3,LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+                expirationList.getExpiringLicences(90,LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
        List<NotificationDto> notificationDtos= new ArrayList<>();
         LocalDateTime endDate;
         dateTime=dateTime.plusMonths(3);
@@ -82,6 +77,18 @@ public class Scheduler {
                 if(institution!=null){
                     notificationDto.setInstitutionName(institution.getInstitutionName());
                     notificationDto.setInstitutionEmail(institution.getEmailAddress());
+
+                }
+                Agent agent=(Agent) mongoRepositoryReactive.findById(license.getAgentId(),Agent.class).block();
+                if(agent!=null){
+                    notificationDto.setAgentFullName(agent.getFullName());
+                    notificationDto.setAgentEmailAddress(agent.getEmailAddress());
+
+                }
+                GamingMachine gamingMachine=(GamingMachine) mongoRepositoryReactive.findById(license.convertToDto().getGamingMachineId(),GamingMachine.class).block();
+                if(gamingMachine!=null){
+                    notificationDto.setMachineNumber(gamingMachine.getMachineNumber());
+
                 }
 
                 notificationDtos.add(notificationDto);
@@ -135,24 +142,48 @@ public class Scheduler {
             model.put("institutionName", notificationDto.getInstitutionName());
             model.put("endDate", notificationDto.getEndDate());
             if(type=="expiring"){
-                model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType());//+" License will expire in "+notificationDto.getDaysToExpiration()+" days");
+                if(!StringUtils.isEmpty(notificationDto.getGamingMachineId())){
+                    model.put("description", notificationDto.getInstitutionName()+" Gaming Machine with machine number: "+notificationDto.getMachineNumber()+" License will expire soon");
+
+                }else if(!StringUtils.isEmpty(notificationDto.getAgentId())){
+                    model.put("description", notificationDto.getInstitutionName()+" Agent: "+notificationDto.getAgentFullName()+" License will expire soon");
+
+                }else{
+                    model.put("description", notificationDto.getInstitutionName()+" with Game Type: "+notificationDto.getGameType()+" License will expire soon");
+
+                }
             }else if(type=="expired"){
-                model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType()+" License has expired");
-            }else if(type=="AIPExpired"){
+                if(!StringUtils.isEmpty(notificationDto.getGamingMachineId())) {
+                    model.put("description", notificationDto.getInstitutionName()+" Gaming Machine with machine number: "+notificationDto.getMachineNumber() + " License has expired");
+                }
+                if(!StringUtils.isEmpty(notificationDto.getAgentId())) {
+                    model.put("description", notificationDto.getInstitutionName()+" Agent: "+notificationDto.getAgentFullName()+ " License has expired");
+                }
+                else{
+                    model.put("description", notificationDto.getInstitutionName()+" with Game Type: "+notificationDto.getGameType()+" License has expired");
+
+                }
+                }else if(type=="AIPExpired"){
                 model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType()+" AIP has expired");
             }else if(type=="AIPExpiring"){
                 model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType());//+" AIP will expire in"+notificationDto.getDaysToExpiration()+" days. Do contact LSLB Admin to confirm your license");
             }
+
             model.put("gameType", notificationDto.getGameType());
             model.put("date", LocalDate.now().toString("dd-MM-YYYY"));
             String content = mailContentBuilderService.build(model, "LicenseExpiration");
+
            if((type=="AIPExpired")||(type=="AIPExpiring")){
                emailService.sendEmail(content,"AIP Expiration Notification", notificationDto.getInstitutionEmail());
                emailService.sendEmail(content,"AIP Expiration Notification", adminEmail);
 
            }else{
-               emailService.sendEmail(content,"Licence Expiration Notification", notificationDto.getInstitutionEmail());
-               emailService.sendEmail(content,"Licence Expiration Notification", adminEmail);
+               if(!StringUtils.isEmpty(notificationDto.getAgentId())){
+                   emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getAgentEmailAddress());
+
+               }
+                   emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getInstitutionEmail());
+                   emailService.sendEmail(content, "Licence Expiration Notification", adminEmail);
 
            }
 
@@ -185,6 +216,17 @@ public class Scheduler {
                         Institution.class).block();
                 notificationDto.setInstitutionName(institution.getInstitutionName());
                 notificationDto.setInstitutionEmail(institution.getEmailAddress());
+                Agent agent=(Agent) mongoRepositoryReactive.findById(license.getAgentId(),Agent.class).block();
+                if(agent!=null){
+                    notificationDto.setAgentFullName(agent.getFullName());
+                    notificationDto.setAgentEmailAddress(agent.getEmailAddress());
+
+                }
+                GamingMachine gamingMachine=(GamingMachine) mongoRepositoryReactive.findById(license.convertToDto().getGamingMachineId(),GamingMachine.class).block();
+                if(gamingMachine!=null){
+                    notificationDto.setMachineNumber(gamingMachine.getMachineNumber());
+
+                }
                 notificationDtos.add(notificationDto);
 
                 license.setLicenseStatusId("03");

@@ -1,13 +1,13 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.GameType;
+import com.software.finatech.lslb.cms.service.domain.License;
+import com.software.finatech.lslb.cms.service.domain.LicenseStatus;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseUpdateDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.ExpirationList;
@@ -54,14 +54,22 @@ public class LicenseServiceImpl implements LicenseService {
                                                String sortDirection,
                                                String sortProperty,
                                                String institutionId,
+                                               String agentId,
+                                               String gamingMachineId,
                                                String licenseStatusId,
                                                String gameTypeId,
-                                               String paymentRecordId, HttpServletResponse httpServletResponse) {
+                                               String paymentRecordId, String licenseType, HttpServletResponse httpServletResponse) {
 
         try {
             Query query = new Query();
             if (!StringUtils.isEmpty(institutionId)) {
                 query.addCriteria(Criteria.where("institutionId").is(institutionId));
+            }
+            if (!StringUtils.isEmpty(agentId)) {
+                query.addCriteria(Criteria.where("agentId").is(agentId));
+            }
+            if (!StringUtils.isEmpty(gamingMachineId)) {
+                query.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
             }
             if (!StringUtils.isEmpty(licenseStatusId)) {
                 query.addCriteria(Criteria.where("licenseStatusId").is(licenseStatusId));
@@ -70,6 +78,9 @@ public class LicenseServiceImpl implements LicenseService {
                 query.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));
             }if (!StringUtils.isEmpty(gameTypeId)) {
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+            }
+            if (!StringUtils.isEmpty(licenseType)) {
+                query.addCriteria(Criteria.where("licenseType").is(licenseType));
             }
 
             if (page == 0) {
@@ -104,21 +115,33 @@ public class LicenseServiceImpl implements LicenseService {
         }
     }
 
-    @Override
-    public Mono<ResponseEntity> findLicenseById(String licenseId) {
-        return null;
-    }
 
     @Override
-    public Mono<ResponseEntity> findLicenseByInstitutionId(String institutionId, String gameTypeId) {
+    public Mono<ResponseEntity> findLicense(String licenseId, String institutionId, String agentId, String gamingMachineId,String gameTypeId) {
         LocalDateTime dateTime = new LocalDateTime();
         dateTime = dateTime.plusDays(90);
         Query queryLicence = new Query();
 
-        queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
+            if(!StringUtils.isEmpty(institutionId)){
+                queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
+
+            }
+            if(!StringUtils.isEmpty(agentId)){
+                queryLicence.addCriteria(Criteria.where("agentId").is(agentId));
+            }
+            if(!StringUtils.isEmpty(gamingMachineId)){
+                queryLicence.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
+            }
+
+            if(!StringUtils.isEmpty(licenseId)){
+                queryLicence.addCriteria(Criteria.where("id").is(licenseId));
+            }
+
+
         if(!StringUtils.isEmpty(gameTypeId)){
             queryLicence.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         }
+
         List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicence, License.class).toStream().collect(Collectors.toList());
         List<LicenseDto> licenseDtos= new ArrayList<>();
         if (licenses.size() == 0) {
@@ -215,7 +238,7 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public Mono<ResponseEntity> updateLicense(LicenseUpdateDto licenseUpdateDto) {
         try {
-              License license;
+            License license;
             Query queryLicence = new Query();
             queryLicence.addCriteria(Criteria.where("paymentRecordId").is(licenseUpdateDto.getPaymentRecordId()));
             License licenseCheck = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
@@ -224,15 +247,6 @@ public class LicenseServiceImpl implements LicenseService {
                 return Mono.just(new ResponseEntity<>("No Valid Payment Record", HttpStatus.BAD_REQUEST));
 
             }
-            Query queryPaymentRecord = new Query();
-            queryPaymentRecord.addCriteria(Criteria.where("id").is(licenseCheck.getPaymentRecordId()));
-            PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.find(queryPaymentRecord, PaymentRecord.class).block();
-            /*if (paymentRecord.convertToDto().getFee().getFeePaymentType().getId().equals(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID)) {
-                if (!licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID)) {
-                    return Mono.just(new ResponseEntity<>("Invalid License Status Selected", HttpStatus.BAD_REQUEST));
-                }
-            }*/
-
             license = licenseCheck;
             LocalDateTime fromDate;
             if(licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID)){
@@ -264,7 +278,13 @@ public class LicenseServiceImpl implements LicenseService {
             if(licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID)){
                 duration = Integer.parseInt(gameType.convertToDto().getAipDuration());
             }else if(licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
-                duration = Integer.parseInt(gameType.convertToDto().getLicenseDuration());
+               if(licenseUpdateDto.getLicenseType().equalsIgnoreCase("agent")){
+                   duration = Integer.parseInt(gameType.convertToDto().getAgentLicenseDuration());
+               }else if(licenseUpdateDto.getLicenseType().equalsIgnoreCase("gamingMachine")){
+                   duration = Integer.parseInt(gameType.convertToDto().getGamingMachineLicenseDuration());
+               }else if(licenseUpdateDto.getLicenseType().equalsIgnoreCase("institution")){
+                    duration = Integer.parseInt(gameType.convertToDto().getLicenseDuration());
+               }
             }
 
             if (!licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID) &&
