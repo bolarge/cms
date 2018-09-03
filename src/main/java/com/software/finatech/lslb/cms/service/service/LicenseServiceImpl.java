@@ -298,6 +298,7 @@ public class LicenseServiceImpl implements LicenseService {
 
                 }
             }
+            
 
             Query queryGameType = new Query();
             queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().convertToDto().getFee().getGameType().getId()));
