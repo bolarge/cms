@@ -23,7 +23,7 @@ public class FeePaymentTypeReferenceData {
         }
         feePaymentType2.setName("Licensing Fees");
 
-        FeePaymentType feePaymentType3 = (FeePaymentType) mongoRepositoryReactive.findById(LICENSE_RENEWAL_FEE_TYPE_ID, FeePaymentType.class).block();
+        FeePaymentType feePaymentType3 = (FeePaymentType) mongoRepositoryReactive.findById(LICENSE_RENEWAL_FEE_TYPE_ID ,FeePaymentType.class).block();
         if (feePaymentType3 == null) {
             feePaymentType3 = new FeePaymentType();
             feePaymentType3.setId(LICENSE_RENEWAL_FEE_TYPE_ID);
