@@ -16,12 +16,14 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+@Service
 public class GamingMachineServiceImpl implements GamingMachineService {
 
     private static final Logger logger = LoggerFactory.getLogger(GamingMachineServiceImpl.class);

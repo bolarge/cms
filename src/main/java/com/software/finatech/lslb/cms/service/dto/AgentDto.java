@@ -16,7 +16,8 @@ public class AgentDto {
     private String meansOfId;
     private String passportId;
     private String fullName;
-private String idNumber;
+    private String idNumber;
+
     public Set<AgentInstitutionDto> getAgentInstitutions() {
         return agentInstitutions;
     }
