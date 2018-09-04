@@ -33,6 +33,7 @@ public class Document extends AbstractFact {
     protected String institutionId;
     protected String gameTypeId;
 
+
     public String getGameTypeId() {
         return gameTypeId;
     }

@@ -116,22 +116,17 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         return Mono.just(new ResponseEntity<>(getPaymentStatus(), HttpStatus.OK));
     }
     @Override
-    public List<PaymentRecord> findPayments(String institutionId,String agentId, String gamingMachineId, String gameTypeId,boolean isMostRecent) {
-        List<PaymentRecord> findPaymentRecords=findPaymentRecords(institutionId, agentId, gamingMachineId,gameTypeId, isMostRecent);
+    public List<PaymentRecord> findPayments(String institutionId,String agentId, String gamingMachineId, String gameTypeId,String startYear) {
+        List<PaymentRecord> findPaymentRecords=findPaymentRecords(institutionId, agentId, gamingMachineId,gameTypeId, startYear);
         return findPaymentRecords;
 
     }
 
-    public List<PaymentRecord> findPaymentRecords(String institutionId,String agentId, String gamingMachineId, String gameTypeId,boolean isMostRecent) {
+    public List<PaymentRecord> findPaymentRecords(String institutionId,String agentId, String gamingMachineId, String gameTypeId, String startYear) {
         try {
 
             Query query = new Query();
 
-            if(isMostRecent==true){
-                query.limit(1);
-                query.with(new Sort(Sort.Direction.DESC, "createdAt"));
-
-            }
             if(StringUtils.isEmpty(agentId)&&StringUtils.isEmpty(gamingMachineId)&&!StringUtils.isEmpty(institutionId)){
                 query.addCriteria(Criteria.where("institutionId").is(institutionId));
 
@@ -152,6 +147,9 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             }
             if(!StringUtils.isEmpty(gameTypeId)){
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+            }
+            if(!StringUtils.isEmpty(startYear)){
+                query.addCriteria(Criteria.where("startYear").is(startYear));
             }
             List<PaymentRecord> paymentRecords=(List<PaymentRecord>) mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
             if (paymentRecords.size()==0) {
@@ -185,10 +183,12 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         paymentRecord.setStartYear(paymentRecordCreateDto.getStartYear());
         int startYear= Integer.parseInt(paymentRecordCreateDto.getStartYear());
 
+        String startYearValue= String.valueOf(startYear-1);
+
         Fee fee = (Fee) mongoRepositoryReactive.findById(paymentRecordCreateDto.getFeeId(),Fee.class).block();
         if(paymentRecordCreateDto.getRenewalCheck()=="true"){
             List<PaymentRecord> previousLicenses=
-                    findPaymentRecords(paymentRecordCreateDto.getInstitutionId(), paymentRecordCreateDto.getAgentId(),paymentRecordCreateDto.getGamingMachineId(), fee.getGameTypeId(),true);
+                    findPaymentRecords(paymentRecordCreateDto.getInstitutionId(), paymentRecordCreateDto.getAgentId(),paymentRecordCreateDto.getGamingMachineId(), fee.getGameTypeId(),startYearValue);
 
               PaymentRecord lastLicense= previousLicenses.get(previousLicenses.size()-1);
               paymentRecord.setParentLicenseId(lastLicense.getId());

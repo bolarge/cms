@@ -110,6 +110,7 @@ public class DocumentController extends BaseController {
                         document.setOriginalFilename(originalFilename);
                         document.setMimeType(file.getContentType());
                         document.setArchive(false);
+                        document.setInstitutionId(documentDto.getInstitutionId());
                         document.setPreviousDocumentId(documentDto.getPreviousDocumentId());
                         //document.setValidFrom(new LocalDate(documentDto.getValidFrom()));
                         //document.setValidTo(new LocalDate(documentDto.getValidTo()));
@@ -138,7 +139,7 @@ public class DocumentController extends BaseController {
                 mongoRepositoryReactive.saveOrUpdate(doc);
             });
 
-            return Mono.just(new ResponseEntity<>("Success", HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(documents, HttpStatus.OK));
         } catch (Exception e) {
             return ErrorResponseUtil.logAndReturnError(logger, "An error occured while uploading the documents", e);
         }

@@ -55,7 +55,7 @@ public class PaymentRecordController extends BaseController {
         return paymentRecordService.findAllPaymentRecords(page, pageSize, sortType, sortParam, approverId, institutionId,  feeId, httpServletResponse);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/specific-payment", params={"institutionId","agentId","gamingMachineId","gameTypeId","mostRecent"})
+    @RequestMapping(method = RequestMethod.GET, value = "/specific-payment", params={"institutionId","agentId","gamingMachineId","gameTypeId","startYear"})
     @ApiOperation(value = "Get specific payment Status", response = PaymentRecord.class,responseContainer = "List",consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -66,18 +66,13 @@ public class PaymentRecordController extends BaseController {
                                                                @RequestParam("gameTypeId") String gameTypeId,
                                                                @RequestParam("agentId") String agentId,
                                                                @RequestParam("gamingMachineId") String gamingMachineId,
-                                                               @RequestParam("mostRecent") String isMostRecent ) {
-        boolean isMostRecentI;
-        if(StringUtils.isEmpty(isMostRecent)){
-            isMostRecentI=false;
-        }else{
-            isMostRecentI= Boolean.valueOf(isMostRecent);
-        }
-        if(StringUtils.isEmpty(institutionId)||StringUtils.isEmpty(agentId)||StringUtils.isEmpty(gamingMachineId)){
+                                                               @RequestParam("startYear") String startYear ) {
+
+        if(StringUtils.isEmpty(institutionId)&&StringUtils.isEmpty(agentId)&&StringUtils.isEmpty(gamingMachineId)){
             return Mono.just(new ResponseEntity<>("Provide InstitutionId or agentId or Gaming Machine Id", HttpStatus.BAD_REQUEST));
 
         }
-        List<PaymentRecord> paymentsRecords = paymentRecordService.findPayments(institutionId,agentId,gamingMachineId,gameTypeId,isMostRecentI);
+        List<PaymentRecord> paymentsRecords = paymentRecordService.findPayments(institutionId,agentId,gamingMachineId,gameTypeId,startYear);
         List<PaymentRecordDto> paymentRecordDtos= new ArrayList<>();
         paymentsRecords.stream().forEach(paymentRecord -> {
             paymentRecordDtos.add(paymentRecord.convertToDto());

@@ -23,7 +23,7 @@ public interface PaymentRecordService {
     Mono<ResponseEntity> getAllPaymentStatus();
     Mono<ResponseEntity> updatePaymentRecord(PaymentRecordUpdateDto paymentRecordUpdateDto);
     Mono<ResponseEntity> createPaymentRecord(PaymentRecordCreateDto paymentRecordCreateDto);
-    List<PaymentRecord> findPayments(String institutionId, String agentId, String gamingMachineId, String gameTypeId, boolean isMostRecent);
+    List<PaymentRecord> findPayments(String institutionId, String agentId, String gamingMachineId, String gameTypeId, String startYear);
 
 
 }
