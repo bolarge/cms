@@ -11,12 +11,19 @@ import java.util.Set;
 @Document(collection = "GamingMachines")
 public class GamingMachine extends AbstractFact {
    protected String institutionId;
-   protected String agentId;
-   protected boolean managedByInstitution;
    protected String manufacturer;
    protected String serialNumber;
    protected Set<GamingMachineGameDetails> gameDetailsList = new HashSet<>();
    protected String machineNumber;
+   private String machineAddress;
+
+    public String getMachineAddress() {
+        return machineAddress;
+    }
+
+    public void setMachineAddress(String machineAddress) {
+        this.machineAddress = machineAddress;
+    }
 
     public String getInstitutionId() {
         return institutionId;
@@ -24,22 +31,6 @@ public class GamingMachine extends AbstractFact {
 
     public void setInstitutionId(String institutionId) {
         this.institutionId = institutionId;
-    }
-
-    public String getAgentId() {
-        return agentId;
-    }
-
-    public void setAgentId(String agentId) {
-        this.agentId = agentId;
-    }
-
-    public boolean isManagedByInstitution() {
-        return managedByInstitution;
-    }
-
-    public void setManagedByInstitution(boolean managedByInstitution) {
-        this.managedByInstitution = managedByInstitution;
     }
 
     public String getManufacturer() {
@@ -78,29 +69,15 @@ public class GamingMachine extends AbstractFact {
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
 
-    private AuthInfo getAgentUser() {
-        AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(agentId, AuthInfo.class).block();
-        if (authInfo == null) {
-            return null;
-        } else {
-            return authInfo;
-        }
-    }
-
-
     public GamingMachineDto convertToDto(){
         GamingMachineDto gamingMachineDto = new GamingMachineDto();
-        gamingMachineDto.setAgentId(getAgentId());
         gamingMachineDto.setGameDetailsList(getGameDetailsList());
         gamingMachineDto.setInstitutionId(getInstitutionId());
         gamingMachineDto.setMachineNumber(getMachineNumber());
-        gamingMachineDto.setManagedByInstitution(isManagedByInstitution());
         gamingMachineDto.setManufacturer(getManufacturer());
-
-        AuthInfo agent = getAgentUser();
-        if (agent != null){
-            gamingMachineDto.setAgentName(agent.getFullName());
-        }
+        gamingMachineDto.setSerialNumber(getSerialNumber());
+        gamingMachineDto.setMachineAddress(getMachineAddress());
+        gamingMachineDto.setInstitutionId(getInstitutionId());
         Institution institution = getInstitution();
         if (institution != null){
             gamingMachineDto.setInstitutionName(institution.getInstitutionName());

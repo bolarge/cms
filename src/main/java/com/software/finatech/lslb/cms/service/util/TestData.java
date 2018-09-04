@@ -217,7 +217,6 @@ public class TestData {
             }
 
             gamingMachine.setMachineNumber(String.valueOf(i));
-            gamingMachine.setAgentId(String.valueOf(i));
             gamingMachine.setInstitutionId(String.valueOf(i));
 
             PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById(String.valueOf(i), PaymentRecord.class).block();

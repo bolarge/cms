@@ -6,7 +6,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Set;
 
-public class GamingMachineCreateDto {
+public class GamingMachineUpdateDto {
     @NotNull(message = "please enter machine number")
     private String gameMachineNumber;
     @NotEmpty(message = "please provide machine address")
@@ -17,8 +17,8 @@ public class GamingMachineCreateDto {
     private String serialNumber;
     @NotNull(message = "please provide game details")
     private Set<GamingMachineGameDetails> gameDetailsList;
-    @NotEmpty(message = "please provide institutionId")
-    private String institutionId;
+    @NotNull(message = "please provide gaming machine id")
+    private String id;
 
     public String getGameMachineNumber() {
         return gameMachineNumber;
@@ -60,11 +60,11 @@ public class GamingMachineCreateDto {
         this.gameDetailsList = gameDetailsList;
     }
 
-    public String getInstitutionId() {
-        return institutionId;
+    public String getId() {
+        return id;
     }
 
-    public void setInstitutionId(String institutionId) {
-        this.institutionId = institutionId;
+    public void setId(String id) {
+        this.id = id;
     }
 }

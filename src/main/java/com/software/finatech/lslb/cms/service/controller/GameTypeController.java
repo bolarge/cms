@@ -5,17 +5,16 @@ import com.software.finatech.lslb.cms.service.domain.GameType;
 import com.software.finatech.lslb.cms.service.dto.GameTypeCreateDto;
 import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
 import com.software.finatech.lslb.cms.service.dto.GameTypeUpdateDto;
+import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
@@ -27,6 +26,13 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1/gameType")
 public class GameTypeController extends BaseController {
+
+    private GameTypeService gameTypeService;
+
+    @Autowired
+    public void setGameTypeService(GameTypeService gameTypeService) {
+        this.gameTypeService = gameTypeService;
+    }
 
     @RequestMapping(method = RequestMethod.GET, value = "/allgametypes")
     @ApiOperation(value = "Get GameType", response = GameTypeDto.class, consumes = "application/json")
@@ -55,6 +61,7 @@ public class GameTypeController extends BaseController {
         }
         return null;
     }
+
     @RequestMapping(method = RequestMethod.POST, value = "/new")
     @ApiOperation(value = "Create new GameType", response = GameType.class, consumes = "application/json")
     @ApiResponses(value = {
@@ -91,11 +98,11 @@ public class GameTypeController extends BaseController {
     public Mono<ResponseEntity> updateGameType(@RequestBody @Valid GameTypeUpdateDto gameTypeUpdateDto) {
 
         GameType gameType = (GameType) mongoRepositoryReactive.findById(gameTypeUpdateDto.getId(), GameType.class).block();
-       if(gameType==null){
+        if (gameType == null) {
 
-           return Mono.just(new ResponseEntity<>("Invalid GameType Selected", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Invalid GameType Selected", HttpStatus.BAD_REQUEST));
 
-       }
+        }
         gameType.setAipDuration(gameTypeUpdateDto.getAipDuration());
         gameType.setLicenseDuration(gameTypeUpdateDto.getLicenseDuration());
         gameType.setName(gameTypeUpdateDto.getName());
@@ -104,5 +111,16 @@ public class GameTypeController extends BaseController {
         gameType.setGamingMachineLicenseDuration(gameTypeUpdateDto.getGamingMachineLicenseDuration());
         mongoRepositoryReactive.saveOrUpdate(gameType);
         return Mono.just(new ResponseEntity<>(gameType.convertToDto(), HttpStatus.OK));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{institutionId}/")
+    @ApiOperation(value = "Get GameTypes for institution", response = GameTypeDto.class, responseContainer = "List",consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getGameTypesForInstitution(@PathVariable("institutionId") String institutionId) {
+        return gameTypeService.getAllGameTypesForInstitution(institutionId);
     }
 }

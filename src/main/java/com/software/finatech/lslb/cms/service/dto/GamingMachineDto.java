@@ -6,30 +6,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class GamingMachineDto {
-    private String agentName;
-    private String agentId;
     private String institutionId;
     private String institutionName;
     private Set<GamingMachineGameDetails> gameDetailsList = new HashSet<>();
-    private  boolean managedByInstitution;
     private String manufacturer;
     private String serialNumber;
     private String machineNumber;
+    private String machineAddress;
 
-    public String getAgentName() {
-        return agentName;
+    public String getMachineAddress() {
+        return machineAddress;
     }
 
-    public void setAgentName(String agentName) {
-        this.agentName = agentName;
-    }
-
-    public String getAgentId() {
-        return agentId;
-    }
-
-    public void setAgentId(String agentId) {
-        this.agentId = agentId;
+    public void setMachineAddress(String machineAddress) {
+        this.machineAddress = machineAddress;
     }
 
     public String getInstitutionId() {
@@ -54,14 +44,6 @@ public class GamingMachineDto {
 
     public void setGameDetailsList(Set<GamingMachineGameDetails> gameDetailsList) {
         this.gameDetailsList = gameDetailsList;
-    }
-
-    public boolean isManagedByInstitution() {
-        return managedByInstitution;
-    }
-
-    public void setManagedByInstitution(boolean managedByInstitution) {
-        this.managedByInstitution = managedByInstitution;
     }
 
     public String getManufacturer() {

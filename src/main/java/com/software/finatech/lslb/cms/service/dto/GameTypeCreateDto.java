@@ -30,7 +30,6 @@ public class GameTypeCreateDto  {
         this.gamingMachineLicenseDuration = gamingMachineLicenseDuration;
     }
 
-
     protected String description;
 
     public String getDescription() {
