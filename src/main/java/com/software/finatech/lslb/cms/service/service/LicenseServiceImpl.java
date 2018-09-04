@@ -281,7 +281,8 @@ public class LicenseServiceImpl implements LicenseService {
 
             license = licenseCheck;
             LocalDateTime fromDate;
-            if(licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID)){
+            if(licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID)
+                    || licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID)){
                 fromDate=null;
             }
 
@@ -320,7 +321,10 @@ public class LicenseServiceImpl implements LicenseService {
             }
 
             if (!licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID) &&
-                    !licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID)) {
+                    !licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID)
+                    &&!licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID)
+                    ) {
+
                 license.setEndDate(fromDate.plusMonths(duration));
                 license.setRenewalStatus("false");
 
@@ -333,6 +337,12 @@ public class LicenseServiceImpl implements LicenseService {
 
                }
            }
+            LocalDateTime dateTime = new LocalDateTime();
+
+            if(license.getEndDate().toDate().compareTo(dateTime.toDate())<0){
+               license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
+               license.setRenewalStatus("true");
+            }
 
 
             mongoRepositoryReactive.saveOrUpdate(license);

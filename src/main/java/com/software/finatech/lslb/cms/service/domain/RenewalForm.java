@@ -4,7 +4,7 @@ import com.software.finatech.lslb.cms.service.dto.RenewalFormDto;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @SuppressWarnings("serial")
-@Document(collection = "RenewalForm")
+@Document(collection = "RenewalForms")
 public class RenewalForm extends AbstractFact {
     protected String paymentRecordId;
     protected String institutionId;
