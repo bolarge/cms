@@ -1,9 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.service.domain.Fee;
-import com.software.finatech.lslb.cms.service.domain.License;
-import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
-import com.software.finatech.lslb.cms.service.domain.PaymentStatus;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordCreateDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
@@ -170,6 +167,13 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
     }
     @Override
     public Mono<ResponseEntity> createPaymentRecord(PaymentRecordCreateDto paymentRecordCreateDto) {
+       if(StringUtils.isEmpty(paymentRecordCreateDto.getInstitutionId())
+               &&StringUtils.isEmpty(paymentRecordCreateDto.getAgentId())
+       &&StringUtils.isEmpty(paymentRecordCreateDto.getGamingMachineId())){
+           return Mono.just(new ResponseEntity<>("Invalid Payment Record", HttpStatus.OK));
+
+       }
+
         PaymentRecord paymentRecord = new PaymentRecord();
         paymentRecord.setId(UUID.randomUUID().toString());
         paymentRecord.setApproverId(paymentRecordCreateDto.getApproverId());
@@ -178,9 +182,10 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         paymentRecord.setPaymentStatusId(paymentRecordCreateDto.getPaymentStatusId());
         paymentRecord.setAgentId(paymentRecordCreateDto.getAgentId());
         paymentRecord.setGamingMachineId(paymentRecordCreateDto.getGamingMachineId());
+        paymentRecord.setStartYear(paymentRecordCreateDto.getStartYear());
+        int startYear= Integer.parseInt(paymentRecordCreateDto.getStartYear());
 
         Fee fee = (Fee) mongoRepositoryReactive.findById(paymentRecordCreateDto.getFeeId(),Fee.class).block();
-
         if(paymentRecordCreateDto.getRenewalCheck()=="true"){
             List<PaymentRecord> previousLicenses=
                     findPaymentRecords(paymentRecordCreateDto.getInstitutionId(), paymentRecordCreateDto.getAgentId(),paymentRecordCreateDto.getGamingMachineId(), fee.getGameTypeId(),true);
@@ -194,6 +199,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             return Mono.just(new ResponseEntity<>(paymentRecord.convertToDto(), HttpStatus.OK));
         }
 
+        GameType gameType = (GameType) mongoRepositoryReactive.findById(fee.getGameTypeId(),GameType.class).block();
 
        License license;
         Query queryLicence= new Query();
@@ -208,12 +214,13 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                 license=licenseCheck;
             }
         if(fee.getFeePaymentTypeId().equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID)) {
-           /* if(fee.getRevenueName()){
-
-            }*/
             if (!StringUtils.isEmpty(paymentRecord.getAgentId())
-                    &&!StringUtils.isEmpty(paymentRecord.getInstitutionId())) {
+                    &&!StringUtils.isEmpty(paymentRecord.getInstitutionId())
+            &&StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
                 license.setLicenceType("Agent");
+               int duration= Integer.parseInt(gameType.getAgentLicenseDuration());
+               int endYear= startYear+ (duration/12);
+                paymentRecord.setEndYear(String.valueOf(endYear));
                 license.setAgentId(paymentRecord.getAgentId());
                 license.setInstitutionId(paymentRecord.getInstitutionId());
 
@@ -222,17 +229,21 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                     StringUtils.isEmpty(paymentRecord.getGamingMachineId()) ) {
                 license.setLicenceType("Institution");
                 license.setInstitutionId(paymentRecord.getInstitutionId());
+                int duration= Integer.parseInt(gameType.getLicenseDuration());
+                int endYear= startYear+ (duration/12);
+                paymentRecord.setEndYear(String.valueOf(endYear));
 
             } else if (!StringUtils.isEmpty(paymentRecord.getGamingMachineId())
-                    &&!StringUtils.isEmpty(paymentRecord.getInstitutionId())) {
+                    &&!StringUtils.isEmpty(paymentRecord.getInstitutionId())&&
+                    StringUtils.isEmpty(paymentRecord.getAgentId())) {
+                int duration= Integer.parseInt(gameType.getGamingMachineLicenseDuration());
+                int endYear= startYear+ (duration/12);
+                paymentRecord.setEndYear(String.valueOf(endYear));
                 license.setLicenceType("GamingMachine");
                 license.setGamingMachineId(paymentRecord.getGamingMachineId());
                 license.setInstitutionId(paymentRecord.getInstitutionId());
-
             }else{
                 return Mono.just(new ResponseEntity<>("Invalid Payment Record", HttpStatus.OK));
-
-
             }
         }
         license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID);
@@ -275,32 +286,39 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         }else{
             license=licenseCheck;
         }
+        Fee fee = (Fee) mongoRepositoryReactive.findById(paymentRecordUpdateDto.getFeeId(),Fee.class).block();
+        GameType gameType = (GameType) mongoRepositoryReactive.findById(fee.getGameTypeId(),GameType.class).block();
+        int startYear= Integer.parseInt(paymentRecordUpdateDto.getStartYear());
         if(paymentRecord.convertToDto().getFee().getFeePaymentType().getId().equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID)) {
-           /* if(fee.getRevenueName()){
-
-            }*/
             if (!StringUtils.isEmpty(paymentRecord.getAgentId())
-                    &&!StringUtils.isEmpty(paymentRecord.getInstitutionId())) {
+                    &&!StringUtils.isEmpty(paymentRecord.getInstitutionId())
+                    &&StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
                 license.setLicenceType("Agent");
+                int duration= Integer.parseInt(gameType.getAgentLicenseDuration());
+                int endYear= startYear+ (duration/12);
+                paymentRecord.setEndYear(String.valueOf(endYear));
                 license.setAgentId(paymentRecord.getAgentId());
                 license.setInstitutionId(paymentRecord.getInstitutionId());
-
             } else if (!StringUtils.isEmpty(paymentRecord.getInstitutionId())
                     &&StringUtils.isEmpty(paymentRecord.getAgentId())&&
                     StringUtils.isEmpty(paymentRecord.getGamingMachineId()) ) {
                 license.setLicenceType("Institution");
                 license.setInstitutionId(paymentRecord.getInstitutionId());
+                int duration= Integer.parseInt(gameType.getLicenseDuration());
+                int endYear= startYear+ (duration/12);
+                paymentRecord.setEndYear(String.valueOf(endYear));
 
             } else if (!StringUtils.isEmpty(paymentRecord.getGamingMachineId())
-                    &&!StringUtils.isEmpty(paymentRecord.getInstitutionId())) {
+                    &&!StringUtils.isEmpty(paymentRecord.getInstitutionId())&&
+                    StringUtils.isEmpty(paymentRecord.getAgentId())) {
+                int duration= Integer.parseInt(gameType.getGamingMachineLicenseDuration());
+                int endYear= startYear+ (duration/12);
+                paymentRecord.setEndYear(String.valueOf(endYear));
                 license.setLicenceType("GamingMachine");
                 license.setGamingMachineId(paymentRecord.getGamingMachineId());
                 license.setInstitutionId(paymentRecord.getInstitutionId());
-
             }else{
-                return Mono.just(new ResponseEntity<>("Invalid Payment Record", HttpStatus.BAD_REQUEST));
-
-
+                return Mono.just(new ResponseEntity<>("Invalid Payment Record", HttpStatus.OK));
             }
         }
         license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID);

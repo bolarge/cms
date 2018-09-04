@@ -229,7 +229,8 @@ public class TestData {
             paymentRecord.setInstitutionId("" + i);
             paymentRecord.setFeeId(fee.getId());
             paymentRecord.setApproverId("1");
-
+            paymentRecord.setStartYear("2018");
+            paymentRecord.setEndYear("2019");
             License license = (License) mongoRepositoryReactive.findById(paymentRecord.getId(), License.class).block();
             if (license == null) {
                 license = new License();

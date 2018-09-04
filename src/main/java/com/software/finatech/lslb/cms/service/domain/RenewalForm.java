@@ -9,21 +9,21 @@ public class RenewalForm extends AbstractFact {
     protected String paymentRecordId;
     protected String institutionId;
     protected String gameTypeId;
-    protected Boolean checkStakeHoldersChange;
+    protected String checkStakeHoldersChange;
     protected String stakeHoldersChange;
-    protected Boolean checkSharesAquisition;
+    protected String checkSharesAquisition;
     protected String sharesAquisition;
-    protected Boolean checkConvictedCrime;
+    protected String checkConvictedCrime;
     protected String convictedCrime;
-    protected Boolean checkPoliticalOffice;
+    protected String checkPoliticalOffice;
     protected String politicalOffice;
-    protected Boolean checkPoliticalParty;
+    protected String checkPoliticalParty;
     protected String politicalParty;
-    protected Boolean checkTechnicalPartner;
+    protected String checkTechnicalPartner;
     protected String technicalPartner;
-    protected Boolean checkChangeInGamingMachines;
+    protected String checkChangeInGamingMachines;
     protected String changeInGamingMachines;
-    protected Boolean checkNewInvestors;
+    protected String checkNewInvestors;
     protected String newInvestors;
 
 
@@ -51,11 +51,11 @@ public class RenewalForm extends AbstractFact {
         this.paymentRecordId = paymentRecordId;
     }
 
-    public Boolean getCheckStakeHoldersChange() {
+    public String getCheckStakeHoldersChange() {
         return checkStakeHoldersChange;
     }
 
-    public void setCheckStakeHoldersChange(Boolean checkStakeHoldersChange) {
+    public void setCheckStakeHoldersChange(String checkStakeHoldersChange) {
         this.checkStakeHoldersChange = checkStakeHoldersChange;
     }
 
@@ -67,11 +67,11 @@ public class RenewalForm extends AbstractFact {
         this.stakeHoldersChange = stakeHoldersChange;
     }
 
-    public Boolean getCheckSharesAquisition() {
+    public String getCheckSharesAquisition() {
         return checkSharesAquisition;
     }
 
-    public void setCheckSharesAquisition(Boolean checkSharesAquisition) {
+    public void setCheckSharesAquisition(String checkSharesAquisition) {
         this.checkSharesAquisition = checkSharesAquisition;
     }
 
@@ -83,11 +83,11 @@ public class RenewalForm extends AbstractFact {
         this.sharesAquisition = sharesAquisition;
     }
 
-    public Boolean getCheckConvictedCrime() {
+    public String getCheckConvictedCrime() {
         return checkConvictedCrime;
     }
 
-    public void setCheckConvictedCrime(Boolean checkConvictedCrime) {
+    public void setCheckConvictedCrime(String checkConvictedCrime) {
         this.checkConvictedCrime = checkConvictedCrime;
     }
 
@@ -99,11 +99,11 @@ public class RenewalForm extends AbstractFact {
         this.convictedCrime = convictedCrime;
     }
 
-    public Boolean getCheckPoliticalOffice() {
+    public String getCheckPoliticalOffice() {
         return checkPoliticalOffice;
     }
 
-    public void setCheckPoliticalOffice(Boolean checkPoliticalOffice) {
+    public void setCheckPoliticalOffice(String checkPoliticalOffice) {
         this.checkPoliticalOffice = checkPoliticalOffice;
     }
 
@@ -115,11 +115,11 @@ public class RenewalForm extends AbstractFact {
         this.politicalOffice = politicalOffice;
     }
 
-    public Boolean getCheckPoliticalParty() {
+    public String getCheckPoliticalParty() {
         return checkPoliticalParty;
     }
 
-    public void setCheckPoliticalParty(Boolean checkPoliticalParty) {
+    public void setCheckPoliticalParty(String checkPoliticalParty) {
         this.checkPoliticalParty = checkPoliticalParty;
     }
 
@@ -131,11 +131,11 @@ public class RenewalForm extends AbstractFact {
         this.politicalParty = politicalParty;
     }
 
-    public Boolean getCheckTechnicalPartner() {
+    public String getCheckTechnicalPartner() {
         return checkTechnicalPartner;
     }
 
-    public void setCheckTechnicalPartner(Boolean checkTechnicalPartner) {
+    public void setCheckTechnicalPartner(String checkTechnicalPartner) {
         this.checkTechnicalPartner = checkTechnicalPartner;
     }
 
@@ -147,11 +147,11 @@ public class RenewalForm extends AbstractFact {
         this.technicalPartner = technicalPartner;
     }
 
-    public Boolean getCheckChangeInGamingMachines() {
+    public String getCheckChangeInGamingMachines() {
         return checkChangeInGamingMachines;
     }
 
-    public void setCheckChangeInGamingMachines(Boolean checkChangeInGamingMachines) {
+    public void setCheckChangeInGamingMachines(String checkChangeInGamingMachines) {
         this.checkChangeInGamingMachines = checkChangeInGamingMachines;
     }
 
@@ -163,11 +163,11 @@ public class RenewalForm extends AbstractFact {
         this.changeInGamingMachines = changeInGamingMachines;
     }
 
-    public Boolean getCheckNewInvestors() {
+    public String getCheckNewInvestors() {
         return checkNewInvestors;
     }
 
-    public void setCheckNewInvestors(Boolean checkNewInvestors) {
+    public void setCheckNewInvestors(String checkNewInvestors) {
         this.checkNewInvestors = checkNewInvestors;
     }
 
@@ -199,7 +199,8 @@ public class RenewalForm extends AbstractFact {
         renewalFormDto.setStakeHoldersChange(getStakeHoldersChange());
         renewalFormDto.setTechnicalPartner(getTechnicalPartner());
         PaymentRecord paymentRecord= (PaymentRecord) mongoRepositoryReactive.findById(getPaymentRecordId(),PaymentRecord.class).block();
-        renewalFormDto.setPaymentRecord(paymentRecord.convertToDto());
+        renewalFormDto.setPaymentRecord(paymentRecord.convertToDto()== null ? null :paymentRecord.convertToDto() );
+
 
         return renewalFormDto;
 

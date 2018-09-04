@@ -10,7 +10,20 @@ public class PaymentRecordDto {
     private String parentLicenseId;
     private AgentDto agent;
     private GamingMachineDto gamingMachine;
+    private String startYear;
+    private String endYear;
 
+    public String getStartYear() {
+        return startYear;
+    }
+
+    public void setEndYear(String endYear) {
+        this.endYear = endYear;
+    }
+
+    public void setStartYear(String startYear) {
+        this.startYear = startYear;
+    }
 
     public AgentDto getAgent() {
         return agent;

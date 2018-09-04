@@ -45,6 +45,7 @@ public class Scheduler {
     LocalDateTime dateTime = new LocalDateTime();
 
 
+    //@Scheduled(cron = "0 0 4 * * ?")
     @Scheduled(cron = "0 0 4 * * ?")
     protected void checkForLicensesCloseToExpirations(){
         List<License> licenses=
