@@ -144,7 +144,7 @@ public class RenewalFormController extends BaseController {
         queryLicenceStatus.addCriteria(Criteria.where("paymentRecordId").is(renewalFormCreateDto.getPaymentRecordId()));
         queryLicenceStatus.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID));
         License license = (License)mongoRepositoryReactive.find(queryLicenceStatus, License.class).block();
-        if(paymentRecord==null || license==null || license.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID)){
+        if(paymentRecord==null || license==null || !license.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID)){
             return Mono.just(new ResponseEntity<>("Invalid payment record", HttpStatus.BAD_REQUEST));
         }
         license.setRenewalStatus("false");
