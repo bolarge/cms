@@ -7,8 +7,8 @@ public class DocumentTypeDto extends EnumeratedFactDto{
 
     protected String documentPurposeId;
     protected DocumentPurposeDto documentPurpose;
-    protected Boolean active;
-    protected Boolean required;
+    protected boolean active;
+    protected boolean required;
     protected Set<String> gameTypeNames;
 
     public Set<String> getGameTypeNames() {

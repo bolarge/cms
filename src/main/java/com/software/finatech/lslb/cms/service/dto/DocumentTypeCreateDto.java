@@ -6,9 +6,7 @@ import javax.validation.constraints.NotEmpty;
 public class DocumentTypeCreateDto extends EnumeratedFactDto{
     @NotEmpty(message = "Enter a valid document purpose ID")
     protected String documentPurposeId;
-    @NotEmpty(message = "Enter a valid status")
     protected boolean active;
-    @NotEmpty(message = "Enter a required status")
     protected boolean required;
 
     public boolean isActive() {
