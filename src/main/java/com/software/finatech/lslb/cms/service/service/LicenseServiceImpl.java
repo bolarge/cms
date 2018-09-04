@@ -324,9 +324,8 @@ public class LicenseServiceImpl implements LicenseService {
                     !licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID)
                     &&!licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID)
                     ) {
-
-                license.setEndDate(fromDate.plusMonths(duration));
-                license.setRenewalStatus("false");
+                        license.setEndDate(fromDate.plusMonths(duration));
+                        license.setRenewalStatus("false");
 
             }
             int licenseRecordEndYear=Integer.parseInt(licenseCheck.getEndDate().toString("yyyy"));
