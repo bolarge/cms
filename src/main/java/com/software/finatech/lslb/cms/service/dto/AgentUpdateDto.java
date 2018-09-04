@@ -1,13 +1,14 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-
 import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.HashSet;
 import java.util.Set;
 
-public class AgentCreateDto {
+public class AgentUpdateDto {
+    @NotEmpty(message = "please provide agent id")
+    private String id;
     @NotEmpty(message = "please provide agent first name")
     private String firstName;
     @NotEmpty(message = "please provide agent last name")
@@ -31,22 +32,15 @@ public class AgentCreateDto {
     private String bvn;
     @NotEmpty(message = "please provide agent institutions")
     private Set<AgentInstitution> agentInstitutions = new HashSet<>();
+    @NotEmpty(message = "please provide agent passport id")
     private String passportId;
 
-    public String getPassportId() {
-        return passportId;
+    public String getId() {
+        return id;
     }
 
-    public void setPassportId(String passportId) {
-        this.passportId = passportId;
-    }
-
-    public Set<String> getBusinessAddresses() {
-        return businessAddresses;
-    }
-
-    public void setBusinessAddresses(Set<String> businessAddresses) {
-        this.businessAddresses = businessAddresses;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getFirstName() {
@@ -105,6 +99,14 @@ public class AgentCreateDto {
         this.residentialAddress = residentialAddress;
     }
 
+    public Set<String> getBusinessAddresses() {
+        return businessAddresses;
+    }
+
+    public void setBusinessAddresses(Set<String> businessAddresses) {
+        this.businessAddresses = businessAddresses;
+    }
+
     public String getMeansOfId() {
         return meansOfId;
     }
@@ -135,5 +137,13 @@ public class AgentCreateDto {
 
     public void setAgentInstitutions(Set<AgentInstitution> agentInstitutions) {
         this.agentInstitutions = agentInstitutions;
+    }
+
+    public String getPassportId() {
+        return passportId;
+    }
+
+    public void setPassportId(String passportId) {
+        this.passportId = passportId;
     }
 }

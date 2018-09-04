@@ -305,7 +305,8 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createApplciationFormComment(@RequestParam("applicationFormId") String applicationFormId, @RequestBody @Valid ApplicationFormCreateCommentDto applicationFormCreateCommentDto) {
+    public Mono<ResponseEntity> createApplicationFormComment(@RequestParam("applicationFormId") String applicationFormId,
+                                                             @RequestBody @Valid ApplicationFormCreateCommentDto applicationFormCreateCommentDto) {
         return applicationFormService.addCommentsToFormFromLslbAdmin(applicationFormId, applicationFormCreateCommentDto);
     }
 

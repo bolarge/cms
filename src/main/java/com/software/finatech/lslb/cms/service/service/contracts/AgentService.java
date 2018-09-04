@@ -1,6 +1,8 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
+import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.dto.AgentCreateDto;
+import com.software.finatech.lslb.cms.service.dto.AgentUpdateDto;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
@@ -17,4 +19,8 @@ public interface AgentService {
                                        HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> createAgent(AgentCreateDto agentCreateDto);
+
+    Mono<ResponseEntity> updateAgent(AgentUpdateDto agentUpdateDto);
+
+    Agent findById(String agentId);
 }
