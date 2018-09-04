@@ -1,18 +1,56 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.RenewalFormDto;
+import com.software.finatech.lslb.cms.service.dto.ReportFormDto;
+import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Map;
+
 @SuppressWarnings("serial")
-@Document(collection = "RenewalForm")
+@Document(collection = "ReportForm")
 public class ReportForm extends AbstractFact {
     protected String institutionId;
     protected String gameTypeId;
     protected String comment;
-    protected String repoterId;
+    protected String userId;
     protected LocalDate reportedDate;
+    protected String userRoleId;
+    protected String agentId;
+    protected String gamingMachineId;
 
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
+
+    public String getGamingMachineId() {
+        return gamingMachineId;
+    }
+
+    public void setGamingMachineId(String gamingMachineId) {
+        this.gamingMachineId = gamingMachineId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getUserRoleId() {
+        return userRoleId;
+    }
+
+    public void setUserRoleId(String userRoleId) {
+        this.userRoleId = userRoleId;
+    }
 
     public String getInstitutionId() {
         return institutionId;
@@ -38,13 +76,6 @@ public class ReportForm extends AbstractFact {
         this.comment = comment;
     }
 
-    public String getRepoterId() {
-        return repoterId;
-    }
-
-    public void setRepoterId(String repoterId) {
-        this.repoterId = repoterId;
-    }
 
     public LocalDate getReportedDate() {
         return reportedDate;
@@ -54,31 +85,49 @@ public class ReportForm extends AbstractFact {
         this.reportedDate = reportedDate;
     }
 
-   /* public RenewalFormDto convertToDto(){
-        RenewalFormDto renewalFormDto = new RenewalFormDto();
-        renewalFormDto.setRenewalFormId(getId());
-        renewalFormDto.setCheckChangeInGamingMachines(getCheckChangeInGamingMachines());
-        renewalFormDto.setCheckConvictedCrime(getCheckConvictedCrime());
-        renewalFormDto.setCheckNewInvestors(getCheckNewInvestors());
-        renewalFormDto.setCheckPoliticalOffice(getCheckPoliticalOffice());
-        renewalFormDto.setCheckPoliticalParty(getCheckPoliticalParty());
-        renewalFormDto.setCheckSharesAquisition(getCheckSharesAquisition());
-        renewalFormDto.setCheckStakeHoldersChange(getCheckStakeHoldersChange());
-        renewalFormDto.setCheckTechnicalPartner(getCheckTechnicalPartner());
-        renewalFormDto.setChangeInGamingMachines(getChangeInGamingMachines());
-        renewalFormDto.setNewInvestors(getNewInvestors());
-        renewalFormDto.setPoliticalParty(getPoliticalParty());
-        renewalFormDto.setPoliticalOffice(getPoliticalOffice());
-        renewalFormDto.setConvictedCrime(getConvictedCrime());
-        renewalFormDto.setSharesAquisition(getSharesAquisition());
-        renewalFormDto.setStakeHoldersChange(getStakeHoldersChange());
-        renewalFormDto.setTechnicalPartner(getTechnicalPartner());
-        PaymentRecord paymentRecord= (PaymentRecord) mongoRepositoryReactive.findById(getPaymentRecordId(),PaymentRecord.class).block();
-        renewalFormDto.setPaymentRecord(paymentRecord.convertToDto());
+    public ReportFormDto convertToDto(){
+        ReportFormDto reportFormDto = new ReportFormDto();
+        reportFormDto.setComment(getComment());
+        Agent agent =(Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
+        if(agent!=null){
+            reportFormDto.setAgent(agent.convertToDto());
+        }
+        Institution institution =(Institution) mongoRepositoryReactive.findById(getInstitutionId(), Institution.class).block();
+        if(institution!=null){
+            reportFormDto.setInstitution(institution.convertToDto());
+        }
+        GamingMachine gamingMachine =(GamingMachine) mongoRepositoryReactive.findById(getGamingMachineId(), GamingMachine.class).block();
+        if(gamingMachine!=null){
+            reportFormDto.setGamingMachine(gamingMachine.convertToDto());
+        }
+        Map gameTypeMap = Mapstore.STORE.get("GameType");
 
-        return renewalFormDto;
+        GameType gameType = null;
+        if (gameTypeMap != null) {
+            gameType = (GameType) gameTypeMap.get(gameTypeId);
+        }
+        if (gameType == null) {
+            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
+            if (gameType != null && gameTypeMap != null) {
+                gameTypeMap.put(gameTypeId, gameType);
+            }
+        }
+        if (gameType != null) {
+            reportFormDto.setGameType(gameType.convertToDto());
+        }
+        reportFormDto.setId(getId());
+        AuthInfo authInfo =(AuthInfo) mongoRepositoryReactive.findById(getUserId(), AuthInfo.class).block();
+        if(authInfo!=null){
+            reportFormDto.setUser(authInfo.convertToDto());
+        }
+        AuthRole authRole =(AuthRole) mongoRepositoryReactive.findById(getUserRoleId(), AuthRole.class).block();
+        if(authRole!=null){
+            reportFormDto.setUserRole(authRole.convertToDto());
+        }
+        reportFormDto.setReportedDate(getReportedDate().toString("dd/MM/yyyy HH:mm:ss"));
+        return reportFormDto;
 
-    }*/
+    }
 
 
     @Override

@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.domain.FeePaymentType;
+import com.software.finatech.lslb.cms.service.domain.RevenueName;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
@@ -44,6 +45,8 @@ public class FeeServiceImpl implements FeeService {
             Query query = new Query();
             query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
             query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+            query.addCriteria(Criteria.where("revenueNameId").is(feeCreateDto.getRevenueNameId()));
+
             Fee existingFeeWithGameTypeAndFeePaymentType = (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
             if (existingFeeWithGameTypeAndFeePaymentType != null) {
                 return Mono.just(new ResponseEntity<>("A fee setting already exist with the Fee Type and Game Type please update it", HttpStatus.BAD_REQUEST));
@@ -54,7 +57,7 @@ public class FeeServiceImpl implements FeeService {
             fee.setAmount(Double.valueOf(feeCreateDto.getAmount()));
             fee.setFeePaymentTypeId(feePaymentTypeId);
             fee.setGameTypeId(gameTypeId);
-            fee.setRevenueName(feeCreateDto.getRevenueName());
+            fee.setRevenueNameId(feeCreateDto.getRevenueNameId());
             fee.setActive(true);
             mongoRepositoryReactive.saveOrUpdate(fee);
             return Mono.just(new ResponseEntity<>(fee.convertToDto(), HttpStatus.OK));
@@ -70,6 +73,9 @@ public class FeeServiceImpl implements FeeService {
             String feeId = feeUpdateDto.getId();
             Query query = new Query();
             query.addCriteria(Criteria.where("id").is(feeId));
+            query.addCriteria(Criteria.where("gameTypeId").is(feeUpdateDto.getRevenueNameId()));
+            query.addCriteria(Criteria.where("revenueNameId").is(feeUpdateDto.getRevenueNameId()));
+
             Fee fee = (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
             if (fee == null) {
                 return Mono.just(new ResponseEntity<>("This Fee setting does not exist", HttpStatus.BAD_REQUEST));
@@ -78,7 +84,7 @@ public class FeeServiceImpl implements FeeService {
             fee.setFeePaymentTypeId(feeUpdateDto.getFeePaymentTypeId());
             fee.setGameTypeId(feeUpdateDto.getGameTypeId());
             fee.setActive(feeUpdateDto.isActive());
-            fee.setRevenueName(feeUpdateDto.getRevenueName());
+            fee.setRevenueNameId(feeUpdateDto.getRevenueNameId());
             mongoRepositoryReactive.saveOrUpdate(fee);
             return Mono.just(new ResponseEntity<>(fee.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -111,7 +117,7 @@ public class FeeServiceImpl implements FeeService {
     public Mono<ResponseEntity> createFeePaymentType(FeePaymentTypeDto feeTypeCreateDto) {
         try {
             Query query = new Query();
-            query.addCriteria(Criteria.where("id").is(feeTypeCreateDto.getName()));
+            query.addCriteria(Criteria.where("name").is(feeTypeCreateDto.getName()));
             FeePaymentType existingFeeWithGameTypeAndFeePaymentType = (FeePaymentType) mongoRepositoryReactive.find(query, FeePaymentType.class).block();
             if (existingFeeWithGameTypeAndFeePaymentType != null) {
                 return Mono.just(new ResponseEntity<>("This FeePayment setting exist", HttpStatus.BAD_REQUEST));
@@ -122,6 +128,27 @@ public class FeeServiceImpl implements FeeService {
             feePaymentType.setName(feeTypeCreateDto.getName());
             mongoRepositoryReactive.saveOrUpdate(feePaymentType);
             return Mono.just(new ResponseEntity<>(feePaymentType.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            String errorMsg = "An error occurred while creating the fee setting";
+            return logAndReturnError(logger, errorMsg, e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> createRevenueName(RevenueNameDto revenueNameDto) {
+        try {
+            Query query = new Query();
+            query.addCriteria(Criteria.where("name").is(revenueNameDto.getName()));
+            RevenueName existingRevenueNameWithGameTypeAndFeePaymentType = (RevenueName) mongoRepositoryReactive.find(query, RevenueName.class).block();
+            if (existingRevenueNameWithGameTypeAndFeePaymentType != null) {
+                return Mono.just(new ResponseEntity<>("This RevenueName setting exist", HttpStatus.BAD_REQUEST));
+            }
+            RevenueName revenueName = new RevenueName();
+            revenueName.setId(UUID.randomUUID().toString());
+            revenueName.setDescription(revenueNameDto.getDescription());
+            revenueName.setName(revenueNameDto.getName());
+            mongoRepositoryReactive.saveOrUpdate(revenueName);
+            return Mono.just(new ResponseEntity<>(revenueName.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while creating the fee setting";
             return logAndReturnError(logger, errorMsg, e);
@@ -163,6 +190,17 @@ public class FeeServiceImpl implements FeeService {
             feePaymentTypeDtoList.add(feePaymentType.convertToDto());
         });
         return feePaymentTypeDtoList;
+    }
+    @Override
+    public List<EnumeratedFactDto> getRevenueNames() {
+        Map revenueNameMap = Mapstore.STORE.get("RevenueName");
+        ArrayList<RevenueName> revenueNames = new ArrayList<RevenueName> (revenueNameMap.values());
+        List<EnumeratedFactDto> revenueNameDtoList = new ArrayList<>();
+        revenueNames.forEach(factObject -> {
+            RevenueName revenueName = factObject;
+            revenueNameDtoList.add(revenueName.convertToDto());
+        });
+        return revenueNameDtoList;
     }
     @Override
     public Mono<ResponseEntity> getAllFeePaymentType() {

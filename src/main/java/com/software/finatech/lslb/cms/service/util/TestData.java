@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.referencedata.GameTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,7 +168,7 @@ public class TestData {
         fee.setAmount(200000);
         fee.setFeePaymentTypeId("02");
         fee.setGameTypeId("01");
-        fee.setRevenueName("Revenue Name");
+        fee.setRevenueNameId(RevenueNameReferenceData.INSTITUTION_REVENUE_CODE);
         mongoRepositoryReactive.saveOrUpdate(fee);
         for (int i = 1; i < 6; i++) {
 

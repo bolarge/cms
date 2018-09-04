@@ -204,12 +204,14 @@ public class Document extends AbstractFact {
             }
             setDocumentType(DocumentType);
         }
+
     }
 
     public DocumentDto convertToDto() {
         DocumentDto dto = new DocumentDto();
         dto.setEntityId(getEntityId());
         dto.setId(getId());
+        dto.setArchive(isArchive());
         dto.setCurrent(getCurrent());
         dto.setDescription(getDescription());
         dto.setDocumentTypeId(getDocumentTypeId());
@@ -218,7 +220,7 @@ public class Document extends AbstractFact {
         dto.setEntryDate(getEntryDate() == null ? null : getEntryDate().toString(DateTimeFormat.longDateTime()));
         dto.setFilename(getFilename());
         dto.setInstitutionId(getInstitutionId());
-        dto.setInstitution(getInstitution().convertToDto());
+        dto.setInstitution(getInstitution() == null ? null : getInstitution().convertToDto());
         dto.setOriginalFilename(getOriginalFilename());
         dto.setMimeType(getMimeType());
         dto.setPreviousDocumentId(getPreviousDocumentId());
