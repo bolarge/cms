@@ -184,7 +184,7 @@ public class Scheduler {
 
                }
                    emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getInstitutionEmail());
-                   emailService.sendEmail(content, "Licence Expiration Notification", adminEmail);
+                   emailService.sendEmail(content, "Licence Expiration Notification", "elohor.evwrujae@venturegardengroup.com");
 
            }
 
