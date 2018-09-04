@@ -67,7 +67,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             }
 
             ApplicationForm applicationForm = fromCreateDto(applicationFormCreateDto);
-            applicationForm.setApplicationFormStatusId("1");
+            applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.CREATED_STATUS_ID);
             saveApplicationForm(applicationForm);
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -594,6 +594,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             ApplicationForm applicationForm = getApplicationFormById(applicationFormId);
             if (applicationForm == null) {
                 return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
+            }
+            if (!StringUtils.equals(ApplicationFormStatusReferenceData.IN_REVIEW_STATUS_ID, applicationForm.getApplicationFormStatusId())) {
+                return Mono.just(new ResponseEntity<>("Application form status has to be IN REVIEW for you to add a comment", HttpStatus.BAD_REQUEST));
             }
             AuthInfo lslbAdmin = authInfoService.getUserById(applicationFormCreateCommentDto.getUserId());
             if (lslbAdmin == null) {
