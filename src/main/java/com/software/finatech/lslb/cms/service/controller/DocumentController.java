@@ -46,7 +46,7 @@ public class DocumentController extends BaseController {
     private static Logger logger = LoggerFactory.getLogger(DocumentController.class);
 
     @RequestMapping(method = RequestMethod.POST, value = "/upload", produces = "application/json")
-    @ApiOperation(value = "Upload Document", response = DocumentCreateDto.class, consumes = "application/json")
+    @ApiOperation(value = "Upload Document", response = DocumentDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
