@@ -8,13 +8,13 @@ public class FeeDto {
     protected EnumeratedFactDto feePaymentType;
     protected String id;
     protected boolean active;
-    protected RevenueName revenueName;
+    protected EnumeratedFactDto revenueName;
 
-    public RevenueName getRevenueName() {
+    public EnumeratedFactDto getRevenueName() {
         return revenueName;
     }
 
-    public void setRevenueName(RevenueName revenueName) {
+    public void setRevenueName(EnumeratedFactDto revenueName) {
         this.revenueName = revenueName;
     }
 

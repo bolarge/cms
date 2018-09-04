@@ -4,6 +4,7 @@ package com.software.finatech.lslb.cms.service.controller;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
 import com.software.finatech.lslb.cms.service.dto.RenewalFormCreateDto;
+import com.software.finatech.lslb.cms.service.dto.RenewalFormDto;
 import com.software.finatech.lslb.cms.service.dto.RenewalFormUpdateDto;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
@@ -43,13 +44,14 @@ public class RenewalFormController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> getAllRenewalForms(@RequestParam("page") int page,
-                                                   @RequestParam("pageSize") int pageSize,
-                                                   @RequestParam("sortType") String sortType,
-                                                   @RequestParam("sortProperty") String sortParam,
-                                                   @RequestParam("institutionId") String institutionId,
-                                                   @RequestParam("gameTypeIds") String gameTypeIds,
-                                                   HttpServletResponse httpServletResponse) {
+    public Mono<ResponseEntity> getAllRenewalForms(
+                                                       @RequestParam("page") int page,
+                                                       @RequestParam("pageSize") int pageSize,
+                                                       @RequestParam("sortType") String sortType,
+                                                       @RequestParam("sortProperty") String sortParam,
+                                                       @RequestParam("institutionId") String institutionId,
+                                                       @RequestParam("gameTypeIds") String gameTypeIds,
+                                                       HttpServletResponse httpServletResponse) {
      //   return institutionService.findAllInstitutions(page, pageSize, sortType, sortParam,institutionId, gameTypeIds, httpServletResponse);
 
       try {
@@ -92,7 +94,7 @@ public class RenewalFormController extends BaseController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/new")
-    @ApiOperation(value = "Create new Renewal Form", response = RenewalForm.class, consumes = "application/json")
+    @ApiOperation(value = "Create new Renewal Form", response = RenewalFormDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -108,10 +110,33 @@ public class RenewalFormController extends BaseController {
 
         }if(!paymentRecord.convertToDto().getFee().getGameType().getId().equals(renewalFormCreateDto.getGameTypeId())){
             return Mono.just(new ResponseEntity<>("Invalid institution Selected", HttpStatus.BAD_REQUEST));
-
         }
         if (paymentRecord.convertToDto().getFee().getFeePaymentType().getId().equals(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID)){
             return Mono.just(new ResponseEntity<>("Invalid Payment Record Selected", HttpStatus.BAD_REQUEST));
+        }
+
+        if(StringUtils.isEmpty(renewalFormCreateDto.getCheckChangeInGamingMachines())){
+            return Mono.just(new ResponseEntity<>("Enter CheckChangeInGamingMachines", HttpStatus.BAD_REQUEST));
+
+        }if(StringUtils.isEmpty(renewalFormCreateDto.getCheckConvictedCrime())){
+            return Mono.just(new ResponseEntity<>("Enter CheckConvictedCrime", HttpStatus.BAD_REQUEST));
+
+        }if(StringUtils.isEmpty(renewalFormCreateDto.getCheckNewInvestors())){
+            return Mono.just(new ResponseEntity<>("Enter CheckNewInvestors", HttpStatus.BAD_REQUEST));
+
+        }if(StringUtils.isEmpty(renewalFormCreateDto.getCheckPoliticalOffice())){
+            return Mono.just(new ResponseEntity<>("Enter CheckPoliticalOffice", HttpStatus.BAD_REQUEST));
+
+        }if(StringUtils.isEmpty(renewalFormCreateDto.getCheckPoliticalParty())){
+            return Mono.just(new ResponseEntity<>("Enter CheckPoliticalParty", HttpStatus.BAD_REQUEST));
+
+        }if(StringUtils.isEmpty(renewalFormCreateDto.getCheckTechnicalPartner())){
+            return Mono.just(new ResponseEntity<>("Enter CheckTechnicalPartner", HttpStatus.BAD_REQUEST));
+
+        }if(StringUtils.isEmpty(renewalFormCreateDto.getCheckStakeHoldersChange())){
+            return Mono.just(new ResponseEntity<>("Enter CheckStakeHoldersChange", HttpStatus.BAD_REQUEST));
+        }if(StringUtils.isEmpty(renewalFormCreateDto.getCheckSharesAquisition())){
+            return Mono.just(new ResponseEntity<>("Enter CheckSharesAquisition", HttpStatus.BAD_REQUEST));
 
         }
         Query queryLicenceStatus= new Query();

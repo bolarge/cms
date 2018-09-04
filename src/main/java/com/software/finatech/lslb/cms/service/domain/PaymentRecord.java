@@ -17,7 +17,24 @@ public class PaymentRecord extends AbstractFact {
     private String parentLicenseId;
     private String agentId;
     private String gamingMachineId;
+    private String startYear;
+    private String endYear;
 
+    public String getStartYear() {
+        return startYear;
+    }
+
+    public void setStartYear(String startYear) {
+        this.startYear = startYear;
+    }
+
+    public String getEndYear() {
+        return endYear;
+    }
+
+    public void setEndYear(String endYear) {
+        this.endYear = endYear;
+    }
 
     public String getAgentId() {
         return agentId;
@@ -124,6 +141,8 @@ public class PaymentRecord extends AbstractFact {
             paymentRecordDto.setGamingMachine(gamingMachine.convertToDto());
         }
         //paymentRecordDto.setGamingMachineId(getGamingMachineId());
+        paymentRecordDto.setStartYear(getStartYear());
+        paymentRecordDto.setEndYear(getEndYear());
         paymentRecordDto.setApproverName(getApproverFullName());
         paymentRecordDto.setInstitutionId(getInstitutionId());
         paymentRecordDto.setInstitutionName(getInstitution().institutionName);

@@ -35,7 +35,7 @@ public class ExpirationList {
             return null;
         }
         for(License license: licenses) {
-            if(licenseStatusId.equals("02")){
+            if(licenseStatusId.equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
                 license.setRenewalStatus("true");
                 mongoRepositoryReactive.saveOrUpdate(license);
             }

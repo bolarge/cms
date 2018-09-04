@@ -4,7 +4,6 @@ import javax.validation.constraints.NotEmpty;
 
 public class PaymentRecordCreateDto {
     private String approverId;
-    @NotEmpty(message = "Please provide institutionId")
     private String institutionId;
     @NotEmpty(message = "Please provide payment Status Id")
     private String paymentStatusId;
@@ -14,7 +13,17 @@ public class PaymentRecordCreateDto {
     private String renewalCheck;
     private String agentId;
     private String gamingMachineId;
+    @NotEmpty(message = "Please provide start Year")
+    private String startYear;
+    private String endYear;
 
+    public String getStartYear() {
+        return startYear;
+    }
+
+    public void setStartYear(String startYear) {
+        this.startYear = startYear;
+    }
 
     public String getAgentId() {
         return agentId;
