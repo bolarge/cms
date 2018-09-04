@@ -75,8 +75,8 @@ public class DocumentTypeController extends BaseController{
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> createDocumentType(@RequestBody @Valid DocumentTypeCreateDto documentTypeCreateDto) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("documentPurposeId").is(documentTypeCreateDto.getDocumentPurposeId()));
-        DocumentType checkForDocumentType= (DocumentType) mongoRepositoryReactive.findById(documentTypeCreateDto.getDocumentPurposeId(), DocumentType.class).block();
+        query.addCriteria(Criteria.where("name").is(documentTypeCreateDto.getName()));
+        DocumentType checkForDocumentType= (DocumentType) mongoRepositoryReactive.find(query, DocumentType.class).block();
         if(checkForDocumentType!=null){
             return Mono.just(new ResponseEntity("Document Type exist, try make an update", HttpStatus.OK));
 

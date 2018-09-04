@@ -11,8 +11,7 @@ public class FeeUpdateDto {
     protected String feePaymentTypeId;
     @NotEmpty(message = "Please provide Id")
     protected String id;
-    @NotEmpty(message = "Please fee status")
-    protected boolean active;
+   protected boolean active;
     @NotEmpty(message = "Please provide a revenue id")
     protected String revenueNameId;
 
