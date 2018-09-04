@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDateTime;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -143,12 +144,32 @@ public class RenewalFormController extends BaseController {
         queryLicenceStatus.addCriteria(Criteria.where("paymentRecordId").is(renewalFormCreateDto.getPaymentRecordId()));
         queryLicenceStatus.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID));
         License license = (License)mongoRepositoryReactive.find(queryLicenceStatus, License.class).block();
-        if(paymentRecord==null || license==null){
+        if(paymentRecord==null || license==null || license.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID)){
             return Mono.just(new ResponseEntity<>("Invalid payment record", HttpStatus.BAD_REQUEST));
         }
+        license.setRenewalStatus("false");
+        license.setStartDate(LocalDateTime.now());
+        Query queryGameType = new Query();
+        queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().convertToDto().getFee().getGameType().getId()));
+        GameType gameType = (GameType) mongoRepositoryReactive.find(queryGameType, GameType.class).block();
+        int duration=0;
+        if(license.getLicenseStatusId().equals(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID)){
+            duration = Integer.parseInt(gameType.convertToDto().getAipDuration());
+        }else if(license.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
+            if(license.getLicenceType().equalsIgnoreCase("agent")){
+                duration = Integer.parseInt(gameType.convertToDto().getAgentLicenseDuration());
+            }else if(license.getLicenceType().equalsIgnoreCase("gamingMachine")){
+                duration = Integer.parseInt(gameType.convertToDto().getGamingMachineLicenseDuration());
+            }else if(license.getLicenceType().equalsIgnoreCase("institution")){
+                duration = Integer.parseInt(gameType.convertToDto().getLicenseDuration());
+            }
+        }
+        license.setEndDate(license.getStartDate().plusMonths(duration));
+        license.setRenewalStatus("false");
 
         RenewalForm renewalForm = new RenewalForm();
         renewalForm.setId(UUID.randomUUID().toString());
+        renewalForm.setPaymentRecordId(renewalFormCreateDto.getPaymentRecordId());
         renewalForm.setCheckChangeInGamingMachines(renewalFormCreateDto.getCheckChangeInGamingMachines());
         renewalForm.setCheckConvictedCrime(renewalFormCreateDto.getCheckConvictedCrime());
         renewalForm.setCheckNewInvestors(renewalFormCreateDto.getCheckNewInvestors());
@@ -157,7 +178,6 @@ public class RenewalFormController extends BaseController {
         renewalForm.setCheckSharesAquisition(renewalFormCreateDto.getCheckSharesAquisition());
         renewalForm.setCheckStakeHoldersChange(renewalFormCreateDto.getCheckStakeHoldersChange());
         renewalForm.setCheckTechnicalPartner(renewalFormCreateDto.getCheckTechnicalPartner());
-
         renewalForm.setChangeInGamingMachines(renewalFormCreateDto.getChangeInGamingMachines());
         renewalForm.setNewInvestors(renewalFormCreateDto.getNewInvestors());
         renewalForm.setPoliticalParty(renewalFormCreateDto.getPoliticalParty());
@@ -169,7 +189,7 @@ public class RenewalFormController extends BaseController {
         renewalForm.setInstitutionId(renewalFormCreateDto.getInstitutionId());
         renewalForm.setGameTypeId(renewalFormCreateDto.getGameTypeId());
         mongoRepositoryReactive.saveOrUpdate(renewalForm);
-
+        mongoRepositoryReactive.saveOrUpdate(license);
         return Mono.just(new ResponseEntity<>(renewalForm.convertToDto(), HttpStatus.OK));
 
     }
