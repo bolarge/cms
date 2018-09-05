@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.service;
 import com.software.finatech.lslb.cms.service.domain.GameType;
 import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.domain.LicenseStatus;
+import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseUpdateDto;
@@ -269,15 +270,19 @@ public class LicenseServiceImpl implements LicenseService {
             queryLicence.addCriteria(Criteria.where("paymentRecordId").is(licenseUpdateDto.getPaymentRecordId()));
             License licenseCheck = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
 
-
             if (licenseCheck == null) {
-
                 return Mono.just(new ResponseEntity<>("No Valid Payment Record", HttpStatus.BAD_REQUEST));
-
             }
+            Query queryPaymentRecord = new Query();
+
+            queryPaymentRecord.addCriteria(Criteria.where("id").is(licenseUpdateDto.getPaymentRecordId()));
+            PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.find(queryPaymentRecord, PaymentRecord.class).block();
+            int paymentRecordEndYear= Integer.parseInt(paymentRecord.getEndYear());
+
             license = licenseCheck;
             LocalDateTime fromDate;
-            if(licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID)){
+            if(licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID)
+                    || licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID)){
                 fromDate=null;
             }
 
@@ -298,7 +303,6 @@ public class LicenseServiceImpl implements LicenseService {
 
                 }
             }
-            
 
             Query queryGameType = new Query();
             queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().convertToDto().getFee().getGameType().getId()));
@@ -317,13 +321,28 @@ public class LicenseServiceImpl implements LicenseService {
             }
 
             if (!licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID) &&
-                    !licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID)) {
-                license.setEndDate(fromDate.plusMonths(duration));
-                license.setRenewalStatus("false");
+                    !licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID)
+                    &&!licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID)
+                    ) {
+                        license.setEndDate(fromDate.plusMonths(duration));
+                        license.setRenewalStatus("false");
 
             }
-
+            int licenseRecordEndYear=Integer.parseInt(licenseCheck.getEndDate().toString("yyyy"));
             license.setLicenseStatusId(licenseUpdateDto.getLicenseStatusId());
+           if(!licenseUpdateDto.getLicenseStatusId().equalsIgnoreCase(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID)){
+               if(paymentRecordEndYear != licenseRecordEndYear){
+                   return Mono.just(new ResponseEntity<>("No Valid Payment Record", HttpStatus.BAD_REQUEST));
+
+               }
+           }
+            LocalDateTime dateTime = new LocalDateTime();
+
+            if(license.getEndDate().toDate().compareTo(dateTime.toDate())<0){
+               license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
+               license.setRenewalStatus("true");
+            }
+
 
             mongoRepositoryReactive.saveOrUpdate(license);
             return Mono.just(new ResponseEntity<>(license.convertToDto(), HttpStatus.OK));

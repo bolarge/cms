@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.domain;
 
+import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.FeeDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -76,7 +77,7 @@ public class Fee extends AbstractFact {
             }
         }
         if (revenueName != null) {
-            feeDto.setRevenueName(revenueName);
+            feeDto.setRevenueName(revenueName.convertToDto());
         }
         Map gameTypeMap = Mapstore.STORE.get("GameType");
 

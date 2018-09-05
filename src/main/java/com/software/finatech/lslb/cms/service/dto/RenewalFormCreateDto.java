@@ -10,28 +10,28 @@ public class RenewalFormCreateDto {
     @NotEmpty(message = "Please enter game Type")
     protected String gameTypeId;
     @NotEmpty(message = "Please enter checkStakeHoldersChange")
-    protected Boolean checkStakeHoldersChange;
+    protected String checkStakeHoldersChange;
     protected String stakeHoldersChange;
     @NotEmpty(message = "Please enter checkSharesAquisition")
-    protected Boolean checkSharesAquisition;
+    protected String checkSharesAquisition;
     protected String sharesAquisition;
     @NotEmpty(message = "Please enter checkConvictedCrime")
-    protected Boolean checkConvictedCrime;
+    protected String checkConvictedCrime;
     protected String convictedCrime;
     @NotEmpty(message = "Please enter checkPoliticalOffice")
-    protected Boolean checkPoliticalOffice;
+    protected String checkPoliticalOffice;
     protected String politicalOffice;
     @NotEmpty(message = "Please enter checkPoliticalParty")
-    protected Boolean checkPoliticalParty;
+    protected String checkPoliticalParty;
     protected String politicalParty;
     @NotEmpty(message = "Please enter checkTechnicalPartner")
-    protected Boolean checkTechnicalPartner;
+    protected String checkTechnicalPartner;
     protected String technicalPartner;
     @NotEmpty(message = "Please enter checkChangeInGamingMachines")
-    protected Boolean checkChangeInGamingMachines;
+    protected String checkChangeInGamingMachines;
     protected String changeInGamingMachines;
     @NotEmpty(message = "Please enter checkNewInvestors")
-    protected Boolean checkNewInvestors;
+    protected String checkNewInvestors;
     protected String newInvestors;
 
     public String getInstitutionId() {
@@ -58,11 +58,11 @@ public class RenewalFormCreateDto {
         this.paymentRecordId = paymentRecordId;
     }
 
-    public Boolean getCheckStakeHoldersChange() {
+    public String getCheckStakeHoldersChange() {
         return checkStakeHoldersChange;
     }
 
-    public void setCheckStakeHoldersChange(Boolean checkStakeHoldersChange) {
+    public void setCheckStakeHoldersChange(String checkStakeHoldersChange) {
         this.checkStakeHoldersChange = checkStakeHoldersChange;
     }
 
@@ -74,11 +74,11 @@ public class RenewalFormCreateDto {
         this.stakeHoldersChange = stakeHoldersChange;
     }
 
-    public Boolean getCheckSharesAquisition() {
+    public String getCheckSharesAquisition() {
         return checkSharesAquisition;
     }
 
-    public void setCheckSharesAquisition(Boolean checkSharesAquisition) {
+    public void setCheckSharesAquisition(String checkSharesAquisition) {
         this.checkSharesAquisition = checkSharesAquisition;
     }
 
@@ -90,11 +90,11 @@ public class RenewalFormCreateDto {
         this.sharesAquisition = sharesAquisition;
     }
 
-    public Boolean getCheckConvictedCrime() {
+    public String getCheckConvictedCrime() {
         return checkConvictedCrime;
     }
 
-    public void setCheckConvictedCrime(Boolean checkConvictedCrime) {
+    public void setCheckConvictedCrime(String checkConvictedCrime) {
         this.checkConvictedCrime = checkConvictedCrime;
     }
 
@@ -106,11 +106,11 @@ public class RenewalFormCreateDto {
         this.convictedCrime = convictedCrime;
     }
 
-    public Boolean getCheckPoliticalOffice() {
+    public String getCheckPoliticalOffice() {
         return checkPoliticalOffice;
     }
 
-    public void setCheckPoliticalOffice(Boolean checkPoliticalOffice) {
+    public void setCheckPoliticalOffice(String checkPoliticalOffice) {
         this.checkPoliticalOffice = checkPoliticalOffice;
     }
 
@@ -122,11 +122,11 @@ public class RenewalFormCreateDto {
         this.politicalOffice = politicalOffice;
     }
 
-    public Boolean getCheckPoliticalParty() {
+    public String getCheckPoliticalParty() {
         return checkPoliticalParty;
     }
 
-    public void setCheckPoliticalParty(Boolean checkPoliticalParty) {
+    public void setCheckPoliticalParty(String checkPoliticalParty) {
         this.checkPoliticalParty = checkPoliticalParty;
     }
 
@@ -138,11 +138,11 @@ public class RenewalFormCreateDto {
         this.politicalParty = politicalParty;
     }
 
-    public Boolean getCheckTechnicalPartner() {
+    public String getCheckTechnicalPartner() {
         return checkTechnicalPartner;
     }
 
-    public void setCheckTechnicalPartner(Boolean checkTechnicalPartner) {
+    public void setCheckTechnicalPartner(String checkTechnicalPartner) {
         this.checkTechnicalPartner = checkTechnicalPartner;
     }
 
@@ -154,11 +154,11 @@ public class RenewalFormCreateDto {
         this.technicalPartner = technicalPartner;
     }
 
-    public Boolean getCheckChangeInGamingMachines() {
+    public String getCheckChangeInGamingMachines() {
         return checkChangeInGamingMachines;
     }
 
-    public void setCheckChangeInGamingMachines(Boolean checkChangeInGamingMachines) {
+    public void setCheckChangeInGamingMachines(String checkChangeInGamingMachines) {
         this.checkChangeInGamingMachines = checkChangeInGamingMachines;
     }
 
@@ -170,11 +170,11 @@ public class RenewalFormCreateDto {
         this.changeInGamingMachines = changeInGamingMachines;
     }
 
-    public Boolean getCheckNewInvestors() {
+    public String getCheckNewInvestors() {
         return checkNewInvestors;
     }
 
-    public void setCheckNewInvestors(Boolean checkNewInvestors) {
+    public void setCheckNewInvestors(String checkNewInvestors) {
         this.checkNewInvestors = checkNewInvestors;
     }
 

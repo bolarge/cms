@@ -45,6 +45,7 @@ public class Scheduler {
     LocalDateTime dateTime = new LocalDateTime();
 
 
+    //@Scheduled(cron = "0 0 4 * * ?")
     @Scheduled(cron = "0 0 4 * * ?")
     protected void checkForLicensesCloseToExpirations(){
         List<License> licenses=
@@ -183,7 +184,7 @@ public class Scheduler {
 
                }
                    emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getInstitutionEmail());
-                   emailService.sendEmail(content, "Licence Expiration Notification", adminEmail);
+                   emailService.sendEmail(content, "Licence Expiration Notification", "elohor.evwrujae@venturegardengroup.com");
 
            }
 

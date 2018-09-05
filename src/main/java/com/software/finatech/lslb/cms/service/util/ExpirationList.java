@@ -35,7 +35,7 @@ public class ExpirationList {
             return null;
         }
         for(License license: licenses) {
-            if(licenseStatusId.equals("02")){
+            if(licenseStatusId.equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
                 license.setRenewalStatus("true");
                 mongoRepositoryReactive.saveOrUpdate(license);
             }
@@ -61,7 +61,7 @@ public class ExpirationList {
         }
         if(licenseStatusId.equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
             for(License license: licenses){
-                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID);
+                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
                 license.setRenewalStatus("true");
                 mongoRepositoryReactive.saveOrUpdate(license);
                 Query queryRenewalDocuments= new Query();

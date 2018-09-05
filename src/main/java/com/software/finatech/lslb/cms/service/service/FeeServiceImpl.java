@@ -70,6 +70,8 @@ public class FeeServiceImpl implements FeeService {
     @Override
     public Mono<ResponseEntity> updateFee(FeeUpdateDto feeUpdateDto) {
         try {
+
+
             String feeId = feeUpdateDto.getId();
             Query query = new Query();
             query.addCriteria(Criteria.where("id").is(feeId));
