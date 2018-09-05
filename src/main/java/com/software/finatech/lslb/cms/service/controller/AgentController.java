@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.dto.AgentCreateDto;
 import com.software.finatech.lslb.cms.service.dto.AgentDto;
+import com.software.finatech.lslb.cms.service.dto.AgentUpdateDto;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -53,6 +54,18 @@ public class AgentController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> createAgent(@RequestBody @Valid AgentCreateDto agentCreateDto) {
         return agentService.createAgent(agentCreateDto);
+    }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/update")
+    @ApiOperation(value = "Update an Agent", response = AgentDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> updateAgent(@RequestBody @Valid AgentUpdateDto agentUpdateDto) {
+        return agentService.updateAgent(agentUpdateDto);
     }
 
 }
