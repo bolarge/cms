@@ -32,7 +32,7 @@ public class LicenseController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize",
-            "sortType", "sortProperty", "institutionId","gamingMachineId","agentId", "licenseStatusId","gameTypeId", "paymentRecordId"})
+            "sortType", "sortProperty", "institutionId","gamingMachineId","agentId", "licenseStatusId","gameTypeId", "paymentRecordId","licenseType"})
     @ApiOperation(value = "Get all licenses", response = LicenseDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),

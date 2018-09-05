@@ -11,6 +11,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -107,6 +109,22 @@ public class ReportFormController extends BaseController {
     public Mono<ResponseEntity> createReportForm(@RequestBody @Valid ReportFormCreateDto reportFormCreateDto) {
 
         try {
+
+            LocalDate fromDate;
+            String startDate = reportFormCreateDto.getReportedDate();
+            if ((startDate != "" && !startDate.isEmpty())) {
+                if (!startDate.matches("([0-9]{4})-([0-9]{2})-([0-9]{2})")) {
+                    return Mono.just(new ResponseEntity("Invalid Date format. " +
+                            "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
+                }
+                fromDate = new LocalDate(startDate);
+
+            } else {
+
+                return Mono.just(new ResponseEntity("Invalid Date format. " +
+                        "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
+
+            }
             ReportForm reportForm = new ReportForm();
 
             reportForm.setId(UUID.randomUUID().toString());
@@ -114,7 +132,8 @@ public class ReportFormController extends BaseController {
             reportForm.setComment(reportFormCreateDto.getComment());
             reportForm.setGameTypeId(reportFormCreateDto.getGameTypeId());
             reportForm.setGamingMachineId(reportFormCreateDto.getGamingMachineId());
-            reportForm.setReportedDate(reportFormCreateDto.getReportedDate());
+
+            reportForm.setReportedDate(fromDate);
             reportForm.setUserRoleId(reportFormCreateDto.getUserRoleId());
             reportForm.setInstitutionId(reportFormCreateDto.getInstitutionId());
             mongoRepositoryReactive.saveOrUpdate(reportForm);
