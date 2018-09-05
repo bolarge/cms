@@ -114,7 +114,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         try {
             Query query = new Query();
             if (!StringUtils.isEmpty(gameTypeIds)) {
-                List<String> gameTypeIdList = Arrays.asList(gameTypeIds.split("-"));
+                List<String> gameTypeIdList = Arrays.asList(gameTypeIds.split("\\s*,\\s*"));
                 query.addCriteria(Criteria.where("gameTypeIds").in(gameTypeIdList));
             }
             if (page == 0) {

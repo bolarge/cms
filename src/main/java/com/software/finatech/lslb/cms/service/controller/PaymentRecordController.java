@@ -50,7 +50,6 @@ public class PaymentRecordController extends BaseController {
                                                    @RequestParam("feeId") String feeId,
                                                    @RequestParam("institutionId") String institutionId,
                                                    @RequestParam("approverId") String approverId,
-
                                                    HttpServletResponse httpServletResponse) {
       try{  return paymentRecordService.findAllPaymentRecords(page, pageSize, sortType, sortParam, approverId, institutionId,  feeId, httpServletResponse);}catch (Exception ex){
           return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
@@ -122,6 +121,7 @@ try{
             return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
         }
     }
+
     @RequestMapping(method = RequestMethod.POST, value = "/update")
     @ApiOperation(value = "Update Payment Status", response = PaymentRecord.class, consumes = "application/json")
     @ApiResponses(value = {

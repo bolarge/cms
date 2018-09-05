@@ -85,6 +85,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                                                        String applicationFormTypeId,
                                                        String applicationFormStatusId,
                                                        String approverId,
+                                                       String gameTypeId,
                                                        HttpServletResponse httpServletResponse) {
 
         try {
@@ -101,6 +102,10 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             if (!StringUtils.isEmpty(applicationFormStatusId)) {
                 query.addCriteria(Criteria.where("applicationFormStatusId").is(applicationFormStatusId));
             }
+            if (!StringUtils.isEmpty(gameTypeId)) {
+                query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+            }
+
 
             if (page == 0) {
                 Long count = mongoRepositoryReactive.count(query, ApplicationForm.class).block();
@@ -684,10 +689,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         String institutionId = applicationFormCreateDto.getInstitutionId();
         String gameTypeId = applicationFormCreateDto.getGameTypeId();
         String applicationFormTypeId = applicationFormCreateDto.getApplicationFormTypeId();
+        String rejectedStatusId = ApplicationFormStatusReferenceData.REJECTED_STATUS_ID;
         Query query = new Query();
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
         query.addCriteria(Criteria.where("applicationFormTypeId").is(applicationFormTypeId));
+        query.addCriteria(Criteria.where("applicationFormStatusId").ne(rejectedStatusId));
 
         ApplicationForm existingApplicationFormForInstitutionWithGameTypeAndApplicationType = (ApplicationForm) mongoRepositoryReactive.find(query, ApplicationForm.class).block();
         if (existingApplicationFormForInstitutionWithGameTypeAndApplicationType != null) {
@@ -705,7 +712,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         }
 
         Query queryForExistingConfirmedPaymentRecord = new Query();
-        String confirmedPaymentStatusId = PaymentStatusReferenceData.CONFIRMED_PAYMENT_STATUS_ID;
+        String confirmedPaymentStatusId = PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID;
         queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("feeId").is(applicationFeeForGameType.getId()));
         queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("institutionId").is(institutionId));
         queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("paymentStatusId").is(confirmedPaymentStatusId));

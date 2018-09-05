@@ -26,6 +26,7 @@ public interface ApplicationFormService {
                                                 String applicationFormTypeId,
                                                 String applicationFormStatusId,
                                                 String approverId,
+                                                String gameTypeId,
                                                 HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getAllApplicationFormTypes();

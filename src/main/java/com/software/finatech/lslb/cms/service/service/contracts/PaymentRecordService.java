@@ -12,18 +12,23 @@ import java.util.List;
 public interface PaymentRecordService {
 
     Mono<ResponseEntity> findAllPaymentRecords(int page,
-                                              int pageSize,
-                                              String sortDirection,
-                                              String sortProperty,
-                                              String institutionId,
-                                              String approverId,
-                                              String feeId,
-                                              HttpServletResponse httpServletResponse);
+                                               int pageSize,
+                                               String sortDirection,
+                                               String sortProperty,
+                                               String institutionId,
+                                               String approverId,
+                                               String feeId,
+                                               HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getAllPaymentStatus();
+
     Mono<ResponseEntity> updatePaymentRecord(PaymentRecordUpdateDto paymentRecordUpdateDto);
+
     Mono<ResponseEntity> createPaymentRecord(PaymentRecordCreateDto paymentRecordCreateDto);
+
     List<PaymentRecord> findPayments(String institutionId, String agentId, String gamingMachineId, String gameTypeId, String startYear);
 
+    PaymentRecord findById(String paymentRecordId);
 
+    void savePaymentRecord(PaymentRecord paymentRecord);
 }
