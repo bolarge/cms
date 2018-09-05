@@ -99,7 +99,7 @@ public class Scheduler {
 
     }
     //@Scheduled(cron = "0 0 3 * * ?")
-    @Scheduled(cron = "0 0/30 * * * ?")
+    @Scheduled(cron = "0 0/4 * * * ?")
     protected void checkForAIPCloseToExpirations(){
         List<License> licenses= expirationList.getExpiringLicences(14,LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
         List<NotificationDto> notificationDtos= new ArrayList<>();
