@@ -230,7 +230,7 @@ public class Scheduler {
                 }
                 notificationDtos.add(notificationDto);
 
-                license.setLicenseStatusId("03");
+                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
 
                 mongoRepositoryReactive.saveOrUpdate(license);
             }

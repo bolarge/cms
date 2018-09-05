@@ -15,5 +15,6 @@ public interface FeeService {
     Mono<ResponseEntity> createFeePaymentType(FeePaymentTypeDto feeTypeCreateDto);
     Mono<ResponseEntity> createRevenueName(RevenueNameDto revenueNameDto);
     List<EnumeratedFactDto> getRevenueNames();
+    List<FeesTypeDto>  getAllFeesType();
 
 }

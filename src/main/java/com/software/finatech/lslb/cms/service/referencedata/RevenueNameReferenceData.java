@@ -14,21 +14,21 @@ public class RevenueNameReferenceData {
             revenueName = new RevenueName();
             revenueName.setId(INSTITUTION_REVENUE_CODE);
         }
-        revenueName.setName("INSTITUTION REVENUE CODE");
+        revenueName.setName("INSTITUTION");
 
         RevenueName revenueName1 = (RevenueName) mongoRepositoryReactive.findById(AGENT_REVENUE_CODE, RevenueName.class).block();
         if (revenueName1 == null) {
             revenueName1 = new RevenueName();
             revenueName1.setId(AGENT_REVENUE_CODE);
         }
-        revenueName1.setName("AGENT REVENUE CODE");
+        revenueName1.setName("AGENT REVENUE");
 
         RevenueName revenueName2 = (RevenueName) mongoRepositoryReactive.findById(GAMING_MACHINE_CODE, RevenueName.class).block();
         if (revenueName2 == null) {
             revenueName2 = new RevenueName();
             revenueName2.setId(GAMING_MACHINE_CODE);
         }
-        revenueName2.setName("GAMING REVENUE CODE");
+        revenueName2.setName("GAMING REVENUE");
 
         mongoRepositoryReactive.saveOrUpdate(revenueName);
         mongoRepositoryReactive.saveOrUpdate(revenueName1);

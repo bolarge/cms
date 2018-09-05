@@ -55,7 +55,7 @@ public class PaymentRecordController extends BaseController {
         return paymentRecordService.findAllPaymentRecords(page, pageSize, sortType, sortParam, approverId, institutionId,  feeId, httpServletResponse);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/specific-payment", params={"institutionId","agentId","gamingMachineId","gameTypeId","startYear"})
+    @RequestMapping(method = RequestMethod.GET, value = "/specific-payment", params={"institutionId","agentId","gamingMachineId","feeId","startYear"})
     @ApiOperation(value = "Get specific payment Status", response = PaymentRecord.class,responseContainer = "List",consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -63,7 +63,7 @@ public class PaymentRecordController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getPaymentRecordsByInstitution(@RequestParam("institutionId") String institutionId,
-                                                               @RequestParam("gameTypeId") String gameTypeId,
+                                                               @RequestParam("feeId") String feeId,
                                                                @RequestParam("agentId") String agentId,
                                                                @RequestParam("gamingMachineId") String gamingMachineId,
                                                                @RequestParam("startYear") String startYear ) {
@@ -72,7 +72,12 @@ public class PaymentRecordController extends BaseController {
             return Mono.just(new ResponseEntity<>("Provide InstitutionId or agentId or Gaming Machine Id", HttpStatus.BAD_REQUEST));
 
         }
-        List<PaymentRecord> paymentsRecords = paymentRecordService.findPayments(institutionId,agentId,gamingMachineId,gameTypeId,startYear);
+        List<PaymentRecord> paymentsRecords = paymentRecordService.findPayments(institutionId,agentId,gamingMachineId,feeId,startYear);
+
+       if(paymentsRecords.size()==0){
+           return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+
+       }
         List<PaymentRecordDto> paymentRecordDtos= new ArrayList<>();
         paymentsRecords.stream().forEach(paymentRecord -> {
             paymentRecordDtos.add(paymentRecord.convertToDto());

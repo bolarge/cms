@@ -1,7 +1,8 @@
-package com.software.finatech.lslb.cms.service.domain;
+package com.software.finatech.lslb.cms.service.controller;
 
 
 import com.software.finatech.lslb.cms.service.controller.BaseController;
+import com.software.finatech.lslb.cms.service.domain.ReportForm;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
