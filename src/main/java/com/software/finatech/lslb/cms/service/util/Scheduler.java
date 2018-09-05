@@ -75,7 +75,7 @@ public class Scheduler {
                 }
                 notificationDto.setGameType(gameType.getName());
                 notificationDto.setInstitutionId(license.getInstitutionId());
-                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
+                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
                 Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),Institution.class).block();
                 if(institution!=null){
                     notificationDto.setInstitutionName(institution.getInstitutionName());
@@ -130,7 +130,7 @@ public class Scheduler {
                 }
                 notificationDto.setGameType(gameType.getName());
                 notificationDto.setInstitutionId(license.getInstitutionId());
-                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
+                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
                 Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),
                         Institution.class).block();
                 notificationDto.setInstitutionName(institution.getInstitutionName());
@@ -218,7 +218,7 @@ public class Scheduler {
                     }
                 } notificationDto.setGameType(gameType.getName());
                 notificationDto.setInstitutionId(license.getInstitutionId());
-                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
+                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
                 Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),
                         Institution.class).block();
                 notificationDto.setInstitutionName(institution.getInstitutionName());
@@ -266,7 +266,7 @@ public class Scheduler {
                     }
                 } notificationDto.setGameType(gameType.getName());
                 notificationDto.setInstitutionId(license.getPaymentRecord().getInstitutionId());
-                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
+                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
                 Institution institution=(Institution) mongoRepositoryReactive.findById(license.getPaymentRecord().getInstitutionId(),
                         Institution.class).block();
                 notificationDto.setInstitutionName(institution.getInstitutionName());
