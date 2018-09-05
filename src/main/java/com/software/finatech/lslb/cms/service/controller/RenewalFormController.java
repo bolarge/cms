@@ -140,7 +140,7 @@ public class RenewalFormController extends BaseController {
             return Mono.just(new ResponseEntity<>("Enter CheckSharesAquisition", HttpStatus.BAD_REQUEST));
 
         }
-        Query queryLicenceStatus= new Query();
+    try{    Query queryLicenceStatus= new Query();
         queryLicenceStatus.addCriteria(Criteria.where("paymentRecordId").is(renewalFormCreateDto.getPaymentRecordId()));
         queryLicenceStatus.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID));
         License license = (License)mongoRepositoryReactive.find(queryLicenceStatus, License.class).block();
@@ -190,7 +190,10 @@ public class RenewalFormController extends BaseController {
         renewalForm.setGameTypeId(renewalFormCreateDto.getGameTypeId());
         mongoRepositoryReactive.saveOrUpdate(renewalForm);
         mongoRepositoryReactive.saveOrUpdate(license);
-        return Mono.just(new ResponseEntity<>(renewalForm.convertToDto(), HttpStatus.OK));
+        return Mono.just(new ResponseEntity<>(renewalForm.convertToDto(), HttpStatus.OK));}
+        catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+        }
 
     }
 
@@ -205,30 +208,35 @@ public class RenewalFormController extends BaseController {
     )
     public Mono<ResponseEntity> updateGameType(@RequestBody @Valid RenewalFormUpdateDto renewalFormUpdateDto) {
 
-        RenewalForm renewalForm = (RenewalForm) mongoRepositoryReactive.findById(renewalFormUpdateDto.getId(), RenewalForm.class).block();
-       if(renewalForm==null){
+        try {
+            RenewalForm renewalForm = (RenewalForm) mongoRepositoryReactive.findById(renewalFormUpdateDto.getId(), RenewalForm.class).block();
+            if (renewalForm == null) {
 
-           return Mono.just(new ResponseEntity<>("Invalid Renewal Form Selected", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Invalid Renewal Form Selected", HttpStatus.BAD_REQUEST));
 
-       }
-        renewalForm.setCheckChangeInGamingMachines(renewalFormUpdateDto.getCheckChangeInGamingMachines());
-        renewalForm.setCheckConvictedCrime(renewalFormUpdateDto.getCheckConvictedCrime());
-        renewalForm.setCheckNewInvestors(renewalFormUpdateDto.getCheckNewInvestors());
-        renewalForm.setCheckPoliticalOffice(renewalFormUpdateDto.getCheckPoliticalOffice());
-        renewalForm.setCheckPoliticalParty(renewalFormUpdateDto.getCheckPoliticalParty());
-        renewalForm.setCheckSharesAquisition(renewalFormUpdateDto.getCheckSharesAquisition());
-        renewalForm.setCheckStakeHoldersChange(renewalFormUpdateDto.getCheckStakeHoldersChange());
-        renewalForm.setCheckTechnicalPartner(renewalFormUpdateDto.getCheckTechnicalPartner());
+            }
+            renewalForm.setCheckChangeInGamingMachines(renewalFormUpdateDto.getCheckChangeInGamingMachines());
+            renewalForm.setCheckConvictedCrime(renewalFormUpdateDto.getCheckConvictedCrime());
+            renewalForm.setCheckNewInvestors(renewalFormUpdateDto.getCheckNewInvestors());
+            renewalForm.setCheckPoliticalOffice(renewalFormUpdateDto.getCheckPoliticalOffice());
+            renewalForm.setCheckPoliticalParty(renewalFormUpdateDto.getCheckPoliticalParty());
+            renewalForm.setCheckSharesAquisition(renewalFormUpdateDto.getCheckSharesAquisition());
+            renewalForm.setCheckStakeHoldersChange(renewalFormUpdateDto.getCheckStakeHoldersChange());
+            renewalForm.setCheckTechnicalPartner(renewalFormUpdateDto.getCheckTechnicalPartner());
 
-        renewalForm.setChangeInGamingMachines(renewalFormUpdateDto.getChangeInGamingMachines());
-        renewalForm.setNewInvestors(renewalFormUpdateDto.getNewInvestors());
-        renewalForm.setPoliticalParty(renewalFormUpdateDto.getPoliticalParty());
-        renewalForm.setPoliticalOffice(renewalFormUpdateDto.getPoliticalOffice());
-        renewalForm.setConvictedCrime(renewalFormUpdateDto.getConvictedCrime());
-        renewalForm.setSharesAquisition(renewalFormUpdateDto.getSharesAquisition());
-        renewalForm.setStakeHoldersChange(renewalFormUpdateDto.getStakeHoldersChange());
-        renewalForm.setTechnicalPartner(renewalFormUpdateDto.getTechnicalPartner());
-        mongoRepositoryReactive.saveOrUpdate(renewalForm);
-        return Mono.just(new ResponseEntity<>(renewalForm.convertToDto(), HttpStatus.OK));
+            renewalForm.setChangeInGamingMachines(renewalFormUpdateDto.getChangeInGamingMachines());
+            renewalForm.setNewInvestors(renewalFormUpdateDto.getNewInvestors());
+            renewalForm.setPoliticalParty(renewalFormUpdateDto.getPoliticalParty());
+            renewalForm.setPoliticalOffice(renewalFormUpdateDto.getPoliticalOffice());
+            renewalForm.setConvictedCrime(renewalFormUpdateDto.getConvictedCrime());
+            renewalForm.setSharesAquisition(renewalFormUpdateDto.getSharesAquisition());
+            renewalForm.setStakeHoldersChange(renewalFormUpdateDto.getStakeHoldersChange());
+            renewalForm.setTechnicalPartner(renewalFormUpdateDto.getTechnicalPartner());
+            mongoRepositoryReactive.saveOrUpdate(renewalForm);
+            return Mono.just(new ResponseEntity<>(renewalForm.convertToDto(), HttpStatus.OK));
+        }catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+
+        }
     }
 }

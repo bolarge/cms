@@ -72,17 +72,22 @@ public class GameTypeController extends BaseController {
     }
     )
     public Mono<ResponseEntity> createGameType(@RequestBody @Valid GameTypeCreateDto gameTypeCreateDto) {
-        GameType gameType = new GameType();
-        gameType.setId(UUID.randomUUID().toString());
-        gameType.setAipDuration(gameTypeCreateDto.getAipDuration());
-        gameType.setAgentLicenseDuration(gameTypeCreateDto.getAgentLicenseDuration());
-        gameType.setGamingMachineLicenseDuration(gameTypeCreateDto.getGamingMachineLicenseDuration());
-        gameType.setLicenseDuration(gameTypeCreateDto.getLicenseDuration());
-        gameType.setName(gameTypeCreateDto.getName());
-        gameType.setDescription(gameTypeCreateDto.getDescription());
-        mongoRepositoryReactive.saveOrUpdate(gameType);
+       try {
+           GameType gameType = new GameType();
+           gameType.setId(UUID.randomUUID().toString());
+           gameType.setAipDuration(gameTypeCreateDto.getAipDuration());
+           gameType.setAgentLicenseDuration(gameTypeCreateDto.getAgentLicenseDuration());
+           gameType.setGamingMachineLicenseDuration(gameTypeCreateDto.getGamingMachineLicenseDuration());
+           gameType.setLicenseDuration(gameTypeCreateDto.getLicenseDuration());
+           gameType.setName(gameTypeCreateDto.getName());
+           gameType.setDescription(gameTypeCreateDto.getDescription());
+           mongoRepositoryReactive.saveOrUpdate(gameType);
 
-        return Mono.just(new ResponseEntity<>(gameType.convertToDto(), HttpStatus.OK));
+           return Mono.just(new ResponseEntity<>(gameType.convertToDto(), HttpStatus.OK));
+       }catch (Exception ex){
+           return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+
+       }
 
     }
 
