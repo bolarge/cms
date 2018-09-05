@@ -113,7 +113,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
     @Override
     public Mono<ResponseEntity> validateInstitutionGamingMachineLicense(String institutionId) {
         String gameTypeId = GameTypeReferenceData.GAMING_MACHINE_OPERATOR_ID;
-        Mono<ResponseEntity> licenseValidationResponse = licenseValidatorUtil.validateInstitutionGameTypeLicenseConfirmed(institutionId, gameTypeId);
+        Mono<ResponseEntity> licenseValidationResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
         if (licenseValidationResponse != null) {
             return licenseValidationResponse;
         }

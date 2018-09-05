@@ -41,7 +41,7 @@ public class AgentServiceImpl implements AgentService {
     private AuthInfoController authInfoController;
     private LicenseValidatorUtil licenseValidatorUtil;
 
-    private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static final Logger logger = LoggerFactory.getLogger(AgentServiceImpl.class);
 
     @Autowired
@@ -119,7 +119,7 @@ public class AgentServiceImpl implements AgentService {
 
             AuthInfoCreateDto agentUserCreateDto = createAuthInfoDtoFromAgent(agentCreateDto);
             authInfoService.createAuthInfo(agentUserCreateDto, authInfoController.getAppHostPort());
-            return Mono.just(new ResponseEntity<>(agent, HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format for date of birth , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
@@ -225,7 +225,8 @@ public class AgentServiceImpl implements AgentService {
         for (AgentInstitution agentInstitution : agentInstitutions) {
             String institutionId = agentInstitution.getInstitutionId();
             String gameTypeId = agentInstitution.getGameTypeId();
-            Mono<ResponseEntity> validateLicenseResponse = licenseValidatorUtil.validateInstitutionGameTypeLicenseConfirmed(institutionId, gameTypeId);
+   //         Mono<ResponseEntity> validateLicenseResponse = licenseValidatorUtil.validateInstitutionGameTypeLicenseConfirmed(institutionId, gameTypeId);
+            Mono<ResponseEntity> validateLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
             if (validateLicenseResponse != null) {
                 return validateLicenseResponse;
             }

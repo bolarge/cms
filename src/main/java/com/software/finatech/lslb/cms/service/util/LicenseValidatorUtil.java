@@ -40,7 +40,7 @@ public class LicenseValidatorUtil {
             gameTypeName = gameType.getDescription();
         }
 
-        Object licenseDtoEntity = licenseService.findLicense("", institutionId, "", "", gameTypeId).block().getBody();
+        Object licenseDtoEntity = licenseService.findLicense(null, institutionId, null, null, gameTypeId).block().getBody();
         if (licenseDtoEntity instanceof List) {
             List<LicenseDto> licenseDtosList = (List<LicenseDto>) licenseDtoEntity;
             //check if he has existing license record
@@ -90,5 +90,23 @@ public class LicenseValidatorUtil {
             return Mono.just(new ResponseEntity<>(String.format("Institution %s does not have an existing license record for gameType %s", institutionName, gameTypeName), HttpStatus.BAD_REQUEST));
         }
         return null;
+    }
+
+    public Mono<ResponseEntity> validateInstitutionLicenseForGameType(String institutionId, String gameTypeId){
+        if (licenseService.institutionIsLicensedForGameType(institutionId, gameTypeId)){
+            return  null;
+        } else {
+            GameType gameType = gameTypeService.findById(gameTypeId);
+            String gameTypeName = gameTypeId;
+            if (gameType != null) {
+                gameTypeName = gameType.getDescription();
+            }
+            Institution institution = institutionService.findById(institutionId);
+            String institutionName = institutionId;
+            if (institution != null) {
+                institutionName = institution.getInstitutionName();
+            }
+            return Mono.just(new ResponseEntity<>(String.format("Institution %s does not have an existing license record for gameType %s", institutionName, gameTypeName), HttpStatus.BAD_REQUEST));
+        }
     }
 }
