@@ -72,7 +72,7 @@ public class ScheduledMeetingController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/update")
-    @ApiOperation(value = "Update a a scheduled meeting", response = String.class, consumes = "application/json")
+    @ApiOperation(value = "Update a a scheduled meeting", response = ScheduledMeetingDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -83,7 +83,7 @@ public class ScheduledMeetingController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/cancel")
-    @ApiOperation(value = "Cancel a scheduled meeting", response = String.class, consumes = "application/json")
+    @ApiOperation(value = "Cancel a scheduled meeting",response = ScheduledMeetingDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -94,7 +94,7 @@ public class ScheduledMeetingController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/complete")
-    @ApiOperation(value = "Complete a scheduled meeting", response = String.class, consumes = "application/json")
+    @ApiOperation(value = "Complete a scheduled meeting", response = ScheduledMeetingDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),

@@ -30,5 +30,5 @@ public interface LicenseService {
     Mono<ResponseEntity> updateLicense(LicenseUpdateDto licenseUpdateDto);
     List<EnumeratedFactDto> getLicenseStatus();
 
-
+    boolean institutionIsLicensedForGameType(String institutionId, String gameTypeId);
 }

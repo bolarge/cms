@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.dto.GamingMachineCreateDto;
 import com.software.finatech.lslb.cms.service.dto.GamingMachineDto;
+import com.software.finatech.lslb.cms.service.dto.GamingMachineUpdateDto;
 import com.software.finatech.lslb.cms.service.dto.UploadTransactionResponse;
 import com.software.finatech.lslb.cms.service.service.contracts.GamingMachineService;
 import io.swagger.annotations.Api;
@@ -54,6 +55,17 @@ public class GamingMachineController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> createGamingMachine(@RequestBody @Valid GamingMachineCreateDto gamingMachineCreateDto) {
         return gamingMachineService.createGamingMachine(gamingMachineCreateDto);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/update")
+    @ApiOperation(value = "Update a Gaming Machine", response = GamingMachineDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> updateGamingMachine(@RequestBody @Valid GamingMachineUpdateDto gamingMachineUpdateDto) {
+        return gamingMachineService.updateGamingMachine(gamingMachineUpdateDto);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{institutionId}/upload-multiple")

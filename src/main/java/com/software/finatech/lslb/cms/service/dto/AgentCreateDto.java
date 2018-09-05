@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.dto;
 
 import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,6 +14,7 @@ public class AgentCreateDto {
     @NotEmpty(message = "please provide agent last name")
     private String lastName;
     private String fullName;
+    @Email
     @NotEmpty(message = "please provide agent email address")
     private String emailAddress;
     @NotEmpty(message = "please provide agent phone number")

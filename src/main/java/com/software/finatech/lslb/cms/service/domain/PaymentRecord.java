@@ -1,10 +1,12 @@
 package com.software.finatech.lslb.cms.service.domain;
 
+import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetail;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("serial")
 @Document(collection = "PaymentRecords")
@@ -19,6 +21,10 @@ public class PaymentRecord extends AbstractFact {
     private String gamingMachineId;
     private String startYear;
     private String endYear;
+    private double amount;
+    private double amountPaid;
+    private double amountOutstanding;
+    private Set<PaymentRecordDetail> paymentRecordDetailList;
 
     public String getStartYear() {
         return startYear;
@@ -108,6 +114,38 @@ public class PaymentRecord extends AbstractFact {
         } else {
             return authInfo.getFullName();
         }
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
+
+    public double getAmountPaid() {
+        return amountPaid;
+    }
+
+    public void setAmountPaid(double amountPaid) {
+        this.amountPaid = amountPaid;
+    }
+
+    public double getAmountOutstanding() {
+        return amountOutstanding;
+    }
+
+    public void setAmountOutstanding(double amountOutstanding) {
+        this.amountOutstanding = amountOutstanding;
+    }
+
+    public Set<PaymentRecordDetail> getPaymentRecordDetailList() {
+        return paymentRecordDetailList;
+    }
+
+    public void setPaymentRecordDetailList(Set<PaymentRecordDetail> paymentRecordDetailList) {
+        this.paymentRecordDetailList = paymentRecordDetailList;
     }
 
     public PaymentRecordDto convertToDto() {
