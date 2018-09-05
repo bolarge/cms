@@ -126,36 +126,37 @@ public class LicenseServiceImpl implements LicenseService {
             if(!StringUtils.isEmpty(institutionId)&&StringUtils.isEmpty(agentId)&&
                     StringUtils.isEmpty(gamingMachineId)){
                 queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
-                queryLicence.addCriteria(Criteria.where("gamingMachineId").is(""));
-                queryLicence.addCriteria(Criteria.where("agentId").is(""));
+                queryLicence.addCriteria(Criteria.where("licenceType").is("institution"));
 
             }
-            if(!StringUtils.isEmpty(agentId)&&StringUtils.isEmpty(institutionId)&&StringUtils.isEmpty(gamingMachineId)){
+            if(!StringUtils.isEmpty(agentId)&&StringUtils.isEmpty(institutionId)
+                    &&StringUtils.isEmpty(gamingMachineId)){
                 queryLicence.addCriteria(Criteria.where("agentId").is(agentId));
-                queryLicence.addCriteria(Criteria.where("institutionId").is(""));
-                queryLicence.addCriteria(Criteria.where("gamingMachineId").is(""));
+                queryLicence.addCriteria(Criteria.where("licenceType").is("agent"));
             }
             if(!StringUtils.isEmpty(gamingMachineId)&&StringUtils.isEmpty(institutionId)&&StringUtils.isEmpty(agentId)){
                 queryLicence.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
-                queryLicence.addCriteria(Criteria.where("institutionId").is(""));
-                queryLicence.addCriteria(Criteria.where("agentId").is(""));
+               queryLicence.addCriteria(Criteria.where("licenseType").is("gamingMachineId"));
+
             }
         if(!StringUtils.isEmpty(gamingMachineId)&&!StringUtils.isEmpty(institutionId)
                 &&StringUtils.isEmpty(institutionId)){
             queryLicence.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
             queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
-            queryLicence.addCriteria(Criteria.where("institutionId").is(""));
+            queryLicence.addCriteria(Criteria.where("licenseType").is("gamingMachine"));
+
         }
         if(!StringUtils.isEmpty(agentId)&&!StringUtils.isEmpty(institutionId)
                 &&StringUtils.isEmpty(institutionId)){
             queryLicence.addCriteria(Criteria.where("agentId").is(agentId));
-            queryLicence.addCriteria(Criteria.where("institutionId").is(""));
+            queryLicence.addCriteria(Criteria.where("licenceType").is("gamingMachine"));
             queryLicence.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
 
         }if(!StringUtils.isEmpty(agentId)&&!StringUtils.isEmpty(gamingMachineId)
                 &&!StringUtils.isEmpty(institutionId)){
             queryLicence.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
             queryLicence.addCriteria(Criteria.where("agentId").is(agentId));
+            queryLicence.addCriteria(Criteria.where("licenceType").is("gamingMachine"));
             queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
 
         }
