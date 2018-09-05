@@ -148,7 +148,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
             return Mono.just(new ResponseEntity<>(String.format("Institution with id %s does not exist", institutionId), HttpStatus.BAD_REQUEST));
         }
         String gameTypeId = GameTypeReferenceData.GAMING_MACHINE_OPERATOR_ID;
-        Mono<ResponseEntity> licenseValidationResponse = licenseValidatorUtil.validateInstitutionGameTypeLicenseConfirmed(institutionId, gameTypeId);
+        Mono<ResponseEntity> licenseValidationResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
         if (licenseValidationResponse != null) {
             return licenseValidationResponse;
         }
