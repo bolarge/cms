@@ -66,11 +66,11 @@ public class AgentServiceImpl implements AgentService {
         try {
             Query query = new Query();
             if (!StringUtils.isEmpty(institutionIds)) {
-                List<String> institutionIdList = Arrays.asList(institutionIds.split("-"));
+                List<String> institutionIdList = Arrays.asList(institutionIds.split(","));
                 query.addCriteria(Criteria.where("institutionIds").in(institutionIdList));
             }
             if (!StringUtils.isEmpty(gameTypeIds)) {
-                List<String> gameTypeIdList = Arrays.asList(gameTypeIds.split("-"));
+                List<String> gameTypeIdList = Arrays.asList(gameTypeIds.split("\\s*,\\s*"));
                 query.addCriteria(Criteria.where("gameTypeIds").in(gameTypeIdList));
             }
 
@@ -225,7 +225,7 @@ public class AgentServiceImpl implements AgentService {
         for (AgentInstitution agentInstitution : agentInstitutions) {
             String institutionId = agentInstitution.getInstitutionId();
             String gameTypeId = agentInstitution.getGameTypeId();
-   //         Mono<ResponseEntity> validateLicenseResponse = licenseValidatorUtil.validateInstitutionGameTypeLicenseConfirmed(institutionId, gameTypeId);
+            //         Mono<ResponseEntity> validateLicenseResponse = licenseValidatorUtil.validateInstitutionGameTypeLicenseConfirmed(institutionId, gameTypeId);
             Mono<ResponseEntity> validateLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
             if (validateLicenseResponse != null) {
                 return validateLicenseResponse;

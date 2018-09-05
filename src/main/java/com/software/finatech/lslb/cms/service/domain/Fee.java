@@ -11,6 +11,10 @@ import java.util.Map;
 @Document(collection = "Fees")
 public class Fee extends AbstractFact {
     protected boolean active;
+    protected double amount;
+    protected String gameTypeId;
+    protected String feePaymentTypeId;
+    protected String revenueNameId;
 
     public boolean isActive() {
         return active;
@@ -19,10 +23,6 @@ public class Fee extends AbstractFact {
     public void setActive(boolean active) {
         this.active = active;
     }
-    protected double amount;
-    protected String gameTypeId;
-    protected String feePaymentTypeId;
-    protected String revenueNameId;
 
     public String getRevenueNameId() {
         return revenueNameId;
