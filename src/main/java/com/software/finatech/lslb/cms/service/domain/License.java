@@ -22,7 +22,7 @@ public class License extends AbstractFact {
     protected LocalDateTime startDate;
     protected LocalDateTime endDate;
     protected String renewalStatus;
-    protected String licenceType;
+    protected String licenseType;
     protected String agentId;
     protected String gamingMachineId;
 
@@ -42,12 +42,12 @@ public class License extends AbstractFact {
         this.gamingMachineId = gamingMachineId;
     }
 
-    public String getLicenceType() {
-        return licenceType;
+    public String getLicenseType() {
+        return licenseType;
     }
 
-    public void setLicenceType(String licenceType) {
-        this.licenceType = licenceType;
+    public void setLicenseType(String licenseType) {
+        this.licenseType = licenseType;
     }
 
     public String getInstitutionId() {
@@ -132,7 +132,7 @@ public class License extends AbstractFact {
             }
         }
         licenseDto.setLicenseStatus(licenseStatus.convertToDto());
-        licenseDto.setLicenseType(getLicenceType());
+        licenseDto.setLicenseType(getLicenseType());
         //licenseDto.setGamingMachineId(getGamingMachineId());
        // licenseDto.setAgentId(getAgentId());
         licenseDto.setPaymentRecord(getPaymentRecord().convertToDto());

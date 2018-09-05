@@ -156,11 +156,11 @@ public class RenewalFormController extends BaseController {
         if(license.getLicenseStatusId().equals(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID)){
             duration = Integer.parseInt(gameType.convertToDto().getAipDuration());
         }else if(license.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
-            if(license.getLicenceType().equalsIgnoreCase("agent")){
+            if(license.getLicenseType().equalsIgnoreCase("agent")){
                 duration = Integer.parseInt(gameType.convertToDto().getAgentLicenseDuration());
-            }else if(license.getLicenceType().equalsIgnoreCase("gamingMachine")){
+            }else if(license.getLicenseType().equalsIgnoreCase("gamingMachine")){
                 duration = Integer.parseInt(gameType.convertToDto().getGamingMachineLicenseDuration());
-            }else if(license.getLicenceType().equalsIgnoreCase("institution")){
+            }else if(license.getLicenseType().equalsIgnoreCase("institution")){
                 duration = Integer.parseInt(gameType.convertToDto().getLicenseDuration());
             }
         }
