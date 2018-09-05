@@ -333,4 +333,17 @@ public class LicenseServiceImpl implements LicenseService {
             return logAndReturnError(logger, errorMsg, e);
         }
     }
+
+    @Override
+    public boolean institutionIsLicensedForGameType(String institutionId, String gameTypeId) {
+        Query queryForLicensedInstitutionInGameType = new Query();
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("institutionId").is(institutionId));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        License licenseForInstitutionAndGameType = (License)mongoRepositoryReactive.find(queryForLicensedInstitutionInGameType, License.class).block();
+        if (licenseForInstitutionAndGameType == null){
+            return  false;
+        }else {
+            return StringUtils.equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID, licenseForInstitutionAndGameType.getLicenseStatusId());
+        }
+    }
 }
