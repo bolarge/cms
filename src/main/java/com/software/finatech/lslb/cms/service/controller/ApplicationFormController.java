@@ -36,7 +36,7 @@ public class ApplicationFormController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize",
-            "sortType", "sortProperty", "institutionId", "applicationFormTypeId", "applicationFormStatusId"})
+            "sortType", "sortProperty", "institutionId", "applicationFormTypeId", "applicationFormStatusId", "gameTypeId"})
     @ApiOperation(value = "Get all Application Forms", response = ApplicationFormDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -51,8 +51,9 @@ public class ApplicationFormController {
                                                        @RequestParam("applicationFormTypeId") String applicationFormTypeId,
                                                        @RequestParam("applicationFormStatusId") String applicationFormStatusId,
                                                        @RequestParam("approverId") String approverId,
+                                                       @RequestParam("gameTypeId") String gameTypeId,
                                                        HttpServletResponse httpServletResponse) {
-        return applicationFormService.findAllApplicationForm(page, pageSize, sortType, sortParam, institutionId, applicationFormTypeId, applicationFormStatusId, approverId, httpServletResponse);
+        return applicationFormService.findAllApplicationForm(page, pageSize, sortType, sortParam, institutionId, applicationFormTypeId, applicationFormStatusId, approverId, gameTypeId,httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create")

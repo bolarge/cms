@@ -50,7 +50,6 @@ public class PaymentRecordController extends BaseController {
                                                    @RequestParam("feeId") String feeId,
                                                    @RequestParam("institutionId") String institutionId,
                                                    @RequestParam("approverId") String approverId,
-
                                                    HttpServletResponse httpServletResponse) {
         return paymentRecordService.findAllPaymentRecords(page, pageSize, sortType, sortParam, approverId, institutionId,  feeId, httpServletResponse);
     }
@@ -107,6 +106,7 @@ public class PaymentRecordController extends BaseController {
     public Mono<ResponseEntity> createPaymentRecord(@RequestBody @Valid PaymentRecordCreateDto paymentRecordCreateDto) {
         return paymentRecordService.createPaymentRecord(paymentRecordCreateDto);
     }
+
     @RequestMapping(method = RequestMethod.POST, value = "/update")
     @ApiOperation(value = "Update Payment Status", response = PaymentRecord.class, consumes = "application/json")
     @ApiResponses(value = {

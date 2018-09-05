@@ -225,7 +225,7 @@ public class TestData {
                 paymentRecord = new PaymentRecord();
                 paymentRecord.setId(String.valueOf(i));
             }
-            paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.CONFIRMED_PAYMENT_STATUS_ID);
+            paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
             paymentRecord.setInstitutionId("" + i);
             paymentRecord.setFeeId(fee.getId());
             paymentRecord.setApproverId("1");

@@ -33,15 +33,17 @@ public class FeeController extends BaseController {
         this.feeService = feeService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"feePaymentTypeId", "gameTypeId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"feePaymentTypeId", "gameTypeId", "revenueNameId"})
     @ApiOperation(value = "Get all Fees", response = FeeDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getAllFees(@RequestParam("feePaymentTypeId") String feePaymentTypeId, @RequestParam("gameTypeId") String gameTypeId) {
-        return feeService.getAllFees(feePaymentTypeId, gameTypeId);
+    public Mono<ResponseEntity> getAllFees(@RequestParam("feePaymentTypeId") String feePaymentTypeId,
+                                           @RequestParam("gameTypeId") String gameTypeId,
+                                           @RequestParam("revenueNameId") String revenueNameId) {
+        return feeService.getAllFees(feePaymentTypeId, gameTypeId, revenueNameId);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-fee-payment-types")
@@ -110,6 +112,19 @@ public class FeeController extends BaseController {
         }
         return Mono.just(new ResponseEntity<>(revenueNames, HttpStatus.OK));
 
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/find-fee", params = {"feePaymentTypeId", "gameTypeId", "revenueNameId"})
+    @ApiOperation(value = "Get Fee with revenue name, gameType and Fee Payment Type", response = FeeDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> findFeeByParams(@RequestParam("feePaymentTypeId") String feePaymentTypeId,
+                                           @RequestParam("gameTypeId") String gameTypeId,
+                                           @RequestParam("revenueNameId") String revenueNameId) {
+        return feeService.findActiveFeeByGameTypeAndPaymentTypeAndRevenueName(gameTypeId,feePaymentTypeId, revenueNameId);
     }
 
 }

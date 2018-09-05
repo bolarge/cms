@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
+
 @Service
 public class FeeServiceImpl implements FeeService {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
@@ -35,6 +36,7 @@ public class FeeServiceImpl implements FeeService {
     public void setMongoRepositoryReactive(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
     }
+
     @Autowired
     MapValues mapValues;
 
@@ -158,7 +160,7 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public Mono<ResponseEntity> getAllFees(String feePaymentTypeId, String gameTypeId) {
+    public Mono<ResponseEntity> getAllFees(String feePaymentTypeId, String gameTypeId, String revenueNameId) {
         try {
             Query query = new Query();
             if (!StringUtils.isEmpty(feePaymentTypeId)) {
@@ -167,6 +169,10 @@ public class FeeServiceImpl implements FeeService {
             if (!StringUtils.isEmpty(gameTypeId)) {
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             }
+            if (!StringUtils.isEmpty(revenueNameId)) {
+                query.addCriteria(Criteria.where("revenueNameId").is(revenueNameId));
+            }
+
             query.addCriteria(Criteria.where("active").is(true));
 
             ArrayList<Fee> fees = (ArrayList<Fee>) mongoRepositoryReactive.findAll(query, Fee.class).toStream().collect(Collectors.toList());
@@ -183,9 +189,10 @@ public class FeeServiceImpl implements FeeService {
             return logAndReturnError(logger, errorMsg, e);
         }
     }
+
     public List<EnumeratedFactDto> getFeePaymentType() {
         Map feePaymentTypeMap = Mapstore.STORE.get("FeePaymentType");
-        ArrayList<FeePaymentType> feePaymentTypes = new ArrayList<FeePaymentType> (feePaymentTypeMap.values());
+        ArrayList<FeePaymentType> feePaymentTypes = new ArrayList<FeePaymentType>(feePaymentTypeMap.values());
         List<EnumeratedFactDto> feePaymentTypeDtoList = new ArrayList<>();
         feePaymentTypes.forEach(factObject -> {
             FeePaymentType feePaymentType = factObject;
@@ -193,10 +200,11 @@ public class FeeServiceImpl implements FeeService {
         });
         return feePaymentTypeDtoList;
     }
+
     @Override
     public List<EnumeratedFactDto> getRevenueNames() {
         Map revenueNameMap = Mapstore.STORE.get("RevenueName");
-        ArrayList<RevenueName> revenueNames = new ArrayList<RevenueName> (revenueNameMap.values());
+        ArrayList<RevenueName> revenueNames = new ArrayList<RevenueName>(revenueNameMap.values());
         List<EnumeratedFactDto> revenueNameDtoList = new ArrayList<>();
         revenueNames.forEach(factObject -> {
             RevenueName revenueName = factObject;
@@ -204,6 +212,7 @@ public class FeeServiceImpl implements FeeService {
         });
         return revenueNameDtoList;
     }
+
     @Override
     public Mono<ResponseEntity> getAllFeePaymentType() {
         try {
@@ -212,5 +221,31 @@ public class FeeServiceImpl implements FeeService {
             String errorMsg = "An error occurred while trying to get all payment types";
             return logAndReturnError(logger, errorMsg, e);
         }
+    }
+
+    @Override
+    public Mono<ResponseEntity> findActiveFeeByGameTypeAndPaymentTypeAndRevenueName(String gameTypeId, String feePaymentTypeId, String revenueNameId) {
+        if (StringUtils.isEmpty(revenueNameId) || StringUtils.isEmpty(gameTypeId) || StringUtils.isEmpty(feePaymentTypeId)) {
+            return Mono.just(new ResponseEntity<>("None of the request params should be empty", HttpStatus.BAD_REQUEST));
+        }
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("revenueNameId").is(revenueNameId));
+        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
+        query.addCriteria(Criteria.where("active").is(true));
+        Fee fee = (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
+        if (fee == null) {
+            return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
+        }
+        FeeDto feeDto = new FeeDto();
+        feeDto.setId(fee.getId());
+        feeDto.setAmount(fee.getAmount());
+        return Mono.just(new ResponseEntity<>(feeDto, HttpStatus.OK));
+    }
+
+    @Override
+    public Fee findFeeById(String feeId) {
+        return (Fee) mongoRepositoryReactive.findById(feeId, Fee.class).block();
     }
 }
