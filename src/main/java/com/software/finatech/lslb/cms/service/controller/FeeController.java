@@ -111,5 +111,21 @@ public class FeeController extends BaseController {
         return Mono.just(new ResponseEntity<>(revenueNames, HttpStatus.OK));
 
     }
+    @RequestMapping(method = RequestMethod.GET, value = "/all-processing-fees")
+    @ApiOperation(value = "Get all Processing Fees", response = FeesTypeDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllProcessingFees() {
+        List<FeesTypeDto> feesTypeDtos= feeService.getAllFeesType();
+        if(feesTypeDtos.size()==0){
+            return Mono.just(new ResponseEntity<>("No Processing FeeType ", HttpStatus.OK));
+
+        }
+        return Mono.just(new ResponseEntity<>(feesTypeDtos, HttpStatus.OK));
+
+    }
 
 }

@@ -183,6 +183,27 @@ public class FeeServiceImpl implements FeeService {
             return logAndReturnError(logger, errorMsg, e);
         }
     }
+
+
+    @Override
+    public List<FeesTypeDto>  getAllFeesType() {
+        try {
+            Query query = new Query();
+            query.addCriteria(Criteria.where("active").is(true));
+            List<Fee> fees = (ArrayList<Fee>) mongoRepositoryReactive.findAll(query, Fee.class).toStream().collect(Collectors.toList());
+            ArrayList<FeesTypeDto> feeDtos = new ArrayList<>();
+            fees.forEach(fee -> {
+               FeesTypeDto feesTypeDto = new FeesTypeDto();
+               feesTypeDto.setFeeId(fee.getId());
+               feesTypeDto.setFee(fee.convertToDto().getRevenueName().getName()+" "+fee.convertToDto().getGameType().getName()+" "+fee.convertToDto().getFeePaymentType().getName());
+               feeDtos.add(feesTypeDto);
+            });
+            return feeDtos;
+        } catch (Exception e) {
+            String errorMsg = "An error occurred while getting all fees";
+            return null;
+        }
+    }
     public List<EnumeratedFactDto> getFeePaymentType() {
         Map feePaymentTypeMap = Mapstore.STORE.get("FeePaymentType");
         ArrayList<FeePaymentType> feePaymentTypes = new ArrayList<FeePaymentType> (feePaymentTypeMap.values());

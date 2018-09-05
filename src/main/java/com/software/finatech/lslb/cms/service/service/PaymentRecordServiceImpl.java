@@ -122,7 +122,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
 
     }
 
-    public List<PaymentRecord> findPaymentRecords(String institutionId,String agentId, String gamingMachineId, String gameTypeId, String startYear) {
+    public List<PaymentRecord> findPaymentRecords(String institutionId,String agentId, String gamingMachineId, String feeId, String startYear) {
         try {
 
             Query query = new Query();
@@ -145,15 +145,15 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                 }
 
             }
-            if(!StringUtils.isEmpty(gameTypeId)){
-                query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+            if(!StringUtils.isEmpty(feeId)){
+                query.addCriteria(Criteria.where("feeId").is(feeId));
             }
             if(!StringUtils.isEmpty(startYear)){
                 query.addCriteria(Criteria.where("startYear").is(startYear));
             }
             List<PaymentRecord> paymentRecords=(List<PaymentRecord>) mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
             if (paymentRecords.size()==0) {
-                return null;
+                return paymentRecords;
             }
 
                 return paymentRecords;
