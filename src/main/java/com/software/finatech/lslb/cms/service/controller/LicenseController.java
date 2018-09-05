@@ -11,6 +11,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -112,7 +113,11 @@ public class LicenseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllExpiredLicenseStatus() {
-        return licenseService.getExpiredLicenses();
+        try{return licenseService.getExpiredLicenses();}
+        catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+
+        }
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-expired-aips")
@@ -123,7 +128,10 @@ public class LicenseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllExpiredAIPStatus() {
-        return licenseService.getExpiredAIPs();
+        try{return licenseService.getExpiredAIPs();}catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+
+        }
     }
 
 
@@ -135,6 +143,10 @@ public class LicenseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> updateLicense(@RequestBody @Valid LicenseUpdateDto licenseUpdateDto) {
-        return licenseService.updateLicense(licenseUpdateDto);
+        try {return licenseService.updateLicense(licenseUpdateDto);}
+        catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+
+        }
     }
 }

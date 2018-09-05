@@ -103,12 +103,17 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllRevenueNames() {
-        List<EnumeratedFactDto> revenueNames= feeService.getRevenueNames();
-        if(revenueNames==null){
-            return Mono.just(new ResponseEntity<>("No Revenue Name Record", HttpStatus.OK));
+       try {
+           List<EnumeratedFactDto> revenueNames = feeService.getRevenueNames();
+           if (revenueNames == null) {
+               return Mono.just(new ResponseEntity<>("No Revenue Name Record", HttpStatus.OK));
 
-        }
-        return Mono.just(new ResponseEntity<>(revenueNames, HttpStatus.OK));
+           }
+           return Mono.just(new ResponseEntity<>(revenueNames, HttpStatus.OK));
+       }catch (Exception ex){
+           return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+
+       }
 
     }
     @RequestMapping(method = RequestMethod.GET, value = "/all-processing-fees")
@@ -119,13 +124,18 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllProcessingFees() {
-        List<FeesTypeDto> feesTypeDtos= feeService.getAllFeesType();
-        if(feesTypeDtos.size()==0){
-            return Mono.just(new ResponseEntity<>("No Processing FeeType ", HttpStatus.OK));
+        try {
+            List<FeesTypeDto> feesTypeDtos = feeService.getAllFeesType();
+            if (feesTypeDtos.size() == 0) {
+                return Mono.just(new ResponseEntity<>("No Processing FeeType ", HttpStatus.OK));
+
+            }
+            return Mono.just(new ResponseEntity<>(feesTypeDtos, HttpStatus.OK));
+
+        }catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
 
         }
-        return Mono.just(new ResponseEntity<>(feesTypeDtos, HttpStatus.OK));
-
     }
 
 }

@@ -91,8 +91,8 @@ public class ReportFormController extends BaseController {
             return Mono.just(new ResponseEntity<>(reportFormDtos, HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while fetching all institutions";
-            return null;//logAndReturnError(errorMsg, errorMsg, e);
-        }
+          return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+      }
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/new")
@@ -106,18 +106,24 @@ public class ReportFormController extends BaseController {
     )
     public Mono<ResponseEntity> createReportForm(@RequestBody @Valid ReportFormCreateDto reportFormCreateDto) {
 
-        ReportForm reportForm = new ReportForm();
-        reportForm.setId(UUID.randomUUID().toString());
-        reportForm.setAgentId(reportFormCreateDto.getAgentId());
-        reportForm.setComment(reportFormCreateDto.getComment());
-        reportForm.setGameTypeId(reportFormCreateDto.getGameTypeId());
-        reportForm.setGamingMachineId(reportFormCreateDto.getGamingMachineId());
-        reportForm.setReportedDate(reportFormCreateDto.getReportedDate());
-        reportForm.setUserRoleId(reportFormCreateDto.getUserRoleId());
-        reportForm.setInstitutionId(reportFormCreateDto.getInstitutionId());
-         mongoRepositoryReactive.saveOrUpdate(reportForm);
+        try {
+            ReportForm reportForm = new ReportForm();
 
-        return Mono.just(new ResponseEntity<>(reportForm.convertToDto(), HttpStatus.OK));
+            reportForm.setId(UUID.randomUUID().toString());
+            reportForm.setAgentId(reportFormCreateDto.getAgentId());
+            reportForm.setComment(reportFormCreateDto.getComment());
+            reportForm.setGameTypeId(reportFormCreateDto.getGameTypeId());
+            reportForm.setGamingMachineId(reportFormCreateDto.getGamingMachineId());
+            reportForm.setReportedDate(reportFormCreateDto.getReportedDate());
+            reportForm.setUserRoleId(reportFormCreateDto.getUserRoleId());
+            reportForm.setInstitutionId(reportFormCreateDto.getInstitutionId());
+            mongoRepositoryReactive.saveOrUpdate(reportForm);
+
+            return Mono.just(new ResponseEntity<>(reportForm.convertToDto(), HttpStatus.OK));
+        }catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+
+        }
 
     }
 
