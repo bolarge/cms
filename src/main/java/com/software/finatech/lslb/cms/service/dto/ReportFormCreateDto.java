@@ -18,7 +18,7 @@ public class ReportFormCreateDto  {
     @NotEmpty(message = "Provide User ID")
     protected String userId;
     @NotEmpty(message = "Provide reportDate")
-    protected LocalDate reportedDate;
+    protected String reportedDate;
     @NotEmpty(message = "Provide User role")
     protected String userRoleId;
     protected String agentId;
@@ -81,11 +81,11 @@ public class ReportFormCreateDto  {
     }
 
 
-    public LocalDate getReportedDate() {
+    public String getReportedDate() {
         return reportedDate;
     }
 
-    public void setReportedDate(LocalDate reportedDate) {
+    public void setReportedDate(String reportedDate) {
         this.reportedDate = reportedDate;
     }
 
