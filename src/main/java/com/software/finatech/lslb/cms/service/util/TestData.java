@@ -168,8 +168,42 @@ public class TestData {
         fee.setAmount(200000);
         fee.setFeePaymentTypeId("02");
         fee.setGameTypeId("01");
+        fee.setActive(true);
         fee.setRevenueNameId(RevenueNameReferenceData.INSTITUTION_REVENUE_CODE);
         mongoRepositoryReactive.saveOrUpdate(fee);
+        Fee fee2 = (Fee) mongoRepositoryReactive.findById("2", Fee.class).block();
+        if (fee2 == null) {
+            fee2 = new Fee();
+            fee2.setId("2");
+        }
+        fee2.setAmount(100000);
+        fee2.setFeePaymentTypeId("02");
+        fee2.setGameTypeId("02");
+        fee2.setActive(true);
+        fee2.setRevenueNameId(RevenueNameReferenceData.INSTITUTION_REVENUE_CODE);
+        mongoRepositoryReactive.saveOrUpdate(fee2);
+        Fee fee3 = (Fee) mongoRepositoryReactive.findById("3", Fee.class).block();
+        if (fee3 == null) {
+            fee3 = new Fee();
+            fee3.setId("3");
+        }
+        fee3.setAmount(100000);
+        fee3.setFeePaymentTypeId("02");
+        fee3.setGameTypeId("01");
+        fee3.setActive(true);
+        fee3.setRevenueNameId(RevenueNameReferenceData.AGENT_REVENUE_CODE);
+        mongoRepositoryReactive.saveOrUpdate(fee3);
+        Fee fee4 = (Fee) mongoRepositoryReactive.findById("4", Fee.class).block();
+        if (fee4 == null) {
+            fee4 = new Fee();
+            fee4.setId("4");
+        }
+        fee4.setAmount(200000);
+        fee4.setFeePaymentTypeId("02");
+        fee4.setGameTypeId("02");
+        fee4.setActive(true);
+        fee4.setRevenueNameId(RevenueNameReferenceData.AGENT_REVENUE_CODE);
+        mongoRepositoryReactive.saveOrUpdate(fee4);
         for (int i = 1; i < 6; i++) {
 
             Institution institution = (Institution) mongoRepositoryReactive.findById(String.valueOf(i), Institution.class).block();
@@ -244,6 +278,11 @@ public class TestData {
             LocalDateTime startDate = new LocalDateTime();
             license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getLicenseDuration())));
             license.setLicenceType("institution");
+            if(i==1){
+                license.setStartDate(LocalDateTime.now());
+                license.setLicenseStatusId(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
+                license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getAipDuration())));
+             }
             if (i == 3) {
                 paymentRecord.setGamingMachineId(gamingMachine.getId());
                 license.setGamingMachineId(paymentRecord.getGamingMachineId());

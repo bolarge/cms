@@ -1,7 +1,8 @@
-package com.software.finatech.lslb.cms.service.domain;
+package com.software.finatech.lslb.cms.service.controller;
 
 
 import com.software.finatech.lslb.cms.service.controller.BaseController;
+import com.software.finatech.lslb.cms.service.domain.ReportForm;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
@@ -10,6 +11,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -90,8 +93,8 @@ public class ReportFormController extends BaseController {
             return Mono.just(new ResponseEntity<>(reportFormDtos, HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while fetching all institutions";
-            return null;//logAndReturnError(errorMsg, errorMsg, e);
-        }
+          return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+      }
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/new")
@@ -105,18 +108,41 @@ public class ReportFormController extends BaseController {
     )
     public Mono<ResponseEntity> createReportForm(@RequestBody @Valid ReportFormCreateDto reportFormCreateDto) {
 
-        ReportForm reportForm = new ReportForm();
-        reportForm.setId(UUID.randomUUID().toString());
-        reportForm.setAgentId(reportFormCreateDto.getAgentId());
-        reportForm.setComment(reportFormCreateDto.getComment());
-        reportForm.setGameTypeId(reportFormCreateDto.getGameTypeId());
-        reportForm.setGamingMachineId(reportFormCreateDto.getGamingMachineId());
-        reportForm.setReportedDate(reportFormCreateDto.getReportedDate());
-        reportForm.setUserRoleId(reportFormCreateDto.getUserRoleId());
-        reportForm.setInstitutionId(reportFormCreateDto.getInstitutionId());
-         mongoRepositoryReactive.saveOrUpdate(reportForm);
+        try {
 
-        return Mono.just(new ResponseEntity<>(reportForm.convertToDto(), HttpStatus.OK));
+            LocalDate fromDate;
+            String startDate = reportFormCreateDto.getReportedDate();
+            if ((startDate != "" && !startDate.isEmpty())) {
+                if (!startDate.matches("([0-9]{4})-([0-9]{2})-([0-9]{2})")) {
+                    return Mono.just(new ResponseEntity("Invalid Date format. " +
+                            "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
+                }
+                fromDate = new LocalDate(startDate);
+
+            } else {
+
+                return Mono.just(new ResponseEntity("Invalid Date format. " +
+                        "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
+
+            }
+            ReportForm reportForm = new ReportForm();
+
+            reportForm.setId(UUID.randomUUID().toString());
+            reportForm.setAgentId(reportFormCreateDto.getAgentId());
+            reportForm.setComment(reportFormCreateDto.getComment());
+            reportForm.setGameTypeId(reportFormCreateDto.getGameTypeId());
+            reportForm.setGamingMachineId(reportFormCreateDto.getGamingMachineId());
+
+            reportForm.setReportedDate(fromDate);
+            reportForm.setUserRoleId(reportFormCreateDto.getUserRoleId());
+            reportForm.setInstitutionId(reportFormCreateDto.getInstitutionId());
+            mongoRepositoryReactive.saveOrUpdate(reportForm);
+
+            return Mono.just(new ResponseEntity<>(reportForm.convertToDto(), HttpStatus.OK));
+        }catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+
+        }
 
     }
 

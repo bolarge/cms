@@ -51,10 +51,13 @@ public class PaymentRecordController extends BaseController {
                                                    @RequestParam("institutionId") String institutionId,
                                                    @RequestParam("approverId") String approverId,
                                                    HttpServletResponse httpServletResponse) {
-        return paymentRecordService.findAllPaymentRecords(page, pageSize, sortType, sortParam, approverId, institutionId,  feeId, httpServletResponse);
+      try{  return paymentRecordService.findAllPaymentRecords(page, pageSize, sortType, sortParam, approverId, institutionId,  feeId, httpServletResponse);}catch (Exception ex){
+          return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+
+      }
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/specific-payment", params={"institutionId","agentId","gamingMachineId","gameTypeId","startYear"})
+    @RequestMapping(method = RequestMethod.GET, value = "/specific-payment", params={"institutionId","agentId","gamingMachineId","feeId","startYear"})
     @ApiOperation(value = "Get specific payment Status", response = PaymentRecord.class,responseContainer = "List",consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -62,21 +65,30 @@ public class PaymentRecordController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getPaymentRecordsByInstitution(@RequestParam("institutionId") String institutionId,
-                                                               @RequestParam("gameTypeId") String gameTypeId,
+                                                               @RequestParam("feeId") String feeId,
                                                                @RequestParam("agentId") String agentId,
                                                                @RequestParam("gamingMachineId") String gamingMachineId,
                                                                @RequestParam("startYear") String startYear ) {
-
+try{
         if(StringUtils.isEmpty(institutionId)&&StringUtils.isEmpty(agentId)&&StringUtils.isEmpty(gamingMachineId)){
             return Mono.just(new ResponseEntity<>("Provide InstitutionId or agentId or Gaming Machine Id", HttpStatus.BAD_REQUEST));
 
         }
-        List<PaymentRecord> paymentsRecords = paymentRecordService.findPayments(institutionId,agentId,gamingMachineId,gameTypeId,startYear);
+        List<PaymentRecord> paymentsRecords = paymentRecordService.findPayments(institutionId,agentId,gamingMachineId,feeId,startYear);
+
+       if(paymentsRecords.size()==0){
+           return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+
+       }
         List<PaymentRecordDto> paymentRecordDtos= new ArrayList<>();
         paymentsRecords.stream().forEach(paymentRecord -> {
             paymentRecordDtos.add(paymentRecord.convertToDto());
         });
-        return Mono.just(new ResponseEntity<>(paymentRecordDtos, HttpStatus.OK));
+        return Mono.just(new ResponseEntity<>(paymentRecordDtos, HttpStatus.OK));}
+        catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+
+        }
 
     }
 
@@ -88,10 +100,10 @@ public class PaymentRecordController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllPaymentStatus() {
-        return paymentRecordService.getAllPaymentStatus();
+        try{return paymentRecordService.getAllPaymentStatus();}catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+        }
     }
-
-
 
 
     @RequestMapping(method = RequestMethod.POST, value = "/new")
@@ -104,7 +116,10 @@ public class PaymentRecordController extends BaseController {
     }
     )
     public Mono<ResponseEntity> createPaymentRecord(@RequestBody @Valid PaymentRecordCreateDto paymentRecordCreateDto) {
-        return paymentRecordService.createPaymentRecord(paymentRecordCreateDto);
+        try{return paymentRecordService.createPaymentRecord(paymentRecordCreateDto);}
+        catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+        }
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/update")
@@ -117,6 +132,9 @@ public class PaymentRecordController extends BaseController {
     }
     )
     public Mono<ResponseEntity> updatePaymentRecord(@RequestBody @Valid PaymentRecordUpdateDto paymentRecordUpdateDto) {
-        return paymentRecordService.updatePaymentRecord(paymentRecordUpdateDto);
+        try{return paymentRecordService.updatePaymentRecord(paymentRecordUpdateDto);}catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+
+        }
     }
 }

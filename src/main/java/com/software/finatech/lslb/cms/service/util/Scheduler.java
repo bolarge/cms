@@ -46,8 +46,10 @@ public class Scheduler {
 
 
     //@Scheduled(cron = "0 0 4 * * ?")
-    @Scheduled(cron = "0 0 4 * * ?")
+    @Scheduled(cron = "0 0 0/1 * * ?")
+   // @Scheduled(fixedRate = 300)
     protected void checkForLicensesCloseToExpirations(){
+        logger.info(" checkForLicensesCloseToExpirations");
         List<License> licenses=
                 expirationList.getExpiringLicences(90,LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
        List<NotificationDto> notificationDtos= new ArrayList<>();
@@ -98,9 +100,13 @@ public class Scheduler {
         }
 
     }
-    @Scheduled(cron = "0 0 3 * * ?")
+    //@Scheduled(cron = "0 0 3 * * ?")
+   // @Scheduled(fixedRate = 300)
+    @Scheduled(cron = "0 0 0/1 * * ?")
     protected void checkForAIPCloseToExpirations(){
-        List<License> licenses= expirationList.getExpiringLicences(14,LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+
+        logger.info("checkForAIPCloseToExpirations");
+        List<License> licenses= expirationList.getExpiringLicences(14,LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
         List<NotificationDto> notificationDtos= new ArrayList<>();
         LocalDateTime endDate;
         dateTime=dateTime.plusDays(14);
@@ -175,16 +181,16 @@ public class Scheduler {
             String content = mailContentBuilderService.build(model, "LicenseExpiration");
 
            if((type=="AIPExpired")||(type=="AIPExpiring")){
+               emailService.sendEmail(content,"AIP Expiration Notification", "elohor.evwrujae@venturegardengroup.com");
                emailService.sendEmail(content,"AIP Expiration Notification", notificationDto.getInstitutionEmail());
-               emailService.sendEmail(content,"AIP Expiration Notification", adminEmail);
 
            }else{
                if(!StringUtils.isEmpty(notificationDto.getAgentId())){
                    emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getAgentEmailAddress());
 
                }
-                   emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getInstitutionEmail());
                    emailService.sendEmail(content, "Licence Expiration Notification", "elohor.evwrujae@venturegardengroup.com");
+                   emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getInstitutionEmail());
 
            }
 
@@ -230,7 +236,7 @@ public class Scheduler {
                 }
                 notificationDtos.add(notificationDto);
 
-                license.setLicenseStatusId("03");
+                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
 
                 mongoRepositoryReactive.saveOrUpdate(license);
             }
