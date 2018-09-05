@@ -278,11 +278,14 @@ public class TestData {
             LocalDateTime startDate = new LocalDateTime();
             license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getLicenseDuration())));
             license.setLicenseType("institution");
+            license.setFirstPayment(false);
+
             if(i==1){
                 license.setStartDate(LocalDateTime.now());
                 license.setLicenseStatusId(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
                 license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getAipDuration())));
-             }
+
+            }
             if (i == 3) {
                 paymentRecord.setGamingMachineId(gamingMachine.getId());
                 license.setGamingMachineId(paymentRecord.getGamingMachineId());

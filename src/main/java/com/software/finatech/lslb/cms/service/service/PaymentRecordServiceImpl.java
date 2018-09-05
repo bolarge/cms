@@ -215,9 +215,13 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         if(licenseCheck==null){
                 license=new License();
                 license.setId(UUID.randomUUID().toString());
+                license.setFirstPayment(true);
+
             }else{
                 license=licenseCheck;
-            }
+            license.setFirstPayment(false);
+
+        }
         if(fee.getFeePaymentTypeId().equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID)) {
             if (!StringUtils.isEmpty(paymentRecord.getAgentId())
                     &&!StringUtils.isEmpty(paymentRecord.getInstitutionId())

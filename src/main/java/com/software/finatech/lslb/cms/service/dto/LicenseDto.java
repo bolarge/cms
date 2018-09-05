@@ -4,7 +4,6 @@ import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 public class LicenseDto {
     protected LicenseStatusDto licenseStatus;
-    protected Institution institution;
     protected String id;
     protected PaymentRecordDto paymentRecord;
     protected Fee fee;
@@ -68,14 +67,6 @@ public class LicenseDto {
 
     public void setLicenseStatus(LicenseStatusDto licenseStatus) {
         this.licenseStatus = licenseStatus;
-    }
-
-    public Institution getInstitution() {
-        return institution;
-    }
-
-    public void setInstitution(Institution institution) {
-        this.institution = institution;
     }
 
     public String getId() {
