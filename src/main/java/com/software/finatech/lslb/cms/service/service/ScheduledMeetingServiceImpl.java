@@ -147,7 +147,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             }
 
             sendInitialNotificationToMeetingParticipants(scheduledMeeting);
-            return Mono.just(new ResponseEntity<>("Scheduled meeting created successfully", HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(scheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format for meeting date , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
@@ -170,7 +170,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             scheduledMeeting.setScheduledMeetingStatusId(canceledMeetingStatusId);
             scheduledMeeting.setCancelerId(cancelerId);
             saveScheduledMeeting(scheduledMeeting);
-            return Mono.just(new ResponseEntity<>("Meeting canceled successfully", HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(scheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while canceling the scheduled meeting", e);
         }
@@ -186,7 +186,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             String completedMeetingStatusId = "2";
             scheduledMeeting.setScheduledMeetingStatusId(completedMeetingStatusId);
             saveScheduledMeeting(scheduledMeeting);
-            return Mono.just(new ResponseEntity<>("Meeting completed successfully", HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(scheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while completing the scheduled meeting", e);
         }
@@ -205,7 +205,8 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             existingScheduledMeeting.setMeetingDescription(scheduledMeetingUpdateDto.getAdditionalNotes());
             existingScheduledMeeting.setInstitutionId(scheduledMeetingUpdateDto.getInstitutionId());
             existingScheduledMeeting.setMeetingDate(FORMATTER.parseDateTime(scheduledMeetingUpdateDto.getMeetingDate()));
-            return Mono.just(new ResponseEntity<>("Meeting updated successfully", HttpStatus.OK));
+            saveScheduledMeeting(existingScheduledMeeting);
+            return Mono.just(new ResponseEntity<>(existingScheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format for meeting date , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
