@@ -98,7 +98,8 @@ public class Scheduler {
         }
 
     }
-    @Scheduled(cron = "0 0 3 * * ?")
+    //@Scheduled(cron = "0 0 3 * * ?")
+    @Scheduled(cron = "0 0/30 * * * ?")
     protected void checkForAIPCloseToExpirations(){
         List<License> licenses= expirationList.getExpiringLicences(14,LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
         List<NotificationDto> notificationDtos= new ArrayList<>();
@@ -176,14 +177,14 @@ public class Scheduler {
 
            if((type=="AIPExpired")||(type=="AIPExpiring")){
                emailService.sendEmail(content,"AIP Expiration Notification", notificationDto.getInstitutionEmail());
-               emailService.sendEmail(content,"AIP Expiration Notification", adminEmail);
+               emailService.sendEmail(content,"AIP Expiration Notification", "elohor.evwrujae@venturegardengroup.com");
 
            }else{
                if(!StringUtils.isEmpty(notificationDto.getAgentId())){
                    emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getAgentEmailAddress());
 
                }
-                   emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getInstitutionEmail());
+                   emailService.sendEmail(content, "Licence Expiration Notification", "elohor.evwrujae@venturegardengroup.com");
                    emailService.sendEmail(content, "Licence Expiration Notification", "elohor.evwrujae@venturegardengroup.com");
 
            }

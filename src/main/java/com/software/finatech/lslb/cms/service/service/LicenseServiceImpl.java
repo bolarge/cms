@@ -83,7 +83,28 @@ public class LicenseServiceImpl implements LicenseService {
             if (!StringUtils.isEmpty(licenseType)) {
                 query.addCriteria(Criteria.where("licenseType").is(licenseType));
             }
+            if(!StringUtils.isEmpty(gamingMachineId)&&!StringUtils.isEmpty(institutionId)
+                    &&StringUtils.isEmpty(agentId)){
+                return Mono.just(new ResponseEntity<>("Enter either agentId or gaming machineId, or institutionId", HttpStatus.OK));
 
+
+            }
+            if(!StringUtils.isEmpty(gamingMachineId)&&!StringUtils.isEmpty(agentId)
+                    &&StringUtils.isEmpty(institutionId)){
+                return Mono.just(new ResponseEntity<>("Enter either agentId or gaming machineId, or institutionId", HttpStatus.OK));
+
+
+            }
+            if(!StringUtils.isEmpty(agentId)&&!StringUtils.isEmpty(institutionId)
+                    &&StringUtils.isEmpty(gamingMachineId)){
+                return Mono.just(new ResponseEntity<>("Enter either agentId or gaming machineId, or institutionId", HttpStatus.OK));
+
+
+            }if(!StringUtils.isEmpty(agentId)&&!StringUtils.isEmpty(gamingMachineId)
+                    &&!StringUtils.isEmpty(institutionId)){
+                return Mono.just(new ResponseEntity<>("Enter either agentId or gaming machineId, or institutionId", HttpStatus.OK));
+
+            }
             if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, License.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
@@ -140,24 +161,25 @@ public class LicenseServiceImpl implements LicenseService {
 
             }
         if(!StringUtils.isEmpty(gamingMachineId)&&!StringUtils.isEmpty(institutionId)
+                &&StringUtils.isEmpty(agentId)){
+            return Mono.just(new ResponseEntity<>("Enter either agentId or gaming machineId, or institutionId", HttpStatus.OK));
+
+
+        }
+        if(!StringUtils.isEmpty(gamingMachineId)&&!StringUtils.isEmpty(agentId)
                 &&StringUtils.isEmpty(institutionId)){
-            queryLicence.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
-            queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
-            queryLicence.addCriteria(Criteria.where("licenseType").is("gamingMachine"));
+            return Mono.just(new ResponseEntity<>("Enter either agentId or gaming machineId, or institutionId", HttpStatus.OK));
+
 
         }
         if(!StringUtils.isEmpty(agentId)&&!StringUtils.isEmpty(institutionId)
-                &&StringUtils.isEmpty(institutionId)){
-            queryLicence.addCriteria(Criteria.where("agentId").is(agentId));
-            queryLicence.addCriteria(Criteria.where("licenceType").is("gamingMachine"));
-            queryLicence.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
+                &&StringUtils.isEmpty(gamingMachineId)){
+            return Mono.just(new ResponseEntity<>("Enter either agentId or gaming machineId, or institutionId", HttpStatus.OK));
+
 
         }if(!StringUtils.isEmpty(agentId)&&!StringUtils.isEmpty(gamingMachineId)
                 &&!StringUtils.isEmpty(institutionId)){
-            queryLicence.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
-            queryLicence.addCriteria(Criteria.where("agentId").is(agentId));
-            queryLicence.addCriteria(Criteria.where("licenceType").is("gamingMachine"));
-            queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
+            return Mono.just(new ResponseEntity<>("Enter either agentId or gaming machineId, or institutionId", HttpStatus.OK));
 
         }
 
