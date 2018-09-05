@@ -81,7 +81,7 @@ public class LicenseServiceImpl implements LicenseService {
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             }
             if (!StringUtils.isEmpty(licenseType)) {
-                query.addCriteria(Criteria.where("licenceType").is(licenseType));
+                query.addCriteria(Criteria.where("licenseType").is(licenseType));
             }
             if(!StringUtils.isEmpty(gamingMachineId)&&!StringUtils.isEmpty(institutionId)
                     &&StringUtils.isEmpty(agentId)){
@@ -147,17 +147,17 @@ public class LicenseServiceImpl implements LicenseService {
             if(!StringUtils.isEmpty(institutionId)&&StringUtils.isEmpty(agentId)&&
                     StringUtils.isEmpty(gamingMachineId)){
                 queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
-                queryLicence.addCriteria(Criteria.where("licenceType").is("institution"));
+                queryLicence.addCriteria(Criteria.where("licenseType").is("institution"));
 
             }
             if(!StringUtils.isEmpty(agentId)&&StringUtils.isEmpty(institutionId)
                     &&StringUtils.isEmpty(gamingMachineId)){
                 queryLicence.addCriteria(Criteria.where("agentId").is(agentId));
-                queryLicence.addCriteria(Criteria.where("licenceType").is("agent"));
+                queryLicence.addCriteria(Criteria.where("licenseType").is("agent"));
             }
             if(!StringUtils.isEmpty(gamingMachineId)&&StringUtils.isEmpty(institutionId)&&StringUtils.isEmpty(agentId)){
                 queryLicence.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
-               queryLicence.addCriteria(Criteria.where("licenceType").is("gamingMachineId"));
+               queryLicence.addCriteria(Criteria.where("licenseType").is("gamingMachineId"));
 
             }
         if(!StringUtils.isEmpty(gamingMachineId)&&!StringUtils.isEmpty(institutionId)

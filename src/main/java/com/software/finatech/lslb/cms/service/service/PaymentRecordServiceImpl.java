@@ -222,7 +222,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             if (!StringUtils.isEmpty(paymentRecord.getAgentId())
                     &&!StringUtils.isEmpty(paymentRecord.getInstitutionId())
             &&StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
-                license.setLicenceType("Agent");
+                license.setLicenseType("Agent");
                int duration= Integer.parseInt(gameType.getAgentLicenseDuration());
                int endYear= startYear+ (duration/12);
                 paymentRecord.setEndYear(String.valueOf(endYear));
@@ -232,7 +232,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             } else if (!StringUtils.isEmpty(paymentRecord.getInstitutionId())
                     &&StringUtils.isEmpty(paymentRecord.getAgentId())&&
                     StringUtils.isEmpty(paymentRecord.getGamingMachineId()) ) {
-                license.setLicenceType("Institution");
+                license.setLicenseType("Institution");
                 license.setInstitutionId(paymentRecord.getInstitutionId());
                 int duration= Integer.parseInt(gameType.getLicenseDuration());
                 int endYear= startYear+ (duration/12);
@@ -244,7 +244,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                 int duration= Integer.parseInt(gameType.getGamingMachineLicenseDuration());
                 int endYear= startYear+ (duration/12);
                 paymentRecord.setEndYear(String.valueOf(endYear));
-                license.setLicenceType("GamingMachine");
+                license.setLicenseType("GamingMachine");
                 license.setGamingMachineId(paymentRecord.getGamingMachineId());
                 license.setInstitutionId(paymentRecord.getInstitutionId());
             }else{
@@ -298,7 +298,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             if (!StringUtils.isEmpty(paymentRecord.getAgentId())
                     &&!StringUtils.isEmpty(paymentRecord.getInstitutionId())
                     &&StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
-                license.setLicenceType("Agent");
+                license.setLicenseType("Agent");
                 int duration= Integer.parseInt(gameType.getAgentLicenseDuration());
                 int endYear= startYear+ (duration/12);
                 paymentRecord.setEndYear(String.valueOf(endYear));
@@ -307,7 +307,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             } else if (!StringUtils.isEmpty(paymentRecord.getInstitutionId())
                     &&StringUtils.isEmpty(paymentRecord.getAgentId())&&
                     StringUtils.isEmpty(paymentRecord.getGamingMachineId()) ) {
-                license.setLicenceType("Institution");
+                license.setLicenseType("Institution");
                 license.setInstitutionId(paymentRecord.getInstitutionId());
                 int duration= Integer.parseInt(gameType.getLicenseDuration());
                 int endYear= startYear+ (duration/12);
@@ -319,7 +319,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                 int duration= Integer.parseInt(gameType.getGamingMachineLicenseDuration());
                 int endYear= startYear+ (duration/12);
                 paymentRecord.setEndYear(String.valueOf(endYear));
-                license.setLicenceType("GamingMachine");
+                license.setLicenseType("GamingMachine");
                 license.setGamingMachineId(paymentRecord.getGamingMachineId());
                 license.setInstitutionId(paymentRecord.getInstitutionId());
             }else{

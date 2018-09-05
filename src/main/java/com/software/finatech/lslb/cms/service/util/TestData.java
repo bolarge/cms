@@ -277,7 +277,7 @@ public class TestData {
             license.setStartDate(LocalDateTime.now());
             LocalDateTime startDate = new LocalDateTime();
             license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getLicenseDuration())));
-            license.setLicenceType("institution");
+            license.setLicenseType("institution");
             if(i==1){
                 license.setStartDate(LocalDateTime.now());
                 license.setLicenseStatusId(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
@@ -287,14 +287,14 @@ public class TestData {
                 paymentRecord.setGamingMachineId(gamingMachine.getId());
                 license.setGamingMachineId(paymentRecord.getGamingMachineId());
                 license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getGamingMachineLicenseDuration())));
-                license.setLicenceType("gamingMachine");
+                license.setLicenseType("gamingMachine");
 
             }
             if (i == 4) {
                 paymentRecord.setAgentId(agent.getId());
                 license.setAgentId(paymentRecord.getAgentId());
                 license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getAgentLicenseDuration())));
-                license.setLicenceType("agent");
+                license.setLicenseType("agent");
                 agent.setEmailAddress("samelikzra@gmail.com");
 
             }
