@@ -81,7 +81,7 @@ public class LicenseServiceImpl implements LicenseService {
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             }
             if (!StringUtils.isEmpty(licenseType)) {
-                query.addCriteria(Criteria.where("licenseType").is(licenseType));
+                query.addCriteria(Criteria.where("licenceType").is(licenseType));
             }
             if(!StringUtils.isEmpty(gamingMachineId)&&!StringUtils.isEmpty(institutionId)
                     &&StringUtils.isEmpty(agentId)){
@@ -157,7 +157,7 @@ public class LicenseServiceImpl implements LicenseService {
             }
             if(!StringUtils.isEmpty(gamingMachineId)&&StringUtils.isEmpty(institutionId)&&StringUtils.isEmpty(agentId)){
                 queryLicence.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
-               queryLicence.addCriteria(Criteria.where("licenseType").is("gamingMachineId"));
+               queryLicence.addCriteria(Criteria.where("licenceType").is("gamingMachineId"));
 
             }
         if(!StringUtils.isEmpty(gamingMachineId)&&!StringUtils.isEmpty(institutionId)
