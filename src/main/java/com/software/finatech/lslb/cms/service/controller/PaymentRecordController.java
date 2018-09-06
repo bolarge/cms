@@ -36,7 +36,7 @@ public class PaymentRecordController extends BaseController {
     }
 
 
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "gameTypeIds", "approverId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "feeId","institutionId","approverId"})
     @ApiOperation(value = "Get all payment records", response = PaymentRecordDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
