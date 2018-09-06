@@ -2,7 +2,7 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
-import org.joda.time.LocalDateTime;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -19,8 +19,8 @@ public class License extends AbstractFact {
     protected String institutionId;
     protected String gameTypeId;
     protected String paymentRecordId;
-    protected LocalDateTime startDate;
-    protected LocalDateTime endDate;
+    protected LocalDate startDate;
+    protected LocalDate endDate;
     protected String renewalStatus;
     protected String licenseType;
     protected String agentId;
@@ -92,22 +92,22 @@ public class License extends AbstractFact {
         this.paymentRecordId = paymentRecordId;
     }
 
-    public LocalDateTime getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public LocalDateTime getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
 
     private static final Logger logger = LoggerFactory.getLogger(License.class);
 
-    public void setStartDate(LocalDateTime startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public void setEndDate(LocalDateTime endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 
@@ -148,8 +148,8 @@ public class License extends AbstractFact {
             licenseDto.setPaymentRecord(getPaymentRecord().convertToDto());
         }
             if(getStartDate()!=null){
-                licenseDto.setStartDate(getStartDate().toString("dd/MM/yyyy HH:mm:ss"));
-                licenseDto.setEndDate(getStartDate().toString("dd/MM/yyyy HH:mm:ss"));
+                licenseDto.setStartDate(getStartDate().toString("dd-MM-yyyy"));
+                licenseDto.setEndDate(getStartDate().toString("dd-MM-yyyy"));
             }
 
         licenseDto.setRenewalStatus(getRenewalStatus());

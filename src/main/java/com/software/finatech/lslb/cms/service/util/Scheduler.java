@@ -51,7 +51,7 @@ public class Scheduler {
         List<License> licenses=
                 expirationList.getExpiringLicences(90,LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
        List<NotificationDto> notificationDtos= new ArrayList<>();
-        LocalDateTime endDate;
+        LocalDate endDate;
         dateTime=dateTime.plusMonths(3);
         if(licenses!=null){
             for(License license: licenses){
@@ -105,7 +105,7 @@ public class Scheduler {
         logger.info("checkForAIPCloseToExpirations");
         List<License> licenses= expirationList.getExpiringLicences(14,LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
         List<NotificationDto> notificationDtos= new ArrayList<>();
-        LocalDateTime endDate;
+        LocalDate endDate;
         dateTime=dateTime.plusDays(14);
         if(licenses!=null){
             for(License license: licenses){
@@ -202,7 +202,7 @@ public class Scheduler {
         if(licenses!=null){
             for(License license: licenses){
                 NotificationDto notificationDto= new NotificationDto();
-                LocalDateTime endDate=license.getEndDate();
+                LocalDate endDate=license.getEndDate();
                 GameType gameType = null;
                 Map gameTypeMap = Mapstore.STORE.get("GameType");
                 if (gameTypeMap != null) {
@@ -250,7 +250,7 @@ public class Scheduler {
         if(licenses!=null){
             for(License license: licenses){
                 NotificationDto notificationDto= new NotificationDto();
-                LocalDateTime endDate=license.getEndDate();
+                LocalDate endDate=license.getEndDate();
                 GameType gameType = null;
                 Map gameTypeMap = Mapstore.STORE.get("GameType");
                 if (gameTypeMap != null) {

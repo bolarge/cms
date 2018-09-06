@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -154,7 +155,7 @@ public class RenewalFormController extends BaseController {
             return Mono.just(new ResponseEntity<>("An existing renewal application is tied to this payment", HttpStatus.BAD_REQUEST));
         }
         license.setRenewalStatus("false");
-        license.setStartDate(LocalDateTime.now());
+        license.setStartDate(LocalDate.now());
         Query queryGameType = new Query();
         queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().convertToDto().getFee().getGameType().getId()));
         GameType gameType = (GameType) mongoRepositoryReactive.find(queryGameType, GameType.class).block();
