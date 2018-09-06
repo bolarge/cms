@@ -235,7 +235,7 @@ public class DocumentController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page","pageSize","sortType","sortProperty","id", "documentTypeId","institutionId","archive"}, produces = "application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page","pageSize","sortType","sortProperty","id", "documentTypeId","institutionId","archive","isCurrent"}, produces = "application/json")
     public Mono<ResponseEntity> getById(@RequestParam("page") int page,
                                         @RequestParam("pageSize") int pageSize,
                                         @RequestParam("sortType") String sortType,
@@ -244,6 +244,7 @@ public class DocumentController extends BaseController {
                                         @RequestParam("documentTypeId") String documentTypeId,
                                         @RequestParam("institutionId") String institutionId,
                                         @RequestParam("archive") boolean archive,
+                                        @RequestParam("isCurrent") boolean isCurrent,
                                         HttpServletResponse httpServletResponse) {
 
         Query query = new Query();
@@ -258,7 +259,7 @@ public class DocumentController extends BaseController {
         if(!StringUtils.isEmpty(id)){
             query.addCriteria(Criteria.where("id").is(id));
         }
-
+            query.addCriteria(Criteria.where("isCurrent").is(isCurrent));
             query.addCriteria(Criteria.where("archive").is(archive));
 
 
