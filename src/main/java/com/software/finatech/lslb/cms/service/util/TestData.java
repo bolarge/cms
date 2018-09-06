@@ -301,6 +301,10 @@ public class TestData {
                 agent.setEmailAddress("samelikzra@gmail.com");
 
             }
+            if(i==5){
+                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID);
+                
+            }
             license.setRenewalStatus("false");
             mongoRepositoryReactive.saveOrUpdate(gamingMachine);
             mongoRepositoryReactive.saveOrUpdate(agent);

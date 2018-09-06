@@ -147,6 +147,12 @@ public class RenewalFormController extends BaseController {
         if(paymentRecord==null || license==null || !license.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID)){
             return Mono.just(new ResponseEntity<>("Invalid payment record", HttpStatus.BAD_REQUEST));
         }
+        Query queryRenewal= new Query();
+        queryRenewal.addCriteria(Criteria.where("paymentRecordId").is(renewalFormCreateDto.getPaymentRecordId()));
+        RenewalForm renewalFormCheck = (RenewalForm)mongoRepositoryReactive.find(queryRenewal, RenewalForm.class).block();
+        if(renewalFormCheck!=null){
+            return Mono.just(new ResponseEntity<>("Invalid payment record", HttpStatus.BAD_REQUEST));
+        }
         license.setRenewalStatus("false");
         license.setStartDate(LocalDateTime.now());
         Query queryGameType = new Query();
