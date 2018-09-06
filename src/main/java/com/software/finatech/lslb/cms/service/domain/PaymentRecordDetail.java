@@ -17,7 +17,16 @@ public class PaymentRecordDetail extends AbstractFact {
     private String modeOfPaymentId;
     private String id;
     private String paymentRecordId;
+    private boolean paymentAddedToParent;
 
+
+    public boolean isPaymentAddedToParent() {
+        return paymentAddedToParent;
+    }
+
+    public void setPaymentAddedToParent(boolean paymentAddedToParent) {
+        this.paymentAddedToParent = paymentAddedToParent;
+    }
 
     public String getPaymentRecordId() {
         return paymentRecordId;
