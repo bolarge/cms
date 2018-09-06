@@ -53,8 +53,8 @@ jwt:
 
 racs:
   ui:
-    host: localhost
-    port: 3000
+    host: lslbcms.test.vggdev.com
+    port:
 
     
 email-host: smtp.gmail.com
