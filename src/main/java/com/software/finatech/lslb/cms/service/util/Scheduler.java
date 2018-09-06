@@ -71,7 +71,8 @@ public class Scheduler {
                         gameTypeMap.put(license.getGameTypeId(), gameType);
                     }
                 }
-                notificationDto.setGameType(gameType.getName());
+
+                notificationDto.setGameType(gameType.getDescription());
                 notificationDto.setInstitutionId(license.getInstitutionId());
                 notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
                 Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),Institution.class).block();
@@ -124,7 +125,7 @@ public class Scheduler {
                         gameTypeMap.put(license.getGameTypeId(), gameType);
                     }
                 }
-                notificationDto.setGameType(gameType.getName());
+                notificationDto.setGameType(gameType.getDescription());
                 notificationDto.setInstitutionId(license.getInstitutionId());
                 notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
                 Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),
@@ -212,7 +213,7 @@ public class Scheduler {
                     if (gameType != null && gameTypeMap != null) {
                         gameTypeMap.put(license.getGameTypeId(), gameType);
                     }
-                } notificationDto.setGameType(gameType.getName());
+                } notificationDto.setGameType(gameType.getDescription());
                 notificationDto.setInstitutionId(license.getInstitutionId());
                 notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
                 Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),
@@ -260,7 +261,7 @@ public class Scheduler {
                     if (gameType != null && gameTypeMap != null) {
                         gameTypeMap.put(license.getGameTypeId(), gameType);
                     }
-                } notificationDto.setGameType(gameType.getName());
+                } notificationDto.setGameType(gameType.getDescription());
                 notificationDto.setInstitutionId(license.getPaymentRecord().getInstitutionId());
                 notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
                 Institution institution=(Institution) mongoRepositoryReactive.findById(license.getPaymentRecord().getInstitutionId(),

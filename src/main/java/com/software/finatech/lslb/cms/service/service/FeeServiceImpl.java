@@ -173,7 +173,6 @@ public class FeeServiceImpl implements FeeService {
                 query.addCriteria(Criteria.where("revenueNameId").is(revenueNameId));
             }
 
-            query.addCriteria(Criteria.where("active").is(true));
 
             ArrayList<Fee> fees = (ArrayList<Fee>) mongoRepositoryReactive.findAll(query, Fee.class).toStream().collect(Collectors.toList());
             if (fees == null || fees.isEmpty()) {
