@@ -4,6 +4,7 @@ import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecordDetail;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
+import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailUpdateDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
@@ -15,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,14 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     private PaymentRecordService paymentRecordService;
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
 
+    @Autowired
+    public PaymentRecordDetailServiceImpl(FeeService feeService,
+                                          PaymentRecordService paymentRecordService,
+                                          MongoRepositoryReactiveImpl mongoRepositoryReactive) {
+        this.feeService = feeService;
+        this.paymentRecordService = paymentRecordService;
+        this.mongoRepositoryReactive = mongoRepositoryReactive;
+    }
 
     @Override
     public Mono<ResponseEntity> createPaymentRecordDetail(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto) {
@@ -53,6 +63,15 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         }
     }
 
+
+    @Override
+    public Mono<ResponseEntity> updatePaymentRecordDetail(PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto) {
+        PaymentRecordDetail existingPaymentRecordDetail = findById(paymentRecordDetailUpdateDto.getId());
+
+
+        return null;
+    }
+
     private PaymentRecordDetail savePaymentRecordAndPaymentRecordDetail(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto) throws FactNotFoundException {
         PaymentRecord paymentRecord = new PaymentRecord();
         paymentRecord.setId(UUID.randomUUID().toString());
@@ -68,7 +87,13 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         paymentRecordDetail.setPaymentDate(DateTime.now());
         paymentRecordDetail.setModeOfPaymentId(paymentRecordDetailCreateDto.getModeOfPaymentId());
         paymentRecordDetail.setInvoiceNumber(paymentRecordDetailCreateDto.getInvoiceNumber());
-        paymentRecordDetail.setPaymentStatusId(paymentRecordDetailCreateDto.getPaymentStatusId());
+        String paymentStatusId = paymentRecordDetailCreateDto.getPaymentStatusId();
+
+        if (StringUtils.isEmpty(paymentStatusId)) {
+            paymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.UNPAID_STATUS_ID);
+        } else {
+            paymentRecordDetail.setPaymentStatusId(paymentRecordDetailCreateDto.getPaymentStatusId());
+        }
         savePaymentRecordDetail(paymentRecordDetail);
 
 
@@ -106,5 +131,10 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     @Override
     public void savePaymentRecordDetail(PaymentRecordDetail paymentRecordDetail) {
         mongoRepositoryReactive.saveOrUpdate(paymentRecordDetail);
+    }
+
+    @Override
+    public PaymentRecordDetail findById(String paymentRecordDetailId) {
+        return (PaymentRecordDetail) mongoRepositoryReactive.findById(paymentRecordDetailId, PaymentRecordDetail.class).block();
     }
 }
