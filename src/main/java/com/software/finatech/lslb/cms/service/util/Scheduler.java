@@ -150,30 +150,30 @@ public class Scheduler {
             model.put("endDate", notificationDto.getEndDate());
             if(type=="expiring"){
                 if(!StringUtils.isEmpty(notificationDto.getGamingMachineId())){
-                    model.put("description", notificationDto.getInstitutionName()+" Gaming Machine with machine number: "+notificationDto.getMachineNumber()+" License will expire soon");
+                    model.put("description", notificationDto.getInstitutionName()+" Gaming Machine with machine number: "+notificationDto.getMachineNumber()+" License is due to expire on "+notificationDto.getEndDate());
 
                 }else if(!StringUtils.isEmpty(notificationDto.getAgentId())){
-                    model.put("description", notificationDto.getInstitutionName()+" Agent: "+notificationDto.getAgentFullName()+" License will expire soon");
+                    model.put("description", notificationDto.getInstitutionName()+" Agent: "+notificationDto.getAgentFullName()+" License is due to expire on "+notificationDto.getEndDate());
 
                 }else{
-                    model.put("description", notificationDto.getInstitutionName()+" with Game Type: "+notificationDto.getGameType()+" License will expire soon");
+                    model.put("description", notificationDto.getInstitutionName()+" with Game Type: "+notificationDto.getGameType()+" License is due to expire on "+notificationDto.getEndDate());
 
                 }
             }else if(type=="expired"){
                 if(!StringUtils.isEmpty(notificationDto.getGamingMachineId())) {
-                    model.put("description", notificationDto.getInstitutionName()+" Gaming Machine with machine number: "+notificationDto.getMachineNumber() + " License has expired");
+                    model.put("description", notificationDto.getInstitutionName()+" Gaming Machine with machine number: "+notificationDto.getMachineNumber() + " License has expired. License Expiration Date is "+notificationDto.getEndDate());
                 }
                 if(!StringUtils.isEmpty(notificationDto.getAgentId())) {
-                    model.put("description", notificationDto.getInstitutionName()+" Agent: "+notificationDto.getAgentFullName()+ " License has expired");
+                    model.put("description", notificationDto.getInstitutionName()+" Agent: "+notificationDto.getAgentFullName()+ " License is due to expire on "+notificationDto.getEndDate());
                 }
                 else{
-                    model.put("description", notificationDto.getInstitutionName()+" with Game Type: "+notificationDto.getGameType()+" License has expired");
+                    model.put("description", notificationDto.getInstitutionName()+" with Game Type: "+notificationDto.getGameType()+" License has expired. License Expiration Date is "+notificationDto.getEndDate());
 
                 }
                 }else if(type=="AIPExpired"){
                 model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType()+" AIP has expired");
             }else if(type=="AIPExpiring"){
-                model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType());//+" AIP will expire in"+notificationDto.getDaysToExpiration()+" days. Do contact LSLB Admin to confirm your license");
+                model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType()+" AIP is due to expire on "+notificationDto.getEndDate());
             }
 
             model.put("gameType", notificationDto.getGameType());
