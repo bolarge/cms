@@ -132,11 +132,8 @@ public class PaymentRecordDetail extends AbstractFact {
         return modeOfPayment;
     }
 
-
     @Override
     public String getFactName() {
         return "PaymentRecordDetails";
     }
-
-
 }

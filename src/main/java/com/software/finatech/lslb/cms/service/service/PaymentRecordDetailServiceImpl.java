@@ -87,7 +87,13 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         paymentRecordDetail.setPaymentDate(DateTime.now());
         paymentRecordDetail.setModeOfPaymentId(paymentRecordDetailCreateDto.getModeOfPaymentId());
         paymentRecordDetail.setInvoiceNumber(paymentRecordDetailCreateDto.getInvoiceNumber());
-        paymentRecordDetail.setPaymentStatusId(paymentRecordDetailCreateDto.getPaymentStatusId());
+        String paymentStatusId = paymentRecordDetailCreateDto.getPaymentStatusId();
+
+        if (StringUtils.isEmpty(paymentStatusId)) {
+            paymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.UNPAID_STATUS_ID);
+        } else {
+            paymentRecordDetail.setPaymentStatusId(paymentRecordDetailCreateDto.getPaymentStatusId());
+        }
         savePaymentRecordDetail(paymentRecordDetail);
 
 
