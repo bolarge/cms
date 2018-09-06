@@ -338,7 +338,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                 int duration= Integer.parseInt(gameType.getGamingMachineLicenseDuration());
                 int endYear= startYear+ (duration/12);
                 paymentRecord.setEndYear(String.valueOf(endYear));
-                license.setLicenseType("GamingMachine");
+                license.setLicenseType("Gaming Machine");
                 license.setGamingMachineId(paymentRecord.getGamingMachineId());
                 license.setInstitutionId(paymentRecord.getInstitutionId());
             }else{

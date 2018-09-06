@@ -38,7 +38,7 @@ public class LicenseStatusReferenceData {
             licenseStatus4 = new LicenseStatus();
             licenseStatus4.setId(LICENSE_IN_PROGRESS_LICENSE_STATUS_ID);
         }
-        licenseStatus4.setName("LICENSE IN PROGRESS");
+        licenseStatus4.setName("RENEWAL IN REVIEW");
 
 
         LicenseStatus licenseStatus5 = (LicenseStatus)mongoRepositoryReactive.findById(LICENSE_EXPIRED_STATUS_ID, LicenseStatus.class).block();

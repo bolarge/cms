@@ -162,11 +162,11 @@ public class RenewalFormController extends BaseController {
         if(license.getLicenseStatusId().equals(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID)){
             duration = Integer.parseInt(gameType.convertToDto().getAipDuration());
         }else if(license.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
-            if(license.getLicenseType().equalsIgnoreCase("agent")){
+            if(license.getLicenseType().equalsIgnoreCase("Agent")){
                 duration = Integer.parseInt(gameType.convertToDto().getAgentLicenseDuration());
-            }else if(license.getLicenseType().equalsIgnoreCase("gamingMachine")){
+            }else if(license.getLicenseType().equalsIgnoreCase("Gaming Machine")){
                 duration = Integer.parseInt(gameType.convertToDto().getGamingMachineLicenseDuration());
-            }else if(license.getLicenseType().equalsIgnoreCase("institution")){
+            }else if(license.getLicenseType().equalsIgnoreCase("Institution")){
                 duration = Integer.parseInt(gameType.convertToDto().getLicenseDuration());
             }
         }
@@ -212,7 +212,7 @@ public class RenewalFormController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> updateGameType(@RequestBody @Valid RenewalFormUpdateDto renewalFormUpdateDto) {
+    public Mono<ResponseEntity> updateRenewalForm(@RequestBody @Valid RenewalFormUpdateDto renewalFormUpdateDto) {
 
         try {
             RenewalForm renewalForm = (RenewalForm) mongoRepositoryReactive.findById(renewalFormUpdateDto.getId(), RenewalForm.class).block();
