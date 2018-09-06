@@ -172,7 +172,7 @@ public class RenewalFormController extends BaseController {
         }
         license.setEndDate(license.getStartDate().plusMonths(duration));
         license.setRenewalStatus("false");
-
+        license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
         RenewalForm renewalForm = new RenewalForm();
         renewalForm.setId(UUID.randomUUID().toString());
         renewalForm.setPaymentRecordId(renewalFormCreateDto.getPaymentRecordId());

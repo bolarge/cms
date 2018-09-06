@@ -345,8 +345,12 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                 return Mono.just(new ResponseEntity<>("Invalid Payment Record", HttpStatus.OK));
             }
         }
+
         license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID);
         license.setInstitutionId(paymentRecord.getInstitutionId());
+        license.setGamingMachineId(paymentRecord.getGamingMachineId());
+        license.setAgentId(paymentRecord.getAgentId());
+
         license.setGameTypeId(paymentRecord.convertToDto().getFee().getGameType().getId());
         license.setPaymentRecordId(paymentRecord.getId());
         mongoRepositoryReactive.saveOrUpdate(paymentRecord);
