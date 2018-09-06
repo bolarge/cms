@@ -5,7 +5,6 @@ import javax.validation.constraints.NotEmpty;
 public class PaymentRecordDetailCreateDto {
     @NotEmpty(message = "please provide mode of paymentId")
     private String modeOfPaymentId;
-    @NotEmpty(message = "please provide amount")
     private double amount;
     private String paymentRecordId;
     private String feeId;

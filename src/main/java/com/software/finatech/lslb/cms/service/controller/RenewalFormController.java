@@ -151,7 +151,7 @@ public class RenewalFormController extends BaseController {
         queryRenewal.addCriteria(Criteria.where("paymentRecordId").is(renewalFormCreateDto.getPaymentRecordId()));
         RenewalForm renewalFormCheck = (RenewalForm)mongoRepositoryReactive.find(queryRenewal, RenewalForm.class).block();
         if(renewalFormCheck!=null){
-            return Mono.just(new ResponseEntity<>("Invalid payment record", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("An existing renewal application is tied to this payment", HttpStatus.BAD_REQUEST));
         }
         license.setRenewalStatus("false");
         license.setStartDate(LocalDateTime.now());
