@@ -337,11 +337,11 @@ public class LicenseServiceImpl implements LicenseService {
             if(licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID)){
                 duration = Integer.parseInt(gameType.convertToDto().getAipDuration());
             }else if(licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
-               if(licenseUpdateDto.getLicenseType().equalsIgnoreCase("agent")){
+               if(licenseUpdateDto.getLicenseType().equalsIgnoreCase("Agent")){
                    duration = Integer.parseInt(gameType.convertToDto().getAgentLicenseDuration());
-               }else if(licenseUpdateDto.getLicenseType().equalsIgnoreCase("gamingMachine")){
+               }else if(licenseUpdateDto.getLicenseType().equalsIgnoreCase("Gaming Machine")){
                    duration = Integer.parseInt(gameType.convertToDto().getGamingMachineLicenseDuration());
-               }else if(licenseUpdateDto.getLicenseType().equalsIgnoreCase("institution")){
+               }else if(licenseUpdateDto.getLicenseType().equalsIgnoreCase("Institution")){
                     duration = Integer.parseInt(gameType.convertToDto().getLicenseDuration());
                }
             }
