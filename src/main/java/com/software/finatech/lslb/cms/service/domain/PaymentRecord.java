@@ -4,7 +4,9 @@ import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 @Document(collection = "PaymentRecords")
@@ -177,12 +179,12 @@ public class PaymentRecord extends AbstractFact {
             paymentRecordDto.setPaymentStatus(paymentStatus.convertToDto());
         }
         //paymentRecordDto.setAgentId(getAgentId());
-        Agent agent =(Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
-        if(agent!=null){
+        Agent agent = (Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
+        if (agent != null) {
             paymentRecordDto.setAgent(agent.convertToDto());
         }
-        GamingMachine gamingMachine =(GamingMachine) mongoRepositoryReactive.findById(getGamingMachineId(), GamingMachine.class).block();
-        if(gamingMachine!=null){
+        GamingMachine gamingMachine = (GamingMachine) mongoRepositoryReactive.findById(getGamingMachineId(), GamingMachine.class).block();
+        if (gamingMachine != null) {
             paymentRecordDto.setGamingMachine(gamingMachine.convertToDto());
         }
         //paymentRecordDto.setGamingMachineId(getGamingMachineId());
@@ -190,8 +192,11 @@ public class PaymentRecord extends AbstractFact {
         paymentRecordDto.setEndYear(getEndYear());
         paymentRecordDto.setApproverName(getApproverFullName());
         paymentRecordDto.setInstitutionId(getInstitutionId());
-        paymentRecordDto.setInstitutionName(getInstitution().institutionName);
-
+        //  paymentRecordDto.setInstitutionName(getInstitution().institutionName);
+        Institution institution = getInstitution();
+        if (institution != null) {
+            paymentRecordDto.setInstitutionName(institution.getInstitutionName());
+        }
         return paymentRecordDto;
     }
 

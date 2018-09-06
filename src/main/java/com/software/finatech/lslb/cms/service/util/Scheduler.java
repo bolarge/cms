@@ -45,9 +45,7 @@ public class Scheduler {
     LocalDateTime dateTime = new LocalDateTime();
 
 
-    //@Scheduled(cron = "0 0 4 * * ?")
-    @Scheduled(cron = "0 0 0/1 * * ?")
-   // @Scheduled(fixedRate = 300)
+    @Scheduled(cron = "0 0 4 * * ?")
     protected void checkForLicensesCloseToExpirations(){
         logger.info(" checkForLicensesCloseToExpirations");
         List<License> licenses=
@@ -100,9 +98,7 @@ public class Scheduler {
         }
 
     }
-    //@Scheduled(cron = "0 0 3 * * ?")
-   // @Scheduled(fixedRate = 300)
-    @Scheduled(cron = "0 0 0/1 * * ?")
+    @Scheduled(cron = "0 0 3 * * ?")
     protected void checkForAIPCloseToExpirations(){
 
         logger.info("checkForAIPCloseToExpirations");
