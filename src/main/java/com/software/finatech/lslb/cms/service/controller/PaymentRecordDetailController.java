@@ -8,6 +8,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,11 @@ import javax.validation.Valid;
 public class PaymentRecordDetailController extends BaseController{
 
     private PaymentRecordDetailService paymentRecordDetailService;
+
+    @Autowired
+    public void setPaymentRecordDetailService(PaymentRecordDetailService paymentRecordDetailService) {
+        this.paymentRecordDetailService = paymentRecordDetailService;
+    }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create")
     @ApiOperation(value = "Create a new payment record detail", response = PaymentRecordDetailDto.class, consumes = "application/json")
