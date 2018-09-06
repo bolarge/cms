@@ -33,7 +33,7 @@ public class PaymentRecordDetailController extends BaseController{
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> updatePaymentRecord(@RequestBody @Valid PaymentRecordDetailCreateDto paymentRecordDetailCreateDto) {
+    public Mono<ResponseEntity> createPaymentRecordDetail(@RequestBody @Valid PaymentRecordDetailCreateDto paymentRecordDetailCreateDto) {
         return paymentRecordDetailService.createPaymentRecordDetail(paymentRecordDetailCreateDto);
     }
 }
