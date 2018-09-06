@@ -105,6 +105,7 @@ public class LicenseServiceImpl implements LicenseService {
                 return Mono.just(new ResponseEntity<>("Enter either agentId or gaming machineId, or institutionId", HttpStatus.OK));
 
             }
+            query.addCriteria(Criteria.where("firstPayment").is(false));
             if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, License.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
@@ -112,7 +113,7 @@ public class LicenseServiceImpl implements LicenseService {
 
             Sort sort;
             if (!StringUtils.isEmpty(sortDirection) && !StringUtils.isEmpty(sortProperty)) {
-                sort = new Sort((sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC),
+                sort = new Sort((sortDirection.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.DESC),
                         sortProperty);
             } else {
                 sort = new Sort(Sort.Direction.DESC, "id");
@@ -120,7 +121,7 @@ public class LicenseServiceImpl implements LicenseService {
             query.with(PageRequest.of(page, pageSize, sort));
             query.with(sort);
 
-            ArrayList<License> licenses = (ArrayList<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
+            List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
             if (licenses.size() == 0 || licenses.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
             }
@@ -147,17 +148,19 @@ public class LicenseServiceImpl implements LicenseService {
             if(!StringUtils.isEmpty(institutionId)&&StringUtils.isEmpty(agentId)&&
                     StringUtils.isEmpty(gamingMachineId)){
                 queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
-                queryLicence.addCriteria(Criteria.where("licenceType").is("institution"));
+                queryLicence.addCriteria(Criteria.where("licenseType").is("institution"));
 
             }
-            if(!StringUtils.isEmpty(agentId)&&StringUtils.isEmpty(institutionId)
+           queryLicence.addCriteria(Criteria.where("firstPayment").is(false));
+
+        if(!StringUtils.isEmpty(agentId)&&StringUtils.isEmpty(institutionId)
                     &&StringUtils.isEmpty(gamingMachineId)){
                 queryLicence.addCriteria(Criteria.where("agentId").is(agentId));
-                queryLicence.addCriteria(Criteria.where("licenceType").is("agent"));
+                queryLicence.addCriteria(Criteria.where("licenseType").is("agent"));
             }
             if(!StringUtils.isEmpty(gamingMachineId)&&StringUtils.isEmpty(institutionId)&&StringUtils.isEmpty(agentId)){
                 queryLicence.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
-               queryLicence.addCriteria(Criteria.where("licenseType").is("gamingMachineId"));
+               queryLicence.addCriteria(Criteria.where("licenseType").is("gamingMachine"));
 
             }
         if(!StringUtils.isEmpty(gamingMachineId)&&!StringUtils.isEmpty(institutionId)
@@ -360,7 +363,7 @@ public class LicenseServiceImpl implements LicenseService {
                }
            }
             LocalDateTime dateTime = new LocalDateTime();
-
+            license.setFirstPayment(true);
             if(license.getEndDate().toDate().compareTo(dateTime.toDate())<0){
                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
                license.setRenewalStatus("true");

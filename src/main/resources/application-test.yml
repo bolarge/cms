@@ -1,7 +1,6 @@
 spring:
   application:
     name: lslb-cms
-
   #jackson:
     #time-zone: GMT
 management:
@@ -9,7 +8,17 @@ management:
   enabled-by-default: false
   shutdown:
     enabled: true
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+  enabled-by-default: true
+  health:
+    show-details: ALWAYS
+  shutdown:
+    enabled: true
 server:
   port: ${APPLICATIONPORT:2001}
 security:
@@ -17,29 +26,30 @@ security:
   ignored: /resources/**
   basic:
     enabled: false
-
 mongodb:
   host: db2.mlnx.test.vggdev.com
   username: finatech-user
-  password: ${DB_PASSWORD}
+  password: finatechuser
   database: LslbCMSDb
   port: 27017
 logging:
   level:
     ROOT: INFO
+    #Rememeber to change the credentials for SSO
 sso:
   baseIdentityURL: https://sso.test.vggdev.com/identity
   baseAPIURL: http://ssoapi.test.vggdev.com
   apiUsername: lslb-cms-api
-  apiPassword: ${SSO_API_PASSWORD}
+  apiPassword: fhhsnns___===i1omnsnaa
   clientId: lslb-cms
-  clientSecret:  ${SSO_CLIENT_SECRET}
+  clientSecret:  fhhsnns___===i1omnsnaa
   baseLogoutURL: https://sso.test.vggdev.com
   publicKeyURL: https://sso.test.vggdev.com/identity/.well-known/jwks
   applicationName: lslb-cms
 
 jwt:
   header: Authorization
+
 
 racs:
   ui:

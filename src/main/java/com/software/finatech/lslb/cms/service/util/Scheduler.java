@@ -45,9 +45,7 @@ public class Scheduler {
     LocalDateTime dateTime = new LocalDateTime();
 
 
-    //@Scheduled(cron = "0 0 4 * * ?")
-    @Scheduled(cron = "0 0 0/1 * * ?")
-   // @Scheduled(fixedRate = 300)
+    @Scheduled(cron = "0 0 4 * * ?")
     protected void checkForLicensesCloseToExpirations(){
         logger.info(" checkForLicensesCloseToExpirations");
         List<License> licenses=
@@ -75,7 +73,7 @@ public class Scheduler {
                 }
                 notificationDto.setGameType(gameType.getName());
                 notificationDto.setInstitutionId(license.getInstitutionId());
-                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
+                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
                 Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),Institution.class).block();
                 if(institution!=null){
                     notificationDto.setInstitutionName(institution.getInstitutionName());
@@ -100,9 +98,7 @@ public class Scheduler {
         }
 
     }
-    //@Scheduled(cron = "0 0 3 * * ?")
-   // @Scheduled(fixedRate = 300)
-    @Scheduled(cron = "0 0 0/1 * * ?")
+    @Scheduled(cron = "0 0 3 * * ?")
     protected void checkForAIPCloseToExpirations(){
 
         logger.info("checkForAIPCloseToExpirations");
@@ -130,7 +126,7 @@ public class Scheduler {
                 }
                 notificationDto.setGameType(gameType.getName());
                 notificationDto.setInstitutionId(license.getInstitutionId());
-                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
+                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
                 Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),
                         Institution.class).block();
                 notificationDto.setInstitutionName(institution.getInstitutionName());
@@ -150,30 +146,30 @@ public class Scheduler {
             model.put("endDate", notificationDto.getEndDate());
             if(type=="expiring"){
                 if(!StringUtils.isEmpty(notificationDto.getGamingMachineId())){
-                    model.put("description", notificationDto.getInstitutionName()+" Gaming Machine with machine number: "+notificationDto.getMachineNumber()+" License will expire soon");
+                    model.put("description", notificationDto.getInstitutionName()+" Gaming Machine with machine number: "+notificationDto.getMachineNumber()+" License is due to expire on "+notificationDto.getEndDate());
 
                 }else if(!StringUtils.isEmpty(notificationDto.getAgentId())){
-                    model.put("description", notificationDto.getInstitutionName()+" Agent: "+notificationDto.getAgentFullName()+" License will expire soon");
+                    model.put("description", notificationDto.getInstitutionName()+" Agent: "+notificationDto.getAgentFullName()+" License is due to expire on "+notificationDto.getEndDate());
 
                 }else{
-                    model.put("description", notificationDto.getInstitutionName()+" with Game Type: "+notificationDto.getGameType()+" License will expire soon");
+                    model.put("description", notificationDto.getInstitutionName()+" with Game Type: "+notificationDto.getGameType()+" License is due to expire on "+notificationDto.getEndDate());
 
                 }
             }else if(type=="expired"){
                 if(!StringUtils.isEmpty(notificationDto.getGamingMachineId())) {
-                    model.put("description", notificationDto.getInstitutionName()+" Gaming Machine with machine number: "+notificationDto.getMachineNumber() + " License has expired");
+                    model.put("description", notificationDto.getInstitutionName()+" Gaming Machine with machine number: "+notificationDto.getMachineNumber() + " License has expired. License Expiration Date is "+notificationDto.getEndDate());
                 }
                 if(!StringUtils.isEmpty(notificationDto.getAgentId())) {
-                    model.put("description", notificationDto.getInstitutionName()+" Agent: "+notificationDto.getAgentFullName()+ " License has expired");
+                    model.put("description", notificationDto.getInstitutionName()+" Agent: "+notificationDto.getAgentFullName()+ " License is due to expire on "+notificationDto.getEndDate());
                 }
                 else{
-                    model.put("description", notificationDto.getInstitutionName()+" with Game Type: "+notificationDto.getGameType()+" License has expired");
+                    model.put("description", notificationDto.getInstitutionName()+" with Game Type: "+notificationDto.getGameType()+" License has expired. License Expiration Date is "+notificationDto.getEndDate());
 
                 }
                 }else if(type=="AIPExpired"){
                 model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType()+" AIP has expired");
             }else if(type=="AIPExpiring"){
-                model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType());//+" AIP will expire in"+notificationDto.getDaysToExpiration()+" days. Do contact LSLB Admin to confirm your license");
+                model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType()+" AIP is due to expire on "+notificationDto.getEndDate());
             }
 
             model.put("gameType", notificationDto.getGameType());
@@ -218,7 +214,7 @@ public class Scheduler {
                     }
                 } notificationDto.setGameType(gameType.getName());
                 notificationDto.setInstitutionId(license.getInstitutionId());
-                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
+                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
                 Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),
                         Institution.class).block();
                 notificationDto.setInstitutionName(institution.getInstitutionName());
@@ -266,7 +262,7 @@ public class Scheduler {
                     }
                 } notificationDto.setGameType(gameType.getName());
                 notificationDto.setInstitutionId(license.getPaymentRecord().getInstitutionId());
-                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
+                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
                 Institution institution=(Institution) mongoRepositoryReactive.findById(license.getPaymentRecord().getInstitutionId(),
                         Institution.class).block();
                 notificationDto.setInstitutionName(institution.getInstitutionName());

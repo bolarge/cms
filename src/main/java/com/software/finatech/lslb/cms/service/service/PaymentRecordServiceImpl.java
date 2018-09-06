@@ -121,13 +121,13 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
     }
 
     @Override
-    public List<PaymentRecord> findPayments(String institutionId,String agentId, String gamingMachineId, String gameTypeId,String startYear) {
-        List<PaymentRecord> findPaymentRecords=findPaymentRecords(institutionId, agentId, gamingMachineId,gameTypeId, startYear);
+    public List<PaymentRecord> findPayments(String institutionId,String agentId, String gamingMachineId, String feeId,String startYear) {
+        List<PaymentRecord> findPaymentRecords=findPaymentRecords(institutionId, agentId, gamingMachineId,feeId, startYear);
         return findPaymentRecords;
 
     }
 
-    public List<PaymentRecord> findPaymentRecords(String institutionId,String agentId, String gamingMachineId, String gameTypeId, String startYear) {
+    public List<PaymentRecord> findPaymentRecords(String institutionId,String agentId, String gamingMachineId, String feeId, String startYear) {
         try {
 
             Query query = new Query();
@@ -150,16 +150,14 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                 }
 
             }
-            if(!StringUtils.isEmpty(gameTypeId)){
-                query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+            if(!StringUtils.isEmpty(feeId)){
+                query.addCriteria(Criteria.where("feeId").is(feeId));
             }
             if(!StringUtils.isEmpty(startYear)){
                 query.addCriteria(Criteria.where("startYear").is(startYear));
             }
             List<PaymentRecord> paymentRecords=(List<PaymentRecord>) mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
-            if (paymentRecords.size()==0) {
-                return null;
-            }
+
 
                 return paymentRecords;
 
@@ -176,8 +174,25 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
            return Mono.just(new ResponseEntity<>("Invalid Payment Record", HttpStatus.OK));
 
        }
+       Query queryPaymentRecord= new Query();
+       queryPaymentRecord.addCriteria(Criteria.where("feeId").is(paymentRecordCreateDto.getFeeId()));
+       queryPaymentRecord.addCriteria(Criteria.where("startYear").is(paymentRecordCreateDto.getStartYear()));
+       if(!StringUtils.isEmpty(paymentRecordCreateDto.getInstitutionId())){
+           queryPaymentRecord.addCriteria(Criteria.where("institutionId").is(paymentRecordCreateDto.getInstitutionId()));
+       }
+       if(!StringUtils.isEmpty(paymentRecordCreateDto.getGamingMachineId())){
+           queryPaymentRecord.addCriteria(Criteria.where("gamingMachineId").is(paymentRecordCreateDto.getGamingMachineId()));
+       }
+       if(!StringUtils.isEmpty(paymentRecordCreateDto.getAgentId())){
+            queryPaymentRecord.addCriteria(Criteria.where("agentId").is(paymentRecordCreateDto.getAgentId()));
+        }
+       PaymentRecord paymentRecordCheck = (PaymentRecord)mongoRepositoryReactive.find(queryPaymentRecord, PaymentRecord.class).block();
+        if(paymentRecordCheck!=null){
+            return Mono.just(new ResponseEntity<>("Duplicate Payment, Check and Try Again", HttpStatus.OK));
 
-        PaymentRecord paymentRecord = new PaymentRecord();
+        }
+
+       PaymentRecord paymentRecord = new PaymentRecord();
         paymentRecord.setId(UUID.randomUUID().toString());
         paymentRecord.setApproverId(paymentRecordCreateDto.getApproverId());
         paymentRecord.setFeeId(paymentRecordCreateDto.getFeeId());
@@ -215,14 +230,18 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         if(licenseCheck==null){
                 license=new License();
                 license.setId(UUID.randomUUID().toString());
+                license.setFirstPayment(true);
+
             }else{
                 license=licenseCheck;
-            }
+            license.setFirstPayment(false);
+
+        }
         if(fee.getFeePaymentTypeId().equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID)) {
             if (!StringUtils.isEmpty(paymentRecord.getAgentId())
                     &&!StringUtils.isEmpty(paymentRecord.getInstitutionId())
             &&StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
-                license.setLicenceType("Agent");
+                license.setLicenseType("Agent");
                int duration= Integer.parseInt(gameType.getAgentLicenseDuration());
                int endYear= startYear+ (duration/12);
                 paymentRecord.setEndYear(String.valueOf(endYear));
@@ -232,7 +251,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             } else if (!StringUtils.isEmpty(paymentRecord.getInstitutionId())
                     &&StringUtils.isEmpty(paymentRecord.getAgentId())&&
                     StringUtils.isEmpty(paymentRecord.getGamingMachineId()) ) {
-                license.setLicenceType("Institution");
+                license.setLicenseType("Institution");
                 license.setInstitutionId(paymentRecord.getInstitutionId());
                 int duration= Integer.parseInt(gameType.getLicenseDuration());
                 int endYear= startYear+ (duration/12);
@@ -244,7 +263,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                 int duration= Integer.parseInt(gameType.getGamingMachineLicenseDuration());
                 int endYear= startYear+ (duration/12);
                 paymentRecord.setEndYear(String.valueOf(endYear));
-                license.setLicenceType("GamingMachine");
+                license.setLicenseType("GamingMachine");
                 license.setGamingMachineId(paymentRecord.getGamingMachineId());
                 license.setInstitutionId(paymentRecord.getInstitutionId());
             }else{
@@ -298,7 +317,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             if (!StringUtils.isEmpty(paymentRecord.getAgentId())
                     &&!StringUtils.isEmpty(paymentRecord.getInstitutionId())
                     &&StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
-                license.setLicenceType("Agent");
+                license.setLicenseType("Agent");
                 int duration= Integer.parseInt(gameType.getAgentLicenseDuration());
                 int endYear= startYear+ (duration/12);
                 paymentRecord.setEndYear(String.valueOf(endYear));
@@ -307,7 +326,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             } else if (!StringUtils.isEmpty(paymentRecord.getInstitutionId())
                     &&StringUtils.isEmpty(paymentRecord.getAgentId())&&
                     StringUtils.isEmpty(paymentRecord.getGamingMachineId()) ) {
-                license.setLicenceType("Institution");
+                license.setLicenseType("Institution");
                 license.setInstitutionId(paymentRecord.getInstitutionId());
                 int duration= Integer.parseInt(gameType.getLicenseDuration());
                 int endYear= startYear+ (duration/12);
@@ -319,7 +338,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                 int duration= Integer.parseInt(gameType.getGamingMachineLicenseDuration());
                 int endYear= startYear+ (duration/12);
                 paymentRecord.setEndYear(String.valueOf(endYear));
-                license.setLicenceType("GamingMachine");
+                license.setLicenseType("GamingMachine");
                 license.setGamingMachineId(paymentRecord.getGamingMachineId());
                 license.setInstitutionId(paymentRecord.getInstitutionId());
             }else{

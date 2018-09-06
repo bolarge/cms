@@ -22,9 +22,18 @@ public class License extends AbstractFact {
     protected LocalDateTime startDate;
     protected LocalDateTime endDate;
     protected String renewalStatus;
-    protected String licenceType;
+    protected String licenseType;
     protected String agentId;
     protected String gamingMachineId;
+    protected boolean firstPayment;
+
+    public boolean isFirstPayment() {
+        return firstPayment;
+    }
+
+    public void setFirstPayment(boolean firstPayment) {
+        this.firstPayment = firstPayment;
+    }
 
     public String getAgentId() {
         return agentId;
@@ -42,12 +51,12 @@ public class License extends AbstractFact {
         this.gamingMachineId = gamingMachineId;
     }
 
-    public String getLicenceType() {
-        return licenceType;
+    public String getLicenseType() {
+        return licenseType;
     }
 
-    public void setLicenceType(String licenceType) {
-        this.licenceType = licenceType;
+    public void setLicenseType(String licenseType) {
+        this.licenseType = licenseType;
     }
 
     public String getInstitutionId() {
@@ -132,12 +141,17 @@ public class License extends AbstractFact {
             }
         }
         licenseDto.setLicenseStatus(licenseStatus.convertToDto());
-        licenseDto.setLicenseType(getLicenceType());
+        licenseDto.setLicenseType(getLicenseType());
         //licenseDto.setGamingMachineId(getGamingMachineId());
        // licenseDto.setAgentId(getAgentId());
-        licenseDto.setPaymentRecord(getPaymentRecord().convertToDto());
-        licenseDto.setStartDate(startDate.toString("dd/MM/yyyy HH:mm:ss"));
-        licenseDto.setEndDate(endDate.toString("dd/MM/yyyy HH:mm:ss"));
+        if(getPaymentRecord()!=null){
+            licenseDto.setPaymentRecord(getPaymentRecord().convertToDto());
+        }
+            if(getStartDate()!=null){
+                licenseDto.setStartDate(getStartDate().toString("dd/MM/yyyy HH:mm:ss"));
+                licenseDto.setEndDate(getStartDate().toString("dd/MM/yyyy HH:mm:ss"));
+            }
+
         licenseDto.setRenewalStatus(getRenewalStatus());
 
         licenseDto.setId(id);
