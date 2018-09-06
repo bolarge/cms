@@ -15,6 +15,7 @@ import com.software.finatech.lslb.cms.service.util.ExpirationList;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Days;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -306,7 +307,7 @@ public class LicenseServiceImpl implements LicenseService {
             int paymentRecordEndYear= Integer.parseInt(paymentRecord.getEndYear());
 
             license = licenseCheck;
-            LocalDateTime fromDate;
+            LocalDate fromDate;
             if(licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID)
                     || licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID)){
                 fromDate=null;
@@ -319,7 +320,7 @@ public class LicenseServiceImpl implements LicenseService {
                         return Mono.just(new ResponseEntity("Invalid Date format. " +
                                 "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
                     }
-                    fromDate = new LocalDateTime(startDate);
+                    fromDate = new LocalDate(startDate);
                     license.setStartDate(fromDate);
 
                 } else {

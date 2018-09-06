@@ -31,14 +31,14 @@ public class LicenseStatusReferenceData {
             licenseStatus3 = new LicenseStatus();
             licenseStatus3.setId(LICENSE_REVOKED_LICENSE_STATUS_ID);
         }
-        licenseStatus3.setName("LICENSE REVOKED");
+        licenseStatus3.setName("REVOKED");
 
         LicenseStatus licenseStatus4 = (LicenseStatus)mongoRepositoryReactive.findById(LICENSE_IN_PROGRESS_LICENSE_STATUS_ID, LicenseStatus.class).block();
         if (licenseStatus4 == null){
             licenseStatus4 = new LicenseStatus();
             licenseStatus4.setId(LICENSE_IN_PROGRESS_LICENSE_STATUS_ID);
         }
-        licenseStatus4.setName("RENEWAL IN REVIEW");
+        licenseStatus4.setName("RENEWAL IN PROGRESS");
 
 
         LicenseStatus licenseStatus5 = (LicenseStatus)mongoRepositoryReactive.findById(LICENSE_EXPIRED_STATUS_ID, LicenseStatus.class).block();
@@ -46,7 +46,7 @@ public class LicenseStatusReferenceData {
             licenseStatus5 = new LicenseStatus();
             licenseStatus5.setId(LICENSE_EXPIRED_STATUS_ID);
         }
-        licenseStatus5.setName("LICENSE EXPIRED");
+        licenseStatus5.setName("EXPIRED");
 
         mongoRepositoryReactive.saveOrUpdate(licenseStatus1);
         mongoRepositoryReactive.saveOrUpdate(licenseStatus2);

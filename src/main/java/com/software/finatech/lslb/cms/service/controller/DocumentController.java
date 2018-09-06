@@ -99,8 +99,8 @@ public class DocumentController extends BaseController {
                             queryPreviousDocuments.addCriteria(Criteria.where("documentTypeId").is(documentDto.getDocumentTypeId()));
                             Document previousDocument = (Document) mongoRepositoryReactive.find(queryPreviousDocuments, Document.class).block();
                             previousDocument.setArchive(true);
-                            mongoRepositoryReactive.saveOrUpdate(previousDocument);
-
+                            //mongoRepositoryReactive.saveOrUpdate(previousDocument);
+                            documents.add(previousDocument);
                         }
                         document.setDescription(documentDto.getDescription());
                         document.setDocumentTypeId(documentDto.getDocumentTypeId());
@@ -111,6 +111,7 @@ public class DocumentController extends BaseController {
                         document.setMimeType(file.getContentType());
                         document.setArchive(false);
                         document.setInstitutionId(documentDto.getInstitutionId());
+                        document.setAgentId(documentDto.getAgentId());
                         document.setPreviousDocumentId(documentDto.getPreviousDocumentId());
                         //document.setValidFrom(new LocalDate(documentDto.getValidFrom()));
                         //document.setValidTo(new LocalDate(documentDto.getValidTo()));

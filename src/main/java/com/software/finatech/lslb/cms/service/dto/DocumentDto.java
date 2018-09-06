@@ -18,9 +18,26 @@ public class DocumentDto {
     protected String previousDocumentId;
     protected String originalFilename;
     protected boolean archive;
-    protected InstitutionDto institution;
     protected String institutionId;
     protected String gameTypeId;
+    protected String agentId;
+    protected String owner;
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
 
     public String getGameTypeId() {
         return gameTypeId;
@@ -37,15 +54,6 @@ public class DocumentDto {
     public void setInstitutionId(String institutionId) {
         this.institutionId = institutionId;
     }
-
-    public InstitutionDto getInstitution() {
-        return institution;
-    }
-
-    public void setInstitution(InstitutionDto institution) {
-        this.institution = institution;
-    }
-
     public boolean isArchive() {
         return archive;
     }
