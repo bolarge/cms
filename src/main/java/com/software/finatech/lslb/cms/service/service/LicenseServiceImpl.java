@@ -7,6 +7,7 @@ import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.ExpirationList;
@@ -340,11 +341,11 @@ public class LicenseServiceImpl implements LicenseService {
             if (licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID)) {
                 duration = Integer.parseInt(gameType.convertToDto().getAipDuration());
             } else if (licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)) {
-                if (licenseUpdateDto.getLicenseType().equalsIgnoreCase("Agent")) {
+                if (licenseUpdateDto.getLicenseType().equalsIgnoreCase(LicenseTypeReferenceData.AGENT)) {
                     duration = Integer.parseInt(gameType.convertToDto().getAgentLicenseDuration());
-                } else if (licenseUpdateDto.getLicenseType().equalsIgnoreCase("Gaming Machine")) {
+                } else if (licenseUpdateDto.getLicenseType().equalsIgnoreCase(LicenseTypeReferenceData.GAMING_MACHINE)) {
                     duration = Integer.parseInt(gameType.convertToDto().getGamingMachineLicenseDuration());
-                } else if (licenseUpdateDto.getLicenseType().equalsIgnoreCase("Institution")) {
+                } else if (licenseUpdateDto.getLicenseType().equalsIgnoreCase(LicenseTypeReferenceData.INSTITUTION)) {
                     duration = Integer.parseInt(gameType.convertToDto().getLicenseDuration());
                 }
             }
@@ -401,7 +402,7 @@ public class LicenseServiceImpl implements LicenseService {
         Query queryForInstitutionAIP = new Query();
         queryForInstitutionAIP.addCriteria(Criteria.where("institutionId").is(institutionId));
         queryForInstitutionAIP.addCriteria(Criteria.where("licensedStatusId").is(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID));
-        queryForInstitutionAIP.addCriteria(Criteria.where("licenseType").is("Institution"));
+        queryForInstitutionAIP.addCriteria(Criteria.where("licenseType").is(LicenseTypeReferenceData.INSTITUTION));
         List<License> aipsForInstitution = (List<License>) mongoRepositoryReactive.findAll(queryForInstitutionAIP, License.class).toStream().collect(Collectors.toList());
         ArrayList<AIPCheckDto> aipCheckDtos = new ArrayList<>();
         if (aipsForInstitution.size() == 0) {
@@ -447,7 +448,7 @@ public class LicenseServiceImpl implements LicenseService {
             Query queryLicence = new Query();
             queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
             queryLicence.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-            queryLicence.addCriteria(Criteria.where("licenseType").is("Institution"));
+            queryLicence.addCriteria(Criteria.where("licenseType").is(LicenseTypeReferenceData.INSTITUTION));
             queryLicence.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID));
             License license = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
             if (license == null) {

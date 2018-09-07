@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
@@ -240,7 +241,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         }
         if (!StringUtils.isEmpty(paymentRecord.getAgentId()) && !StringUtils.isEmpty(paymentRecord.getInstitutionId())
                 && StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
-            license.setLicenseType("Agent");
+            license.setLicenseType(LicenseTypeReferenceData.AGENT);
             int duration = Integer.parseInt(gameType.getAgentLicenseDuration());
             int endYear = startYear + (duration / 12);
             paymentRecord.setEndYear(String.valueOf(endYear));
@@ -250,7 +251,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         } else if (!StringUtils.isEmpty(paymentRecord.getInstitutionId())
                 && StringUtils.isEmpty(paymentRecord.getAgentId()) &&
                 StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
-            license.setLicenseType("Institution");
+            license.setLicenseType(LicenseTypeReferenceData.INSTITUTION);
             license.setInstitutionId(paymentRecord.getInstitutionId());
             int duration = Integer.parseInt(gameType.getLicenseDuration());
             int endYear = startYear + (duration / 12);
@@ -262,7 +263,8 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             int duration = Integer.parseInt(gameType.getGamingMachineLicenseDuration());
             int endYear = startYear + (duration / 12);
             paymentRecord.setEndYear(String.valueOf(endYear));
-            license.setLicenseType("Gaming Machine");
+            license.setLicenseType(LicenseTypeReferenceData.GAMING_MACHINE);
+
             license.setGamingMachineId(paymentRecord.getGamingMachineId());
             license.setInstitutionId(paymentRecord.getInstitutionId());
         } else if (StringUtils.isEmpty(paymentRecord.getGamingMachineId())
@@ -271,7 +273,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             int duration = Integer.parseInt(gameType.getGamingMachineLicenseDuration());
             int endYear = startYear + (duration / 12);
             paymentRecord.setEndYear(String.valueOf(endYear));
-            license.setLicenseType("Agent");
+            license.setLicenseType(LicenseTypeReferenceData.AGENT);
             license.setAgentId(paymentRecord.getAgentId());
         } else {
             return Mono.just(new ResponseEntity<>("Hey Something Has Broken", HttpStatus.OK));
@@ -349,7 +351,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             } else if (!StringUtils.isEmpty(paymentRecord.getInstitutionId())
                     && StringUtils.isEmpty(paymentRecord.getAgentId()) &&
                     StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
-                license.setLicenseType("Institution");
+                license.setLicenseType(LicenseTypeReferenceData.INSTITUTION);
                 license.setInstitutionId(paymentRecord.getInstitutionId());
                 int duration = Integer.parseInt(gameType.getLicenseDuration());
                 int endYear = startYear + (duration / 12);
