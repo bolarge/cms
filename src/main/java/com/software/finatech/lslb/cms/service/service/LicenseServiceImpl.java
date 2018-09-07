@@ -109,7 +109,7 @@ public class LicenseServiceImpl implements LicenseService {
                 return Mono.just(new ResponseEntity<>("Enter either agentId or gaming machineId, or institutionId", HttpStatus.OK));
 
             }
-            query.addCriteria(Criteria.where("firstPayment").is(false));
+           // query.addCriteria(Criteria.where("firstPayment").is(false));
             if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, License.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
