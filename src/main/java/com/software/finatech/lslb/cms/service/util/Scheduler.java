@@ -25,10 +25,11 @@ import java.util.Map;
 
 @Component
 public class Scheduler {
-    @Autowired
-    EmailService emailService;
+
     @Autowired
     MapValues mapValues;
+    @Autowired
+    EmailService emailService;
     @Autowired
     MailContentBuilderService mailContentBuilderService;
     @Autowired

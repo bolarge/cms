@@ -29,6 +29,9 @@ public interface LicenseService {
     Mono<ResponseEntity> getExpiredAIPs();
     Mono<ResponseEntity> updateLicense(LicenseUpdateDto licenseUpdateDto);
     List<EnumeratedFactDto> getLicenseStatus();
+    Mono<ResponseEntity> getInstitutionAIPs(String institutionId);
+    Mono<ResponseEntity> updateToDocumentAIP(String licenseId);
+    Mono<ResponseEntity> updateAIPDocToLicense(String institutionId, String gameTypeId);
 
     boolean institutionIsLicensedForGameType(String institutionId, String gameTypeId);
 }
