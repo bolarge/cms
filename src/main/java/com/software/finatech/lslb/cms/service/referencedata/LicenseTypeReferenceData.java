@@ -29,7 +29,7 @@ public class LicenseTypeReferenceData {
                 licenseType2 = new LicenseType();
                 licenseType2.setId(GAMING_MACHINE);
             }
-            licenseType1.setName("GAMING MACHINE");
+            licenseType2.setName("GAMING MACHINE");
 
             mongoRepositoryReactive.saveOrUpdate(licenseType);
         mongoRepositoryReactive.saveOrUpdate(licenseType1);
