@@ -38,18 +38,18 @@ public class RevenueNameVGpayCustomerCreationJob {
         query.addCriteria(Criteria.where("vgPayCustomerCode").is(null));
         ArrayList<Institution> institutionsWithout = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
         for (Institution institution : institutionsWithout) {
-          //  logger.info("Trying to get customer code for institution {} -> {}", institution.getInstitutionName(), institution.getInstitutionName());
+            logger.info("Trying to get customer code for institution {} -> {}", institution.getInstitutionName(), institution.getInstitutionName());
             List<AuthInfo> gamingOperatorAdmins = authInfoService.getAllGamingOperatorAdminsForInstitution(institution.getId());
             if (gamingOperatorAdmins.isEmpty()) {
-//                logger.info("Institution does not have gaming operator admins");
-//                logger.info("Finished for institution {} -> {}", institution.getInstitutionName(), institution.getId());
+              logger.info("Institution does not have gaming operator admins");
+               logger.info("Finished for institution {} -> {}", institution.getInstitutionName(), institution.getId());
                 continue;
             }
             String customerCode = vigipayService.createCustomerCodeForInstitution(institution);
-        //    logger.info("Gotten customer code {}", customerCode);
+          logger.info("Gotten customer code {}", customerCode);
             institution.setVgPayCustomerCode(customerCode);
             mongoRepositoryReactive.saveOrUpdate(institution);
-         //   logger.info("Finished for institution {} -> {}", institution.getInstitutionName(), institution.getId());
+          logger.info("Finished for institution {} -> {}", institution.getInstitutionName(), institution.getId());
         }
 
 
