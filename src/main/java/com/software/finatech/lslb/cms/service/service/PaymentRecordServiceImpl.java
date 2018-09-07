@@ -285,7 +285,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         mongoRepositoryReactive.saveOrUpdate(license);
 
         if (licenseCheck == null) {
-            if (StringUtils.isEmpty(paymentRecord.getAgentId()) && !StringUtils.isEmpty(paymentRecord.getInstitutionId())
+        /*    if (StringUtils.isEmpty(paymentRecord.getAgentId()) && !StringUtils.isEmpty(paymentRecord.getInstitutionId())
                     && StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
                 NotificationDto notificationDto = new NotificationDto();
                 if (sendEmaill.getInstitution(paymentRecord.getInstitutionId()) == null) {
@@ -300,7 +300,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                 notificationDto.setDescription("Your application has been reviewed and Your licence fees have been received. All supporting documents must be uploaded to complete your licence application process. Failure to do so will result in your application being delayed or determined based on the information we have available which may affect the decision on whether a licence can be granted. Click the 'upload document' button to continue");
                 sendEmaill.sendEmailLicenseApplicationNotification(notificationDto);
 
-            }
+            }*/
         }
 
         return Mono.just(new ResponseEntity<>(paymentRecord.convertToDto(), HttpStatus.OK));
