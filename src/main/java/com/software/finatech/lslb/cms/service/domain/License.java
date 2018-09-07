@@ -149,7 +149,7 @@ public class License extends AbstractFact {
         }
             if(getStartDate()!=null){
                 licenseDto.setStartDate(getStartDate().toString("dd-MM-yyyy"));
-                licenseDto.setEndDate(getStartDate().toString("dd-MM-yyyy"));
+                licenseDto.setEndDate(getEndDate()==null?null: getEndDate().toString("dd-MM-yyyy"));
             }
 
         licenseDto.setRenewalStatus(getRenewalStatus());
