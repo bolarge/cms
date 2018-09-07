@@ -459,7 +459,6 @@ public class LicenseServiceImpl implements LicenseService {
 
                     return Mono.just(new ResponseEntity("Invalid Date format. " +
                             "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
-
                 }
 
             Query queryLicence = new Query();
