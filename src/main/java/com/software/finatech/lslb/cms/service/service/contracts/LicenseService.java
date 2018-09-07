@@ -31,7 +31,7 @@ public interface LicenseService {
     List<EnumeratedFactDto> getLicenseStatus();
     Mono<ResponseEntity> getInstitutionAIPs(String institutionId);
     Mono<ResponseEntity> updateToDocumentAIP(String licenseId);
-    Mono<ResponseEntity> updateAIPDocToLicense(String institutionId, String gameTypeId);
+    Mono<ResponseEntity> updateAIPDocToLicense(String institutionId, String gameTypeId, String startDate);
 
     boolean institutionIsLicensedForGameType(String institutionId, String gameTypeId);
 }

@@ -10,7 +10,7 @@ public class LicenseDto {
     protected String startDate;
     protected String endDate;
     protected String renewalStatus;
-    protected String licenseType;
+    protected EnumeratedFactDto licenseType;
     protected String agentId;
     protected String gamingMachineId;
 
@@ -29,11 +29,11 @@ public class LicenseDto {
     public void setGamingMachineId(String gamingMachineId) {
         this.gamingMachineId = gamingMachineId;
     }
-    public String getLicenseType() {
+    public EnumeratedFactDto getLicenseType() {
         return licenseType;
     }
 
-    public void setLicenseType(String licenseType) {
+    public void setLicenseType(EnumeratedFactDto licenseType) {
         this.licenseType = licenseType;
     }
 

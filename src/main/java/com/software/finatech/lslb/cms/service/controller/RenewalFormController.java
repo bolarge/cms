@@ -161,14 +161,12 @@ public class RenewalFormController extends BaseController {
         queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().convertToDto().getFee().getGameType().getId()));
         GameType gameType = (GameType) mongoRepositoryReactive.find(queryGameType, GameType.class).block();
         int duration=0;
-        if(license.getLicenseStatusId().equals(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID)){
-            duration = Integer.parseInt(gameType.convertToDto().getAipDuration());
-        }else if(license.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
-            if(license.getLicenseType().equalsIgnoreCase(LicenseTypeReferenceData.AGENT)){
+        if(license.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
+            if(license.getLicenseStatusId().equalsIgnoreCase(LicenseTypeReferenceData.AGENT)){
                 duration = Integer.parseInt(gameType.convertToDto().getAgentLicenseDuration());
-            }else if(license.getLicenseType().equalsIgnoreCase(LicenseTypeReferenceData.GAMING_MACHINE)){
+            }else if(license.getLicenseStatusId().equalsIgnoreCase(LicenseTypeReferenceData.GAMING_MACHINE)){
                 duration = Integer.parseInt(gameType.convertToDto().getGamingMachineLicenseDuration());
-            }else if(license.getLicenseType().equalsIgnoreCase(LicenseTypeReferenceData.INSTITUTION)){
+            }else if(license.getLicenseStatusId().equalsIgnoreCase(LicenseTypeReferenceData.INSTITUTION)){
                 duration = Integer.parseInt(gameType.convertToDto().getLicenseDuration());
             }
         }

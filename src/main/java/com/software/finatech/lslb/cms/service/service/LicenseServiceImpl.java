@@ -443,8 +443,25 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
     @Override
-    public Mono<ResponseEntity> updateAIPDocToLicense(String institutionId, String gameTypeId) {
+    public Mono<ResponseEntity> updateAIPDocToLicense(String institutionId, String gameTypeId, String startDate) {
         try {
+
+            LocalDate fromDate;
+
+            if ((startDate != "" && !startDate.isEmpty())) {
+                    if (!startDate.matches("([0-9]{4})-([0-9]{2})-([0-9]{2})")) {
+                        return Mono.just(new ResponseEntity("Invalid Date format. " +
+                                "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
+                    }
+                    fromDate = new LocalDate(startDate);
+
+                } else {
+
+                    return Mono.just(new ResponseEntity("Invalid Date format. " +
+                            "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
+
+                }
+
             Query queryLicence = new Query();
             queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
             queryLicence.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
@@ -456,6 +473,13 @@ public class LicenseServiceImpl implements LicenseService {
 
             }
             license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+            license.setStartDate(fromDate);
+            Query queryGameType = new Query();
+            queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().convertToDto().getFee().getGameType().getId()));
+            GameType gameType = (GameType) mongoRepositoryReactive.find(queryGameType, GameType.class).block();
+            int duration = Integer.parseInt(gameType.getLicenseDuration());
+            license.setEndDate(fromDate.plusMonths(duration));
+            license.setRenewalStatus("false");
             mongoRepositoryReactive.saveOrUpdate(license);
             NotificationDto notificationDto = new NotificationDto();
             if (sendEmaill.getInstitution(license.getInstitutionId()) == null) {
