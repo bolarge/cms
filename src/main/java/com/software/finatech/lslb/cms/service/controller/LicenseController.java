@@ -170,8 +170,25 @@ public class LicenseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> updateLicense(@RequestParam("licensedId") String licensedId) {
+    public Mono<ResponseEntity> updateLicenseToAIP(@RequestParam("licensedId") String licensedId) {
         try {return licenseService.updateToDocumentAIP(licensedId);}
+        catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+
+        }
+    }
+    @RequestMapping(method = RequestMethod.GET, value = "/update-aipdoc-to-license", params={"institutionId","gameTypeId","startDate"})
+    @ApiOperation(value = "Update AIP to AIP Document Upload Status", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> updateAIPToLicense(@RequestParam("institutionId") String institutionId,
+                                                   @RequestParam("gameTypeId") String gameTypeId,
+    @RequestParam("startDate") String startDate) {
+        try {
+            return licenseService.updateAIPDocToLicense(institutionId,gameTypeId,startDate);}
         catch (Exception ex){
             return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
 

@@ -22,7 +22,7 @@ public class License extends AbstractFact {
     protected LocalDate startDate;
     protected LocalDate endDate;
     protected String renewalStatus;
-    protected String licenseType;
+    protected String licenseTypeId;
     protected String agentId;
     protected String gamingMachineId;
     protected boolean firstPayment;
@@ -51,12 +51,12 @@ public class License extends AbstractFact {
         this.gamingMachineId = gamingMachineId;
     }
 
-    public String getLicenseType() {
-        return licenseType;
+    public String getLicenseTypeId() {
+        return licenseTypeId;
     }
 
-    public void setLicenseType(String licenseType) {
-        this.licenseType = licenseType;
+    public void setLicenseType(String licenseTypeId) {
+        this.licenseTypeId = licenseTypeId;
     }
 
     public String getInstitutionId() {
@@ -130,7 +130,10 @@ public class License extends AbstractFact {
         LicenseDto licenseDto = new LicenseDto();
         licenseDto.setId(getId());
         Map licenseStatusMap = Mapstore.STORE.get("LicenseStatus");
+        Map licenseTypeMap = Mapstore.STORE.get("LicenseTypes");
+
         LicenseStatus licenseStatus = null;
+        LicenseType licenseType = null;
         if (licenseStatusMap != null) {
             licenseStatus = (LicenseStatus) licenseStatusMap.get(licenseStatusId);
         }
@@ -140,8 +143,14 @@ public class License extends AbstractFact {
                 licenseStatusMap.put(licenseStatusId, licenseStatus);
             }
         }
+        if (licenseType == null) {
+            licenseType = (LicenseType) mongoRepositoryReactive.findById(licenseTypeId, LicenseType.class).block();
+            if (licenseType != null && licenseTypeMap != null) {
+                licenseTypeMap.put(licenseStatusId, licenseType);
+            }
+        }
         licenseDto.setLicenseStatus(licenseStatus.convertToDto());
-        licenseDto.setLicenseType(getLicenseType());
+        licenseDto.setLicenseType(licenseType.convertToDto());
         //licenseDto.setGamingMachineId(getGamingMachineId());
        // licenseDto.setAgentId(getAgentId());
         if(getPaymentRecord()!=null){
