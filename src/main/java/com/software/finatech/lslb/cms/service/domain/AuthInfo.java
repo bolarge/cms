@@ -27,6 +27,7 @@ public class AuthInfo extends AbstractFact {
 	protected String emailAddress;
 	protected String authRoleId;
 	protected String ssoUserId;
+	protected String title;
 	//UI application level field settings
 	protected Set<String> authViews = new java.util.HashSet<>();
 	protected String gameTypeId;
@@ -130,6 +131,14 @@ public class AuthInfo extends AbstractFact {
 
 	public String getFullName() {
 		return fullName;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	public void setFullName(String fullName) {

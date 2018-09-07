@@ -180,4 +180,9 @@ public class InstitutionServiceImpl implements InstitutionService {
         institution.setGameTypeIds(institutionCreateDto.getGameTypeIds());
         return institution;
     }
+
+    @Override
+    public List<Institution> getAllUncreatedOnVGPay() {
+        return null;
+    }
 }

@@ -7,10 +7,16 @@ import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 public interface PaymentRecordDetailService {
-    Mono<ResponseEntity> createPaymentRecordDetail(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto);
+
+    Mono<ResponseEntity> createInBranchPaymentRecordDetail(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto);
+
+    Mono<ResponseEntity> createWebPaymentPaymentRecordDetail(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto);
 
     void savePaymentRecordDetail(PaymentRecordDetail paymentRecordDetail);
 
+    Mono<ResponseEntity> findAllPaymentRecordDetailForPaymentRecord(String paymentRecord);
+
     Mono<ResponseEntity> updatePaymentRecordDetail(PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto);
+
     PaymentRecordDetail findById(String paymentRecordDetailId);
 }

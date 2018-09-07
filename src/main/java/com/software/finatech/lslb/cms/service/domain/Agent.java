@@ -31,6 +31,34 @@ public class Agent extends AbstractFact {
     protected String bvn;
     protected Set<String> institutionIds;
     protected Set<String> gameTypeIds;
+    protected boolean customerCreatedOnVGPay = false;
+    protected String vgPayCustomerCode;
+    private String title;
+
+
+    public boolean isCustomerCreatedOnVGPay() {
+        return customerCreatedOnVGPay;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setCustomerCreatedOnVGPay(boolean customerCreatedOnVGPay) {
+        this.customerCreatedOnVGPay = customerCreatedOnVGPay;
+    }
+
+    public String getVgPayCustomerCode() {
+        return vgPayCustomerCode;
+    }
+
+    public void setVgPayCustomerCode(String vgPayCustomerCode) {
+        this.vgPayCustomerCode = vgPayCustomerCode;
+    }
 
     public DateTime getDateOfBirth() {
         return dateOfBirth;
