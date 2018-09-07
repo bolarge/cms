@@ -30,7 +30,7 @@ public class PaymentRecordDetailController extends BaseController {
     public void setPaymentRecordDetailService(PaymentRecordDetailService paymentRecordDetailService) {
         this.paymentRecordDetailService = paymentRecordDetailService;
     }
-    
+
     @RequestMapping(method = RequestMethod.POST, value = "/create/in-branch")
     @ApiOperation(value = "Create a new payment record detail in branch payment", response = PaymentRecordDetailDto.class, consumes = "application/json")
     @ApiResponses(value = {
@@ -46,7 +46,7 @@ public class PaymentRecordDetailController extends BaseController {
 
 
     @RequestMapping(method = RequestMethod.POST, value = "/create/web-payment")
-    @ApiOperation(value = "Create a new payment record detail in branch payment", response = PaymentRecordDetailDto.class, consumes = "application/json")
+    @ApiOperation(value = "Create a new payment record detail web payment", response = PaymentRecordDetailDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -61,7 +61,7 @@ public class PaymentRecordDetailController extends BaseController {
 
 
     @RequestMapping(method = RequestMethod.POST, value = "/update")
-    @ApiOperation(value = "Update an existing payment record", response = PaymentRecordDetailDto.class, consumes = "application/json")
+    @ApiOperation(value = "Update an existing payment record detail", response = PaymentRecordDetailDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
