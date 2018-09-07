@@ -83,7 +83,7 @@ public class DocumentTypeReferenceData {
         documentType6.setDescription("Financial details including \n1) Company's bank statement for the preceding 12months(for existing companies) or evidence of financial capability to operate business (for new companies). \n2) Capital budgets.\n3) Business plan. \n4) Financing plan and marketing plan. \n5) 5 year financial projection and the assumption made in considering the figures. \n6) Management accounts.");
         documentType6.setActive(true);
         documentType6.setDocumentPurposeId(applicationFormDocumentPurposeId);
-        documentType6.setRequired(true);
+        documentType6.setRequired(false);
         documentType6.setGameTypeIds(getOSbAndPolGameTypeIdSet());
 
         DocumentType documentType7 = (DocumentType) mongoRepositoryReactive.findById("7", DocumentType.class).block();
@@ -95,7 +95,7 @@ public class DocumentTypeReferenceData {
         documentType7.setDescription("Detailed information on proposed technical topography including \n1) Architectural  illustration of the platform. \n2) Detailed information abput all the technical solution providers.");
         documentType7.setActive(true);
         documentType7.setDocumentPurposeId(applicationFormDocumentPurposeId);
-        documentType7.setRequired(true);
+        documentType7.setRequired(false);
         documentType7.setGameTypeIds(getOSbAndPolGameTypeIdSet());
 
         DocumentType documentType8 = (DocumentType) mongoRepositoryReactive.findById("8", DocumentType.class).block();
@@ -107,7 +107,7 @@ public class DocumentTypeReferenceData {
         documentType8.setDocumentPurposeId(applicationFormDocumentPurposeId);
         documentType8.setGameTypeIds(getOSbAndPolGameTypeIdSet());
         documentType8.setActive(true);
-        documentType8.setRequired(true);
+        documentType8.setRequired(false);
 
         DocumentType documentType9 = (DocumentType) mongoRepositoryReactive.findById("9", DocumentType.class).block();
         if (documentType9 == null) {

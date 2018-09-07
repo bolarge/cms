@@ -8,11 +8,13 @@ import com.software.finatech.lslb.cms.service.dto.RenewalFormDto;
 import com.software.finatech.lslb.cms.service.dto.RenewalFormUpdateDto;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -154,25 +156,23 @@ public class RenewalFormController extends BaseController {
             return Mono.just(new ResponseEntity<>("An existing renewal application is tied to this payment", HttpStatus.BAD_REQUEST));
         }
         license.setRenewalStatus("false");
-        license.setStartDate(LocalDateTime.now());
+        license.setStartDate(LocalDate.now());
         Query queryGameType = new Query();
         queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().convertToDto().getFee().getGameType().getId()));
         GameType gameType = (GameType) mongoRepositoryReactive.find(queryGameType, GameType.class).block();
         int duration=0;
-        if(license.getLicenseStatusId().equals(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID)){
-            duration = Integer.parseInt(gameType.convertToDto().getAipDuration());
-        }else if(license.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
-            if(license.getLicenseType().equalsIgnoreCase("agent")){
+        if(license.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
+            if(license.getLicenseStatusId().equalsIgnoreCase(LicenseTypeReferenceData.AGENT)){
                 duration = Integer.parseInt(gameType.convertToDto().getAgentLicenseDuration());
-            }else if(license.getLicenseType().equalsIgnoreCase("gamingMachine")){
+            }else if(license.getLicenseStatusId().equalsIgnoreCase(LicenseTypeReferenceData.GAMING_MACHINE)){
                 duration = Integer.parseInt(gameType.convertToDto().getGamingMachineLicenseDuration());
-            }else if(license.getLicenseType().equalsIgnoreCase("institution")){
+            }else if(license.getLicenseStatusId().equalsIgnoreCase(LicenseTypeReferenceData.INSTITUTION)){
                 duration = Integer.parseInt(gameType.convertToDto().getLicenseDuration());
             }
         }
         license.setEndDate(license.getStartDate().plusMonths(duration));
         license.setRenewalStatus("false");
-
+        license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
         RenewalForm renewalForm = new RenewalForm();
         renewalForm.setId(UUID.randomUUID().toString());
         renewalForm.setPaymentRecordId(renewalFormCreateDto.getPaymentRecordId());
@@ -212,7 +212,7 @@ public class RenewalFormController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> updateGameType(@RequestBody @Valid RenewalFormUpdateDto renewalFormUpdateDto) {
+    public Mono<ResponseEntity> updateRenewalForm(@RequestBody @Valid RenewalFormUpdateDto renewalFormUpdateDto) {
 
         try {
             RenewalForm renewalForm = (RenewalForm) mongoRepositoryReactive.findById(renewalFormUpdateDto.getId(), RenewalForm.class).block();

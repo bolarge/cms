@@ -3,10 +3,8 @@ package com.software.finatech.lslb.cms.service.util;
 
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.GameTypeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -274,14 +272,14 @@ public class TestData {
             license.setInstitutionId(paymentRecord.getInstitutionId());
             license.setGameTypeId("01");
             license.setPaymentRecordId(paymentRecord.getId());
-            license.setStartDate(LocalDateTime.now());
-            LocalDateTime startDate = new LocalDateTime();
+            license.setStartDate(LocalDate.now());
+            LocalDate startDate = new LocalDate();
             license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getLicenseDuration())));
-            license.setLicenseType("institution");
+            license.setLicenseType(LicenseTypeReferenceData.INSTITUTION);
             license.setFirstPayment(false);
 
             if(i==1){
-                license.setStartDate(LocalDateTime.now());
+                license.setStartDate(LocalDate.now());
                 license.setLicenseStatusId(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
                 license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getAipDuration())));
 
@@ -290,14 +288,14 @@ public class TestData {
                 paymentRecord.setGamingMachineId(gamingMachine.getId());
                 license.setGamingMachineId(paymentRecord.getGamingMachineId());
                 license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getGamingMachineLicenseDuration())));
-                license.setLicenseType("gamingMachine");
+                license.setLicenseType(LicenseTypeReferenceData.GAMING_MACHINE);
 
             }
             if (i == 4) {
                 paymentRecord.setAgentId(agent.getId());
                 license.setAgentId(paymentRecord.getAgentId());
                 license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getAgentLicenseDuration())));
-                license.setLicenseType("agent");
+                license.setLicenseType(LicenseTypeReferenceData.AGENT);
                 agent.setEmailAddress("samelikzra@gmail.com");
 
             }

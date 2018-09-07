@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.DocumentDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.Binary;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -32,7 +33,15 @@ public class Document extends AbstractFact {
     private String applicationFormId;
     protected String institutionId;
     protected String gameTypeId;
+    protected String agentId;
 
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
 
     public String getGameTypeId() {
         return gameTypeId;
@@ -190,7 +199,26 @@ public class Document extends AbstractFact {
         this.originalFilename = originalFilename;
     }
     public Institution getInstitution() {
-        return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+        if(!StringUtils.isEmpty(institutionId)) {
+            return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+        }
+        return  null;
+    }
+    public Agent getAgent() {
+        if(!StringUtils.isEmpty(agentId)){
+            return (Agent) mongoRepositoryReactive.findById(agentId, Agent.class).block();
+        }
+        return null;
+    }
+
+    public String getOwner(){
+        if(!StringUtils.isEmpty(agentId)){
+            return (getAgent()==null?null:getAgent().getFullName());
+        }else if(!StringUtils.isEmpty(institutionId)){
+           return  (getInstitution()==null?null:getInstitution().getInstitutionName());
+        }else{
+            return null;
+        }
     }
     public void setAssociatedProperties() throws FactNotFoundException {
         if (documentTypeId != null) {
@@ -218,16 +246,16 @@ public class Document extends AbstractFact {
         dto.setDocumentTypeId(getDocumentTypeId());
         dto.setDocumentType(getDocumentType() == null ? null : getDocumentType().convertToDto());
         dto.setEntity(getEntity());
-        dto.setEntryDate(getEntryDate() == null ? null : getEntryDate().toString(DateTimeFormat.longDateTime()));
+        dto.setEntryDate(getEntryDate() == null ? null : getEntryDate().toString("dd-MM-yyyy HH:mm:ss"));
         dto.setFilename(getFilename());
         dto.setInstitutionId(getInstitutionId());
-        dto.setInstitution(getInstitution() == null ? null : getInstitution().convertToDto());
+        //dto.setInstitution(getInstitution() == null ? null : getInstitution().convertToDto());
         dto.setOriginalFilename(getOriginalFilename());
         dto.setMimeType(getMimeType());
         dto.setPreviousDocumentId(getPreviousDocumentId());
         dto.setValidFrom(getValidFrom() == null ? null : getValidFrom().toString("dd-MM-yyyy"));
         dto.setValidTo(getValidTo() == null ? null : getValidTo().toString("dd-MM-yyyy"));
-
+        dto.setOwner(getOwner());
         return dto;
     }
 }

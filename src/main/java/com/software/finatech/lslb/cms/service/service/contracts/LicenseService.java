@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
+import com.software.finatech.lslb.cms.service.dto.LicenseUpdateAIPToLicenseDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseUpdateDto;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
@@ -29,6 +30,9 @@ public interface LicenseService {
     Mono<ResponseEntity> getExpiredAIPs();
     Mono<ResponseEntity> updateLicense(LicenseUpdateDto licenseUpdateDto);
     List<EnumeratedFactDto> getLicenseStatus();
+    Mono<ResponseEntity> getInstitutionAIPs(String institutionId);
+    Mono<ResponseEntity> updateToDocumentAIP(String licenseId);
+    Mono<ResponseEntity> updateAIPDocToLicense(LicenseUpdateAIPToLicenseDto licenseUpdateDto);
 
     boolean institutionIsLicensedForGameType(String institutionId, String gameTypeId);
 }

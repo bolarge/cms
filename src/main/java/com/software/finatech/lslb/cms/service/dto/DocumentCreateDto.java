@@ -18,10 +18,18 @@ public class DocumentCreateDto {
     @NotEmpty(message = "Entity field ID can not be empty")
     protected String entityId;
     protected String previousDocumentId;
-    @NotEmpty(message = "Institution ID can not be empty")
-    protected String institutionId;
-    @NotEmpty(message = "GameType ID can not be empty")
+     protected String institutionId;
+     protected String agentId;
+     @NotEmpty(message = "GameType ID can not be empty")
     protected String gameTypeId;
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
 
     public String getGameTypeId() {
         return gameTypeId;

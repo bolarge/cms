@@ -56,6 +56,7 @@ public class DatabaseLoaderUtils {
         DocumentTypeReferenceData.load(mongoRepositoryReactive);
         RevenueNameReferenceData.load(mongoRepositoryReactive);
         ModeOfPaymentReferenceData.load(mongoRepositoryReactive);
+        LicenseTypeReferenceData.load(mongoRepositoryReactive);
     }
 
     // @Profile("test")
@@ -71,8 +72,7 @@ public class DatabaseLoaderUtils {
     public void runLoadData() {
 
         ConcurrentHashMap<String, Class> factEnums = new ConcurrentHashMap<>();
-        //factEnums.put("AccountRole",AccountRole.class);
-        factEnums.put("AuthRole", AuthRole.class);
+         factEnums.put("AuthRole", AuthRole.class);
         factEnums.put("AuthPermission", AuthPermission.class);
         factEnums.put("GameType", GameType.class);
         factEnums.put("ApplicationFormStatus", ApplicationFormStatus.class);
@@ -85,6 +85,7 @@ public class DatabaseLoaderUtils {
         factEnums.put("DocumentType", DocumentType.class);
         factEnums.put("RevenueName", RevenueName.class);
         factEnums.put("ModeOfPayment", ModeOfPayment.class);
+        factEnums.put("LicenseTypes", LicenseType.class);
 
         for (Map.Entry<String, Class> entry : factEnums.entrySet()) {
             logger.info("Importing ReferenceMasterData for > " + entry.getKey());

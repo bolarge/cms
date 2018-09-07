@@ -4,6 +4,7 @@ package com.software.finatech.lslb.cms.service.controller;
 import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
+import com.software.finatech.lslb.cms.service.dto.LicenseUpdateAIPToLicenseDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseUpdateDto;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import io.swagger.annotations.Api;
@@ -11,6 +12,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -132,6 +134,18 @@ public class LicenseController {
             return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
 
         }
+    }@RequestMapping(method = RequestMethod.GET, value = "/get-institution-aips", params={"institutionId"})
+    @ApiOperation(value = "Get all Institution AIPs", response = License.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllAIPStatus(@RequestParam("institutionId")String institutionId) {
+        try{return licenseService.getInstitutionAIPs(institutionId);}catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+
+        }
     }
 
 
@@ -144,6 +158,36 @@ public class LicenseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> updateLicense(@RequestBody @Valid LicenseUpdateDto licenseUpdateDto) {
         try {return licenseService.updateLicense(licenseUpdateDto);}
+        catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/update-to-aip-document", params={"licensedId"})
+    @ApiOperation(value = "Update AIP to AIP Document Upload Status", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> updateLicenseToAIP(@RequestParam("licensedId") String licensedId) {
+        try {return licenseService.updateToDocumentAIP(licensedId);}
+        catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+
+        }
+    }
+    @RequestMapping(method = RequestMethod.POST, value = "/update-aipdoc-to-license")
+    @ApiOperation(value = "Update AIP to AIP Document Upload Status", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> updateAIPToLicense(@RequestBody @Valid LicenseUpdateAIPToLicenseDto licenseUpdateAIPToLicenseDto) {
+        try {
+            return licenseService.updateAIPDocToLicense(licenseUpdateAIPToLicenseDto);}
         catch (Exception ex){
             return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
 

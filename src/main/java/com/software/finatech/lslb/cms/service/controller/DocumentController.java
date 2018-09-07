@@ -99,18 +99,20 @@ public class DocumentController extends BaseController {
                             queryPreviousDocuments.addCriteria(Criteria.where("documentTypeId").is(documentDto.getDocumentTypeId()));
                             Document previousDocument = (Document) mongoRepositoryReactive.find(queryPreviousDocuments, Document.class).block();
                             previousDocument.setArchive(true);
-                            mongoRepositoryReactive.saveOrUpdate(previousDocument);
-
+                            //mongoRepositoryReactive.saveOrUpdate(previousDocument);
+                            documents.add(previousDocument);
                         }
                         document.setDescription(documentDto.getDescription());
                         document.setDocumentTypeId(documentDto.getDocumentTypeId());
                         document.setEntity(documentDto.getEntity());
                         document.setEntryDate(LocalDateTime.now());
+                        document.setGameTypeId(documentDto.getGameTypeId());
                         document.setFilename(originalFilename);
                         document.setOriginalFilename(originalFilename);
                         document.setMimeType(file.getContentType());
                         document.setArchive(false);
                         document.setInstitutionId(documentDto.getInstitutionId());
+                        document.setAgentId(documentDto.getAgentId());
                         document.setPreviousDocumentId(documentDto.getPreviousDocumentId());
                         //document.setValidFrom(new LocalDate(documentDto.getValidFrom()));
                         //document.setValidTo(new LocalDate(documentDto.getValidTo()));
@@ -183,6 +185,61 @@ public class DocumentController extends BaseController {
         return Mono.just(new ResponseEntity(documentsDto, HttpStatus.OK));
     }
 
+
+    @RequestMapping(method = RequestMethod.GET, value = "/get-institution-document-aip", params = {"gameTypeId", "documentPurposeId","institutionId"})
+    @ApiOperation(value = "Get AIP Documents", response = ApplicationFormDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getByEntity(@RequestParam("gameTypeId") String gameTypeId, @RequestParam("documentPurposeId") String documentPurposeId,@RequestParam("institutionId") String institutionId ) {
+
+        Query query = new Query();
+
+        if (gameTypeId != null && !gameTypeId.isEmpty()) {
+            return Mono.just(new ResponseEntity("gameTypeId is required", HttpStatus.NOT_FOUND));
+
+        }
+        if (documentPurposeId != null && !documentPurposeId.isEmpty()) {
+            return Mono.just(new ResponseEntity("documentPurposeId is required", HttpStatus.NOT_FOUND));
+
+        }
+        if (institutionId != null && !institutionId.isEmpty()) {
+            return Mono.just(new ResponseEntity("institutionId is required", HttpStatus.NOT_FOUND));
+        }
+
+        Query queryDocumentType= new Query();
+        queryDocumentType.addCriteria(Criteria.where("documentPurposeId").is(documentPurposeId));
+        List<DocumentType>documentTypes = (List<DocumentType>)mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
+         List<String>documentTypeIds= new ArrayList<>();
+         documentTypes.stream().forEach(documentType -> {
+             documentTypeIds.add(documentType.getId());
+         });
+
+         Query queryDocument = new Query();
+         queryDocument.addCriteria(Criteria.where("documentTypeId").in(documentTypeIds));
+         queryDocument.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+         queryDocument.addCriteria(Criteria.where("institutionId").is(institutionId));
+
+        List<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
+        ArrayList<DocumentDto> documentsDto = new ArrayList<>();
+        documents.forEach(entry -> {
+            try {
+                entry.setAssociatedProperties();
+            } catch (FactNotFoundException e) {
+                e.printStackTrace();
+            }
+            documentsDto.add(entry.convertToDto());
+        });
+
+        if (documentsDto.size() == 0) {
+            return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
+        }
+
+        return Mono.just(new ResponseEntity(documentsDto, HttpStatus.OK));
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = "/downloadById/{id}")
     @ApiOperation(value = "Download Bytes By Id")
     @ApiResponses(value = {
@@ -235,7 +292,7 @@ public class DocumentController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page","pageSize","sortType","sortProperty","id", "documentTypeId","institutionId","archive"}, produces = "application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page","pageSize","sortType","sortProperty","id", "documentTypeId","institutionId","archive","isCurrent"}, produces = "application/json")
     public Mono<ResponseEntity> getById(@RequestParam("page") int page,
                                         @RequestParam("pageSize") int pageSize,
                                         @RequestParam("sortType") String sortType,
@@ -244,6 +301,7 @@ public class DocumentController extends BaseController {
                                         @RequestParam("documentTypeId") String documentTypeId,
                                         @RequestParam("institutionId") String institutionId,
                                         @RequestParam("archive") boolean archive,
+                                        @RequestParam("isCurrent") boolean isCurrent,
                                         HttpServletResponse httpServletResponse) {
 
         Query query = new Query();
@@ -258,7 +316,7 @@ public class DocumentController extends BaseController {
         if(!StringUtils.isEmpty(id)){
             query.addCriteria(Criteria.where("id").is(id));
         }
-
+            query.addCriteria(Criteria.where("isCurrent").is(isCurrent));
             query.addCriteria(Criteria.where("archive").is(archive));
 
 
