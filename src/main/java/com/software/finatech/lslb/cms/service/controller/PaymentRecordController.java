@@ -51,7 +51,7 @@ public class PaymentRecordController extends BaseController {
                                                    @RequestParam("institutionId") String institutionId,
                                                    @RequestParam("approverId") String approverId,
                                                    HttpServletResponse httpServletResponse) {
-      try{  return paymentRecordService.findAllPaymentRecords(page, pageSize, sortType, sortParam, approverId, institutionId,  feeId, httpServletResponse);}catch (Exception ex){
+      try{  return paymentRecordService.findAllPaymentRecords(page, pageSize, sortType, sortParam, institutionId, approverId, feeId, httpServletResponse);}catch (Exception ex){
           return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
 
       }
