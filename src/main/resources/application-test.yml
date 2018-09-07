@@ -1,8 +1,10 @@
 spring:
   application:
     name: lslb-cms
-  #jackson:
-    #time-zone: GMT
+  servlet:
+    multipart:
+      max-file-size: 30MB
+      max-request-size: 30MB
 management:
   endpoint:
   enabled-by-default: false
@@ -36,6 +38,11 @@ logging:
   level:
     ROOT: INFO
     #Rememeber to change the credentials for SSO
+
+
+
+
+
 sso:
   baseIdentityURL: https://sso.test.vggdev.com/identity
   baseAPIURL: http://ssoapi.test.vggdev.com
