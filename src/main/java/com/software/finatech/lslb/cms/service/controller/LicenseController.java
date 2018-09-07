@@ -4,6 +4,7 @@ package com.software.finatech.lslb.cms.service.controller;
 import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
+import com.software.finatech.lslb.cms.service.dto.LicenseUpdateAIPToLicenseDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseUpdateDto;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import io.swagger.annotations.Api;
@@ -177,18 +178,16 @@ public class LicenseController {
 
         }
     }
-    @RequestMapping(method = RequestMethod.GET, value = "/update-aipdoc-to-license", params={"institutionId","gameTypeId","startDate"})
+    @RequestMapping(method = RequestMethod.POST, value = "/update-aipdoc-to-license")
     @ApiOperation(value = "Update AIP to AIP Document Upload Status", response = String.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> updateAIPToLicense(@RequestParam("institutionId") String institutionId,
-                                                   @RequestParam("gameTypeId") String gameTypeId,
-    @RequestParam("startDate") String startDate) {
+    public Mono<ResponseEntity> updateAIPToLicense(@RequestBody @Valid LicenseUpdateAIPToLicenseDto licenseUpdateAIPToLicenseDto) {
         try {
-            return licenseService.updateAIPDocToLicense(institutionId,gameTypeId,startDate);}
+            return licenseService.updateAIPDocToLicense(licenseUpdateAIPToLicenseDto);}
         catch (Exception ex){
             return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
 

@@ -443,17 +443,17 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
     @Override
-    public Mono<ResponseEntity> updateAIPDocToLicense(String institutionId, String gameTypeId, String startDate) {
+    public Mono<ResponseEntity> updateAIPDocToLicense(LicenseUpdateAIPToLicenseDto licenseUpdateDto) {
         try {
 
             LocalDate fromDate;
 
-            if ((startDate != "" && !startDate.isEmpty())) {
-                    if (!startDate.matches("([0-9]{4})-([0-9]{2})-([0-9]{2})")) {
+            if ((licenseUpdateDto.getStartDate() != "" && !licenseUpdateDto.getStartDate().isEmpty())) {
+                    if (!licenseUpdateDto.getStartDate().matches("([0-9]{4})-([0-9]{2})-([0-9]{2})")) {
                         return Mono.just(new ResponseEntity("Invalid Date format. " +
                                 "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
                     }
-                    fromDate = new LocalDate(startDate);
+                    fromDate = new LocalDate(licenseUpdateDto.getStartDate());
 
                 } else {
 
@@ -462,8 +462,8 @@ public class LicenseServiceImpl implements LicenseService {
                 }
 
             Query queryLicence = new Query();
-            queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
-            queryLicence.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+            queryLicence.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
+            queryLicence.addCriteria(Criteria.where("gameTypeId").is(licenseUpdateDto.getGameTypeId()));
             queryLicence.addCriteria(Criteria.where("licenseType").is(LicenseTypeReferenceData.INSTITUTION));
             queryLicence.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID));
             License license = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
