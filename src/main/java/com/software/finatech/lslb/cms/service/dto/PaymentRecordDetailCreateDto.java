@@ -1,19 +1,29 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import org.apache.commons.lang3.StringUtils;
+
 import javax.validation.constraints.NotEmpty;
 
 public class PaymentRecordDetailCreateDto {
-    @NotEmpty(message = "please provide mode of paymentId")
     private String modeOfPaymentId;
     private double amount;
     private String paymentRecordId;
+    @NotEmpty(message = "please provide feeId")
     private String feeId;
     private String institutionId;
     private String agentId;
     private String gamingMachineId;
     private String invoiceNumber;
     private String paymentStatusId;
+    private String feeNotes;
 
+    public String getFeeNotes() {
+        return feeNotes;
+    }
+
+    public void setFeeNotes(String feeNotes) {
+        this.feeNotes = feeNotes;
+    }
 
     public String getPaymentStatusId() {
         return paymentStatusId;
@@ -85,5 +95,26 @@ public class PaymentRecordDetailCreateDto {
 
     public void setPaymentRecordId(String paymentRecordId) {
         this.paymentRecordId = paymentRecordId;
+    }
+
+    public boolean isInstitutionPayment() {
+        return StringUtils.isEmpty(this.getAgentId())
+                && StringUtils.isEmpty(this.getGamingMachineId())
+                && !StringUtils.isEmpty(this.getInstitutionId());
+
+    }
+
+    public boolean isAgentPayment() {
+        return !StringUtils.isEmpty(this.getAgentId())
+                && StringUtils.isEmpty(this.getGamingMachineId())
+                && StringUtils.isEmpty(this.getInstitutionId());
+
+    }
+
+    public boolean isGamingMachinePayment() {
+        return StringUtils.isEmpty(this.getAgentId())
+                && !StringUtils.isEmpty(this.getGamingMachineId())
+                && StringUtils.isEmpty(this.getInstitutionId());
+
     }
 }

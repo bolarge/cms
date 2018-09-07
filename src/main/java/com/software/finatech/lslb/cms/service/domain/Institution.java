@@ -20,9 +20,36 @@ public class Institution extends AbstractFact {
     protected String emailAddress;
     protected String description;
     protected Boolean active;
+    private String address;
     protected String phoneNumber;
     protected String licenseId;
     protected Boolean status;
+    protected boolean customerCreatedOnVGPay = false;
+    protected String vgPayCustomerCode;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public boolean isCustomerCreatedOnVGPay() {
+        return customerCreatedOnVGPay;
+    }
+
+    public void setCustomerCreatedOnVGPay(boolean customerCreatedOnVGPay) {
+        this.customerCreatedOnVGPay = customerCreatedOnVGPay;
+    }
+
+    public String getVgPayCustomerCode() {
+        return vgPayCustomerCode;
+    }
+
+    public void setVgPayCustomerCode(String vgPayCustomerCode) {
+        this.vgPayCustomerCode = vgPayCustomerCode;
+    }
 
     protected Set<String> gameTypeIds = new HashSet<>();
 

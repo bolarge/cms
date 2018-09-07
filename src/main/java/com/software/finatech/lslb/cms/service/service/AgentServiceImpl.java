@@ -185,7 +185,8 @@ public class AgentServiceImpl implements AgentService {
         }
     }
 
-    private void saveAgent(Agent agent) {
+    @Override
+    public void saveAgent(Agent agent) {
         mongoRepositoryReactive.saveOrUpdate(agent);
     }
 
@@ -269,5 +270,12 @@ public class AgentServiceImpl implements AgentService {
         authInfoCreateDto.setFirstName(agentCreateDto.getFirstName());
         authInfoCreateDto.setLastName(agentCreateDto.getLastName());
         return authInfoCreateDto;
+    }
+
+    @Override
+    public List<Agent> getAllUncreatedOnVGPay() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("customerCreatedOnVGPay").is(false));
+        return (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
     }
 }
