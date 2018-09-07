@@ -106,6 +106,7 @@ public class DocumentController extends BaseController {
                         document.setDocumentTypeId(documentDto.getDocumentTypeId());
                         document.setEntity(documentDto.getEntity());
                         document.setEntryDate(LocalDateTime.now());
+                        document.setGameTypeId(documentDto.getGameTypeId());
                         document.setFilename(originalFilename);
                         document.setOriginalFilename(originalFilename);
                         document.setMimeType(file.getContentType());
@@ -167,6 +168,61 @@ public class DocumentController extends BaseController {
 
         ArrayList<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
 
+        ArrayList<DocumentDto> documentsDto = new ArrayList<>();
+        documents.forEach(entry -> {
+            try {
+                entry.setAssociatedProperties();
+            } catch (FactNotFoundException e) {
+                e.printStackTrace();
+            }
+            documentsDto.add(entry.convertToDto());
+        });
+
+        if (documentsDto.size() == 0) {
+            return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
+        }
+
+        return Mono.just(new ResponseEntity(documentsDto, HttpStatus.OK));
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/get-institution-document-aip", params = {"gameTypeId", "documentPurposeId","institutionId"})
+    @ApiOperation(value = "Get AIP Documents", response = ApplicationFormDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getByEntity(@RequestParam("gameTypeId") String gameTypeId, @RequestParam("documentPurposeId") String documentPurposeId,@RequestParam("institutionId") String institutionId ) {
+
+        Query query = new Query();
+
+        if (gameTypeId != null && !gameTypeId.isEmpty()) {
+            return Mono.just(new ResponseEntity("gameTypeId is required", HttpStatus.NOT_FOUND));
+
+        }
+        if (documentPurposeId != null && !documentPurposeId.isEmpty()) {
+            return Mono.just(new ResponseEntity("documentPurposeId is required", HttpStatus.NOT_FOUND));
+
+        }
+        if (institutionId != null && !institutionId.isEmpty()) {
+            return Mono.just(new ResponseEntity("institutionId is required", HttpStatus.NOT_FOUND));
+        }
+
+        Query queryDocumentType= new Query();
+        queryDocumentType.addCriteria(Criteria.where("documentPurposeId").is(documentPurposeId));
+        List<DocumentType>documentTypes = (List<DocumentType>)mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
+         List<String>documentTypeIds= new ArrayList<>();
+         documentTypes.stream().forEach(documentType -> {
+             documentTypeIds.add(documentType.getId());
+         });
+
+         Query queryDocument = new Query();
+         queryDocument.addCriteria(Criteria.where("documentTypeId").in(documentTypeIds));
+         queryDocument.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+         queryDocument.addCriteria(Criteria.where("institutionId").is(institutionId));
+
+        List<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
         ArrayList<DocumentDto> documentsDto = new ArrayList<>();
         documents.forEach(entry -> {
             try {

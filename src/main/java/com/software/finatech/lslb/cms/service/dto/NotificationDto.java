@@ -13,6 +13,15 @@ public class NotificationDto {
     protected String agentFullName;
     protected String agentEmailAddress;
     protected String machineNumber;
+    protected String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getAgentEmailAddress() {
         return agentEmailAddress;

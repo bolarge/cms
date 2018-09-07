@@ -8,6 +8,7 @@ import com.software.finatech.lslb.cms.service.dto.RenewalFormDto;
 import com.software.finatech.lslb.cms.service.dto.RenewalFormUpdateDto;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -163,11 +164,11 @@ public class RenewalFormController extends BaseController {
         if(license.getLicenseStatusId().equals(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID)){
             duration = Integer.parseInt(gameType.convertToDto().getAipDuration());
         }else if(license.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
-            if(license.getLicenseType().equalsIgnoreCase("Agent")){
+            if(license.getLicenseType().equalsIgnoreCase(LicenseTypeReferenceData.AGENT)){
                 duration = Integer.parseInt(gameType.convertToDto().getAgentLicenseDuration());
-            }else if(license.getLicenseType().equalsIgnoreCase("Gaming Machine")){
+            }else if(license.getLicenseType().equalsIgnoreCase(LicenseTypeReferenceData.GAMING_MACHINE)){
                 duration = Integer.parseInt(gameType.convertToDto().getGamingMachineLicenseDuration());
-            }else if(license.getLicenseType().equalsIgnoreCase("Institution")){
+            }else if(license.getLicenseType().equalsIgnoreCase(LicenseTypeReferenceData.INSTITUTION)){
                 duration = Integer.parseInt(gameType.convertToDto().getLicenseDuration());
             }
         }
