@@ -67,7 +67,7 @@ public class VigipayServiceImpl implements VigipayService {
 
     private VigipayCreateCustomer createCustomerFromAgent(Agent agent) {
         VigipayCreateCustomer vigipayCreateCustomer = new VigipayCreateCustomer();
-        vigipayCreateCustomer.setAddressLine1(agent.getResidentialAddress());
+        vigipayCreateCustomer.setAddressLine1(agent.getResidentialAddress() != null ? agent.getResidentialAddress(): "42 Local Airport Road");
         vigipayCreateCustomer.setContactPersonEmail(agent.getEmailAddress());
         vigipayCreateCustomer.setName(agent.getFullName());
         vigipayCreateCustomer.setCustomerCorporateCode(customerCorporateCode);
@@ -83,12 +83,12 @@ public class VigipayServiceImpl implements VigipayService {
         VigipayCreateCustomer vigipayCreateCustomer = new VigipayCreateCustomer();
         List<AuthInfo> gamingOperatorAdmins = authInfoService.getAllGamingOperatorAdminsForInstitution(institution.getId());
         AuthInfo admin1 = gamingOperatorAdmins.get(0);
-        vigipayCreateCustomer.setAddressLine1(institution.getAddress());
+        vigipayCreateCustomer.setAddressLine1(institution.getAddress() != null ? institution.getAddress() : "42 local airport road");
         vigipayCreateCustomer.setContactPersonEmail(institution.getEmailAddress());
         vigipayCreateCustomer.setContactPersonLastName(admin1.getLastName());
         vigipayCreateCustomer.setName(institution.getInstitutionName());
         vigipayCreateCustomer.setCustomerCorporateCode(customerCorporateCode);
-        vigipayCreateCustomer.setContactPersonTitle(admin1.getTitle() != null? admin1.getTitle(): "Mr");
+        vigipayCreateCustomer.setContactPersonTitle(admin1.getTitle() != null ? admin1.getTitle() : "Mr");
         vigipayCreateCustomer.setContactPersonFirstName(admin1.getFirstName());
         vigipayCreateCustomer.setContactPersonLastName(admin1.getLastName());
         vigipayCreateCustomer.setContactPersonPhone(institution.getPhoneNumber());
@@ -147,7 +147,7 @@ public class VigipayServiceImpl implements VigipayService {
         VigipayRecipient vigipayRecipient = new VigipayRecipient();
         vigipayRecipient.setEmail(agent.getEmailAddress());
         vigipayRecipient.setPhone(agent.getPhoneNumber());
-        vigipayRecipient.setTitle(agent.getTitle());
+        vigipayRecipient.setTitle(agent.getTitle() != null ? agent.getTitle() : "Mr");
         vigipayRecipient.setLastName(agent.getLastName());
         vigipayRecipient.setFirstName(agent.getFirstName());
         vigipayRecipientList.add(vigipayRecipient);
@@ -160,7 +160,7 @@ public class VigipayServiceImpl implements VigipayService {
             VigipayRecipient vigipayRecipient = new VigipayRecipient();
             vigipayRecipient.setFirstName(admin.getFirstName());
             vigipayRecipient.setLastName(admin.getLastName());
-            vigipayRecipient.setTitle(admin.getTitle());
+            vigipayRecipient.setTitle(admin.getTitle() != null ? admin.getTitle() : "Mr");
             vigipayRecipient.setPhone(admin.getPhoneNumber());
             vigipayRecipient.setEmail(admin.getEmailAddress());
             vigipayRecipientList.add(vigipayRecipient);

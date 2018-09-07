@@ -281,6 +281,11 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         }
     }
 
+    @Override
+    public Mono<ResponseEntity> findAllPaymentRecordDetailForPaymentRecord(String paymentRecord) {
+       return   null;
+    }
+
     private String createInBranchRecordDetailForInstitution(Institution institution, String feeDescription, PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, List<AuthInfo> admins) {
         VigipayInvoiceItem vigipayInvoiceItem = new VigipayInvoiceItem();
         vigipayInvoiceItem.setAmount(paymentRecordDetailCreateDto.getAmount());

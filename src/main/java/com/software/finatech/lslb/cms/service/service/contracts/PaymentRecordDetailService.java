@@ -14,6 +14,9 @@ public interface PaymentRecordDetailService {
 
     void savePaymentRecordDetail(PaymentRecordDetail paymentRecordDetail);
 
+    Mono<ResponseEntity> findAllPaymentRecordDetailForPaymentRecord(String paymentRecord);
+
     Mono<ResponseEntity> updatePaymentRecordDetail(PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto);
+
     PaymentRecordDetail findById(String paymentRecordDetailId);
 }
