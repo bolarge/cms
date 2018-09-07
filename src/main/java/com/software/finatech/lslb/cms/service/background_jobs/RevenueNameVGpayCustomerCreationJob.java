@@ -33,37 +33,37 @@ public class RevenueNameVGpayCustomerCreationJob {
 
     @Scheduled(fixedRate = 5000)
     public void createCustomers() {
-        logger.info("Started getting customer code");
+        //logger.info("Started getting customer code");
         Query query = new Query();
         query.addCriteria(Criteria.where("vgPayCustomerCode").is(null));
         ArrayList<Institution> institutionsWithout = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
         for (Institution institution : institutionsWithout) {
-            logger.info("Trying to get customer code for institution {} -> {}", institution.getInstitutionName(), institution.getInstitutionName());
+          //  logger.info("Trying to get customer code for institution {} -> {}", institution.getInstitutionName(), institution.getInstitutionName());
             List<AuthInfo> gamingOperatorAdmins = authInfoService.getAllGamingOperatorAdminsForInstitution(institution.getId());
             if (gamingOperatorAdmins.isEmpty()) {
-                logger.info("Institution does not have gaming operator admins");
-                logger.info("Finished for institution {} -> {}", institution.getInstitutionName(), institution.getId());
+//                logger.info("Institution does not have gaming operator admins");
+//                logger.info("Finished for institution {} -> {}", institution.getInstitutionName(), institution.getId());
                 continue;
             }
             String customerCode = vigipayService.createCustomerCodeForInstitution(institution);
-            logger.info("Gotten customer code {}", customerCode);
+        //    logger.info("Gotten customer code {}", customerCode);
             institution.setVgPayCustomerCode(customerCode);
             mongoRepositoryReactive.saveOrUpdate(institution);
-            logger.info("Finished for institution {} -> {}", institution.getInstitutionName(), institution.getId());
+         //   logger.info("Finished for institution {} -> {}", institution.getInstitutionName(), institution.getId());
         }
 
 
 
         ArrayList<Agent> agentWithout = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
         for (Agent agent : agentWithout) {
-            logger.info("Trying to get customer code for agent {} -> {}", agent.getFullName(), agent.getId());
+           // logger.info("Trying to get customer code for agent {} -> {}", agent.getFullName(), agent.getId());
             String customerCode = vigipayService.createCustomerCodeForAgent(agent);
-            logger.info("Gotten customer code {}", customerCode);
+          //  logger.info("Gotten customer code {}", customerCode);
             agent.setVgPayCustomerCode(customerCode);
             mongoRepositoryReactive.saveOrUpdate(agent);
-            logger.info("Finished for agent {} -> {}", agent.getFullName(), agent.getId());
+         //   logger.info("Finished for agent {} -> {}", agent.getFullName(), agent.getId());
         }
 
-        logger.info("Ended getting customer");
+      //  logger.info("Ended getting customer");
     }
 }
