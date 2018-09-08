@@ -57,7 +57,8 @@ public class VigipayHttpClient {
     private String getAccessToken() {
         logger.info(vigipayTokenUrl);
         try {
-            RestTemplate restTemplate = new RestTemplate();
+            // RestTemplate restTemplate = new RestTemplate();
+            RestTemplate restTemplate = getUnsecureRestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
             MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
@@ -77,6 +78,9 @@ public class VigipayHttpClient {
             return null;
         } catch (IOException e) {
             logger.error("An error occurred while parsing the response body", e);
+            return null;
+        } catch (Exception e) {
+            logger.error("An error occurred while creating customer with vg pay", e);
             return null;
         }
     }
