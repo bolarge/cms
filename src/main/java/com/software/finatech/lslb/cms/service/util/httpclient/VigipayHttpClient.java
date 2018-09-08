@@ -6,27 +6,17 @@ import com.software.finatech.lslb.cms.service.dto.sso.SSOToken;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayCreateCustomer;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayCreateInvoice;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.TrustStrategy;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 
 @Component
 public class VigipayHttpClient {
@@ -89,7 +79,7 @@ public class VigipayHttpClient {
         try {
             String accessToken = getAccessToken();
             if (!StringUtils.isEmpty(accessToken)) {
-                  RestTemplate restTemplate = new RestTemplate()'
+                RestTemplate restTemplate = new RestTemplate();
                 restTemplate.setErrorHandler(new ErrorHandler());
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
@@ -121,7 +111,7 @@ public class VigipayHttpClient {
         try {
             String accessToken = getAccessToken();
             if (!StringUtils.isEmpty(accessToken)) {
-                   RestTemplate restTemplate = new RestTemplate();
+                RestTemplate restTemplate = new RestTemplate();
                 restTemplate.setErrorHandler(new ErrorHandler());
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
