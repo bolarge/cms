@@ -57,8 +57,7 @@ public class VigipayHttpClient {
     private String getAccessToken() {
         logger.info(vigipayTokenUrl);
         try {
-            // RestTemplate restTemplate = new RestTemplate();
-            RestTemplate restTemplate = getUnsecureRestTemplate();
+            RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
             MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
@@ -90,8 +89,7 @@ public class VigipayHttpClient {
         try {
             String accessToken = getAccessToken();
             if (!StringUtils.isEmpty(accessToken)) {
-                //   RestTemplate restTemplate = new RestTemplate();
-                RestTemplate restTemplate = getUnsecureRestTemplate();
+                  RestTemplate restTemplate = new RestTemplate()'
                 restTemplate.setErrorHandler(new ErrorHandler());
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
@@ -123,8 +121,7 @@ public class VigipayHttpClient {
         try {
             String accessToken = getAccessToken();
             if (!StringUtils.isEmpty(accessToken)) {
-                //    RestTemplate restTemplate = new RestTemplate();
-                RestTemplate restTemplate = getUnsecureRestTemplate();
+                   RestTemplate restTemplate = new RestTemplate();
                 restTemplate.setErrorHandler(new ErrorHandler());
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
@@ -143,27 +140,5 @@ public class VigipayHttpClient {
             logger.error("An error occurred while making the call", e);
             return null;
         }
-    }
-
-
-    private RestTemplate getUnsecureRestTemplate() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
-        TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
-
-        SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
-                .loadTrustMaterial(null, acceptingTrustStrategy)
-                .build();
-
-        SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext);
-
-        CloseableHttpClient httpClient = HttpClients.custom()
-                .setSSLSocketFactory(csf)
-                .build();
-
-        HttpComponentsClientHttpRequestFactory requestFactory =
-                new HttpComponentsClientHttpRequestFactory();
-
-        requestFactory.setHttpClient(httpClient);
-
-        return new RestTemplate(requestFactory);
     }
 }
