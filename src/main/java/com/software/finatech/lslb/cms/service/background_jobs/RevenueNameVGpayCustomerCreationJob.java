@@ -31,7 +31,7 @@ public class RevenueNameVGpayCustomerCreationJob {
     private static final Logger logger = LoggerFactory.getLogger(RevenueNameVGpayCustomerCreationJob.class);
 
 
-   // @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 5000)
     public void createCustomers() {
         //logger.info("Started getting customer code");
         Query query = new Query();
