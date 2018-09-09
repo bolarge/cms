@@ -1,9 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.service.domain.GameType;
-import com.software.finatech.lslb.cms.service.domain.License;
-import com.software.finatech.lslb.cms.service.domain.LicenseStatus;
-import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
@@ -410,7 +407,10 @@ public class LicenseServiceImpl implements LicenseService {
         }
         aipsForInstitution.stream().forEach(aipForInstitution -> {
             AIPCheckDto aipCheckDto = new AIPCheckDto();
-            aipCheckDto.setGameType(aipForInstitution.getGameTypeId());
+            GameType gameType = (GameType)mongoRepositoryReactive.findById(aipForInstitution.getGameTypeId(), GameType.class).block();
+            if(gameType!=null){
+                aipCheckDto.setGameType(gameType.convertToDto());
+            }
             aipCheckDto.setLicensedId(aipForInstitution.getId());
             aipCheckDto.setLicenseStatusId(aipForInstitution.getLicenseStatusId());
             aipCheckDtos.add(aipCheckDto);

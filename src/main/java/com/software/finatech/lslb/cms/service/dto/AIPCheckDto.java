@@ -2,7 +2,7 @@ package com.software.finatech.lslb.cms.service.dto;
 
 public class AIPCheckDto {
     protected String licenseStatusId;
-    protected String gameType;
+    protected GameTypeDto gameType;
     protected String licensedId;
 
     public String getLicenseStatusId() {
@@ -13,11 +13,11 @@ public class AIPCheckDto {
         this.licenseStatusId = licenseStatusId;
     }
 
-    public String getGameType() {
+    public GameTypeDto getGameType() {
         return gameType;
     }
 
-    public void setGameType(String gameType) {
+    public void setGameType(GameTypeDto gameType) {
         this.gameType = gameType;
     }
 
