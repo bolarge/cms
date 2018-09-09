@@ -81,7 +81,7 @@ public class VigipayServiceImpl implements VigipayService {
 
     private VigipayCreateCustomer createCustomerFromInstitution(Institution institution) {
         VigipayCreateCustomer vigipayCreateCustomer = new VigipayCreateCustomer();
-        List<AuthInfo> gamingOperatorAdmins = authInfoService.getAllGamingOperatorAdminsForInstitution(institution.getId());
+        List<AuthInfo> gamingOperatorAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institution.getId());
         AuthInfo admin1 = gamingOperatorAdmins.get(0);
         vigipayCreateCustomer.setAddressLine1(institution.getAddress() != null ? institution.getAddress() : "42 local airport road");
         vigipayCreateCustomer.setContactPersonEmail(institution.getEmailAddress());

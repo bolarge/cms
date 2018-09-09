@@ -16,6 +16,16 @@ public class PaymentRecordDetail extends AbstractFact {
     private double amount;
     private String modeOfPaymentId;
     private String paymentRecordId;
+    private String vigiPayTransactionReference;
+
+
+    public String getVigiPayTransactionReference() {
+        return vigiPayTransactionReference;
+    }
+
+    public void setVigiPayTransactionReference(String vigiPayTransactionReference) {
+        this.vigiPayTransactionReference = vigiPayTransactionReference;
+    }
 
     public LocalDate getPaymentDate() {
         return paymentDate;

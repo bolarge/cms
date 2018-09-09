@@ -14,6 +14,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -35,6 +36,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -587,7 +589,18 @@ public class AuthInfoController extends BaseController {
         try {
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(authInfoUpdateDto.getId(), AuthInfo.class).block();
             if (authInfo == null) {
-                return Mono.just(new ResponseEntity("Bad Request", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST));
+            }
+
+            List<String> gamingOperatorRoles = authInfoService.getAllGamingOperatorAdminAndUserRoles();
+            if (!StringUtils.equals(authInfoUpdateDto.getAuthRoleId(), authInfo.getAuthRoleId())
+                    && !StringUtils.isEmpty(authInfo.getInstitutionId())
+                    && gamingOperatorRoles.contains(authInfoUpdateDto.getAuthRoleId())) {
+                int maxNumberOfGamingOperatorUsers = 3;
+                List<AuthInfo> authInfoListWithGamingOperatorLimitedRoles = authInfoService.getAllActiveGamingOperatorAdminsAndUsersForInstitution(authInfo.getInstitutionId());
+                if (authInfoListWithGamingOperatorLimitedRoles.size() >= maxNumberOfGamingOperatorUsers) {
+                    return Mono.just(new ResponseEntity<>("Number of users for gaming operator exceeded", HttpStatus.BAD_REQUEST));
+                }
             }
 
             if (authInfoUpdateDto.getAuthRoleId() != null && !authInfoUpdateDto.getAuthRoleId().isEmpty()) {
@@ -659,7 +672,7 @@ public class AuthInfoController extends BaseController {
     }
 
 
-    public String getAppHostPort(){
-        return  this.appHostPort;
+    public String getAppHostPort() {
+        return this.appHostPort;
     }
 }

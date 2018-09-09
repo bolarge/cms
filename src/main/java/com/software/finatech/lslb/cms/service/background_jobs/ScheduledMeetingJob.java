@@ -104,7 +104,7 @@ public class ScheduledMeetingJob {
         Institution institution = institutionService.findById(scheduledMeeting.getInstitutionId());
         String creatorMailSubject = String.format("REMINDER : Scheduled meeting with %s", institution.getInstitutionName());
         scheduledMeetingService.sendMeetingNotificationEmailToMeetingCreator(creatorMailSubject, "ScheduledMeetingReminderNotificationForLslbAdmin", scheduledMeeting);
-        ArrayList<AuthInfo> gamingOperatorAdmins = authInfoService.getAllGamingOperatorAdminsForInstitution(scheduledMeeting.getInstitutionId());
+        ArrayList<AuthInfo> gamingOperatorAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(scheduledMeeting.getInstitutionId());
         for (AuthInfo gamingOperatorAdmin : gamingOperatorAdmins) {
             scheduledMeetingService.sendMeetingNotificationEmailToAttendee("REMINDER: Scheduled meeting with Lagos State Lotteries Board", "ScheduledMeetingReminderNotificationForGamingOperator",
                     gamingOperatorAdmin, scheduledMeeting);

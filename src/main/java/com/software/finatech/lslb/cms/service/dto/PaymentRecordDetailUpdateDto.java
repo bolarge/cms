@@ -8,6 +8,15 @@ public class PaymentRecordDetailUpdateDto {
     private String paymentStatusId;
     @NotEmpty(message = "please provide the id of the entity")
     private String id;
+    private String vigipayReference;
+
+    public String getVigipayReference() {
+        return vigipayReference;
+    }
+
+    public void setVigipayReference(String vigipayReference) {
+        this.vigipayReference = vigipayReference;
+    }
 
     public String getInvoiceNumber() {
         return invoiceNumber;
