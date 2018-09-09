@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -39,7 +38,7 @@ public class RevenueNameVGpayCustomerCreationJob {
         ArrayList<Institution> institutionsWithout = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
         for (Institution institution : institutionsWithout) {
             logger.info("Trying to get customer code for institution {} -> {}", institution.getInstitutionName(), institution.getInstitutionName());
-            List<AuthInfo> gamingOperatorAdmins = authInfoService.getAllGamingOperatorAdminsForInstitution(institution.getId());
+            List<AuthInfo> gamingOperatorAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institution.getId());
             if (gamingOperatorAdmins.isEmpty()) {
               logger.info("Institution does not have gaming operator admins");
                logger.info("Finished for institution {} -> {}", institution.getInstitutionName(), institution.getId());

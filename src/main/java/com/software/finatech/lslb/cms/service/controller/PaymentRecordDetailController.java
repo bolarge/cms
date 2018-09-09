@@ -4,6 +4,7 @@ package com.software.finatech.lslb.cms.service.controller;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailUpdateDto;
+import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInBranchNotification;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordDetailService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -11,10 +12,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
@@ -59,7 +57,6 @@ public class PaymentRecordDetailController extends BaseController {
     }
 
 
-
     @RequestMapping(method = RequestMethod.POST, value = "/update")
     @ApiOperation(value = "Update an existing payment record detail", response = PaymentRecordDetailDto.class, consumes = "application/json")
     @ApiResponses(value = {
@@ -71,5 +68,31 @@ public class PaymentRecordDetailController extends BaseController {
     )
     public Mono<ResponseEntity> updatePaymentRecord(@RequestBody @Valid PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto) {
         return paymentRecordDetailService.updatePaymentRecordDetail(paymentRecordDetailUpdateDto);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/vigipay-in-branch-payment-notification")
+    @ApiOperation(value = "Notification of successful in branch payment from Vigipay", response = String.class ,consumes= "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")
+    }
+    )
+    public Mono<ResponseEntity> updateVigiPayInBranchNotification(@RequestBody VigipayInBranchNotification vigipayInBranchNotification) {
+        return paymentRecordDetailService.handleVigipayInBranchNotification(vigipayInBranchNotification);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/for-payment-record", params = {"paymentRecordId"})
+    @ApiOperation(value = "Get all payment record details for a payment record", response = PaymentRecordDetailDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")
+    }
+    )
+    public Mono<ResponseEntity> findAllPaymentRecordDetailsForPaymentRecord(@RequestParam("paymentRecordId") String paymentRecordId) {
+        return paymentRecordDetailService.findAllPaymentRecordDetailForPaymentRecord(paymentRecordId);
     }
 }

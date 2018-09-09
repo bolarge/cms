@@ -22,9 +22,9 @@ public interface AuthInfoService {
     Mono<ResponseEntity> loginToken(String userName, String password,AuthInfo authInfo);
     Mono<ResponseEntity> completeRegistration(VerificationToken verificationToken, AuthInfoCompleteDto authInfoCompleteDto, AuthInfo authInfo);
 
-    ArrayList<AuthInfo> getAllGamingOperatorAdminsAndUsersForInstitution(String institutionId);
+    ArrayList<AuthInfo> getAllActiveGamingOperatorAdminsAndUsersForInstitution(String institutionId);
 
-    ArrayList<AuthInfo> getAllGamingOperatorAdminsForInstitution(String institutionId);
+    ArrayList<AuthInfo> getAllActiveGamingOperatorAdminsForInstitution(String institutionId);
 
     AuthInfo getUserById(String userId);
 }
