@@ -647,7 +647,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     private void sendAdminCommentNotificationToInstitutionAdmins(ApplicationForm applicationForm, String comment) {
-        ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllGamingOperatorAdminsForInstitution(applicationForm.getInstitutionId());
+        ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(applicationForm.getInstitutionId());
         for (AuthInfo institutionAdmin : institutionAdmins) {
             sendCommentNotificationToInstitutionUser(institutionAdmin, comment, applicationForm);
         }

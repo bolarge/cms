@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,6 +18,7 @@ public class AgentCreateDto {
     @Email
     @NotEmpty(message = "please provide agent email address")
     private String emailAddress;
+    @Size(min = 9,  message= "Phone number should be at least 9 characaters")
     @NotEmpty(message = "please provide agent phone number")
     private String phoneNumber;
     @NotEmpty(message = "please provide agent date of birth")

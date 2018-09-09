@@ -131,7 +131,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             if (invitedInstitution == null) {
                 return Mono.just(new ResponseEntity<>("Invited institution does not exist", badRequestStatus));
             }
-            ArrayList<AuthInfo> gamingOperatorAdminsForInstitution = authInfoService.getAllGamingOperatorAdminsForInstitution(institutionId);
+            ArrayList<AuthInfo> gamingOperatorAdminsForInstitution = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institutionId);
             if (gamingOperatorAdminsForInstitution == null || gamingOperatorAdminsForInstitution.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("There is no user with role gaming operator admin for institution", badRequestStatus));
             }
@@ -226,7 +226,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
         if (invitedInstitution == null) {
             return Mono.just(new ResponseEntity<>("Invited institution does not exist", badRequestStatus));
         }
-        ArrayList<AuthInfo> gamingOperatorAdminsForInstitution = authInfoService.getAllGamingOperatorAdminsForInstitution(institutionId);
+        ArrayList<AuthInfo> gamingOperatorAdminsForInstitution = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institutionId);
         if (gamingOperatorAdminsForInstitution == null || gamingOperatorAdminsForInstitution.isEmpty()) {
             return Mono.just(new ResponseEntity<>("There is no user with role gaming operator admin for institution", badRequestStatus));
         }
@@ -267,7 +267,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
         Institution institution = getInstitution(scheduledMeeting.getInstitutionId());
         String creatorMailSubject = String.format("Scheduled meeting with %s", institution.getInstitutionName());
         sendMeetingNotificationEmailToMeetingCreator(creatorMailSubject, "ScheduledMeetingInitialNotificationForLslbAdmin", scheduledMeeting);
-        ArrayList<AuthInfo> gamingOperatorAdmins = authInfoService.getAllGamingOperatorAdminsForInstitution(scheduledMeeting.getInstitutionId());
+        ArrayList<AuthInfo> gamingOperatorAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(scheduledMeeting.getInstitutionId());
         for (AuthInfo gamingOperatorAdmin : gamingOperatorAdmins) {
             sendMeetingNotificationEmailToAttendee("Meeting Invite With Lagos State Lotteries Board", "ScheduledMeetingInitialNotificationForGamingOperator", gamingOperatorAdmin, scheduledMeeting);
         }

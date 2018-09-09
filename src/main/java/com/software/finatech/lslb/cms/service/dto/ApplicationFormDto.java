@@ -6,6 +6,7 @@ public class ApplicationFormDto {
     private String gameTypeDescription;
     private String gameTypeId;
     private String statusName;
+    private String statusId;
     private String applicationFormTypeName;
     private String formName;
     private String institutionId;
@@ -25,6 +26,14 @@ public class ApplicationFormDto {
     private String lslbAdminName;
     private String lslbAdminComment;
 
+
+    public String getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(String statusId) {
+        this.statusId = statusId;
+    }
 
     public String getGameTypeName() {
         return gameTypeName;

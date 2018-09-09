@@ -2,30 +2,37 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
-import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Map;
 
 @SuppressWarnings("serial")
-@Document(collection = "PaymentRecordsDetail")
+@Document(collection = "PaymentRecordDetail")
 public class PaymentRecordDetail extends AbstractFact {
     private String invoiceNumber;
-    private DateTime paymentDate;
+    private LocalDate paymentDate;
     private String paymentStatusId;
     private double amount;
     private String modeOfPaymentId;
-    private String id;
     private String paymentRecordId;
-    private boolean paymentAddedToParent;
+    private String vigiPayTransactionReference;
 
 
-    public boolean isPaymentAddedToParent() {
-        return paymentAddedToParent;
+    public String getVigiPayTransactionReference() {
+        return vigiPayTransactionReference;
     }
 
-    public void setPaymentAddedToParent(boolean paymentAddedToParent) {
-        this.paymentAddedToParent = paymentAddedToParent;
+    public void setVigiPayTransactionReference(String vigiPayTransactionReference) {
+        this.vigiPayTransactionReference = vigiPayTransactionReference;
+    }
+
+    public LocalDate getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(LocalDate paymentDate) {
+        this.paymentDate = paymentDate;
     }
 
     public String getPaymentRecordId() {
@@ -36,28 +43,12 @@ public class PaymentRecordDetail extends AbstractFact {
         this.paymentRecordId = paymentRecordId;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public String getInvoiceNumber() {
         return invoiceNumber;
     }
 
     public void setInvoiceNumber(String invoiceNumber) {
         this.invoiceNumber = invoiceNumber;
-    }
-
-    public DateTime getPaymentDate() {
-        return paymentDate;
-    }
-
-    public void setPaymentDate(DateTime paymentDate) {
-        this.paymentDate = paymentDate;
     }
 
     public String getPaymentStatusId() {
@@ -98,6 +89,9 @@ public class PaymentRecordDetail extends AbstractFact {
         if (paymentStatus != null) {
             paymentRecordDetailDto.setPaymentStatus(paymentStatus.getName());
         }
+
+        paymentRecordDetailDto.setCreationDate(getCreatedAt() != null ? getCreatedAt().toString("dd-MM-yyyy") : null);
+        paymentRecordDetailDto.setPaymentDate(paymentDate != null ? paymentDate.toString("dd-MM-yyyy") : null);
         return paymentRecordDetailDto;
     }
 

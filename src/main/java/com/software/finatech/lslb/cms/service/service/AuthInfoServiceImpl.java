@@ -601,7 +601,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         int maxNumberOfGamingOperatorUsers = 3;
         ArrayList<String> gamingOperatorLimitedRoles = getAllGamingOperatorAdminAndUserRoles();
         if (gamingOperatorLimitedRoles.contains(authInfoCreateDto.getAuthRoleId())) {
-            ArrayList<AuthInfo> authInfoListWithGamingOperatorLimitedRoles = getAllGamingOperatorAdminsAndUsersForInstitution(authInfoCreateDto.getInstitutionId());
+            ArrayList<AuthInfo> authInfoListWithGamingOperatorLimitedRoles = getAllActiveGamingOperatorAdminsAndUsersForInstitution(authInfoCreateDto.getInstitutionId());
             if (authInfoListWithGamingOperatorLimitedRoles.size() >= maxNumberOfGamingOperatorUsers) {
                 return Mono.just(new ResponseEntity<>("Number of users for gaming operator exceeded", HttpStatus.BAD_REQUEST));
             }
@@ -610,20 +610,22 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public ArrayList<AuthInfo> getAllGamingOperatorAdminsAndUsersForInstitution(String institutionId) {
+    public ArrayList<AuthInfo> getAllActiveGamingOperatorAdminsAndUsersForInstitution(String institutionId) {
         ArrayList<String> gamingOperatorAdminAndUserRoles = getAllGamingOperatorAdminAndUserRoles();
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
+        query.addCriteria(Criteria.where("enabled").is(true));
         query.addCriteria(Criteria.where("authRoleId").in(gamingOperatorAdminAndUserRoles));
         return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
     }
 
     @Override
-    public ArrayList<AuthInfo> getAllGamingOperatorAdminsForInstitution(String institutionId) {
+    public ArrayList<AuthInfo> getAllActiveGamingOperatorAdminsForInstitution(String institutionId) {
         String gamingOperatorAdminRoleId = LSLBAuthRoleReferenceData.GAMING_OPERATOR_ADMIN_ROLE_ID;
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
         query.addCriteria(Criteria.where("authRoleId").is(gamingOperatorAdminRoleId));
+        query.addCriteria(Criteria.where("enabled").is(true));
         return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
     }
 
@@ -632,7 +634,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         return (AuthInfo)mongoRepositoryReactive.findById(userId, AuthInfo.class).block();
     }
 
-    private ArrayList<String> getAllGamingOperatorAdminAndUserRoles() {
+    public ArrayList<String> getAllGamingOperatorAdminAndUserRoles() {
         String gamingOperatorAdminRoleId = LSLBAuthRoleReferenceData.GAMING_OPERATOR_ADMIN_ROLE_ID;
         String gamingOperatorUserRoleId = LSLBAuthRoleReferenceData.GAMING_OPERATOR_USER_ROLE_ID;
         ArrayList<String> gamingOperatorLimitedRoles = new ArrayList<>();

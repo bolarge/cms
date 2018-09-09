@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface AgentService {
 
@@ -23,4 +24,8 @@ public interface AgentService {
     Mono<ResponseEntity> updateAgent(AgentUpdateDto agentUpdateDto);
 
     Agent findById(String agentId);
+
+    List<Agent> getAllUncreatedOnVGPay();
+
+    void saveAgent(Agent agent);
 }

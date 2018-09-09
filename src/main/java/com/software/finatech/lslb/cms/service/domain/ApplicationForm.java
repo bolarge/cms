@@ -286,6 +286,7 @@ public class ApplicationForm extends AbstractFact {
         applicationFormDto.setFilledApplicantOtherInformation(getApplicantOtherInformation() != null);
         applicationFormDto.setFilledApplicantOutletInformation(getApplicantOutletInformation() != null);
         applicationFormDto.setFilledApplicantDetails(getApplicantDetails() != null);
+        applicationFormDto.setStatusId(applicationFormStatusId);
         return applicationFormDto;
     }
 

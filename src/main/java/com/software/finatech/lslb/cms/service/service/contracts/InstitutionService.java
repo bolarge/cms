@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 public interface InstitutionService {
     Mono<ResponseEntity> createInstitution(InstitutionCreateDto institutionCreateDto);
@@ -24,4 +25,6 @@ public interface InstitutionService {
                                              HttpServletResponse httpServletResponse);
 
     Institution findById(String institutionId);
+
+    List<Institution> getAllUncreatedOnVGPay();
 }
