@@ -222,7 +222,7 @@ public class DocumentController extends BaseController {
          queryDocument.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
          queryDocument.addCriteria(Criteria.where("institutionId").is(institutionId));
 
-        List<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
+        List<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(queryDocument, Document.class).toStream().collect(Collectors.toList());
         ArrayList<DocumentDto> documentsDto = new ArrayList<>();
         documents.forEach(entry -> {
             try {
