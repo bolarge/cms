@@ -480,19 +480,7 @@ public class LicenseServiceImpl implements LicenseService {
             license.setEndDate(fromDate.plusMonths(duration));
             license.setRenewalStatus("false");
             mongoRepositoryReactive.saveOrUpdate(license);
-          /*  NotificationDto notificationDto = new NotificationDto();
-            if (sendEmaill.getInstitution(license.getInstitutionId()) == null) {
-                return Mono.just(new ResponseEntity<>("Institution does not exist", HttpStatus.BAD_REQUEST));
-            }
-            if (sendEmaill.getGameType(license.getGameTypeId()) == null) {
-                return Mono.just(new ResponseEntity<>("Institution does not have this license for the selected gameType", HttpStatus.BAD_REQUEST));
-            }
-            notificationDto.setInstitutionName(license.convertToDto().getPaymentRecord().getInstitutionName());
-            notificationDto.setInstitutionEmail(sendEmaill.getInstitution(license.getInstitutionId()).getEmailAddress());
-            notificationDto.setGameType(sendEmaill.getGameType(license.getGameTypeId()).getDescription());
-            notificationDto.setDescription("Congratulations!! " + notificationDto.getInstitutionName() + " with Game Type: " + notificationDto.getGameType() + " Application has been successfully Licensed");
 
-            sendEmaill.sendEmailLicenseApplicationNotification(notificationDto);*/
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
 
         } catch (Exception ex) {
