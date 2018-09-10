@@ -194,6 +194,7 @@ public class Agent extends AbstractFact {
         agentDto.setMeansOfId(getMeansOfId());
         agentDto.setIdNumber(getIdNumber());
         agentDto.setAgentInstitutions(convertAgentInstitutions(getAgentInstitutions()));
+        agentDto.setId(getId());
         return agentDto;
     }
 

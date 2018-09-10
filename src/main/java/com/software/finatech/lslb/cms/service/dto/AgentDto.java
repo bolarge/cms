@@ -16,6 +16,15 @@ public class AgentDto {
     private String passportId;
     private String fullName;
     private String idNumber;
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public Set<AgentInstitutionDto> getAgentInstitutions() {
         return agentInstitutions;

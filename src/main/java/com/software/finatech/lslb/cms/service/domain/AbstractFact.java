@@ -176,5 +176,4 @@ public abstract class AbstractFact implements PropertyChangeListener, FactObject
 		this.version = version;
 	}
 
-
 }

@@ -4,19 +4,19 @@ import com.software.finatech.lslb.cms.service.domain.RevenueName;
 
 public class FeeDto {
     protected double amount;
-    protected GameTypeDto gameType;
-    protected EnumeratedFactDto feePaymentType;
+ //   protected GameTypeDto gameType;
+ //   protected EnumeratedFactDto feePaymentType;
+    private String gameTypeName;
+    private String gameTypeId;
     protected String id;
     protected boolean active;
-    protected EnumeratedFactDto revenueName;
+    private String feePaymentTypeName;
+    private String feePaymentTypeId;
+    private String revenueName;
+    private String revenueId;
 
-    public EnumeratedFactDto getRevenueName() {
-        return revenueName;
-    }
 
-    public void setRevenueName(EnumeratedFactDto revenueName) {
-        this.revenueName = revenueName;
-    }
+  //  protected EnumeratedFactDto revenueName;
 
     public boolean isActive() {
         return active;
@@ -42,20 +42,51 @@ public class FeeDto {
         this.amount = amount;
     }
 
-    public GameTypeDto getGameType() {
-        return gameType;
+    public String getGameTypeName() {
+        return gameTypeName;
     }
 
-    public void setGameType(GameTypeDto gameType) {
-        this.gameType = gameType;
+    public void setGameTypeName(String gameTypeName) {
+        this.gameTypeName = gameTypeName;
     }
 
-    public EnumeratedFactDto getFeePaymentType() {
-        return feePaymentType;
+    public String getGameTypeId() {
+        return gameTypeId;
     }
 
-    public void setFeePaymentType(EnumeratedFactDto feePaymentType) {
-        this.feePaymentType = feePaymentType;
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
     }
 
+    public String getFeePaymentTypeName() {
+        return feePaymentTypeName;
     }
+
+    public void setFeePaymentTypeName(String feePaymentTypeName) {
+        this.feePaymentTypeName = feePaymentTypeName;
+    }
+
+    public String getFeePaymentTypeId() {
+        return feePaymentTypeId;
+    }
+
+    public void setFeePaymentTypeId(String feePaymentTypeId) {
+        this.feePaymentTypeId = feePaymentTypeId;
+    }
+
+    public String getRevenueName() {
+        return revenueName;
+    }
+
+    public void setRevenueName(String revenueName) {
+        this.revenueName = revenueName;
+    }
+
+    public String getRevenueId() {
+        return revenueId;
+    }
+
+    public void setRevenueId(String revenueId) {
+        this.revenueId = revenueId;
+    }
+}

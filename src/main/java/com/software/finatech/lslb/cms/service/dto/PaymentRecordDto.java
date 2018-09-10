@@ -4,14 +4,62 @@ public class PaymentRecordDto {
     private String institutionName;
     private String institutionId;
     private String approverName;
-    private EnumeratedFactDto paymentStatus;
-    private FeeDto fee;
+    private String apprcverId;
+    private String paymentStatusId;
+    private String paymentStatusName;
+   // private EnumeratedFactDto paymentStatus;
+    private String gameTypeName;
+    private String gameTypeId;
+    private String feeId;
+  //  private FeeDto fee;
+    private double amountPaid;
+    private double amountOutstanding;
+    private double amount;
     private String id;
     private String parentLicenseId;
-    private AgentDto agent;
-    private GamingMachineDto gamingMachine;
+    private String agentId;
+    private String agentName;
+    private String gamingMachineId;
+  //  private AgentDto agent;
+  //  private GamingMachineDto gamingMachine;
     private String startYear;
     private String endYear;
+    private String feePaymentTypeName;
+    private String feePaymentTypeId;
+    private String revenueName;
+    private String revenueNameId;
+
+    public String getFeePaymentTypeId() {
+        return feePaymentTypeId;
+    }
+
+    public void setFeePaymentTypeId(String feePaymentTypeId) {
+        this.feePaymentTypeId = feePaymentTypeId;
+    }
+
+    public String getRevenueNameId() {
+        return revenueNameId;
+    }
+
+    public void setRevenueNameId(String revenueNameId) {
+        this.revenueNameId = revenueNameId;
+    }
+
+    public String getFeePaymentTypeName() {
+        return feePaymentTypeName;
+    }
+
+    public void setFeePaymentTypeName(String feePaymentTypeName) {
+        this.feePaymentTypeName = feePaymentTypeName;
+    }
+
+    public String getRevenueName() {
+        return revenueName;
+    }
+
+    public void setRevenueName(String revenueName) {
+        this.revenueName = revenueName;
+    }
 
     public String getStartYear() {
         return startYear;
@@ -23,22 +71,6 @@ public class PaymentRecordDto {
 
     public void setStartYear(String startYear) {
         this.startYear = startYear;
-    }
-
-    public AgentDto getAgent() {
-        return agent;
-    }
-
-    public void setAgent(AgentDto agent) {
-        this.agent = agent;
-    }
-
-    public GamingMachineDto getGamingMachine() {
-        return gamingMachine;
-    }
-
-    public void setGamingMachine(GamingMachineDto gamingMachine) {
-        this.gamingMachine = gamingMachine;
     }
 
     public String getInstitutionName() {
@@ -81,19 +113,103 @@ public class PaymentRecordDto {
         this.approverName = approverName;
     }
 
-    public EnumeratedFactDto getPaymentStatus() {
-        return paymentStatus;
+    public String getApprcverId() {
+        return apprcverId;
     }
 
-    public void setPaymentStatus(EnumeratedFactDto paymentStatus) {
-        this.paymentStatus = paymentStatus;
+    public void setApprcverId(String apprcverId) {
+        this.apprcverId = apprcverId;
     }
 
-    public FeeDto getFee() {
-        return fee;
+    public String getPaymentStatusId() {
+        return paymentStatusId;
     }
 
-    public void setFee(FeeDto fee) {
-        this.fee = fee;
+    public void setPaymentStatusId(String paymentStatusId) {
+        this.paymentStatusId = paymentStatusId;
+    }
+
+    public String getPaymentStatusName() {
+        return paymentStatusName;
+    }
+
+    public void setPaymentStatusName(String paymentStatusName) {
+        this.paymentStatusName = paymentStatusName;
+    }
+
+    public String getGameTypeName() {
+        return gameTypeName;
+    }
+
+    public void setGameTypeName(String gameTypeName) {
+        this.gameTypeName = gameTypeName;
+    }
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
+
+    public String getFeeId() {
+        return feeId;
+    }
+
+    public void setFeeId(String feeId) {
+        this.feeId = feeId;
+    }
+
+    public double getAmountPaid() {
+        return amountPaid;
+    }
+
+    public void setAmountPaid(double amountPaid) {
+        this.amountPaid = amountPaid;
+    }
+
+    public double getAmountOutstanding() {
+        return amountOutstanding;
+    }
+
+    public void setAmountOutstanding(double amountOutstanding) {
+        this.amountOutstanding = amountOutstanding;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
+
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
+    }
+
+    public String getGamingMachineId() {
+        return gamingMachineId;
+    }
+
+    public void setGamingMachineId(String gamingMachineId) {
+        this.gamingMachineId = gamingMachineId;
+    }
+
+    public String getEndYear() {
+        return endYear;
     }
 }

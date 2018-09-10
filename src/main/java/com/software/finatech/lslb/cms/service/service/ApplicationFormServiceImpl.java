@@ -106,7 +106,6 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             }
 
-
             if (page == 0) {
                 Long count = mongoRepositoryReactive.count(query, ApplicationForm.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
@@ -725,16 +724,16 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         return null;
     }
 
-    private List<DocumentTypeDto> getDocumentTypesFromDocumentIds(Set<String> documentIds) throws FactNotFoundException {
-        List<DocumentTypeDto> documentTypeDtos = new ArrayList<>();
-        for (String documentId : documentIds) {
-            Document document = (Document) mongoRepositoryReactive.findById(documentId, Document.class).block();
-            if (document != null) {
-                document.setAssociatedProperties();
-                DocumentType documentType = document.getDocumentType();
-                documentTypeDtos.add(documentType.convertToDto());
-            }
-        }
-        return documentTypeDtos;
-    }
+//    private List<DocumentTypeDto> getDocumentTypesFromDocumentIds(Set<String> documentIds) throws FactNotFoundException {
+//        List<DocumentTypeDto> documentTypeDtos = new ArrayList<>();
+//        for (String documentId : documentIds) {
+//            Document document = (Document) mongoRepositoryReactive.findById(documentId, Document.class).block();
+//            if (document != null) {
+//                document.setAssociatedProperties();
+//                DocumentType documentType = document.getDocumentType();
+//                documentTypeDtos.add(documentType.convertToDto());
+//            }
+//        }
+//        return documentTypeDtos;
+//    }
 }

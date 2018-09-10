@@ -157,13 +157,23 @@ public class PaymentRecord extends AbstractFact {
         this.paymentRecordDetailIds = paymentRecordDetailIds;
     }
 
-    public PaymentRecordDto convertToDto() {
-        PaymentRecordDto paymentRecordDto = new PaymentRecordDto();
-        Fee fee = getFee();
-        paymentRecordDto.setId(getId());
-        if (fee != null) {
-            paymentRecordDto.setFee(fee.convertToDto());
+    public GameType getGameType() {
+        Map gameTypeMap = Mapstore.STORE.get("GameType");
+        GameType gameType = null;
+        if (gameTypeMap != null) {
+            gameType = (GameType) gameTypeMap.get(gameTypeId);
         }
+        if (gameType == null) {
+            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
+            if (gameType != null && gameTypeMap != null) {
+                gameTypeMap.put(gameTypeId, gameType);
+            }
+        }
+        return gameType;
+    }
+
+
+    public PaymentStatus getPaymentStatus() {
         Map paymentStatusMap = Mapstore.STORE.get("PaymentStatus");
         PaymentStatus paymentStatus = null;
         if (paymentStatusMap != null) {
@@ -175,27 +185,68 @@ public class PaymentRecord extends AbstractFact {
                 paymentStatusMap.put(paymentStatusId, paymentStatus);
             }
         }
+        return paymentStatus;
+    }
+
+    public Agent getAgent() {
+        return (Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
+    }
+
+    public GamingMachine getGamingMachine() {
+        return (GamingMachine) mongoRepositoryReactive.findById(getGamingMachineId(), GamingMachine.class).block();
+    }
+
+    public PaymentRecordDto convertToDto() {
+        PaymentRecordDto paymentRecordDto = new PaymentRecordDto();
+        Fee fee = getFee();
+        paymentRecordDto.setId(getId());
+        if (fee != null) {
+            paymentRecordDto.setFeeId(getFeeId());
+            RevenueName revenueName = fee.getRevenueName();
+            FeePaymentType feePaymentType = fee.getFeePaymentType();
+            if (revenueName != null) {
+                paymentRecordDto.setRevenueName(revenueName.getName());
+                paymentRecordDto.setRevenueNameId(revenueName.getId());
+            }
+            if (feePaymentType != null){
+                paymentRecordDto.setFeePaymentTypeId(feePaymentType.getId());
+                paymentRecordDto.setFeePaymentTypeName(feePaymentType.getName());
+            }
+        }
+        PaymentStatus paymentStatus = getPaymentStatus();
         if (paymentStatus != null) {
-            paymentRecordDto.setPaymentStatus(paymentStatus.convertToDto());
+            paymentRecordDto.setPaymentStatusId(getPaymentStatusId());
+            paymentRecordDto.setPaymentStatusName(paymentStatus.getName());
         }
-        //paymentRecordDto.setAgentId(getAgentId());
-        Agent agent = (Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
+        Agent agent = getAgent();
         if (agent != null) {
-            paymentRecordDto.setAgent(agent.convertToDto());
+            paymentRecordDto.setAgentId(getAgentId());
+            paymentRecordDto.setAgentName(agent.getFullName());
         }
-        GamingMachine gamingMachine = (GamingMachine) mongoRepositoryReactive.findById(getGamingMachineId(), GamingMachine.class).block();
+        GamingMachine gamingMachine = getGamingMachine();
         if (gamingMachine != null) {
-            paymentRecordDto.setGamingMachine(gamingMachine.convertToDto());
+            paymentRecordDto.setGamingMachineId(getGamingMachineId());
+            paymentRecordDto.setInstitutionId(gamingMachine.getInstitutionId());
+            Institution institution = gamingMachine.getInstitution();
+            if (institution != null) {
+                paymentRecordDto.setInstitutionName(institution.getInstitutionName());
+            }
         }
-        //paymentRecordDto.setGamingMachineId(getGamingMachineId());
         paymentRecordDto.setStartYear(getStartYear());
         paymentRecordDto.setEndYear(getEndYear());
         paymentRecordDto.setApproverName(getApproverFullName());
         paymentRecordDto.setInstitutionId(getInstitutionId());
-        //  paymentRecordDto.setInstitutionName(getInstitution().institutionName);
+        paymentRecordDto.setAmount(getAmount());
+        paymentRecordDto.setAmountPaid(getAmountPaid());
+        paymentRecordDto.setAmountOutstanding(getAmountOutstanding());
         Institution institution = getInstitution();
         if (institution != null) {
             paymentRecordDto.setInstitutionName(institution.getInstitutionName());
+        }
+        GameType gameType = getGameType();
+        if (gameType != null) {
+            paymentRecordDto.setGameTypeId(getGameTypeId());
+            paymentRecordDto.setGameTypeName(gameType.getName());
         }
         return paymentRecordDto;
     }

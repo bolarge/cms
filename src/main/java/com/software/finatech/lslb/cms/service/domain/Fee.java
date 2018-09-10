@@ -1,6 +1,5 @@
 package com.software.finatech.lslb.cms.service.domain;
 
-import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.FeeDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -57,13 +56,7 @@ public class Fee extends AbstractFact {
     }
 
 
-
-    public FeeDto convertToDto() {
-        FeeDto feeDto = new FeeDto();
-        feeDto.setAmount(getAmount());
-        feeDto.setId(getId());
-        feeDto.setActive(isActive());
-      //  feeDto.setRevenueName(getRevenueName());
+    public RevenueName getRevenueName() {
         Map revenueNameMap = Mapstore.STORE.get("RevenueName");
 
         RevenueName revenueName = null;
@@ -76,11 +69,11 @@ public class Fee extends AbstractFact {
                 revenueNameMap.put(revenueNameId, revenueName);
             }
         }
-        if (revenueName != null) {
-            feeDto.setRevenueName(revenueName.convertToDto());
-        }
-        Map gameTypeMap = Mapstore.STORE.get("GameType");
+        return revenueName;
+    }
 
+    public GameType getGameType() {
+        Map gameTypeMap = Mapstore.STORE.get("GameType");
         GameType gameType = null;
         if (gameTypeMap != null) {
             gameType = (GameType) gameTypeMap.get(gameTypeId);
@@ -91,9 +84,11 @@ public class Fee extends AbstractFact {
                 gameTypeMap.put(gameTypeId, gameType);
             }
         }
-        if (gameType != null) {
-            feeDto.setGameType(gameType.convertToDto());
-        }
+        return gameType;
+    }
+
+
+    public FeePaymentType getFeePaymentType() {
         Map feePaymentTypeMap = Mapstore.STORE.get("FeePaymentType");
         FeePaymentType feePaymentType = null;
         if (feePaymentTypeMap != null) {
@@ -105,8 +100,28 @@ public class Fee extends AbstractFact {
                 feePaymentTypeMap.put(feePaymentTypeId, feePaymentType);
             }
         }
+        return feePaymentType;
+    }
+
+    public FeeDto convertToDto() {
+        FeeDto feeDto = new FeeDto();
+        feeDto.setAmount(getAmount());
+        feeDto.setId(getId());
+        feeDto.setActive(isActive());
+        RevenueName revenueName = getRevenueName();
+        if (revenueName != null) {
+            feeDto.setRevenueName(revenueName.getName());
+            feeDto.setRevenueId(getRevenueNameId());
+        }
+        GameType gameType = getGameType();
+        if (gameType != null) {
+            feeDto.setGameTypeName(gameType.getName());
+            feeDto.setGameTypeId(getGameTypeId());
+        }
+        FeePaymentType feePaymentType = getFeePaymentType();
         if (feePaymentType != null) {
-            feeDto.setFeePaymentType(feePaymentType.convertToDto());
+            feeDto.setFeePaymentTypeName(feePaymentType.getName());
+            feeDto.setFeePaymentTypeId(getFeePaymentTypeId());
         }
         return feeDto;
     }
