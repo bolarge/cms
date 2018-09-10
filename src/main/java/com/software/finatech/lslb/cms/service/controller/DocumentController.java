@@ -197,15 +197,15 @@ public class DocumentController extends BaseController {
 
         Query query = new Query();
 
-        if (gameTypeId != null && !gameTypeId.isEmpty()) {
+        if (gameTypeId == null && gameTypeId.isEmpty()) {
             return Mono.just(new ResponseEntity("gameTypeId is required", HttpStatus.NOT_FOUND));
 
         }
-        if (documentPurposeId != null && !documentPurposeId.isEmpty()) {
+        if (documentPurposeId == null && documentPurposeId.isEmpty()) {
             return Mono.just(new ResponseEntity("documentPurposeId is required", HttpStatus.NOT_FOUND));
 
         }
-        if (institutionId != null && !institutionId.isEmpty()) {
+        if (institutionId == null && institutionId.isEmpty()) {
             return Mono.just(new ResponseEntity("institutionId is required", HttpStatus.NOT_FOUND));
         }
 
