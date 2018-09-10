@@ -83,7 +83,7 @@ public class ReportFormController extends BaseController {
             ArrayList<ReportFormDto> reportFormDtos= new ArrayList<>();
             List<ReportForm> reportForms= (List<ReportForm>) mongoRepositoryReactive.findAll(query, ReportForm.class).toStream().collect(Collectors.toList());
 
-             if(reportFormDtos.size()==0){
+             if(reportForms.size()==0){
                  return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
              }
 

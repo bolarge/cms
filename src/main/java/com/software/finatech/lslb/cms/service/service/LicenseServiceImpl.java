@@ -1,9 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.service.domain.GameType;
-import com.software.finatech.lslb.cms.service.domain.License;
-import com.software.finatech.lslb.cms.service.domain.LicenseStatus;
-import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
@@ -155,7 +152,7 @@ public class LicenseServiceImpl implements LicenseService {
             queryLicence.addCriteria(Criteria.where("licenseType").is("institution"));
 
         }
-        queryLicence.addCriteria(Criteria.where("firstPayment").is(false));
+       // queryLicence.addCriteria(Criteria.where("firstPayment").is(false));
 
         if (!StringUtils.isEmpty(agentId) && StringUtils.isEmpty(institutionId)
                 && StringUtils.isEmpty(gamingMachineId)) {
@@ -410,7 +407,10 @@ public class LicenseServiceImpl implements LicenseService {
         }
         aipsForInstitution.stream().forEach(aipForInstitution -> {
             AIPCheckDto aipCheckDto = new AIPCheckDto();
-            aipCheckDto.setGameType(aipForInstitution.getGameTypeId());
+            GameType gameType = (GameType)mongoRepositoryReactive.findById(aipForInstitution.getGameTypeId(), GameType.class).block();
+            if(gameType!=null){
+                aipCheckDto.setGameType(gameType.convertToDto());
+            }
             aipCheckDto.setLicensedId(aipForInstitution.getId());
             aipCheckDto.setLicenseStatusId(aipForInstitution.getLicenseStatusId());
             aipCheckDtos.add(aipCheckDto);
@@ -464,7 +464,7 @@ public class LicenseServiceImpl implements LicenseService {
             Query queryLicence = new Query();
             queryLicence.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
             queryLicence.addCriteria(Criteria.where("gameTypeId").is(licenseUpdateDto.getGameTypeId()));
-            queryLicence.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
+            queryLicence.addCriteria(Criteria.where("licenseType").is(LicenseTypeReferenceData.INSTITUTION));
             queryLicence.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID));
             License license = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
             if (license == null) {
@@ -480,19 +480,7 @@ public class LicenseServiceImpl implements LicenseService {
             license.setEndDate(fromDate.plusMonths(duration));
             license.setRenewalStatus("false");
             mongoRepositoryReactive.saveOrUpdate(license);
-            NotificationDto notificationDto = new NotificationDto();
-            if (sendEmaill.getInstitution(license.getInstitutionId()) == null) {
-                return Mono.just(new ResponseEntity<>("Institution does not exist", HttpStatus.BAD_REQUEST));
-            }
-            if (sendEmaill.getGameType(license.getGameTypeId()) == null) {
-                return Mono.just(new ResponseEntity<>("Institution does not have this license for the selected gameType", HttpStatus.BAD_REQUEST));
-            }
-            notificationDto.setInstitutionName(license.convertToDto().getPaymentRecord().getInstitutionName());
-            notificationDto.setInstitutionEmail(sendEmaill.getInstitution(license.getInstitutionId()).getEmailAddress());
-            notificationDto.setGameType(sendEmaill.getGameType(license.getGameTypeId()).getDescription());
-            notificationDto.setDescription("Congratulations!! " + notificationDto.getInstitutionName() + " with Game Type: " + notificationDto.getGameType() + " Application has been successfully Licensed");
 
-            sendEmaill.sendEmailLicenseApplicationNotification(notificationDto);
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
 
         } catch (Exception ex) {

@@ -197,15 +197,15 @@ public class DocumentController extends BaseController {
 
         Query query = new Query();
 
-        if (gameTypeId != null && !gameTypeId.isEmpty()) {
+        if (gameTypeId == null && gameTypeId.isEmpty()) {
             return Mono.just(new ResponseEntity("gameTypeId is required", HttpStatus.NOT_FOUND));
 
         }
-        if (documentPurposeId != null && !documentPurposeId.isEmpty()) {
+        if (documentPurposeId == null && documentPurposeId.isEmpty()) {
             return Mono.just(new ResponseEntity("documentPurposeId is required", HttpStatus.NOT_FOUND));
 
         }
-        if (institutionId != null && !institutionId.isEmpty()) {
+        if (institutionId == null && institutionId.isEmpty()) {
             return Mono.just(new ResponseEntity("institutionId is required", HttpStatus.NOT_FOUND));
         }
 
@@ -222,7 +222,7 @@ public class DocumentController extends BaseController {
          queryDocument.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
          queryDocument.addCriteria(Criteria.where("institutionId").is(institutionId));
 
-        List<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
+        List<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(queryDocument, Document.class).toStream().collect(Collectors.toList());
         ArrayList<DocumentDto> documentsDto = new ArrayList<>();
         documents.forEach(entry -> {
             try {

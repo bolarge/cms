@@ -124,7 +124,7 @@ public class ReportForm extends AbstractFact {
         if(authRole!=null){
             reportFormDto.setUserRole(authRole.convertToDto());
         }
-        reportFormDto.setReportedDate(getReportedDate().toString("dd/MM/yyyy HH:mm:ss"));
+        reportFormDto.setReportedDate(getReportedDate().toString("dd/MM/yyyy"));
         return reportFormDto;
 
     }
