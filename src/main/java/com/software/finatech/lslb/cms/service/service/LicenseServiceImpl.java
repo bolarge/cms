@@ -449,17 +449,17 @@ public class LicenseServiceImpl implements LicenseService {
             LocalDate fromDate;
 
             if ((licenseUpdateDto.getStartDate() != "" && !licenseUpdateDto.getStartDate().isEmpty())) {
-                    if (!licenseUpdateDto.getStartDate().matches("([0-9]{4})-([0-9]{2})-([0-9]{2})")) {
-                        return Mono.just(new ResponseEntity("Invalid Date format. " +
-                                "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
-                    }
-                    fromDate = new LocalDate(licenseUpdateDto.getStartDate());
-
-                } else {
-
+                if (!licenseUpdateDto.getStartDate().matches("([0-9]{4})-([0-9]{2})-([0-9]{2})")) {
                     return Mono.just(new ResponseEntity("Invalid Date format. " +
                             "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
                 }
+                fromDate = new LocalDate(licenseUpdateDto.getStartDate());
+
+            } else {
+
+                return Mono.just(new ResponseEntity("Invalid Date format. " +
+                        "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
+            }
 
             Query queryLicence = new Query();
             queryLicence.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
@@ -480,7 +480,7 @@ public class LicenseServiceImpl implements LicenseService {
             license.setEndDate(fromDate.plusMonths(duration));
             license.setRenewalStatus("false");
             mongoRepositoryReactive.saveOrUpdate(license);
-            NotificationDto notificationDto = new NotificationDto();
+          /*  NotificationDto notificationDto = new NotificationDto();
             if (sendEmaill.getInstitution(license.getInstitutionId()) == null) {
                 return Mono.just(new ResponseEntity<>("Institution does not exist", HttpStatus.BAD_REQUEST));
             }
@@ -492,7 +492,7 @@ public class LicenseServiceImpl implements LicenseService {
             notificationDto.setGameType(sendEmaill.getGameType(license.getGameTypeId()).getDescription());
             notificationDto.setDescription("Congratulations!! " + notificationDto.getInstitutionName() + " with Game Type: " + notificationDto.getGameType() + " Application has been successfully Licensed");
 
-            sendEmaill.sendEmailLicenseApplicationNotification(notificationDto);
+            sendEmaill.sendEmailLicenseApplicationNotification(notificationDto);*/
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
 
         } catch (Exception ex) {
