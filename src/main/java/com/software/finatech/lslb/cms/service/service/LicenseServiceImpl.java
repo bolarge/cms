@@ -152,7 +152,7 @@ public class LicenseServiceImpl implements LicenseService {
             queryLicence.addCriteria(Criteria.where("licenseType").is("institution"));
 
         }
-        queryLicence.addCriteria(Criteria.where("firstPayment").is(false));
+       // queryLicence.addCriteria(Criteria.where("firstPayment").is(false));
 
         if (!StringUtils.isEmpty(agentId) && StringUtils.isEmpty(institutionId)
                 && StringUtils.isEmpty(gamingMachineId)) {
