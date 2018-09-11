@@ -232,7 +232,8 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             if (!StringUtils.isEmpty(paymentRecord.getInstitutionId()) && StringUtils.isEmpty(paymentRecord.getAgentId()) &&
                     StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
-
+            }if(!StringUtils.isEmpty(paymentRecord.getGamingMachineId())||!StringUtils.isEmpty(paymentRecord.getAgentId())){
+                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
             }
         } else {
             license = licenseCheck;
