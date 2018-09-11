@@ -126,9 +126,9 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         }
 
         FeeDto feeDto = fee.convertToDto();
-        String feeName = feeDto.getFeePaymentType() != null ? feeDto.getFeePaymentType().getName() : "";
-        String gameTypeName = feeDto.getGameType() != null ? feeDto.getGameType().getDescription() : "";
-        String revenueName = feeDto.getRevenueName() != null ? feeDto.getRevenueName().getName() : "";
+        String feeName = feeDto.getFeePaymentTypeName();
+        String gameTypeName = feeDto.getGameTypeName();
+        String revenueName = feeDto.getRevenueName();
         String feeDescription = String.format("%s Fee for %ss for category %s ", feeName, revenueName, gameTypeName);
         feeDescription = StringUtils.capitalize(feeDescription);
         if (paymentRecordDetailCreateDto.getAmount() < fee.getAmount()) {

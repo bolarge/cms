@@ -320,13 +320,13 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         paymentRecord.setApproverId(paymentRecordUpdateDto.getApproverId());
         paymentRecord.setPaymentStatusId(paymentRecordUpdateDto.getPaymentStatusId());
         if (!paymentRecord.getPaymentStatusId().equalsIgnoreCase(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID)
-                || paymentRecord.convertToDto().getFee().getFeePaymentType().getId().equals(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID)) {
+                || paymentRecord.convertToDto().getFeePaymentTypeId().equals(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID)) {
             mongoRepositoryReactive.saveOrUpdate(paymentRecord);
             return Mono.just(new ResponseEntity<>(paymentRecord.convertToDto(), HttpStatus.OK));
         }
         License license;
         Query queryLicence = new Query();
-        queryLicence.addCriteria(Criteria.where("gameTypeId").is(paymentRecord.convertToDto().getFee().getGameType().getId()));
+        queryLicence.addCriteria(Criteria.where("gameTypeId").is(paymentRecord.convertToDto().getGameTypeId()));
         queryLicence.addCriteria(Criteria.where("paymentRecordId").is(paymentRecord.getId()));
         License licenseCheck = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
 
@@ -339,7 +339,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         Fee fee = (Fee) mongoRepositoryReactive.findById(paymentRecordUpdateDto.getFeeId(), Fee.class).block();
         GameType gameType = (GameType) mongoRepositoryReactive.findById(fee.getGameTypeId(), GameType.class).block();
         int startYear = Integer.parseInt(paymentRecordUpdateDto.getStartYear());
-        if (paymentRecord.convertToDto().getFee().getFeePaymentType().getId().equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID)) {
+        if (paymentRecord.convertToDto().getFeePaymentTypeId().equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID)) {
             if (!StringUtils.isEmpty(paymentRecord.getAgentId())
                     && !StringUtils.isEmpty(paymentRecord.getInstitutionId())
                     && StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
@@ -377,7 +377,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         license.setGamingMachineId(paymentRecord.getGamingMachineId());
         license.setAgentId(paymentRecord.getAgentId());
 
-        license.setGameTypeId(paymentRecord.convertToDto().getFee().getGameType().getId());
+        license.setGameTypeId(paymentRecord.convertToDto().getGameTypeId());
         license.setPaymentRecordId(paymentRecord.getId());
         mongoRepositoryReactive.saveOrUpdate(paymentRecord);
         mongoRepositoryReactive.saveOrUpdate(license);

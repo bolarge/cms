@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Api(value = "GameType", description = "", tags = "")
+@Api(value = "Renewal Form", description = "", tags = "")
 @RestController
 @RequestMapping("/api/v1/renewalForm")
 public class RenewalFormController extends BaseController {
@@ -111,10 +111,10 @@ public class RenewalFormController extends BaseController {
         if(!paymentRecord.getInstitutionId().equals(renewalFormCreateDto.getInstitutionId())){
             return Mono.just(new ResponseEntity<>("Invalid Institution Selected", HttpStatus.BAD_REQUEST));
 
-        }if(!paymentRecord.convertToDto().getFee().getGameType().getId().equals(renewalFormCreateDto.getGameTypeId())){
+        }if(!paymentRecord.convertToDto().getGameTypeId().equals(renewalFormCreateDto.getGameTypeId())){
             return Mono.just(new ResponseEntity<>("Invalid institution Selected", HttpStatus.BAD_REQUEST));
         }
-        if (paymentRecord.convertToDto().getFee().getFeePaymentType().getId().equals(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID)){
+        if (paymentRecord.convertToDto().getFeePaymentTypeId().equals(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID)){
             return Mono.just(new ResponseEntity<>("Invalid Payment Record Selected", HttpStatus.BAD_REQUEST));
         }
 
@@ -158,7 +158,7 @@ public class RenewalFormController extends BaseController {
         license.setRenewalStatus("false");
         license.setStartDate(LocalDate.now());
         Query queryGameType = new Query();
-        queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().convertToDto().getFee().getGameType().getId()));
+        queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().convertToDto().getGameTypeId()));
         GameType gameType = (GameType) mongoRepositoryReactive.find(queryGameType, GameType.class).block();
         int duration=0;
         if(license.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){

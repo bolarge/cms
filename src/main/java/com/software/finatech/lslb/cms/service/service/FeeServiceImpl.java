@@ -213,7 +213,7 @@ public class FeeServiceImpl implements FeeService {
             fees.forEach(fee -> {
                FeesTypeDto feesTypeDto = new FeesTypeDto();
                feesTypeDto.setFeeId(fee.getId());
-               feesTypeDto.setFee(fee.convertToDto().getRevenueName().getName()+" "+fee.convertToDto().getGameType().getName()+" "+fee.convertToDto().getFeePaymentType().getName());
+               feesTypeDto.setFee(fee.convertToDto().getRevenueName()+" "+fee.convertToDto().getGameTypeName()+" "+fee.convertToDto().getFeePaymentTypeName());
                feeDtos.add(feesTypeDto);
             });
             return feeDtos;

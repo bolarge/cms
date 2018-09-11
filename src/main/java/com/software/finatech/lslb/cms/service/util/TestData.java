@@ -259,6 +259,7 @@ public class TestData {
             }
             paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
             paymentRecord.setInstitutionId("" + i);
+            paymentRecord.setGameTypeId("01");
             paymentRecord.setFeeId(fee.getId());
             paymentRecord.setApproverId("1");
             paymentRecord.setStartYear("2018");
@@ -274,27 +275,27 @@ public class TestData {
             license.setPaymentRecordId(paymentRecord.getId());
             license.setStartDate(LocalDate.now());
             LocalDate startDate = new LocalDate();
-            license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getLicenseDuration())));
+            license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.getGameType().getLicenseDuration())));
             license.setLicenseType(LicenseTypeReferenceData.INSTITUTION);
             license.setFirstPayment(false);
 
             if(i==1){
                 license.setStartDate(LocalDate.now());
                 license.setLicenseStatusId(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
-                license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getAipDuration())));
+                license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.getGameType().getAipDuration())));
 
             }
             if (i == 3) {
                 paymentRecord.setGamingMachineId(gamingMachine.getId());
                 license.setGamingMachineId(paymentRecord.getGamingMachineId());
-                license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getGamingMachineLicenseDuration())));
+                license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.getGameType().getGamingMachineLicenseDuration())));
                 license.setLicenseType(LicenseTypeReferenceData.GAMING_MACHINE);
 
             }
             if (i == 4) {
                 paymentRecord.setAgentId(agent.getId());
                 license.setAgentId(paymentRecord.getAgentId());
-                license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.convertToDto().getFee().getGameType().getAgentLicenseDuration())));
+                license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.getGameType().getAgentLicenseDuration())));
                 license.setLicenseType(LicenseTypeReferenceData.AGENT);
                 agent.setEmailAddress("samelikzra@gmail.com");
 
@@ -308,8 +309,6 @@ public class TestData {
             mongoRepositoryReactive.saveOrUpdate(agent);
             mongoRepositoryReactive.saveOrUpdate(paymentRecord);
             mongoRepositoryReactive.saveOrUpdate(license);
-
         }
     }
-
 }
