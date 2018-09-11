@@ -19,7 +19,7 @@ public class PaymentRecordUpdater {
         Query query = new Query();
         ArrayList<PaymentRecord> paymentRecords = (ArrayList<PaymentRecord>) mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
         for (PaymentRecord paymentRecord : paymentRecords) {
-            if (paymentRecord.getAmount() == null) {
+            if (paymentRecord.getAmount() <= 0) {
                 Fee fee = paymentRecord.getFee();
                 if (fee != null) {
                     paymentRecord.setAmount(fee.getAmount());
