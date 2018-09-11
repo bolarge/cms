@@ -12,7 +12,7 @@ import java.net.URI;
 public class ErrorHandler implements ResponseErrorHandler {
   private static  final Logger logger = LoggerFactory.getLogger(ErrorHandler.class);
     @Override
-    public boolean hasError(ClientHttpResponse response) throws IOException {
+    public boolean hasError(ClientHttpResponse response) {
         return false;
     }
 
@@ -22,7 +22,7 @@ public class ErrorHandler implements ResponseErrorHandler {
     }
 
     @Override
-    public void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
+    public void handleError(URI url, HttpMethod method, ClientHttpResponse response) {
 
     }
 }

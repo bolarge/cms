@@ -153,7 +153,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             if (!StringUtils.isEmpty(startYear)) {
                 query.addCriteria(Criteria.where("startYear").is(startYear));
             }
-            List<PaymentRecord> paymentRecords = (List<PaymentRecord>) mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
+            List<PaymentRecord> paymentRecords = (List<PaymentRecord>)mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
 
 
             return paymentRecords;

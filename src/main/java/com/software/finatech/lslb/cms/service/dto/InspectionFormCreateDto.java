@@ -9,7 +9,7 @@ import javax.validation.constraints.NotEmpty;
 import java.util.Map;
 
 
-public class ReportFormCreateDto  {
+public class InspectionFormCreateDto {
     protected String institutionId;
     @NotEmpty(message = "Provide Game Type")
     protected String gameTypeId;
@@ -18,7 +18,7 @@ public class ReportFormCreateDto  {
     @NotEmpty(message = "Provide User ID")
     protected String userId;
     @NotEmpty(message = "Provide reportDate")
-    protected String reportedDate;
+    protected String inspectionDate;
     @NotEmpty(message = "Provide User role")
     protected String userRoleId;
     protected String agentId;
@@ -81,12 +81,12 @@ public class ReportFormCreateDto  {
     }
 
 
-    public String getReportedDate() {
-        return reportedDate;
+    public String getInspectionDate() {
+        return inspectionDate;
     }
 
-    public void setReportedDate(String reportedDate) {
-        this.reportedDate = reportedDate;
+    public void setInspectionDate(String inspectionDate) {
+        this.inspectionDate = inspectionDate;
     }
 
 
