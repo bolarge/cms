@@ -57,6 +57,8 @@ public class DatabaseLoaderUtils {
         RevenueNameReferenceData.load(mongoRepositoryReactive);
         ModeOfPaymentReferenceData.load(mongoRepositoryReactive);
         LicenseTypeReferenceData.load(mongoRepositoryReactive);
+
+        PaymentRecordUpdater.updatePaymentRecords(mongoRepositoryReactive);
     }
 
     // @Profile("test")
@@ -72,7 +74,7 @@ public class DatabaseLoaderUtils {
     public void runLoadData() {
 
         ConcurrentHashMap<String, Class> factEnums = new ConcurrentHashMap<>();
-         factEnums.put("AuthRole", AuthRole.class);
+        factEnums.put("AuthRole", AuthRole.class);
         factEnums.put("AuthPermission", AuthPermission.class);
         factEnums.put("GameType", GameType.class);
         factEnums.put("ApplicationFormStatus", ApplicationFormStatus.class);

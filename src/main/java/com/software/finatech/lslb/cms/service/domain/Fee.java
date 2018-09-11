@@ -57,6 +57,9 @@ public class Fee extends AbstractFact {
 
 
     public RevenueName getRevenueName() {
+        if (revenueNameId == null) {
+            return null;
+        }
         Map revenueNameMap = Mapstore.STORE.get("RevenueName");
 
         RevenueName revenueName = null;
@@ -73,6 +76,9 @@ public class Fee extends AbstractFact {
     }
 
     public GameType getGameType() {
+        if (gameTypeId == null) {
+            return null;
+        }
         Map gameTypeMap = Mapstore.STORE.get("GameType");
         GameType gameType = null;
         if (gameTypeMap != null) {
@@ -89,6 +95,9 @@ public class Fee extends AbstractFact {
 
 
     public FeePaymentType getFeePaymentType() {
+        if (feePaymentTypeId == null) {
+            return null;
+        }
         Map feePaymentTypeMap = Mapstore.STORE.get("FeePaymentType");
         FeePaymentType feePaymentType = null;
         if (feePaymentTypeMap != null) {

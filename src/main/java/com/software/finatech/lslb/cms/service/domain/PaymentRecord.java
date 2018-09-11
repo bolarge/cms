@@ -112,11 +112,17 @@ public class PaymentRecord extends AbstractFact {
     }
 
 
-    private Fee getFee() {
+    public Fee getFee() {
+        if (feeId == null) {
+            return null;
+        }
         return (Fee) mongoRepositoryReactive.findById(feeId, Fee.class).block();
     }
 
     private String getApproverFullName() {
+        if (approverId == null) {
+            return null;
+        }
         AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(approverId, AuthInfo.class).block();
         if (authInfo == null) {
             return null;
@@ -125,7 +131,7 @@ public class PaymentRecord extends AbstractFact {
         }
     }
 
-    public double getAmount() {
+    public Double getAmount() {
         return amount;
     }
 
@@ -158,6 +164,9 @@ public class PaymentRecord extends AbstractFact {
     }
 
     public GameType getGameType() {
+        if (gameTypeId == null) {
+            return null;
+        }
         Map gameTypeMap = Mapstore.STORE.get("GameType");
         GameType gameType = null;
         if (gameTypeMap != null) {
@@ -174,6 +183,9 @@ public class PaymentRecord extends AbstractFact {
 
 
     public PaymentStatus getPaymentStatus() {
+        if (paymentStatusId == null) {
+            return null;
+        }
         Map paymentStatusMap = Mapstore.STORE.get("PaymentStatus");
         PaymentStatus paymentStatus = null;
         if (paymentStatusMap != null) {
@@ -208,7 +220,7 @@ public class PaymentRecord extends AbstractFact {
                 paymentRecordDto.setRevenueName(revenueName.getName());
                 paymentRecordDto.setRevenueNameId(revenueName.getId());
             }
-            if (feePaymentType != null){
+            if (feePaymentType != null) {
                 paymentRecordDto.setFeePaymentTypeId(feePaymentType.getId());
                 paymentRecordDto.setFeePaymentTypeName(feePaymentType.getName());
             }
