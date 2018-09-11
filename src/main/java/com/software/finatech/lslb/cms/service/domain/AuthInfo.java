@@ -28,6 +28,7 @@ public class AuthInfo extends AbstractFact {
 	protected String authRoleId;
 	protected String ssoUserId;
 	protected String title;
+	protected String agentId;
 	//UI application level field settings
 	protected Set<String> authViews = new java.util.HashSet<>();
 	protected String gameTypeId;
@@ -47,6 +48,14 @@ public class AuthInfo extends AbstractFact {
 
 	public void setGameTypeName(String gameTypeName) {
 		this.gameTypeName = gameTypeName;
+	}
+
+	public String getAgentId() {
+		return agentId;
+	}
+
+	public void setAgentId(String agentId) {
+		this.agentId = agentId;
 	}
 
 	public String getGameTypeId() {
@@ -232,6 +241,7 @@ public class AuthInfo extends AbstractFact {
 		if (userInstitution != null){
 			authInfoDto.setInstitutionName(userInstitution.getInstitutionName());
 		}
+		authInfoDto.setAgentId(getAgentId());
 		return authInfoDto;
 	}
 

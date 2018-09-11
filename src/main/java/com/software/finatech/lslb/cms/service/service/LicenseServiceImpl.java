@@ -106,7 +106,7 @@ public class LicenseServiceImpl implements LicenseService {
                 return Mono.just(new ResponseEntity<>("Enter either agentId or gaming machineId, or institutionId", HttpStatus.OK));
 
             }
-           // query.addCriteria(Criteria.where("firstPayment").is(false));
+            // query.addCriteria(Criteria.where("firstPayment").is(false));
             if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, License.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
@@ -332,7 +332,7 @@ public class LicenseServiceImpl implements LicenseService {
             }
 
             Query queryGameType = new Query();
-            queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().convertToDto().getFee().getGameType().getId()));
+            queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().getGameTypeId()));
             GameType gameType = (GameType) mongoRepositoryReactive.find(queryGameType, GameType.class).block();
             int duration = 0;
             if (licenseUpdateDto.getLicenseStatusId().equals(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID)) {
@@ -474,7 +474,7 @@ public class LicenseServiceImpl implements LicenseService {
             license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
             license.setStartDate(fromDate);
             Query queryGameType = new Query();
-            queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().convertToDto().getFee().getGameType().getId()));
+            queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().getGameTypeId()));
             GameType gameType = (GameType) mongoRepositoryReactive.find(queryGameType, GameType.class).block();
             int duration = Integer.parseInt(gameType.getLicenseDuration());
             license.setEndDate(fromDate.plusMonths(duration));

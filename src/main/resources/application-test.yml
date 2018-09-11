@@ -71,8 +71,8 @@ vigipay:
   password: vigipayP@ssw0rd
   scope: ebipsgatewayapi offline_access roles profile
   grant-type: password
-  token-url: http://ebipssso.test.vggdev.com/core/connect/token
-  loop-base-url: http://ebipsgateway.test.vggdev.com/api
+  token-url: https://ebipssso.test.vggdev.com/core/connect/token
+  loop-base-url: https://ebipsgateway.test.vggdev.com/api
   country-code: 566
   location-code: LSG
   currency-code: NGN
