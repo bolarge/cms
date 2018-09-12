@@ -9,6 +9,7 @@ public class PaymentStatusReferenceData {
     public static final String FAILED_PAYMENT_STATUS_ID = "03";
     public static final String PARTIALLY_PAID_STATUS_ID = "04";
     public static final String UNPAID_STATUS_ID = "05";
+    public static final String PENDING_VIGIPAY_CONFIRMATION_STATUS_ID = "06";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         PaymentStatus paymentStatus1 = (PaymentStatus) mongoRepositoryReactive.findById(COMPLETED_PAYMENT_STATUS_ID, PaymentStatus.class).block();
@@ -48,10 +49,19 @@ public class PaymentStatusReferenceData {
         paymentStatus5.setName("UNPAID");
 
 
+        PaymentStatus paymentStatus6 = (PaymentStatus) mongoRepositoryReactive.findById(PENDING_VIGIPAY_CONFIRMATION_STATUS_ID, PaymentStatus.class).block();
+        if (paymentStatus6 == null) {
+            paymentStatus6 = new PaymentStatus();
+            paymentStatus6.setId(PENDING_VIGIPAY_CONFIRMATION_STATUS_ID);
+        }
+        paymentStatus6.setName("PENDING VIGI PAY CONFIRMATION");
+        paymentStatus6.setDescription("Vigipay has sent a payment notification but requery to confirm the status from them has not been confirmed");
+
         mongoRepositoryReactive.saveOrUpdate(paymentStatus1);
         mongoRepositoryReactive.saveOrUpdate(paymentStatus2);
         mongoRepositoryReactive.saveOrUpdate(paymentStatus3);
         mongoRepositoryReactive.saveOrUpdate(paymentStatus4);
         mongoRepositoryReactive.saveOrUpdate(paymentStatus5);
+        mongoRepositoryReactive.saveOrUpdate(paymentStatus6);
     }
 }

@@ -8,6 +8,7 @@ import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingStat
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
 import com.software.finatech.lslb.cms.service.service.contracts.ScheduledMeetingService;
+import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ public class ScheduledMeetingJob {
     private AuthInfoService authInfoService;
     private InstitutionService institutionService;
 
+    private static final int FIVE_MIN = 5 * 60 * 1000;
+
     @Autowired
     public ScheduledMeetingJob(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                                ScheduledMeetingService scheduledMeetingService,
@@ -40,6 +43,7 @@ public class ScheduledMeetingJob {
 
 
     @Scheduled(fixedRate = 30000)
+    @SchedulerLock(name = "Remind Meeting Invites", lockAtMostFor = FIVE_MIN, lockAtLeastFor = FIVE_MIN)
     public void remindPendingMeetingInvites() {
         ArrayList<ScheduledMeeting> pendingScheduledMeetings = getAllPendingScheduledMeetings();
         for (ScheduledMeeting scheduledMeeting : pendingScheduledMeetings) {

@@ -16,6 +16,15 @@ public class GamingMachine extends AbstractFact {
    protected Set<GamingMachineGameDetails> gameDetailsList = new HashSet<>();
    protected String machineNumber;
    private String machineAddress;
+   private String gameTypeId;
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
 
     public String getMachineAddress() {
         return machineAddress;

@@ -1,7 +1,10 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.domain.*;
-import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
+import com.software.finatech.lslb.cms.service.dto.PaymentRecordCreateDto;
+import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
+import com.software.finatech.lslb.cms.service.dto.PaymentRecordUpdateDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
@@ -153,7 +156,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             if (!StringUtils.isEmpty(startYear)) {
                 query.addCriteria(Criteria.where("startYear").is(startYear));
             }
-            List<PaymentRecord> paymentRecords = (List<PaymentRecord>)mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
+            List<PaymentRecord> paymentRecords = (List<PaymentRecord>) mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
 
 
             return paymentRecords;
@@ -169,7 +172,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         if (StringUtils.isEmpty(paymentRecordCreateDto.getInstitutionId())
                 && StringUtils.isEmpty(paymentRecordCreateDto.getAgentId())
                 && StringUtils.isEmpty(paymentRecordCreateDto.getGamingMachineId())) {
-            return Mono.just(new ResponseEntity<>("Invalid Payment Record", HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>("Invalid Payment Record", HttpStatus.BAD_REQUEST));
 
         }
         Query queryPaymentRecord = new Query();
@@ -186,8 +189,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         }
         PaymentRecord paymentRecordCheck = (PaymentRecord) mongoRepositoryReactive.find(queryPaymentRecord, PaymentRecord.class).block();
         if (paymentRecordCheck != null) {
-            return Mono.just(new ResponseEntity<>("Duplicate Payment, Check and Try Again", HttpStatus.OK));
-
+            return Mono.just(new ResponseEntity<>("Duplicate Payment, Check and Try Again", HttpStatus.BAD_REQUEST));
         }
 
         PaymentRecord paymentRecord = new PaymentRecord();
@@ -232,7 +234,8 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             if (!StringUtils.isEmpty(paymentRecord.getInstitutionId()) && StringUtils.isEmpty(paymentRecord.getAgentId()) &&
                     StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
-            }if(!StringUtils.isEmpty(paymentRecord.getGamingMachineId())||!StringUtils.isEmpty(paymentRecord.getAgentId())){
+            }
+            if (!StringUtils.isEmpty(paymentRecord.getGamingMachineId()) || !StringUtils.isEmpty(paymentRecord.getAgentId())) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
             }
         } else {
@@ -394,6 +397,100 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
     @Override
     public void savePaymentRecord(PaymentRecord paymentRecord) {
         mongoRepositoryReactive.saveOrUpdate(paymentRecord);
+    }
+
+    public void createLicenseForCompletedPaymentRecord(PaymentRecord paymentRecord, PaymentRecordCreateDto paymentRecordCreateDto) {
+
+        Fee fee = (Fee) mongoRepositoryReactive.findById(paymentRecordCreateDto.getFeeId(), Fee.class).block();
+        int startYear = Integer.parseInt(paymentRecordCreateDto.getStartYear());
+        String startYearValue = String.valueOf(startYear - 1);
+        GameType gameType = (GameType) mongoRepositoryReactive.findById(fee.getGameTypeId(), GameType.class).block();
+
+        License license;
+        Query queryLicence = new Query();
+        queryLicence.addCriteria(Criteria.where("gameTypeId").is(fee.getGameTypeId()));
+        queryLicence.addCriteria(Criteria.where("institutionId").is(paymentRecordCreateDto.getInstitutionId()));
+        License licenseCheck = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
+
+        if (licenseCheck == null) {
+            license = new License();
+            license.setId(UUID.randomUUID().toString());
+            license.setFirstPayment(true);
+            if (!StringUtils.isEmpty(paymentRecord.getInstitutionId()) && StringUtils.isEmpty(paymentRecord.getAgentId()) &&
+                    StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
+                license.setLicenseStatusId(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
+            }
+            if (!StringUtils.isEmpty(paymentRecord.getGamingMachineId()) || !StringUtils.isEmpty(paymentRecord.getAgentId())) {
+                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+            }
+        } else {
+            license = licenseCheck;
+            license.setFirstPayment(false);
+            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID);
+        }
+        if (!StringUtils.isEmpty(paymentRecord.getAgentId()) && !StringUtils.isEmpty(paymentRecord.getInstitutionId())
+                && StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
+            license.setLicenseType(LicenseTypeReferenceData.AGENT);
+            int duration = Integer.parseInt(gameType.getAgentLicenseDuration());
+            int endYear = startYear + (duration / 12);
+            paymentRecord.setEndYear(String.valueOf(endYear));
+            license.setAgentId(paymentRecord.getAgentId());
+            license.setInstitutionId(paymentRecord.getInstitutionId());
+
+        } else if (!StringUtils.isEmpty(paymentRecord.getInstitutionId())
+                && StringUtils.isEmpty(paymentRecord.getAgentId()) &&
+                StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
+            license.setLicenseType(LicenseTypeReferenceData.INSTITUTION);
+            license.setInstitutionId(paymentRecord.getInstitutionId());
+            int duration = Integer.parseInt(gameType.getLicenseDuration());
+            int endYear = startYear + (duration / 12);
+            paymentRecord.setEndYear(String.valueOf(endYear));
+
+        } else if (!StringUtils.isEmpty(paymentRecord.getGamingMachineId())
+                && !StringUtils.isEmpty(paymentRecord.getInstitutionId()) &&
+                StringUtils.isEmpty(paymentRecord.getAgentId())) {
+            int duration = Integer.parseInt(gameType.getGamingMachineLicenseDuration());
+            int endYear = startYear + (duration / 12);
+            paymentRecord.setEndYear(String.valueOf(endYear));
+            license.setLicenseType(LicenseTypeReferenceData.GAMING_MACHINE);
+
+            license.setGamingMachineId(paymentRecord.getGamingMachineId());
+            license.setInstitutionId(paymentRecord.getInstitutionId());
+        } else if (StringUtils.isEmpty(paymentRecord.getGamingMachineId())
+                && StringUtils.isEmpty(paymentRecord.getInstitutionId()) &&
+                !StringUtils.isEmpty(paymentRecord.getAgentId())) {
+            int duration = Integer.parseInt(gameType.getGamingMachineLicenseDuration());
+            int endYear = startYear + (duration / 12);
+            paymentRecord.setEndYear(String.valueOf(endYear));
+            license.setLicenseType(LicenseTypeReferenceData.AGENT);
+            license.setAgentId(paymentRecord.getAgentId());
+        } else {
+            return;
+        }
+        license.setInstitutionId(paymentRecord.getInstitutionId());
+        license.setGameTypeId(fee.getGameTypeId());
+        license.setPaymentRecordId(paymentRecord.getId());
+        mongoRepositoryReactive.saveOrUpdate(paymentRecord);
+        mongoRepositoryReactive.saveOrUpdate(license);
+
+        if (licenseCheck == null) {
+        /*    if (StringUtils.isEmpty(paymentRecord.getAgentId()) && !StringUtils.isEmpty(paymentRecord.getInstitutionId())
+                    && StringUtils.isEmpty(paymentRecord.getGamingMachineId())) {
+                NotificationDto notificationDto = new NotificationDto();
+                if (sendEmaill.getInstitution(paymentRecord.getInstitutionId()) == null) {
+                    return Mono.just(new ResponseEntity<>("Institution does not exist", HttpStatus.BAD_REQUEST));
+                }
+                if (sendEmaill.getGameType(paymentRecord.getGameTypeId()) == null) {
+                    return Mono.just(new ResponseEntity<>("Institution does not have this license for the selected gameType", HttpStatus.BAD_REQUEST));
+                }
+                notificationDto.setInstitutionName(license.convertToDto().getPaymentRecord().getInstitutionName());
+                notificationDto.setInstitutionEmail(sendEmaill.getInstitution(license.getInstitutionId()).getEmailAddress());
+                notificationDto.setGameType(sendEmaill.getGameType(fee.getGameTypeId()).getDescription());
+                notificationDto.setDescription("Your application has been reviewed and Your licence fees have been received. All supporting documents must be uploaded to complete your licence application process. Failure to do so will result in your application being delayed or determined based on the information we have available which may affect the decision on whether a licence can be granted. Click the 'upload document' button to continue");
+                sendEmaill.sendEmailLicenseApplicationNotification(notificationDto);
+
+            }*/
+        }
     }
 }
 

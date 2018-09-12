@@ -246,6 +246,7 @@ public class ApplicationForm extends AbstractFact {
         ApplicationFormStatus applicationFormStatus = getStatus();
         if (applicationFormStatus != null) {
             applicationFormDto.setStatusName(applicationFormStatus.getName());
+            applicationFormDto.setStatusId(getApplicationFormStatusId());
         }
 
         ApplicationFormType applicationFormType = getApplicationFormType();

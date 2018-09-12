@@ -16,6 +16,15 @@ public class PaymentRecordDetailCreateDto {
     private String invoiceNumber;
     private String paymentStatusId;
     private String feeNotes;
+    private String startYear;
+
+    public String getStartYear() {
+        return startYear;
+    }
+
+    public void setStartYear(String startYear) {
+        this.startYear = startYear;
+    }
 
     public String getFeeNotes() {
         return feeNotes;

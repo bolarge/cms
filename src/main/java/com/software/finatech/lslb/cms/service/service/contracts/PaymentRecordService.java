@@ -30,5 +30,7 @@ public interface PaymentRecordService {
 
     PaymentRecord findById(String paymentRecordId);
 
+    void createLicenseForCompletedPaymentRecord(PaymentRecord paymentRecord, PaymentRecordCreateDto paymentRecordCreateDto);
+
     void savePaymentRecord(PaymentRecord paymentRecord);
 }
