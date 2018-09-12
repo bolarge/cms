@@ -3,10 +3,15 @@ package com.software.finatech.lslb.cms.service.service;
 import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.Institution;
-import com.software.finatech.lslb.cms.service.model.vigipay.*;
+import com.software.finatech.lslb.cms.service.exception.VigiPayServiceException;
+import com.software.finatech.lslb.cms.service.model.vigipay.VigipayCreateCustomer;
+import com.software.finatech.lslb.cms.service.model.vigipay.VigipayCreateInvoice;
+import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInvoiceItem;
+import com.software.finatech.lslb.cms.service.model.vigipay.VigipayRecipient;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.VigipayService;
 import com.software.finatech.lslb.cms.service.util.httpclient.VigipayHttpClient;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,13 +70,18 @@ public class VigipayServiceImpl implements VigipayService {
         return vigipayHttpClient.createInvoice(vigipayCreateInvoice);
     }
 
+    @Override
+    public boolean isConfirmedInvoicePayment(String invoiceNumber) throws VigiPayServiceException {
+        return vigipayHttpClient.validateInvoicePaid(invoiceNumber);
+    }
+
     private VigipayCreateCustomer createCustomerFromAgent(Agent agent) {
         VigipayCreateCustomer vigipayCreateCustomer = new VigipayCreateCustomer();
-        vigipayCreateCustomer.setAddressLine1(agent.getResidentialAddress() != null ? agent.getResidentialAddress(): "42 Local Airport Road");
+        vigipayCreateCustomer.setAddressLine1(agent.getResidentialAddress() != null ? agent.getResidentialAddress() : "42 Local Airport Road");
         vigipayCreateCustomer.setContactPersonEmail(agent.getEmailAddress());
         vigipayCreateCustomer.setName(agent.getFullName());
         vigipayCreateCustomer.setCustomerCorporateCode(customerCorporateCode);
-        vigipayCreateCustomer.setContactPersonTitle(agent.getTitle());
+        vigipayCreateCustomer.setContactPersonTitle(!StringUtils.isEmpty(agent.getTitle())? agent.getTitle() : "Mr");
         vigipayCreateCustomer.setContactPersonFirstName(agent.getFirstName());
         vigipayCreateCustomer.setContactPersonLastName(agent.getLastName());
         vigipayCreateCustomer.setContactPersonPhone(agent.getPhoneNumber());
@@ -147,7 +157,7 @@ public class VigipayServiceImpl implements VigipayService {
         VigipayRecipient vigipayRecipient = new VigipayRecipient();
         vigipayRecipient.setEmail(agent.getEmailAddress());
         vigipayRecipient.setPhone(agent.getPhoneNumber());
-        vigipayRecipient.setTitle(agent.getTitle() != null ? agent.getTitle() : "Mr");
+        vigipayRecipient.setTitle(StringUtils.isEmpty(agent.getTitle()) ? "Mr" : agent.getTitle());
         vigipayRecipient.setLastName(agent.getLastName());
         vigipayRecipient.setFirstName(agent.getFirstName());
         vigipayRecipientList.add(vigipayRecipient);
@@ -160,7 +170,7 @@ public class VigipayServiceImpl implements VigipayService {
             VigipayRecipient vigipayRecipient = new VigipayRecipient();
             vigipayRecipient.setFirstName(admin.getFirstName());
             vigipayRecipient.setLastName(admin.getLastName());
-            vigipayRecipient.setTitle(admin.getTitle() != null ? admin.getTitle() : "Mr");
+            vigipayRecipient.setTitle(StringUtils.isEmpty(admin.getTitle()) ? "Mr" : admin.getTitle());
             vigipayRecipient.setPhone(admin.getPhoneNumber());
             vigipayRecipient.setEmail(admin.getEmailAddress());
             vigipayRecipientList.add(vigipayRecipient);

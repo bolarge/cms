@@ -1,10 +1,8 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.domain.*;
-import com.software.finatech.lslb.cms.service.dto.FeeDto;
-import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
-import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailDto;
-import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.exception.VigiPayServiceException;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigiPayMessage;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInBranchNotification;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInvoiceItem;
@@ -85,12 +83,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 amountOutstanding = amountOutstanding - existingPaymentRecordDetail.getAmount();
                 paymentRecord.setAmountOutstanding(amountOutstanding);
 
-                if (paymentRecord.getAmountOutstanding() <= 0) {
-                    paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
-                } else {
-                    paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.PARTIALLY_PAID_STATUS_ID);
-                }
-                paymentRecordService.savePaymentRecord(paymentRecord);
+                updatePaymentRecord(paymentRecord);
             }
             existingPaymentRecordDetail.setInvoiceNumber(paymentRecordDetailUpdateDto.getInvoiceNumber());
             existingPaymentRecordDetail.setPaymentDate(LocalDate.now());
@@ -129,8 +122,8 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         String feeName = feeDto.getFeePaymentTypeName();
         String gameTypeName = feeDto.getGameTypeName();
         String revenueName = feeDto.getRevenueName();
-        String feeDescription = String.format("%s Fee for %ss for category %s ", feeName, revenueName, gameTypeName);
-        feeDescription = StringUtils.capitalize(feeDescription);
+        String feeDescription = String.format("%s for %ss for category : %s ", feeName, revenueName, gameTypeName);
+        feeDescription = convertToTitleCaseIteratingChars(feeDescription);
         if (paymentRecordDetailCreateDto.getAmount() < fee.getAmount()) {
             feeDescription = String.format("%s (Part Payment)", feeDescription);
         }
@@ -195,7 +188,6 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             }
             paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.UNPAID_STATUS_ID);
             paymentRecordService.savePaymentRecord(paymentRecord);
-
         }
 
 
@@ -316,45 +308,57 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         try {
             VigiPayMessage vigiPayMessage = vigipayInBranchNotification.getMessage();
             if (vigiPayMessage != null) {
+
                 Query query = new Query();
                 query.addCriteria(Criteria.where("invoiceNumber").is(vigiPayMessage.getInvoiceNumber()));
                 PaymentRecordDetail existingPaymentRecordDetail = (PaymentRecordDetail) mongoRepositoryReactive.find(query, PaymentRecordDetail.class).block();
                 if (existingPaymentRecordDetail == null) {
                     return Mono.just(new ResponseEntity<>("Invoice does not exist", HttpStatus.BAD_REQUEST));
                 }
-                if (!StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, existingPaymentRecordDetail.getPaymentRecordId())) {
-                    PaymentRecord paymentRecord = paymentRecordService.findById(existingPaymentRecordDetail.getPaymentRecordId());
-                    double amountPaid = paymentRecord.getAmountPaid();
-                    amountPaid = amountPaid + vigiPayMessage.getAmountPaid();
-                    paymentRecord.setAmountPaid(amountPaid);
+                String invoiceNumber = existingPaymentRecordDetail.getInvoiceNumber();
+                if (!StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, existingPaymentRecordDetail.getPaymentStatusId())) {
+                    boolean isConfirmedPayment;
 
-                    double amountOutstanding = paymentRecord.getAmountOutstanding();
-                    amountOutstanding = amountOutstanding - vigiPayMessage.getAmountPaid();
-                    paymentRecord.setAmountOutstanding(amountOutstanding);
-
-                    if (paymentRecord.getAmountOutstanding() <= 0) {
-                        paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
-                    } else {
-                        paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.PARTIALLY_PAID_STATUS_ID);
+                    try {
+                        isConfirmedPayment = vigipayService.isConfirmedInvoicePayment(invoiceNumber);
+                    } catch (VigiPayServiceException e) {
+                        logger.error("An error occurred while confirming payment status from vigipay", e);
+                        existingPaymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.PENDING_VIGIPAY_CONFIRMATION_STATUS_ID);
+                        savePaymentRecordDetail(existingPaymentRecordDetail);
+                        return Mono.just(new ResponseEntity<>("An error occurred while confirming payment from vigipay", HttpStatus.INTERNAL_SERVER_ERROR));
                     }
-                    paymentRecordService.savePaymentRecord(paymentRecord);
+                    if (isConfirmedPayment) {
+                        PaymentRecord paymentRecord = paymentRecordService.findById(existingPaymentRecordDetail.getPaymentRecordId());
+                        double amountPaid = paymentRecord.getAmountPaid();
+                        amountPaid = amountPaid + vigiPayMessage.getAmountPaid();
+                        paymentRecord.setAmountPaid(amountPaid);
 
-                    if (existingPaymentRecordDetail.getAmount() > vigiPayMessage.getAmountPaid()) {
-                        existingPaymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.PARTIALLY_PAID_STATUS_ID);
-                    } else {
-                        existingPaymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
+                        double amountOutstanding = paymentRecord.getAmountOutstanding();
+                        amountOutstanding = amountOutstanding - vigiPayMessage.getAmountPaid();
+                        paymentRecord.setAmountOutstanding(amountOutstanding);
+
+                        updatePaymentRecord(paymentRecord);
+
+                        if (existingPaymentRecordDetail.getAmount() > vigiPayMessage.getAmountPaid()) {
+                            existingPaymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.PARTIALLY_PAID_STATUS_ID);
+                        } else {
+                            existingPaymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
+                        }
+                        existingPaymentRecordDetail.setPaymentDate(LocalDate.now());
+                        existingPaymentRecordDetail.setVigiPayTransactionReference(vigiPayMessage.getPaymentReference());
+                        existingPaymentRecordDetail.setInvoiceNumber(vigiPayMessage.getInvoiceNumber());
+                        savePaymentRecordDetail(existingPaymentRecordDetail);
+                        return Mono.just(new ResponseEntity<>("updated successfully", HttpStatus.OK));
                     }
-                    existingPaymentRecordDetail.setPaymentDate(LocalDate.now());
-                    existingPaymentRecordDetail.setVigiPayTransactionReference(vigiPayMessage.getPaymentReference());
-                    existingPaymentRecordDetail.setInvoiceNumber(vigiPayMessage.getInvoiceNumber());
+                    existingPaymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.PENDING_VIGIPAY_CONFIRMATION_STATUS_ID);
                     savePaymentRecordDetail(existingPaymentRecordDetail);
-                    return Mono.just(new ResponseEntity<>("updated successfully", HttpStatus.OK));
+                    return Mono.just(new ResponseEntity<>("Payment status was not confirmed ", HttpStatus.FAILED_DEPENDENCY));
                 }
                 return Mono.just(new ResponseEntity<>("Payment completed already", HttpStatus.BAD_REQUEST));
             }
             return Mono.just(new ResponseEntity<>("Empty Message object", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
-            return logAndReturnError(logger, "An error occurred while processing the vigipay notification", e);
+            return logAndReturnError(logger, "An error occurred while processing the vigi pay notification", e);
         }
     }
 
@@ -374,5 +378,83 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         vigipayInvoiceItem.setQuantity(1);
         vigipayInvoiceItem.setProductCode("");
         return vigipayService.createInBranchInvoiceForAgent(agent, vigipayInvoiceItem);
+    }
+
+    private String convertToTitleCaseIteratingChars(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+
+        StringBuilder converted = new StringBuilder();
+
+        boolean convertNext = true;
+        for (char ch : text.toCharArray()) {
+            if (Character.isSpaceChar(ch)) {
+                convertNext = true;
+            } else if (convertNext) {
+                ch = Character.toTitleCase(ch);
+                convertNext = false;
+            } else {
+                ch = Character.toLowerCase(ch);
+            }
+            converted.append(ch);
+        }
+        return converted.toString();
+    }
+
+    private PaymentRecordCreateDto fromPaymentRecord(PaymentRecord paymentRecord) {
+        PaymentRecordCreateDto paymentRecordCreateDto = new PaymentRecordCreateDto();
+        paymentRecordCreateDto.setStartYear(LocalDate.now().toString("YYYY"));
+        paymentRecordCreateDto.setInstitutionId(paymentRecord.getInstitutionId());
+        paymentRecordCreateDto.setAgentId(paymentRecord.getAgentId());
+        paymentRecordCreateDto.setGamingMachineId(paymentRecord.getGamingMachineId());
+        paymentRecordCreateDto.setFeeId(paymentRecord.getFeeId());
+        return paymentRecordCreateDto;
+    }
+
+    private void updatePaymentRecord(PaymentRecord paymentRecord) {
+        if (paymentRecord.getAmountOutstanding() <= 0) {
+            paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
+            PaymentRecordCreateDto paymentRecordCreateDto = fromPaymentRecord(paymentRecord);
+            paymentRecordService.createLicenseForCompletedPaymentRecord(paymentRecord, paymentRecordCreateDto);
+
+        } else {
+            paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.PARTIALLY_PAID_STATUS_ID);
+        }
+        paymentRecordService.savePaymentRecord(paymentRecord);
+    }
+
+    private Mono<ResponseEntity> validateNewPaymentRecordDetail(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto) {
+        if (StringUtils.isEmpty(paymentRecordDetailCreateDto.getInstitutionId())
+                && StringUtils.isEmpty(paymentRecordDetailCreateDto.getAgentId())
+                && StringUtils.isEmpty(paymentRecordDetailCreateDto.getGamingMachineId())) {
+            return Mono.just(new ResponseEntity<>("Invalid Payment Record", HttpStatus.BAD_REQUEST));
+
+        }
+        Fee fee = feeService.findFeeById(paymentRecordDetailCreateDto.getFeeId());
+        GameType gameType = fee.getGameType();
+        // gameType.get//
+        //  Pay
+        String startYear = paymentRecordDetailCreateDto.getStartYear();
+        String paymentRecordId = paymentRecordDetailCreateDto.getPaymentRecordId();
+        if (StringUtils.isEmpty(paymentRecordId)) {
+            Query queryPaymentRecord = new Query();
+            queryPaymentRecord.addCriteria(Criteria.where("feeId").is(paymentRecordDetailCreateDto.getFeeId()));
+            queryPaymentRecord.addCriteria(Criteria.where("startYear").is(paymentRecordDetailCreateDto.getStartYear()));
+            if (!StringUtils.isEmpty(paymentRecordDetailCreateDto.getInstitutionId())) {
+                queryPaymentRecord.addCriteria(Criteria.where("institutionId").is(paymentRecordDetailCreateDto.getInstitutionId()));
+            }
+            if (!StringUtils.isEmpty(paymentRecordDetailCreateDto.getGamingMachineId())) {
+                queryPaymentRecord.addCriteria(Criteria.where("gamingMachineId").is(paymentRecordDetailCreateDto.getGamingMachineId()));
+            }
+            if (!StringUtils.isEmpty(paymentRecordDetailCreateDto.getAgentId())) {
+                queryPaymentRecord.addCriteria(Criteria.where("agentId").is(paymentRecordDetailCreateDto.getAgentId()));
+            }
+            PaymentRecord paymentRecordCheck = (PaymentRecord) mongoRepositoryReactive.find(queryPaymentRecord, PaymentRecord.class).block();
+            if (paymentRecordCheck != null) {
+                return Mono.just(new ResponseEntity<>("Duplicate Payment, Check and Try Again", HttpStatus.BAD_REQUEST));
+            }
+        }
+        return null;
     }
 }

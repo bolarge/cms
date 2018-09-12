@@ -1,7 +1,6 @@
 package com.software.finatech.lslb.cms.service.domain;
 
-import com.software.finatech.lslb.cms.service.dto.RenewalFormDto;
-import com.software.finatech.lslb.cms.service.dto.ReportFormDto;
+import com.software.finatech.lslb.cms.service.dto.InspectionFormDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -9,13 +8,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.Map;
 
 @SuppressWarnings("serial")
-@Document(collection = "ReportForm")
-public class ReportForm extends AbstractFact {
+@Document(collection = "InspectionForm")
+public class InspectionForm extends AbstractFact {
     protected String institutionId;
     protected String gameTypeId;
     protected String comment;
     protected String userId;
-    protected LocalDate reportedDate;
+    protected LocalDate inspectionDate;
     protected String userRoleId;
     protected String agentId;
     protected String gamingMachineId;
@@ -77,28 +76,28 @@ public class ReportForm extends AbstractFact {
     }
 
 
-    public LocalDate getReportedDate() {
-        return reportedDate;
+    public LocalDate getInspectionDate() {
+        return inspectionDate;
     }
 
-    public void setReportedDate(LocalDate reportedDate) {
-        this.reportedDate = reportedDate;
+    public void setInspectionDate(LocalDate inspectionDate) {
+        this.inspectionDate = inspectionDate;
     }
 
-    public ReportFormDto convertToDto(){
-        ReportFormDto reportFormDto = new ReportFormDto();
-        reportFormDto.setComment(getComment());
+    public InspectionFormDto convertToDto(){
+        InspectionFormDto inspectionFormDto = new InspectionFormDto();
+        inspectionFormDto.setComment(getComment());
         Agent agent =(Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
         if(agent!=null){
-            reportFormDto.setAgent(agent.convertToDto());
+            inspectionFormDto.setAgent(agent.convertToDto());
         }
         Institution institution =(Institution) mongoRepositoryReactive.findById(getInstitutionId(), Institution.class).block();
         if(institution!=null){
-            reportFormDto.setInstitution(institution.convertToDto());
+            inspectionFormDto.setInstitution(institution.convertToDto());
         }
         GamingMachine gamingMachine =(GamingMachine) mongoRepositoryReactive.findById(getGamingMachineId(), GamingMachine.class).block();
         if(gamingMachine!=null){
-            reportFormDto.setGamingMachine(gamingMachine.convertToDto());
+            inspectionFormDto.setGamingMachine(gamingMachine.convertToDto());
         }
         Map gameTypeMap = Mapstore.STORE.get("GameType");
 
@@ -113,19 +112,19 @@ public class ReportForm extends AbstractFact {
             }
         }
         if (gameType != null) {
-            reportFormDto.setGameType(gameType.convertToDto());
+            inspectionFormDto.setGameType(gameType.convertToDto());
         }
-        reportFormDto.setId(getId());
+        inspectionFormDto.setId(getId());
         AuthInfo authInfo =(AuthInfo) mongoRepositoryReactive.findById(getUserId(), AuthInfo.class).block();
         if(authInfo!=null){
-            reportFormDto.setUser(authInfo.convertToDto());
+            inspectionFormDto.setUser(authInfo.convertToDto());
         }
         AuthRole authRole =(AuthRole) mongoRepositoryReactive.findById(getUserRoleId(), AuthRole.class).block();
         if(authRole!=null){
-            reportFormDto.setUserRole(authRole.convertToDto());
+            inspectionFormDto.setUserRole(authRole.convertToDto());
         }
-        reportFormDto.setReportedDate(getReportedDate().toString("dd/MM/yyyy"));
-        return reportFormDto;
+        inspectionFormDto.setInspectionDate(getInspectionDate().toString("dd/MM/yyyy"));
+        return inspectionFormDto;
 
     }
 

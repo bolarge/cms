@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.util.httpclient;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOToken;
+import com.software.finatech.lslb.cms.service.exception.VigiPayServiceException;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayCreateCustomer;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayCreateInvoice;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +46,6 @@ public class VigipayHttpClient {
 
 
     private String getAccessToken() {
-        logger.info(vigipayTokenUrl);
         try {
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
@@ -120,15 +120,44 @@ public class VigipayHttpClient {
                 HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
                 ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, entity, String.class);
                 if (responseEntity.getStatusCode() == HttpStatus.OK) {
-                    return responseEntity.getBody();
+                    String invoiceNumber = responseEntity.getBody();
+                    return invoiceNumber.replace("\"", "");
                 }
                 return null;
             }
             return null;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.error("An error occurred while making the call", e);
+            logger.error("An error occurred while creating invoice with Vigipay", e);
             return null;
+        }
+    }
+
+    public boolean validateInvoicePaid(String invoiceNumber) throws VigiPayServiceException {
+        String url = vigipayBaseUrl + "/Invoices/LookUpRef?invoiceReference=" + invoiceNumber;
+        try {
+            String accessToken = getAccessToken();
+            if (!StringUtils.isEmpty(accessToken)) {
+                RestTemplate restTemplate = new RestTemplate();
+                restTemplate.setErrorHandler(new ErrorHandler());
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                headers.set("Authorization", "Bearer " + accessToken);
+                HttpEntity<?> httpEntity = new HttpEntity<>(headers);
+                ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
+                if (responseEntity.getStatusCode() == HttpStatus.OK) {
+                    String responseBody = responseEntity.getBody();
+                    JSONObject responseJson = new JSONObject(responseBody);
+                    return responseJson.getInt("PaymentStatus") == 1;
+                }
+                logger.info(responseEntity.getBody());
+                return false;
+            }
+            return false;
+        } catch (Exception e) {
+            String errorMessage = "An error occurred while getting invoice payment status from vigipay";
+            logger.error(errorMessage, e);
+            throw new VigiPayServiceException(errorMessage);
         }
     }
 }

@@ -122,7 +122,7 @@ public class LicenseServiceImpl implements LicenseService {
             query.with(PageRequest.of(page, pageSize, sort));
             query.with(sort);
 
-            List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
+            List<License> licenses = (List<License> )mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
             if (licenses.size() == 0 || licenses.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
             }
@@ -197,7 +197,7 @@ public class LicenseServiceImpl implements LicenseService {
             queryLicence.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         }
 
-        List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicence, License.class).toStream().collect(Collectors.toList());
+        List<License> licenses = (List<License>)mongoRepositoryReactive.findAll(queryLicence, License.class).toStream().collect(Collectors.toList());
         List<LicenseDto> licenseDtos = new ArrayList<>();
         if (licenses.size() == 0) {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
@@ -400,7 +400,7 @@ public class LicenseServiceImpl implements LicenseService {
         queryForInstitutionAIP.addCriteria(Criteria.where("institutionId").is(institutionId));
         queryForInstitutionAIP.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID));
         queryForInstitutionAIP.addCriteria(Criteria.where("licenseType").is(LicenseTypeReferenceData.INSTITUTION));
-        List<License> aipsForInstitution = (List<License>) mongoRepositoryReactive.findAll(queryForInstitutionAIP, License.class).toStream().collect(Collectors.toList());
+        List<License> aipsForInstitution = (List<License>)mongoRepositoryReactive.findAll(queryForInstitutionAIP, License.class).toStream().collect(Collectors.toList());
         ArrayList<AIPCheckDto> aipCheckDtos = new ArrayList<>();
         if (aipsForInstitution.size() == 0) {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));

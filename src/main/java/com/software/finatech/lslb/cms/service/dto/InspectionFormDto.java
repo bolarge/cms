@@ -5,13 +5,13 @@ import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
-public class ReportFormDto {
+public class InspectionFormDto {
     protected InstitutionDto institution;
     protected GameTypeDto gameType;
     protected String comment;
     protected AuthInfoDto user;
     protected AuthRoleDto userRole;
-    protected String reportedDate;
+    protected String inspectionDate;
     protected AgentDto agent;
     protected GamingMachineDto gamingMachine;
     protected String id;
@@ -84,11 +84,11 @@ public class ReportFormDto {
     }
 
 
-    public String getReportedDate() {
-        return reportedDate;
+    public String getInspectionDate() {
+        return inspectionDate;
     }
 
-    public void setReportedDate(String reportedDate) {
-        this.reportedDate = reportedDate;
+    public void setInspectionDate(String inspectionDate) {
+        this.inspectionDate = inspectionDate;
     }
 }

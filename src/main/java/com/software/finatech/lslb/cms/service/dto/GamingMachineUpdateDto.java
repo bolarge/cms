@@ -19,6 +19,8 @@ public class GamingMachineUpdateDto {
     private Set<GamingMachineGameDetails> gameDetailsList;
     @NotNull(message = "please provide gaming machine id")
     private String id;
+    @NotNull(message = "please provide game type id")
+    private String gameTypeId;
 
     public String getGameMachineNumber() {
         return gameMachineNumber;
@@ -66,5 +68,13 @@ public class GamingMachineUpdateDto {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
     }
 }
