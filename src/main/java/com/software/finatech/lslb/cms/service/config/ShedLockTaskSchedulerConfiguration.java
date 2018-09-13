@@ -1,6 +1,4 @@
-package com.software.finatech.lslb.cms.service.config;//package com.software.finatech.healthpay.config;
-
-
+package com.software.finatech.lslb.cms.service.config;
 import com.mongodb.MongoClient;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.provider.mongo.MongoLockProvider;

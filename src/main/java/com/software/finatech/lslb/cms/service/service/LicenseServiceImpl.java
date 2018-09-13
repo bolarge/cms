@@ -14,7 +14,6 @@ import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReference
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
-import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.ExpirationList;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.SendEmaill;
@@ -547,7 +546,11 @@ public class LicenseServiceImpl implements LicenseService {
         if (!StringUtils.isEmpty(gameTypeId)) {
             query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         }
-        query.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID));
+
+        List<String> licenseStatuIds = new ArrayList<>();
+        licenseStatuIds.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+        licenseStatuIds.add(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
+        query.addCriteria(Criteria.where("licenseStatusId").in(licenseStatuIds));
         Sort sort = new Sort(Sort.Direction.DESC, "effectiveDate");
 
         query.with(PageRequest.of(0, 10000, sort));

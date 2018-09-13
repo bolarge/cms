@@ -11,6 +11,7 @@ public class LSLBAuthRoleReferenceData {
     public static final String GAMING_OPERATOR_ADMIN_ROLE_ID = "6";
     public static final String GAMING_OPERATOR_USER_ROLE_ID = "7";
     public static final String AGENT_ROLE_ID = "8";
+    public static final String APPLICANT_ROLE_ID = "9";
 
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
@@ -70,12 +71,22 @@ public class LSLBAuthRoleReferenceData {
         role8.getAuthPermissionIds().addAll(Arrays.asList("1", "2"));
 
 
+        AuthRole role9 = (AuthRole) mongoRepositoryReactive.findById(APPLICANT_ROLE_ID, AuthRole.class).block();
+        if (role9 == null) {
+            role9 = new AuthRole();
+            role9.setId(APPLICANT_ROLE_ID);
+        }
+        role9.setDescription("Applicant user for gaming operators");
+        role9.setName("APPLICANT");
+        role9.setSsoRoleMapping("clientuser");
+        role9.getAuthPermissionIds().addAll(Arrays.asList("1", "2"));
+
+
         mongoRepositoryReactive.saveOrUpdate(role4);
         mongoRepositoryReactive.saveOrUpdate(role5);
         mongoRepositoryReactive.saveOrUpdate(role6);
         mongoRepositoryReactive.saveOrUpdate(role7);
         mongoRepositoryReactive.saveOrUpdate(role8);
-
-
+        mongoRepositoryReactive.saveOrUpdate(role9);
     }
 }

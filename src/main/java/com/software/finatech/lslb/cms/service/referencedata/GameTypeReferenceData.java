@@ -41,7 +41,6 @@ public class GameTypeReferenceData {
         if (gameType3 == null) {
             gameType3 = new GameType();
             gameType3.setId(GAMING_MACHINE_OPERATOR_ID);
-
         }
         gameType3.setDescription("A gaming machine operator (operator that has gaming machines)");
         gameType3.setName("GAMING_MACHINE");
