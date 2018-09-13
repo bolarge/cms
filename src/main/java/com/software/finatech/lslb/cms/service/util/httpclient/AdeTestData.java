@@ -58,7 +58,6 @@ public class AdeTestData {
         Agent agent = new Agent();
         agent.setId("1234");
         agent.setPhoneNumber("08109481835");
-        agent.setCustomerCreatedOnVGPay(false);
         agent.setFirstName("Adeyiwunmi");
         agent.setLastName("Adebolu");
         agent.setEmailAddress("Adeboludeyi@gmail.com");

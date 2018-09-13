@@ -1,8 +1,5 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import com.software.finatech.lslb.cms.service.domain.Fee;
-import com.software.finatech.lslb.cms.service.domain.Institution;
-
 public class LicenseDto {
     protected String licenseStatusName;
     protected String licenseStatusId;
@@ -14,10 +11,37 @@ public class LicenseDto {
     protected String renewalStatus;
     protected String licenseTypeName;
     private String licenseTypeId;
-    protected String agentId;
     protected String gamingMachineId;
     private String paymentRecordId;
     private String licenseNumber;
+    private String institutionId;
+    private String institutionName;
+    protected String agentId;
+    private String agentName;
+
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
+
+    public String getInstitutionName() {
+        return institutionName;
+    }
+
+    public void setInstitutionName(String institutionName) {
+        this.institutionName = institutionName;
+    }
+
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
+    }
 
     public String getLicenseNumber() {
         return licenseNumber;

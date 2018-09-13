@@ -3,7 +3,6 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
@@ -93,9 +92,11 @@ public class PaymentRecord extends AbstractFact {
     }
 
     public Institution getInstitution() {
+        if (StringUtils.isEmpty(this.institutionId)){
+            return null;
+        }
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
-
 
     public Fee getFee() {
         if (feeId == null) {
@@ -174,10 +175,16 @@ public class PaymentRecord extends AbstractFact {
     }
 
     public Agent getAgent() {
+        if (StringUtils.isEmpty(this.agentId)) {
+            return null;
+        }
         return (Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
     }
 
     public GamingMachine getGamingMachine() {
+        if (StringUtils.isEmpty(this.gamingMachineId)) {
+            return null;
+        }
         return (GamingMachine) mongoRepositoryReactive.findById(getGamingMachineId(), GamingMachine.class).block();
     }
 
@@ -200,23 +207,39 @@ public class PaymentRecord extends AbstractFact {
         return revenueName;
     }
 
-    public PaymentRecordDto convertToDto() {
-        PaymentRecordDto paymentRecordDto = new PaymentRecordDto();
-        Fee fee = getFee();
-        paymentRecordDto.setId(getId());
-        if (fee != null) {
-            paymentRecordDto.setFeeId(getFeeId());
-            RevenueName revenueName = fee.getRevenueName();
-            FeePaymentType feePaymentType = fee.getFeePaymentType();
-            if (revenueName != null) {
-                paymentRecordDto.setRevenueName(revenueName.getName());
-                paymentRecordDto.setRevenueNameId(revenueName.getId());
-            }
-            if (feePaymentType != null) {
-                paymentRecordDto.setFeePaymentTypeId(feePaymentType.getId());
-                paymentRecordDto.setFeePaymentTypeName(feePaymentType.getName());
+    public FeePaymentType getFeePaymentType() {
+        if (feePaymentTypeId == null) {
+            return null;
+        }
+        Map feePaymentTypeMap = Mapstore.STORE.get("FeePaymentType");
+        FeePaymentType feePaymentType = null;
+        if (feePaymentTypeMap != null) {
+            feePaymentType = (FeePaymentType) feePaymentTypeMap.get(feePaymentTypeId);
+        }
+        if (feePaymentType == null) {
+            feePaymentType = (FeePaymentType) mongoRepositoryReactive.findById(feePaymentTypeId, FeePaymentType.class).block();
+            if (feePaymentType != null && feePaymentTypeMap != null) {
+                feePaymentTypeMap.put(feePaymentTypeId, feePaymentType);
             }
         }
+        return feePaymentType;
+    }
+
+    public PaymentRecordDto convertToDto() {
+        PaymentRecordDto paymentRecordDto = new PaymentRecordDto();
+        paymentRecordDto.setId(getId());
+        paymentRecordDto.setFeeId(getFeeId());
+        RevenueName revenueName = getRevenueName();
+        if (revenueName != null) {
+            paymentRecordDto.setRevenueName(revenueName.getName());
+            paymentRecordDto.setRevenueNameId(revenueName.getId());
+        }
+        FeePaymentType feePaymentType = getFeePaymentType();
+        if (feePaymentType != null) {
+            paymentRecordDto.setFeePaymentTypeId(feePaymentType.getId());
+            paymentRecordDto.setFeePaymentTypeName(feePaymentType.getName());
+        }
+
         PaymentStatus paymentStatus = getPaymentStatus();
         if (paymentStatus != null) {
             paymentRecordDto.setPaymentStatusId(getPaymentStatusId());

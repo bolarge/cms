@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -126,6 +127,9 @@ public class ScheduledMeeting extends AbstractFact {
     }
 
     private String getCreatorFullName() {
+        if (StringUtils.isEmpty(this.creatorId)) {
+            return null;
+        }
         AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(creatorId, AuthInfo.class).block();
         if (authInfo == null) {
             return null;
@@ -135,6 +139,9 @@ public class ScheduledMeeting extends AbstractFact {
     }
 
     private ScheduledMeetingStatus getMeetingStatus() {
+        if (StringUtils.isEmpty(this.scheduledMeetingStatusId)) {
+            return null;
+        }
         Map scheduledMeetingStatusMap = Mapstore.STORE.get("ScheduledMeetingStatus");
         ScheduledMeetingStatus scheduledMeetingStatus = null;
         if (scheduledMeetingStatusMap != null) {
@@ -157,11 +164,13 @@ public class ScheduledMeeting extends AbstractFact {
         scheduledMeetingDto.setMeetingDate(getMeetingDate().toString("dd/MM/yyyy HH:mm:ss"));
         ScheduledMeetingStatus scheduledMeetingStatus = getMeetingStatus();
         if (scheduledMeetingStatus != null) {
-            scheduledMeetingDto.setMeetingStatus(scheduledMeetingStatus.convertToDto());
+            scheduledMeetingDto.setMeetingStatusId(getScheduledMeetingStatusId());
+            scheduledMeetingDto.setMeetingStatusName(scheduledMeetingStatus.getName());
         }
         Institution institution = getInstitution();
         if (institution != null) {
             scheduledMeetingDto.setInstitutionName(institution.getInstitutionName());
+            scheduledMeetingDto.setInstitutionId(getInstitutionId());
         }
         scheduledMeetingDto.setCreatorFullName(getCreatorFullName());
         scheduledMeetingDto.setVenue(getVenue());

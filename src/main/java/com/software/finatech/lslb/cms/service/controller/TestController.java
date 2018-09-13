@@ -26,7 +26,6 @@ public class TestController extends BaseController {
         Agent agent = (Agent) mongoRepositoryReactive.findById(institutionId, Agent.class).block();
         String customerCode = vigipayService.createCustomerCodeForAgent(agent);
         if (customerCode != null) {
-            agent.setCustomerCreatedOnVGPay(true);
             agent.setVgPayCustomerCode(customerCode);
             mongoRepositoryReactive.saveOrUpdate(agent);
         }

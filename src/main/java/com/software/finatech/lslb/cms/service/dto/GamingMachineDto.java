@@ -13,6 +13,24 @@ public class GamingMachineDto {
     private String serialNumber;
     private String machineNumber;
     private String machineAddress;
+    private String gameTypeId;
+    private String gameTypeName;
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
+
+    public String getGameTypeName() {
+        return gameTypeName;
+    }
+
+    public void setGameTypeName(String gameTypeName) {
+        this.gameTypeName = gameTypeName;
+    }
 
     public String getMachineAddress() {
         return machineAddress;

@@ -174,30 +174,53 @@ public class License extends AbstractFact {
         return gameType;
     }
 
+    public Agent getAgent() {
+        if (StringUtils.isEmpty(this.agentId)) {
+            return null;
+        }
+        return (Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
+    }
+
+    public Institution getInstitution() {
+        if (StringUtils.isEmpty(this.institutionId)) {
+            return null;
+        }
+        return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+    }
+
     public LicenseDto convertToDto() {
         LicenseDto licenseDto = new LicenseDto();
         licenseDto.setId(getId());
-        LicenseStatus licenseStatus = getLicenseStatus();
-        if (licenseStatus != null) {
-            licenseDto.setLicenseStatusId(licenseStatus.getId());
-            licenseDto.setLicenseStatusName(licenseStatus.getName());
-        }
-
         licenseDto.setGamingMachineId(getGamingMachineId());
-        licenseDto.setAgentId(getAgentId());
         licenseDto.setPaymentRecordId(getPaymentRecordId());
+        licenseDto.setLicenseTypeId(getLicenseTypeId());
+        licenseDto.setLicenseTypeName(getLicenseTypeId());
+        licenseDto.setId(id);
+        licenseDto.setLicenseNumber(getLicenseNumber());
         if (getEffectiveDate() != null && getExpiryDate() != null) {
             licenseDto.setStartDate(getEffectiveDate().toString("dd-MM-yyyy"));
             licenseDto.setEndDate(getExpiryDate() == null ? null : getExpiryDate().toString("dd-MM-yyyy"));
         }
         GameType gameType = getGameType();
-        if (gameType != null){
+        if (gameType != null) {
             licenseDto.setGameTypeId(getGameTypeId());
             licenseDto.setGameTypeName(gameType.getName());
         }
-
-        licenseDto.setId(id);
-        licenseDto.setLicenseNumber(getLicenseNumber());
+        Agent agent = getAgent();
+        if (agent != null) {
+            licenseDto.setAgentId(getAgentId());
+            licenseDto.setAgentName(agent.getFullName());
+        }
+        Institution institution = getInstitution();
+        if (institution != null) {
+            licenseDto.setInstitutionName(institution.getInstitutionName());
+            licenseDto.setInstitutionId(getInstitutionId());
+        }
+        LicenseStatus licenseStatus = getLicenseStatus();
+        if (licenseStatus != null) {
+            licenseDto.setLicenseStatusId(licenseStatus.getId());
+            licenseDto.setLicenseStatusName(licenseStatus.getName());
+        }
         return licenseDto;
     }
 
