@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotEmpty;
@@ -17,6 +18,15 @@ public class PaymentRecordDetailCreateDto {
     private String paymentStatusId;
     private String feeNotes;
     private String startYear;
+    private AgentInstitution agentInstitution;
+
+    public AgentInstitution getAgentInstitution() {
+        return agentInstitution;
+    }
+
+    public void setAgentInstitution(AgentInstitution agentInstitution) {
+        this.agentInstitution = agentInstitution;
+    }
 
     public String getStartYear() {
         return startYear;
@@ -125,5 +135,9 @@ public class PaymentRecordDetailCreateDto {
                 && !StringUtils.isEmpty(this.getGamingMachineId())
                 && StringUtils.isEmpty(this.getInstitutionId());
 
+    }
+
+    public boolean isFirstPayment() {
+        return StringUtils.isEmpty(this.paymentRecordId);
     }
 }

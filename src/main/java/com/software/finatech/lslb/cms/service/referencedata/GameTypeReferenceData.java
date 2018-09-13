@@ -18,10 +18,10 @@ public class GameTypeReferenceData {
         }
         gameType1.setDescription("Public Online Lottery");
         gameType1.setName("Public Online Lottery");
-        gameType1.setAipDuration("3");
-        gameType1.setLicenseDuration("12");
-        gameType1.setGamingMachineLicenseDuration("12");
-        gameType1.setAgentLicenseDuration("12");
+        gameType1.setAipDurationMonths(3);
+        gameType1.setInstitutionLicenseDurationMonths(12);
+        gameType1.setGamingMachineLicenseDurationMonths(12);
+        gameType1.setAgentLicenseDurationMonths(12);
 
 
         GameType gameType2 = (GameType) mongoRepositoryReactive.findById(OSB_GAME_TYPE_ID, GameType.class).block();
@@ -32,10 +32,10 @@ public class GameTypeReferenceData {
         }
         gameType2.setDescription("Online Sport Betting");
         gameType2.setName("Online Sport Betting");
-        gameType2.setAipDuration("3");
-        gameType2.setLicenseDuration("12");
-        gameType2.setGamingMachineLicenseDuration("12");
-        gameType2.setAgentLicenseDuration("12");
+        gameType2.setAipDurationMonths(3);
+        gameType2.setInstitutionLicenseDurationMonths(12);
+        gameType2.setGamingMachineLicenseDurationMonths(12);
+        gameType2.setAgentLicenseDurationMonths(12);
 
         GameType gameType3 = (GameType) mongoRepositoryReactive.findById(GAMING_MACHINE_OPERATOR_ID, GameType.class).block();
         if (gameType3 == null) {
@@ -45,10 +45,10 @@ public class GameTypeReferenceData {
         }
         gameType3.setDescription("A gaming machine operator (operator that has gaming machines)");
         gameType3.setName("GAMING_MACHINE");
-        gameType3.setAipDuration("3");
-        gameType3.setLicenseDuration("12");
-        gameType3.setGamingMachineLicenseDuration("12");
-        gameType3.setAgentLicenseDuration("12");
+        gameType3.setAipDurationMonths(3);
+        gameType3.setInstitutionLicenseDurationMonths(12);
+        gameType3.setGamingMachineLicenseDurationMonths(12);
+        gameType3.setAgentLicenseDurationMonths(12);
 
 
         mongoRepositoryReactive.saveOrUpdate(gameType1);

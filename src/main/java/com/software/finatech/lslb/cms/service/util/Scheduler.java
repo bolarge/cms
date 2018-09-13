@@ -58,7 +58,7 @@ public class Scheduler {
             for(License license: licenses){
                 int days=0;
                 NotificationDto notificationDto= new NotificationDto();
-                endDate=license.getEndDate();
+                endDate=license.getExpiryDate();
                 days= Days.daysBetween(dateTime,endDate).getDays();
                 notificationDto.setDaysToExpiration(days);
                 Map gameTypeMap = Mapstore.STORE.get("GameType");
@@ -112,7 +112,7 @@ public class Scheduler {
             for(License license: licenses){
                 int days=0;
                 NotificationDto notificationDto= new NotificationDto();
-                endDate=license.getEndDate();
+                endDate=license.getExpiryDate();
                 days= Days.daysBetween(dateTime,endDate).getDays();
                 notificationDto.setDaysToExpiration(days);
                 Map gameTypeMap = Mapstore.STORE.get("GameType");
@@ -203,7 +203,7 @@ public class Scheduler {
         if(licenses!=null){
             for(License license: licenses){
                 NotificationDto notificationDto= new NotificationDto();
-                LocalDate endDate=license.getEndDate();
+                LocalDate endDate=license.getExpiryDate();
                 GameType gameType = null;
                 Map gameTypeMap = Mapstore.STORE.get("GameType");
                 if (gameTypeMap != null) {
@@ -251,7 +251,7 @@ public class Scheduler {
         if(licenses!=null){
             for(License license: licenses){
                 NotificationDto notificationDto= new NotificationDto();
-                LocalDate endDate=license.getEndDate();
+                LocalDate endDate=license.getExpiryDate();
                 GameType gameType = null;
                 Map gameTypeMap = Mapstore.STORE.get("GameType");
                 if (gameTypeMap != null) {

@@ -17,7 +17,7 @@ public class PaymentStatusReferenceData {
             paymentStatus1 = new PaymentStatus();
             paymentStatus1.setId(COMPLETED_PAYMENT_STATUS_ID);
         }
-        paymentStatus1.setName("COMPLETED");
+        paymentStatus1.setName("PAID");
 
 
         PaymentStatus paymentStatus2 = (PaymentStatus) mongoRepositoryReactive.findById(PENDING_PAYMENT_STATUS_ID, PaymentStatus.class).block();

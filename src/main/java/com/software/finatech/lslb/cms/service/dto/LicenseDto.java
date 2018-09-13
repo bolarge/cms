@@ -2,17 +2,38 @@ package com.software.finatech.lslb.cms.service.dto;
 
 import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.domain.Institution;
+
 public class LicenseDto {
-    protected LicenseStatusDto licenseStatus;
+    protected String licenseStatusName;
+    protected String licenseStatusId;
+    private String gameTypeId;
+    private String gameTypeName;
     protected String id;
-    protected PaymentRecordDto paymentRecord;
-    protected Fee fee;
     protected String startDate;
     protected String endDate;
     protected String renewalStatus;
-    protected String licenseType;
+    protected String licenseTypeName;
+    private String licenseTypeId;
     protected String agentId;
     protected String gamingMachineId;
+    private String paymentRecordId;
+    private String licenseNumber;
+
+    public String getLicenseNumber() {
+        return licenseNumber;
+    }
+
+    public void setLicenseNumber(String licenseNumber) {
+        this.licenseNumber = licenseNumber;
+    }
+
+    public String getPaymentRecordId() {
+        return paymentRecordId;
+    }
+
+    public void setPaymentRecordId(String paymentRecordId) {
+        this.paymentRecordId = paymentRecordId;
+    }
 
     public String getAgentId() {
         return agentId;
@@ -28,13 +49,6 @@ public class LicenseDto {
 
     public void setGamingMachineId(String gamingMachineId) {
         this.gamingMachineId = gamingMachineId;
-    }
-    public String getLicenseType() {
-        return licenseType;
-    }
-
-    public void setLicenseType(String licenseType) {
-        this.licenseType = licenseType;
     }
 
     public String getStartDate() {
@@ -61,14 +75,6 @@ public class LicenseDto {
         return renewalStatus;
     }
 
-    public LicenseStatusDto getLicenseStatus() {
-        return licenseStatus;
-    }
-
-    public void setLicenseStatus(LicenseStatusDto licenseStatus) {
-        this.licenseStatus = licenseStatus;
-    }
-
     public String getId() {
         return id;
     }
@@ -77,20 +83,51 @@ public class LicenseDto {
         this.id = id;
     }
 
-    public PaymentRecordDto getPaymentRecord() {
-        return paymentRecord;
+    public String getLicenseStatusName() {
+        return licenseStatusName;
     }
 
-    public void setPaymentRecord(PaymentRecordDto paymentRecord) {
-        this.paymentRecord = paymentRecord;
+    public void setLicenseStatusName(String licenseStatusName) {
+        this.licenseStatusName = licenseStatusName;
     }
 
-    public Fee getFee() {
-        return fee;
+    public String getLicenseStatusId() {
+        return licenseStatusId;
     }
 
-    public void setFee(Fee fee) {
-        this.fee = fee;
+    public void setLicenseStatusId(String licenseStatusId) {
+        this.licenseStatusId = licenseStatusId;
     }
 
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
+
+    public String getGameTypeName() {
+        return gameTypeName;
+    }
+
+    public void setGameTypeName(String gameTypeName) {
+        this.gameTypeName = gameTypeName;
+    }
+
+    public String getLicenseTypeName() {
+        return licenseTypeName;
+    }
+
+    public void setLicenseTypeName(String licenseTypeName) {
+        this.licenseTypeName = licenseTypeName;
+    }
+
+    public String getLicenseTypeId() {
+        return licenseTypeId;
+    }
+
+    public void setLicenseTypeId(String licenseTypeId) {
+        this.licenseTypeId = licenseTypeId;
+    }
 }

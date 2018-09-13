@@ -8,7 +8,7 @@ public class LicenseStatusReferenceData {
     public static final String AIP_LICENSE_STATUS_ID = "01";
     public static  final String LICENSED_LICENSE_STATUS_ID = "02";
     public static final String LICENSE_REVOKED_LICENSE_STATUS_ID = "03";
-    public static final String LICENSE_IN_PROGRESS_LICENSE_STATUS_ID = "04";
+    public static final String RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID = "04";
     public static final String LICENSE_EXPIRED_STATUS_ID = "05";
     public static final String AIP_DOCUMENT_STATUS_ID="06";
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive){
@@ -34,10 +34,10 @@ public class LicenseStatusReferenceData {
         }
         licenseStatus3.setName("REVOKED");
 
-        LicenseStatus licenseStatus4 = (LicenseStatus)mongoRepositoryReactive.findById(LICENSE_IN_PROGRESS_LICENSE_STATUS_ID, LicenseStatus.class).block();
+        LicenseStatus licenseStatus4 = (LicenseStatus)mongoRepositoryReactive.findById(RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID, LicenseStatus.class).block();
         if (licenseStatus4 == null){
             licenseStatus4 = new LicenseStatus();
-            licenseStatus4.setId(LICENSE_IN_PROGRESS_LICENSE_STATUS_ID);
+            licenseStatus4.setId(RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
         }
         licenseStatus4.setName("RENEWAL IN PROGRESS");
 

@@ -96,7 +96,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                 sort = new Sort((sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC),
                         sortProperty);
             } else {
-                sort = new Sort(Sort.Direction.DESC, "id");
+                sort = new Sort(Sort.Direction.DESC, "createdAt");
             }
             query.with(PageRequest.of(page, pageSize, sort));
             query.with(sort);
@@ -212,25 +212,6 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while updating the scheduled meeting", e);
         }
-    }
-
-    private Mono<ResponseEntity> validateCreateScheduledMeeting(ScheduledMeetingCreateDto scheduledMeetingCreateDto) {
-        HttpStatus badRequestStatus = HttpStatus.BAD_REQUEST;
-        AuthInfo creator = getUser(scheduledMeetingCreateDto.getCreatorId());
-        if (creator == null) {
-            return Mono.just(new ResponseEntity<>("Creating user does not exist", badRequestStatus));
-        }
-
-        String institutionId = scheduledMeetingCreateDto.getInstitutionId();
-        Institution invitedInstitution = getInstitution(institutionId);
-        if (invitedInstitution == null) {
-            return Mono.just(new ResponseEntity<>("Invited institution does not exist", badRequestStatus));
-        }
-        ArrayList<AuthInfo> gamingOperatorAdminsForInstitution = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institutionId);
-        if (gamingOperatorAdminsForInstitution == null || gamingOperatorAdminsForInstitution.isEmpty()) {
-            return Mono.just(new ResponseEntity<>("There is no user with role gaming operator admin for institution", badRequestStatus));
-        }
-        return null;
     }
 
     private ScheduledMeeting fromCreateDto(ScheduledMeetingCreateDto scheduledMeetingCreateDto) {
