@@ -199,6 +199,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         institution.setPhoneNumber(institutionCreateDto.getPhoneNumber());
         institution.setEmailAddress(institutionCreateDto.getEmailAddress());
         institution.setGameTypeIds(institutionCreateDto.getGameTypeIds());
+        institution.setAddress(institutionCreateDto.getAddress());
+        institution.setActive(true);
         return institution;
     }
 }

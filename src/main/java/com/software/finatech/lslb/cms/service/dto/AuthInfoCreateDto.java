@@ -15,6 +15,8 @@ public class AuthInfoCreateDto {
     protected String emailAddress;
     @NotNull(message = "Role ID field can not be empty")
     protected String authRoleId;
+    @NotNull(message = "Title field can not be empty")
+    protected String title;
     protected String institutionId;
 
     public String getInstitutionId() {
@@ -63,5 +65,13 @@ public class AuthInfoCreateDto {
 
     public void setAuthRoleId(String authRoleId) {
         this.authRoleId = authRoleId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

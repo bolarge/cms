@@ -14,6 +14,16 @@ public class CreateApplicantAuthInfoDto {
     protected String phoneNumber;
     @NotNull(message = "Email Address field can not be empty")
     protected String emailAddress;
+    @NotNull(message = "Title field can not be empty")
+    protected String title;
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
     public String getFirstName() {
         return firstName;

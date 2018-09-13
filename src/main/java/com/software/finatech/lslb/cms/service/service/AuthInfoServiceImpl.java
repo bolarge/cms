@@ -96,6 +96,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         authInfo.setPhoneNumber(authInfoCreateDto.getPhoneNumber());
         authInfo.setFirstName(authInfoCreateDto.getFirstName());
         authInfo.setLastName(authInfoCreateDto.getLastName());
+        authInfo.setTitle(authInfoCreateDto.getTitle());
         authInfo.setFullName(authInfoCreateDto.getFirstName() + " " + authInfoCreateDto.getLastName());
         authInfo.setInstitutionId(authInfoCreateDto.getInstitutionId());
         mongoRepositoryReactive.saveOrUpdate(authInfo);
@@ -181,6 +182,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         authInfo.setPhoneNumber(createApplicantAuthInfoDto.getPhoneNumber());
         authInfo.setFirstName(createApplicantAuthInfoDto.getFirstName());
         authInfo.setLastName(createApplicantAuthInfoDto.getLastName());
+        authInfo.setTitle(createApplicantAuthInfoDto.getTitle());
         authInfo.setFullName(createApplicantAuthInfoDto.getFirstName() + " " + createApplicantAuthInfoDto.getLastName());
         mongoRepositoryReactive.saveOrUpdate(authInfo);
 

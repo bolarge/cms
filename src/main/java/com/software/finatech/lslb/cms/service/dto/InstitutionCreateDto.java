@@ -16,8 +16,18 @@ public class InstitutionCreateDto {
     @Size(min = 9, message = "Phone number should not be less than 9 characters")
     @NotEmpty(message = "Phone Number should not be empty")
     protected String phoneNumber;
+    @NotEmpty(message = "Address should not be empty")
+    protected String address;
     private String userId;
     protected Set<String> gameTypeIds = new HashSet<>();
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
     public String getUserId() {
         return userId;
