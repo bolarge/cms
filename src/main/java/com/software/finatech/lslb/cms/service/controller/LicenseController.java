@@ -2,15 +2,14 @@ package com.software.finatech.lslb.cms.service.controller;
 
 
 import com.software.finatech.lslb.cms.service.domain.License;
-import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
-import com.software.finatech.lslb.cms.service.dto.LicenseDto;
-import com.software.finatech.lslb.cms.service.dto.LicenseUpdateAIPToLicenseDto;
-import com.software.finatech.lslb.cms.service.dto.LicenseUpdateDto;
+import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +18,8 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 @Api(value = "License", description = "For everything related to gaming operators licenses", tags = "")
 @RestController
@@ -185,5 +186,50 @@ public class LicenseController {
             return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
 
         }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/specific-license", params = {"institutionId", "agentId", "gamingMachineId", "gameTypeId", "licenseTypeId"})
+    @ApiOperation(value = "Get specific license", response = PaymentRecord.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getRenewalLicense(@RequestParam("institutionId") String institutionId,
+                                                               @RequestParam("gameTypeId") String gameTypeId,
+                                                               @RequestParam("agentId") String agentId,
+                                                               @RequestParam("gamingMachineId") String gamingMachineId,
+                                                               @RequestParam("licenseTypeId") String licenseTypeId
+                                                              ) {
+        try {
+            if (StringUtils.isEmpty(institutionId) && StringUtils.isEmpty(agentId) && StringUtils.isEmpty(gamingMachineId)) {
+                return Mono.just(new ResponseEntity<>("Provide InstitutionId or agentId or Gaming Machine Id", HttpStatus.BAD_REQUEST));
+
+            }
+            if (!StringUtils.isEmpty(institutionId) && !StringUtils.isEmpty(agentId) && !StringUtils.isEmpty(gamingMachineId)) {
+                return Mono.just(new ResponseEntity<>("Provide InstitutionId or InstitutionId and agentId or InstitutionId and Gaming Machine Id", HttpStatus.BAD_REQUEST));
+
+            }
+            if (StringUtils.isEmpty(gameTypeId)) {
+                return Mono.just(new ResponseEntity<>("Provide GameTypeId", HttpStatus.BAD_REQUEST));
+
+            } if (StringUtils.isEmpty(licenseTypeId)) {
+                return Mono.just(new ResponseEntity<>("Provide LicenseType", HttpStatus.BAD_REQUEST));
+
+            }
+            License licenseRecords = licenseService.findRenewalLicense(institutionId, agentId, gamingMachineId, gameTypeId, licenseTypeId);
+
+           if(licenseRecords==null){
+               return Mono.just(new ResponseEntity<>("No License Found", HttpStatus.BAD_REQUEST));
+
+           }else{
+               return Mono.just(new ResponseEntity<>("Success", HttpStatus.OK));
+
+           }
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+
+        }
+
     }
 }
