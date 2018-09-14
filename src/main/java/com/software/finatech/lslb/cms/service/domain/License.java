@@ -124,10 +124,6 @@ public class License extends AbstractFact {
         this.parentLicenseId = parentLicenseId;
     }
 
-    public PaymentRecord getPaymentRecord() {
-        return (PaymentRecord) mongoRepositoryReactive.findById(paymentRecordId, PaymentRecord.class).block();
-    }
-
     public LicenseStatus getLicenseStatus() {
         if (StringUtils.isEmpty(this.licenseStatusId)) {
             return null;
@@ -179,6 +175,13 @@ public class License extends AbstractFact {
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
 
+    public PaymentRecord getPaymentRecord() {
+        if (StringUtils.isEmpty(this.paymentRecordId)) {
+            return null;
+        }
+        return (PaymentRecord) mongoRepositoryReactive.findById(this.paymentRecordId, PaymentRecord.class).block();
+    }
+
     public LicenseDto convertToDto() {
         LicenseDto licenseDto = new LicenseDto();
         licenseDto.setId(getId());
@@ -211,6 +214,10 @@ public class License extends AbstractFact {
         if (licenseStatus != null) {
             licenseDto.setLicenseStatusId(licenseStatus.getId());
             licenseDto.setLicenseStatusName(licenseStatus.getName());
+        }
+        PaymentRecord paymentRecord = getPaymentRecord();
+        if(paymentRecord!= null){
+            licenseDto.setAmountPaid(paymentRecord.getAmountPaid());
         }
         return licenseDto;
     }
