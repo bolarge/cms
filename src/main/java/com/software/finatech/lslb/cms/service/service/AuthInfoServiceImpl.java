@@ -175,7 +175,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     public AuthInfo createApplicantAuthInfo(CreateApplicantAuthInfoDto createApplicantAuthInfoDto, String appUrl) {
         AuthInfo authInfo = new AuthInfo();
         authInfo.setId(UUID.randomUUID().toString());
-        authInfo.setEnabled(false);
+        authInfo.setEnabled(true);
         authInfo.setAuthRoleId(LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID);
         authInfo.setAccountLocked(false);
         authInfo.setEmailAddress(createApplicantAuthInfoDto.getEmailAddress());
