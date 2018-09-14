@@ -273,7 +273,6 @@ public class TestData {
             LocalDate startDate = new LocalDate();
             license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getInstitutionLicenseDurationMonths()));
             license.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION);
-            license.setFirstPayment(false);
 
             if (i == 1) {
                 license.setEffectiveDate(LocalDate.now());

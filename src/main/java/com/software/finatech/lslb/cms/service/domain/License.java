@@ -24,7 +24,6 @@ public class License extends AbstractFact {
     protected String licenseTypeId;
     protected String agentId;
     protected String gamingMachineId;
-    protected boolean firstPayment;
     protected String parentLicenseId;
     protected String licenseNumber;
 
@@ -34,14 +33,6 @@ public class License extends AbstractFact {
 
     public void setLicenseNumber(String licenseNumber) {
         this.licenseNumber = licenseNumber;
-    }
-
-    public boolean isFirstPayment() {
-        return firstPayment;
-    }
-
-    public void setFirstPayment(boolean firstPayment) {
-        this.firstPayment = firstPayment;
     }
 
     public String getAgentId() {
