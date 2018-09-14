@@ -87,7 +87,7 @@ public class VigipayHttpClient {
                 String requestJson = OBJECT_MAPPER.writeValueAsString(vigipayCreateCustomer);
                 HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
                 ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, entity, String.class);
-
+                logger.info(" response from Vigipay -> {}", responseEntity.getBody());
                 if (responseEntity.getStatusCode() == HttpStatus.OK) {
                     String responseBody = responseEntity.getBody();
                     JSONObject responseJson = new JSONObject(responseBody);
@@ -119,6 +119,7 @@ public class VigipayHttpClient {
                 String requestJson = OBJECT_MAPPER.writeValueAsString(vigipayCreateInvoice);
                 HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
                 ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, entity, String.class);
+                logger.info(" response from Vigipay -> {}", responseEntity.getBody());
                 if (responseEntity.getStatusCode() == HttpStatus.OK) {
                     String invoiceNumber = responseEntity.getBody();
                     return invoiceNumber.replace("\"", "");
@@ -145,6 +146,7 @@ public class VigipayHttpClient {
                 headers.set("Authorization", "Bearer " + accessToken);
                 HttpEntity<?> httpEntity = new HttpEntity<>(headers);
                 ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
+                logger.info(" response from Vigipay -> {}", responseEntity.getBody());
                 if (responseEntity.getStatusCode() == HttpStatus.OK) {
                     String responseBody = responseEntity.getBody();
                     JSONObject responseJson = new JSONObject(responseBody);

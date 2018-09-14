@@ -362,13 +362,13 @@ public class LicenseServiceImpl implements LicenseService {
             queryLicence.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID));
             License license = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
             if (license == null) {
-                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Operator have not uploaded AIP document", HttpStatus.BAD_REQUEST));
 
             }
             license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
             license.setEffectiveDate(fromDate);
             Query queryGameType = new Query();
-            queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().getGameTypeId()));
+            queryGameType.addCriteria(Criteria.where("id").is(license.getGameTypeId()));
             GameType gameType = (GameType) mongoRepositoryReactive.find(queryGameType, GameType.class).block();
             int duration = gameType.getInstitutionLicenseDurationMonths();
             license.setExpiryDate(fromDate.plusMonths(duration));
