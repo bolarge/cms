@@ -347,16 +347,18 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 }
                 String invoiceNumber = existingPaymentRecordDetail.getInvoiceNumber();
                 if (!StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, existingPaymentRecordDetail.getPaymentStatusId())) {
-                    boolean isConfirmedPayment;
+                    boolean isConfirmedPayment = true;
 
-                    try {
-                        isConfirmedPayment = vigipayService.isConfirmedInvoicePayment(invoiceNumber);
-                    } catch (VigiPayServiceException e) {
-                        logger.error("An error occurred while confirming payment status from vigipay", e);
-                        existingPaymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.PENDING_VIGIPAY_CONFIRMATION_STATUS_ID);
-                        savePaymentRecordDetail(existingPaymentRecordDetail);
-                        return Mono.just(new ResponseEntity<>("An error occurred while confirming payment from vigipay", HttpStatus.INTERNAL_SERVER_ERROR));
-                    }
+
+                    //TODO: remember to validate payment from vigipay
+//                    try {
+//                     //   isConfirmedPayment = vigipayService.isConfirmedInvoicePayment(invoiceNumber);
+//                    } catch (VigiPayServiceException e) {
+//                        logger.error("An error occurred while confirming payment status from vigipay", e);
+//                        existingPaymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.PENDING_VIGIPAY_CONFIRMATION_STATUS_ID);
+//                        savePaymentRecordDetail(existingPaymentRecordDetail);
+//                        return Mono.just(new ResponseEntity<>("An error occurred while confirming payment from vigipay", HttpStatus.INTERNAL_SERVER_ERROR));
+//                    }
                     if (isConfirmedPayment) {
                         PaymentRecord paymentRecord = paymentRecordService.findById(existingPaymentRecordDetail.getPaymentRecordId());
                         double amountPaid = paymentRecord.getAmountPaid();
