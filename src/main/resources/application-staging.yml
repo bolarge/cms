@@ -1,14 +1,26 @@
 spring:
   application:
     name: lslb-cms
-  #jackson:
-    #time-zone: GMT
+  servlet:
+    multipart:
+      max-file-size: 30MB
+      max-request-size: 30MB
 management:
   endpoint:
   enabled-by-default: false
   shutdown:
     enabled: true
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+  enabled-by-default: true
+  health:
+    show-details: ALWAYS
+  shutdown:
+    enabled: true
 server:
   port: ${APPLICATIONPORT:2001}
 security:
@@ -16,37 +28,56 @@ security:
   ignored: /resources/**
   basic:
     enabled: false
-
 mongodb:
   host: db2.mlnx.staging.vggdev.com
   username: finatech-user
-  password: ${DB_PASSWORD}
+  password: finatechuser
   database: LslbCMSDb
   port: 27017
 logging:
   level:
     ROOT: INFO
+    #Rememeber to change the credentials for SSO
+
+
+
+
 
 sso:
-  baseIdentityURL: https://sso.test.vggdev.com/identity
-  baseAPIURL: http://ssoapi.test.vggdev.com
+  baseIdentityURL: https://sso.staging.vggdev.com/identity
+  baseAPIURL: http://ssoapi.staging.vggdev.com
   apiUsername: lslb-cms-api
-  apiPassword: ${SSO_API_PASSWORD}
+  apiPassword: fhhsnns___===i1omnsnaa
   clientId: lslb-cms
-  clientSecret:  ${SSO_CLIENT_SECRET}
-  baseLogoutURL: https://sso.test.vggdev.com
-  publicKeyURL: https://sso.test.vggdev.com/identity/.well-known/jwks
+  clientSecret:  fhhsnns___===i1omnsnaa
+  baseLogoutURL: https://sso.staging.vggdev.com
+  publicKeyURL: https://sso.staging.vggdev.com/identity/.well-known/jwks
   applicationName: lslb-cms
 
 jwt:
   header: Authorization
 
+
 racs:
   ui:
-    host: ldap.test.vggdev.com
+    host: lslbcms.test.vggdev.com
     port:
 
-    
+
+vigipay:
+  client-id: LAGOS_STATE_LOTTERIES_BOARD_TEST_API1DH9V9PLSI4W
+  client-secret: vgPsvZAUJMLmHHhe
+  username: adeboludeyi@gmail.com
+  password: vigipayP@ssw0rd
+  scope: ebipsgatewayapi offline_access roles profile
+  grant-type: password
+  token-url: https://ebipssso.staging.vggdev.com/core/connect/token
+  loop-base-url: https://ebipsgateway.staging.vggdev.com/api
+  country-code: 566
+  location-code: LSG
+  currency-code: NGN
+  corporate-revenue-code: 1234
+
 email-host: smtp.gmail.com
 email-username: lslbcms@gmail.com
 email-password: password@123456
