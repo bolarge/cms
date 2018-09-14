@@ -17,6 +17,15 @@ public class VigipayCreateInvoice {
     private boolean EnforceDueDate;
     private int InvoiceType;
     private int InvoiceAction;
+    private boolean CreateContacts;
+
+    public boolean isCreateContacts() {
+        return CreateContacts;
+    }
+
+    public void setCreateContacts(boolean createContacts) {
+        CreateContacts = createContacts;
+    }
 
     public String getCustomerCode() {
         return CustomerCode;
