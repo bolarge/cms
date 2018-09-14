@@ -18,6 +18,15 @@ public class LicenseDto {
     private String institutionName;
     protected String agentId;
     private String agentName;
+    private double amountPaid;
+
+    public double getAmountPaid() {
+        return amountPaid;
+    }
+
+    public void setAmountPaid(double amountPaid) {
+        this.amountPaid = amountPaid;
+    }
 
     public String getInstitutionId() {
         return institutionId;
