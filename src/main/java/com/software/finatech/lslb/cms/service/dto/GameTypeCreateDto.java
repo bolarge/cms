@@ -1,17 +1,18 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 
-public class GameTypeCreateDto  {
-    @NotEmpty(message = "Please enter AIP Duration")
+public class GameTypeCreateDto {
+    @Min(value = 0, message = "Please enter AIP Duration")
     protected int aipDurationMonths;
-    @NotEmpty(message = "Please enter License Duration in months")
+    @Min(value = 0, message = "Please enter License Duration in months")
     protected int licenseDurationMonths;
     @NotEmpty(message = "Please enter GameType Name")
     protected String name;
-    @NotEmpty(message = "Please enter Agent License Duration in months")
+    @Min(value = 0, message = "Please enter Agent License Duration in months")
     protected int agentLicenseDurationMonths;
-    @NotEmpty(message = "Please enter Gaming Machine License Duration in  months")
+    @Min(value = 0, message = "Please enter Gaming Machine License Duration in  months")
     protected int gamingMachineLicenseDurationMonths;
 
     protected String description;
