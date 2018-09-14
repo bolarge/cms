@@ -161,6 +161,9 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             if (institution == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Institution with id %s does not exist", institutionId), HttpStatus.BAD_REQUEST));
             }
+            if (StringUtils.isEmpty(institution.getVgPayCustomerCode())){
+                return Mono.just(new ResponseEntity<>("Customer not created",HttpStatus.BAD_REQUEST));
+            }
             invoiceNumber = createInBranchRecordDetailForInstitution(institution, feeDescription, paymentRecordDetailCreateDto, institutionAdmins);
         }
 
@@ -171,6 +174,9 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institution.getId());
                 if (institutionAdmins.isEmpty()) {
                     return Mono.just(new ResponseEntity<>("There are no gaming operator admins for institution owning gaming machine", HttpStatus.BAD_REQUEST));
+                }
+                if (StringUtils.isEmpty(institution.getVgPayCustomerCode())){
+                    return Mono.just(new ResponseEntity<>("Customer not created",HttpStatus.BAD_REQUEST));
                 }
                 invoiceNumber = createInBranchRecordDetailForInstitution(institution, feeDescription, paymentRecordDetailCreateDto, institutionAdmins);
             }
@@ -347,16 +353,18 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 }
                 String invoiceNumber = existingPaymentRecordDetail.getInvoiceNumber();
                 if (!StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, existingPaymentRecordDetail.getPaymentStatusId())) {
-                    boolean isConfirmedPayment;
+                    boolean isConfirmedPayment = true;
 
-                    try {
-                        isConfirmedPayment = vigipayService.isConfirmedInvoicePayment(invoiceNumber);
-                    } catch (VigiPayServiceException e) {
-                        logger.error("An error occurred while confirming payment status from vigipay", e);
-                        existingPaymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.PENDING_VIGIPAY_CONFIRMATION_STATUS_ID);
-                        savePaymentRecordDetail(existingPaymentRecordDetail);
-                        return Mono.just(new ResponseEntity<>("An error occurred while confirming payment from vigipay", HttpStatus.INTERNAL_SERVER_ERROR));
-                    }
+
+                    //TODO: remember to validate payment from vigipay
+//                    try {
+//                     //   isConfirmedPayment = vigipayService.isConfirmedInvoicePayment(invoiceNumber);
+//                    } catch (VigiPayServiceException e) {
+//                        logger.error("An error occurred while confirming payment status from vigipay", e);
+//                        existingPaymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.PENDING_VIGIPAY_CONFIRMATION_STATUS_ID);
+//                        savePaymentRecordDetail(existingPaymentRecordDetail);
+//                        return Mono.just(new ResponseEntity<>("An error occurred while confirming payment from vigipay", HttpStatus.INTERNAL_SERVER_ERROR));
+//                    }
                     if (isConfirmedPayment) {
                         PaymentRecord paymentRecord = paymentRecordService.findById(existingPaymentRecordDetail.getPaymentRecordId());
                         double amountPaid = paymentRecord.getAmountPaid();

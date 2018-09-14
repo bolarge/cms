@@ -32,8 +32,8 @@ public class CustomerCodeCreator {
     private static final Logger logger = LoggerFactory.getLogger(CustomerCodeCreator.class);
 
 
-   // @Scheduled(fixedRate = 30000)
-   // @SchedulerLock(name = "Create Customer Code for Institutions and Agents without Customer code", lockAtMostFor = FIVE_MIN, lockAtLeastFor = FIVE_MIN)
+    @Scheduled(fixedRate = 30000)
+    @SchedulerLock(name = "Create Customer Code for Institutions and Agents without Customer code", lockAtMostFor = FIVE_MIN, lockAtLeastFor = FIVE_MIN)
     public void createCustomers() {
         logger.info("Started getting customer code");
         Query query = new Query();
