@@ -94,14 +94,14 @@ public class VigipayServiceImpl implements VigipayService {
         List<AuthInfo> gamingOperatorAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institution.getId());
         AuthInfo admin1 = gamingOperatorAdmins.get(0);
         vigipayCreateCustomer.setAddressLine1(institution.getAddress() != null ? institution.getAddress() : "42 local airport road");
-        vigipayCreateCustomer.setContactPersonEmail(institution.getEmailAddress());
+        vigipayCreateCustomer.setContactPersonEmail(admin1.getEmailAddress());
         vigipayCreateCustomer.setContactPersonLastName(admin1.getLastName());
         vigipayCreateCustomer.setName(institution.getInstitutionName());
         vigipayCreateCustomer.setCustomerCorporateCode(customerCorporateCode);
         vigipayCreateCustomer.setContactPersonTitle(admin1.getTitle() != null ? admin1.getTitle() : "Mr");
         vigipayCreateCustomer.setContactPersonFirstName(admin1.getFirstName());
         vigipayCreateCustomer.setContactPersonLastName(admin1.getLastName());
-        vigipayCreateCustomer.setContactPersonPhone(institution.getPhoneNumber());
+        vigipayCreateCustomer.setContactPersonPhone(admin1.getPhoneNumber());
         vigipayCreateCustomer.setCountryCode(countryCode);
         return vigipayCreateCustomer;
     }
@@ -126,6 +126,7 @@ public class VigipayServiceImpl implements VigipayService {
         vigipayCreateInvoice.setEnforceDueDate(false);
         vigipayCreateInvoice.setInvoiceType(1);
         vigipayCreateInvoice.setInvoiceAction(2);
+        vigipayCreateInvoice.setCreateContacts(true);
         return vigipayCreateInvoice;
     }
 
@@ -148,6 +149,7 @@ public class VigipayServiceImpl implements VigipayService {
         vigipayCreateInvoice.setEnforceDueDate(false);
         vigipayCreateInvoice.setInvoiceType(1);
         vigipayCreateInvoice.setInvoiceAction(2);
+        vigipayCreateInvoice.setCreateContacts(true);
         return vigipayCreateInvoice;
     }
 
