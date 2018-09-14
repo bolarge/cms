@@ -75,10 +75,10 @@ public class GameTypeController extends BaseController {
        try {
            GameType gameType = new GameType();
            gameType.setId(UUID.randomUUID().toString());
-           gameType.setAipDuration(gameTypeCreateDto.getAipDuration());
-           gameType.setAgentLicenseDuration(gameTypeCreateDto.getAgentLicenseDuration());
-           gameType.setGamingMachineLicenseDuration(gameTypeCreateDto.getGamingMachineLicenseDuration());
-           gameType.setLicenseDuration(gameTypeCreateDto.getLicenseDuration());
+           gameType.setAipDurationMonths(gameTypeCreateDto.getAipDurationMonths());
+           gameType.setAgentLicenseDurationMonths(gameTypeCreateDto.getAgentLicenseDurationMonths());
+           gameType.setGamingMachineLicenseDurationMonths(gameTypeCreateDto.getGamingMachineLicenseDurationMonths());
+           gameType.setInstitutionLicenseDurationMonths(gameTypeCreateDto.getLicenseDurationMonths());
            gameType.setName(gameTypeCreateDto.getName());
            gameType.setDescription(gameTypeCreateDto.getDescription());
            mongoRepositoryReactive.saveOrUpdate(gameType);
@@ -108,12 +108,12 @@ public class GameTypeController extends BaseController {
             return Mono.just(new ResponseEntity<>("Invalid GameType Selected", HttpStatus.BAD_REQUEST));
 
         }
-        gameType.setAipDuration(gameTypeUpdateDto.getAipDuration());
-        gameType.setLicenseDuration(gameTypeUpdateDto.getLicenseDuration());
+        gameType.setAipDurationMonths(gameTypeUpdateDto.getAipDurationMonths());
+        gameType.setInstitutionLicenseDurationMonths(gameTypeUpdateDto.getLicenseDuration());
         gameType.setName(gameTypeUpdateDto.getName());
         gameType.setDescription(gameTypeUpdateDto.getDescription());
-        gameType.setAgentLicenseDuration(gameTypeUpdateDto.getAgentLicenseDuration());
-        gameType.setGamingMachineLicenseDuration(gameTypeUpdateDto.getGamingMachineLicenseDuration());
+        gameType.setAgentLicenseDurationMonths(gameTypeUpdateDto.getAgentLicenseDurationMonths());
+        gameType.setGamingMachineLicenseDurationMonths(gameTypeUpdateDto.getGamingMachineLicenseDurationMonths());
         mongoRepositoryReactive.saveOrUpdate(gameType);
         return Mono.just(new ResponseEntity<>(gameType.convertToDto(), HttpStatus.OK));
     }

@@ -12,7 +12,7 @@ public class AuthInfoUpdateDto {
     @NotNull(message = "Last Name field can not be empty")
     protected String lastName ;
     @NotNull(message = "Phone Number field can not be empty")
-    @Size(min = 7)
+    @Size(min = 9, message = "Phone number should not be less than 9 characters")
     protected String phoneNumber ;
     @NotNull(message = "Role Id field can not be empty")
     protected String authRoleId;

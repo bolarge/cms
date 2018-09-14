@@ -85,7 +85,7 @@ public class AgentServiceImpl implements AgentService {
                 sort = new Sort((sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC),
                         sortProperty);
             } else {
-                sort = new Sort(Sort.Direction.DESC, "id");
+                sort = new Sort(Sort.Direction.DESC, "createdAt");
             }
             query.with(PageRequest.of(page, pageSize, sort));
             query.with(sort);

@@ -12,11 +12,10 @@ import com.software.finatech.lslb.cms.service.model.otherInformation.ApplicantOt
 import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantOutletInformation;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
+import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -46,16 +45,19 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     private MailContentBuilderService mailContentBuilderService;
     private EmailService emailService;
     private AuthInfoService authInfoService;
+    private PaymentRecordService paymentRecordService;
 
     @Autowired
     public ApplicationFormServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                                       MailContentBuilderService mailContentBuilderService,
                                       EmailService emailService,
-                                      AuthInfoService authInfoService) {
+                                      AuthInfoService authInfoService,
+                                      PaymentRecordService paymentRecordService) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.mailContentBuilderService = mailContentBuilderService;
         this.emailService = emailService;
         this.authInfoService = authInfoService;
+        this.paymentRecordService = paymentRecordService;
     }
 
     @Override
@@ -116,7 +118,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 sort = new Sort((sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC),
                         sortProperty);
             } else {
-                sort = new Sort(Sort.Direction.DESC, "id");
+                sort = new Sort(Sort.Direction.DESC, "createdAt");
             }
             query.with(PageRequest.of(page, pageSize, sort));
             query.with(sort);
@@ -700,40 +702,10 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             return Mono.just(new ResponseEntity<>("An application form already exists for the institution with the same game type and application type", HttpStatus.BAD_REQUEST));
         }
 
-        String applicationFeeTypeId = FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID;
-        Query queryForExistingFee = new Query();
-        queryForExistingFee.addCriteria(Criteria.where("feePaymentTypeId").is(applicationFeeTypeId));
-        queryForExistingFee.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-
-        Fee applicationFeeForGameType = (Fee) mongoRepositoryReactive.find(queryForExistingFee, Fee.class).block();
-        if (applicationFeeForGameType == null) {
-            return Mono.just(new ResponseEntity<>("No Application fee configured for Game Type", HttpStatus.EXPECTATION_FAILED));
-        }
-
-        Query queryForExistingConfirmedPaymentRecord = new Query();
-        String confirmedPaymentStatusId = PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID;
-        queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("feeId").is(applicationFeeForGameType.getId()));
-        queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("institutionId").is(institutionId));
-        queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("paymentStatusId").is(confirmedPaymentStatusId));
-
-        PaymentRecord existingConfirmedPaymentRecord = (PaymentRecord) mongoRepositoryReactive.find(queryForExistingConfirmedPaymentRecord, PaymentRecord.class).block();
-
+        PaymentRecord existingConfirmedPaymentRecord = paymentRecordService.findExistingConfirmedApplicationFeeForInstitutionAndGameType(institutionId, gameTypeId);
         if (existingConfirmedPaymentRecord == null) {
             return Mono.just(new ResponseEntity<>("There is no confirmed application fee payment record for game type", HttpStatus.BAD_REQUEST));
         }
         return null;
     }
-
-//    private List<DocumentTypeDto> getDocumentTypesFromDocumentIds(Set<String> documentIds) throws FactNotFoundException {
-//        List<DocumentTypeDto> documentTypeDtos = new ArrayList<>();
-//        for (String documentId : documentIds) {
-//            Document document = (Document) mongoRepositoryReactive.findById(documentId, Document.class).block();
-//            if (document != null) {
-//                document.setAssociatedProperties();
-//                DocumentType documentType = document.getDocumentType();
-//                documentTypeDtos.add(documentType.convertToDto());
-//            }
-//        }
-//        return documentTypeDtos;
-//    }
 }

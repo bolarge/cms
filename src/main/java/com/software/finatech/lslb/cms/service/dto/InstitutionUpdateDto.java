@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Transient;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.util.Set;
 
 public class InstitutionUpdateDto  {
@@ -16,6 +17,8 @@ public class InstitutionUpdateDto  {
     @Email(message = "Email should be valid")
     protected String emailAddress;
     protected String description;
+    @Size(min = 9, message = "Phone number should not be less than 9 characters")
+    @NotEmpty
     protected String phoneNumber;
     protected Set<String> gameTypeIds = new java.util.HashSet<>();
     @Transient

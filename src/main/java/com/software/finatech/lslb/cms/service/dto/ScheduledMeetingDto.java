@@ -8,7 +8,33 @@ public class ScheduledMeetingDto {
     private String meetingDate;
     private String id;
     private String institutionName;
-    private EnumeratedFactDto meetingStatus;
+    private String institutionId;
+    private String meetingStatusName;
+    private String meetingStatusId;
+
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
+
+    public String getMeetingStatusName() {
+        return meetingStatusName;
+    }
+
+    public void setMeetingStatusName(String meetingStatusName) {
+        this.meetingStatusName = meetingStatusName;
+    }
+
+    public String getMeetingStatusId() {
+        return meetingStatusId;
+    }
+
+    public void setMeetingStatusId(String meetingStatusId) {
+        this.meetingStatusId = meetingStatusId;
+    }
 
     public String getCreatorFullName() {
         return creatorFullName;
@@ -64,13 +90,5 @@ public class ScheduledMeetingDto {
 
     public void setInstitutionName(String institutionName) {
         this.institutionName = institutionName;
-    }
-
-    public EnumeratedFactDto getMeetingStatus() {
-        return meetingStatus;
-    }
-
-    public void setMeetingStatus(EnumeratedFactDto meetingStatus) {
-        this.meetingStatus = meetingStatus;
     }
 }

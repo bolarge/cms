@@ -31,14 +31,8 @@ public class Agent extends AbstractFact {
     protected String bvn;
     protected Set<String> institutionIds;
     protected Set<String> gameTypeIds;
-    protected boolean customerCreatedOnVGPay = false;
     protected String vgPayCustomerCode;
     private String title;
-
-
-    public boolean isCustomerCreatedOnVGPay() {
-        return customerCreatedOnVGPay;
-    }
 
     public String getTitle() {
         return title;
@@ -46,10 +40,6 @@ public class Agent extends AbstractFact {
 
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public void setCustomerCreatedOnVGPay(boolean customerCreatedOnVGPay) {
-        this.customerCreatedOnVGPay = customerCreatedOnVGPay;
     }
 
     public String getVgPayCustomerCode() {
@@ -182,7 +172,7 @@ public class Agent extends AbstractFact {
 
     public AgentDto convertToDto() {
         AgentDto agentDto = new AgentDto();
-        if(getDateOfBirth()!=null) {
+        if (getDateOfBirth() != null) {
             agentDto.setDateOfBirth(getDateOfBirth().toString("dd/MM/yyyy"));
         }
         agentDto.setEmailAddress(getEmailAddress());
@@ -199,19 +189,19 @@ public class Agent extends AbstractFact {
     }
 
 
-    private Set<AgentInstitutionDto> convertAgentInstitutions(Set<AgentInstitution> agentInstitutions){
-       Set<AgentInstitutionDto> agentInstitutionDtos = new HashSet<>();
-        for (AgentInstitution agentInstitution: agentInstitutions) {
-           AgentInstitutionDto agentInstitutionDto = new AgentInstitutionDto();
+    private Set<AgentInstitutionDto> convertAgentInstitutions(Set<AgentInstitution> agentInstitutions) {
+        Set<AgentInstitutionDto> agentInstitutionDtos = new HashSet<>();
+        for (AgentInstitution agentInstitution : agentInstitutions) {
+            AgentInstitutionDto agentInstitutionDto = new AgentInstitutionDto();
             GameType gameType = getGameType(agentInstitution.getGameTypeId());
-            if (gameType != null){
+            if (gameType != null) {
                 agentInstitutionDto.setGameTypeDescription(gameType.getDescription());
                 agentInstitutionDto.setGameTypeId(gameType.getId());
                 agentInstitutionDto.setGameTypeName(gameType.getName());
             }
 
             Institution institution = getInstitution(agentInstitution.getInstitutionId());
-            if (institution != null){
+            if (institution != null) {
                 agentInstitutionDto.setInstitutionName(institution.getInstitutionName());
                 agentInstitutionDto.setInstitutionId(institution.getId());
             }
@@ -226,6 +216,9 @@ public class Agent extends AbstractFact {
     }
 
     private GameType getGameType(String gameTypeId) {
+        if (StringUtils.isEmpty(gameTypeId)) {
+            return null;
+        }
         Map gameTypeMap = Mapstore.STORE.get("GameType");
         GameType gameType = null;
         if (gameTypeMap != null) {
@@ -241,6 +234,9 @@ public class Agent extends AbstractFact {
     }
 
     public Institution getInstitution(String institutionId) {
+        if (StringUtils.isEmpty(institutionId)) {
+            return null;
+        }
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
 }

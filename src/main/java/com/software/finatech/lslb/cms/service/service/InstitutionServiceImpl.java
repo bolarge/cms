@@ -1,10 +1,12 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.dto.InstitutionCreateDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionUpdateDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -149,7 +151,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     @Override
     public Institution findById(String institutionId) {
-        return (Institution)mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+        return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
 
     private Mono<ResponseEntity> validateInstitutionCreateInstitution(InstitutionCreateDto institutionCreateDto) {
@@ -170,6 +172,25 @@ public class InstitutionServiceImpl implements InstitutionService {
         return null;
     }
 
+    @Override
+    public Mono<ResponseEntity> createApplicantInstitution(InstitutionCreateDto institutionCreateDto, AuthInfo applicantUser) {
+        Mono<ResponseEntity> validateInstitutionResponse = validateInstitutionCreateInstitution(institutionCreateDto);
+        if (validateInstitutionResponse != null) {
+            return validateInstitutionResponse;
+        }
+        Institution newInstitution = fromCreateInstitutionDto(institutionCreateDto);
+        try {
+            mongoRepositoryReactive.saveOrUpdate(newInstitution);
+            applicantUser.setAuthRoleId(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ADMIN_ROLE_ID);
+            applicantUser.setInstitutionId(newInstitution.getId());
+            mongoRepositoryReactive.saveOrUpdate(applicantUser);
+            return Mono.just(new ResponseEntity<>(newInstitution.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            String errorMsg = "An error occurred while trying to save institution";
+            return logAndReturnError(logger, errorMsg, e);
+        }
+    }
+
     private Institution fromCreateInstitutionDto(InstitutionCreateDto institutionCreateDto) {
         Institution institution = new Institution();
         institution.setId(UUID.randomUUID().toString());
@@ -178,11 +199,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         institution.setPhoneNumber(institutionCreateDto.getPhoneNumber());
         institution.setEmailAddress(institutionCreateDto.getEmailAddress());
         institution.setGameTypeIds(institutionCreateDto.getGameTypeIds());
+        institution.setAddress(institutionCreateDto.getAddress());
+        institution.setActive(true);
         return institution;
-    }
-
-    @Override
-    public List<Institution> getAllUncreatedOnVGPay() {
-        return null;
     }
 }

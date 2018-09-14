@@ -3,28 +3,26 @@ package com.software.finatech.lslb.cms.service.dto;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-public class AuthInfoCreateDto {
+public class CreateApplicantAuthInfoDto {
     @NotNull(message = "First Name field can not be empty")
     protected String firstName;
     @NotNull(message = "Last Name field can not be empty")
     protected String lastName;
     @NotNull(message = "Phone Number field can not be empty")
-    @Size(min = 9, message = "Phone number should not be less than 9 characters")
+    @Size(min = 7)
+    @NotNull(message = "Phone Number field can not be empty")
     protected String phoneNumber;
     @NotNull(message = "Email Address field can not be empty")
     protected String emailAddress;
-    @NotNull(message = "Role ID field can not be empty")
-    protected String authRoleId;
     @NotNull(message = "Title field can not be empty")
     protected String title;
-    protected String institutionId;
 
-    public String getInstitutionId() {
-        return institutionId;
+    public String getTitle() {
+        return title;
     }
 
-    public void setInstitutionId(String institutionId) {
-        this.institutionId = institutionId;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getFirstName() {
@@ -57,21 +55,5 @@ public class AuthInfoCreateDto {
 
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
-    }
-
-    public String getAuthRoleId() {
-        return authRoleId;
-    }
-
-    public void setAuthRoleId(String authRoleId) {
-        this.authRoleId = authRoleId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 }
