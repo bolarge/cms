@@ -202,7 +202,7 @@ public class LicenseController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/specific-license", params = {"institutionId", "agentId", "gamingMachineId", "gameTypeId", "licenseTypeId"})
-    @ApiOperation(value = "Get specific license", response = PaymentRecord.class, responseContainer = "List", consumes = "application/json")
+    @ApiOperation(value = "Get specific license", response = LicenseDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -236,7 +236,7 @@ public class LicenseController {
                return Mono.just(new ResponseEntity<>("No License Found", HttpStatus.BAD_REQUEST));
 
            }else{
-               return Mono.just(new ResponseEntity<>("Success", HttpStatus.OK));
+               return Mono.just(new ResponseEntity<>(licenseRecords.convertToDto(), HttpStatus.OK));
 
            }
         } catch (Exception ex) {
