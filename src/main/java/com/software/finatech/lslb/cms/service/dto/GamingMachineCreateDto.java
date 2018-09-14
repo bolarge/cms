@@ -19,6 +19,8 @@ public class GamingMachineCreateDto {
     private Set<GamingMachineGameDetails> gameDetailsList;
     @NotEmpty(message = "please provide institutionId")
     private String institutionId;
+    @NotEmpty(message = "please provide game type id")
+    private String gameTypeId;
 
     public String getGameMachineNumber() {
         return gameMachineNumber;
@@ -58,6 +60,15 @@ public class GamingMachineCreateDto {
 
     public void setGameDetailsList(Set<GamingMachineGameDetails> gameDetailsList) {
         this.gameDetailsList = gameDetailsList;
+    }
+
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
     }
 
     public String getInstitutionId() {

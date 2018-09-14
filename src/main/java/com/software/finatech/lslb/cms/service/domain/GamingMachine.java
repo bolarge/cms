@@ -2,9 +2,12 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.GamingMachineDto;
 import com.software.finatech.lslb.cms.service.model.GamingMachineGameDetails;
+import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("serial")
@@ -16,6 +19,15 @@ public class GamingMachine extends AbstractFact {
    protected Set<GamingMachineGameDetails> gameDetailsList = new HashSet<>();
    protected String machineNumber;
    private String machineAddress;
+   private String gameTypeId;
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
 
     public String getMachineAddress() {
         return machineAddress;
@@ -66,8 +78,30 @@ public class GamingMachine extends AbstractFact {
     }
 
     public Institution getInstitution() {
+        if(StringUtils.isEmpty(this.institutionId)){
+            return null;
+        }
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
+
+    public GameType getGameType() {
+        if (gameTypeId == null) {
+            return null;
+        }
+        Map gameTypeMap = Mapstore.STORE.get("GameType");
+        GameType gameType = null;
+        if (gameTypeMap != null) {
+            gameType = (GameType) gameTypeMap.get(gameTypeId);
+        }
+        if (gameType == null) {
+            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
+            if (gameType != null && gameTypeMap != null) {
+                gameTypeMap.put(gameTypeId, gameType);
+            }
+        }
+        return gameType;
+    }
+
 
     public GamingMachineDto convertToDto(){
         GamingMachineDto gamingMachineDto = new GamingMachineDto();
@@ -81,6 +115,11 @@ public class GamingMachine extends AbstractFact {
         Institution institution = getInstitution();
         if (institution != null){
             gamingMachineDto.setInstitutionName(institution.getInstitutionName());
+        }
+        GameType gameType = getGameType();
+        if (gameType != null){
+            gamingMachineDto.setGameTypeId(getGameTypeId());
+            gamingMachineDto.setGameTypeName(gameType.getName());
         }
         return gamingMachineDto;
     }

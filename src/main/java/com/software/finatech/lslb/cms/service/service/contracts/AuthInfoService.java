@@ -4,6 +4,7 @@ import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.VerificationToken;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoCompleteDto;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
+import com.software.finatech.lslb.cms.service.dto.CreateApplicantAuthInfoDto;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOChangePasswordModel;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOPasswordResetModel;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,9 @@ import java.util.ArrayList;
 
 public interface AuthInfoService {
     Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl);
+
+    AuthInfo createApplicantAuthInfo(CreateApplicantAuthInfoDto createApplicantAuthInfoDto, String appUrl);
+
     Mono<String> updateAuthInfo();
     String resetPasswordToken(String email);
     Mono<ResponseEntity> resetPassword(SSOPasswordResetModel ssoPasswordResetModel);

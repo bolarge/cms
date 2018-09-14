@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.dto;
 import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,6 +17,7 @@ public class AgentUpdateDto {
     private String fullName;
     @NotEmpty(message = "please provide agent email address")
     private String emailAddress;
+    @Size(min = 9, message = "Phone number should not be less than 7 characters")
     @NotEmpty(message = "please provide agent phone number")
     private String phoneNumber;
     @NotEmpty(message = "please provide agent date of birth")

@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
@@ -13,42 +14,40 @@ import java.util.Map;
 public class PaymentRecord extends AbstractFact {
 
     private String institutionId;
-    private String approverId;
     private String paymentStatusId;
     private String feeId;
-    private String parentLicenseId;
     private String agentId;
     private String gamingMachineId;
-    private String startYear;
-    private String endYear;
     private double amount;
     private double amountPaid;
     private double amountOutstanding;
     private List<String> paymentRecordDetailIds = new ArrayList<>();
     private String gameTypeId;
+    private String feePaymentTypeId;
+    private String revenueNameId;
+
+    public String getRevenueNameId() {
+        return revenueNameId;
+    }
+
+    public void setRevenueNameId(String revenueNameId) {
+        this.revenueNameId = revenueNameId;
+    }
 
     public String getGameTypeId() {
         return gameTypeId;
     }
 
+    public String getFeePaymentTypeId() {
+        return feePaymentTypeId;
+    }
+
+    public void setFeePaymentTypeId(String feePaymentTypeId) {
+        this.feePaymentTypeId = feePaymentTypeId;
+    }
+
     public void setGameTypeId(String gameTypeId) {
         this.gameTypeId = gameTypeId;
-    }
-
-    public String getStartYear() {
-        return startYear;
-    }
-
-    public void setStartYear(String startYear) {
-        this.startYear = startYear;
-    }
-
-    public String getEndYear() {
-        return endYear;
-    }
-
-    public void setEndYear(String endYear) {
-        this.endYear = endYear;
     }
 
     public String getAgentId() {
@@ -67,14 +66,6 @@ public class PaymentRecord extends AbstractFact {
         this.gamingMachineId = gamingMachineId;
     }
 
-    public String getParentLicenseId() {
-        return parentLicenseId;
-    }
-
-    public void setParentLicenseId(String parentLicenseId) {
-        this.parentLicenseId = parentLicenseId;
-    }
-
     public String getFeeId() {
         return feeId;
     }
@@ -83,13 +74,6 @@ public class PaymentRecord extends AbstractFact {
         this.feeId = feeId;
     }
 
-    public String getApproverId() {
-        return approverId;
-    }
-
-    public void setApproverId(String approverId) {
-        this.approverId = approverId;
-    }
 
     public String getPaymentStatusId() {
         return paymentStatusId;
@@ -108,27 +92,17 @@ public class PaymentRecord extends AbstractFact {
     }
 
     public Institution getInstitution() {
+        if (StringUtils.isEmpty(this.institutionId)){
+            return null;
+        }
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
-
 
     public Fee getFee() {
         if (feeId == null) {
             return null;
         }
         return (Fee) mongoRepositoryReactive.findById(feeId, Fee.class).block();
-    }
-
-    private String getApproverFullName() {
-        if (approverId == null) {
-            return null;
-        }
-        AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(approverId, AuthInfo.class).block();
-        if (authInfo == null) {
-            return null;
-        } else {
-            return authInfo.getFullName();
-        }
     }
 
     public Double getAmount() {
@@ -201,30 +175,71 @@ public class PaymentRecord extends AbstractFact {
     }
 
     public Agent getAgent() {
+        if (StringUtils.isEmpty(this.agentId)) {
+            return null;
+        }
         return (Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
     }
 
     public GamingMachine getGamingMachine() {
+        if (StringUtils.isEmpty(this.gamingMachineId)) {
+            return null;
+        }
         return (GamingMachine) mongoRepositoryReactive.findById(getGamingMachineId(), GamingMachine.class).block();
+    }
+
+    public RevenueName getRevenueName() {
+        if (revenueNameId == null) {
+            return null;
+        }
+        Map revenueNameMap = Mapstore.STORE.get("RevenueName");
+
+        RevenueName revenueName = null;
+        if (revenueNameMap != null) {
+            revenueName = (RevenueName) revenueNameMap.get(revenueNameId);
+        }
+        if (revenueName == null) {
+            revenueName = (RevenueName) mongoRepositoryReactive.findById(revenueNameId, RevenueName.class).block();
+            if (revenueName != null && revenueNameMap != null) {
+                revenueNameMap.put(revenueNameId, revenueName);
+            }
+        }
+        return revenueName;
+    }
+
+    public FeePaymentType getFeePaymentType() {
+        if (feePaymentTypeId == null) {
+            return null;
+        }
+        Map feePaymentTypeMap = Mapstore.STORE.get("FeePaymentType");
+        FeePaymentType feePaymentType = null;
+        if (feePaymentTypeMap != null) {
+            feePaymentType = (FeePaymentType) feePaymentTypeMap.get(feePaymentTypeId);
+        }
+        if (feePaymentType == null) {
+            feePaymentType = (FeePaymentType) mongoRepositoryReactive.findById(feePaymentTypeId, FeePaymentType.class).block();
+            if (feePaymentType != null && feePaymentTypeMap != null) {
+                feePaymentTypeMap.put(feePaymentTypeId, feePaymentType);
+            }
+        }
+        return feePaymentType;
     }
 
     public PaymentRecordDto convertToDto() {
         PaymentRecordDto paymentRecordDto = new PaymentRecordDto();
-        Fee fee = getFee();
         paymentRecordDto.setId(getId());
-        if (fee != null) {
-            paymentRecordDto.setFeeId(getFeeId());
-            RevenueName revenueName = fee.getRevenueName();
-            FeePaymentType feePaymentType = fee.getFeePaymentType();
-            if (revenueName != null) {
-                paymentRecordDto.setRevenueName(revenueName.getName());
-                paymentRecordDto.setRevenueNameId(revenueName.getId());
-            }
-            if (feePaymentType != null) {
-                paymentRecordDto.setFeePaymentTypeId(feePaymentType.getId());
-                paymentRecordDto.setFeePaymentTypeName(feePaymentType.getName());
-            }
+        paymentRecordDto.setFeeId(getFeeId());
+        RevenueName revenueName = getRevenueName();
+        if (revenueName != null) {
+            paymentRecordDto.setRevenueName(revenueName.getName());
+            paymentRecordDto.setRevenueNameId(revenueName.getId());
         }
+        FeePaymentType feePaymentType = getFeePaymentType();
+        if (feePaymentType != null) {
+            paymentRecordDto.setFeePaymentTypeId(feePaymentType.getId());
+            paymentRecordDto.setFeePaymentTypeName(feePaymentType.getName());
+        }
+
         PaymentStatus paymentStatus = getPaymentStatus();
         if (paymentStatus != null) {
             paymentRecordDto.setPaymentStatusId(getPaymentStatusId());
@@ -244,15 +259,13 @@ public class PaymentRecord extends AbstractFact {
                 paymentRecordDto.setInstitutionName(institution.getInstitutionName());
             }
         }
-        paymentRecordDto.setStartYear(getStartYear());
-        paymentRecordDto.setEndYear(getEndYear());
-        paymentRecordDto.setApproverName(getApproverFullName());
-        paymentRecordDto.setInstitutionId(getInstitutionId());
+
         paymentRecordDto.setAmount(getAmount());
         paymentRecordDto.setAmountPaid(getAmountPaid());
         paymentRecordDto.setAmountOutstanding(getAmountOutstanding());
         Institution institution = getInstitution();
         if (institution != null) {
+            paymentRecordDto.setInstitutionId(getInstitutionId());
             paymentRecordDto.setInstitutionName(institution.getInstitutionName());
         }
         GameType gameType = getGameType();

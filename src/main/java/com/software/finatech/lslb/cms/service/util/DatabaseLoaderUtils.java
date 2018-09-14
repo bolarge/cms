@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.util;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
+import com.software.finatech.lslb.cms.service.util.httpclient.AdeTestData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,8 @@ public class DatabaseLoaderUtils {
         ModeOfPaymentReferenceData.load(mongoRepositoryReactive);
         LicenseTypeReferenceData.load(mongoRepositoryReactive);
 
-        PaymentRecordUpdater.updatePaymentRecords(mongoRepositoryReactive);
+       // PaymentRecordUpdater.updatePaymentRecords(mongoRepositoryReactive);
+       // AdeTestData.LoadTestData(mongoRepositoryReactive);
     }
 
     // @Profile("test")

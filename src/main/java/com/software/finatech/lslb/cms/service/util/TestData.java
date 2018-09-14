@@ -5,7 +5,6 @@ import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -261,9 +260,6 @@ public class TestData {
             paymentRecord.setInstitutionId("" + i);
             paymentRecord.setGameTypeId("01");
             paymentRecord.setFeeId(fee.getId());
-            paymentRecord.setApproverId("1");
-            paymentRecord.setStartYear("2018");
-            paymentRecord.setEndYear("2019");
             License license = (License) mongoRepositoryReactive.findById(paymentRecord.getId(), License.class).block();
             if (license == null) {
                 license = new License();
@@ -273,36 +269,36 @@ public class TestData {
             license.setInstitutionId(paymentRecord.getInstitutionId());
             license.setGameTypeId("01");
             license.setPaymentRecordId(paymentRecord.getId());
-            license.setStartDate(LocalDate.now());
+            license.setEffectiveDate(LocalDate.now());
             LocalDate startDate = new LocalDate();
-            license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.getGameType().getLicenseDuration())));
-            license.setLicenseType(LicenseTypeReferenceData.INSTITUTION);
+            license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getInstitutionLicenseDurationMonths()));
+            license.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION);
             license.setFirstPayment(false);
 
-            if(i==1){
-                license.setStartDate(LocalDate.now());
+            if (i == 1) {
+                license.setEffectiveDate(LocalDate.now());
                 license.setLicenseStatusId(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
-                license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.getGameType().getAipDuration())));
+                license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getAipDurationMonths()));
 
             }
             if (i == 3) {
                 paymentRecord.setGamingMachineId(gamingMachine.getId());
                 license.setGamingMachineId(paymentRecord.getGamingMachineId());
-                license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.getGameType().getGamingMachineLicenseDuration())));
-                license.setLicenseType(LicenseTypeReferenceData.GAMING_MACHINE);
+                license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getGamingMachineLicenseDurationMonths()));
+                license.setLicenseTypeId(LicenseTypeReferenceData.GAMING_MACHINE);
 
             }
             if (i == 4) {
                 paymentRecord.setAgentId(agent.getId());
                 license.setAgentId(paymentRecord.getAgentId());
-                license.setEndDate(startDate.plusMonths(Integer.parseInt(paymentRecord.getGameType().getAgentLicenseDuration())));
-                license.setLicenseType(LicenseTypeReferenceData.AGENT);
+                license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getAgentLicenseDurationMonths()));
+                license.setLicenseTypeId(LicenseTypeReferenceData.AGENT);
                 agent.setEmailAddress("samelikzra@gmail.com");
 
             }
-            if(i==5){
-                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_IN_PROGRESS_LICENSE_STATUS_ID);
-                
+            if (i == 5) {
+                license.setLicenseStatusId(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
+
             }
             license.setRenewalStatus("false");
             mongoRepositoryReactive.saveOrUpdate(gamingMachine);

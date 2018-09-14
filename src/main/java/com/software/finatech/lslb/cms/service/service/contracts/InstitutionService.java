@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.dto.InstitutionCreateDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
@@ -26,5 +27,5 @@ public interface InstitutionService {
 
     Institution findById(String institutionId);
 
-    List<Institution> getAllUncreatedOnVGPay();
+    Mono<ResponseEntity> createApplicantInstitution(InstitutionCreateDto institutionCreateDto, AuthInfo applicantUser);
 }

@@ -98,7 +98,9 @@ public class GamingMachineServiceImpl implements GamingMachineService {
     @Override
     public Mono<ResponseEntity> createGamingMachine(GamingMachineCreateDto gamingMachineCreateDto) {
         try {
-            Mono<ResponseEntity> validateGamingMachineLicenseResponse = validateInstitutionGamingMachineLicense(gamingMachineCreateDto.getInstitutionId());
+            String institutionId = gamingMachineCreateDto.getInstitutionId();
+            String gameTypeId = gamingMachineCreateDto.getGameTypeId();
+            Mono<ResponseEntity> validateGamingMachineLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
             if (validateGamingMachineLicenseResponse != null) {
                 return validateGamingMachineLicenseResponse;
             }
@@ -112,11 +114,11 @@ public class GamingMachineServiceImpl implements GamingMachineService {
 
     @Override
     public Mono<ResponseEntity> validateInstitutionGamingMachineLicense(String institutionId) {
-        String gameTypeId = GameTypeReferenceData.GAMING_MACHINE_OPERATOR_ID;
-        Mono<ResponseEntity> licenseValidationResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
-        if (licenseValidationResponse != null) {
-            return licenseValidationResponse;
-        }
+//        String gameTypeId = GameTypeReferenceData.GAMING_MACHINE_OPERATOR_ID;
+//        Mono<ResponseEntity> licenseValidationResponse =
+//        if (licenseValidationResponse != null) {
+//            return licenseValidationResponse;
+//        }
         return null;
     }
 
@@ -141,6 +143,8 @@ public class GamingMachineServiceImpl implements GamingMachineService {
         return (GamingMachine) mongoRepositoryReactive.findById(gamingMachineId, GamingMachine.class).block();
     }
 
+
+    //TODO: validate if its multiple or not
     @Override
     public Mono<ResponseEntity> uploadMultipleGamingMachinesForInstitution(String institutionId, MultipartFile multipartFile) {
         Institution institution = institutionService.findById(institutionId);
@@ -259,6 +263,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
         gamingMachine.setMachineNumber(gamingMachineCreateDto.getGameMachineNumber());
         gamingMachine.setGameDetailsList(gamingMachineCreateDto.getGameDetailsList());
         gamingMachine.setMachineAddress(gamingMachineCreateDto.getMachineAddress());
+        gamingMachine.setGameTypeId(gamingMachineCreateDto.getGameTypeId());
         return gamingMachine;
     }
 

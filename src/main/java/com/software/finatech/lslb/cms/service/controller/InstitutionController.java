@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.dto.InstitutionCreateDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
@@ -10,7 +11,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -51,7 +56,7 @@ public class InstitutionController extends BaseController {
 
 
     @RequestMapping(method = RequestMethod.POST, value = "/new")
-    @ApiOperation(value = "Create new Institution", response = Institution.class, consumes = "application/json")
+    @ApiOperation(value = "Create new Institution", response = InstitutionDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -74,5 +79,27 @@ public class InstitutionController extends BaseController {
     )
     public Mono<ResponseEntity> updateInstitution(@RequestBody @Valid InstitutionUpdateDto institutionUpdateDto) {
         return institutionService.updateInstitution(institutionUpdateDto);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/new-applicant-institution")
+    @ApiOperation(value = "Create new Institution for an applicant  ",response = InstitutionDto.class, consumes = "application/json",
+            notes = "Creates a new institution for an applicant, then makes the applicant a gaming-operator-admin of the institution")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")
+    }
+    )
+    public Mono<ResponseEntity> createApplicantInstitution(@RequestBody @Valid InstitutionCreateDto institutionCreateDto) {
+        String applicantUserId = institutionCreateDto.getUserId();
+        if (StringUtils.isEmpty(applicantUserId)) {
+            return Mono.just(new ResponseEntity<>("Please provide applicant user id", HttpStatus.BAD_REQUEST));
+        }
+        AuthInfo applicantUser = (AuthInfo) mongoRepositoryReactive.findById(applicantUserId, AuthInfo.class).block();
+        if (applicantUser == null) {
+            return Mono.just(new ResponseEntity<>("Applicant user does not exist", HttpStatus.BAD_REQUEST));
+        }
+        return institutionService.createApplicantInstitution(institutionCreateDto, applicantUser);
     }
 }

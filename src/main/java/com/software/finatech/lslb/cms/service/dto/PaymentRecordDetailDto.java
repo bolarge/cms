@@ -7,9 +7,36 @@ public class PaymentRecordDetailDto {
     private String paymentDate;
     private String invoiceNumber;
     private String modeOfPaymentName;
+    private String modeOfPaymentId;
     private String id;
     private String paymentRecordId;
+    private String vigiPayReference;
+    private String paymentStatusId;
 
+
+    public String getPaymentStatusId() {
+        return paymentStatusId;
+    }
+
+    public void setPaymentStatusId(String paymentStatusId) {
+        this.paymentStatusId = paymentStatusId;
+    }
+
+    public String getModeOfPaymentId() {
+        return modeOfPaymentId;
+    }
+
+    public void setModeOfPaymentId(String modeOfPaymentId) {
+        this.modeOfPaymentId = modeOfPaymentId;
+    }
+
+    public String getVigiPayReference() {
+        return vigiPayReference;
+    }
+
+    public void setVigiPayReference(String vigiPayReference) {
+        this.vigiPayReference = vigiPayReference;
+    }
 
     public String getCreationDate() {
         return creationDate;

@@ -64,6 +64,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         "/api/v1/authInfo/confirm",
         "/api/v1/authInfo/new-gaming-operator",
         "/api/v1/gameType/allgametypes",
+        "/api/v1/authInfo/new-applicant-user",
         "/v2/api-docs",
          "/configuration/ui", 
          "/swagger-resources/**", 

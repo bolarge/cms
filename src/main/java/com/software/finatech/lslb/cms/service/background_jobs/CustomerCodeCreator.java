@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.VigipayService;
+import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +29,13 @@ public class CustomerCodeCreator {
     @Autowired
     private VigipayService vigipayService;
 
+    private static final int FIVE_MIN = 5 * 60 * 1000;
+
     private static final Logger logger = LoggerFactory.getLogger(CustomerCodeCreator.class);
 
 
-    @Scheduled(fixedRate = 5000)
+   // @Scheduled(fixedRate = 30000)
+   // @SchedulerLock(name = "Create Customer Code for Institutions and Agents without Customer code", lockAtMostFor = FIVE_MIN, lockAtLeastFor = FIVE_MIN)
     public void createCustomers() {
         logger.info("Started getting customer code");
         Query query = new Query();

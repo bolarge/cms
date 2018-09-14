@@ -10,6 +10,7 @@ import com.software.finatech.lslb.cms.service.dto.sso.SSOUserConfirmResetPasswor
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.service.AuthInfoServiceImpl;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
+import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -305,9 +306,10 @@ public class AuthInfoController extends BaseController {
     }
 
 
-    @RequestMapping(value = "/new-gaming-operator", method = RequestMethod.POST, produces = "application/json")
+    @RequestMapping(value = "/new-applicant-user", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
-    @ApiOperation(value = "Creates a new gaming operator user", response = AuthInfoDto.class, consumes = "application/json")
+    @ApiOperation(value = "Creates a new gaming operator user", response = AuthInfoDto.class, consumes = "application/json",
+            notes = "The endpoint is not secured because it is meant to be accessed from outside the login")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -315,7 +317,7 @@ public class AuthInfoController extends BaseController {
     }
     )
     //@PreAuthorize("hasAuthority('WRITE')")
-    public Mono<ResponseEntity> createGamingOperatorAuthInfo(@Valid @RequestBody CreateGameOperatorAuthInfoDto createGameOperatorAuthInfoDto, HttpServletRequest request) {
+    public Mono<ResponseEntity> createGamingOperatorAuthInfo(@Valid @RequestBody CreateApplicantAuthInfoDto createGameOperatorAuthInfoDto, HttpServletRequest request) {
         try {
             // Lookup AuthInfo in database by e-mail
             AuthInfo authInfoExists = (AuthInfo) mongoRepositoryReactive.find(new Query(Criteria.where("emailAddress").is(createGameOperatorAuthInfoDto.getEmailAddress())), AuthInfo.class).block();
@@ -330,16 +332,12 @@ public class AuthInfoController extends BaseController {
 
             String appUrl = appHostPort + request.getContextPath();
 
-
-            AuthInfo authInfo = authInfoService.createGameOperatorAuthInfo(createGameOperatorAuthInfoDto, appUrl);
-
-            return Mono.just(new ResponseEntity(authInfo.convertToDto(), HttpStatus.OK));
+            AuthInfo authInfo = authInfoService.createApplicantAuthInfo(createGameOperatorAuthInfoDto, appUrl);
+            return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {
-            e.printStackTrace();
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while creating user", e);
         }
-
-        return null;
     }
 
     /**

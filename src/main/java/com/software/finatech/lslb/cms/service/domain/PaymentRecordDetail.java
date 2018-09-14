@@ -18,7 +18,6 @@ public class PaymentRecordDetail extends AbstractFact {
     private String paymentRecordId;
     private String vigiPayTransactionReference;
 
-
     public String getVigiPayTransactionReference() {
         return vigiPayTransactionReference;
     }
@@ -84,14 +83,18 @@ public class PaymentRecordDetail extends AbstractFact {
         ModeOfPayment modeOfPayment = getModeOfPayment();
         if (modeOfPayment != null) {
             paymentRecordDetailDto.setModeOfPaymentName(modeOfPayment.getName());
+            paymentRecordDetailDto.setModeOfPaymentId(getModeOfPaymentId());
         }
         PaymentStatus paymentStatus = getPaymentStatus();
         if (paymentStatus != null) {
             paymentRecordDetailDto.setPaymentStatus(paymentStatus.getName());
+            paymentRecordDetailDto.setPaymentStatusId(getPaymentStatusId());
         }
 
         paymentRecordDetailDto.setCreationDate(getCreatedAt() != null ? getCreatedAt().toString("dd-MM-yyyy") : null);
         paymentRecordDetailDto.setPaymentDate(paymentDate != null ? paymentDate.toString("dd-MM-yyyy") : null);
+        paymentRecordDetailDto.setInvoiceNumber(getInvoiceNumber());
+        paymentRecordDetailDto.setVigiPayReference(getVigiPayTransactionReference());
         return paymentRecordDetailDto;
     }
 

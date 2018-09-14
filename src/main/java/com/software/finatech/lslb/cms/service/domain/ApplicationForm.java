@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.model.declaration.ApplicantDeclara
 import com.software.finatech.lslb.cms.service.model.otherInformation.ApplicantOtherInformation;
 import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantOutletInformation;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Map;
@@ -165,10 +166,16 @@ public class ApplicationForm extends AbstractFact {
     }
 
     public AuthInfo getAuthInfo(String authInfoId) {
+        if (StringUtils.isEmpty(authInfoId)) {
+            return null;
+        }
         return (AuthInfo) mongoRepositoryReactive.findById(authInfoId, AuthInfo.class).block();
     }
 
     private GameType getGameType() {
+        if (StringUtils.isEmpty(this.gameTypeId)) {
+            return null;
+        }
         Map gameTypeMap = Mapstore.STORE.get("GameType");
         GameType gameType = null;
         if (gameTypeMap != null) {
@@ -202,6 +209,9 @@ public class ApplicationForm extends AbstractFact {
     }
 
     private ApplicationFormStatus getStatus() {
+        if (StringUtils.isEmpty(this.applicationFormStatusId)) {
+            return null;
+        }
         Map applicationFormStatusMap = Mapstore.STORE.get("ApplicationFormStatus");
         ApplicationFormStatus applicationFormStatus = null;
         if (applicationFormStatusMap != null) {
@@ -217,6 +227,9 @@ public class ApplicationForm extends AbstractFact {
     }
 
     private ApplicationFormType getApplicationFormType() {
+        if (StringUtils.isEmpty(this.applicationFormTypeId)) {
+            return null;
+        }
         Map applicationFormTypeMap = Mapstore.STORE.get("ApplicationFormType");
         ApplicationFormType applicationFormType = null;
         if (applicationFormTypeMap != null) {
@@ -232,6 +245,9 @@ public class ApplicationForm extends AbstractFact {
     }
 
     public Institution getInstitution() {
+        if (StringUtils.isEmpty(institutionId)) {
+            return null;
+        }
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
 
@@ -246,6 +262,7 @@ public class ApplicationForm extends AbstractFact {
         ApplicationFormStatus applicationFormStatus = getStatus();
         if (applicationFormStatus != null) {
             applicationFormDto.setStatusName(applicationFormStatus.getName());
+            applicationFormDto.setStatusId(getApplicationFormStatusId());
         }
 
         ApplicationFormType applicationFormType = getApplicationFormType();

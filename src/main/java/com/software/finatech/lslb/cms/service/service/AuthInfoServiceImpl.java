@@ -5,7 +5,7 @@ import com.software.finatech.lslb.cms.service.domain.AuthRole;
 import com.software.finatech.lslb.cms.service.domain.VerificationToken;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoCompleteDto;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
-import com.software.finatech.lslb.cms.service.dto.CreateGameOperatorAuthInfoDto;
+import com.software.finatech.lslb.cms.service.dto.CreateApplicantAuthInfoDto;
 import com.software.finatech.lslb.cms.service.dto.sso.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
@@ -96,6 +96,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         authInfo.setPhoneNumber(authInfoCreateDto.getPhoneNumber());
         authInfo.setFirstName(authInfoCreateDto.getFirstName());
         authInfo.setLastName(authInfoCreateDto.getLastName());
+        authInfo.setTitle(authInfoCreateDto.getTitle());
         authInfo.setFullName(authInfoCreateDto.getFirstName() + " " + authInfoCreateDto.getLastName());
         authInfo.setInstitutionId(authInfoCreateDto.getInstitutionId());
         mongoRepositoryReactive.saveOrUpdate(authInfo);
@@ -169,18 +170,20 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         }
     }
 
-    //  @Override
-    public AuthInfo createGameOperatorAuthInfo(CreateGameOperatorAuthInfoDto createGameOperatorAuthInfoDto, String appUrl) {
+
+    @Override
+    public AuthInfo createApplicantAuthInfo(CreateApplicantAuthInfoDto createApplicantAuthInfoDto, String appUrl) {
         AuthInfo authInfo = new AuthInfo();
         authInfo.setId(UUID.randomUUID().toString());
         authInfo.setEnabled(false);
-        authInfo.setAuthRoleId(createGameOperatorAuthInfoDto.getAuthRoleId());
+        authInfo.setAuthRoleId(LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID);
         authInfo.setAccountLocked(false);
-        authInfo.setEmailAddress(createGameOperatorAuthInfoDto.getEmailAddress());
-        authInfo.setPhoneNumber(createGameOperatorAuthInfoDto.getPhoneNumber());
-        authInfo.setFirstName(createGameOperatorAuthInfoDto.getName());
-        authInfo.setLastName(createGameOperatorAuthInfoDto.getName());
-        authInfo.setFullName(createGameOperatorAuthInfoDto.getName());
+        authInfo.setEmailAddress(createApplicantAuthInfoDto.getEmailAddress());
+        authInfo.setPhoneNumber(createApplicantAuthInfoDto.getPhoneNumber());
+        authInfo.setFirstName(createApplicantAuthInfoDto.getFirstName());
+        authInfo.setLastName(createApplicantAuthInfoDto.getLastName());
+        authInfo.setTitle(createApplicantAuthInfoDto.getTitle());
+        authInfo.setFullName(createApplicantAuthInfoDto.getFirstName() + " " + createApplicantAuthInfoDto.getLastName());
         mongoRepositoryReactive.saveOrUpdate(authInfo);
 
         // First we check if User exists
@@ -245,7 +248,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
             return authInfo;
         } catch (Exception e) {
-            logger.error("An error occured when trying to confirm if user exists", e);
+            logger.error("An error occurred when trying to confirm if user exists", e);
             return null;
         }
     }

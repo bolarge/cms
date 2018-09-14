@@ -57,7 +57,7 @@ public class PaymentRecordDetailController extends BaseController {
     }
 
 
-    @RequestMapping(method = RequestMethod.POST, value = "/update")
+    @RequestMapping(method = RequestMethod.POST, value = "/update-web")
     @ApiOperation(value = "Update an existing payment record detail", response = PaymentRecordDetailDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -67,7 +67,7 @@ public class PaymentRecordDetailController extends BaseController {
     }
     )
     public Mono<ResponseEntity> updatePaymentRecord(@RequestBody @Valid PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto) {
-        return paymentRecordDetailService.updatePaymentRecordDetail(paymentRecordDetailUpdateDto);
+        return paymentRecordDetailService.updateWebPaymentRecordDetail(paymentRecordDetailUpdateDto);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/vigipay-in-branch-payment-notification")

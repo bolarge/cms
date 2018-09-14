@@ -7,42 +7,41 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "GameType")
 public class GameType extends EnumeratedFact {
 
+    protected int aipDurationMonths;
+    protected int institutionLicenseDurationMonths;
+    protected int agentLicenseDurationMonths;
+    protected int gamingMachineLicenseDurationMonths;
 
-    protected String aipDuration;
-    protected String licenseDuration;
-    protected String agentLicenseDuration;
-    protected String gamingMachineLicenseDuration;
-
-    public String getAgentLicenseDuration() {
-        return agentLicenseDuration;
+    public int getAipDurationMonths() {
+        return aipDurationMonths;
     }
 
-    public void setAgentLicenseDuration(String agentLicenseDuration) {
-        this.agentLicenseDuration = agentLicenseDuration;
+    public void setAipDurationMonths(int aipDurationMonths) {
+        this.aipDurationMonths = aipDurationMonths;
     }
 
-    public String getGamingMachineLicenseDuration() {
-        return gamingMachineLicenseDuration;
+    public int getInstitutionLicenseDurationMonths() {
+        return institutionLicenseDurationMonths;
     }
 
-    public void setGamingMachineLicenseDuration(String gamingMachineLicenseDuration) {
-        this.gamingMachineLicenseDuration = gamingMachineLicenseDuration;
+    public void setInstitutionLicenseDurationMonths(int institutionLicenseDurationMonths) {
+        this.institutionLicenseDurationMonths = institutionLicenseDurationMonths;
     }
 
-    public String getAipDuration() {
-        return aipDuration;
+    public int getAgentLicenseDurationMonths() {
+        return agentLicenseDurationMonths;
     }
 
-    public void setAipDuration(String aipDuration) {
-        this.aipDuration = aipDuration;
+    public void setAgentLicenseDurationMonths(int agentLicenseDurationMonths) {
+        this.agentLicenseDurationMonths = agentLicenseDurationMonths;
     }
 
-    public String getLicenseDuration() {
-        return licenseDuration;
+    public int getGamingMachineLicenseDurationMonths() {
+        return gamingMachineLicenseDurationMonths;
     }
 
-    public void setLicenseDuration(String licenseDuration) {
-        this.licenseDuration = licenseDuration;
+    public void setGamingMachineLicenseDurationMonths(int gamingMachineLicenseDurationMonths) {
+        this.gamingMachineLicenseDurationMonths = gamingMachineLicenseDurationMonths;
     }
 
     public GameTypeDto convertToDto() {
@@ -50,10 +49,10 @@ public class GameType extends EnumeratedFact {
         gameType.setName(getName());
         gameType.setId(getId());
         gameType.setDescription(getDescription());
-        gameType.setAipDuration(getAipDuration());
-        gameType.setLicenseDuration(getLicenseDuration());
-        gameType.setAgentLicenseDuration(getAgentLicenseDuration());
-        gameType.setGamingMachineLicenseDuration(getGamingMachineLicenseDuration());
+        gameType.setAipDuration(String.valueOf(getAipDurationMonths()));
+        gameType.setLicenseDuration(String.valueOf(getInstitutionLicenseDurationMonths()));
+        gameType.setAgentLicenseDuration(String.valueOf(getAgentLicenseDurationMonths()));
+        gameType.setGamingMachineLicenseDuration(String.valueOf(getGamingMachineLicenseDurationMonths()));
         return gameType;
     }
 

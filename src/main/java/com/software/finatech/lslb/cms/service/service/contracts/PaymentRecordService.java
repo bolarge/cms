@@ -16,19 +16,21 @@ public interface PaymentRecordService {
                                                String sortDirection,
                                                String sortProperty,
                                                String institutionId,
-                                               String approverId,
-                                               String feeId,
+                                               String agentId,
+                                               String gamingMachineId,
+                                               String gameTypeId,
+                                               String feePaymentTypeId,
+                                               String revenueNameId,
+                                               String paymentStatusId,
                                                HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getAllPaymentStatus();
-
-    Mono<ResponseEntity> updatePaymentRecord(PaymentRecordUpdateDto paymentRecordUpdateDto);
-
-    Mono<ResponseEntity> createPaymentRecord(PaymentRecordCreateDto paymentRecordCreateDto);
 
     List<PaymentRecord> findPayments(String institutionId, String agentId, String gamingMachineId, String gameTypeId, String startYear);
 
     PaymentRecord findById(String paymentRecordId);
 
     void savePaymentRecord(PaymentRecord paymentRecord);
+
+    PaymentRecord findExistingConfirmedApplicationFeeForInstitutionAndGameType(String institutionId, String gameTypeId);
 }
