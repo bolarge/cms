@@ -6,13 +6,11 @@ import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.VigipayService;
-import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

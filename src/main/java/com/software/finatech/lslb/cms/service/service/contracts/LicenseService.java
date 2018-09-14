@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.service.contracts;
 
 import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.domain.GameType;
+import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseUpdateAIPToLicenseDto;
@@ -37,7 +38,7 @@ public interface LicenseService {
     Mono<ResponseEntity> getInstitutionAIPs(String institutionId);
     Mono<ResponseEntity> updateToDocumentAIP(String licenseId);
     Mono<ResponseEntity> updateAIPDocToLicense(LicenseUpdateAIPToLicenseDto licenseUpdateDto);
-
+    License findRenewalLicense(String institutionId, String agentId, String gamingMachineId, String gameTypeId, String licenseTypeId);
     boolean institutionIsLicensedForGameType(String institutionId, String gameTypeId);
 
     void createAIPLicenseForCompletedPayment(PaymentRecord paymentRecord);
@@ -47,4 +48,5 @@ public interface LicenseService {
     void createFirstLicenseForGamingMachinePayment(PaymentRecord paymentRecord);
 
     void createRenewedLicenseForPayment(PaymentRecord paymentRecord);
+
 }

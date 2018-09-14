@@ -383,6 +383,27 @@ public class LicenseServiceImpl implements LicenseService {
         }
     }
 
+    @Override
+    public License findRenewalLicense(String institutionId, String agentId, String gamingMachineId, String gameTypeId, String licenseTypeId) {
+        Query queryLicense = new Query();
+        if(!StringUtils.isEmpty(agentId)){
+            queryLicense.addCriteria(Criteria.where("agentId").is(agentId));
+        }
+        if(!StringUtils.isEmpty(gamingMachineId)){
+            queryLicense.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
+        }
+        if(!StringUtils.isEmpty(institutionId)){
+            queryLicense.addCriteria(Criteria.where("institutionId").is(institutionId));
+        }
+        queryLicense.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        queryLicense.addCriteria(Criteria.where("licenseTypeId").is(licenseTypeId));
+        queryLicense.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID));
+
+        License licenses = (License) mongoRepositoryReactive.find(queryLicense, License.class).block();
+        return licenses;
+
+    }
+
 
     @Override
     public void createAIPLicenseForCompletedPayment(PaymentRecord paymentRecord) {
