@@ -95,7 +95,7 @@ public class LicenseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllLicenseTypes() {
-        return Mono.just(new ResponseEntity<>(licenseService.getAllLicenseTypes(), HttpStatus.BAD_REQUEST));
+        return Mono.just(new ResponseEntity<>(licenseService.getAllLicenseTypes(), HttpStatus.OK));
 
     }
 
