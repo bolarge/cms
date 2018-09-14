@@ -21,14 +21,14 @@ public class RevenueNameReferenceData {
             revenueName1 = new RevenueName();
             revenueName1.setId(AGENT_REVENUE_CODE);
         }
-        revenueName1.setName("AGENT REVENUE");
+        revenueName1.setName("AGENT");
 
         RevenueName revenueName2 = (RevenueName) mongoRepositoryReactive.findById(GAMING_MACHINE_CODE, RevenueName.class).block();
         if (revenueName2 == null) {
             revenueName2 = new RevenueName();
             revenueName2.setId(GAMING_MACHINE_CODE);
         }
-        revenueName2.setName("GAMING REVENUE");
+        revenueName2.setName("GAMING");
 
         mongoRepositoryReactive.saveOrUpdate(revenueName);
         mongoRepositoryReactive.saveOrUpdate(revenueName1);
