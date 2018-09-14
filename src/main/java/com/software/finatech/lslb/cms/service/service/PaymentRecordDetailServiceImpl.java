@@ -161,6 +161,9 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             if (institution == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Institution with id %s does not exist", institutionId), HttpStatus.BAD_REQUEST));
             }
+            if (StringUtils.isEmpty(institution.getVgPayCustomerCode())){
+                return Mono.just(new ResponseEntity<>("Customer not created",HttpStatus.BAD_REQUEST));
+            }
             invoiceNumber = createInBranchRecordDetailForInstitution(institution, feeDescription, paymentRecordDetailCreateDto, institutionAdmins);
         }
 
@@ -171,6 +174,9 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institution.getId());
                 if (institutionAdmins.isEmpty()) {
                     return Mono.just(new ResponseEntity<>("There are no gaming operator admins for institution owning gaming machine", HttpStatus.BAD_REQUEST));
+                }
+                if (StringUtils.isEmpty(institution.getVgPayCustomerCode())){
+                    return Mono.just(new ResponseEntity<>("Customer not created",HttpStatus.BAD_REQUEST));
                 }
                 invoiceNumber = createInBranchRecordDetailForInstitution(institution, feeDescription, paymentRecordDetailCreateDto, institutionAdmins);
             }
