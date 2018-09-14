@@ -256,6 +256,7 @@ public class Document extends AbstractFact {
         dto.setValidFrom(getValidFrom() == null ? null : getValidFrom().toString("dd-MM-yyyy"));
         dto.setValidTo(getValidTo() == null ? null : getValidTo().toString("dd-MM-yyyy"));
         dto.setOwner(getOwner());
+        dto.setGameTypeId(getGameTypeId());
         return dto;
     }
 }
