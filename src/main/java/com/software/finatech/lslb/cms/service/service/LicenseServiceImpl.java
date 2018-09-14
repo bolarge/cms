@@ -1,9 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.service.domain.GameType;
-import com.software.finatech.lslb.cms.service.domain.License;
-import com.software.finatech.lslb.cms.service.domain.LicenseStatus;
-import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.AIPCheckDto;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
@@ -219,6 +216,17 @@ public class LicenseServiceImpl implements LicenseService {
         });
         return licenseStatusDtoLists;
     }
+    @Override
+    public List<EnumeratedFactDto> getAllLicenseTypes() {
+        Map licenseMap = Mapstore.STORE.get("LicenseTypes");
+        ArrayList<LicenseType> licenseTypes = new ArrayList<LicenseType>(licenseMap.values());
+        List<EnumeratedFactDto> licenseTypesDtoLists = new ArrayList<>();
+        licenseTypes.forEach(factObject -> {
+            LicenseType licenseType = factObject;
+            licenseTypesDtoLists.add(licenseType.convertToDto());
+        });
+        return licenseTypesDtoLists;
+    }
 
     @Override
     public Mono<ResponseEntity> getAllLicenseStatus() {
@@ -362,7 +370,7 @@ public class LicenseServiceImpl implements LicenseService {
             queryLicence.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID));
             License license = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
             if (license == null) {
-                return Mono.just(new ResponseEntity<>("Operator have not uploaded AIP document", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Operator has not uploaded AIP document", HttpStatus.BAD_REQUEST));
 
             }
             license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
