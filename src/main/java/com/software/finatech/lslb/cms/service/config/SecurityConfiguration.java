@@ -65,6 +65,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         "/api/v1/authInfo/new-gaming-operator",
         "/api/v1/gameType/allgametypes",
         "/api/v1/authInfo/new-applicant-user",
+        "/api/v1/payment-record-details/vigipay-in-branch-payment-notification",
         "/v2/api-docs",
          "/configuration/ui", 
          "/swagger-resources/**", 

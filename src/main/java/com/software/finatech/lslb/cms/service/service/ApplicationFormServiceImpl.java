@@ -549,7 +549,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-        query.addCriteria(Criteria.where("applicationFormStatus").is(ApplicationFormStatusReferenceData.APPROVED_STATUS_ID));
+        query.addCriteria(Criteria.where("applicationFormStatusId").is(ApplicationFormStatusReferenceData.APPROVED_STATUS_ID));
 
         ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.find(query, ApplicationForm.class).block();
         return applicationForm != null;
