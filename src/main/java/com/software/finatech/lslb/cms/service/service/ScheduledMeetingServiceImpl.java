@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.domain.ScheduledMeeting;
@@ -131,6 +132,11 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             if (invitedInstitution == null) {
                 return Mono.just(new ResponseEntity<>("Invited institution does not exist", badRequestStatus));
             }
+            String applicationFormId = scheduledMeetingCreateDto.getApplicationFormId();
+            ApplicationForm applicationForm = getApplicationForm(applicationFormId);
+            if (applicationForm == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Application form with id %s  does not exist", applicationFormId), badRequestStatus));
+            }
             ArrayList<AuthInfo> gamingOperatorAdminsForInstitution = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institutionId);
             if (gamingOperatorAdminsForInstitution == null || gamingOperatorAdminsForInstitution.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("There is no user with role gaming operator admin for institution", badRequestStatus));
@@ -140,10 +146,10 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             ScheduledMeeting scheduledMeeting = fromCreateDto(scheduledMeetingCreateDto);
             saveScheduledMeeting(scheduledMeeting);
             String creatorMailSubject = String.format("Scheduled meeting with %s", invitedInstitution.getInstitutionName());
-            sendMeetingNotificationEmailToMeetingCreator(creatorMailSubject, "ScheduledMeetingInitialNotificationForLslbAdmin", scheduledMeeting);
+            //    sendMeetingNotificationEmailToMeetingCreator(creatorMailSubject, "ScheduledMeetingInitialNotificationForLslbAdmin", scheduledMeeting);
 
             for (AuthInfo gamingOperatorAdmin : gamingOperatorAdminsForInstitution) {
-                sendMeetingNotificationEmailToAttendee("Meeting Invite With Lagos State Lotteries Board", "ScheduledMeetingInitialNotificationForGamingOperator", gamingOperatorAdmin, scheduledMeeting);
+                sendMeetingNotificationEmailToAttendee("Meeting Invite With Lagos State Lotteries Board", "scheduleMeeting-GA-new", gamingOperatorAdmin, scheduledMeeting);
             }
 
             sendInitialNotificationToMeetingParticipants(scheduledMeeting);
@@ -166,7 +172,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             if (canceler == null) {
                 return Mono.just(new ResponseEntity<>("Canceling user does not exist", HttpStatus.BAD_REQUEST));
             }
-            String canceledMeetingStatusId = "3";
+            String canceledMeetingStatusId = ScheduledMeetingStatusReferenceData.CANCELED_STATUS_ID;
             scheduledMeeting.setScheduledMeetingStatusId(canceledMeetingStatusId);
             scheduledMeeting.setCancelerId(cancelerId);
             saveScheduledMeeting(scheduledMeeting);
@@ -183,7 +189,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             if (scheduledMeeting == null) {
                 return Mono.just(new ResponseEntity<>("Scheduled meeting does not exist", HttpStatus.BAD_REQUEST));
             }
-            String completedMeetingStatusId = "2";
+            String completedMeetingStatusId = ScheduledMeetingStatusReferenceData.COMPLETED_STATUS_ID;
             scheduledMeeting.setScheduledMeetingStatusId(completedMeetingStatusId);
             saveScheduledMeeting(scheduledMeeting);
             return Mono.just(new ResponseEntity<>(scheduledMeeting.convertToDto(), HttpStatus.OK));
@@ -199,13 +205,16 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             if (existingScheduledMeeting == null) {
                 return Mono.just(new ResponseEntity<>("Scheduled meeting does not exist", HttpStatus.BAD_REQUEST));
             }
-            existingScheduledMeeting.setCreatorId(scheduledMeetingUpdateDto.getCreatorId());
             existingScheduledMeeting.setMeetingSubject(scheduledMeetingUpdateDto.getMeetingTitle());
             existingScheduledMeeting.setVenue(scheduledMeetingUpdateDto.getVenue());
             existingScheduledMeeting.setMeetingDescription(scheduledMeetingUpdateDto.getAdditionalNotes());
-            existingScheduledMeeting.setInstitutionId(scheduledMeetingUpdateDto.getInstitutionId());
             existingScheduledMeeting.setMeetingDate(FORMATTER.parseDateTime(scheduledMeetingUpdateDto.getMeetingDate()));
             saveScheduledMeeting(existingScheduledMeeting);
+
+            ArrayList<AuthInfo> gamingOperatorAdminsForInstitution = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(existingScheduledMeeting.getInstitutionId());
+            for (AuthInfo gamingOperatorAdmin : gamingOperatorAdminsForInstitution) {
+                sendMeetingNotificationEmailToAttendee("Update on Meeting Invite With Lagos State Lotteries Board", "scheduleMeeting-reschedule-GA-new", gamingOperatorAdmin, existingScheduledMeeting);
+            }
             return Mono.just(new ResponseEntity<>(existingScheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format for meeting date , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
@@ -221,6 +230,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
         scheduledMeeting.setVenue(scheduledMeetingCreateDto.getVenue());
         scheduledMeeting.setMeetingSubject(scheduledMeetingCreateDto.getMeetingTitle());
         scheduledMeeting.setCreatorId(scheduledMeetingCreateDto.getCreatorId());
+        scheduledMeeting.setApplicationFormId(scheduledMeetingCreateDto.getApplicationFormId());
         String pendingScheduledMeetingStatusId = ScheduledMeetingStatusReferenceData.PENDING_STATUS_ID;
         scheduledMeeting.setScheduledMeetingStatusId(pendingScheduledMeetingStatusId);
         DateTime meetingDate = FORMATTER.parseDateTime(scheduledMeetingCreateDto.getMeetingDate());
@@ -244,6 +254,10 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
 
+    private ApplicationForm getApplicationForm(String applicationFormId) {
+        return (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
+    }
+
     public void sendInitialNotificationToMeetingParticipants(ScheduledMeeting scheduledMeeting) {
         Institution institution = getInstitution(scheduledMeeting.getInstitutionId());
         String creatorMailSubject = String.format("Scheduled meeting with %s", institution.getInstitutionName());
@@ -257,16 +271,22 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
     @Override
     public void sendMeetingNotificationEmailToAttendee(String mailSubject, String templateName, AuthInfo invitee, ScheduledMeeting scheduledMeeting) {
         try {
-            AuthInfo inviter = getUser(scheduledMeeting.getCreatorId());
             HashMap<String, Object> model = new HashMap<>();
+            ApplicationForm applicationForm = getApplicationForm(scheduledMeeting.getApplicationFormId());
+            String gameTypeName = "";
+            if (applicationForm != null) {
+                gameTypeName = applicationForm.getGameTypeName();
+            }
 
             String meetingDateString = scheduledMeeting.getMeetingDate().toString("dd/MM/yyyy HH:mm:ss");
             String presentDateString = DateTime.now().toString("dd/MM/yyyy");
+            String meetingTimeString = scheduledMeeting.getMeetingDate().toString("HH:mm:ss a");
             model.put("name", invitee.getFullName());
-            model.put("inviterName", inviter.getFullName());
+            model.put("gameType", gameTypeName);
             model.put("meetingDate", meetingDateString);
             model.put("meetingTitle", scheduledMeeting.getMeetingSubject());
-            model.put("meetingVenue", scheduledMeeting.getVenue());
+            model.put("venue", scheduledMeeting.getVenue());
+            model.put("time",meetingTimeString);
             model.put("additionalNotes", scheduledMeeting.getMeetingDescription());
             model.put("date", presentDateString);
 
@@ -280,7 +300,6 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
     @Override
     public void sendMeetingNotificationEmailToMeetingCreator(String mailSubject, String templateName, ScheduledMeeting scheduledMeeting) {
         AuthInfo inviter = getUser(scheduledMeeting.getCreatorId());
-
         try {
             Institution institution = getInstitution(scheduledMeeting.getInstitutionId());
 

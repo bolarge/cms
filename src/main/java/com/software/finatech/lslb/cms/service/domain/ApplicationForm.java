@@ -35,6 +35,15 @@ public class ApplicationForm extends AbstractFact {
     protected ApplicantOtherInformation applicantOtherInformation;
     protected ApplicantContactDetails applicantContactDetails;
     protected LslbAdminComment lslbAdminComment;
+    protected String reasonForRejection;
+
+    public String getReasonForRejection() {
+        return reasonForRejection;
+    }
+
+    public void setReasonForRejection(String reasonForRejection) {
+        this.reasonForRejection = reasonForRejection;
+    }
 
     public LslbAdminComment getLslbAdminComment() {
         return lslbAdminComment;
@@ -284,6 +293,7 @@ public class ApplicationForm extends AbstractFact {
             applicationFormDto.setRejectorId(rejectorId);
             applicationFormDto.setRejectorName(rejector.getFullName());
         }
+        applicationFormDto.setRejectionReason(getReasonForRejection());
         applicationFormDto.setId(getId());
         applicationFormDto.setFormName(getFormName());
 

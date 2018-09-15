@@ -7,12 +7,13 @@ public class ScheduledMeetingCreateDto {
     private String creatorId;
     @NotEmpty(message = "Please provide institution Id")
     private String institutionId;
-    @NotEmpty(message = "Please provide meeting title")
     private String meetingTitle;
     private String additionalNotes;
     private String venue;
     @NotEmpty(message = "Please provide meeting date")
     private String meetingDate;
+    @NotEmpty(message = "Please provide application form id")
+    private String applicationFormId;
 
     public String getMeetingDate() {
         return meetingDate;
@@ -60,5 +61,13 @@ public class ScheduledMeetingCreateDto {
 
     public void setVenue(String venue) {
         this.venue = venue;
+    }
+
+    public String getApplicationFormId() {
+        return applicationFormId;
+    }
+
+    public void setApplicationFormId(String applicationFormId) {
+        this.applicationFormId = applicationFormId;
     }
 }

@@ -8,8 +8,6 @@ public class ApplicationFormCreateDto {
     protected String gameTypeId;
     @NotEmpty(message = "please provide institution Id")
     protected String institutionId;
-    @NotEmpty(message = "please provide application form type id")
-    protected String applicationFormTypeId;
     protected String formName;
 
     public String getGameTypeId() {
@@ -26,14 +24,6 @@ public class ApplicationFormCreateDto {
 
     public void setInstitutionId(String institutionId) {
         this.institutionId = institutionId;
-    }
-
-    public String getApplicationFormTypeId() {
-        return applicationFormTypeId;
-    }
-
-    public void setApplicationFormTypeId(String applicationFormTypeId) {
-        this.applicationFormTypeId = applicationFormTypeId;
     }
 
     public String getFormName() {

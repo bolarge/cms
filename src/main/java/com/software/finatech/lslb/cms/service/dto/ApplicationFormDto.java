@@ -16,6 +16,7 @@ public class ApplicationFormDto {
     private String id;
     private String rejectorId;
     private String rejectorName;
+    private String rejectionReason;
     private Boolean filledApplicantDetails;
     private Boolean filledApplicantCriminalityDetails;
     private Boolean filledApplicantDeclarationDetails;
@@ -207,5 +208,13 @@ public class ApplicationFormDto {
     }
 
     public void setRejectorName(String fullName) {
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
     }
 }

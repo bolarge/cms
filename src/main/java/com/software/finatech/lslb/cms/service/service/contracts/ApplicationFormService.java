@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.service.contracts;
 
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormCreateCommentDto;
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormCreateDto;
+import com.software.finatech.lslb.cms.service.dto.ApplicationFormRejectDto;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
 import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
 import com.software.finatech.lslb.cms.service.model.contactDetails.ApplicantContactDetails;
@@ -23,13 +24,11 @@ public interface ApplicationFormService {
                                                 String sortDirection,
                                                 String sortProperty,
                                                 String institutionId,
-                                                String applicationFormTypeId,
                                                 String applicationFormStatusId,
                                                 String approverId,
                                                 String gameTypeId,
                                                 HttpServletResponse httpServletResponse);
 
-    Mono<ResponseEntity> getAllApplicationFormTypes();
     Mono<ResponseEntity> getAllApplicationFormStatus();
     Mono<ResponseEntity> getAllApprovers();
 
@@ -55,7 +54,7 @@ public interface ApplicationFormService {
     Mono<ResponseEntity> saveApplicantOutletInformation(String applicationFormId, ApplicantOutletInformation applicantOutletInformation);
 
     Mono<ResponseEntity> approveApplicationForm(String applicationFormId, String  approverId);
-    Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, String rejectorId);
+    Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, ApplicationFormRejectDto applicationFormRejectDto);
     Mono<ResponseEntity> completeApplicationForm(String applicationFormId, boolean isResubmit);
     Mono<ResponseEntity> getPaymentRecordsForApplicationForm(String applicationFormId);
 
