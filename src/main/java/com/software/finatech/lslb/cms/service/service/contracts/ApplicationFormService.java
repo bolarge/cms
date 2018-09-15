@@ -58,5 +58,7 @@ public interface ApplicationFormService {
     Mono<ResponseEntity> completeApplicationForm(String applicationFormId, boolean isResubmit);
     Mono<ResponseEntity> getPaymentRecordsForApplicationForm(String applicationFormId);
 
+    boolean institutionHasCompletedApplicationForGameType(String institutionId, String gameTypeId);
+
     Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String applicationFormId,ApplicationFormCreateCommentDto applicationFormCreateCommentDto);
 }

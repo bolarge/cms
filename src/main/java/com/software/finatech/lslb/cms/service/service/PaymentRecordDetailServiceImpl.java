@@ -5,7 +5,6 @@ import com.software.finatech.lslb.cms.service.dto.FeeDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailUpdateDto;
-import com.software.finatech.lslb.cms.service.exception.VigiPayServiceException;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigiPayMessage;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInBranchNotification;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInvoiceItem;
@@ -48,6 +47,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     private GamingMachineService gamingMachineService;
     private AuthInfoService authInfoService;
     private LicenseService licenseService;
+    private ApplicationFormService applicationFormService;
 
     @Autowired
     public PaymentRecordDetailServiceImpl(FeeService feeService,
@@ -58,7 +58,8 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                                           AgentService agentService,
                                           GamingMachineService gamingMachineService,
                                           AuthInfoService authInfoService,
-                                          LicenseService licenseService) {
+                                          LicenseService licenseService,
+                                          ApplicationFormService applicationFormService) {
         this.feeService = feeService;
         this.paymentRecordService = paymentRecordService;
         this.mongoRepositoryReactive = mongoRepositoryReactive;
@@ -68,6 +69,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         this.gamingMachineService = gamingMachineService;
         this.authInfoService = authInfoService;
         this.licenseService = licenseService;
+        this.applicationFormService = applicationFormService;
     }
 
     @Override
@@ -161,8 +163,8 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             if (institution == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Institution with id %s does not exist", institutionId), HttpStatus.BAD_REQUEST));
             }
-            if (StringUtils.isEmpty(institution.getVgPayCustomerCode())){
-                return Mono.just(new ResponseEntity<>("Customer not created",HttpStatus.BAD_REQUEST));
+            if (StringUtils.isEmpty(institution.getVgPayCustomerCode())) {
+                return Mono.just(new ResponseEntity<>("Customer not created", HttpStatus.BAD_REQUEST));
             }
             invoiceNumber = createInBranchRecordDetailForInstitution(institution, feeDescription, paymentRecordDetailCreateDto, institutionAdmins);
         }
@@ -175,8 +177,8 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 if (institutionAdmins.isEmpty()) {
                     return Mono.just(new ResponseEntity<>("There are no gaming operator admins for institution owning gaming machine", HttpStatus.BAD_REQUEST));
                 }
-                if (StringUtils.isEmpty(institution.getVgPayCustomerCode())){
-                    return Mono.just(new ResponseEntity<>("Customer not created",HttpStatus.BAD_REQUEST));
+                if (StringUtils.isEmpty(institution.getVgPayCustomerCode())) {
+                    return Mono.just(new ResponseEntity<>("Customer not created", HttpStatus.BAD_REQUEST));
                 }
                 invoiceNumber = createInBranchRecordDetailForInstitution(institution, feeDescription, paymentRecordDetailCreateDto, institutionAdmins);
             }
@@ -466,6 +468,13 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         boolean licensePaymentExist = licensePaymentRecordExists(revenueNameId, gameTypeId, gamingMachineId, agentId, institutionId);
         if (licensePaymentExist) {
             return Mono.just(new ResponseEntity<>("Payment for license for category already exists, License Renewal payment is what is applicable", HttpStatus.BAD_REQUEST));
+        }
+
+        boolean institutionHasApprovedForm = applicationFormService.institutionHasCompletedApplicationForGameType(institutionId, gameTypeId);
+        if (!institutionHasApprovedForm) {
+            String gameTypeName = fee.getGameTypeName();
+            String errorMsg = String.format("You do not have an approved application form for category %s, please create an application in the category %s and make sure it is approved before payming for license", gameTypeName, gameTypeName);
+            return Mono.just(new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST));
         }
         return null;
     }
