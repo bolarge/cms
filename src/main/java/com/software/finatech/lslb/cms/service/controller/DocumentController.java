@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
 import com.software.finatech.lslb.cms.service.dto.DocumentCreateDto;
 import com.software.finatech.lslb.cms.service.dto.DocumentDto;
+import com.software.finatech.lslb.cms.service.dto.EntityDocumentDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeReferenceData;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
@@ -350,5 +351,58 @@ public class DocumentController extends BaseController {
         });
 
         return Mono.just(new ResponseEntity(documentDtos, HttpStatus.OK));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/getEntityDocuments", params = {"entityId", "purposeId"})
+    @ApiOperation(value = "Get uploaded and new documents", response = ApplicationFormDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getEntityDocuments(@RequestParam("entityId") String entityId, @RequestParam("purposeId") String purposeId, HttpServletResponse httpServletResponse) {
+        ArrayList<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(new Query(Criteria.where("entityId").is(entityId).and("isCurrent").is(true)), Document.class).toStream().collect(Collectors.toList());
+
+        //We use this to temporarily store so that we can merge
+        HashMap<String,EntityDocumentDto> entityDocuments = new HashMap<>();
+
+        ArrayList<EntityDocumentDto> documentsDto = new ArrayList<>();
+        documents.forEach(entry -> {
+            try {
+                entry.setAssociatedProperties();
+            } catch (FactNotFoundException e) {
+                e.printStackTrace();
+            }
+            EntityDocumentDto dto = new EntityDocumentDto();
+            dto.setDescription(entry.getDescription());
+            dto.setDocumentType(entry.getDocumentType()==null?null:entry.getDocumentType().getName());
+            dto.setDocumentTypeId(entry.getDocumentTypeId());
+            dto.setEntityId(entry.getEntityId());
+            dto.setFilename(entry.getFilename());
+            dto.setMimeType(entry.getMimeType());
+            dto.setId(entry.getId());
+
+            entityDocuments.put(entry.getDocumentTypeId(),dto);
+
+            documentsDto.add(dto);
+        });
+
+        ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(new Query(Criteria.where("purposeId").is(purposeId)), DocumentType.class).toStream().collect(Collectors.toList());
+        documentTypes.forEach(entry -> {
+            if(entityDocuments.get(entry.getId()) == null){
+                EntityDocumentDto dto = new EntityDocumentDto();
+                dto.setDescription(entry.getDescription());
+                dto.setDocumentType(entry.getName());
+                dto.setDocumentTypeId(entry.getId());
+
+                entityDocuments.put(entry.getId(),dto);
+                documentsDto.add(dto);
+            }
+        });
+        if (documentsDto.size() == 0) {
+            return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
+        }
+
+        return Mono.just(new ResponseEntity(documentsDto, HttpStatus.OK));
     }
 }
