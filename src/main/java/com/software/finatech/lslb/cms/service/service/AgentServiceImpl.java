@@ -11,6 +11,7 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
+import com.software.finatech.lslb.cms.service.util.CustomerCodeCreatorAsync;
 import com.software.finatech.lslb.cms.service.util.LicenseValidatorUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -40,6 +41,7 @@ public class AgentServiceImpl implements AgentService {
     private AuthInfoService authInfoService;
     private AuthInfoController authInfoController;
     private LicenseValidatorUtil licenseValidatorUtil;
+    private CustomerCodeCreatorAsync customerCodeCreatorAsync;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static final Logger logger = LoggerFactory.getLogger(AgentServiceImpl.class);
@@ -48,11 +50,13 @@ public class AgentServiceImpl implements AgentService {
     public AgentServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                             LicenseValidatorUtil licenseValidatorUtil,
                             AuthInfoService authInfoService,
-                            AuthInfoController authInfoController) {
+                            AuthInfoController authInfoController,
+                            CustomerCodeCreatorAsync customerCodeCreatorAsync) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.authInfoService = authInfoService;
         this.authInfoController = authInfoController;
         this.licenseValidatorUtil = licenseValidatorUtil;
+        this.customerCodeCreatorAsync = customerCodeCreatorAsync;
     }
 
     @Override
@@ -119,6 +123,7 @@ public class AgentServiceImpl implements AgentService {
 
             AuthInfoCreateDto agentUserCreateDto = createAuthInfoDtoFromAgent(agentCreateDto);
             authInfoService.createAuthInfo(agentUserCreateDto, authInfoController.getAppHostPort());
+            customerCodeCreatorAsync.createVigipayCustomerCodeForAgent(agent);
             return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format for date of birth , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));

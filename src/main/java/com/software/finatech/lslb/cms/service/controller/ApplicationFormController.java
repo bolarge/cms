@@ -36,7 +36,7 @@ public class ApplicationFormController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize",
-            "sortType", "sortProperty", "institutionId", "applicationFormTypeId", "applicationFormStatusId", "gameTypeId"})
+            "sortType", "sortProperty", "institutionId", "applicationFormStatusId", "gameTypeId"})
     @ApiOperation(value = "Get all Application Forms", response = ApplicationFormDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -48,12 +48,11 @@ public class ApplicationFormController {
                                                        @RequestParam("sortType") String sortType,
                                                        @RequestParam("sortProperty") String sortParam,
                                                        @RequestParam("institutionId") String institutionId,
-                                                       @RequestParam("applicationFormTypeId") String applicationFormTypeId,
                                                        @RequestParam("applicationFormStatusId") String applicationFormStatusId,
                                                        @RequestParam("approverId") String approverId,
                                                        @RequestParam("gameTypeId") String gameTypeId,
                                                        HttpServletResponse httpServletResponse) {
-        return applicationFormService.findAllApplicationForm(page, pageSize, sortType, sortParam, institutionId, applicationFormTypeId, applicationFormStatusId, approverId, gameTypeId,httpServletResponse);
+        return applicationFormService.findAllApplicationForm(page, pageSize, sortType, sortParam, institutionId, applicationFormStatusId, approverId, gameTypeId,httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create")
@@ -65,17 +64,6 @@ public class ApplicationFormController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> createApplicationForm(@RequestBody @Valid ApplicationFormCreateDto applicationFormCreateDto) {
         return applicationFormService.createApplicationForm(applicationFormCreateDto);
-    }
-
-    @RequestMapping(method = RequestMethod.GET, value = "/all-application-form-types")
-    @ApiOperation(value = "Get all application form types", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getAllApplicationFormTypes() {
-        return applicationFormService.getAllApplicationFormTypes();
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-application-form-status")
@@ -266,15 +254,15 @@ public class ApplicationFormController {
         return applicationFormService.approveApplicationForm(applicationFormId, approverId);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/reject-application-form", params = {"applicationFormId", "userId"})
+    @RequestMapping(method = RequestMethod.POST, value = "/reject-application-form", params = {"applicationFormId"})
     @ApiOperation(value = "Reject application form", response = String.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> rejectApplicationForm(@RequestParam("applicationFormId") String applicationFormId, @RequestParam("userId") String rejectorId) {
-        return applicationFormService.rejectApplicationForm(applicationFormId, rejectorId);
+    public Mono<ResponseEntity> rejectApplicationForm(@RequestParam("applicationFormId") String applicationFormId, @RequestBody ApplicationFormRejectDto applicationFormRejectDto) {
+        return applicationFormService.rejectApplicationForm(applicationFormId, applicationFormRejectDto);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/complete-application-form", params = {"applicationFormId"})

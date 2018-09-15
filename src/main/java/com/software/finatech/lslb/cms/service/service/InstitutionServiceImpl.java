@@ -8,6 +8,7 @@ import com.software.finatech.lslb.cms.service.dto.InstitutionUpdateDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
+import com.software.finatech.lslb.cms.service.util.CustomerCodeCreatorAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,12 @@ public class InstitutionServiceImpl implements InstitutionService {
     private static final Logger logger = LoggerFactory.getLogger(InstitutionServiceImpl.class);
 
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
+    private CustomerCodeCreatorAsync customerCodeCreatorAsync;
+
+    @Autowired
+    public void setCustomerCodeCreatorAsync(CustomerCodeCreatorAsync customerCodeCreatorAsync) {
+        this.customerCodeCreatorAsync = customerCodeCreatorAsync;
+    }
 
     @Autowired
     public void setMongoRepositoryReactive(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
@@ -184,11 +191,17 @@ public class InstitutionServiceImpl implements InstitutionService {
             applicantUser.setAuthRoleId(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ADMIN_ROLE_ID);
             applicantUser.setInstitutionId(newInstitution.getId());
             mongoRepositoryReactive.saveOrUpdate(applicantUser);
+            customerCodeCreatorAsync.createVigipayCustomerCodeForInstitution(newInstitution);
             return Mono.just(new ResponseEntity<>(newInstitution.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while trying to save institution";
             return logAndReturnError(logger, errorMsg, e);
         }
+    }
+
+    @Override
+    public void saveInstitution(Institution institution) {
+        mongoRepositoryReactive.saveOrUpdate(institution);
     }
 
     private Institution fromCreateInstitutionDto(InstitutionCreateDto institutionCreateDto) {

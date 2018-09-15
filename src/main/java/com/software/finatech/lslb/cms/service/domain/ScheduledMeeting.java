@@ -25,6 +25,15 @@ public class ScheduledMeeting extends AbstractFact {
     private String entityId;
     private boolean firstReminderMailSent;
     private boolean secondReminderMailSent;
+    private String applicationFormId;
+
+    public String getApplicationFormId() {
+        return applicationFormId;
+    }
+
+    public void setApplicationFormId(String applicationFormId) {
+        this.applicationFormId = applicationFormId;
+    }
 
     public boolean isFirstReminderMailSent() {
         return firstReminderMailSent;

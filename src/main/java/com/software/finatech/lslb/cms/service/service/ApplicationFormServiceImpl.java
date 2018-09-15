@@ -16,8 +16,8 @@ import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenc
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
+import com.software.finatech.lslb.cms.service.util.ApplicationFormNotificationHelperAsync;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -32,7 +32,10 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -42,22 +45,19 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationFormServiceImpl.class);
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
-    private MailContentBuilderService mailContentBuilderService;
-    private EmailService emailService;
     private AuthInfoService authInfoService;
     private PaymentRecordService paymentRecordService;
+    private ApplicationFormNotificationHelperAsync applicationFormNotificationHelperAsync;
 
     @Autowired
     public ApplicationFormServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
-                                      MailContentBuilderService mailContentBuilderService,
-                                      EmailService emailService,
                                       AuthInfoService authInfoService,
-                                      PaymentRecordService paymentRecordService) {
+                                      PaymentRecordService paymentRecordService,
+                                      ApplicationFormNotificationHelperAsync applicationFormAsyncNotificationHelper) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
-        this.mailContentBuilderService = mailContentBuilderService;
-        this.emailService = emailService;
         this.authInfoService = authInfoService;
         this.paymentRecordService = paymentRecordService;
+        this.applicationFormNotificationHelperAsync = applicationFormAsyncNotificationHelper;
     }
 
     @Override
@@ -84,7 +84,6 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                                                        String sortDirection,
                                                        String sortProperty,
                                                        String institutionId,
-                                                       String applicationFormTypeId,
                                                        String applicationFormStatusId,
                                                        String approverId,
                                                        String gameTypeId,
@@ -97,9 +96,6 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             }
             if (!StringUtils.isEmpty(approverId)) {
                 query.addCriteria(Criteria.where("approverId").is(approverId));
-            }
-            if (!StringUtils.isEmpty(applicationFormTypeId)) {
-                query.addCriteria(Criteria.where("applicationFormTypeId").is(applicationFormTypeId));
             }
             if (!StringUtils.isEmpty(applicationFormStatusId)) {
                 query.addCriteria(Criteria.where("applicationFormStatusId").is(applicationFormStatusId));
@@ -135,27 +131,6 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             return Mono.just(new ResponseEntity<>(applicationFormDtos, HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while finding application forms";
-            return logAndReturnError(logger, errorMsg, e);
-        }
-    }
-
-    @Override
-    public Mono<ResponseEntity> getAllApplicationFormTypes() {
-        try {
-            ArrayList<ApplicationFormType> applicationFormTypes = (ArrayList<ApplicationFormType>) mongoRepositoryReactive
-                    .findAll(new Query(), ApplicationFormType.class).toStream().collect(Collectors.toList());
-
-            if (applicationFormTypes == null || applicationFormTypes.isEmpty()) {
-                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));
-            }
-            List<EnumeratedFactDto> applicationFormTypeDtos = new ArrayList<>();
-            applicationFormTypes.forEach(applicationFormType -> {
-                applicationFormTypeDtos.add(applicationFormType.convertToDto());
-            });
-
-            return Mono.just(new ResponseEntity<>(applicationFormTypeDtos, HttpStatus.OK));
-        } catch (Exception e) {
-            String errorMsg = "An error occurred while getting all application form types";
             return logAndReturnError(logger, errorMsg, e);
         }
     }
@@ -468,8 +443,8 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String approvedApplicationFormStatusId = ApplicationFormStatusReferenceData.APPROVED_STATUS_ID;
             applicationForm.setApplicationFormStatusId(approvedApplicationFormStatusId);
             saveApplicationForm(applicationForm);
+            applicationFormNotificationHelperAsync.sendApprovedMailToInstitutionAdmins(applicationForm);
             return Mono.just(new ResponseEntity<>("Application form approved successfully", HttpStatus.OK));
-
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving application form", e);
         }
@@ -487,7 +462,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             saveApplicationForm(applicationForm);
 
             if (isResubmit) {
-                sendCompleteApplicationNotificationToLslbAdmin(applicationForm);
+                applicationFormNotificationHelperAsync.sendCompleteApplicationNotificationToLslbAdmin(applicationForm);
             }
             return Mono.just(new ResponseEntity<>("Application completed successfully and now in review", HttpStatus.OK));
         } catch (Exception e) {
@@ -520,8 +495,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, String rejectorId) {
+    public Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, ApplicationFormRejectDto applicationFormRejectDto) {
         try {
+            String rejectorId = applicationFormRejectDto.getUserId();
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(rejectorId, AuthInfo.class).block();
             if (authInfo == null) {
                 return Mono.just(new ResponseEntity<>("Rejecting user does not exist on the system", HttpStatus.BAD_REQUEST));
@@ -532,67 +508,16 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
             }
             applicationForm.setRejectorId(rejectorId);
-            String rejectedApplicationFormStatusId = ApplicationFormStatusReferenceData.REJECTED_STATUS_ID;
-            applicationForm.setApplicationFormStatusId(rejectedApplicationFormStatusId);
+            applicationForm.setReasonForRejection(applicationFormRejectDto.getReason());
+            applicationForm.setApplicationFormStatusId( ApplicationFormStatusReferenceData.REJECTED_STATUS_ID);
             saveApplicationForm(applicationForm);
+            applicationFormNotificationHelperAsync.sendRejectionMailToInstitutionAdmins(applicationForm);
             return Mono.just(new ResponseEntity<>("Application form rejected successfully", HttpStatus.OK));
 
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while rejecting application form", e);
         }
     }
-
-    /*@Override
-    public Mono<ResponseEntity> getDocumentTypesForApplicationForm(String applicationFormId) {
-        try {
-            ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
-            if (applicationForm == null) {
-                return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
-            }
-
-            Query queryForApplicationFormDocumentTypes = new Query();
-            String applicationFormDocumentPurposeId = DocumentPurposeReferenceData.APPLICATION_FORM_DOCUMENT_PURPOSE_ID;
-            String gameTypeId = applicationForm.getGameTypeId();
-
-            queryForApplicationFormDocumentTypes.addCriteria(Criteria.where("documentPurposeId").is(applicationFormDocumentPurposeId));
-            queryForApplicationFormDocumentTypes.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
-            queryForApplicationFormDocumentTypes.addCriteria(Criteria.where("active").is(true));
-
-            ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(queryForApplicationFormDocumentTypes, DocumentType.class).toStream().collect(Collectors.toList());
-            if (documentTypes == null || documentTypes.isEmpty()){
-                return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
-            }
-            ArrayList<ApplicationFormDocumentDto> applicationFormDocumentDtos = new ArrayList<>();
-            documentTypes.forEach(documentType -> {
-                applicationFormDocumentDtos.add(getApplicationFormDocumentDto(applicationForm, documentType));
-            });
-            return Mono.just(new ResponseEntity<>(applicationFormDocumentDtos, HttpStatus.OK));
-        } catch (Exception e) {
-            return logAndReturnError(logger, "An error occurred while getting documents for application form", e);
-        }
-    }
-
-    private ApplicationFormDocumentDto getApplicationFormDocumentDto(ApplicationForm applicationForm, DocumentType documentType) {
-        ApplicationFormDocumentDto applicationFormDocumentDto = new ApplicationFormDocumentDto();
-        applicationFormDocumentDto.setRequired(documentType.isRequired());
-        applicationFormDocumentDto.setActive(documentType.isActive());
-        applicationFormDocumentDto.setName(documentType.getName());
-        applicationFormDocumentDto.setDescription(documentType.getDescription());
-        applicationFormDocumentDto.setId(documentType.getId());
-
-        Query queryForDocumentWithTypeAndApplicationForm = new Query();
-        queryForDocumentWithTypeAndApplicationForm.addCriteria(Criteria.where("applicationFormId").is(applicationForm.getId()));
-        queryForDocumentWithTypeAndApplicationForm.addCriteria(Criteria.where("documentTypeId").is(documentType.getId()));
-
-        Document document = (Document) mongoRepositoryReactive.find(queryForDocumentWithTypeAndApplicationForm, Document.class).block();
-
-        if (document != null) {
-            String documentId = document.getId();
-            Set<String> applicationFormDocumentIds = applicationForm.getDocumentIds();
-            applicationFormDocumentDto.setUploaded(applicationFormDocumentIds.contains(documentId));
-        }
-        return applicationFormDocumentDto;
-    }*/
 
     @Override
     public Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String applicationFormId, ApplicationFormCreateCommentDto applicationFormCreateCommentDto) {
@@ -612,63 +537,11 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationForm.setLslbAdminComment(lslbAdminComment);
             applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.PENDING_RESUBMISSON_ID);
             saveApplicationForm(applicationForm);
-            sendAdminCommentNotificationToInstitutionAdmins(applicationForm, lslbAdminComment.getComment());
+            applicationFormNotificationHelperAsync.sendAdminCommentNotificationToInstitutionAdmins(applicationForm, lslbAdminComment.getComment());
             return Mono.just(new ResponseEntity<>("Comment added successfully", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding comment to application form", e);
         }
-    }
-
-    public void sendCompleteApplicationNotificationToLslbAdmin(ApplicationForm applicationForm) {
-        LslbAdminComment lslbAdminComment = applicationForm.getLslbAdminComment();
-        if (lslbAdminComment == null) {
-            return;
-        }
-        sendCompletionNotificationToLslbAdmin(applicationForm, lslbAdminComment.getUserId());
-    }
-
-    private void sendCompletionNotificationToLslbAdmin(ApplicationForm applicationForm, String lslbAdminId) {
-        Institution institution = applicationForm.getInstitution();
-        AuthInfo lslbAdmin = authInfoService.getUserById(lslbAdminId);
-        String presentDate = DateTime.now().toString("dd/MM/yyyy");
-        String gameTypeName = applicationForm.getGameTypeName();
-        String institutionName = institution.getInstitutionName();
-
-
-        HashMap<String, Object> model = new HashMap<>();
-        model.put("name", lslbAdmin.getFullName());
-        model.put("institutionName", institutionName);
-        model.put("date", presentDate);
-        model.put("gameType", gameTypeName);
-
-        String content = mailContentBuilderService.build(model, "ApplicationFormCompleteUploadNotificationLslbAdmin");
-        String mailSubject = String.format("%s has re application form for %s", institutionName, gameTypeName);
-
-        emailService.sendEmail(content, mailSubject, lslbAdmin.getEmailAddress());
-    }
-
-    private void sendAdminCommentNotificationToInstitutionAdmins(ApplicationForm applicationForm, String comment) {
-        ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(applicationForm.getInstitutionId());
-        for (AuthInfo institutionAdmin : institutionAdmins) {
-            sendCommentNotificationToInstitutionUser(institutionAdmin, comment, applicationForm);
-        }
-    }
-
-    private void sendCommentNotificationToInstitutionUser(AuthInfo institutionAdmin, String comment, ApplicationForm applicationForm) {
-        String institutionAdminName = institutionAdmin.getFullName();
-        String presentDate = DateTime.now().toString("dd/MM/yyyy ");
-        String gameTypeName = applicationForm.getGameTypeName();
-
-
-        HashMap<String, Object> model = new HashMap<>();
-        model.put("name", institutionAdminName);
-        model.put("comment", comment);
-        model.put("date", presentDate);
-        model.put("gameType", gameTypeName);
-
-        String mailSubject = String.format("Notification on your application for %s license", gameTypeName);
-        String content = mailContentBuilderService.build(model, "ApplicationFormPendingUploadGAadmin");
-        emailService.sendEmail(content, mailSubject, institutionAdmin.getEmailAddress());
     }
 
     private ApplicationForm fromCreateDto(ApplicationFormCreateDto applicationFormCreateDto) {
@@ -689,12 +562,10 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     private Mono<ResponseEntity> validateCreateApplicationForm(ApplicationFormCreateDto applicationFormCreateDto) {
         String institutionId = applicationFormCreateDto.getInstitutionId();
         String gameTypeId = applicationFormCreateDto.getGameTypeId();
-        String applicationFormTypeId = applicationFormCreateDto.getApplicationFormTypeId();
         String rejectedStatusId = ApplicationFormStatusReferenceData.REJECTED_STATUS_ID;
         Query query = new Query();
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
-        query.addCriteria(Criteria.where("applicationFormTypeId").is(applicationFormTypeId));
         query.addCriteria(Criteria.where("applicationFormStatusId").ne(rejectedStatusId));
 
         ApplicationForm existingApplicationFormForInstitutionWithGameTypeAndApplicationType = (ApplicationForm) mongoRepositoryReactive.find(query, ApplicationForm.class).block();

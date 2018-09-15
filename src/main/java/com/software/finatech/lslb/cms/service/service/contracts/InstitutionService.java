@@ -27,5 +27,7 @@ public interface InstitutionService {
 
     Institution findById(String institutionId);
 
+    void saveInstitution(Institution institution);
+
     Mono<ResponseEntity> createApplicantInstitution(InstitutionCreateDto institutionCreateDto, AuthInfo applicantUser);
 }
