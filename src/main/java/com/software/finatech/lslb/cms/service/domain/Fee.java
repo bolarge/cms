@@ -93,6 +93,14 @@ public class Fee extends AbstractFact {
         return gameType;
     }
 
+    public String getGameTypeName() {
+        GameType gameType = getGameType();
+        if (gameType == null) {
+            return null;
+        }
+        return gameType.getName();
+    }
+
 
     public FeePaymentType getFeePaymentType() {
         if (feePaymentTypeId == null) {

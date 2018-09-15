@@ -509,7 +509,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             }
             applicationForm.setRejectorId(rejectorId);
             applicationForm.setReasonForRejection(applicationFormRejectDto.getReason());
-            applicationForm.setApplicationFormStatusId( ApplicationFormStatusReferenceData.REJECTED_STATUS_ID);
+            applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.REJECTED_STATUS_ID);
             saveApplicationForm(applicationForm);
             applicationFormNotificationHelperAsync.sendRejectionMailToInstitutionAdmins(applicationForm);
             return Mono.just(new ResponseEntity<>("Application form rejected successfully", HttpStatus.OK));
@@ -544,6 +544,17 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         }
     }
 
+    @Override
+    public boolean institutionHasCompletedApplicationForGameType(String institutionId, String gameTypeId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(institutionId));
+        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        query.addCriteria(Criteria.where("applicationFormStatus").is(ApplicationFormStatusReferenceData.APPROVED_STATUS_ID));
+
+        ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.find(query, ApplicationForm.class).block();
+        return applicationForm != null;
+    }
+
     private ApplicationForm fromCreateDto(ApplicationFormCreateDto applicationFormCreateDto) {
         ApplicationForm applicationForm = new ApplicationForm();
         applicationForm.setId(UUID.randomUUID().toString());
@@ -570,12 +581,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
         ApplicationForm existingApplicationFormForInstitutionWithGameTypeAndApplicationType = (ApplicationForm) mongoRepositoryReactive.find(query, ApplicationForm.class).block();
         if (existingApplicationFormForInstitutionWithGameTypeAndApplicationType != null) {
-            return Mono.just(new ResponseEntity<>("An application form already exists for the institution with the same game type and application type", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("You already have an ongoing application in the current category", HttpStatus.BAD_REQUEST));
         }
 
         PaymentRecord existingConfirmedPaymentRecord = paymentRecordService.findExistingConfirmedApplicationFeeForInstitutionAndGameType(institutionId, gameTypeId);
         if (existingConfirmedPaymentRecord == null) {
-            return Mono.just(new ResponseEntity<>("There is no confirmed application fee payment record for game type", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Please pay application fees for category", HttpStatus.BAD_REQUEST));
         }
         return null;
     }
