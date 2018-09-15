@@ -380,7 +380,7 @@ public class DocumentController extends BaseController {
             dto.setFilename(entry.getFilename());
             dto.setMimeType(entry.getMimeType());
             dto.setId(entry.getId());
-            if(entry.getDocumentType()==null) {
+            if(entry.getDocumentType()!=null) {
                 dto.setDocumentType(entry.getDocumentType().getName());
                 dto.setActive(entry.getDocumentType().isActive());
                 dto.setRequired(entry.getDocumentType().isRequired());
