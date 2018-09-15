@@ -7,8 +7,10 @@ import com.software.finatech.lslb.cms.service.util.httpclient.AdeTestData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,17 +26,26 @@ public class DatabaseLoaderUtils {
     protected MongoRepositoryReactiveImpl mongoRepositoryReactive;
     protected io.advantageous.boon.json.ObjectMapper mapper;
 
-    public void runSeedData() {
+    public void runSeedData(Environment env) {
         //Seed AuthInfo
-        AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById("1", AuthInfo.class).block();
-        if (authInfo == null) {
+        AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById("1",AuthInfo.class).block();
+        if(authInfo==null){
             authInfo = new AuthInfo();
             authInfo.setId("1");
         }
+        if (Arrays.asList(env.getActiveProfiles()).contains("development") || Arrays.asList(env.getActiveProfiles()).contains("test")) {
+            authInfo.setEmailAddress("David_J");
+        }else if( Arrays.asList(env.getActiveProfiles()).contains("staging")){
+            authInfo.setEmailAddress("david.jaiyeola@venturegardengroup.com");
+            //authInfo.setSsoUserId("44016f38-7897-4a5b-b9af-46ee4589b9a1");
+        }else if( Arrays.asList(env.getActiveProfiles()).contains("production")){
+            authInfo.setEmailAddress("david.jaiyeola@venturegardengroup.com");
+            authInfo.setSsoUserId("44016f38-7897-4a5b-b9af-46ee4589b9a1");
+        }
+
         authInfo.setEnabled(true);
         authInfo.setAuthRoleId("2");
         authInfo.setAccountLocked(false);
-        authInfo.setEmailAddress("David_J");
         authInfo.setAttachmentId(null);
         authInfo.setPhoneNumber("");
         authInfo.setFirstName("David");

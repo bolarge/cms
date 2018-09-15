@@ -29,10 +29,10 @@ public class LSLBCMSApplication {
 
         // Our global app context
         GlobalApplicationContext.ctx = ctx;
-
-        DatabaseLoaderUtils databaseLoaderUtils = (DatabaseLoaderUtils) ctx.getBean("databaseLoaderUtils");
-        databaseLoaderUtils.runSeedData();
         Environment env = ctx.getBean(Environment.class);
+        DatabaseLoaderUtils databaseLoaderUtils = (DatabaseLoaderUtils) ctx.getBean("databaseLoaderUtils");
+        databaseLoaderUtils.runSeedData(env);
+
         if (Arrays.asList(env.getActiveProfiles()).contains("development")|| Arrays.asList(env.getActiveProfiles()).contains("test")) {
             databaseLoaderUtils.runLoadTestData();
         }
