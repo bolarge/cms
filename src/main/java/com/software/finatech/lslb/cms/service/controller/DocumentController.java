@@ -375,13 +375,16 @@ public class DocumentController extends BaseController {
             }
             EntityDocumentDto dto = new EntityDocumentDto();
             dto.setDescription(entry.getDescription());
-            dto.setDocumentType(entry.getDocumentType()==null?null:entry.getDocumentType().getName());
             dto.setDocumentTypeId(entry.getDocumentTypeId());
             dto.setEntityId(entry.getEntityId());
             dto.setFilename(entry.getFilename());
             dto.setMimeType(entry.getMimeType());
             dto.setId(entry.getId());
-
+            if(entry.getDocumentType()==null) {
+                dto.setDocumentType(entry.getDocumentType().getName());
+                dto.setActive(entry.getDocumentType().isActive());
+                dto.setRequired(entry.getDocumentType().isRequired());
+            }
             entityDocuments.put(entry.getDocumentTypeId(),dto);
 
             documentsDto.add(dto);
@@ -394,7 +397,8 @@ public class DocumentController extends BaseController {
                 dto.setDescription(entry.getDescription());
                 dto.setDocumentType(entry.getName());
                 dto.setDocumentTypeId(entry.getId());
-
+                dto.setActive(entry.isActive());
+                dto.setRequired(entry.isRequired());
                 entityDocuments.put(entry.getId(),dto);
                 documentsDto.add(dto);
             }
