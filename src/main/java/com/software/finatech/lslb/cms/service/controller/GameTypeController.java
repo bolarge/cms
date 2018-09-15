@@ -128,4 +128,16 @@ public class GameTypeController extends BaseController {
     public Mono<ResponseEntity> getGameTypesForInstitution(@PathVariable("institutionId") String institutionId) {
         return gameTypeService.getAllGameTypesForInstitution(institutionId);
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{agentId}/")
+    @ApiOperation(value = "Get GameTypes for agent ", response = GameTypeDto.class, responseContainer = "List",consumes = "application/json",
+    notes = "returns all game types an agent operates in")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getGameTypesForAgent(@PathVariable("agentId") String agentId) {
+        return gameTypeService.getAllGameTypesForAgent(agentId);
+    }
 }

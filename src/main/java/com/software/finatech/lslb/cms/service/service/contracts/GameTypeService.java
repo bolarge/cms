@@ -9,4 +9,6 @@ public interface GameTypeService {
     GameType findById(String gameTypeId);
 
     Mono<ResponseEntity> getAllGameTypesForInstitution(String institutionId);
+
+    Mono<ResponseEntity> getAllGameTypesForAgent(String agentId);
 }

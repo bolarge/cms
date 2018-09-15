@@ -20,4 +20,6 @@ public interface FeeService {
 
     Mono<ResponseEntity> findActiveFeeByGameTypeAndPaymentTypeAndRevenueName(String gameTypeId, String feePaymentTypeId, String revenueNameId);
     Fee findFeeById(String feeId);
+
+    Mono<ResponseEntity> findAllFeePaymentTypeForRevenueName(String revenueNameId);
 }

@@ -353,7 +353,6 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 if (existingPaymentRecordDetail == null) {
                     return Mono.just(new ResponseEntity<>("Invoice does not exist", HttpStatus.BAD_REQUEST));
                 }
-                String invoiceNumber = existingPaymentRecordDetail.getInvoiceNumber();
                 if (!StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, existingPaymentRecordDetail.getPaymentStatusId())) {
                     boolean isConfirmedPayment = true;
 
