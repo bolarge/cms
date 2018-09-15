@@ -28,7 +28,7 @@ public class ExpirationList {
         LocalDateTime dateTime = new LocalDateTime();
         dateTime=dateTime.plusDays(duration);
         Query queryLicence= new Query();
-        queryLicence.addCriteria(Criteria.where("endDate").lt(dateTime));
+        queryLicence.addCriteria(Criteria.where("expiryDate").lt(dateTime));
         queryLicence.addCriteria(Criteria.where("licenseStatusId").is(licenseStatusId));
         List<License> licenses= (List<License>) mongoRepositoryReactive.findAll(queryLicence,License.class).toStream().collect(Collectors.toList());
         if(licenses.size()==0){
@@ -49,7 +49,7 @@ public class ExpirationList {
     public List<License> getExpiredLicences( String licenseStatusId){
         LocalDateTime dateTime = new LocalDateTime();
         Query queryLicence= new Query();
-        queryLicence.addCriteria(Criteria.where("endDate").lte(dateTime));
+        queryLicence.addCriteria(Criteria.where("expiryDate").lte(dateTime));
         if(licenseStatusId==LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID){
             queryLicence.addCriteria(Criteria.where("licenseStatusId").is(licenseStatusId));//orOperator(Criteria.where("licenseStatusId").is("03")));
         }else{
@@ -94,7 +94,7 @@ public class ExpirationList {
         }
 
         Query queryExpiredLicence= new Query();
-        queryExpiredLicence.addCriteria(Criteria.where("endDate").lte(dateTime));
+        queryExpiredLicence.addCriteria(Criteria.where("expiryDate").lte(dateTime));
         if(licenseStatusId==LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID){
             queryExpiredLicence.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSE_REVOKED_LICENSE_STATUS_ID));
 
