@@ -166,7 +166,7 @@ public class TestData {
         fee.setFeePaymentTypeId("02");
         fee.setGameTypeId("01");
         fee.setActive(true);
-        fee.setRevenueNameId(RevenueNameReferenceData.INSTITUTION_REVENUE_CODE);
+        fee.setRevenueNameId(RevenueNameReferenceData.INSTITUTION_REVENUE_ID);
         mongoRepositoryReactive.saveOrUpdate(fee);
         Fee fee2 = (Fee) mongoRepositoryReactive.findById("2", Fee.class).block();
         if (fee2 == null) {
@@ -177,7 +177,7 @@ public class TestData {
         fee2.setFeePaymentTypeId("02");
         fee2.setGameTypeId("02");
         fee2.setActive(true);
-        fee2.setRevenueNameId(RevenueNameReferenceData.INSTITUTION_REVENUE_CODE);
+        fee2.setRevenueNameId(RevenueNameReferenceData.INSTITUTION_REVENUE_ID);
         mongoRepositoryReactive.saveOrUpdate(fee2);
         Fee fee3 = (Fee) mongoRepositoryReactive.findById("3", Fee.class).block();
         if (fee3 == null) {
@@ -188,7 +188,7 @@ public class TestData {
         fee3.setFeePaymentTypeId("02");
         fee3.setGameTypeId("01");
         fee3.setActive(true);
-        fee3.setRevenueNameId(RevenueNameReferenceData.AGENT_REVENUE_CODE);
+        fee3.setRevenueNameId(RevenueNameReferenceData.AGENT_REVENUE_ID);
         mongoRepositoryReactive.saveOrUpdate(fee3);
         Fee fee4 = (Fee) mongoRepositoryReactive.findById("4", Fee.class).block();
         if (fee4 == null) {
@@ -199,7 +199,7 @@ public class TestData {
         fee4.setFeePaymentTypeId("02");
         fee4.setGameTypeId("02");
         fee4.setActive(true);
-        fee4.setRevenueNameId(RevenueNameReferenceData.AGENT_REVENUE_CODE);
+        fee4.setRevenueNameId(RevenueNameReferenceData.AGENT_REVENUE_ID);
         mongoRepositoryReactive.saveOrUpdate(fee4);
         for (int i = 1; i < 6; i++) {
 

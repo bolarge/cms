@@ -291,21 +291,60 @@ public class FeeServiceImpl implements FeeService {
 
     @Override
     public Mono<ResponseEntity> findAllFeePaymentTypeForRevenueName(String revenueNameId) {
-        if (StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_CODE, revenueNameId)
-                || StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_CODE, revenueNameId)) {
-            Query query = new Query();
-            query.addCriteria(Criteria.where("id").ne(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID));
+        try {
+            if (StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID, revenueNameId)
+                    || StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_ID, revenueNameId)) {
+                Query query = new Query();
+                query.addCriteria(Criteria.where("id").ne(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID));
 
-            ArrayList<FeePaymentType> feePaymentTypes = (ArrayList<FeePaymentType>) mongoRepositoryReactive.findAll(query, FeePaymentType.class).toStream().collect(Collectors.toList());
-            ArrayList<EnumeratedFactDto> feePaymentTypeDtos = new ArrayList<>();
-            for (FeePaymentType feePaymentType : feePaymentTypes) {
-                feePaymentTypeDtos.add(feePaymentType.convertToDto());
+                ArrayList<FeePaymentType> feePaymentTypes = (ArrayList<FeePaymentType>) mongoRepositoryReactive.findAll(query, FeePaymentType.class).toStream().collect(Collectors.toList());
+                ArrayList<EnumeratedFactDto> feePaymentTypeDtos = new ArrayList<>();
+                for (FeePaymentType feePaymentType : feePaymentTypes) {
+                    feePaymentTypeDtos.add(feePaymentType.convertToDto());
+                }
+                return Mono.just(new ResponseEntity<>(feePaymentTypeDtos, HttpStatus.OK));
             }
-            return Mono.just(new ResponseEntity<>(feePaymentTypeDtos, HttpStatus.OK));
+            if (StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_ID, revenueNameId)) {
+                return getAllFeePaymentType();
+            }
+            return Mono.just(new ResponseEntity<>("Invalid Revenue Name Supplied", HttpStatus.BAD_REQUEST));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while finding fee payment types for revenue", e);
         }
-        if (StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_CODE, revenueNameId)) {
-            return getAllFeePaymentType();
+    }
+
+    @Override
+    public Mono<ResponseEntity> findRevenueNameByParams(String institutionId, String agentId) {
+        try {
+            if (!StringUtils.isEmpty(institutionId) && StringUtils.isEmpty(agentId)) {
+                Query query = Query.query(Criteria.where("id").ne(RevenueNameReferenceData.AGENT_REVENUE_ID));
+
+                ArrayList<RevenueName> revenueNames = (ArrayList<RevenueName>) mongoRepositoryReactive.findAll(query, RevenueName.class).toStream().collect(Collectors.toList());
+                if (revenueNames == null || revenueNames.isEmpty()) {
+                    return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
+                }
+                ArrayList<EnumeratedFactDto> enumeratedFactDtos = new ArrayList<>();
+                for (RevenueName revenueName : revenueNames) {
+                    enumeratedFactDtos.add(revenueName.convertToDto());
+                }
+                return Mono.just(new ResponseEntity<>(enumeratedFactDtos, HttpStatus.OK));
+            }
+
+            if (!StringUtils.isEmpty(agentId) && StringUtils.isEmpty(institutionId)) {
+                Query query = Query.query(Criteria.where("id").is(RevenueNameReferenceData.AGENT_REVENUE_ID));
+                ArrayList<RevenueName> revenueNames = (ArrayList<RevenueName>) mongoRepositoryReactive.findAll(query, RevenueName.class).toStream().collect(Collectors.toList());
+                if (revenueNames == null || revenueNames.isEmpty()) {
+                    return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
+                }
+                ArrayList<EnumeratedFactDto> enumeratedFactDtos = new ArrayList<>();
+                for (RevenueName revenueName : revenueNames) {
+                    enumeratedFactDtos.add(revenueName.convertToDto());
+                }
+                return Mono.just(new ResponseEntity<>(enumeratedFactDtos, HttpStatus.OK));
+            }
+            return Mono.just(new ResponseEntity<>("Please make either institution or agent id null", HttpStatus.BAD_REQUEST));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while finding revenue names by param", e);
         }
-        return Mono.just(new ResponseEntity<>("Invalid Revenue Name Supplied", HttpStatus.BAD_REQUEST));
     }
 }

@@ -439,17 +439,17 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             String revenueNameId = paymentRecord.getRevenueNameId();
             String feePaymentTypeId = paymentRecord.getFeePaymentTypeId();
 
-            if (StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_CODE, revenueNameId)
+            if (StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_ID, revenueNameId)
                     && StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, feePaymentTypeId)) {
                 licenseService.createAIPLicenseForCompletedPayment(paymentRecord);
             }
 
-            if (StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_CODE, revenueNameId) &&
+            if (StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_ID, revenueNameId) &&
                     StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, feePaymentTypeId)) {
                 licenseService.createFirstLicenseForGamingMachinePayment(paymentRecord);
             }
 
-            if (StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_CODE, revenueNameId) &&
+            if (StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID, revenueNameId) &&
                     StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, feePaymentTypeId)) {
                 licenseService.createFirstLicenseForAgentPayment(paymentRecord);
             }
@@ -496,7 +496,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         String applicationFeeTypeId = FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID;
         String institutionId = paymentRecordDetailCreateDto.getInstitutionId();
         String gameTypeId = fee.getGameTypeId();
-        String institutionRevenueNameId = RevenueNameReferenceData.INSTITUTION_REVENUE_CODE;
+        String institutionRevenueNameId = RevenueNameReferenceData.INSTITUTION_REVENUE_ID;
 
         Query query = new Query();
         query.addCriteria(Criteria.where("feePaymentTypeId").is(applicationFeeTypeId));

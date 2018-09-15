@@ -40,8 +40,8 @@ public class CustomerCodeCreator {
     public void createCustomers() {
         Query query = new Query();
         query.addCriteria(Criteria.where("vgPayCustomerCode").is(null));
-        ArrayList<Institution> institutionsWithout = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
-        for (Institution institution : institutionsWithout) {
+        ArrayList<Institution> institutionsWithoutVigiPayCustomerCode = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
+        for (Institution institution : institutionsWithoutVigiPayCustomerCode) {
             List<AuthInfo> gamingOperatorAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institution.getId());
             if (gamingOperatorAdmins.isEmpty()) {
                 continue;
@@ -56,8 +56,8 @@ public class CustomerCodeCreator {
         }
 
 
-        ArrayList<Agent> agentWithout = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
-        for (Agent agent : agentWithout) {
+        ArrayList<Agent> agentWithoutVigiPayCustomerCode = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
+        for (Agent agent : agentWithoutVigiPayCustomerCode) {
             String customerCode = vigipayService.createCustomerCodeForAgent(agent);
             if (StringUtils.isEmpty(customerCode)) {
                 logger.info("Gotten customer code {}", customerCode);
