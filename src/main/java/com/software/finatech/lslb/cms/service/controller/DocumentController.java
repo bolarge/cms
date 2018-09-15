@@ -387,7 +387,7 @@ public class DocumentController extends BaseController {
             documentsDto.add(dto);
         });
 
-        ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(new Query(Criteria.where("purposeId").is(purposeId)), DocumentType.class).toStream().collect(Collectors.toList());
+        ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(new Query(Criteria.where("documentPurposeId").is(purposeId)), DocumentType.class).toStream().collect(Collectors.toList());
         documentTypes.forEach(entry -> {
             if(entityDocuments.get(entry.getId()) == null){
                 EntityDocumentDto dto = new EntityDocumentDto();
