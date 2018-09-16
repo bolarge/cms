@@ -126,19 +126,13 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             return Mono.just(new ResponseEntity<>(String.format("Fee with id %s not found", feeId), HttpStatus.BAD_REQUEST));
         }
 
-        if (StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, fee.getFeePaymentTypeId()) && paymentRecordDetailCreateDto.isFirstPayment()) {
-            Mono<ResponseEntity> validateLicensePaymentResponse = validateLicensePayment(paymentRecordDetailCreateDto, fee);
-            if (validateLicensePaymentResponse != null) {
-                return validateLicensePaymentResponse;
+        if (paymentRecordDetailCreateDto.isFirstPayment()) {
+            Mono<ResponseEntity> validateFirstPaymentResponse = validateFirstPayment(paymentRecordDetailCreateDto, fee);
+            if (validateFirstPaymentResponse != null) {
+                return validateFirstPaymentResponse;
             }
         }
 
-        if (StringUtils.equals(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID, fee.getFeePaymentTypeId()) && paymentRecordDetailCreateDto.isFirstPayment()) {
-            Mono<ResponseEntity> validateApplicationPaymentResponse = validateApplicationPayment(paymentRecordDetailCreateDto, fee);
-            if (validateApplicationPaymentResponse != null) {
-                return validateApplicationPaymentResponse;
-            }
-        }
         FeeDto feeDto = fee.convertToDto();
         String feeName = feeDto.getFeePaymentTypeName();
         String gameTypeName = feeDto.getGameTypeName();
@@ -248,19 +242,14 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             if (fee == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Fee with id %s not found", feeId), HttpStatus.BAD_REQUEST));
             }
-            if (StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, fee.getFeePaymentTypeId()) && paymentRecordDetailCreateDto.isFirstPayment()) {
-                Mono<ResponseEntity> validateLicensePaymentResponse = validateLicensePayment(paymentRecordDetailCreateDto, fee);
-                if (validateLicensePaymentResponse != null) {
-                    return validateLicensePaymentResponse;
+
+            if (paymentRecordDetailCreateDto.isFirstPayment()) {
+                Mono<ResponseEntity> validateFirstPaymentResponse = validateFirstPayment(paymentRecordDetailCreateDto, fee);
+                if (validateFirstPaymentResponse != null) {
+                    return validateFirstPaymentResponse;
                 }
             }
 
-            if (StringUtils.equals(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID, fee.getFeePaymentTypeId()) && paymentRecordDetailCreateDto.isFirstPayment()) {
-                Mono<ResponseEntity> validateApplicationPaymentResponse = validateApplicationPayment(paymentRecordDetailCreateDto, fee);
-                if (validateApplicationPaymentResponse != null) {
-                    return validateApplicationPaymentResponse;
-                }
-            }
             PaymentRecord paymentRecord = new PaymentRecord();
             String paymentRecordId = paymentRecordDetailCreateDto.getPaymentRecordId();
             if (!paymentRecordDetailCreateDto.isFirstPayment()) {
@@ -439,17 +428,17 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             String revenueNameId = paymentRecord.getRevenueNameId();
             String feePaymentTypeId = paymentRecord.getFeePaymentTypeId();
 
-            if (StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_CODE, revenueNameId)
+            if (StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_ID, revenueNameId)
                     && StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, feePaymentTypeId)) {
                 licenseService.createAIPLicenseForCompletedPayment(paymentRecord);
             }
 
-            if (StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_CODE, revenueNameId) &&
+            if (StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_ID, revenueNameId) &&
                     StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, feePaymentTypeId)) {
                 licenseService.createFirstLicenseForGamingMachinePayment(paymentRecord);
             }
 
-            if (StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_CODE, revenueNameId) &&
+            if (StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID, revenueNameId) &&
                     StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, feePaymentTypeId)) {
                 licenseService.createFirstLicenseForAgentPayment(paymentRecord);
             }
@@ -463,6 +452,31 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         }
         paymentRecordService.savePaymentRecord(paymentRecord);
     }
+
+    private Mono<ResponseEntity> validateFirstPayment(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, Fee fee) {
+        if (StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_RENEWAL_FEE_TYPE_ID, fee.getFeePaymentTypeId())) {
+            Mono<ResponseEntity> validateRenewalLicenseResponse = validateLicenseRenewalPayment(paymentRecordDetailCreateDto, fee);
+            if (validateRenewalLicenseResponse != null) {
+                return validateRenewalLicenseResponse;
+            }
+        }
+
+        if (StringUtils.equals(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID, fee.getFeePaymentTypeId())) {
+            Mono<ResponseEntity> validateApplicationPaymentResponse = validateApplicationPayment(paymentRecordDetailCreateDto, fee);
+            if (validateApplicationPaymentResponse != null) {
+                return validateApplicationPaymentResponse;
+            }
+        }
+
+        if (StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, fee.getFeePaymentTypeId())) {
+            Mono<ResponseEntity> validateLicensePaymentResponse = validateLicensePayment(paymentRecordDetailCreateDto, fee);
+            if (validateLicensePaymentResponse != null) {
+                return validateLicensePaymentResponse;
+            }
+        }
+        return null;
+    }
+
 
     private Mono<ResponseEntity> validateLicensePayment(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, Fee fee) {
         String institutionId = paymentRecordDetailCreateDto.getInstitutionId();
@@ -486,17 +500,35 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         boolean institutionHasApprovedForm = applicationFormService.institutionHasCompletedApplicationForGameType(institutionId, gameTypeId);
         if (!institutionHasApprovedForm) {
             String gameTypeName = fee.getGameTypeName();
-            String errorMsg = String.format("You do not have an approved application form for category %s, please create an application in the category %s and make sure it is approved before paying for license", gameTypeName, gameTypeName);
+            String errorMsg = String.format("You do not have an approved application form for category %s, please create an application in category %s and make sure it is approved before paying for license", gameTypeName, gameTypeName);
             return Mono.just(new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST));
         }
         return null;
     }
 
+    private Mono<ResponseEntity> validateLicenseRenewalPayment(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, Fee fee) {
+        String institutionId = paymentRecordDetailCreateDto.getInstitutionId();
+        String agentId = paymentRecordDetailCreateDto.getAgentId();
+        String gamingMachineId = paymentRecordDetailCreateDto.getGamingMachineId();
+        String gameTypeId = fee.getGameTypeId();
+        int page = 0;
+        int pageSize = 10000;
+        String sortDirection = "DESC";
+        String sortProperty = "createdAt";
+        Mono<ResponseEntity> findLicenseResponse = licenseService.findAllLicense(page, pageSize, sortDirection, sortProperty, institutionId, agentId, gamingMachineId, null, gameTypeId, null, null, null, null);
+        if (findLicenseResponse.block().getStatusCode() != HttpStatus.OK) {
+            String categoryName = fee.getGameTypeName();
+            return Mono.just(new ResponseEntity<>(String.format("You do not have an existing license for category %s, please get licensed for category %s before attempting to pay for license renewal for the category", categoryName, categoryName), HttpStatus.BAD_REQUEST));
+        }
+        return null;
+    }
+
+
     private Mono<ResponseEntity> validateApplicationPayment(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, Fee fee) {
         String applicationFeeTypeId = FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID;
         String institutionId = paymentRecordDetailCreateDto.getInstitutionId();
         String gameTypeId = fee.getGameTypeId();
-        String institutionRevenueNameId = RevenueNameReferenceData.INSTITUTION_REVENUE_CODE;
+        String institutionRevenueNameId = RevenueNameReferenceData.INSTITUTION_REVENUE_ID;
 
         Query query = new Query();
         query.addCriteria(Criteria.where("feePaymentTypeId").is(applicationFeeTypeId));
@@ -506,7 +538,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
 
         PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.find(query, PaymentRecord.class).block();
         if (paymentRecord != null) {
-            return Mono.just(new ResponseEntity<>("You have an existing application payment for the category specified", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("You have an existing payment for application for license  for the category specified", HttpStatus.BAD_REQUEST));
         }
         return null;
     }

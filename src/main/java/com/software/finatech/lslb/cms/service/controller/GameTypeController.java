@@ -10,6 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
@@ -72,22 +73,22 @@ public class GameTypeController extends BaseController {
     }
     )
     public Mono<ResponseEntity> createGameType(@RequestBody @Valid GameTypeCreateDto gameTypeCreateDto) {
-       try {
-           GameType gameType = new GameType();
-           gameType.setId(UUID.randomUUID().toString());
-           gameType.setAipDurationMonths(gameTypeCreateDto.getAipDurationMonths());
-           gameType.setAgentLicenseDurationMonths(gameTypeCreateDto.getAgentLicenseDurationMonths());
-           gameType.setGamingMachineLicenseDurationMonths(gameTypeCreateDto.getGamingMachineLicenseDurationMonths());
-           gameType.setInstitutionLicenseDurationMonths(gameTypeCreateDto.getLicenseDurationMonths());
-           gameType.setName(gameTypeCreateDto.getName());
-           gameType.setDescription(gameTypeCreateDto.getDescription());
-           mongoRepositoryReactive.saveOrUpdate(gameType);
+        try {
+            GameType gameType = new GameType();
+            gameType.setId(UUID.randomUUID().toString());
+            gameType.setAipDurationMonths(gameTypeCreateDto.getAipDurationMonths());
+            gameType.setAgentLicenseDurationMonths(gameTypeCreateDto.getAgentLicenseDurationMonths());
+            gameType.setGamingMachineLicenseDurationMonths(gameTypeCreateDto.getGamingMachineLicenseDurationMonths());
+            gameType.setInstitutionLicenseDurationMonths(gameTypeCreateDto.getLicenseDurationMonths());
+            gameType.setName(gameTypeCreateDto.getName());
+            gameType.setDescription(gameTypeCreateDto.getDescription());
+            mongoRepositoryReactive.saveOrUpdate(gameType);
 
-           return Mono.just(new ResponseEntity<>(gameType.convertToDto(), HttpStatus.OK));
-       }catch (Exception ex){
-           return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>(gameType.convertToDto(), HttpStatus.OK));
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
 
-       }
+        }
 
     }
 
@@ -118,26 +119,45 @@ public class GameTypeController extends BaseController {
         return Mono.just(new ResponseEntity<>(gameType.convertToDto(), HttpStatus.OK));
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{institutionId}/")
-    @ApiOperation(value = "Get GameTypes for institution", response = GameTypeDto.class, responseContainer = "List",consumes = "application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "/for-institution/")
+    @ApiOperation(value = "Get GameTypes for institution", response = GameTypeDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getGameTypesForInstitution(@PathVariable("institutionId") String institutionId) {
+    public Mono<ResponseEntity> getGameTypesForInstitution(@RequestParam("institutionId") String institutionId) {
         return gameTypeService.getAllGameTypesForInstitution(institutionId);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{agentId}/")
-    @ApiOperation(value = "Get GameTypes for agent ", response = GameTypeDto.class, responseContainer = "List",consumes = "application/json",
-    notes = "returns all game types an agent operates in")
+    @RequestMapping(method = RequestMethod.GET, value = "/for-agent/")
+    @ApiOperation(value = "Get GameTypes for agent ", response = GameTypeDto.class, responseContainer = "List", consumes = "application/json",
+            notes = "returns all game types an agent operates in")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getGameTypesForAgent(@PathVariable("agentId") String agentId) {
+    public Mono<ResponseEntity> getGameTypesForAgent(@RequestParam("agentId")String agentId) {
         return gameTypeService.getAllGameTypesForAgent(agentId);
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/for-payment")
+    @ApiOperation(value = "Get GameTypes for a payment operation", response = GameTypeDto.class, responseContainer = "List", consumes = "application/json",
+            notes = "returns all game types for a payment operation, You supply agent id or institution id , it finds all the game types registered for the person")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getGameTypesForPayment(@RequestParam("agentId") String agentId, @RequestParam("institutionId") String institutionId) {
+        if (!StringUtils.isEmpty(institutionId) && StringUtils.isEmpty(agentId)) {
+            return getGameTypesForInstitution(institutionId);
+        }
+        if (!StringUtils.isEmpty(agentId) && StringUtils.isEmpty(institutionId)) {
+            return getGameTypesForAgent(agentId);
+        }
+        return Mono.just(new ResponseEntity<>("Please supply one of agent id or institution Id", HttpStatus.BAD_REQUEST));
     }
 }

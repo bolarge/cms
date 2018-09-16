@@ -547,11 +547,11 @@ public class LicenseServiceImpl implements LicenseService {
 
     private String getLicenseTypeFromRevenueNameId(String revenueNameId) {
         switch (revenueNameId) {
-            case RevenueNameReferenceData.AGENT_REVENUE_CODE:
+            case RevenueNameReferenceData.AGENT_REVENUE_ID:
                 return LicenseTypeReferenceData.AGENT;
-            case RevenueNameReferenceData.GAMING_MACHINE_CODE:
+            case RevenueNameReferenceData.GAMING_MACHINE_ID:
                 return LicenseTypeReferenceData.GAMING_MACHINE;
-            case RevenueNameReferenceData.INSTITUTION_REVENUE_CODE:
+            case RevenueNameReferenceData.INSTITUTION_REVENUE_ID:
                 return LicenseTypeReferenceData.INSTITUTION;
             default:
                 return null;
@@ -592,11 +592,11 @@ public class LicenseServiceImpl implements LicenseService {
         String revenueNameId = paymentRecord.getRevenueNameId();
         String prefix = "LSLB-";
         switch (revenueNameId) {
-            case RevenueNameReferenceData.AGENT_REVENUE_CODE:
+            case RevenueNameReferenceData.AGENT_REVENUE_ID:
                 prefix = prefix + "AG-";
-            case RevenueNameReferenceData.GAMING_MACHINE_CODE:
+            case RevenueNameReferenceData.GAMING_MACHINE_ID:
                 prefix = prefix + "GM-";
-            case RevenueNameReferenceData.INSTITUTION_REVENUE_CODE:
+            case RevenueNameReferenceData.INSTITUTION_REVENUE_ID:
                 prefix = prefix + "OP-";
             default:
         }

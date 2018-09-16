@@ -22,4 +22,6 @@ public interface FeeService {
     Fee findFeeById(String feeId);
 
     Mono<ResponseEntity> findAllFeePaymentTypeForRevenueName(String revenueNameId);
+
+    Mono<ResponseEntity> findRevenueNameByParams(String institutionId, String agentId);
 }
