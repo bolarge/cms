@@ -421,7 +421,7 @@ public class LicenseServiceImpl implements LicenseService {
             }
             GameType gameType = paymentRecord.getGameType();
             LocalDate effectiveDate = LocalDate.now();
-            LocalDate expiryDate = effectiveDate.plusMonths(gameType.getAipDurationMonths());
+            LocalDate expiryDate = effectiveDate.plusMonths(gameType.getAipDurationMonths()).minusDays(1);
             License license = new License();
             license.setId(UUID.randomUUID().toString());
             license.setInstitutionId(paymentRecord.getInstitutionId());
@@ -446,7 +446,7 @@ public class LicenseServiceImpl implements LicenseService {
             }
             GameType gameType = paymentRecord.getGameType();
             LocalDate effectiveDate = LocalDate.now();
-            LocalDate expiryDate = effectiveDate.plusMonths(gameType.getAgentLicenseDurationMonths());
+            LocalDate expiryDate = effectiveDate.plusMonths(gameType.getAgentLicenseDurationMonths()).minusDays(1);
             License license = new License();
             license.setId(UUID.randomUUID().toString());
             license.setInstitutionId(paymentRecord.getInstitutionId());
@@ -473,7 +473,7 @@ public class LicenseServiceImpl implements LicenseService {
 
             GameType gameType = paymentRecord.getGameType();
             LocalDate effectiveDate = LocalDate.now();
-            LocalDate expiryDate = effectiveDate.plusMonths(gameType.getGamingMachineLicenseDurationMonths());
+            LocalDate expiryDate = effectiveDate.plusMonths(gameType.getGamingMachineLicenseDurationMonths()).minusDays(1);
             License license = new License();
             license.setId(UUID.randomUUID().toString());
             license.setInstitutionId(paymentRecord.getInstitutionId());
@@ -535,11 +535,11 @@ public class LicenseServiceImpl implements LicenseService {
         LocalDate newLicenseStartDate = latestLicense.getExpiryDate();
         switch (latestLicense.getLicenseTypeId()) {
             case LicenseTypeReferenceData.AGENT:
-                return newLicenseStartDate.plusMonths(gameType.getAgentLicenseDurationMonths());
+                return newLicenseStartDate.plusMonths(gameType.getAgentLicenseDurationMonths()).minusDays(1);
             case LicenseTypeReferenceData.INSTITUTION:
-                return newLicenseStartDate.plusMonths(gameType.getInstitutionLicenseDurationMonths());
+                return newLicenseStartDate.plusMonths(gameType.getInstitutionLicenseDurationMonths()).minusDays(1);
             case LicenseTypeReferenceData.GAMING_MACHINE:
-                return newLicenseStartDate.plusMonths(gameType.getGamingMachineLicenseDurationMonths());
+                return newLicenseStartDate.plusMonths(gameType.getGamingMachineLicenseDurationMonths()).minusDays(1);
             default:
                 throw new Exception();
         }
@@ -547,11 +547,11 @@ public class LicenseServiceImpl implements LicenseService {
 
     private String getLicenseTypeFromRevenueNameId(String revenueNameId) {
         switch (revenueNameId) {
-            case RevenueNameReferenceData.AGENT_REVENUE_CODE:
+            case RevenueNameReferenceData.AGENT_REVENUE_ID:
                 return LicenseTypeReferenceData.AGENT;
-            case RevenueNameReferenceData.GAMING_MACHINE_CODE:
+            case RevenueNameReferenceData.GAMING_MACHINE_ID:
                 return LicenseTypeReferenceData.GAMING_MACHINE;
-            case RevenueNameReferenceData.INSTITUTION_REVENUE_CODE:
+            case RevenueNameReferenceData.INSTITUTION_REVENUE_ID:
                 return LicenseTypeReferenceData.INSTITUTION;
             default:
                 return null;
@@ -592,11 +592,11 @@ public class LicenseServiceImpl implements LicenseService {
         String revenueNameId = paymentRecord.getRevenueNameId();
         String prefix = "LSLB-";
         switch (revenueNameId) {
-            case RevenueNameReferenceData.AGENT_REVENUE_CODE:
+            case RevenueNameReferenceData.AGENT_REVENUE_ID:
                 prefix = prefix + "AG-";
-            case RevenueNameReferenceData.GAMING_MACHINE_CODE:
+            case RevenueNameReferenceData.GAMING_MACHINE_ID:
                 prefix = prefix + "GM-";
-            case RevenueNameReferenceData.INSTITUTION_REVENUE_CODE:
+            case RevenueNameReferenceData.INSTITUTION_REVENUE_ID:
                 prefix = prefix + "OP-";
             default:
         }

@@ -545,7 +545,6 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
             if (responseCode == 200) {
                 // everything is fine, handle the response
-                // String stringResponse = EntityUtils.toString(response.getEntity());
                 SSOToken token = mapper.readValue(stringResponse, SSOToken.class);
                 token.setAuthInfo(authInfo.convertToDto());
 

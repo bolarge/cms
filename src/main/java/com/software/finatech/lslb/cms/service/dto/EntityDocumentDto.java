@@ -9,6 +9,24 @@ public class EntityDocumentDto {
     protected String documentTypeId;
     protected String documentType;
     protected String entityId;
+    protected boolean active;
+    protected boolean required;
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
 
     public String getId() {
         return id;

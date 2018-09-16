@@ -1,6 +1,5 @@
 package com.software.finatech.lslb.cms.service.controller;
 
-import com.software.finatech.lslb.cms.service.domain.EnumeratedFact;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
 import io.swagger.annotations.Api;
@@ -67,6 +66,7 @@ public class FeeController extends BaseController {
     public Mono<ResponseEntity> createFee(@RequestBody @Valid FeeCreateDto feeCreateDto) {
         return feeService.createFee(feeCreateDto);
     }
+
     @RequestMapping(method = RequestMethod.POST, value = "/update")
     @ApiOperation(value = "Update Fee Configuration", response = FeeDto.class, consumes = "application/json")
     @ApiResponses(value = {
@@ -77,6 +77,7 @@ public class FeeController extends BaseController {
     public Mono<ResponseEntity> updateFee(@RequestBody @Valid FeeUpdateDto feeUpdateDto) {
         return feeService.updateFee(feeUpdateDto);
     }
+
     @RequestMapping(method = RequestMethod.POST, value = "/updateFeePaymentType")
     @ApiOperation(value = "Update FeePaymentType Configuration", response = FeePaymentTypeDto.class, consumes = "application/json")
     @ApiResponses(value = {
@@ -87,6 +88,7 @@ public class FeeController extends BaseController {
     public Mono<ResponseEntity> updateFeePaymentType(@RequestBody @Valid FeePaymentTypeDto feeUpdateDto) {
         return feeService.updateFeePaymentType(feeUpdateDto);
     }
+
     @RequestMapping(method = RequestMethod.POST, value = "/createFeePayment")
     @ApiOperation(value = "Create Fee Payment Configuration", response = FeePaymentTypeDto.class, consumes = "application/json")
     @ApiResponses(value = {
@@ -97,6 +99,7 @@ public class FeeController extends BaseController {
     public Mono<ResponseEntity> createFee(@RequestBody @Valid FeePaymentTypeDto feeCreateDto) {
         return feeService.createFeePaymentType(feeCreateDto);
     }
+
     @RequestMapping(method = RequestMethod.GET, value = "/all-revenue-names")
     @ApiOperation(value = "Get all Revenue Names", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
@@ -105,19 +108,20 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllRevenueNames() {
-       try {
-           List<EnumeratedFactDto> revenueNames = feeService.getRevenueNames();
-           if (revenueNames == null) {
-               return Mono.just(new ResponseEntity<>("No Revenue Name Record", HttpStatus.OK));
+        try {
+            List<EnumeratedFactDto> revenueNames = feeService.getRevenueNames();
+            if (revenueNames == null) {
+                return Mono.just(new ResponseEntity<>("No Revenue Name Record", HttpStatus.OK));
 
-           }
-           return Mono.just(new ResponseEntity<>(revenueNames, HttpStatus.OK));
-       }catch (Exception ex){
-           return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+            }
+            return Mono.just(new ResponseEntity<>(revenueNames, HttpStatus.OK));
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
 
-       }
+        }
 
     }
+
     @RequestMapping(method = RequestMethod.GET, value = "/all-processing-fees")
     @ApiOperation(value = "Get all Processing Fees", response = FeesTypeDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
@@ -134,7 +138,7 @@ public class FeeController extends BaseController {
             }
             return Mono.just(new ResponseEntity<>(feesTypeDtos, HttpStatus.OK));
 
-        }catch (Exception ex){
+        } catch (Exception ex) {
             return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
 
         }
@@ -148,9 +152,32 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> findFeeByParams(@RequestParam("feePaymentTypeId") String feePaymentTypeId,
-                                           @RequestParam("gameTypeId") String gameTypeId,
-                                           @RequestParam("revenueNameId") String revenueNameId) {
-        return feeService.findActiveFeeByGameTypeAndPaymentTypeAndRevenueName(gameTypeId,feePaymentTypeId, revenueNameId);
+                                                @RequestParam("gameTypeId") String gameTypeId,
+                                                @RequestParam("revenueNameId") String revenueNameId) {
+        return feeService.findActiveFeeByGameTypeAndPaymentTypeAndRevenueName(gameTypeId, feePaymentTypeId, revenueNameId);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/fee-payment-types/for-revenue-name", params = {"revenueNameId"})
+    @ApiOperation(value = "Get Fee Payment Types for Revenue name", response = EnumeratedFactDto.class, consumes = "application/json",
+            notes = "This endpoint find all fee payment types for revenue name \n(Returns only License and License Renewal for agents and gaming machine, \n returns all fee payment types for institutions)")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> findFeeByParams(@RequestParam("revenueNameId") String revenueNameId) {
+        return feeService.findAllFeePaymentTypeForRevenueName(revenueNameId);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/revenue-names/by-params", params = {"institutionId", "agentId"})
+    @ApiOperation(value = "Get all Revenue Names", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> findRevenueNamesByParam(@RequestParam("institutionId") String institutionId, @RequestParam("agentId") String agentId) {
+        return feeService.findRevenueNameByParams(institutionId, agentId);
     }
 
 }
