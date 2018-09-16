@@ -79,16 +79,16 @@ public class RenewalFormController extends BaseController {
             query.with(PageRequest.of(page, pageSize, sort));
             query.with(sort);
 
-            ArrayList<Institution> institutions = (ArrayList<Institution>) mongoRepositoryReactive
+            ArrayList<RenewalForm> renewalForms = (ArrayList<RenewalForm>) mongoRepositoryReactive
                     .findAll(query, Institution.class).toStream().collect(Collectors.toList());
-            if (institutions.size() == 0) {
+            if (renewalForms.size() == 0) {
                 return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
             }
-            ArrayList<InstitutionDto> institutionDtos = new ArrayList<>();
-            institutions.forEach(entry -> {
-                institutionDtos.add(entry.convertToDto());
+            ArrayList<RenewalFormDto> renewalFormDtos = new ArrayList<>();
+            renewalForms.forEach(entry -> {
+                renewalFormDtos.add(entry.convertToDto());
             });
-            return Mono.just(new ResponseEntity<>(institutionDtos, HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(renewalFormDtos, HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while fetching all institutions";
             return null;//logAndReturnError(errorMsg, errorMsg, e);
@@ -251,6 +251,44 @@ public class RenewalFormController extends BaseController {
         } catch (Exception ex) {
             return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
 
+        }
+    }
+
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/get-renewal-form-by-institution", params = {"institutionId"})
+    @ApiOperation(value = "Get all Institution Renewal Form", response = RenewalForm.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")
+    }
+    )
+    public Mono<ResponseEntity> getRenewalForms(
+
+            @RequestParam("institutionId") String institutionId
+    ) {
+
+        try {
+            Query query = new Query();
+
+            if (!StringUtils.isEmpty(institutionId)) {
+                query.addCriteria(Criteria.where("institutionId").in(institutionId));
+            }
+            ArrayList<RenewalForm> renewalForms = (ArrayList<RenewalForm>) mongoRepositoryReactive
+                    .findAll(query, RenewalForm.class).toStream().collect(Collectors.toList());
+            if (renewalForms.size() == 0) {
+                return Mono.just(new ResponseEntity<>("No record found", HttpStatus.BAD_REQUEST));
+            }
+            ArrayList<RenewalFormDto> renewalFormDtos = new ArrayList<>();
+            renewalForms.forEach(entry -> {
+                renewalFormDtos.add(entry.convertToDto());
+            });
+            return Mono.just(new ResponseEntity<>(renewalFormDtos, HttpStatus.OK));
+        } catch (Exception e) {
+            String errorMsg = "An error occurred while fetching all institutions";
+            return null;//logAndReturnError(errorMsg, errorMsg, e);
         }
     }
 }
