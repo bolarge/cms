@@ -6,7 +6,6 @@ public class LicenseUpdateDto {
 
     @NotEmpty(message = "Please provide License Status Id")
     private String licenseStatusId;
-    private String startDate;
     @NotEmpty(message = "Please provide Payment Record Id")
     private String paymentRecordId;
     @NotEmpty(message = "Please provide license Type")
@@ -46,13 +45,6 @@ public class LicenseUpdateDto {
         this.paymentRecordId = paymentRecordId;
     }
 
-    public String getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
-    }
 
     public String getLicenseStatusId() {
         return licenseStatusId;
