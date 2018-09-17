@@ -200,8 +200,6 @@ public class RenewalForm extends AbstractFact {
         renewalFormDto.setTechnicalPartner(getTechnicalPartner());
         PaymentRecord paymentRecord= (PaymentRecord) mongoRepositoryReactive.findById(getPaymentRecordId(),PaymentRecord.class).block();
         renewalFormDto.setPaymentRecord(paymentRecord.convertToDto());
-
-
         return renewalFormDto;
 
     }
