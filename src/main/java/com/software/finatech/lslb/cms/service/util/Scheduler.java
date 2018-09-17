@@ -4,6 +4,7 @@ import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.NotificationDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.PaymentRecordServiceImpl;
@@ -18,10 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class Scheduler {
@@ -46,11 +44,14 @@ public class Scheduler {
     LocalDateTime dateTime = new LocalDateTime();
 
 
-    @Scheduled(cron = "0 0 4 * * ?")
+    //@Scheduled(cron = "5 8 * * 1")
     protected void checkForLicensesCloseToExpirations(){
         logger.info(" checkForLicensesCloseToExpirations");
+        ArrayList<String> licenseStatuses= new ArrayList<>();
+        licenseStatuses.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+
         List<License> licenses=
-                expirationList.getExpiringLicences(90,LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+                expirationList.getExpiringLicences(90,licenseStatuses);
        List<NotificationDto> notificationDtos= new ArrayList<>();
         LocalDate endDate;
         dateTime=dateTime.plusMonths(3);
@@ -100,11 +101,14 @@ public class Scheduler {
         }
 
     }
-    @Scheduled(cron = "0 0 3 * * ?")
+    //@Scheduled(cron = "5 8 * * 1")
     protected void checkForAIPCloseToExpirations(){
 
         logger.info("checkForAIPCloseToExpirations");
-        List<License> licenses= expirationList.getExpiringLicences(14,LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
+        ArrayList<String> licenseStatuses= new ArrayList<>();
+        licenseStatuses.add(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
+        licenseStatuses.add(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID);
+        List<License> licenses= expirationList.getExpiringLicences(14, licenseStatuses);
         List<NotificationDto> notificationDtos= new ArrayList<>();
         LocalDate endDate;
         dateTime=dateTime.plusDays(14);
@@ -194,11 +198,11 @@ public class Scheduler {
 
         }
     }
-    //@Scheduled(cron = "0 0/1 * * * ?")
-    @Scheduled(cron = "0 0 4 * * ?")
-    protected void deactivateInstitutionsWithExpiredLicense(){
-
-        List<License> licenses= expirationList.getExpiredLicences(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+    //@Scheduled(cron = "5 8 * * 1")
+    protected void InstitutionsWithExpiredLicense(){
+        ArrayList<String> licenseStatuses= new ArrayList<>();
+        licenseStatuses.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+        List<License> licenses= expirationList.getExpiredLicences(licenseStatuses);
         List<NotificationDto> notificationDtos= new ArrayList<>();
         if(licenses!=null){
             for(License license: licenses){
@@ -241,12 +245,20 @@ public class Scheduler {
             sendEmailNotification(notificationDtos,"expired");
         }
     }
+    @Scheduled(cron = "0 0 4 * * ?")
+    protected void deactivateInstitutionsWithExpiredLicense() {
+        ArrayList<String> licenseStatuses = new ArrayList<>();
+        licenseStatuses.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+        expirationList.getExpiredLicences(licenseStatuses);
 
-
-    @Scheduled(cron = "0 0 3 * * ?")
+    }
+    //@Scheduled(cron = "5 8 * * 1")
     protected void WithExpiredAIP(){
+        ArrayList<String> licenseStatuses= new ArrayList<>();
+        licenseStatuses.add(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
+        licenseStatuses.add(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID);
 
-        List<License> licenses= expirationList.getExpiredLicences(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
+        List<License> licenses= expirationList.getExpiredLicences(licenseStatuses);
         List<NotificationDto> notificationDtos= new ArrayList<>();
         if(licenses!=null){
             for(License license: licenses){
