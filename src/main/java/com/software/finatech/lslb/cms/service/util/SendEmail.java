@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 @Component
-public class SendEmaill {
+public class SendEmail {
     @Autowired
     EmailService emailService;
     @Autowired
@@ -29,13 +29,9 @@ public class SendEmaill {
         model.put("institutionName", notificationDto.getInstitutionName());
         model.put("description", notificationDto.getDescription());
         model.put("date", LocalDate.now().toString("dd-MM-YYYY"));
-        String content = mailContentBuilderService.build(model, "LicenseUpdate");
+        String content = mailContentBuilderService.build(model, "LicenseExpiration");
         emailService.sendEmail(content, "Licence Update Notification", notificationDto.getInstitutionEmail());
         return "success";
     }
-  public Institution getInstitution(String institutionId) {
-    return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
-}public GameType getGameType(String gameTypeId) {
-    return (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
-}
+
 }
