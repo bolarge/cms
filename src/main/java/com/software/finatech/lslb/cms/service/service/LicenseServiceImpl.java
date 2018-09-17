@@ -357,21 +357,6 @@ public class LicenseServiceImpl implements LicenseService {
     public Mono<ResponseEntity> updateAIPDocToLicense(LicenseUpdateAIPToLicenseDto licenseUpdateDto) {
         try {
 
-            LocalDate fromDate;
-
-            if ((licenseUpdateDto.getStartDate() != "" && !licenseUpdateDto.getStartDate().isEmpty())) {
-                if (!licenseUpdateDto.getStartDate().matches("([0-9]{4})-([0-9]{2})-([0-9]{2})")) {
-                    return Mono.just(new ResponseEntity("Invalid Date format. " +
-                            "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
-                }
-                fromDate = new LocalDate(licenseUpdateDto.getStartDate());
-
-            } else {
-
-                return Mono.just(new ResponseEntity("Invalid Date format. " +
-                        "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
-            }
-
             Query queryLicence = new Query();
             queryLicence.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
             queryLicence.addCriteria(Criteria.where("gameTypeId").is(licenseUpdateDto.getGameTypeId()));
@@ -385,7 +370,6 @@ public class LicenseServiceImpl implements LicenseService {
             license.setLicenseStatusId(LicenseStatusReferenceData.AIP_COMPLETED);
             License createLicense = new License();
 
-            createLicense.setEffectiveDate(fromDate);
             Query queryGameType = new Query();
 
             queryGameType.addCriteria(Criteria.where("id").is(license.getGameTypeId()));
@@ -406,8 +390,8 @@ public class LicenseServiceImpl implements LicenseService {
                 licenseNumber=generateLicenseNumberForPaymentRecord(paymentRecord);
                  createLicense.setLicenseNumber(licenseNumber);
                 }
-            createLicense.setExpiryDate(licenseEndDate);
             createLicense.setEffectiveDate(license.getExpiryDate().plusDays(1));
+            createLicense.setExpiryDate(licenseEndDate);
             createLicense.setRenewalStatus("false");
             createLicense.setInstitutionId(license.getInstitutionId());
             createLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
