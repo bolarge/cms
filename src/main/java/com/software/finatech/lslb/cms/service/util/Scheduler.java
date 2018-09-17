@@ -44,7 +44,7 @@ public class Scheduler {
     LocalDateTime dateTime = new LocalDateTime();
 
 
-    @Scheduled(cron = "5 8 * * 1")
+    //@Scheduled(cron = "5 8 * * 1")
     protected void checkForLicensesCloseToExpirations(){
         logger.info(" checkForLicensesCloseToExpirations");
         ArrayList<String> licenseStatuses= new ArrayList<>();
@@ -101,7 +101,7 @@ public class Scheduler {
         }
 
     }
-    @Scheduled(cron = "5 8 * * 1")
+    //@Scheduled(cron = "5 8 * * 1")
     protected void checkForAIPCloseToExpirations(){
 
         logger.info("checkForAIPCloseToExpirations");
@@ -198,7 +198,7 @@ public class Scheduler {
 
         }
     }
-    @Scheduled(cron = "5 8 * * 1")
+    //@Scheduled(cron = "5 8 * * 1")
     protected void InstitutionsWithExpiredLicense(){
         ArrayList<String> licenseStatuses= new ArrayList<>();
         licenseStatuses.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
@@ -252,7 +252,7 @@ public class Scheduler {
         expirationList.getExpiredLicences(licenseStatuses);
 
     }
-    @Scheduled(cron = "5 8 * * 1")
+    //@Scheduled(cron = "5 8 * * 1")
     protected void WithExpiredAIP(){
         ArrayList<String> licenseStatuses= new ArrayList<>();
         licenseStatuses.add(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
