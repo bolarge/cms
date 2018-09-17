@@ -161,7 +161,7 @@ public class ApplicationFormNotificationHelperAsync {
         HashMap<String, Object> model = new HashMap<>();
         model.put("date", presentDate);
         model.put("gameType", gameTypeName);
-        model.put("CallbackUrl", callBackUrl);
+        model.put("frontEndUrl", callBackUrl);
         String mailSubject = String.format("Notification on your application for %s license", gameTypeName);
 
         String content = mailContentBuilderService.build(model, "application-form-approval-GA-new");
