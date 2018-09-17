@@ -11,6 +11,7 @@ public class LicenseStatusReferenceData {
     public static final String RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID = "04";
     public static final String LICENSE_EXPIRED_STATUS_ID = "05";
     public static final String AIP_DOCUMENT_STATUS_ID="06";
+    public static final String AIP_COMPLETED="07";
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive){
         LicenseStatus licenseStatus1 = (LicenseStatus)mongoRepositoryReactive.findById(AIP_LICENSE_STATUS_ID, LicenseStatus.class).block();
         if (licenseStatus1 == null){
@@ -56,12 +57,21 @@ public class LicenseStatusReferenceData {
         }
         licenseStatus6.setName("AIP DOCUMENT UPLOADED");
 
+
+        LicenseStatus licenseStatus7= (LicenseStatus)mongoRepositoryReactive.findById(AIP_COMPLETED, LicenseStatus.class).block();
+        if (licenseStatus7 == null){
+            licenseStatus7 = new LicenseStatus();
+            licenseStatus7.setId(AIP_COMPLETED);
+        }
+        licenseStatus7.setName("AIP COMPLETED");
+
         mongoRepositoryReactive.saveOrUpdate(licenseStatus1);
         mongoRepositoryReactive.saveOrUpdate(licenseStatus2);
         mongoRepositoryReactive.saveOrUpdate(licenseStatus3);
         mongoRepositoryReactive.saveOrUpdate(licenseStatus4);
         mongoRepositoryReactive.saveOrUpdate(licenseStatus5);
         mongoRepositoryReactive.saveOrUpdate(licenseStatus6);
+        mongoRepositoryReactive.saveOrUpdate(licenseStatus7);
 
     }
 }
