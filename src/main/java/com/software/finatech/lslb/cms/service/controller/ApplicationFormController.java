@@ -261,7 +261,7 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> rejectApplicationForm(@RequestParam("applicationFormId") String applicationFormId, @RequestBody ApplicationFormRejectDto applicationFormRejectDto) {
+    public Mono<ResponseEntity> rejectApplicationForm(@RequestParam("applicationFormId") String applicationFormId, @RequestBody @Valid ApplicationFormRejectDto applicationFormRejectDto) {
         return applicationFormService.rejectApplicationForm(applicationFormId, applicationFormRejectDto);
     }
 
