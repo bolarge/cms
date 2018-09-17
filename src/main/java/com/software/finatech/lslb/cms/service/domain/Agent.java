@@ -33,6 +33,15 @@ public class Agent extends AbstractFact {
     protected Set<String> gameTypeIds;
     protected String vgPayCustomerCode;
     private String title;
+    private String authInfoId;
+
+    public String getAuthInfoId() {
+        return authInfoId;
+    }
+
+    public void setAuthInfoId(String authInfoId) {
+        this.authInfoId = authInfoId;
+    }
 
     public String getTitle() {
         return title;
@@ -238,5 +247,12 @@ public class Agent extends AbstractFact {
             return null;
         }
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+    }
+
+    public AuthInfo getAuthInfo(){
+        if(StringUtils.isEmpty(this.authInfoId)){
+            return  null;
+        }
+        return (AuthInfo)mongoRepositoryReactive.findById(this.authInfoId,AuthInfo.class).block();
     }
 }

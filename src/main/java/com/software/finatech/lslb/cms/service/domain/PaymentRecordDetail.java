@@ -1,7 +1,9 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailDto;
+import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -127,6 +129,33 @@ public class PaymentRecordDetail extends AbstractFact {
             }
         }
         return modeOfPayment;
+    }
+
+    public PaymentRecord getPaymentRecord() {
+        if (StringUtils.isEmpty(this.paymentRecordId)) {
+            return null;
+        }
+        return (PaymentRecord) mongoRepositoryReactive.findById(this.paymentRecordId, PaymentRecord.class).block();
+    }
+
+    public String getRevenueName() {
+        PaymentRecord paymentRecord = getPaymentRecord();
+        if (paymentRecord == null) {
+            return null;
+        }
+        RevenueName revenueName = paymentRecord.getRevenueName();
+        if (revenueName == null) {
+            return null;
+        }
+        return revenueName.getName();
+    }
+
+    public boolean isSuccessfulPayment() {
+        return StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, this.paymentStatusId);
+    }
+
+    public boolean isFailedPayment() {
+        return StringUtils.equals(PaymentStatusReferenceData.FAILED_PAYMENT_STATUS_ID, this.paymentStatusId);
     }
 
     @Override
