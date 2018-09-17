@@ -8,7 +8,7 @@ import com.software.finatech.lslb.cms.service.dto.InstitutionUpdateDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
-import com.software.finatech.lslb.cms.service.util.CustomerCodeCreatorAsync;
+import com.software.finatech.lslb.cms.service.util.async_helpers.CustomerCodeCreatorAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

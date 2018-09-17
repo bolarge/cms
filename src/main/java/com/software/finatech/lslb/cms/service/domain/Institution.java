@@ -25,6 +25,15 @@ public class Institution extends AbstractFact {
     protected String licenseId;
     protected Boolean status;
     protected String vgPayCustomerCode;
+    protected String website;
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
 
     public String getAddress() {
         return address;

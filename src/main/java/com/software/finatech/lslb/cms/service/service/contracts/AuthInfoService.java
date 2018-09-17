@@ -31,4 +31,6 @@ public interface AuthInfoService {
     ArrayList<AuthInfo> getAllActiveGamingOperatorAdminsForInstitution(String institutionId);
 
     AuthInfo getUserById(String userId);
+
+    AuthInfo getUserByAgentId(String agentId);
 }

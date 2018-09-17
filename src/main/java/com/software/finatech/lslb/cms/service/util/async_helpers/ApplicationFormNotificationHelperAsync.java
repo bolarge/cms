@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.service.util;
+package com.software.finatech.lslb.cms.service.util.async_helpers;
 
 import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
@@ -7,28 +7,68 @@ import com.software.finatech.lslb.cms.service.domain.LslbAdminComment;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 @Component
 public class ApplicationFormNotificationHelperAsync {
 
+    private static final Logger logger = LoggerFactory.getLogger(ApplicationFormNotificationHelperAsync.class);
+
     private AuthInfoService authInfoService;
     private MailContentBuilderService mailContentBuilderService;
     private EmailService emailService;
+    private Environment environment;
+
+
+    @Value("${racs.ui.host}")
+    private String frontEndHost;
+    @Value("${racs.ui.port}")
+    private String frontEndPort;
+    private String frontEndUrl;
 
     @Autowired
     public ApplicationFormNotificationHelperAsync(AuthInfoService authInfoService,
                                                   MailContentBuilderService mailContentBuilderService,
-                                                  EmailService emailService) {
+                                                  EmailService emailService,
+                                                  Environment environment) {
         this.authInfoService = authInfoService;
         this.mailContentBuilderService = mailContentBuilderService;
         this.emailService = emailService;
+        this.environment = environment;
+    }
+
+    @PostConstruct
+    public void initialize() {
+        String[] activeProfileArray = environment.getActiveProfiles();
+        List<String> activeProfiles = Arrays.asList(activeProfileArray);
+        frontEndUrl = frontEndHost;
+        if (!StringUtils.isEmpty(frontEndPort)) {
+            frontEndUrl = String.format("%s:%s", frontEndHost, frontEndPort);
+        }
+        if (activeProfiles.contains("development") ||
+                activeProfiles.contains("test") ||
+                activeProfiles.contains("staging")) {
+            frontEndUrl = String.format("http://%s", frontEndUrl);
+        }
+
+        if (activeProfiles.contains("production")) {
+            frontEndUrl = String.format("https://%s", frontEndUrl);
+        }
+        logger.info("Front end url : {}", frontEndUrl);
     }
 
     @Async
@@ -117,9 +157,11 @@ public class ApplicationFormNotificationHelperAsync {
     private void sendApprovedMailToInstitutionUser(AuthInfo institutionAdmin, ApplicationForm applicationForm) {
         String gameTypeName = applicationForm.getGameTypeName();
         String presentDate = DateTime.now().toString("dd/MM/yyyy ");
+        String callBackUrl = frontEndUrl + "/payment-page";
         HashMap<String, Object> model = new HashMap<>();
         model.put("date", presentDate);
         model.put("gameType", gameTypeName);
+        model.put("callBackUrl", callBackUrl);
         String mailSubject = String.format("Notification on your application for %s license", gameTypeName);
 
         String content = mailContentBuilderService.build(model, "application-form-approval-GA-new");

@@ -14,6 +14,7 @@ import com.software.finatech.lslb.cms.service.referencedata.ModeOfPaymentReferen
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.*;
+import com.software.finatech.lslb.cms.service.util.async_helpers.PaymentEmailNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -48,6 +49,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     private AuthInfoService authInfoService;
     private LicenseService licenseService;
     private ApplicationFormService applicationFormService;
+    private PaymentEmailNotifierAsync paymentEmailNotifierAsync;
 
     @Autowired
     public PaymentRecordDetailServiceImpl(FeeService feeService,
@@ -59,7 +61,8 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                                           GamingMachineService gamingMachineService,
                                           AuthInfoService authInfoService,
                                           LicenseService licenseService,
-                                          ApplicationFormService applicationFormService) {
+                                          ApplicationFormService applicationFormService,
+                                          PaymentEmailNotifierAsync paymentEmailNotifierAsync) {
         this.feeService = feeService;
         this.paymentRecordService = paymentRecordService;
         this.mongoRepositoryReactive = mongoRepositoryReactive;
@@ -70,6 +73,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         this.authInfoService = authInfoService;
         this.licenseService = licenseService;
         this.applicationFormService = applicationFormService;
+        this.paymentEmailNotifierAsync = paymentEmailNotifierAsync;
     }
 
     @Override
@@ -99,6 +103,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             existingPaymentRecordDetail.setPaymentStatusId(paymentRecordDetailUpdateDto.getPaymentStatusId());
             existingPaymentRecordDetail.setVigiPayTransactionReference(paymentRecordDetailUpdateDto.getVigipayReference());
             savePaymentRecordDetail(existingPaymentRecordDetail);
+            paymentEmailNotifierAsync.sendPaymentNotificationForPaymentRecordDetail(existingPaymentRecordDetail, paymentRecord);
             return Mono.just(new ResponseEntity<>(existingPaymentRecordDetail.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while updating payment record detail", e);
@@ -194,27 +199,9 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         if (StringUtils.isEmpty(invoiceNumber)) {
             return Mono.just(new ResponseEntity<>("Invoice was not created successfully", HttpStatus.INTERNAL_SERVER_ERROR));
         }
-        if (StringUtils.isEmpty(paymentRecordId)) {
-            paymentRecord = new PaymentRecord();
-            paymentRecord.setId(UUID.randomUUID().toString());
-            paymentRecord.setAmount(fee.getAmount());
-            paymentRecord.setAmountOutstanding(fee.getAmount());
-            paymentRecord.setAmountPaid(0);
-            paymentRecord.setFeeId(fee.getId());
-            paymentRecord.setGameTypeId(fee.getGameTypeId());
-            paymentRecord.setFeePaymentTypeId(fee.getFeePaymentTypeId());
-            paymentRecord.setRevenueNameId(fee.getRevenueNameId());
-            if (institution != null) {
-                paymentRecord.setInstitutionId(institution.getId());
-            }
-            if (agent != null) {
-                paymentRecord.setAgentId(agent.getId());
-                AgentInstitution agentInstitution = paymentRecordDetailCreateDto.getAgentInstitution();
-                paymentRecord.setInstitutionId(agentInstitution.getInstitutionId());
-                paymentRecord.setGameTypeId(agentInstitution.getGameTypeId());
-            }
-            paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.UNPAID_STATUS_ID);
-            paymentRecordService.savePaymentRecord(paymentRecord);
+
+        if (paymentRecordDetailCreateDto.isFirstPayment()) {
+            paymentRecord = newPaymentFromFee(fee, agent, institution);
         }
 
 
@@ -285,25 +272,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 }
             }
             if (paymentRecordDetailCreateDto.isFirstPayment()) {
-                paymentRecord = new PaymentRecord();
-                paymentRecord.setId(UUID.randomUUID().toString());
-                paymentRecord.setAmountOutstanding(fee.getAmount());
-                paymentRecord.setAmount(fee.getAmount());
-                paymentRecord.setAmountPaid(0);
-                paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.UNPAID_STATUS_ID);
-                paymentRecord.setFeeId(feeId);
-                paymentRecord.setGameTypeId(fee.getGameTypeId());
-                paymentRecord.setRevenueNameId(fee.getRevenueNameId());
-                paymentRecord.setFeePaymentTypeId(fee.getFeePaymentTypeId());
-                if (agent != null) {
-                    paymentRecord.setAgentId(agent.getId());
-                    AgentInstitution agentInstitution = paymentRecordDetailCreateDto.getAgentInstitution();
-                    paymentRecord.setInstitutionId(agentInstitution.getInstitutionId());
-                    paymentRecord.setGameTypeId(agentInstitution.getGameTypeId());
-                }
-                if (institution != null) {
-                    paymentRecord.setInstitutionId(institution.getId());
-                }
+                paymentRecord = newPaymentFromFee(fee, agent, institution);
             }
 
             PaymentRecordDetail paymentRecordDetail = new PaymentRecordDetail();
@@ -390,6 +359,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                         existingPaymentRecordDetail.setVigiPayTransactionReference(vigiPayMessage.getPaymentReference());
                         existingPaymentRecordDetail.setInvoiceNumber(vigiPayMessage.getInvoiceNumber());
                         savePaymentRecordDetail(existingPaymentRecordDetail);
+                        paymentEmailNotifierAsync.sendPaymentNotificationForPaymentRecordDetail(existingPaymentRecordDetail, paymentRecord);
                         return Mono.just(new ResponseEntity<>("updated successfully", HttpStatus.OK));
                     }
                     existingPaymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.PENDING_VIGIPAY_CONFIRMATION_STATUS_ID);
@@ -581,5 +551,25 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             converted.append(ch);
         }
         return converted.toString();
+    }
+
+    private PaymentRecord newPaymentFromFee(Fee fee, Agent agent, Institution institution) {
+        PaymentRecord paymentRecord = new PaymentRecord();
+        paymentRecord.setId(UUID.randomUUID().toString());
+        paymentRecord.setAmountOutstanding(fee.getAmount());
+        paymentRecord.setAmount(fee.getAmount());
+        paymentRecord.setAmountPaid(0);
+        paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.UNPAID_STATUS_ID);
+        paymentRecord.setFeeId(fee.getId());
+        paymentRecord.setGameTypeId(fee.getGameTypeId());
+        paymentRecord.setRevenueNameId(fee.getRevenueNameId());
+        paymentRecord.setFeePaymentTypeId(fee.getFeePaymentTypeId());
+        if (agent != null) {
+            paymentRecord.setAgentId(agent.getId());
+        }
+        if (institution != null) {
+            paymentRecord.setInstitutionId(institution.getId());
+        }
+        return paymentRecord;
     }
 }

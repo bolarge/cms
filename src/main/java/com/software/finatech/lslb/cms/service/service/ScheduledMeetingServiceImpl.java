@@ -152,7 +152,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                 sendMeetingNotificationEmailToAttendee("Meeting Invite With Lagos State Lotteries Board", "scheduleMeeting-GA-new", gamingOperatorAdmin, scheduledMeeting);
             }
 
-            sendInitialNotificationToMeetingParticipants(scheduledMeeting);
+         //   sendInitialNotificationToMeetingParticipants(scheduledMeeting);
             return Mono.just(new ResponseEntity<>(scheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format for meeting date , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
