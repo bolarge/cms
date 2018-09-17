@@ -119,7 +119,7 @@ public class ApplicationFormNotificationHelperAsync {
         model.put("date", presentDate);
         model.put("gameType", gameTypeName);
 
-        String mailSubject = String.format("Notification on your application for %s license", gameTypeName);
+        String mailSubject = String.format("Notification on your application for %s licence", gameTypeName);
         String content = mailContentBuilderService.build(model, "ApplicationFormPendingUploadGAadmin");
         emailService.sendEmail(content, mailSubject, institutionAdmin.getEmailAddress());
     }
@@ -162,7 +162,7 @@ public class ApplicationFormNotificationHelperAsync {
         model.put("date", presentDate);
         model.put("gameType", gameTypeName);
         model.put("frontEndUrl", callBackUrl);
-        String mailSubject = String.format("Notification on your application for %s license", gameTypeName);
+        String mailSubject = String.format("Notification on your application for %s licence", gameTypeName);
 
         String content = mailContentBuilderService.build(model, "application-form-approval-GA-new");
         emailService.sendEmail(content, mailSubject, institutionAdmin.getEmailAddress());
