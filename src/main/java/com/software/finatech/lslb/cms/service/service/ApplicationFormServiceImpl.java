@@ -439,6 +439,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             if (applicationForm == null) {
                 return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
             }
+            if (StringUtils.equals(ApplicationFormStatusReferenceData.REJECTED_STATUS_ID, applicationForm.getApplicationFormStatusId())) {
+                return Mono.just(new ResponseEntity<>("Application already rejected", HttpStatus.BAD_REQUEST));
+            }
             applicationForm.setApproverId(approverId);
             String approvedApplicationFormStatusId = ApplicationFormStatusReferenceData.APPROVED_STATUS_ID;
             applicationForm.setApplicationFormStatusId(approvedApplicationFormStatusId);

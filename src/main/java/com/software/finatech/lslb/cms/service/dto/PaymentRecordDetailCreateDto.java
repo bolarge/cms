@@ -14,50 +14,14 @@ public class PaymentRecordDetailCreateDto {
     private String institutionId;
     private String agentId;
     private String gamingMachineId;
-    private String invoiceNumber;
-    private String paymentStatusId;
-    private String feeNotes;
-    private String startYear;
+
     private AgentInstitution agentInstitution;
 
     public AgentInstitution getAgentInstitution() {
         return agentInstitution;
     }
-
     public void setAgentInstitution(AgentInstitution agentInstitution) {
         this.agentInstitution = agentInstitution;
-    }
-
-    public String getStartYear() {
-        return startYear;
-    }
-
-    public void setStartYear(String startYear) {
-        this.startYear = startYear;
-    }
-
-    public String getFeeNotes() {
-        return feeNotes;
-    }
-
-    public void setFeeNotes(String feeNotes) {
-        this.feeNotes = feeNotes;
-    }
-
-    public String getPaymentStatusId() {
-        return paymentStatusId;
-    }
-
-    public void setPaymentStatusId(String paymentStatusId) {
-        this.paymentStatusId = paymentStatusId;
-    }
-
-    public String getInvoiceNumber() {
-        return invoiceNumber;
-    }
-
-    public void setInvoiceNumber(String invoiceNumber) {
-        this.invoiceNumber = invoiceNumber;
     }
 
     public String getInstitutionId() {

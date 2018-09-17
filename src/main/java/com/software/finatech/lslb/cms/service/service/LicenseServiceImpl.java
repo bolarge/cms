@@ -43,6 +43,9 @@ public class LicenseServiceImpl implements LicenseService {
     @Autowired
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
 
+    @Autowired
+    private AuthInfoServiceImpl authInfoService;
+
 
 
     @Override
@@ -390,13 +393,13 @@ public class LicenseServiceImpl implements LicenseService {
                 licenseNumber=generateLicenseNumberForPaymentRecord(paymentRecord);
                  createLicense.setLicenseNumber(licenseNumber);
                 }
+            createLicense.setId(UUID.randomUUID().toString());
             createLicense.setEffectiveDate(license.getExpiryDate().plusDays(1));
             createLicense.setExpiryDate(licenseEndDate);
             createLicense.setRenewalStatus("false");
             createLicense.setInstitutionId(license.getInstitutionId());
             createLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
             createLicense.setGameTypeId(license.getGameTypeId());
-            createLicense.setLicenseNumber(license.getLicenseNumber());
             createLicense.setParentLicenseId(license.getId());
             createLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION);
             createLicense.setPaymentRecordId(license.getPaymentRecordId());
@@ -408,7 +411,7 @@ public class LicenseServiceImpl implements LicenseService {
             notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
             notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName()+",  License for "+
             notificationDto.getGameType()+" have been approved.\n License Number is: "+licenseNumber);
-            AuthInfoServiceImpl authInfoService= new AuthInfoServiceImpl();
+
             ArrayList<AuthInfo>  authInfos=authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
             for(AuthInfo authInfo : authInfos){
                 notificationDto.setInstitutionEmail(authInfo.getEmailAddress());
@@ -417,7 +420,7 @@ public class LicenseServiceImpl implements LicenseService {
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
 
         } catch (Exception ex) {
-            return Mono.just(new ResponseEntity<>("Hey Something Has Broken", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Error occurred. Please contact admin", HttpStatus.BAD_REQUEST));
 
         }
     }public Institution getInstitution(String institutionId) {

@@ -7,8 +7,6 @@ public class LicenseUpdateAIPToLicenseDto {
     protected String institutionId;
     @NotEmpty(message = "Provide gameTypeId")
     protected String gameTypeId;
-    @NotEmpty(message = "Provide startDate")
-    protected String startDate;
 
     public String getInstitutionId() {
         return institutionId;
@@ -26,11 +24,4 @@ public class LicenseUpdateAIPToLicenseDto {
         this.gameTypeId = gameTypeId;
     }
 
-    public String getStartDate() {
-        return startDate;
     }
-
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
-    }
-}
