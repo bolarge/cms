@@ -99,6 +99,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         authInfo.setTitle(authInfoCreateDto.getTitle());
         authInfo.setFullName(authInfoCreateDto.getFirstName() + " " + authInfoCreateDto.getLastName());
         authInfo.setInstitutionId(authInfoCreateDto.getInstitutionId());
+        authInfo.setAgentId(authInfoCreateDto.getAgentId());
         mongoRepositoryReactive.saveOrUpdate(authInfo);
 
         // First we check if User exists

@@ -121,7 +121,7 @@ public class AgentServiceImpl implements AgentService {
             Agent agent = fromCreateAgentDto(agentCreateDto);
             saveAgent(agent);
 
-            AuthInfoCreateDto agentUserCreateDto = createAuthInfoDtoFromAgent(agentCreateDto);
+            AuthInfoCreateDto agentUserCreateDto = createAuthInfoDtoFromAgent(agent);
             authInfoService.createAuthInfo(agentUserCreateDto, authInfoController.getAppHostPort());
             customerCodeCreatorAsync.createVigipayCustomerCodeForAgent(agent);
             return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
@@ -267,13 +267,14 @@ public class AgentServiceImpl implements AgentService {
         return agent;
     }
 
-    private AuthInfoCreateDto createAuthInfoDtoFromAgent(AgentCreateDto agentCreateDto) {
+    private AuthInfoCreateDto createAuthInfoDtoFromAgent(Agent agent) {
         AuthInfoCreateDto authInfoCreateDto = new AuthInfoCreateDto();
         authInfoCreateDto.setAuthRoleId(LSLBAuthRoleReferenceData.AGENT_ROLE_ID);
-        authInfoCreateDto.setEmailAddress(agentCreateDto.getEmailAddress());
-        authInfoCreateDto.setPhoneNumber(agentCreateDto.getPhoneNumber());
-        authInfoCreateDto.setFirstName(agentCreateDto.getFirstName());
-        authInfoCreateDto.setLastName(agentCreateDto.getLastName());
+        authInfoCreateDto.setEmailAddress(agent.getEmailAddress());
+        authInfoCreateDto.setPhoneNumber(agent.getPhoneNumber());
+        authInfoCreateDto.setFirstName(agent.getFirstName());
+        authInfoCreateDto.setLastName(agent.getLastName());
+        authInfoCreateDto.setAgentId(agent.getId());
         return authInfoCreateDto;
     }
 
