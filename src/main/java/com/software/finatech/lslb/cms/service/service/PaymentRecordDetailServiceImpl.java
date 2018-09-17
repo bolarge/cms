@@ -494,13 +494,13 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         }
         boolean licensePaymentExist = licensePaymentRecordExists(revenueNameId, gameTypeId, gamingMachineId, agentId, institutionId);
         if (licensePaymentExist) {
-            return Mono.just(new ResponseEntity<>("Payment for license for category already exists, License Renewal payment is what is applicable", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Payment for licence for category already exists, Licence Renewal payment is what is applicable", HttpStatus.BAD_REQUEST));
         }
 
         boolean institutionHasApprovedForm = applicationFormService.institutionHasCompletedApplicationForGameType(institutionId, gameTypeId);
         if (!institutionHasApprovedForm) {
             String gameTypeName = fee.getGameTypeName();
-            String errorMsg = String.format("You do not have an approved application form for category %s, please create an application in category %s and make sure it is approved before paying for license", gameTypeName, gameTypeName);
+            String errorMsg = String.format("You do not have an approved application form for category %s, please create an application in category %s and make sure it is approved before paying for licence", gameTypeName, gameTypeName);
             return Mono.just(new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST));
         }
         return null;

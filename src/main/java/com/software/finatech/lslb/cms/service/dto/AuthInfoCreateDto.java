@@ -18,6 +18,16 @@ public class AuthInfoCreateDto {
     @NotNull(message = "Title field can not be empty")
     protected String title;
     protected String institutionId;
+    private String agentId;
+
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
 
     public String getInstitutionId() {
         return institutionId;
