@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
+import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -92,7 +93,7 @@ public class PaymentRecord extends AbstractFact {
     }
 
     public Institution getInstitution() {
-        if (StringUtils.isEmpty(this.institutionId)){
+        if (StringUtils.isEmpty(this.institutionId)) {
             return null;
         }
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
@@ -275,7 +276,6 @@ public class PaymentRecord extends AbstractFact {
         }
         return paymentRecordDto;
     }
-
     @Override
     public String getFactName() {
         return "PaymentRecord";

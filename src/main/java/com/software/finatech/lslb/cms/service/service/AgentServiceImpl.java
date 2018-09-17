@@ -11,8 +11,8 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
-import com.software.finatech.lslb.cms.service.util.CustomerCodeCreatorAsync;
 import com.software.finatech.lslb.cms.service.util.LicenseValidatorUtil;
+import com.software.finatech.lslb.cms.service.util.async_helpers.CustomerCodeCreatorAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -121,8 +121,8 @@ public class AgentServiceImpl implements AgentService {
             Agent agent = fromCreateAgentDto(agentCreateDto);
             saveAgent(agent);
 
-            AuthInfoCreateDto agentUserCreateDto = createAuthInfoDtoFromAgent(agentCreateDto);
-            authInfoService.createAuthInfo(agentUserCreateDto, authInfoController.getAppHostPort());
+            AuthInfoCreateDto agentUserCreateDto = createAuthInfoDtoFromAgent(agent);
+            authInfoService.createAuthInfo(agentUserCreateDto, authInfoController.getAppHostPort()).block();
             customerCodeCreatorAsync.createVigipayCustomerCodeForAgent(agent);
             return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
@@ -267,13 +267,14 @@ public class AgentServiceImpl implements AgentService {
         return agent;
     }
 
-    private AuthInfoCreateDto createAuthInfoDtoFromAgent(AgentCreateDto agentCreateDto) {
+    private AuthInfoCreateDto createAuthInfoDtoFromAgent(Agent agent) {
         AuthInfoCreateDto authInfoCreateDto = new AuthInfoCreateDto();
         authInfoCreateDto.setAuthRoleId(LSLBAuthRoleReferenceData.AGENT_ROLE_ID);
-        authInfoCreateDto.setEmailAddress(agentCreateDto.getEmailAddress());
-        authInfoCreateDto.setPhoneNumber(agentCreateDto.getPhoneNumber());
-        authInfoCreateDto.setFirstName(agentCreateDto.getFirstName());
-        authInfoCreateDto.setLastName(agentCreateDto.getLastName());
+        authInfoCreateDto.setEmailAddress(agent.getEmailAddress());
+        authInfoCreateDto.setPhoneNumber(agent.getPhoneNumber());
+        authInfoCreateDto.setFirstName(agent.getFirstName());
+        authInfoCreateDto.setLastName(agent.getLastName());
+        authInfoCreateDto.setAgentId(agent.getId());
         return authInfoCreateDto;
     }
 

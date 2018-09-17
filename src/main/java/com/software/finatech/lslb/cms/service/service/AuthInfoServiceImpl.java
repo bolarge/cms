@@ -99,6 +99,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         authInfo.setTitle(authInfoCreateDto.getTitle());
         authInfo.setFullName(authInfoCreateDto.getFirstName() + " " + authInfoCreateDto.getLastName());
         authInfo.setInstitutionId(authInfoCreateDto.getInstitutionId());
+        authInfo.setAgentId(authInfoCreateDto.getAgentId());
         mongoRepositoryReactive.saveOrUpdate(authInfo);
 
         // First we check if User exists
@@ -634,6 +635,11 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     @Override
     public AuthInfo getUserById(String userId) {
         return (AuthInfo)mongoRepositoryReactive.findById(userId, AuthInfo.class).block();
+    }
+
+    @Override
+    public AuthInfo getUserByAgentId(String agentId) {
+        return null;
     }
 
     public ArrayList<String> getAllGamingOperatorAdminAndUserRoles() {
