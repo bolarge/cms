@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:mc="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:mc="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="format-detection" content="telephone=no" />
     <!-- disable auto telephone linking in iOS -->
-    <title>Meeting Invitation</title>
+    <title>LSLB Email</title>
     <style type="text/css">
         /* RESET STYLES */
         html {
@@ -565,7 +565,7 @@
                                                                     <table border="0" cellpadding="0" cellspacing="0" width="60%" class="emailButton" style="background-color: #3498DB;border-radius: 10px;">
                                                                         <tr>
                                                                             <td align="center" valign="middle" class="buttonContent" style="padding-top:15px;padding-bottom:15px;padding-right:15px;padding-left:15px;">
-                                                                                <a style="color:#FFFFFF;text-decoration:none;font-family:Helvetica,Arial,sans-serif;font-size:20px;line-height:135%;" href="CallbackUrl"
+                                                                                <a style="color:#FFFFFF;text-decoration:none;font-family:Helvetica,Arial,sans-serif;font-size:20px;line-height:135%;" th:href="@{${frontEndUrl}}"
                                                                                    target="_blank">Make License Payment</a>
                                                                             </td>
                                                                         </tr>
