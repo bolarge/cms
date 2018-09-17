@@ -60,7 +60,7 @@ jwt:
 
 racs:
   ui:
-    host: lslbcms.test.vggdev.com
+    host: lslbcms.staging.vggdev.com
     port:
 
 
