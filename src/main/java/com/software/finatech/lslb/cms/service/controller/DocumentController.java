@@ -1,15 +1,11 @@
 package com.software.finatech.lslb.cms.service.controller;
 
-import com.software.finatech.lslb.cms.service.domain.Document;
-import com.software.finatech.lslb.cms.service.domain.DocumentType;
-import com.software.finatech.lslb.cms.service.domain.FactObject;
-import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
-import com.software.finatech.lslb.cms.service.dto.DocumentCreateDto;
-import com.software.finatech.lslb.cms.service.dto.DocumentDto;
-import com.software.finatech.lslb.cms.service.dto.EntityDocumentDto;
+import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeReferenceData;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
+import com.software.finatech.lslb.cms.service.util.Mapstore;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -33,10 +29,7 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotEmpty;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Api(value = "Document", description = "For everything related to documents", tags = "")
@@ -354,7 +347,7 @@ public class DocumentController extends BaseController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/getEntityDocuments", params = {"entityId", "purposeId"})
-    @ApiOperation(value = "Get uploaded and new documents", response = ApplicationFormDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiOperation(value = "Get uploaded and new documents", response = DocumentDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -408,5 +401,28 @@ public class DocumentController extends BaseController {
         }
 
         return Mono.just(new ResponseEntity(documentsDto, HttpStatus.OK));
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/getDocumentPurposes")
+    @ApiOperation(value = "Get all document purpose ID", response = DocumentPurposeDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getDocumentPurpose() {
+        try {
+            Map documentMap = Mapstore.STORE.get("DocumentPurpose");
+            ArrayList<DocumentPurpose> documentPurposes = new ArrayList<DocumentPurpose>(documentMap.values());
+            List<DocumentPurposeDto> documentPurposeDtoLists = new ArrayList<>();
+            documentPurposes.forEach(factObject -> {
+                DocumentPurpose documentPurpose = factObject;
+                documentPurposeDtoLists.add(documentPurpose.convertToDto());
+            });
+            return Mono.just(new ResponseEntity(documentPurposeDtoLists, HttpStatus.OK));
+        } catch (Exception e) {
+            String errorMsg = "An error occurred while getting all document Types";
+            return Mono.just(new ResponseEntity(errorMsg, HttpStatus.BAD_REQUEST));
+        }
     }
 }
