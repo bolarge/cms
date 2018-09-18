@@ -394,7 +394,7 @@ public class LicenseServiceImpl implements LicenseService {
                  createLicense.setLicenseNumber(licenseNumber);
                 }
             createLicense.setId(UUID.randomUUID().toString());
-            createLicense.setEffectiveDate(license.getExpiryDate().plusDays(1));
+            createLicense.setEffectiveDate(LocalDate.now().plusDays(1));
             createLicense.setExpiryDate(licenseEndDate);
             createLicense.setRenewalStatus("false");
             createLicense.setInstitutionId(license.getInstitutionId());
