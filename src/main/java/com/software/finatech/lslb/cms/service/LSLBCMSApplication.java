@@ -1,5 +1,7 @@
 package com.software.finatech.lslb.cms.service;
 
+import com.mongodb.reactivestreams.client.DistinctPublisher;
+import com.mongodb.reactivestreams.client.MongoCollection;
 import com.software.finatech.lslb.cms.service.util.DatabaseLoaderUtils;
 import com.software.finatech.lslb.cms.service.util.GlobalApplicationContext;
 import org.slf4j.Logger;
@@ -11,8 +13,14 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import reactor.core.publisher.Flux;
 
+import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @EnableScheduling
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 public class LSLBCMSApplication {
@@ -33,7 +41,7 @@ public class LSLBCMSApplication {
         DatabaseLoaderUtils databaseLoaderUtils = (DatabaseLoaderUtils) ctx.getBean("databaseLoaderUtils");
         databaseLoaderUtils.runSeedData(env);
 
-        if (Arrays.asList(env.getActiveProfiles()).contains("development")|| Arrays.asList(env.getActiveProfiles()).contains("test")) {
+        if (Arrays.asList(env.getActiveProfiles()).contains("development") || Arrays.asList(env.getActiveProfiles()).contains("test")) {
             databaseLoaderUtils.runLoadTestData();
         }
 

@@ -69,12 +69,13 @@ public class GamingMachineController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{institutionId}/upload-multiple")
-    @ApiOperation(value = "Upload multiple gaming machines for institution", response = UploadTransactionResponse.class)
+    @ApiOperation(value = "Upload multiple gaming machines for institution", response = UploadTransactionResponse.class,
+    notes = "User uploading the gaming machines must specify the category the machines are operating under via the request param \"GameTypeId\" ")
     @ApiResponses(value = {@ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"), @ApiResponse(code = 404, message = "Not Found"),
             @ApiResponse(code = 500, message = "Internal Server error(error occurred while parsing file)")})
-    public Mono<ResponseEntity> uploadTransactionsFromCsv(@PathVariable("institutionId") String institutionId, @RequestParam("file") MultipartFile multipartFile) {
-        return gamingMachineService.uploadMultipleGamingMachinesForInstitution(institutionId, multipartFile);
+    public Mono<ResponseEntity> uploadTransactionsFromCsv(@PathVariable("institutionId") String institutionId, @RequestParam("gameTypeId") String gameTypeId, @RequestParam("file") MultipartFile multipartFile) {
+        return gamingMachineService.uploadMultipleGamingMachinesForInstitution(institutionId, gameTypeId, multipartFile);
     }
 }

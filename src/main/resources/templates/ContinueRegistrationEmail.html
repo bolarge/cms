@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -250,7 +250,8 @@
                                                                                     <td id="body" style="background-color:#fff;padding:20px 20px 10px 20px;width:100%;">
                                                                                         <p style="font-family:Verdana,sans-serif;color:#000;font-size:large;line-height:24px;margin-bottom:30px !important;">Hello <b style="color:#666;text-transform:capitalize;color:#5C842E;font-size:Large">[[${name}]]</b>,</p>
 
-                                                                                        <p style="font-family:Verdana,sans-serif;color:#000;font-size:16px;line-height:24px">Thank you for creating an account with LSLB CMS Click below to continue your registration</p>
+                                                                                        <p style="font-family:Verdana,sans-serif;color:#000;font-size:16px;line-height:24px"><span th:if="${isApplicant == true}">Thank you for creating an account with LSLB CMS Click below to continue your registration</span>
+                                                                                            <span th:unless="${isApplicant == false}">An account has been created for you on LSLB CMS ,click below to set up your profile</span></p>
                                                                                         <br /><br />
                                                                                         <p align= "center" style="font-family:Verdana,sans-serif;color:#000;font-size:16px;line-height:24px"><a href="CallbackUrl" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; font-size: 100%; line-height: 2; color: #ffffff; border-radius: 25px; display: inline-block; cursor: pointer; font-weight: bold; text-decoration: none; background-color:#99cc33; margin: 0; padding: 0; border-color: #99cc33; border-style: solid; border-width: 10px 20px;">Continue Sign Up</a></p>
                                                                                         <br /><br />

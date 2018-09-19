@@ -14,6 +14,7 @@ import com.software.finatech.lslb.cms.service.referencedata.ModeOfPaymentReferen
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.*;
+import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
 import com.software.finatech.lslb.cms.service.util.async_helpers.PaymentEmailNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
@@ -143,7 +144,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         String gameTypeName = feeDto.getGameTypeName();
         String revenueName = feeDto.getRevenueName();
         String feeDescription = String.format("%s for %ss for category : %s ", feeName, revenueName, gameTypeName);
-        feeDescription = convertToTitleCaseIteratingChars(feeDescription);
+        feeDescription = StringCapitalizer.convertToTitleCaseIteratingChars(feeDescription);
         if (paymentRecordDetailCreateDto.getAmount() < fee.getAmount()) {
             feeDescription = String.format("%s (Part Payment)", feeDescription);
         }
@@ -529,28 +530,6 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 pageSize, sortDirection, sortProperty, institutionId, agentId, gamingMachineId, gameTypeId, feePaymentTypeId, revenueNameId, null, null);
 
         return paymentRecordsResponse.block().getStatusCode() != HttpStatus.NOT_FOUND;
-    }
-
-    private String convertToTitleCaseIteratingChars(String text) {
-        if (text == null || text.isEmpty()) {
-            return text;
-        }
-
-        StringBuilder converted = new StringBuilder();
-
-        boolean convertNext = true;
-        for (char ch : text.toCharArray()) {
-            if (Character.isSpaceChar(ch)) {
-                convertNext = true;
-            } else if (convertNext) {
-                ch = Character.toTitleCase(ch);
-                convertNext = false;
-            } else {
-                ch = Character.toLowerCase(ch);
-            }
-            converted.append(ch);
-        }
-        return converted.toString();
     }
 
     private PaymentRecord newPaymentFromFee(Fee fee, Agent agent, Institution institution) {

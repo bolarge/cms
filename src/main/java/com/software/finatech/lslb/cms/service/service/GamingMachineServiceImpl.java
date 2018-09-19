@@ -112,15 +112,6 @@ public class GamingMachineServiceImpl implements GamingMachineService {
         }
     }
 
-    @Override
-    public Mono<ResponseEntity> validateInstitutionGamingMachineLicense(String institutionId) {
-//        String gameTypeId = GameTypeReferenceData.GAMING_MACHINE_OPERATOR_ID;
-//        Mono<ResponseEntity> licenseValidationResponse =
-//        if (licenseValidationResponse != null) {
-//            return licenseValidationResponse;
-//        }
-        return null;
-    }
 
     @Override
     public Mono<ResponseEntity> updateGamingMachine(GamingMachineUpdateDto gamingMachineUpdateDto) {
@@ -146,14 +137,14 @@ public class GamingMachineServiceImpl implements GamingMachineService {
 
     //TODO: validate if its multiple or not
     @Override
-    public Mono<ResponseEntity> uploadMultipleGamingMachinesForInstitution(String institutionId, MultipartFile multipartFile) {
+    public Mono<ResponseEntity> uploadMultipleGamingMachinesForInstitution(String institutionId,String gameTypeId ,MultipartFile multipartFile) {
         Institution institution = institutionService.findById(institutionId);
         if (institution == null) {
             return Mono.just(new ResponseEntity<>(String.format("Institution with id %s does not exist", institutionId), HttpStatus.BAD_REQUEST));
         }
-        Mono<ResponseEntity> licenseValidationResponse = validateInstitutionGamingMachineLicense(institutionId);
-        if (licenseValidationResponse != null) {
-            return licenseValidationResponse;
+        Mono<ResponseEntity> validateGamingMachineLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
+        if (validateGamingMachineLicenseResponse != null) {
+            return validateGamingMachineLicenseResponse;
         }
 
         List<GamingMachine> gamingMachineList = new ArrayList<>();
@@ -179,7 +170,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
                                 gamingMachine.setManufacturer(columns[1]);
                                 gamingMachine.setMachineNumber(columns[2]);
                                 gamingMachine.setMachineAddress(columns[3]);
-
+                                gamingMachine.setGameTypeId(gameTypeId);
                                 GamingMachineGameDetails gamingMachineGameDetails = new GamingMachineGameDetails();
                                 gamingMachineGameDetails.setGameName(columns[4]);
                                 gamingMachineGameDetails.setGameVersion(columns[5]);
