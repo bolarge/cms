@@ -150,37 +150,13 @@ public class RenewalFormController extends BaseController {
 
         }
         try {
-            Query queryLicenceStatus = new Query();
-            queryLicenceStatus.addCriteria(Criteria.where("paymentRecordId").is(renewalFormCreateDto.getPaymentRecordId()));
-            queryLicenceStatus.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID));
-            License license = (License) mongoRepositoryReactive.find(queryLicenceStatus, License.class).block();
-            if (paymentRecord == null || license == null || !license.getLicenseStatusId().equals(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID)) {
-                return Mono.just(new ResponseEntity<>("Invalid payment record", HttpStatus.BAD_REQUEST));
-            }
             Query queryRenewal = new Query();
             queryRenewal.addCriteria(Criteria.where("paymentRecordId").is(renewalFormCreateDto.getPaymentRecordId()));
             RenewalForm renewalFormCheck = (RenewalForm) mongoRepositoryReactive.find(queryRenewal, RenewalForm.class).block();
             if (renewalFormCheck != null) {
                 return Mono.just(new ResponseEntity<>("An existing renewal application is tied to this payment", HttpStatus.BAD_REQUEST));
             }
-            license.setRenewalStatus("false");
-            license.setEffectiveDate(LocalDate.now());
-            Query queryGameType = new Query();
-            queryGameType.addCriteria(Criteria.where("id").is(license.getPaymentRecord().convertToDto().getGameTypeId()));
-            GameType gameType = (GameType) mongoRepositoryReactive.find(queryGameType, GameType.class).block();
-            int duration = 0;
-            if (license.getLicenseStatusId().equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)) {
-                if (license.getLicenseStatusId().equalsIgnoreCase(LicenseTypeReferenceData.AGENT)) {
-                    duration = Integer.parseInt(gameType.convertToDto().getAgentLicenseDuration());
-                } else if (license.getLicenseStatusId().equalsIgnoreCase(LicenseTypeReferenceData.GAMING_MACHINE)) {
-                    duration = Integer.parseInt(gameType.convertToDto().getGamingMachineLicenseDuration());
-                } else if (license.getLicenseStatusId().equalsIgnoreCase(LicenseTypeReferenceData.INSTITUTION)) {
-                    duration = Integer.parseInt(gameType.convertToDto().getLicenseDuration());
-                }
-            }
-            license.setExpiryDate(license.getEffectiveDate().plusMonths(duration));
-            license.setRenewalStatus("false");
-            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+
             RenewalForm renewalForm = new RenewalForm();
             renewalForm.setId(UUID.randomUUID().toString());
             renewalForm.setPaymentRecordId(renewalFormCreateDto.getPaymentRecordId());
@@ -203,10 +179,9 @@ public class RenewalFormController extends BaseController {
             renewalForm.setInstitutionId(renewalFormCreateDto.getInstitutionId());
             renewalForm.setGameTypeId(renewalFormCreateDto.getGameTypeId());
             mongoRepositoryReactive.saveOrUpdate(renewalForm);
-            mongoRepositoryReactive.saveOrUpdate(license);
             return Mono.just(new ResponseEntity<>(renewalForm.convertToDto(), HttpStatus.OK));
         } catch (Exception ex) {
-            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
         }
 
     }
@@ -249,7 +224,7 @@ public class RenewalFormController extends BaseController {
             mongoRepositoryReactive.saveOrUpdate(renewalForm);
             return Mono.just(new ResponseEntity<>(renewalForm.convertToDto(), HttpStatus.OK));
         } catch (Exception ex) {
-            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
         }
     }

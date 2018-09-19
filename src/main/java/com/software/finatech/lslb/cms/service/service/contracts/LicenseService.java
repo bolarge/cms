@@ -39,6 +39,8 @@ public interface LicenseService {
     Mono<ResponseEntity> getInstitutionAIPs(String institutionId);
     Mono<ResponseEntity> updateToDocumentAIP(String licenseId);
     Mono<ResponseEntity> updateAIPDocToLicense(LicenseUpdateAIPToLicenseDto licenseUpdateDto);
+    Mono<ResponseEntity> updateInReviewToLicense(String licenseId);
+    Mono<ResponseEntity>updateRenewalLicenseToReview(String paymentRecordId);
     License findRenewalLicense(String institutionId, String agentId, String gamingMachineId, String gameTypeId, String licenseTypeId);
     boolean institutionIsLicensedForGameType(String institutionId, String gameTypeId);
 
@@ -49,5 +51,6 @@ public interface LicenseService {
     void createFirstLicenseForGamingMachinePayment(PaymentRecord paymentRecord);
 
     void createRenewedLicenseForPayment(PaymentRecord paymentRecord);
+
 
 }

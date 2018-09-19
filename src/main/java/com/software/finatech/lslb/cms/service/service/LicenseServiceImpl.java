@@ -350,11 +350,54 @@ public class LicenseServiceImpl implements LicenseService {
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
 
         } catch (Exception ex) {
-            return Mono.just(new ResponseEntity<>("Hey Something Has Broken", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
         }
     }
 
+    @Override
+    public Mono<ResponseEntity> updateInReviewToLicense(String licenseId) {
+        try {
+            Query queryLicence = new Query();
+            queryLicence.addCriteria(Criteria.where("id").is(licenseId));
+            queryLicence.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.RENEWAL_LICENSE_IN_REVIEW));
+            License license = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
+
+            if (license == null) {
+                return Mono.just(new ResponseEntity<>("No License Record", HttpStatus.BAD_REQUEST));
+            }
+            
+            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+            mongoRepositoryReactive.saveOrUpdate(license);
+            return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
+
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
+
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity>updateRenewalLicenseToReview(String paymentRecordId){
+        try{
+            Query queryLicenceStatus = new Query();
+            queryLicenceStatus.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));
+            queryLicenceStatus.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID));
+            License license = (License) mongoRepositoryReactive.find(queryLicenceStatus, License.class).block();
+            if (license == null || !license.getLicenseStatusId().equals(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID)) {
+                return Mono.just(new ResponseEntity<>("Invalid payment record", HttpStatus.BAD_REQUEST));
+            }
+
+            license.setRenewalStatus("false");
+           
+            license.setLicenseStatusId(LicenseStatusReferenceData.RENEWAL_LICENSE_IN_REVIEW);
+            mongoRepositoryReactive.saveOrUpdate(license);
+            return Mono.just(new ResponseEntity<>("OK", HttpStatus.BAD_REQUEST));
+         }catch(Exception ex){
+            return Mono.just(new ResponseEntity<>("Error while moving to renewal license in review", HttpStatus.BAD_REQUEST));
+
+        }
+    }
 
     @Override
     public Mono<ResponseEntity> updateAIPDocToLicense(LicenseUpdateAIPToLicenseDto licenseUpdateDto) {
