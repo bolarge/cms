@@ -44,7 +44,7 @@ public class Scheduler {
     LocalDateTime dateTime = new LocalDateTime();
 
 
-    //@Scheduled(cron = "5 8 * * 1")
+    @Scheduled(cron = "0 0 4 * * ?")
     protected void checkForLicensesCloseToExpirations(){
         logger.info(" checkForLicensesCloseToExpirations");
         ArrayList<String> licenseStatuses= new ArrayList<>();

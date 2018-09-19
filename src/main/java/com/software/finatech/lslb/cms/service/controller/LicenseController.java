@@ -132,7 +132,7 @@ public class LicenseController {
         try {
             return licenseService.getExpiredLicenses();
         } catch (Exception ex) {
-            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
         }
     }
@@ -148,7 +148,7 @@ public class LicenseController {
         try {
             return licenseService.getExpiredAIPs();
         } catch (Exception ex) {
-            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
         }
     }
@@ -164,7 +164,24 @@ public class LicenseController {
         try {
             return licenseService.getInstitutionAIPs(institutionId);
         } catch (Exception ex) {
-            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
+
+        }
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/get-institution-licenses-close-to-expiration", params = {"institutionId"})
+    @ApiOperation(value = "Get all Institution Licenses that are close to expiration", response = License.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllInstitutionCloseToExpirationLicenses(@RequestParam("institutionId") String institutionId) {
+        try {
+            return licenseService.getInstitutionCloseToExpirationLicenses(institutionId);
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
         }
     }
@@ -180,7 +197,7 @@ public class LicenseController {
         try {
             return licenseService.updateToDocumentAIP(licensedId);
         } catch (Exception ex) {
-            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
         }
     }
@@ -227,7 +244,7 @@ public class LicenseController {
         try {
             return licenseService.updateAIPDocToLicense(licenseUpdateAIPToLicenseDto);
         } catch (Exception ex) {
-            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
         }
     }
@@ -271,7 +288,7 @@ public class LicenseController {
 
            }
         } catch (Exception ex) {
-            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
         }
 
