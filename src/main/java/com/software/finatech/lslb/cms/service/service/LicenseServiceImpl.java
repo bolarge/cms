@@ -346,6 +346,8 @@ public class LicenseServiceImpl implements LicenseService {
             if (gameType != null) {
                 aipCheckDto.setGameType(gameType.convertToDto());
             }
+            aipCheckDto.setInstitutionId(aipForInstitution.getInstitutionId());
+            aipCheckDto.setInstitutionName(aipForInstitution.getInstitution().convertToDto().getInstitutionName());
             aipCheckDto.setLicensedId(aipForInstitution.getId());
             aipCheckDto.setLicenseStatusId(aipForInstitution.getLicenseStatusId());
             aipCheckDtos.add(aipCheckDto);
