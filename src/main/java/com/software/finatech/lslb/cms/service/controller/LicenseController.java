@@ -170,16 +170,16 @@ public class LicenseController {
     }
 
 
-    @RequestMapping(method = RequestMethod.GET, value = "/get-institution-expired-licenses", params = {"institutionId"})
-    @ApiOperation(value = "Get all Institution Expired Licenses", response = License.class, responseContainer = "List", consumes = "application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "/get-institution-licenses-close-to-expiration", params = {"institutionId"})
+    @ApiOperation(value = "Get all Institution Licenses that are close to expiration", response = License.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getAllInstitutionExpiredLicenses(@RequestParam("institutionId") String institutionId) {
+    public Mono<ResponseEntity> getAllInstitutionCloseToExpirationLicenses(@RequestParam("institutionId") String institutionId) {
         try {
-            return licenseService.getInstitutionExpiredLicenses(institutionId);
+            return licenseService.getInstitutionCloseToExpirationLicenses(institutionId);
         } catch (Exception ex) {
             return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 

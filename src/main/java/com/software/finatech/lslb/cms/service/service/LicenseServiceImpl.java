@@ -293,9 +293,11 @@ public class LicenseServiceImpl implements LicenseService {
 
 
     @Override
-    public Mono<ResponseEntity> getInstitutionExpiredLicenses(String institutionId) {
+    public Mono<ResponseEntity> getInstitutionCloseToExpirationLicenses(String institutionId) {
         Query queryForLicensedInstitutionInGameType = new Query();
-        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("institutionId").is(institutionId));
+        if(!StringUtils.isEmpty(institutionId)){
+            queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("institutionId").is(institutionId));
+        }
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("renewalStatus").is("true"));
         List<License> licenses= (List<License>)mongoRepositoryReactive.findAll(queryForLicensedInstitutionInGameType, License.class).toStream().collect(Collectors.toList());
