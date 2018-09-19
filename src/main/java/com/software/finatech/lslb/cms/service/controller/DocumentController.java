@@ -192,18 +192,10 @@ public class DocumentController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getByEntity(@RequestParam("gameTypeId") String gameTypeId, @RequestParam("documentPurposeId") String documentPurposeId,@RequestParam("institutionId") String institutionId ) {
 
-        Query query = new Query();
 
-        if (gameTypeId == null && gameTypeId.isEmpty()) {
-            return Mono.just(new ResponseEntity("gameTypeId is required", HttpStatus.NOT_FOUND));
-
-        }
         if (documentPurposeId == null && documentPurposeId.isEmpty()) {
             return Mono.just(new ResponseEntity("documentPurposeId is required", HttpStatus.NOT_FOUND));
 
-        }
-        if (institutionId == null && institutionId.isEmpty()) {
-            return Mono.just(new ResponseEntity("institutionId is required", HttpStatus.NOT_FOUND));
         }
 
         Query queryDocumentType= new Query();
@@ -216,8 +208,12 @@ public class DocumentController extends BaseController {
 
          Query queryDocument = new Query();
          queryDocument.addCriteria(Criteria.where("documentTypeId").in(documentTypeIds));
-         queryDocument.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-         queryDocument.addCriteria(Criteria.where("institutionId").is(institutionId));
+        if (!StringUtils.isEmpty(gameTypeId)) {
+             queryDocument.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+         }
+        if (!StringUtils.isEmpty(institutionId)) {
+            queryDocument.addCriteria(Criteria.where("institutionId").is(institutionId));
+        }
 
         List<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(queryDocument, Document.class).toStream().collect(Collectors.toList());
         ArrayList<DocumentDto> documentsDto = new ArrayList<>();
