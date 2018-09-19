@@ -104,11 +104,10 @@ public class DocumentTypeController extends BaseController{
     public Mono<ResponseEntity> updateDocumentType(@RequestBody @Valid DocumentTypeUpdateDto documentTypeUpdateDto) {
         Query query = new Query();
         query.addCriteria(Criteria.where("documentPurposeId").is(documentTypeUpdateDto.getDocumentPurposeId()));
-        DocumentType checkForDocumentType= (DocumentType) mongoRepositoryReactive.findById(documentTypeUpdateDto.getDocumentPurposeId(), DocumentType.class).block();
-        if(checkForDocumentType==null){
+        DocumentType documentType= (DocumentType) mongoRepositoryReactive.findById(documentTypeUpdateDto.getDocumentPurposeId(), DocumentType.class).block();
+        if(documentType==null){
             return Mono.just(new ResponseEntity("Document Type does not exist", HttpStatus.BAD_REQUEST));
         }
-        DocumentType documentType = new DocumentType();
         documentType.setDocumentPurposeId(documentTypeUpdateDto.getDocumentPurposeId());
         documentType.setActive(documentTypeUpdateDto.isActive());
         documentType.setRequired(documentTypeUpdateDto.isRequired());

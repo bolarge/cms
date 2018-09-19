@@ -71,6 +71,7 @@ public class DocumentController extends BaseController {
             Boolean filenameValidationCheckFailed = false;
             //We then reconcile it with the document objects
             ArrayList<FactObject> documents = new ArrayList<>();
+            ArrayList<FactObject> documentCheck = new ArrayList<>();
             documentDtos.stream().forEach(documentDto -> {
                 try {
                     logger.info("Creating file : " + documentDto.getFilename());
@@ -93,6 +94,7 @@ public class DocumentController extends BaseController {
                             queryPreviousDocuments.addCriteria(Criteria.where("documentTypeId").is(documentDto.getDocumentTypeId()));
                             Document previousDocument = (Document) mongoRepositoryReactive.find(queryPreviousDocuments, Document.class).block();
                             previousDocument.setArchive(true);
+                            previousDocument.setCurrent(false);
                             //mongoRepositoryReactive.saveOrUpdate(previousDocument);
                             documents.add(previousDocument);
                         }
@@ -112,6 +114,7 @@ public class DocumentController extends BaseController {
                         //document.setValidTo(new LocalDate(documentDto.getValidTo()));
                         document.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
                         documents.add(document);
+                        documentCheck.add(document);
                         //If there is an existing doc we set it to false
                         if (documentDto.getPreviousDocumentId() != null) {
                             Document oldDocument = (Document) mongoRepositoryReactive.findById((documentDto.getPreviousDocumentId()), Document.class).block();
@@ -128,14 +131,14 @@ public class DocumentController extends BaseController {
             });
 
             //This has to be equal. The only time its not is because a file name does not match
-            if (documents.size() != files.length) {
+            if (documentCheck.size() != files.length) {
                 return Mono.just(new ResponseEntity<>("Json & file length do not match. Please make sure the each file has a corresponding filename in the json.", HttpStatus.BAD_REQUEST));
             }
             documents.stream().forEach(doc -> {
                 mongoRepositoryReactive.saveOrUpdate(doc);
             });
 
-            return Mono.just(new ResponseEntity<>(documents, HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>("FileUpload Successful", HttpStatus.OK));
         } catch (Exception e) {
             return ErrorResponseUtil.logAndReturnError(logger, "An error occured while uploading the documents", e);
         }
