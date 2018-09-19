@@ -185,6 +185,37 @@ public class LicenseController {
         }
     }
 
+
+    @RequestMapping(method = RequestMethod.GET, value = "/update-to-renewal-in-review-from-in-progress", params = {"paymentRecordId"})
+    @ApiOperation(value = "Update Renewal In progress to Renewal In Review", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> updateInProgressToInReview(@RequestParam("paymentRecordId") String paymentRecordId) {
+        try {
+            return licenseService.updateRenewalLicenseToReview(paymentRecordId);
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Error! Please contact Admin", HttpStatus.BAD_REQUEST));
+
+        }
+    }
+    @RequestMapping(method = RequestMethod.GET, value = "/update-to-renewal-in-review-from-in-license", params = {"licenseId"})
+    @ApiOperation(value = "Update Renewal In review to Renewal License", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> updateInReviewToInLicense(@RequestParam("licenseId") String licenseId) {
+        try {
+            return licenseService.updateInReviewToLicense(licenseId);
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Error! Please contact Admin", HttpStatus.BAD_REQUEST));
+
+        }
+    }
     @RequestMapping(method = RequestMethod.POST, value = "/update-aipdoc-to-license")
     @ApiOperation(value = "Update AIP to AIP Document Upload Status", response = String.class, consumes = "application/json")
     @ApiResponses(value = {
