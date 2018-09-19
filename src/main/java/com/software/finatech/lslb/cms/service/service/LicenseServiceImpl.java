@@ -83,7 +83,7 @@ public class LicenseServiceImpl implements LicenseService {
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             }
             if (!StringUtils.isEmpty(licenseTypeId)) {
-                query.addCriteria(Criteria.where("licenseType").is(licenseTypeId));
+                query.addCriteria(Criteria.where("licenseTypeId").is(licenseTypeId));
             }
 
             if (!StringUtils.isEmpty(date)) {
@@ -291,6 +291,24 @@ public class LicenseServiceImpl implements LicenseService {
         return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.BAD_REQUEST));
     }
 
+
+    @Override
+    public Mono<ResponseEntity> getInstitutionExpiredLicenses(String institutionId) {
+        Query queryForLicensedInstitutionInGameType = new Query();
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("institutionId").is(institutionId));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("renewalStatus").is("true"));
+        List<License> licenses= (List<License>)mongoRepositoryReactive.findAll(queryForLicensedInstitutionInGameType, License.class).toStream().collect(Collectors.toList());
+        if (licenses.size() == 0) {
+                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+            }
+        List<LicenseDto> licenseDtos = new ArrayList<>();
+        licenses.stream().forEach(license -> {
+            licenseDtos.add(license.convertToDto());
+        });
+        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.BAD_REQUEST));
+    }
+
     @Override
     public boolean institutionIsLicensedForGameType(String institutionId, String gameTypeId) {
         Query queryForLicensedInstitutionInGameType = new Query();
@@ -310,7 +328,9 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public Mono<ResponseEntity> getInstitutionAIPs(String institutionId) {
         Query queryForInstitutionAIP = new Query();
-        queryForInstitutionAIP.addCriteria(Criteria.where("institutionId").is(institutionId));
+        if(!StringUtils.isEmpty(institutionId)){
+            queryForInstitutionAIP.addCriteria(Criteria.where("institutionId").is(institutionId));
+        }
         queryForInstitutionAIP.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID));
         queryForInstitutionAIP.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
         List<License> aipsForInstitution = (List<License>) mongoRepositoryReactive.findAll(queryForInstitutionAIP, License.class).toStream().collect(Collectors.toList());
