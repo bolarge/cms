@@ -4,6 +4,24 @@ public class AIPCheckDto {
     protected String licenseStatusId;
     protected GameTypeDto gameType;
     protected String licensedId;
+    protected String institutionId;
+    protected String institutionName;
+
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
+
+    public String getInstitutionName() {
+        return institutionName;
+    }
+
+    public void setInstitutionName(String institutionName) {
+        this.institutionName = institutionName;
+    }
 
     public String getLicenseStatusId() {
         return licenseStatusId;
