@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:mc="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:mc="http://www.w3.org/1999/xhtml"  xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="format-detection" content="telephone=no" />
     <!-- disable auto telephone linking in iOS -->
-    <title>Meeting Invitation</title>
+    <title>LSLB Payment Notification</title>
     <style type="text/css">
         /* RESET STYLES */
         html {
@@ -531,8 +531,59 @@
                                                                                 Sir/Ma,
                                                                             </h3>
                                                                             <div mc:edit="body" style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
-                                                                             Please be informed that your payment of [[${amount}]]
-                                                                                on our platform via [[${channel}]] was successful.
+                                                                                <span>This is to inform you that a payment was recently made on LSLB Customer Management Portal by <span th:text="${paymentInitiator}"></span>.
+
+                                                                              <br>
+                                                                                The details of the payment are stated below
+                                                                                    <br>  <br>
+                                                                                <table>
+                                                                                    <tr>
+                                                                                        <td>Payment Initiator</td>
+                                                                                        <td> : </td>
+                                                                                        <td><span th:text="${paymentInitiator}"></span></td>
+                                                                                    </tr>
+
+                                                                                    <tr>
+                                                                                        <td>Payment For</td>
+                                                                                        <td> : </td>
+                                                                                        <td><span th:text="${feePaymentType}"></span></td>
+                                                                                    </tr>
+
+                                                                                    <tr>
+                                                                                        <td>Category</td>
+                                                                                        <td> : </td>
+                                                                                        <td><span th:text="${gameType}"></span></td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td>Amount</td>
+                                                                                        <td> : </td>
+                                                                                        <td><span th:text="${amount}"></span></td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td>Payment Date</td>
+                                                                                        <td> : </td>
+                                                                                        <td><span th:text="${paymentDate}"></span></td>
+                                                                                    </tr>
+
+                                                                                    <tr>
+                                                                                        <td>Revenue Name</td>
+                                                                                        <td> : </td>
+                                                                                        <td><span th:text="${revenueName}"></span></td>
+                                                                                    </tr>
+
+                                                                                    <tr>
+                                                                                        <td>Mode Of Payment</td>
+                                                                                        <td> : </td>
+                                                                                        <td><span th:text="${modeOfPayment}"></span></td>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                        <td>Type of Payment</td>
+                                                                                        <td> : </td>
+                                                                                        <td><span th:if="${isPartPayment == true}">Full Payment </span>
+                                                                                            <span th:if="${isPartPayment == false}">Partial Payment</span>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </table>
                                                                                 </div>
                                                                         </td>
                                                                     </tr>
@@ -565,11 +616,7 @@
                                                                                         <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                                                                             <tr>
                                                                                                 <td valign="top" class="textContent">
-                                                                                                    <!--
-                                                                                                            The "mc:edit" is a feature for MailChimp which allows
-                                                                                                            you to edit certain row. It makes it easy for you to quickly edit row sections.
-                                                                                                            http://kb.mailchimp.com/templates/code/create-editable-content-areas-with-mailchimps-template-language
-                                                                                                        -->
+
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </table>
@@ -594,39 +641,6 @@
                                                                                         <table border="0" cellpadding="30" cellspacing="0" width="500" class="flexibleContainer">
                                                                                             <tr>
                                                                                                 <td valign="top" width="500" class="flexibleContainerCell">
-
-                                                                                                    <!-- CONTENT TABLE // -->
-                                                                                                    <!--<table align="left" border="0" cellpadding="0" cellspacing="0" width="100%">-->
-                                                                                                    <!--<tr>-->
-                                                                                                    <!--<td align="left" valign="top" class="flexibleContainerBox">-->
-                                                                                                    <!--<table border="0" cellpadding="0" cellspacing="0" width="210" style="max-width: 100%;">-->
-                                                                                                    <!--<tr>-->
-                                                                                                    <!--<td align="left" class="textContent">-->
-                                                                                                    <!--<h3 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;">Date Of Meeting</h3>-->
-                                                                                                    <!--<div style="text-align:left;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#5F5F5F;line-height:135%;">-->
-                                                                                                    <!--[[${meetingDate}]]-->
-                                                                                                    <!--</div>-->
-                                                                                                    <!--</td>-->
-                                                                                                    <!--</tr>-->
-                                                                                                    <!--</table>-->
-                                                                                                    <!--</td>-->
-                                                                                                    <!--<td align="right" valign="top" class="flexibleContainerBox">-->
-                                                                                                    <!--<table class="flexibleContainerBoxNext" border="0" cellpadding="0" cellspacing="0" width="210" style="max-width: 100%;">-->
-                                                                                                    <!--<tr>-->
-                                                                                                    <!--<td align="left" class="textContent">-->
-                                                                                                    <!--<h3 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;">Venue-->
-                                                                                                    <!--Of Meeting</h3>-->
-                                                                                                    <!--<div style="text-align:left;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#5F5F5F;line-height:135%;">-->
-                                                                                                    <!--[[${venue}]]-->
-                                                                                                    <!--</div>-->
-                                                                                                    <!--</td>-->
-                                                                                                    <!--</tr>-->
-                                                                                                    <!--</table>-->
-                                                                                                    <!--</td>-->
-                                                                                                    <!--</tr>-->
-                                                                                                    <!--</table>-->
-                                                                                                    <!-- // CONTENT TABLE -->
-
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </table>
@@ -648,25 +662,6 @@
                                                                                         <table border="0" cellpadding="30" cellspacing="0" width="500" class="flexibleContainer">
                                                                                             <tr>
                                                                                                 <td valign="top" width="500" class="flexibleContainerCell">
-
-                                                                                                    <!-- CONTENT TABLE // -->
-                                                                                                    <!--<table align="left" border="0" cellpadding="0" cellspacing="0" width="100%">-->
-                                                                                                    <!--<tr>-->
-                                                                                                    <!--<td align="left" valign="top" class="flexibleContainerBox">-->
-                                                                                                    <!--<table border="0" cellpadding="0" cellspacing="0" width="210" style="max-width: 100%;">-->
-                                                                                                    <!--<tr>-->
-                                                                                                    <!--<td align="left" class="textContent">-->
-                                                                                                    <!--<h3 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;">Time Of Meeting</h3>-->
-                                                                                                    <!--<div style="text-align:left;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#5F5F5F;line-height:135%;">-->
-                                                                                                    <!--[[${time}]]-->
-                                                                                                    <!--</div>-->
-                                                                                                    <!--</td>-->
-                                                                                                    <!--</tr>-->
-                                                                                                    <!--</table>-->
-                                                                                                    <!--</td>-->
-                                                                                                    <!--</tr>-->
-                                                                                                    <!--</table>-->
-                                                                                                    <!-- // CONTENT TABLE -->
 
                                                                                                 </td>
                                                                                             </tr>

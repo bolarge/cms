@@ -22,9 +22,7 @@ public interface GamingMachineService {
 
     Mono<ResponseEntity> updateGamingMachine(GamingMachineUpdateDto gamingMachineUpdateDto);
 
-    Mono<ResponseEntity> validateInstitutionGamingMachineLicense(String institutionId);
-
-    Mono<ResponseEntity> uploadMultipleGamingMachinesForInstitution(String institutionId, MultipartFile multipartFile);
+    Mono<ResponseEntity> uploadMultipleGamingMachinesForInstitution(String institutionId,String gameTypeId, MultipartFile multipartFile);
 
     GamingMachine findById(String gamingMachineId);
 }

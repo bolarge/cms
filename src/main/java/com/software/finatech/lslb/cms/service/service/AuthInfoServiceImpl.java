@@ -159,7 +159,8 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 model.put("date", LocalDate.now().toString("dd-MM-YYYY"));
                 url = appUrl + "/authInfo/confirm?token=" + verificationToken.getConfirmationToken();
                 model.put("CallbackUrl", url);
-                String content = mailContentBuilderService.build(model, "ContinueRegistrationEmail");
+                model.put("isApplicant", false);
+                String content = mailContentBuilderService.build(model, "continueRegistration-new");
                 content = content.replaceAll("CallbackUrl", url);
                 emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
             }
@@ -242,7 +243,8 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 model.put("date", LocalDate.now().toString("dd-MM-YYYY"));
                 url = appUrl + "/authInfo/confirm?token=" + verificationToken.getConfirmationToken();
                 model.put("CallbackUrl", url);
-                String content = mailContentBuilderService.build(model, "ContinueRegistrationEmail");
+                model.put("isApplicant", false);
+                String content = mailContentBuilderService.build(model, "continueRegistration-new");
                 content = content.replaceAll("CallbackUrl", url);
                 emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
             }
@@ -634,12 +636,44 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
     @Override
     public AuthInfo getUserById(String userId) {
-        return (AuthInfo)mongoRepositoryReactive.findById(userId, AuthInfo.class).block();
+        return (AuthInfo) mongoRepositoryReactive.findById(userId, AuthInfo.class).block();
     }
 
     @Override
     public AuthInfo getUserByAgentId(String agentId) {
         return null;
+    }
+
+    @Override
+    public ArrayList<AuthInfo> getAllActiveLSLBFinanceAdmins() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("authRoleId").is(LSLBAuthRoleReferenceData.LSLB_FINANCE_ADMIN_ID));
+        query.addCriteria(Criteria.where("enabled").is(true));
+        return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
+    }
+
+    @Override
+    public ArrayList<AuthInfo> getAllActiveLSLBITAdmins() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("authRoleId").is(LSLBAuthRoleReferenceData.LSLB_IT_ADMIN_ID));
+        query.addCriteria(Criteria.where("enabled").is(true));
+        return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
+    }
+
+    @Override
+    public ArrayList<AuthInfo> getAllActiveLSLBLegalAdmins() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("authRoleId").is(LSLBAuthRoleReferenceData.LSLB_LEGAL_ADMIN_ID));
+        query.addCriteria(Criteria.where("enabled").is(true));
+        return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
+    }
+
+    @Override
+    public ArrayList<AuthInfo> getAllActiveLSLBGeneralManagers() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("authRoleId").is(LSLBAuthRoleReferenceData.LSLB_GM_ROLE_ID));
+        query.addCriteria(Criteria.where("enabled").is(true));
+        return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
     }
 
     public ArrayList<String> getAllGamingOperatorAdminAndUserRoles() {

@@ -59,7 +59,7 @@ public class CustomerCodeCreator {
         ArrayList<Agent> agentWithoutVigiPayCustomerCode = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
         for (Agent agent : agentWithoutVigiPayCustomerCode) {
             String customerCode = vigipayService.createCustomerCodeForAgent(agent);
-            if (StringUtils.isEmpty(customerCode)) {
+            if (!StringUtils.isEmpty(customerCode)) {
                 logger.info("Gotten customer code {}", customerCode);
                 agent.setVgPayCustomerCode(customerCode);
                 mongoRepositoryReactive.saveOrUpdate(agent);
