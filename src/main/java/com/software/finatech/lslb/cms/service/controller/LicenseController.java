@@ -168,6 +168,21 @@ public class LicenseController {
 
         }
     }
+    @RequestMapping(method = RequestMethod.GET, value = "/get-institution-uploaded-aips", params = {"institutionId"})
+    @ApiOperation(value = "Get all Institution Uploaded Document AIPs", response = License.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllAIPUploaded(@RequestParam("institutionId") String institutionId) {
+        try {
+            return licenseService.getInstitutionAIPUploaded(institutionId);
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
+
+        }
+    }
 
 
     @RequestMapping(method = RequestMethod.GET, value = "/get-institution-licenses-close-to-expiration", params = {"institutionId"})

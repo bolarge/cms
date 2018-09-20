@@ -42,6 +42,7 @@ public interface LicenseService {
     Mono<ResponseEntity> updateInReviewToLicense(String licenseId);
     Mono<ResponseEntity> getInstitutionCloseToExpirationLicenses(String institutionId);
     Mono<ResponseEntity>updateRenewalLicenseToReview(String paymentRecordId);
+    Mono<ResponseEntity> getInstitutionAIPUploaded(String institutionId);
     License findRenewalLicense(String institutionId, String agentId, String gamingMachineId, String gameTypeId, String licenseTypeId);
     boolean institutionIsLicensedForGameType(String institutionId, String gameTypeId);
 
