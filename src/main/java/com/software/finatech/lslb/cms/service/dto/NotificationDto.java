@@ -14,6 +14,24 @@ public class NotificationDto {
     protected String agentEmailAddress;
     protected String machineNumber;
     protected String description;
+    protected String template;
+    protected String callBackUrl;
+
+    public String getCallBackUrl() {
+        return callBackUrl;
+    }
+
+    public void setCallBackUrl(String callBackUrl) {
+        this.callBackUrl = callBackUrl;
+    }
+
+    public String getTemplate() {
+        return template;
+    }
+
+    public void setTemplate(String template) {
+        this.template = template;
+    }
 
     public String getDescription() {
         return description;

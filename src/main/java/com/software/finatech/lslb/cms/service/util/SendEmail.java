@@ -25,11 +25,11 @@ public class SendEmail {
     }
     public String sendEmailLicenseApplicationNotification(NotificationDto notificationDto) {
         HashMap<String, Object> model = new HashMap<>();
-        model.put("institutionId", notificationDto.getInstitutionId());
-        model.put("institutionName", notificationDto.getInstitutionName());
         model.put("description", notificationDto.getDescription());
         model.put("date", LocalDate.now().toString("dd-MM-YYYY"));
-        String content = mailContentBuilderService.build(model, "LicenseExpiration");
+        model.put("CallbackUrl", notificationDto.getCallBackUrl());
+        String content = mailContentBuilderService.build(model, notificationDto.getTemplate());
+        content = content.replaceAll("CallbackUrl", notificationDto.getCallBackUrl());
         emailService.sendEmail(content, "Licence Update Notification", notificationDto.getInstitutionEmail());
         return "success";
     }
