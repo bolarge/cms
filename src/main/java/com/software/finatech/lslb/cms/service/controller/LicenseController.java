@@ -154,7 +154,7 @@ public class LicenseController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/get-institution-aips", params = {"institutionId"})
-    @ApiOperation(value = "Get all Institution AIPs", response = License.class, responseContainer = "List", consumes = "application/json")
+    @ApiOperation(value = "Get all Institution AIPs", response = AIPCheckDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -169,7 +169,7 @@ public class LicenseController {
         }
     }
     @RequestMapping(method = RequestMethod.GET, value = "/get-institution-uploaded-aips", params = {"institutionId"})
-    @ApiOperation(value = "Get all Institution Uploaded Document AIPs", response = License.class, responseContainer = "List", consumes = "application/json")
+    @ApiOperation(value = "Get all Institution Uploaded Document AIPs", response = AIPCheckDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
