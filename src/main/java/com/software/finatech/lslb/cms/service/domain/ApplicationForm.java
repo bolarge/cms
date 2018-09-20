@@ -260,6 +260,14 @@ public class ApplicationForm extends AbstractFact {
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
 
+    public String getInstitutionName() {
+        Institution institution = getInstitution();
+        if (institution != null) {
+            return institution.getInstitutionName();
+        }
+        return "";
+    }
+
     public ApplicationFormDto convertToDto() {
         ApplicationFormDto applicationFormDto = new ApplicationFormDto();
         GameType gameType = getGameType();

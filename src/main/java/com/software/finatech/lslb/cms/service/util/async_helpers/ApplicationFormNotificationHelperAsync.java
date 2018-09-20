@@ -7,21 +7,18 @@ import com.software.finatech.lslb.cms.service.domain.LslbAdminComment;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
-import org.apache.commons.lang3.StringUtils;
+import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ApplicationFormNotificationHelperAsync {
@@ -31,44 +28,18 @@ public class ApplicationFormNotificationHelperAsync {
     private AuthInfoService authInfoService;
     private MailContentBuilderService mailContentBuilderService;
     private EmailService emailService;
-    private Environment environment;
+    private FrontEndPropertyHelper frontEndPropertyHelper;
 
-
-    @Value("${racs.ui.host}")
-    private String frontEndHost;
-    @Value("${racs.ui.port}")
-    private String frontEndPort;
-    private String frontEndUrl;
 
     @Autowired
     public ApplicationFormNotificationHelperAsync(AuthInfoService authInfoService,
                                                   MailContentBuilderService mailContentBuilderService,
                                                   EmailService emailService,
-                                                  Environment environment) {
+                                                  FrontEndPropertyHelper frontEndPropertyHelper) {
         this.authInfoService = authInfoService;
         this.mailContentBuilderService = mailContentBuilderService;
         this.emailService = emailService;
-        this.environment = environment;
-    }
-
-    @PostConstruct
-    public void initialize() {
-        String[] activeProfileArray = environment.getActiveProfiles();
-        List<String> activeProfiles = Arrays.asList(activeProfileArray);
-        frontEndUrl = frontEndHost;
-        if (!StringUtils.isEmpty(frontEndPort)) {
-            frontEndUrl = String.format("%s:%s", frontEndHost, frontEndPort);
-        }
-        if (activeProfiles.contains("development") ||
-                activeProfiles.contains("test") ||
-                activeProfiles.contains("staging")) {
-            frontEndUrl = String.format("http://%s", frontEndUrl);
-        }
-
-        if (activeProfiles.contains("production")) {
-            frontEndUrl = String.format("https://%s", frontEndUrl);
-        }
-        logger.info("Front end url : {}", frontEndUrl);
+        this.frontEndPropertyHelper = frontEndPropertyHelper;
     }
 
     @Async
@@ -83,7 +54,7 @@ public class ApplicationFormNotificationHelperAsync {
     private void sendCompletionNotificationToLslbAdmin(ApplicationForm applicationForm, String lslbAdminId) {
         Institution institution = applicationForm.getInstitution();
         AuthInfo lslbAdmin = authInfoService.getUserById(lslbAdminId);
-        String presentDate = DateTime.now().toString("dd/MM/yyyy");
+        String presentDate = DateTime.now().toString("dd-MM-yyyy");
         String gameTypeName = applicationForm.getGameTypeName();
         String institutionName = institution.getInstitutionName();
 
@@ -111,7 +82,7 @@ public class ApplicationFormNotificationHelperAsync {
 
     private void sendCommentNotificationToInstitutionUser(AuthInfo institutionAdmin, String comment, ApplicationForm applicationForm) {
         String institutionAdminName = institutionAdmin.getFullName();
-        String presentDate = DateTime.now().toString("dd/MM/yyyy ");
+        String presentDate = DateTime.now().toString("dd-MM-yyyy ");
         String gameTypeName = applicationForm.getGameTypeName();
         HashMap<String, Object> model = new HashMap<>();
         model.put("name", institutionAdminName);
@@ -156,8 +127,8 @@ public class ApplicationFormNotificationHelperAsync {
 
     private void sendApprovedMailToInstitutionUser(AuthInfo institutionAdmin, ApplicationForm applicationForm) {
         String gameTypeName = applicationForm.getGameTypeName();
-        String presentDate = DateTime.now().toString("dd/MM/yyyy ");
-        String callBackUrl = frontEndUrl + "/payment-page";
+        String presentDate = DateTime.now().toString("dd-MM-yyyy ");
+        String callBackUrl = String.format("%s/payment-page", frontEndPropertyHelper.getFrontEndUrl());
         HashMap<String, Object> model = new HashMap<>();
         model.put("date", presentDate);
         model.put("gameType", gameTypeName);
@@ -166,5 +137,67 @@ public class ApplicationFormNotificationHelperAsync {
 
         String content = mailContentBuilderService.build(model, "application-form-approval-GA-new");
         emailService.sendEmail(content, mailSubject, institutionAdmin.getEmailAddress());
+    }
+
+
+    @Async
+    public void sendApplicationFormSubmissionMailToLSLBAdmins(ApplicationForm applicationForm) {
+        String institutionName = applicationForm.getInstitutionName();
+        String gameTypeName = applicationForm.getGameTypeName();
+
+        List<String> adminEmails= new ArrayList<>();
+        ArrayList<AuthInfo> lslbFinanceAdmins = authInfoService.getAllActiveLSLBFinanceAdmins();
+        if (lslbFinanceAdmins == null || lslbFinanceAdmins.isEmpty()) {
+            logger.info("No active LSLB finance admin found, skipping finance admins");
+        }else {
+           adminEmails.addAll(lslbFinanceAdmins.stream().map(AuthInfo::getEmailAddress).collect(Collectors.toList()));
+        }
+
+        ArrayList<AuthInfo> lslbLegalAdmins = authInfoService.getAllActiveLSLBLegalAdmins();
+        if (lslbLegalAdmins == null || lslbLegalAdmins.isEmpty()) {
+            logger.info("No active LSLB Legal admin found, skipping legal admins");
+        }else {
+            adminEmails.addAll(lslbLegalAdmins.stream().map(AuthInfo::getEmailAddress).collect(Collectors.toList()));
+        }
+
+        ArrayList<AuthInfo> lslbITAdmins = authInfoService.getAllActiveLSLBITAdmins();
+        if (lslbITAdmins == null || lslbITAdmins.isEmpty()) {
+            logger.info("No active LSLB IT admin found, skipping IT admins");
+        }else {
+            adminEmails.addAll(lslbITAdmins.stream().map(AuthInfo::getEmailAddress).collect(Collectors.toList()));
+        }
+
+        ArrayList<AuthInfo> lslbGMs = authInfoService.getAllActiveLSLBGeneralManagers();
+        if (lslbGMs == null || lslbGMs.isEmpty()) {
+            logger.info("No active LSLB GM admin found, skipping GMs admins");
+        }else {
+            adminEmails.addAll(lslbGMs.stream().map(AuthInfo::getEmailAddress).collect(Collectors.toList()));
+        }
+
+        if (adminEmails.isEmpty()){
+            logger.info("No LSLB Admin staff found, Skipping email sending");
+            return;
+        }
+        for (String adminEmail:adminEmails) {
+            logger.info("Sending email to LSLB admin with email -> {}", adminEmail);
+            sendApplicationFormSubmissionNotificationToLSLSBAdmin(adminEmail,applicationForm,institutionName,gameTypeName);
+        }
+        logger.info("Finished sending emails to LSLB Admins");
+    }
+
+
+    private void sendApplicationFormSubmissionNotificationToLSLSBAdmin(String adminEmail, ApplicationForm applicationForm, String institutionName, String gameTypeName) {
+        String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId());
+
+        String presentDate = DateTime.now().toString("dd-MM-yyyy ");
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("date", presentDate);
+        model.put("gameType", gameTypeName);
+        model.put("applicantName", institutionName);
+        model.put("frontEndUrl", callbackUrl);
+        String mailSubject = "New Application submitted on LSLB Customer Management System";
+
+        String content = mailContentBuilderService.build(model, "ApplicationFormSubmissionLSLB");
+        emailService.sendEmail(content, mailSubject, adminEmail);
     }
 }

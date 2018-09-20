@@ -30,6 +30,14 @@ public interface AuthInfoService {
 
     ArrayList<AuthInfo> getAllActiveGamingOperatorAdminsForInstitution(String institutionId);
 
+    ArrayList<AuthInfo> getAllActiveLSLBFinanceAdmins();
+
+    ArrayList<AuthInfo> getAllActiveLSLBITAdmins();
+
+    ArrayList<AuthInfo> getAllActiveLSLBLegalAdmins();
+
+    ArrayList<AuthInfo> getAllActiveLSLBGeneralManagers();
+
     AuthInfo getUserById(String userId);
 
     AuthInfo getUserByAgentId(String agentId);

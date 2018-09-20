@@ -1,8 +1,9 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.mongodb.reactivestreams.client.DistinctPublisher;
+import com.mongodb.reactivestreams.client.MongoCollection;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
-import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
 import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
 import com.software.finatech.lslb.cms.service.model.contactDetails.ApplicantContactDetails;
@@ -12,7 +13,6 @@ import com.software.finatech.lslb.cms.service.model.otherInformation.ApplicantOt
 import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantOutletInformation;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
@@ -24,11 +24,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
@@ -156,29 +158,57 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         }
     }
 
-    //TODO: find way to get all approverID distinct in application form table
+    //TODO: find way to get all approverID distinct in application form table :DONE
+    //TODO: Remove commented out code once tested
     @Override
     public Mono<ResponseEntity> getAllApprovers() {
-        String lslbAdminAuthRoleId = LSLBAuthRoleReferenceData.LSLB_ADMIN_ROLE_ID;
-        Query query = new Query();
-        query.addCriteria(Criteria.where("authRoleId").is(lslbAdminAuthRoleId));
-        ArrayList<AuthInfo> authInfos = (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
-        if (authInfos == null || authInfos.isEmpty()) {
-            return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
-        }
-        List<AuthInfoDto> authInfoDtos = new ArrayList<>();
-        authInfos.forEach(authInfo -> {
-            try {
-                authInfo.setAssociatedProperties();
-                AuthInfoDto authInfoDto = new AuthInfoDto();
-                authInfoDto.setId(authInfo.getId());
-                authInfoDto.setFullName(authInfo.getFullName());
-                authInfoDtos.add(authInfoDto);
-            } catch (FactNotFoundException e) {
-                e.printStackTrace();
+        try {
+            MongoCollection mongoCollection = mongoRepositoryReactive.getReactiveMongoTemplate().getCollection("ApplicationForms");
+            DistinctPublisher<String> distinctPublisher = (DistinctPublisher<String>) mongoCollection.distinct("approverId", String.class);
+            List<String> approverIds = Flux.concat(distinctPublisher).toStream().collect(Collectors.toList());
+            if (approverIds == null || approverIds.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
             }
-        });
-        return Mono.just(new ResponseEntity<>(authInfoDtos, HttpStatus.OK));
+            ArrayList<AuthInfoDto> authInfoDtos = new ArrayList<>();
+            for (String approverId : approverIds) {
+                try {
+                    AuthInfo authInfo = authInfoService.getUserById(approverId);
+                    if (authInfo != null) {
+                        AuthInfoDto authInfoDto = new AuthInfoDto();
+                        authInfoDto.setId(approverId);
+                        authInfoDto.setFullName(authInfo.getFullName());
+                        authInfoDtos.add(authInfoDto);
+                    }
+                } catch (Exception e) {
+                    logger.error(String.format("An error occurred while converting user with id %s to DTO", approverId), e);
+                }
+            }
+            return Mono.just(new ResponseEntity<>(authInfoDtos, HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while getting all application form approvers", e);
+        }
+//
+//
+//        String lslbAdminAuthRoleId = LSLBAuthRoleReferenceData.LSLB_GM_ROLE_ID;
+//        Query query = new Query();
+//        query.addCriteria(Criteria.where("authRoleId").is(lslbAdminAuthRoleId));
+//        ArrayList<AuthInfo> authInfos = (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
+//        if (authInfos == null || authInfos.isEmpty()) {
+//            return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
+//        }
+//        List<AuthInfoDto> authInfoDtos = new ArrayList<>();
+//        authInfos.forEach(authInfo -> {
+//            try {
+//                authInfo.setAssociatedProperties();
+//                AuthInfoDto authInfoDto = new AuthInfoDto();
+//                authInfoDto.setId(authInfo.getId());
+//                authInfoDto.setFullName(authInfo.getFullName());
+//                authInfoDtos.add(authInfoDto);
+//            } catch (FactNotFoundException e) {
+//                e.printStackTrace();
+//            }
+//        });
+//        return Mono.just(new ResponseEntity<>(authInfoDtos, HttpStatus.OK));
     }
 
     @Override
@@ -464,6 +494,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationForm.setApplicationFormStatusId(inReviewApplicationFormStatusId);
             saveApplicationForm(applicationForm);
 
+            applicationFormNotificationHelperAsync.sendApplicationFormSubmissionMailToLSLBAdmins(applicationForm);
             if (isResubmit) {
                 applicationFormNotificationHelperAsync.sendCompleteApplicationNotificationToLslbAdmin(applicationForm);
             }
@@ -511,7 +542,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
             }
 
-            if (StringUtils.equals(ApplicationFormStatusReferenceData.APPROVED_STATUS_ID, applicationForm.getApplicationFormStatusId())){
+            if (StringUtils.equals(ApplicationFormStatusReferenceData.APPROVED_STATUS_ID, applicationForm.getApplicationFormStatusId())) {
                 return Mono.just(new ResponseEntity<>("Application already approved", HttpStatus.BAD_REQUEST));
             }
             applicationForm.setRejectorId(rejectorId);
@@ -593,7 +624,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
         PaymentRecord existingConfirmedPaymentRecord = paymentRecordService.findExistingConfirmedApplicationFeeForInstitutionAndGameType(institutionId, gameTypeId);
         if (existingConfirmedPaymentRecord == null) {
-            return Mono.just(new ResponseEntity<>("Please pay application fees for category", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Kindly make application fee payment for category to proceed", HttpStatus.BAD_REQUEST));
         }
         return null;
     }

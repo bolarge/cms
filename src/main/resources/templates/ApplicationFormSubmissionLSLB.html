@@ -557,12 +557,17 @@
                                                                             <h3 mc:edit="header"
                                                                                 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;;margin-bottom:10px;">
                                                                                 Dear
-                                                                                [[${name}]],
+                                                                                Sir/Ma,
                                                                             </h3>
                                                                             <div mc:edit="body"
                                                                                  style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
-                                                                                <span th:if="${isApplicant == true}">Welcome to LSLB Customer management Portal. Click below to continue your sign up</span>
-                                                                                <span th:if="${isApplicant == false}">An account has been created for you on LSLB Customer Management Portal. Click below to continue registration</span>
+                                                                                A new Application has been submitted on
+                                                                                LSLB Customer Management System by <span
+                                                                                    th:text="${applicantName}"></span>
+                                                                                for category <span th:text="${gameType}"></span>.
+                                                                                <br>
+                                                                                <br>
+                                                                               <p> Click the link below to view the application</p>
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -599,10 +604,8 @@
                                                                                         class="buttonContent"
                                                                                         style="padding-top:15px;padding-bottom:15px;padding-right:15px;padding-left:15px;">
                                                                                         <a style="color:#FFFFFF;text-decoration:none;font-family:Helvetica,Arial,sans-serif;font-size:20px;line-height:135%;"
-                                                                                           href="CallbackUrl"
-                                                                                           target="_blank"> <span
-                                                                                                th:if="${isApplicant == true}">Continue Sign Up</span>
-                                                                                            <span th:if="${isApplicant == false}">Continue Registration</span>
+                                                                                           th:href="@{${frontEndUrl}}"
+                                                                                           target="_blank">View Application
                                                                                         </a>
                                                                                     </td>
                                                                                 </tr>

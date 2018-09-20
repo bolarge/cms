@@ -1,7 +1,7 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
-import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -138,6 +138,14 @@ public class PaymentRecord extends AbstractFact {
         this.paymentRecordDetailIds = paymentRecordDetailIds;
     }
 
+    public String getGameTypeName() {
+        GameType gameType = getGameType();
+        if (gameType != null) {
+            return gameType.getName();
+        }
+        return "";
+    }
+
     public GameType getGameType() {
         if (gameTypeId == null) {
             return null;
@@ -189,6 +197,14 @@ public class PaymentRecord extends AbstractFact {
         return (GamingMachine) mongoRepositoryReactive.findById(getGamingMachineId(), GamingMachine.class).block();
     }
 
+    public String getRevenueNameName() {
+        RevenueName revenueName = getRevenueName();
+        if (revenueName != null) {
+            return revenueName.getName();
+        }
+        return "";
+    }
+
     public RevenueName getRevenueName() {
         if (revenueNameId == null) {
             return null;
@@ -206,6 +222,14 @@ public class PaymentRecord extends AbstractFact {
             }
         }
         return revenueName;
+    }
+
+    public String getFeePaymentTypeName() {
+        FeePaymentType feePaymentType = getFeePaymentType();
+        if (feePaymentType != null) {
+            return feePaymentType.getName();
+        }
+        return "";
     }
 
     public FeePaymentType getFeePaymentType() {
@@ -276,6 +300,19 @@ public class PaymentRecord extends AbstractFact {
         }
         return paymentRecordDto;
     }
+
+
+    public boolean isInstitutionPayment(){
+        return StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_ID,this.revenueNameId);
+    }
+    public boolean isGamingMachinePayment(){
+        return StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_ID,this.revenueNameId);
+    }
+
+    public boolean isAgentPayment(){
+        return StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID,this.revenueNameId);
+    }
+
     @Override
     public String getFactName() {
         return "PaymentRecord";
