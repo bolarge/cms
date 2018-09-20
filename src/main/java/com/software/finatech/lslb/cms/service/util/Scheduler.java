@@ -254,7 +254,7 @@ public class Scheduler {
         expirationList.getExpiredLicences(licenseStatuses);
 
     }
-    //@Scheduled(cron = "5 8 * * 1")
+    @Scheduled(cron = "0 0 1 * * ?")
     protected void WithExpiredAIP(){
         ArrayList<String> licenseStatuses= new ArrayList<>();
         licenseStatuses.add(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
