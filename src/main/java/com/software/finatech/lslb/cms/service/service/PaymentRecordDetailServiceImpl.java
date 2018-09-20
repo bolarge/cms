@@ -456,12 +456,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         String gameTypeId = fee.getGameTypeId();
         String revenueNameId = fee.getRevenueNameId();
         if (paymentRecordDetailCreateDto.isAgentPayment()) {
-            AgentInstitution agentInstitution = paymentRecordDetailCreateDto.getAgentInstitution();
-            if (agentInstitution == null) {
-                return Mono.just(new ResponseEntity<>("Agent institution cannot be null for agent payment", HttpStatus.BAD_REQUEST));
-            }
-            institutionId = agentInstitution.getInstitutionId();
-            gameTypeId = agentInstitution.getGameTypeId();
+            gameTypeId = fee.getGameTypeId();
         }
         boolean licensePaymentExist = licensePaymentRecordExists(revenueNameId, gameTypeId, gamingMachineId, agentId, institutionId);
         if (licensePaymentExist) {

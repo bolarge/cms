@@ -235,24 +235,6 @@ public class ApplicationForm extends AbstractFact {
         return applicationFormStatus;
     }
 
-    private ApplicationFormType getApplicationFormType() {
-        if (StringUtils.isEmpty(this.applicationFormTypeId)) {
-            return null;
-        }
-        Map applicationFormTypeMap = Mapstore.STORE.get("ApplicationFormType");
-        ApplicationFormType applicationFormType = null;
-        if (applicationFormTypeMap != null) {
-            applicationFormType = (ApplicationFormType) applicationFormTypeMap.get(applicationFormTypeId);
-        }
-        if (applicationFormType == null) {
-            applicationFormType = (ApplicationFormType) mongoRepositoryReactive.findById(applicationFormTypeId, ApplicationFormType.class).block();
-            if (applicationFormType != null && applicationFormTypeMap != null) {
-                applicationFormTypeMap.put(applicationFormTypeId, applicationFormType);
-            }
-        }
-        return applicationFormType;
-    }
-
     public Institution getInstitution() {
         if (StringUtils.isEmpty(institutionId)) {
             return null;
@@ -282,10 +264,6 @@ public class ApplicationForm extends AbstractFact {
             applicationFormDto.setStatusId(getApplicationFormStatusId());
         }
 
-        ApplicationFormType applicationFormType = getApplicationFormType();
-        if (applicationFormType != null) {
-            applicationFormDto.setApplicationFormTypeName(applicationFormType.getName());
-        }
         Institution institution = getInstitution();
         if (institution != null) {
             applicationFormDto.setInstitutionName(institution.getInstitutionName());

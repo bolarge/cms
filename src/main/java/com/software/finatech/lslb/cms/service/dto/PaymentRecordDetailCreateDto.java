@@ -15,15 +15,6 @@ public class PaymentRecordDetailCreateDto {
     private String agentId;
     private String gamingMachineId;
 
-    private AgentInstitution agentInstitution;
-
-    public AgentInstitution getAgentInstitution() {
-        return agentInstitution;
-    }
-    public void setAgentInstitution(AgentInstitution agentInstitution) {
-        this.agentInstitution = agentInstitution;
-    }
-
     public String getInstitutionId() {
         return institutionId;
     }
