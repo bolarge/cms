@@ -328,6 +328,38 @@ public class LicenseServiceImpl implements LicenseService {
 
 
     @Override
+    public Mono<ResponseEntity> getInstitutionAIPUploaded(String institutionId) {
+        Query queryForInstitutionAIP = new Query();
+        if(!StringUtils.isEmpty(institutionId)){
+            queryForInstitutionAIP.addCriteria(Criteria.where("institutionId").is(institutionId));
+        }
+        queryForInstitutionAIP.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID));
+        queryForInstitutionAIP.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
+        List<License> aipsForInstitution = (List<License>) mongoRepositoryReactive.findAll(queryForInstitutionAIP, License.class).toStream().collect(Collectors.toList());
+        ArrayList<AIPCheckDto> aipCheckDtos = new ArrayList<>();
+        if (aipsForInstitution.size() == 0) {
+            return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+        }
+        aipsForInstitution.stream().forEach(aipForInstitution -> {
+            AIPCheckDto aipCheckDto = new AIPCheckDto();
+            GameType gameType = (GameType) mongoRepositoryReactive.findById(aipForInstitution.getGameTypeId(), GameType.class).block();
+            if (gameType != null) {
+                aipCheckDto.setGameType(gameType.convertToDto());
+            }
+            aipCheckDto.setInstitutionId(aipForInstitution.getInstitutionId());
+            aipCheckDto.setInstitutionName(aipForInstitution.getInstitution().convertToDto().getInstitutionName());
+            aipCheckDto.setLicensedId(aipForInstitution.getId());
+            aipCheckDto.setLicenseStatusId(aipForInstitution.getLicenseStatusId());
+            aipCheckDtos.add(aipCheckDto);
+
+        });
+
+        return Mono.just(new ResponseEntity<>(aipCheckDtos, HttpStatus.OK));
+
+
+    }
+
+    @Override
     public Mono<ResponseEntity> getInstitutionAIPs(String institutionId) {
         Query queryForInstitutionAIP = new Query();
         if(!StringUtils.isEmpty(institutionId)){
