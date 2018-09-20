@@ -557,7 +557,7 @@
                                                                                     <tr>
                                                                                         <td>Amount</td>
                                                                                         <td> : </td>
-                                                                                        <td><span th:text="${amount}"></span></td>
+                                                                                        <td>N<span th:text="${amount}"></span></td>
                                                                                     </tr>
                                                                                     <tr>
                                                                                         <td>Payment Date</td>
@@ -579,8 +579,8 @@
                                                                                     <tr>
                                                                                         <td>Type of Payment</td>
                                                                                         <td> : </td>
-                                                                                        <td><span th:if="${isPartPayment == true}">Full Payment </span>
-                                                                                            <span th:if="${isPartPayment == false}">Partial Payment</span>
+                                                                                        <td><span th:if="${isPartPayment == false}">Full Payment </span>
+                                                                                            <span th:if="${isPartPayment == true}">Partial Payment</span>
                                                                                         </td>
                                                                                     </tr>
                                                                                 </table>

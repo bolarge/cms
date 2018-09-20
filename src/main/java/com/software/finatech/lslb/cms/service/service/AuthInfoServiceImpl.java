@@ -605,12 +605,16 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     private Mono<ResponseEntity> validateCreateGamingOperatorAuthInfo(AuthInfoCreateDto authInfoCreateDto) {
         int maxNumberOfGamingOperatorUsers = 3;
         ArrayList<String> gamingOperatorLimitedRoles = getAllGamingOperatorAdminAndUserRoles();
-        if (gamingOperatorLimitedRoles.contains(authInfoCreateDto.getAuthRoleId())) {
+        String authRoleId = authInfoCreateDto.getAuthRoleId();
+        if (gamingOperatorLimitedRoles.contains(authRoleId)) {
             ArrayList<AuthInfo> authInfoListWithGamingOperatorLimitedRoles = getAllActiveGamingOperatorAdminsAndUsersForInstitution(authInfoCreateDto.getInstitutionId());
             if (authInfoListWithGamingOperatorLimitedRoles.size() >= maxNumberOfGamingOperatorUsers) {
                 return Mono.just(new ResponseEntity<>("Number of users for gaming operator exceeded", HttpStatus.BAD_REQUEST));
             }
+        }else {
+            return Mono.just(new ResponseEntity<>("Role specified cannot be used to create an institution user", HttpStatus.BAD_REQUEST));
         }
+
         return null;
     }
 

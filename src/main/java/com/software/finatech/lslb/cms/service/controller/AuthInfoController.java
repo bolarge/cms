@@ -396,6 +396,16 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity("InvalidToken", HttpStatus.BAD_REQUEST));
             }
 
+            if (verificationToken.getActivated() == true) {
+                return Mono.just(new ResponseEntity("Token already activated", HttpStatus.MOVED_PERMANENTLY));
+            }
+
+            if (verificationToken.getExpired() == true) {
+                return Mono.just(new ResponseEntity("Expired Token", HttpStatus.BAD_REQUEST));
+            }
+
+
+
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(verificationToken.getAuthInfoId(), AuthInfo.class).block();
             //authInfo.setOldFact(authInfo);
             authInfo.setEnabled(true);

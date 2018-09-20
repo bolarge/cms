@@ -132,7 +132,7 @@ public class PaymentRecordDetail extends AbstractFact {
     }
 
     public String getModeOfPaymentName() {
-        ModeOfPayment modeOfPayment = new ModeOfPayment();
+        ModeOfPayment modeOfPayment = getModeOfPayment();
         if (modeOfPayment != null) {
             return modeOfPayment.getName();
         }
