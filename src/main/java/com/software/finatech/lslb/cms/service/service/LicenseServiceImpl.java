@@ -408,7 +408,7 @@ public class LicenseServiceImpl implements LicenseService {
             NotificationDto notificationDto = new NotificationDto();
             notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
             notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
-            notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName()+",  have uploaded "+
+            notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName()+",  has uploaded "+
             notificationDto.getGameType()+" AIP Documents.");
             notificationDto.setTemplate("AIPUpdate");
             notificationDto.setCallBackUrl(baseUrl+"/all-aips");
@@ -465,7 +465,7 @@ public class LicenseServiceImpl implements LicenseService {
             notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
             notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
             notificationDto.setTemplate("LicenseUpdate");
-            notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName()+",  have submitted renewal application and uploaded the requested documents for "+
+            notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName()+",  has submitted renewal application and uploaded the requested documents for "+
             notificationDto.getGameType());
             notificationDto.setInstitutionEmail(adminEmail);
             sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
@@ -532,7 +532,7 @@ public class LicenseServiceImpl implements LicenseService {
             notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
             notificationDto.setTemplate("LicenseUpdate");
             notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName()+",  License for "+
-            notificationDto.getGameType()+" have been approved.\n License Number is: "+licenseNumber);
+            notificationDto.getGameType()+" has been approved.\n License Number is: "+licenseNumber);
 
             ArrayList<AuthInfo>  authInfos=authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
             for(AuthInfo authInfo : authInfos){
