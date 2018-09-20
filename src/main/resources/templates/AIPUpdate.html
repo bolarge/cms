@@ -1,6 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -248,33 +248,13 @@
                                                                             <tbody>
                                                                                 <tr style="height:78px">
                                                                                     <td id="body" style="background-color:#fff;padding:20px 20px 10px 20px;width:100%;">
-                                                                                        <p style="font-family:Verdana,sans-serif;color:#000;font-size:large;line-height:24px;margin-bottom:30px !important;">Dear <b style="color:#666;text-transform:capitalize;color:#5C842E;font-size:Large">Sir/Madam</b>,</p>
+                                                                                        <p style="font-family:Verdana,sans-serif;color:#000;font-size:large;line-height:24px;margin-bottom:30px !important;">Hello <b style="color:#666;text-transform:capitalize;color:#5C842E;font-size:Large">Sir/Madam</b>,</p>
 
-                                                                                        <p style="font-family:Verdana,sans-serif;color:#000;font-size:16px;line-height:24px">In line with our licence application process, your organization is hereby invited to make a presentation to LSLB on your proposed gaming operations in Lagos State. The meeting is scheduled as follows:
-                                                                                            <table>
-                                                                                        <tr>
-                                                                                            <td>Meeting Title</td>
-                                                                                            <td>:</td>
-                                                                                            <td>[[${meetingSubject}]]</td>
-                                                                                        </tr>
-
-                                                                                        <tr>
-                                                                                            <td>Meeting Date</td>
-                                                                                            <td>:</td>
-                                                                                            <td>[[${meetingDate}]]</td>
-                                                                                        </tr>
-                                                                                        <tr>
-                                                                                            <td>Meeting Venue</td>
-                                                                                            <td>:</td>
-                                                                                            <td>[[${meetingVenue}]]</td>
-                                                                                        </tr>
-                                                                                        <tr>
-                                                                                            <td>Additional Notes</td>
-                                                                                            <td>:</td>
-                                                                                            <td>[[${meetingDescription}]]</td>
-                                                                                        </tr>
-                                                                                    </table>
-																						<p style="font-family:Verdana,sans-serif;color:#000;font-size:16px;line-height:24px">Regards,</p>
+                                                                                        <p style="font-family:Verdana,sans-serif;color:#000;font-size:16px;line-height:24px">[[${description}]]</p>
+                                                                                        <br /><br />
+                                                                                        <p align= "center" style="font-family:Verdana,sans-serif;color:#000;font-size:16px;line-height:24px"><a href="CallbackUrl" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; font-size: 100%; line-height: 2; color: #ffffff; border-radius: 25px; display: inline-block; cursor: pointer; font-weight: bold; text-decoration: none; background-color:#99cc33; margin: 0; padding: 0; border-color: #99cc33; border-style: solid; border-width: 10px 20px;">Continue To AIP Document Page</a></p>
+                                                                                        <br /><br />
+																						<p style="font-family:Verdana,sans-serif;color:#000;font-size:16px;line-height:24px">Regards</p>
 																						<p style="font-family:Verdana,sans-serif;color:#000;font-size:16px;line-height:24px">The LSLB CMS Team.</p>
                                                                                     </td>
                                                                                 </tr>

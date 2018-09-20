@@ -18,6 +18,7 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -45,9 +46,10 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Autowired
     private AuthInfoServiceImpl authInfoService;
-
-
-
+    @Value("${ui-url}")
+    String baseUrl;
+    @Value("${email-username}")
+    String adminEmail;
     @Override
     public Mono<ResponseEntity> findAllLicense(int page,
                                                int pageSize,
@@ -403,6 +405,16 @@ public class LicenseServiceImpl implements LicenseService {
             }
             license.setLicenseStatusId(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID);
             mongoRepositoryReactive.saveOrUpdate(license);
+            NotificationDto notificationDto = new NotificationDto();
+            notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
+            notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
+            notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName()+",  have uploaded "+
+            notificationDto.getGameType()+" AIP Documents.");
+            notificationDto.setTemplate("AIPUpdate");
+            notificationDto.setCallBackUrl(baseUrl+"/all-aips");
+            notificationDto.setInstitutionEmail(adminEmail);
+            sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
+
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
 
         } catch (Exception ex) {
@@ -448,6 +460,16 @@ public class LicenseServiceImpl implements LicenseService {
            
             license.setLicenseStatusId(LicenseStatusReferenceData.RENEWAL_LICENSE_IN_REVIEW);
             mongoRepositoryReactive.saveOrUpdate(license);
+
+            NotificationDto notificationDto = new NotificationDto();
+            notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
+            notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
+            notificationDto.setTemplate("LicenseUpdate");
+            notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName()+",  have submitted renewal application and uploaded the requested documents for "+
+            notificationDto.getGameType());
+            notificationDto.setInstitutionEmail(adminEmail);
+            sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
+
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.BAD_REQUEST));
          }catch(Exception ex){
             return Mono.just(new ResponseEntity<>("Error while moving to renewal license in review", HttpStatus.BAD_REQUEST));
@@ -508,6 +530,7 @@ public class LicenseServiceImpl implements LicenseService {
             NotificationDto notificationDto = new NotificationDto();
             notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
             notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
+            notificationDto.setTemplate("LicenseUpdate");
             notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName()+",  License for "+
             notificationDto.getGameType()+" have been approved.\n License Number is: "+licenseNumber);
 

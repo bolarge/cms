@@ -82,3 +82,4 @@ email-host: smtp.gmail.com
 email-username: lslbcms@gmail.com
 email-password: password@123456
 email-port: 587
+ui-url: http://lslbcms.test.vggdev.com/all-aips

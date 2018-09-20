@@ -33,7 +33,7 @@ public class Scheduler {
     @Autowired
     ExpirationList expirationList;
 
-    @Value("email-username")
+    @Value("${email-username}")
     String adminEmail;
     private static final Logger logger = LoggerFactory.getLogger(PaymentRecordServiceImpl.class);
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
@@ -94,14 +94,14 @@ public class Scheduler {
                     notificationDto.setMachineNumber(gamingMachine.getMachineNumber());
 
                 }
-
+                notificationDto.setTemplate("LicenseUpdate");
                 notificationDtos.add(notificationDto);
             }
             sendEmailNotification(notificationDtos,"expiring");
         }
 
     }
-    //@Scheduled(cron = "5 8 * * 1")
+    @Scheduled(cron = "0 0 4 * * ?")
     protected void checkForAIPCloseToExpirations(){
 
         logger.info("checkForAIPCloseToExpirations");
@@ -137,6 +137,7 @@ public class Scheduler {
                         Institution.class).block();
                 notificationDto.setInstitutionName(institution.getInstitutionName());
                 notificationDto.setInstitutionEmail(institution.getEmailAddress());
+                notificationDto.setTemplate("LicenseUpdate");
                 notificationDtos.add(notificationDto);
             }
             sendEmailNotification(notificationDtos,"AIPExpiring");
@@ -180,7 +181,7 @@ public class Scheduler {
 
             model.put("gameType", notificationDto.getGameType());
             model.put("date", LocalDate.now().toString("dd-MM-YYYY"));
-            String content = mailContentBuilderService.build(model, "LicenseExpiration");
+            String content = mailContentBuilderService.build(model, notificationDto.getTemplate());
 
            if((type=="AIPExpired")||(type=="AIPExpiring")){
                emailService.sendEmail(content,"AIP Expiration Notification", "elohor.evwrujae@venturegardengroup.com");
@@ -236,6 +237,7 @@ public class Scheduler {
                     notificationDto.setMachineNumber(gamingMachine.getMachineNumber());
 
                 }
+                notificationDto.setTemplate("LicenseUpdate");
                 notificationDtos.add(notificationDto);
 
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
@@ -281,6 +283,7 @@ public class Scheduler {
                         Institution.class).block();
                 notificationDto.setInstitutionName(institution.getInstitutionName());
                 notificationDto.setInstitutionEmail(institution.getEmailAddress());
+                notificationDto.setTemplate("LicenseUpdate");
                 notificationDtos.add(notificationDto);
 
                 license.setLicenseStatusId("01");
