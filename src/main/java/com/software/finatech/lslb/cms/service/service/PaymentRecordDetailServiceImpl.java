@@ -456,23 +456,20 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         String gameTypeId = fee.getGameTypeId();
         String revenueNameId = fee.getRevenueNameId();
         if (paymentRecordDetailCreateDto.isAgentPayment()) {
-            AgentInstitution agentInstitution = paymentRecordDetailCreateDto.getAgentInstitution();
-            if (agentInstitution == null) {
-                return Mono.just(new ResponseEntity<>("Agent institution cannot be null for agent payment", HttpStatus.BAD_REQUEST));
-            }
-            institutionId = agentInstitution.getInstitutionId();
-            gameTypeId = agentInstitution.getGameTypeId();
+            gameTypeId = fee.getGameTypeId();
         }
         boolean licensePaymentExist = licensePaymentRecordExists(revenueNameId, gameTypeId, gamingMachineId, agentId, institutionId);
         if (licensePaymentExist) {
             return Mono.just(new ResponseEntity<>("Payment for licence for category already exists, Licence Renewal payment is what is applicable", HttpStatus.BAD_REQUEST));
         }
 
-        boolean institutionHasApprovedForm = applicationFormService.institutionHasCompletedApplicationForGameType(institutionId, gameTypeId);
-        if (!institutionHasApprovedForm) {
-            String gameTypeName = fee.getGameTypeName();
-            String errorMsg = String.format("You do not have an approved application form for category %s, please create an application in category %s and make sure it is approved before paying for licence", gameTypeName, gameTypeName);
-            return Mono.just(new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST));
+        if (paymentRecordDetailCreateDto.isInstitutionPayment()) {
+            boolean institutionHasApprovedForm = applicationFormService.institutionHasCompletedApplicationForGameType(institutionId, gameTypeId);
+            if (!institutionHasApprovedForm) {
+                String gameTypeName = fee.getGameTypeName();
+                String errorMsg = String.format("You do not have an approved application form for category %s, please create an application in category %s and make sure it is approved before paying for licence", gameTypeName, gameTypeName);
+                return Mono.just(new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST));
+            }
         }
         return null;
     }

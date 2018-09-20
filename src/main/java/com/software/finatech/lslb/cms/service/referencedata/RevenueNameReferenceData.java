@@ -28,7 +28,7 @@ public class RevenueNameReferenceData {
             revenueName2 = new RevenueName();
             revenueName2.setId(GAMING_MACHINE_ID);
         }
-        revenueName2.setName("GAMING");
+        revenueName2.setName("GAMING MACHINE");
 
         mongoRepositoryReactive.saveOrUpdate(revenueName);
         mongoRepositoryReactive.saveOrUpdate(revenueName1);
