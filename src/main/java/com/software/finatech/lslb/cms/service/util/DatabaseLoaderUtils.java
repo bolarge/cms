@@ -59,7 +59,6 @@ public class DatabaseLoaderUtils {
         LSLBAuthRoleReferenceData.load(mongoRepositoryReactive);
         GameTypeReferenceData.load(mongoRepositoryReactive);
         ApplicationFormStatusReferenceData.load(mongoRepositoryReactive);
-        ApplicationFromTypeReferenceData.load(mongoRepositoryReactive);
         PaymentStatusReferenceData.load(mongoRepositoryReactive);
         LicenseStatusReferenceData.load(mongoRepositoryReactive);
         FeePaymentTypeReferenceData.load(mongoRepositoryReactive);
@@ -92,7 +91,6 @@ public class DatabaseLoaderUtils {
         factEnums.put("GameType", GameType.class);
         factEnums.put("ApplicationFormStatus", ApplicationFormStatus.class);
         factEnums.put("LicenseStatus", LicenseStatus.class);
-        factEnums.put("ApplicationFormType", ApplicationFormType.class);
         factEnums.put("PaymentStatus", PaymentStatus.class);
         factEnums.put("FeePaymentType", FeePaymentType.class);
         factEnums.put("ScheduledMeetingStatus", ScheduledMeetingStatus.class);
