@@ -94,7 +94,7 @@ public class PaymentEmailNotifierAsync {
             HashMap<String, Object> model = new HashMap<>();
             String presentDateString = DateTime.now().toString("dd-MM-yyyy");
             String feePaymentTypeName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getFeePaymentTypeName());
-            String amount = "₦" + NumberFormat.getInstance().format(paymentRecordDetail.getAmount());
+            String amount = NumberFormat.getInstance().format(paymentRecordDetail.getAmount());
             String modeOfPaymentName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecordDetail.getModeOfPaymentName());
             String revenueName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getRevenueNameName());
             String gameTypeName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getGameTypeName());
