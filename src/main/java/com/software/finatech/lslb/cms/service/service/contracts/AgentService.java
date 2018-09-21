@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.service.contracts;
 
 import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.dto.AgentCreateDto;
+import com.software.finatech.lslb.cms.service.dto.AgentInstitutionCreateDto;
 import com.software.finatech.lslb.cms.service.dto.AgentUpdateDto;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
@@ -28,4 +29,6 @@ public interface AgentService {
     List<Agent> getAllUncreatedOnVGPay();
 
     void saveAgent(Agent agent);
+
+    Mono<ResponseEntity> createAgentUnderInstitution(AgentInstitutionCreateDto agentInstitutionCreateDto);
 }

@@ -1,18 +1,19 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.software.finatech.lslb.cms.service.controller.AuthInfoController;
 import com.software.finatech.lslb.cms.service.domain.Agent;
+import com.software.finatech.lslb.cms.service.domain.AgentApprovalRequest;
 import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
 import com.software.finatech.lslb.cms.service.dto.AgentCreateDto;
 import com.software.finatech.lslb.cms.service.dto.AgentDto;
+import com.software.finatech.lslb.cms.service.dto.AgentInstitutionCreateDto;
 import com.software.finatech.lslb.cms.service.dto.AgentUpdateDto;
-import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.AgentApprovalRequestTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.LicenseValidatorUtil;
-import com.software.finatech.lslb.cms.service.util.async_helpers.CustomerCodeCreatorAsync;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AgentUserCreatorAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -39,24 +40,22 @@ import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logA
 public class AgentServiceImpl implements AgentService {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private AuthInfoService authInfoService;
-    private AuthInfoController authInfoController;
     private LicenseValidatorUtil licenseValidatorUtil;
-    private CustomerCodeCreatorAsync customerCodeCreatorAsync;
+    private AgentUserCreatorAsync agentUserCreatorAsync;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static final Logger logger = LoggerFactory.getLogger(AgentServiceImpl.class);
 
+
     @Autowired
     public AgentServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
-                            LicenseValidatorUtil licenseValidatorUtil,
                             AuthInfoService authInfoService,
-                            AuthInfoController authInfoController,
-                            CustomerCodeCreatorAsync customerCodeCreatorAsync) {
+                            LicenseValidatorUtil licenseValidatorUtil,
+                            AgentUserCreatorAsync agentUserCreatorAsync) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.authInfoService = authInfoService;
-        this.authInfoController = authInfoController;
         this.licenseValidatorUtil = licenseValidatorUtil;
-        this.customerCodeCreatorAsync = customerCodeCreatorAsync;
+        this.agentUserCreatorAsync = agentUserCreatorAsync;
     }
 
     @Override
@@ -69,6 +68,7 @@ public class AgentServiceImpl implements AgentService {
                                               HttpServletResponse httpServletResponse) {
         try {
             Query query = new Query();
+            query.addCriteria(Criteria.where("enabled").is(true));
             if (!StringUtils.isEmpty(institutionIds)) {
                 List<String> institutionIdList = Arrays.asList(institutionIds.split(","));
                 query.addCriteria(Criteria.where("institutionIds").in(institutionIdList));
@@ -120,17 +120,26 @@ public class AgentServiceImpl implements AgentService {
             }
             Agent agent = fromCreateAgentDto(agentCreateDto);
             saveAgent(agent);
-
-            AuthInfoCreateDto agentUserCreateDto = createAuthInfoDtoFromAgent(agent);
-            authInfoService.createAuthInfo(agentUserCreateDto, authInfoController.getAppHostPort()).block();
-            customerCodeCreatorAsync.createVigipayCustomerCodeForAgent(agent);
-            return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
+            AgentApprovalRequest agentApprovalRequest = fromAgentCreateDto(agentCreateDto, agent);
+            mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
+            return Mono.just(new ResponseEntity<>("Your request has been submitted for approval", HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format for date of birth , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
             return logAndReturnError(logger, "an error occurred when creating agent", e);
         }
 
+    }
+
+    private AgentApprovalRequest fromAgentCreateDto(AgentCreateDto agentCreateDto, Agent agent) {
+        AgentApprovalRequest agentApprovalRequest = new AgentApprovalRequest();
+        agentApprovalRequest.setId(UUID.randomUUID().toString());
+        agentApprovalRequest.setAgentId(agent.getId());
+        agentApprovalRequest.setGameTypeId(agentCreateDto.getGameTypeId());
+        agentApprovalRequest.setInstitutionId(agentCreateDto.getInstitutionId());
+        agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+        agentApprovalRequest.setAgentApprovalRequestTypeId(AgentApprovalRequestTypeReferenceData.CREATE_AGENT_ID);
+        return agentApprovalRequest;
     }
 
 
@@ -157,11 +166,6 @@ public class AgentServiceImpl implements AgentService {
                 }
             }
 
-            Mono<ResponseEntity> validateAgentInstitutions = validateAgentInstitutions(agentUpdateDto.getAgentInstitutions());
-            if (validateAgentInstitutions != null) {
-                return validateAgentInstitutions;
-            }
-
             DateTime dateOfBirth = FORMATTER.parseDateTime(agentUpdateDto.getDateOfBirth());
             agent.setDateOfBirth(dateOfBirth);
             agent.setResidentialAddress(agentUpdateDto.getResidentialAddress());
@@ -182,13 +186,54 @@ public class AgentServiceImpl implements AgentService {
             }
             agent.setGameTypeIds(gameTypeIds);
             agent.setInstitutionIds(institutionIds);
-            agent.setAgentInstitutions(agentUpdateDto.getAgentInstitutions());
+            //  agent.setAgentInstitutions(agentUpdateDto.getAgentInstitutions());
             saveAgent(agent);
             return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while updating agent", e);
         }
     }
+
+    @Override
+    public Mono<ResponseEntity> createAgentUnderInstitution(AgentInstitutionCreateDto agentInstitutionCreateDto) {
+        try {
+            String institutionId = agentInstitutionCreateDto.getInstitutionId();
+            String gameTypeId = agentInstitutionCreateDto.getGameTypeId();
+
+            //TODO: MAKE SURE VALIDATION IS MADE FOR INSTITUTION LICENSE AND GAME TYPE
+//            Mono<ResponseEntity> validateInstitutionLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
+//            if (validateInstitutionLicenseResponse != null) {
+//                return validateInstitutionLicenseResponse;
+//            }
+
+            Query query = new Query();
+            query.addCriteria(Criteria.where("emailAddress").is(agentInstitutionCreateDto.getAgentEmailAddress()));
+            query.addCriteria(Criteria.where("enabled").is(true));
+            Agent agentWithEmail = (Agent) mongoRepositoryReactive.find(query, Agent.class).block();
+            if (agentWithEmail == null) {
+                return Mono.just(new ResponseEntity<>("Agent does not exist, please create agent with full details", HttpStatus.NOT_FOUND));
+            }
+
+            AgentApprovalRequest agentApprovalRequest = fromAgentInstitutionCreate(agentInstitutionCreateDto, agentWithEmail);
+            mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
+            return Mono.just(new ResponseEntity<>("Agent creation has been submitted for approval", HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while trying to create agent under institution", e);
+        }
+    }
+
+    private AgentApprovalRequest fromAgentInstitutionCreate(AgentInstitutionCreateDto agentInstitutionCreateDto, Agent agent) {
+        AgentApprovalRequest agentApprovalRequest = new AgentApprovalRequest();
+        agentApprovalRequest.setId(UUID.randomUUID().toString());
+        agentApprovalRequest.setInstitutionId(agentInstitutionCreateDto.getInstitutionId());
+        agentApprovalRequest.setAgentId(agent.getId());
+        agentApprovalRequest.setGameTypeId(agentInstitutionCreateDto.getGameTypeId());
+        agentApprovalRequest.setBusinessAddressList(agentInstitutionCreateDto.getBusinessAddressList());
+        agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+        agentApprovalRequest.setAgentApprovalRequestTypeId(AgentApprovalRequestTypeReferenceData.ADD_INSTITUTION_TO_AGENT_ID);
+        return agentApprovalRequest;
+    }
+
 
     @Override
     public void saveAgent(Agent agent) {
@@ -211,36 +256,18 @@ public class AgentServiceImpl implements AgentService {
         if (agent != null) {
             return Mono.just(new ResponseEntity<>(String.format("An agent already exist with the email address %s", email), HttpStatus.BAD_REQUEST));
         }
-        //for all the agent institutions , check if the institution has a valid license for the gameType
-        Mono<ResponseEntity> validateAgentInstitutionsResponse = validateAgentInstitutions(agentCreateDto.getAgentInstitutions());
-        if (validateAgentInstitutionsResponse != null) {
-            return validateAgentInstitutionsResponse;
-        }
+        //TODO: VALIDATE THE INSTITUTION CREATING AN AGENT IF IT HAS LICENCE FOR THE CATEGORY
+//        Mono<ResponseEntity> validateLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(agentCreateDto.getInstitutionId(), agentCreateDto.getGameTypeId());
+//        if (validateLicenseResponse != null) {
+//            return validateLicenseResponse;
+//        }
 
-        return null;
-    }
-
-
-    /**
-     * checks if the institution-andg-gametypes to be attached to an agent are valid
-     *
-     * @param agentInstitutions
-     * @return
-     */
-    private Mono<ResponseEntity> validateAgentInstitutions(Set<AgentInstitution> agentInstitutions) {
-        for (AgentInstitution agentInstitution : agentInstitutions) {
-            String institutionId = agentInstitution.getInstitutionId();
-            String gameTypeId = agentInstitution.getGameTypeId();
-            //         Mono<ResponseEntity> validateLicenseResponse = licenseValidatorUtil.validateInstitutionGameTypeLicenseConfirmed(institutionId, gameTypeId);
-            Mono<ResponseEntity> validateLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
-            if (validateLicenseResponse != null) {
-                return validateLicenseResponse;
-            }
-        }
         return null;
     }
 
     private Agent fromCreateAgentDto(AgentCreateDto agentCreateDto) {
+        String gameTypeId = agentCreateDto.getGameTypeId();
+        String institutionId = agentCreateDto.getInstitutionId();
         Agent agent = new Agent();
         agent.setId(UUID.randomUUID().toString());
         agent.setFirstName(agentCreateDto.getFirstName());
@@ -252,30 +279,23 @@ public class AgentServiceImpl implements AgentService {
         agent.setMeansOfId(agentCreateDto.getMeansOfId());
         agent.setIdNumber(agentCreateDto.getIdNumber());
         agent.setResidentialAddress(agentCreateDto.getResidentialAddress());
-        agent.setBusinessAddresses(agentCreateDto.getBusinessAddresses());
         DateTime dateOfBirth = FORMATTER.parseDateTime(agentCreateDto.getDateOfBirth());
         agent.setDateOfBirth(dateOfBirth);
         Set<String> gameTypeIds = new HashSet<>();
         Set<String> institutionIds = new HashSet<>();
-        for (AgentInstitution agentInstitution : agentCreateDto.getAgentInstitutions()) {
-            gameTypeIds.add(agentInstitution.getGameTypeId());
-            institutionIds.add(agentInstitution.getInstitutionId());
-        }
+        AgentInstitution agentInstitution = new AgentInstitution();
+        gameTypeIds.add(gameTypeId);
+        institutionIds.add(institutionId);
+        agentInstitution.setBusinessAddressList(agentCreateDto.getBusinessAddressList());
+        agentInstitution.setGameTypeId(gameTypeId);
+        agentInstitution.setInstitutionId(institutionId);
+        List<AgentInstitution> agentInstitutions = new ArrayList<>();
+        agentInstitutions.add(agentInstitution);
+        agent.setEnabled(false);
         agent.setGameTypeIds(gameTypeIds);
         agent.setInstitutionIds(institutionIds);
-        agent.setAgentInstitutions(agentCreateDto.getAgentInstitutions());
+        agent.setAgentInstitutions(agentInstitutions);
         return agent;
-    }
-
-    private AuthInfoCreateDto createAuthInfoDtoFromAgent(Agent agent) {
-        AuthInfoCreateDto authInfoCreateDto = new AuthInfoCreateDto();
-        authInfoCreateDto.setAuthRoleId(LSLBAuthRoleReferenceData.AGENT_ROLE_ID);
-        authInfoCreateDto.setEmailAddress(agent.getEmailAddress());
-        authInfoCreateDto.setPhoneNumber(agent.getPhoneNumber());
-        authInfoCreateDto.setFirstName(agent.getFirstName());
-        authInfoCreateDto.setLastName(agent.getLastName());
-        authInfoCreateDto.setAgentId(agent.getId());
-        return authInfoCreateDto;
     }
 
     @Override
