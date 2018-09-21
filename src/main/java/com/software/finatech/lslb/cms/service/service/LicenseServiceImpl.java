@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferen
 import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.ExpirationList;
+import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.SendEmail;
 import org.apache.commons.lang3.StringUtils;
@@ -46,10 +47,10 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Autowired
     private AuthInfoServiceImpl authInfoService;
-    @Value("${ui-url}")
-    String baseUrl;
     @Value("${email-username}")
     String adminEmail;
+    @Autowired
+    private FrontEndPropertyHelper frontEndPropertyHelper;
     @Override
     public Mono<ResponseEntity> findAllLicense(int page,
                                                int pageSize,
@@ -408,10 +409,10 @@ public class LicenseServiceImpl implements LicenseService {
             NotificationDto notificationDto = new NotificationDto();
             notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
             notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
-            notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName()+",  have uploaded "+
+            notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName()+",  has uploaded "+
             notificationDto.getGameType()+" AIP Documents.");
             notificationDto.setTemplate("AIPUpdate");
-            notificationDto.setCallBackUrl(baseUrl+"/all-aips");
+            notificationDto.setCallBackUrl(frontEndPropertyHelper.getFrontEndUrl()+"/all-aips");
             notificationDto.setInstitutionEmail(adminEmail);
             sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
 
@@ -465,7 +466,7 @@ public class LicenseServiceImpl implements LicenseService {
             notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
             notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
             notificationDto.setTemplate("LicenseUpdate");
-            notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName()+",  have submitted renewal application and uploaded the requested documents for "+
+            notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName()+",  has submitted renewal application and uploaded the requested documents for "+
             notificationDto.getGameType());
             notificationDto.setInstitutionEmail(adminEmail);
             sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
@@ -532,7 +533,7 @@ public class LicenseServiceImpl implements LicenseService {
             notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
             notificationDto.setTemplate("LicenseUpdate");
             notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName()+",  License for "+
-            notificationDto.getGameType()+" have been approved.\n License Number is: "+licenseNumber);
+            notificationDto.getGameType()+" has been approved.\n License Number is: "+licenseNumber);
 
             ArrayList<AuthInfo>  authInfos=authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
             for(AuthInfo authInfo : authInfos){

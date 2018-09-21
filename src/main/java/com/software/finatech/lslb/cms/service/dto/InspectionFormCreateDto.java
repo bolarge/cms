@@ -1,12 +1,6 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import com.software.finatech.lslb.cms.service.domain.*;
-import com.software.finatech.lslb.cms.service.util.Mapstore;
-import org.joda.time.LocalDate;
-import org.springframework.data.mongodb.core.mapping.Document;
-
 import javax.validation.constraints.NotEmpty;
-import java.util.Map;
 
 
 public class InspectionFormCreateDto {

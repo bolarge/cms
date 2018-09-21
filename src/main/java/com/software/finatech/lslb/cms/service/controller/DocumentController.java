@@ -1,6 +1,9 @@
 package com.software.finatech.lslb.cms.service.controller;
 
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.Document;
+import com.software.finatech.lslb.cms.service.domain.DocumentPurpose;
+import com.software.finatech.lslb.cms.service.domain.DocumentType;
+import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeReferenceData;
@@ -93,10 +96,13 @@ public class DocumentController extends BaseController {
                             queryPreviousDocuments.addCriteria(Criteria.where("gameTypeId").is(documentDto.getGameTypeId()));
                             queryPreviousDocuments.addCriteria(Criteria.where("documentTypeId").is(documentDto.getDocumentTypeId()));
                             Document previousDocument = (Document) mongoRepositoryReactive.find(queryPreviousDocuments, Document.class).block();
-                            previousDocument.setArchive(true);
-                            previousDocument.setCurrent(false);
-                            //mongoRepositoryReactive.saveOrUpdate(previousDocument);
-                            documents.add(previousDocument);
+                           if(previousDocument!=null){
+                               previousDocument.setArchive(true);
+                               previousDocument.setCurrent(false);
+                               //mongoRepositoryReactive.saveOrUpdate(previousDocument);
+                               mongoRepositoryReactive.saveOrUpdate(previousDocument);
+                           }
+
                         }
                         document.setDescription(documentDto.getDescription());
                         document.setDocumentTypeId(documentDto.getDocumentTypeId());

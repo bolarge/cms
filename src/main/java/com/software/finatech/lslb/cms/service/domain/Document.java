@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.types.Binary;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.springframework.data.annotation.Transient;
 
 
