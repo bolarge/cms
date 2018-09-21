@@ -10,6 +10,7 @@ import com.software.finatech.lslb.cms.service.model.otherInformation.ApplicantOt
 import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantOutletInformation;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Map;
@@ -36,6 +37,15 @@ public class ApplicationForm extends AbstractFact {
     protected ApplicantContactDetails applicantContactDetails;
     protected LslbAdminComment lslbAdminComment;
     protected String reasonForRejection;
+    protected LocalDate submissionDate;
+
+    public LocalDate getSubmissionDate() {
+        return submissionDate;
+    }
+
+    public void setSubmissionDate(LocalDate submissionDate) {
+        this.submissionDate = submissionDate;
+    }
 
     public String getReasonForRejection() {
         return reasonForRejection;

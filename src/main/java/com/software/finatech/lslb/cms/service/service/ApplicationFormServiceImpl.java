@@ -18,6 +18,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import com.software.finatech.lslb.cms.service.util.async_helpers.ApplicationFormNotificationHelperAsync;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -491,6 +492,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             }
             String inReviewApplicationFormStatusId = ApplicationFormStatusReferenceData.IN_REVIEW_STATUS_ID;
             applicationForm.setApplicationFormStatusId(inReviewApplicationFormStatusId);
+            applicationForm.setSubmissionDate(LocalDate.now());
             saveApplicationForm(applicationForm);
 
             applicationFormNotificationHelperAsync.sendApplicationFormSubmissionMailToLSLBAdmins(applicationForm);

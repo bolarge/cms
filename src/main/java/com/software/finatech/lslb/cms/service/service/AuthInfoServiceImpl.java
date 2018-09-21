@@ -10,6 +10,8 @@ import com.software.finatech.lslb.cms.service.dto.sso.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
+import com.software.finatech.lslb.cms.service.service.contracts.AuthRoleService;
+import com.software.finatech.lslb.cms.service.util.async_helpers.NewUserEmailNotifierAsync;
 import io.advantageous.boon.json.JsonFactory;
 import io.advantageous.boon.json.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -62,6 +64,8 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
     @Autowired
     private MailContentBuilderService mailContentBuilderService;
+    @Autowired
+    private NewUserEmailNotifierAsync newUserEmailNotifierAsync;
 
     @Autowired
     private EmailService emailService;
@@ -87,6 +91,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 return validateCreateAuthInfo;
             }
         }
+
         AuthInfo authInfo = new AuthInfo();
         authInfo.setId(UUID.randomUUID().toString());
         authInfo.setEnabled(false);
@@ -510,7 +515,11 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
             mongoRepositoryReactive.saveOrUpdate(verificationToken);
 
-            return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
+            if (authRole.isSSOClientAdmin()) {
+                newUserEmailNotifierAsync.sendNewSSOClientAdminNotificationToVGGAdmins(authInfo);
+                return Mono.just(new ResponseEntity<>("User created successfully,\n please contact your admin for SSO clearance", HttpStatus.OK));
+            }
+            return Mono.just(new ResponseEntity<>("User created successfully", HttpStatus.OK));
 
         } catch (Throwable e) {
             String errorMsg = "An error occurred while completing user creation";
@@ -611,7 +620,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             if (authInfoListWithGamingOperatorLimitedRoles.size() >= maxNumberOfGamingOperatorUsers) {
                 return Mono.just(new ResponseEntity<>("Number of users for gaming operator exceeded", HttpStatus.BAD_REQUEST));
             }
-        }else {
+        } else {
             return Mono.just(new ResponseEntity<>("Role specified cannot be used to create an institution user", HttpStatus.BAD_REQUEST));
         }
 
