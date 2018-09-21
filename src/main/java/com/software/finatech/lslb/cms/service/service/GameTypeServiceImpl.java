@@ -6,7 +6,6 @@ import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
-import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

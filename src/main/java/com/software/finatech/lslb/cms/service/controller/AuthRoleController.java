@@ -4,7 +4,6 @@ import com.software.finatech.lslb.cms.service.domain.AuthPermission;
 import com.software.finatech.lslb.cms.service.domain.AuthRole;
 import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.dto.*;
-import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

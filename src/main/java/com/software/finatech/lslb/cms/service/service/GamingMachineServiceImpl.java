@@ -8,7 +8,6 @@ import com.software.finatech.lslb.cms.service.dto.GamingMachineUpdateDto;
 import com.software.finatech.lslb.cms.service.dto.UploadTransactionResponse;
 import com.software.finatech.lslb.cms.service.model.GamingMachineGameDetails;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.GameTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.GamingMachineService;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;

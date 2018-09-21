@@ -2,20 +2,14 @@ package com.software.finatech.lslb.cms.service.util;
 
 import com.software.finatech.lslb.cms.service.domain.GameType;
 import com.software.finatech.lslb.cms.service.domain.Institution;
-import com.software.finatech.lslb.cms.service.dto.LicenseDto;
-import com.software.finatech.lslb.cms.service.dto.LicenseStatusDto;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 @Component
 public class LicenseValidatorUtil {

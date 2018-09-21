@@ -1,7 +1,5 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import com.software.finatech.lslb.cms.service.domain.RevenueName;
-
 public class FeeDto {
     protected double amount;
  //   protected GameTypeDto gameType;

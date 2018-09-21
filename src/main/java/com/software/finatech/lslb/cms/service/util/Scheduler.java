@@ -4,7 +4,6 @@ import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.NotificationDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.PaymentRecordServiceImpl;
@@ -19,7 +18,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class Scheduler {
@@ -174,9 +176,9 @@ public class Scheduler {
 
                 }
                 }else if(type=="AIPExpired"){
-                model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType()+" AIP has expired");
+                model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType()+" AIP period has ended");
             }else if(type=="AIPExpiring"){
-                model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType()+" AIP is due to expire on "+notificationDto.getEndDate());
+                model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType()+" AIP period is due to end on "+notificationDto.getEndDate());
             }
 
             model.put("gameType", notificationDto.getGameType());
@@ -184,7 +186,7 @@ public class Scheduler {
             String content = mailContentBuilderService.build(model, notificationDto.getTemplate());
 
            if((type=="AIPExpired")||(type=="AIPExpiring")){
-               emailService.sendEmail(content,"AIP Expiration Notification", "elohor.evwrujae@venturegardengroup.com");
+               emailService.sendEmail(content,"AIP Expiration Notification", adminEmail);
                emailService.sendEmail(content,"AIP Expiration Notification", notificationDto.getInstitutionEmail());
 
            }else{
@@ -192,7 +194,7 @@ public class Scheduler {
                    emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getAgentEmailAddress());
 
                }
-                   emailService.sendEmail(content, "Licence Expiration Notification", "elohor.evwrujae@venturegardengroup.com");
+                   emailService.sendEmail(content, "Licence Expiration Notification", adminEmail);
                    emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getInstitutionEmail());
 
            }
@@ -254,13 +256,12 @@ public class Scheduler {
         expirationList.getExpiredLicences(licenseStatuses);
 
     }
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 0 4 * * ?")
     protected void WithExpiredAIP(){
         ArrayList<String> licenseStatuses= new ArrayList<>();
         licenseStatuses.add(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
         licenseStatuses.add(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID);
-
-        List<License> licenses= expirationList.getExpiredLicences(licenseStatuses);
+         List<License> licenses= expirationList.getExpiredLicences(licenseStatuses);
         List<NotificationDto> notificationDtos= new ArrayList<>();
         if(licenses!=null){
             for(License license: licenses){

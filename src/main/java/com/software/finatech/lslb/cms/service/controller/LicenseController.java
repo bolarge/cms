@@ -2,8 +2,10 @@ package com.software.finatech.lslb.cms.service.controller;
 
 
 import com.software.finatech.lslb.cms.service.domain.License;
-import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
-import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.dto.AIPCheckDto;
+import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
+import com.software.finatech.lslb.cms.service.dto.LicenseDto;
+import com.software.finatech.lslb.cms.service.dto.LicenseUpdateAIPToLicenseDto;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,8 +20,6 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
 
 @Api(value = "License", description = "For everything related to gaming operators licenses", tags = "")
 @RestController
