@@ -176,6 +176,11 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             scheduledMeeting.setScheduledMeetingStatusId(canceledMeetingStatusId);
             scheduledMeeting.setCancelerId(cancelerId);
             saveScheduledMeeting(scheduledMeeting);
+
+            ArrayList<AuthInfo> gamingOperatorAdminsForInstitution = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(scheduledMeeting.getInstitutionId());
+            for (AuthInfo gamingOperatorAdmin : gamingOperatorAdminsForInstitution) {
+                sendMeetingNotificationEmailToAttendee("Update on Meeting Invite With Lagos State Lotteries Board", "schedule-meeting-cancel", gamingOperatorAdmin, scheduledMeeting);
+            }
             return Mono.just(new ResponseEntity<>(scheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while canceling the scheduled meeting", e);
@@ -278,7 +283,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                 gameTypeName = applicationForm.getGameTypeName();
             }
 
-            String meetingDateString = scheduledMeeting.getMeetingDate().toString("dd/MM/yyyy HH:mm:ss");
+            String meetingDateString = scheduledMeeting.getMeetingDate().toString("dd-MM-yyyy");
             String presentDateString = DateTime.now().toString("dd/MM/yyyy");
             String meetingTimeString = scheduledMeeting.getMeetingDate().toString("HH:mm:ss a");
             model.put("name", invitee.getFullName());

@@ -6,6 +6,9 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import java.util.Arrays;
 
 public class AuthRoleReferenceData {
+    public static  final String VGG_ADMIN_ID = "2";
+
+
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive){
         AuthRole role1 = (AuthRole) mongoRepositoryReactive.findById("1",AuthRole.class).block();
         if(role1==null){
@@ -18,10 +21,10 @@ public class AuthRoleReferenceData {
         role1.setSsoRoleMapping("vgg_superadmin");
         role1.getAuthPermissionIds().addAll(Arrays.asList("1","12","18"));
 
-        AuthRole role2 = (AuthRole) mongoRepositoryReactive.findById("2",AuthRole.class).block();
+        AuthRole role2 = (AuthRole) mongoRepositoryReactive.findById(VGG_ADMIN_ID,AuthRole.class).block();
         if(role2==null){
             role2 = new AuthRole();
-            role2.setId("2");
+            role2.setId(VGG_ADMIN_ID);
         }
         role2.setDescription("VGG ADMIN");
         role2.setName("VGG ADMIN");

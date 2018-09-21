@@ -18,7 +18,7 @@ public class LSLBAuthRoleReferenceData {
     public static final String AGENT_ROLE_ID = "13";
     public static final String APPLICANT_ROLE_ID = "14";
 
-    private static final String SSO_CLIENT_ADMIN = "clientadmin";
+    public static final String SSO_CLIENT_ADMIN = "clientadmin";
     private static final String SSO_CLIENT_USER = "clientuser";
 
 
