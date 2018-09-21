@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:mc="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:mc="http://www.w3.org/1999/xhtml">
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="format-detection" content="telephone=no" />
     <!-- disable auto telephone linking in iOS -->
-    <title>LSLB Email</title>
+    <title>Meeting Invitation</title>
     <style type="text/css">
         /* RESET STYLES */
         html {
@@ -527,16 +527,13 @@
                                                                                     you to edit certain row. It makes it easy for you to quickly edit row sections.
                                                                                     http://kb.mailchimp.com/templates/code/create-editable-content-areas-with-mailchimps-template-language
                                                                                 -->
-                                                                            <h3 mc:edit="header" style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;;margin-bottom:10px;">Dear <span th:text="${institutionName}"></span>,
+                                                                            <h3 mc:edit="header" style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;;margin-bottom:10px;">Dear
+                                                                                Sir/Madam,
                                                                             </h3>
                                                                             <div mc:edit="body" style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
-                                                                                Reference is made to your application received on <span th:text="${submissionDate}"></span> LSLB has duly considered your application for a <span th:text="${gameType}"></span> licence, however please be informed that your application has been declined for the following reasons:
-                                                                                <br/>
-                                                                                <span th:text="${rejectionReason}"></span>
-                                                                                <br/>
-                                                                                We wish you the best in your future endeavours.
-
-                                                                                Best regards,
+                                                                            Please be informed that your presentation with LSLB in line with your application for licence in category [[${gameType}]]
+                                                                                scheduled to hold on [[${meetingDate}]] at [[${venue}]]
+                                                                                has been canceled.
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -600,40 +597,6 @@
                                                                                                 <td valign="top" width="500" class="flexibleContainerCell">
 
                                                                                                     <!-- CONTENT TABLE // -->
-                                                                                                    <!--<table align="left" border="0" cellpadding="0" cellspacing="0" width="100%">-->
-                                                                                                    <!--<tr>-->
-                                                                                                    <!--<td align="left" valign="top" class="flexibleContainerBox">-->
-                                                                                                    <!--<table border="0" cellpadding="0" cellspacing="0" width="210" style="max-width: 100%;">-->
-                                                                                                    <!--<tr>-->
-                                                                                                    <!--<td align="left" class="textContent">-->
-                                                                                                    <!--<h3 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;">Date Of Meeting</h3>-->
-                                                                                                    <!--<div style="text-align:left;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#5F5F5F;line-height:135%;">-->
-                                                                                                    <!--[[${meetingDate}]]-->
-                                                                                                    <!--</div>-->
-                                                                                                    <!--</td>-->
-                                                                                                    <!--</tr>-->
-                                                                                                    <!--</table>-->
-                                                                                                    <!--</td>-->
-                                                                                                    <!--<td align="right" valign="top" class="flexibleContainerBox">-->
-                                                                                                    <!--<table class="flexibleContainerBoxNext" border="0" cellpadding="0" cellspacing="0" width="210" style="max-width: 100%;">-->
-                                                                                                    <!--<tr>-->
-                                                                                                    <!--<td align="left" class="textContent">-->
-                                                                                                    <!--<h3 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;">Venue-->
-                                                                                                    <!--Of Meeting</h3>-->
-                                                                                                    <!--<div style="text-align:left;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#5F5F5F;line-height:135%;">-->
-                                                                                                    <!--[[${venue}]]-->
-                                                                                                    <!--</div>-->
-                                                                                                    <!--</td>-->
-                                                                                                    <!--</tr>-->
-                                                                                                    <!--</table>-->
-                                                                                                    <!--</td>-->
-                                                                                                    <!--</tr>-->
-                                                                                                    <!--</table>-->
-                                                                                                    <!-- // CONTENT TABLE -->
-
-                                                                                                </td>
-                                                                                            </tr>
-                                                                                        </table>
                                                                                         <!-- // FLEXIBLE CONTAINER -->
                                                                                     </td>
                                                                                 </tr>
@@ -652,26 +615,6 @@
                                                                                         <table border="0" cellpadding="30" cellspacing="0" width="500" class="flexibleContainer">
                                                                                             <tr>
                                                                                                 <td valign="top" width="500" class="flexibleContainerCell">
-
-                                                                                                    <!-- CONTENT TABLE // -->
-                                                                                                    <!--<table align="left" border="0" cellpadding="0" cellspacing="0" width="100%">-->
-                                                                                                    <!--<tr>-->
-                                                                                                    <!--<td align="left" valign="top" class="flexibleContainerBox">-->
-                                                                                                    <!--<table border="0" cellpadding="0" cellspacing="0" width="210" style="max-width: 100%;">-->
-                                                                                                    <!--<tr>-->
-                                                                                                    <!--<td align="left" class="textContent">-->
-                                                                                                    <!--<h3 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;">Time Of Meeting</h3>-->
-                                                                                                    <!--<div style="text-align:left;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#5F5F5F;line-height:135%;">-->
-                                                                                                    <!--[[${time}]]-->
-                                                                                                    <!--</div>-->
-                                                                                                    <!--</td>-->
-                                                                                                    <!--</tr>-->
-                                                                                                    <!--</table>-->
-                                                                                                    <!--</td>-->
-                                                                                                    <!--</tr>-->
-                                                                                                    <!--</table>-->
-                                                                                                    <!-- // CONTENT TABLE -->
-
                                                                                                 </td>
                                                                                             </tr>
                                                                                         </table>

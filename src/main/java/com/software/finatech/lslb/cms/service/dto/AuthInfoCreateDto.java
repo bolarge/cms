@@ -20,7 +20,6 @@ public class AuthInfoCreateDto {
     protected String institutionId;
     private String agentId;
 
-
     public String getAgentId() {
         return agentId;
     }
