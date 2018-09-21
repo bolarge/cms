@@ -1,7 +1,5 @@
 package com.software.finatech.lslb.cms.service.referencedata;
 
-import com.software.finatech.lslb.cms.service.domain.FeePaymentType;
-import com.software.finatech.lslb.cms.service.domain.GamingMachine;
 import com.software.finatech.lslb.cms.service.domain.LicenseType;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 

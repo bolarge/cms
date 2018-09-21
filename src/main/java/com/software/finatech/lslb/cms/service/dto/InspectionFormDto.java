@@ -1,10 +1,5 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import com.software.finatech.lslb.cms.service.domain.*;
-import org.joda.time.LocalDate;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-
 public class InspectionFormDto {
     protected InstitutionDto institution;
     protected GameTypeDto gameType;
