@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferen
 import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.ExpirationList;
+import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.SendEmail;
 import org.apache.commons.lang3.StringUtils;
@@ -46,10 +47,10 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Autowired
     private AuthInfoServiceImpl authInfoService;
-    @Value("${ui-url}")
-    String baseUrl;
     @Value("${email-username}")
     String adminEmail;
+    @Autowired
+    private FrontEndPropertyHelper frontEndPropertyHelper;
     @Override
     public Mono<ResponseEntity> findAllLicense(int page,
                                                int pageSize,
@@ -411,7 +412,7 @@ public class LicenseServiceImpl implements LicenseService {
             notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName()+",  has uploaded "+
             notificationDto.getGameType()+" AIP Documents.");
             notificationDto.setTemplate("AIPUpdate");
-            notificationDto.setCallBackUrl(baseUrl+"/all-aips");
+            notificationDto.setCallBackUrl(frontEndPropertyHelper.getFrontEndUrl()+"/all-aips");
             notificationDto.setInstitutionEmail(adminEmail);
             sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
 
