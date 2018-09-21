@@ -168,6 +168,21 @@ public class LicenseController {
 
         }
     }
+    @RequestMapping(method = RequestMethod.GET, value = "/get-renewal-review-licenses", params = {"institutionId"})
+    @ApiOperation(value = "Get all Institution licenses In Renewal In Review", response = License.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllRenewalInReviews(@RequestParam("institutionId") String institutionId) {
+        try {
+            return licenseService.getLicensesInRenewalInReview(institutionId);
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
+
+        }
+    }
     @RequestMapping(method = RequestMethod.GET, value = "/get-institution-uploaded-aips", params = {"institutionId"})
     @ApiOperation(value = "Get all Institution Uploaded Document AIPs", response = AIPCheckDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
@@ -271,7 +286,7 @@ public class LicenseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getRenewalLicense(@RequestParam("institutionId") String institutionId,
+    public Mono<ResponseEntity> getSpecificLicense(@RequestParam("institutionId") String institutionId,
                                                                @RequestParam("gameTypeId") String gameTypeId,
                                                                @RequestParam("agentId") String agentId,
                                                                @RequestParam("gamingMachineId") String gamingMachineId,

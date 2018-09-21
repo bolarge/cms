@@ -315,6 +315,24 @@ public class LicenseServiceImpl implements LicenseService {
         });
         return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.BAD_REQUEST));
     }
+    @Override
+    public Mono<ResponseEntity> getLicensesInRenewalInReview(String institutionId) {
+        Query queryForLicensedInstitutionInGameType = new Query();
+        if(!StringUtils.isEmpty(institutionId)){
+            queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("institutionId").is(institutionId));
+        }
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.RENEWAL_LICENSE_IN_REVIEW));
+        List<License> licenses= (List<License>)mongoRepositoryReactive.findAll(queryForLicensedInstitutionInGameType, License.class).toStream().collect(Collectors.toList());
+        if (licenses.size() == 0) {
+            return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+        }
+        List<LicenseDto> licenseDtos = new ArrayList<>();
+        licenses.stream().forEach(license -> {
+            licenseDtos.add(license.convertToDto());
+        });
+        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.BAD_REQUEST));
+    }
 
     @Override
     public boolean institutionIsLicensedForGameType(String institutionId, String gameTypeId) {
