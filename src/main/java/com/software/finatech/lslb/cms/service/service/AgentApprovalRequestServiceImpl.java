@@ -289,6 +289,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
         mongoRepositoryReactive.saveOrUpdate(agent);
         agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
         agentApprovalRequest.setApproverId(userId);
+        mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
         agentUserCreatorAsync.createUserAndCustomerCodeForAgentAsync(agent);
     }
 

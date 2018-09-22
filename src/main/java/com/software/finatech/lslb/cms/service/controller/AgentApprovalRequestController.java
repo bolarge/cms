@@ -59,7 +59,7 @@ public class AgentApprovalRequestController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> createAgent(@RequestBody @Valid AgentApprovalRequestOperationtDto agentApprovalRequestOperationtDto) {
-        return agentApprovalRequestService.approvedRequest(agentApprovalRequestOperationtDto);
+        return agentApprovalRequestService.approveRequest(agentApprovalRequestOperationtDto);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/reject")
