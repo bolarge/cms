@@ -10,9 +10,13 @@ public class ApplicantDetails {
     private String shareCapital;
     private String emailAddress;
     private String phoneNumber;
+    private  boolean applicantHasPreviousName;
     private ApplicantPreviousName applicantPreviousName;
+    private boolean applicantHasPreviousApplication;
     private ApplicantPreviousApplication applicantPreviousApplication;
+    private boolean applicantHasMemberPreviousApplication;
     private ApplicantMemberPreviousApplication applicantMemberPreviousApplication;
+    private boolean applicantHasOutsideLagosStateLicense;
     private OutsideLagosStateLicense outsideLagosStateLicense;
     private String periodApplicantHasBeenInOperation;
     private boolean isApplicantMemberAffiliatedWithPoliticalParty;
@@ -23,6 +27,39 @@ public class ApplicantDetails {
     private String applicantMemberGamingExperienceDetails;
     private boolean isApplicantIndigenous;
     private String applicantIndigenousDetails;
+
+
+    public boolean isApplicantHasPreviousName() {
+        return applicantHasPreviousName;
+    }
+
+    public void setApplicantHasPreviousName(boolean applicantHasPreviousName) {
+        this.applicantHasPreviousName = applicantHasPreviousName;
+    }
+
+    public boolean isApplicantHasPreviousApplication() {
+        return applicantHasPreviousApplication;
+    }
+
+    public void setApplicantHasPreviousApplication(boolean applicantHasPreviousApplication) {
+        this.applicantHasPreviousApplication = applicantHasPreviousApplication;
+    }
+
+    public boolean isApplicantHasMemberPreviousApplication() {
+        return applicantHasMemberPreviousApplication;
+    }
+
+    public void setApplicantHasMemberPreviousApplication(boolean applicantHasMemberPreviousApplication) {
+        this.applicantHasMemberPreviousApplication = applicantHasMemberPreviousApplication;
+    }
+
+    public boolean isApplicantHasOutsideLagosStateLicense() {
+        return applicantHasOutsideLagosStateLicense;
+    }
+
+    public void setApplicantHasOutsideLagosStateLicense(boolean applicantHasOutsideLagosStateLicense) {
+        this.applicantHasOutsideLagosStateLicense = applicantHasOutsideLagosStateLicense;
+    }
 
     public String getApplicantName() {
         return applicantName;

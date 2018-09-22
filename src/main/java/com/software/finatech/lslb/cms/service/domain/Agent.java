@@ -8,9 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("serial")
 @Document(collection = "Agents")
@@ -22,7 +20,7 @@ public class Agent extends AbstractFact {
     protected String fullName;
     protected String emailAddress;
     protected String phoneNumber;
-    protected Set<AgentInstitution> agentInstitutions = new HashSet<>();
+    protected List<AgentInstitution> agentInstitutions = new ArrayList<>();
     protected DateTime dateOfBirth;
     protected String residentialAddress;
     protected Set<String> businessAddresses = new HashSet<>();
@@ -34,6 +32,24 @@ public class Agent extends AbstractFact {
     protected String vgPayCustomerCode;
     private String title;
     private String authInfoId;
+    private String agentId;
+    private boolean enabled;
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
 
     public String getAuthInfoId() {
         return authInfoId;
@@ -163,11 +179,11 @@ public class Agent extends AbstractFact {
         this.phoneNumber = phoneNumber;
     }
 
-    public Set<AgentInstitution> getAgentInstitutions() {
+    public List<AgentInstitution> getAgentInstitutions() {
         return agentInstitutions;
     }
 
-    public void setAgentInstitutions(Set<AgentInstitution> agentInstitutions) {
+    public void setAgentInstitutions(List<AgentInstitution> agentInstitutions) {
         this.agentInstitutions = agentInstitutions;
     }
 
@@ -182,11 +198,10 @@ public class Agent extends AbstractFact {
     public AgentDto convertToDto() {
         AgentDto agentDto = new AgentDto();
         if (getDateOfBirth() != null) {
-            agentDto.setDateOfBirth(getDateOfBirth().toString("dd/MM/yyyy"));
+            agentDto.setDateOfBirth(getDateOfBirth().toString("dd-MM-yyyy"));
         }
         agentDto.setEmailAddress(getEmailAddress());
         agentDto.setResidentialAddress(getResidentialAddress());
-        agentDto.setBusinessAddresses(getBusinessAddresses());
         agentDto.setFirstName(getFirstName());
         agentDto.setFullName(getFullName());
         agentDto.setLastName(getLastName());
@@ -198,13 +213,12 @@ public class Agent extends AbstractFact {
     }
 
 
-    private Set<AgentInstitutionDto> convertAgentInstitutions(Set<AgentInstitution> agentInstitutions) {
+    private Set<AgentInstitutionDto> convertAgentInstitutions(List<AgentInstitution> agentInstitutions) {
         Set<AgentInstitutionDto> agentInstitutionDtos = new HashSet<>();
         for (AgentInstitution agentInstitution : agentInstitutions) {
             AgentInstitutionDto agentInstitutionDto = new AgentInstitutionDto();
             GameType gameType = getGameType(agentInstitution.getGameTypeId());
             if (gameType != null) {
-                agentInstitutionDto.setGameTypeDescription(gameType.getDescription());
                 agentInstitutionDto.setGameTypeId(gameType.getId());
                 agentInstitutionDto.setGameTypeName(gameType.getName());
             }
@@ -214,6 +228,7 @@ public class Agent extends AbstractFact {
                 agentInstitutionDto.setInstitutionName(institution.getInstitutionName());
                 agentInstitutionDto.setInstitutionId(institution.getId());
             }
+            agentInstitutionDto.setBusinessAddressList(agentInstitution.getBusinessAddressList());
             agentInstitutionDtos.add(agentInstitutionDto);
         }
         return agentInstitutionDtos;
@@ -249,10 +264,10 @@ public class Agent extends AbstractFact {
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
 
-    public AuthInfo getAuthInfo(){
-        if(StringUtils.isEmpty(this.authInfoId)){
-            return  null;
+    public AuthInfo getAuthInfo() {
+        if (StringUtils.isEmpty(this.authInfoId)) {
+            return null;
         }
-        return (AuthInfo)mongoRepositoryReactive.findById(this.authInfoId,AuthInfo.class).block();
+        return (AuthInfo) mongoRepositoryReactive.findById(this.authInfoId, AuthInfo.class).block();
     }
 }

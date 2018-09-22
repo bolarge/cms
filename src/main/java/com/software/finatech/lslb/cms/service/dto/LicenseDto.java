@@ -15,10 +15,17 @@ public class LicenseDto {
     private String paymentRecordId;
     private String licenseNumber;
     private String institutionId;
-    private String institutionName;
     protected String agentId;
-    private String agentName;
     private double amountPaid;
+    private String ownerName;
+
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
 
     public double getAmountPaid() {
         return amountPaid;
@@ -34,22 +41,6 @@ public class LicenseDto {
 
     public void setInstitutionId(String institutionId) {
         this.institutionId = institutionId;
-    }
-
-    public String getInstitutionName() {
-        return institutionName;
-    }
-
-    public void setInstitutionName(String institutionName) {
-        this.institutionName = institutionName;
-    }
-
-    public String getAgentName() {
-        return agentName;
-    }
-
-    public void setAgentName(String agentName) {
-        this.agentName = agentName;
     }
 
     public String getLicenseNumber() {

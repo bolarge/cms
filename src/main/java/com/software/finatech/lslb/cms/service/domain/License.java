@@ -203,11 +203,11 @@ public class License extends AbstractFact {
         Agent agent = getAgent();
         if (agent != null) {
             licenseDto.setAgentId(getAgentId());
-            licenseDto.setAgentName(agent.getFullName());
+            licenseDto.setOwnerName(agent.getFullName());
         }
         Institution institution = getInstitution();
         if (institution != null) {
-            licenseDto.setInstitutionName(institution.getInstitutionName());
+            licenseDto.setOwnerName(institution.getInstitutionName());
             licenseDto.setInstitutionId(getInstitutionId());
         }
         LicenseStatus licenseStatus = getLicenseStatus();
