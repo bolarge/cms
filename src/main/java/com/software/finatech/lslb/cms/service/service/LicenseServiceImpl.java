@@ -264,7 +264,7 @@ public class LicenseServiceImpl implements LicenseService {
         licenses.stream().forEach(license -> {
             licenseDtos.add(license.convertToDto());
         });
-        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.BAD_REQUEST));
+        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
     }
 
     @Override
@@ -277,7 +277,7 @@ public class LicenseServiceImpl implements LicenseService {
         licenses.stream().forEach(license -> {
             licenseDtos.add(license.convertToDto());
         });
-        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.BAD_REQUEST));
+        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
     }
 
     @Override
@@ -293,7 +293,7 @@ public class LicenseServiceImpl implements LicenseService {
         licenses.stream().forEach(license -> {
             licenseDtos.add(license.convertToDto());
         });
-        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.BAD_REQUEST));
+        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
     }
 
 
@@ -313,7 +313,7 @@ public class LicenseServiceImpl implements LicenseService {
         licenses.stream().forEach(license -> {
             licenseDtos.add(license.convertToDto());
         });
-        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.BAD_REQUEST));
+        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
     }
     @Override
     public Mono<ResponseEntity> getLicensesInRenewalInReview(String institutionId) {
@@ -331,7 +331,7 @@ public class LicenseServiceImpl implements LicenseService {
         licenses.stream().forEach(license -> {
             licenseDtos.add(license.convertToDto());
         });
-        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.BAD_REQUEST));
+        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
     }
 
     @Override
