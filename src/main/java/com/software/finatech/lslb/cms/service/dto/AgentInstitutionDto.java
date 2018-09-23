@@ -1,12 +1,23 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AgentInstitutionDto {
     private String institutionName;
     private String institutionId;
     private String gameTypeId;
     private String gameTypeName;
-    private String gameTypeDescription;
+    private List<String> businessAddressList = new ArrayList<>();
+
+    public List<String> getBusinessAddressList() {
+        return businessAddressList;
+    }
+
+    public void setBusinessAddressList(List<String> businessAddressList) {
+        this.businessAddressList = businessAddressList;
+    }
 
     public String getInstitutionName() {
         return institutionName;
@@ -38,13 +49,5 @@ public class AgentInstitutionDto {
 
     public void setGameTypeName(String gameTypeName) {
         this.gameTypeName = gameTypeName;
-    }
-
-    public String getGameTypeDescription() {
-        return gameTypeDescription;
-    }
-
-    public void setGameTypeDescription(String gameTypeDescription) {
-        this.gameTypeDescription = gameTypeDescription;
     }
 }

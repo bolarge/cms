@@ -1,13 +1,11 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 
-import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
-
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AgentCreateDto {
     @NotEmpty(message = "please provide agent first name")
@@ -18,24 +16,51 @@ public class AgentCreateDto {
     @Email
     @NotEmpty(message = "please provide agent email address")
     private String emailAddress;
-    @Size(min = 9,  message= "Phone number should be at least 9 characaters")
+    @Size(min = 9, message = "Phone number should be at least 9 characaters")
     @NotEmpty(message = "please provide agent phone number")
     private String phoneNumber;
     @NotEmpty(message = "please provide agent date of birth")
     private String dateOfBirth;
     @NotEmpty(message = "please provide agent residential address")
     private String residentialAddress;
-    @NotEmpty(message = "please provide agent business addresses")
-    private Set<String> businessAddresses = new HashSet<>();
     @NotEmpty(message = "please provide agent means of id")
     private String meansOfId;
     @NotEmpty(message = "please provide agent id number")
     private String idNumber;
     @NotEmpty(message = "please provide agent BVN")
     private String bvn;
-    @NotEmpty(message = "please provide agent institutions")
-    private Set<AgentInstitution> agentInstitutions = new HashSet<>();
     private String passportId;
+    @NotEmpty(message = "please provide agent business addresses")
+    private List<String> businessAddressList = new ArrayList<>();
+    @NotEmpty(message = "please provide institutionId")
+    private String institutionId;
+    @NotEmpty(message = "please provide gameTypeId")
+    private String gameTypeId;
+
+
+    public List<String> getBusinessAddressList() {
+        return businessAddressList;
+    }
+
+    public void setBusinessAddressList(List<String> businessAddressList) {
+        this.businessAddressList = businessAddressList;
+    }
+
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
 
     public String getPassportId() {
         return passportId;
@@ -43,14 +68,6 @@ public class AgentCreateDto {
 
     public void setPassportId(String passportId) {
         this.passportId = passportId;
-    }
-
-    public Set<String> getBusinessAddresses() {
-        return businessAddresses;
-    }
-
-    public void setBusinessAddresses(Set<String> businessAddresses) {
-        this.businessAddresses = businessAddresses;
     }
 
     public String getFirstName() {
@@ -133,11 +150,4 @@ public class AgentCreateDto {
         this.bvn = bvn;
     }
 
-    public Set<AgentInstitution> getAgentInstitutions() {
-        return agentInstitutions;
-    }
-
-    public void setAgentInstitutions(Set<AgentInstitution> agentInstitutions) {
-        this.agentInstitutions = agentInstitutions;
-    }
 }

@@ -10,7 +10,6 @@ import com.software.finatech.lslb.cms.service.dto.sso.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
-import com.software.finatech.lslb.cms.service.service.contracts.AuthRoleService;
 import com.software.finatech.lslb.cms.service.util.async_helpers.NewUserEmailNotifierAsync;
 import io.advantageous.boon.json.JsonFactory;
 import io.advantageous.boon.json.ObjectMapper;
@@ -629,6 +628,9 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
     @Override
     public ArrayList<AuthInfo> getAllActiveGamingOperatorAdminsAndUsersForInstitution(String institutionId) {
+        if (StringUtils.isEmpty(institutionId)) {
+            return new ArrayList<>();
+        }
         ArrayList<String> gamingOperatorAdminAndUserRoles = getAllGamingOperatorAdminAndUserRoles();
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").is(institutionId));

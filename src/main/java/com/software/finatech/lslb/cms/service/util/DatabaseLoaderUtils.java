@@ -27,17 +27,17 @@ public class DatabaseLoaderUtils {
 
     public void runSeedData(Environment env) {
         //Seed AuthInfo
-        AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById("1",AuthInfo.class).block();
-        if(authInfo==null){
+        AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById("1", AuthInfo.class).block();
+        if (authInfo == null) {
             authInfo = new AuthInfo();
             authInfo.setId("1");
         }
         if (Arrays.asList(env.getActiveProfiles()).contains("development") || Arrays.asList(env.getActiveProfiles()).contains("test")) {
             authInfo.setEmailAddress("David_J");
-        }else if( Arrays.asList(env.getActiveProfiles()).contains("staging")){
+        } else if (Arrays.asList(env.getActiveProfiles()).contains("staging")) {
             authInfo.setEmailAddress("david.jaiyeola@venturegardengroup.com");
             //authInfo.setSsoUserId("44016f38-7897-4a5b-b9af-46ee4589b9a1");
-        }else if( Arrays.asList(env.getActiveProfiles()).contains("production")){
+        } else if (Arrays.asList(env.getActiveProfiles()).contains("production")) {
             authInfo.setEmailAddress("david.jaiyeola@venturegardengroup.com");
             authInfo.setSsoUserId("44016f38-7897-4a5b-b9af-46ee4589b9a1");
         }
@@ -67,9 +67,11 @@ public class DatabaseLoaderUtils {
         RevenueNameReferenceData.load(mongoRepositoryReactive);
         ModeOfPaymentReferenceData.load(mongoRepositoryReactive);
         LicenseTypeReferenceData.load(mongoRepositoryReactive);
+        ApprovalRequestStatusReferenceData.load(mongoRepositoryReactive);
+        AgentApprovalRequestTypeReferenceData.load(mongoRepositoryReactive);
 
-       // PaymentRecordUpdater.updatePaymentRecords(mongoRepositoryReactive);
-       // AdeTestData.LoadTestData(mongoRepositoryReactive);
+        // PaymentRecordUpdater.updatePaymentRecords(mongoRepositoryReactive);
+        // AdeTestData.LoadTestData(mongoRepositoryReactive);
     }
 
     // @Profile("test")
@@ -98,6 +100,8 @@ public class DatabaseLoaderUtils {
         factEnums.put("RevenueName", RevenueName.class);
         factEnums.put("ModeOfPayment", ModeOfPayment.class);
         factEnums.put("LicenseTypes", LicenseType.class);
+        factEnums.put("ApprovalRequestStatus", ApprovalRequestStatus.class);
+        factEnums.put("AgentApprovalRequestType", AgentApprovalRequestType.class);
 
         for (Map.Entry<String, Class> entry : factEnums.entrySet()) {
             logger.info("Importing ReferenceMasterData for > " + entry.getKey());
