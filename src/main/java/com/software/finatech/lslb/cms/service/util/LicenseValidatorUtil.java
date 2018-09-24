@@ -100,7 +100,7 @@ public class LicenseValidatorUtil {
             if (institution != null) {
                 institutionName = institution.getInstitutionName();
             }
-            return Mono.just(new ResponseEntity<>(String.format("Institution %s is not currently licensed for category %s", institutionName, gameTypeName), HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>(String.format("%s is not currently licensed for category %s", institutionName, gameTypeName), HttpStatus.BAD_REQUEST));
         }
     }
 }
