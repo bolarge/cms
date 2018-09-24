@@ -1,23 +1,24 @@
 package com.software.finatech.lslb.cms.service.util.async_helpers;
 
 
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.Agent;
+import com.software.finatech.lslb.cms.service.domain.AgentApprovalRequest;
+import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
-import com.software.finatech.lslb.cms.service.util.Mapstore;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class AgentCreationNotifierAsync {
@@ -40,6 +41,7 @@ public class AgentCreationNotifierAsync {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
     }
 
+    @Async
     public void sendEmailNotificationToInstitutionAdminsOnAgentRequestCreation(AgentApprovalRequest agentApprovalRequest) {
         List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(agentApprovalRequest.getInstitutionId());
         if (institutionAdmins == null || institutionAdmins.isEmpty()) {
@@ -92,6 +94,5 @@ public class AgentCreationNotifierAsync {
         } catch (Exception e) {
             logger.error("An error occurred while sending agent creation notification email to user with email -> {}", institutionAdmin.getEmailAddress(), e);
         }
-
     }
 }
