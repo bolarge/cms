@@ -342,7 +342,7 @@ public class LicenseServiceImpl implements LicenseService {
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("institutionId").is(institutionId));
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
-        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("effectiveDate").lte(today).andOperator(Criteria.where("expiryDate").gte(today)));
+        queryForLicensedInstitutionInGameType.addCriteria(new Criteria().andOperator(Criteria.where("effectiveDate").lte(today),(Criteria.where("expiryDate").gte(today))));
         License licenseForInstitutionAndGameType = (License) mongoRepositoryReactive.find(queryForLicensedInstitutionInGameType, License.class).block();
         if (licenseForInstitutionAndGameType == null) {
             return false;
