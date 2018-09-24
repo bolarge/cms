@@ -196,7 +196,7 @@ public class DocumentController extends BaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getByEntity(@RequestParam("gameTypeId") String gameTypeId, @RequestParam("documentPurposeId") String documentPurposeId,@RequestParam("institutionId") String institutionId ) {
+    public Mono<ResponseEntity> getByInstitution(@RequestParam("gameTypeId") String gameTypeId, @RequestParam("documentPurposeId") String documentPurposeId,@RequestParam("institutionId") String institutionId ) {
 
 
         if (StringUtils.isEmpty(documentPurposeId)) {
@@ -222,6 +222,7 @@ public class DocumentController extends BaseController {
          Query queryDocument = new Query();
          queryDocument.addCriteria(Criteria.where("documentTypeId").in(documentTypeIds));
          queryDocument.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+         queryDocument.addCriteria(Criteria.where("institutionId").is(institutionId));
 
          List<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(queryDocument, Document.class).toStream().collect(Collectors.toList());
         ArrayList<DocumentDto> documentsDto = new ArrayList<>();
