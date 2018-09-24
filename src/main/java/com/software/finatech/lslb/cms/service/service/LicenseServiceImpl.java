@@ -342,13 +342,17 @@ public class LicenseServiceImpl implements LicenseService {
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("institutionId").is(institutionId));
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
-        queryForLicensedInstitutionInGameType.addCriteria(new Criteria().andOperator(Criteria.where("effectiveDate").lte(today),(Criteria.where("expiryDate").gte(today))));
-        License licenseForInstitutionAndGameType = (License) mongoRepositoryReactive.find(queryForLicensedInstitutionInGameType, License.class).block();
-        if (licenseForInstitutionAndGameType == null) {
+        queryForLicensedInstitutionInGameType.addCriteria(new Criteria().andOperator(Criteria.where("effectiveDate").lte(today), (Criteria.where("expiryDate").gte(today))));
+        ArrayList<License> licensesForInstitutionAndGameType = (ArrayList<License>) mongoRepositoryReactive.findAll(queryForLicensedInstitutionInGameType, License.class).toStream().collect(Collectors.toList());
+        if (licensesForInstitutionAndGameType == null || licensesForInstitutionAndGameType.isEmpty()) {
             return false;
-        } else {
-            return StringUtils.equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID, licenseForInstitutionAndGameType.getLicenseStatusId());
         }
+        for (License licenseForInstitutionAndGameType : licensesForInstitutionAndGameType) {
+            if (StringUtils.equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID, licenseForInstitutionAndGameType.getLicenseStatusId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
