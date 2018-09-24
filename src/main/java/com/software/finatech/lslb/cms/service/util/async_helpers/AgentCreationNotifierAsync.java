@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
+import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,20 +30,23 @@ public class AgentCreationNotifierAsync {
     private EmailService emailService;
     private AuthInfoService authInfoService;
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
+    private FrontEndPropertyHelper frontEndPropertyHelper;
 
     @Autowired
     public AgentCreationNotifierAsync(MailContentBuilderService mailContentBuilderService,
                                       EmailService emailService,
                                       AuthInfoService authInfoService,
-                                      MongoRepositoryReactiveImpl mongoRepositoryReactive) {
+                                      MongoRepositoryReactiveImpl mongoRepositoryReactive,
+                                      FrontEndPropertyHelper frontEndPropertyHelper) {
         this.mailContentBuilderService = mailContentBuilderService;
         this.emailService = emailService;
         this.authInfoService = authInfoService;
         this.mongoRepositoryReactive = mongoRepositoryReactive;
+        this.frontEndPropertyHelper = frontEndPropertyHelper;
     }
 
     @Async
-    public void sendEmailNotificationToInstitutionAdminsOnAgentRequestCreation(AgentApprovalRequest agentApprovalRequest) {
+    public void sendEmailNotificationToInstitutionAdminsAndLslbOnAgentRequestCreation(AgentApprovalRequest agentApprovalRequest) {
         List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(agentApprovalRequest.getInstitutionId());
         if (institutionAdmins == null || institutionAdmins.isEmpty()) {
             logger.info("Institution with id {} does not have admins, skipping email notification", agentApprovalRequest.getInstitutionId());
@@ -52,7 +56,16 @@ public class AgentCreationNotifierAsync {
         for (AuthInfo institutionAdmin : institutionAdmins) {
             sendAgentCreationNotificationEmailToInstitutionAdmin(agentApprovalRequest, institutionAdmin);
         }
+
+        if (agentApprovalRequest.isApprovedRequest() && agentApprovalRequest.isInstitutionAgentAdditionRequest()) {
+            sendAgentCreationNotificationToAgent(agentApprovalRequest);
+        }
+
+
+        //TODO::validate lslb admin emails
+        sendNewAgentRequestToLslbAdmin(agentApprovalRequest, "lslbcms@gmail.com");
     }
+
 
     private void sendAgentCreationNotificationEmailToInstitutionAdmin(AgentApprovalRequest agentApprovalRequest, AuthInfo institutionAdmin) {
         try {
@@ -95,4 +108,41 @@ public class AgentCreationNotifierAsync {
             logger.error("An error occurred while sending agent creation notification email to user with email -> {}", institutionAdmin.getEmailAddress(), e);
         }
     }
+
+    private void sendNewAgentRequestToLslbAdmin(AgentApprovalRequest agentApprovalRequest, String lslbAdminEmail) {
+        try {
+            String frontEndUrl = String.format("%s/agent-approval-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), agentApprovalRequest.getId());
+            String presentDateString = LocalDate.now().toString("dd-MM-YYYY");
+            HashMap<String, Object> model = new HashMap<>();
+            model.put("institutionName", agentApprovalRequest.getInstitutionName());
+            model.put("date", presentDateString);
+            model.put("frontEndUrl", frontEndUrl);
+
+            String content = mailContentBuilderService.build(model, "Lslb-CreateAgent-Notification");
+            emailService.sendEmail(content, "LSLB Agent Creation Notification", lslbAdminEmail);
+        } catch (Exception e) {
+            logger.error("");
+        }
+    }
+
+    private void sendAgentCreationNotificationToAgent(AgentApprovalRequest agentApprovalRequest) {
+        try {
+            Agent agent = agentApprovalRequest.getAgent();
+            String frontEndUrl = String.format("%s/agent-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), agentApprovalRequest.getAgentId());
+            List<String> businessAddressList = agentApprovalRequest.getBusinessAddressList();
+            String presentDateString = LocalDate.now().toString("dd-MM-YYYY");
+            HashMap<String, Object> model = new HashMap<>();
+            model.put("institutionName", agentApprovalRequest.getInstitutionName());
+            model.put("date", presentDateString);
+            model.put("frontEndUrl", frontEndUrl);
+            model.put("gameType", agentApprovalRequest.getGameTypeName());
+            model.put("businessAddressList", businessAddressList);
+
+            String content = mailContentBuilderService.build(model, "Agent-CreateAgent-Notification");
+            emailService.sendEmail(content, "LSLB Profile Update", agent.getEmailAddress());
+        } catch (Exception e) {
+            logger.error("");
+        }
+    }
+
 }
