@@ -218,7 +218,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             }
 
             agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsOnAgentRequestCreation(agentApprovalRequest);
-            return Mono.just(new ResponseEntity<>("Request successfully rejected", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Request successfully rejected", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving request", e);
         }
