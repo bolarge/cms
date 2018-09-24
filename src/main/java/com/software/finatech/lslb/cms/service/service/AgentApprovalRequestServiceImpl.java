@@ -184,7 +184,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.ADD_INSTITUTION_TO_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
                 approveAddInstitutionToAgentRequest(agentApprovalRequest, userId);
             }
-            agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsOnAgentRequestCreation(agentApprovalRequest);
+            agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsAndLslbOnAgentRequestCreation(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>("Request successfully approved", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving request", e);
@@ -217,7 +217,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
                 rejectAddInstitutionToAgentRequest(agentApprovalRequest, userId, rejectReason);
             }
 
-            agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsOnAgentRequestCreation(agentApprovalRequest);
+            agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsAndLslbOnAgentRequestCreation(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>("Request successfully rejected", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving request", e);
@@ -265,7 +265,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
         String institutionId = agentApprovalRequest.getInstitutionId();
         AgentInstitution agentInstitution = new AgentInstitution();
         agentInstitution.setGameTypeId(gameTypeId);
-        agentInstitution.setInstitutionId(gameTypeId);
+        agentInstitution.setInstitutionId(institutionId);
         agentInstitution.setBusinessAddressList(agentApprovalRequest.getBusinessAddressList());
         agentInstitutions.add(agentInstitution);
         agent.setAgentInstitutions(agentInstitutions);

@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
@@ -216,10 +217,22 @@ public class License extends AbstractFact {
             licenseDto.setLicenseStatusName(licenseStatus.getName());
         }
         PaymentRecord paymentRecord = getPaymentRecord();
-        if(paymentRecord!= null){
+        if (paymentRecord != null) {
             licenseDto.setAmountPaid(paymentRecord.getAmountPaid());
         }
         return licenseDto;
+    }
+
+    public boolean isInstitutionLicense() {
+        return StringUtils.equals(LicenseTypeReferenceData.INSTITUTION, this.licenseTypeId);
+    }
+
+    public boolean isGamingMachineLicense() {
+        return StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE, this.licenseTypeId);
+    }
+
+    public boolean isAgentLicense() {
+        return StringUtils.equals(LicenseTypeReferenceData.AGENT, this.licenseTypeId);
     }
 
     @Override
