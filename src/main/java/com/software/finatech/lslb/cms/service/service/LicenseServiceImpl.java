@@ -491,7 +491,7 @@ public class LicenseServiceImpl implements LicenseService {
             notificationDto.setInstitutionEmail(adminEmail);
             sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
 
-            return Mono.just(new ResponseEntity<>("OK", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
         } catch (Exception ex) {
             return Mono.just(new ResponseEntity<>("Error while moving to renewal license in review", HttpStatus.BAD_REQUEST));
 
