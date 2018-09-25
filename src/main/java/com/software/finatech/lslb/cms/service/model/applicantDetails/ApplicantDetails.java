@@ -10,56 +10,23 @@ public class ApplicantDetails {
     private String shareCapital;
     private String emailAddress;
     private String phoneNumber;
-    private boolean applicantHasPreviousName;
+    private Boolean applicantHasPreviousName;
     private ApplicantPreviousName applicantPreviousName;
-    private boolean applicantHasPreviousApplication;
+    private Boolean applicantHasPreviousApplication;
     private ApplicantPreviousApplication applicantPreviousApplication;
-    private boolean applicantHasMemberPreviousApplication;
+    private Boolean applicantHasMemberPreviousApplication;
     private ApplicantMemberPreviousApplication applicantMemberPreviousApplication;
-    private boolean applicantHasOutsideLagosStateLicense;
+    private Boolean applicantHasOutsideLagosStateLicense;
     private OutsideLagosStateLicense outsideLagosStateLicense;
     private String periodApplicantHasBeenInOperation;
-    private boolean applicantMemberAffiliatedWithPoliticalParty;
+    private Boolean applicantMemberAffiliatedWithPoliticalParty;
     private String applicantMemberPoliticalPartyAffiliationDetails;
-    private boolean applicantFundedByPoliticalParty;
+    private Boolean applicantFundedByPoliticalParty;
     private String applicantPoliticalPartyFundingDetails;
-    private boolean applicantMemberWithGamingExperience;
+    private Boolean applicantMemberWithGamingExperience;
     private String applicantMemberGamingExperienceDetails;
-    private boolean applicantIndigenous;
+    private Boolean applicantIndigenous;
     private String applicantIndigenousDetails;
-
-
-    public boolean isApplicantHasPreviousName() {
-        return applicantHasPreviousName;
-    }
-
-    public void setApplicantHasPreviousName(boolean applicantHasPreviousName) {
-        this.applicantHasPreviousName = applicantHasPreviousName;
-    }
-
-    public boolean isApplicantHasPreviousApplication() {
-        return applicantHasPreviousApplication;
-    }
-
-    public void setApplicantHasPreviousApplication(boolean applicantHasPreviousApplication) {
-        this.applicantHasPreviousApplication = applicantHasPreviousApplication;
-    }
-
-    public boolean isApplicantHasMemberPreviousApplication() {
-        return applicantHasMemberPreviousApplication;
-    }
-
-    public void setApplicantHasMemberPreviousApplication(boolean applicantHasMemberPreviousApplication) {
-        this.applicantHasMemberPreviousApplication = applicantHasMemberPreviousApplication;
-    }
-
-    public boolean isApplicantHasOutsideLagosStateLicense() {
-        return applicantHasOutsideLagosStateLicense;
-    }
-
-    public void setApplicantHasOutsideLagosStateLicense(boolean applicantHasOutsideLagosStateLicense) {
-        this.applicantHasOutsideLagosStateLicense = applicantHasOutsideLagosStateLicense;
-    }
 
     public String getApplicantName() {
         return applicantName;
@@ -125,12 +92,28 @@ public class ApplicantDetails {
         this.phoneNumber = phoneNumber;
     }
 
+    public Boolean getApplicantHasPreviousName() {
+        return applicantHasPreviousName;
+    }
+
+    public void setApplicantHasPreviousName(Boolean applicantHasPreviousName) {
+        this.applicantHasPreviousName = applicantHasPreviousName;
+    }
+
     public ApplicantPreviousName getApplicantPreviousName() {
         return applicantPreviousName;
     }
 
     public void setApplicantPreviousName(ApplicantPreviousName applicantPreviousName) {
         this.applicantPreviousName = applicantPreviousName;
+    }
+
+    public Boolean getApplicantHasPreviousApplication() {
+        return applicantHasPreviousApplication;
+    }
+
+    public void setApplicantHasPreviousApplication(Boolean applicantHasPreviousApplication) {
+        this.applicantHasPreviousApplication = applicantHasPreviousApplication;
     }
 
     public ApplicantPreviousApplication getApplicantPreviousApplication() {
@@ -141,12 +124,28 @@ public class ApplicantDetails {
         this.applicantPreviousApplication = applicantPreviousApplication;
     }
 
+    public Boolean getApplicantHasMemberPreviousApplication() {
+        return applicantHasMemberPreviousApplication;
+    }
+
+    public void setApplicantHasMemberPreviousApplication(Boolean applicantHasMemberPreviousApplication) {
+        this.applicantHasMemberPreviousApplication = applicantHasMemberPreviousApplication;
+    }
+
     public ApplicantMemberPreviousApplication getApplicantMemberPreviousApplication() {
         return applicantMemberPreviousApplication;
     }
 
     public void setApplicantMemberPreviousApplication(ApplicantMemberPreviousApplication applicantMemberPreviousApplication) {
         this.applicantMemberPreviousApplication = applicantMemberPreviousApplication;
+    }
+
+    public Boolean getApplicantHasOutsideLagosStateLicense() {
+        return applicantHasOutsideLagosStateLicense;
+    }
+
+    public void setApplicantHasOutsideLagosStateLicense(Boolean applicantHasOutsideLagosStateLicense) {
+        this.applicantHasOutsideLagosStateLicense = applicantHasOutsideLagosStateLicense;
     }
 
     public OutsideLagosStateLicense getOutsideLagosStateLicense() {
@@ -165,11 +164,11 @@ public class ApplicantDetails {
         this.periodApplicantHasBeenInOperation = periodApplicantHasBeenInOperation;
     }
 
-    public boolean isApplicantMemberAffiliatedWithPoliticalParty() {
+    public Boolean getApplicantMemberAffiliatedWithPoliticalParty() {
         return applicantMemberAffiliatedWithPoliticalParty;
     }
 
-    public void setApplicantMemberAffiliatedWithPoliticalParty(boolean applicantMemberAffiliatedWithPoliticalParty) {
+    public void setApplicantMemberAffiliatedWithPoliticalParty(Boolean applicantMemberAffiliatedWithPoliticalParty) {
         this.applicantMemberAffiliatedWithPoliticalParty = applicantMemberAffiliatedWithPoliticalParty;
     }
 
@@ -181,11 +180,11 @@ public class ApplicantDetails {
         this.applicantMemberPoliticalPartyAffiliationDetails = applicantMemberPoliticalPartyAffiliationDetails;
     }
 
-    public boolean isApplicantFundedByPoliticalParty() {
+    public Boolean getApplicantFundedByPoliticalParty() {
         return applicantFundedByPoliticalParty;
     }
 
-    public void setApplicantFundedByPoliticalParty(boolean applicantFundedByPoliticalParty) {
+    public void setApplicantFundedByPoliticalParty(Boolean applicantFundedByPoliticalParty) {
         this.applicantFundedByPoliticalParty = applicantFundedByPoliticalParty;
     }
 
@@ -197,11 +196,11 @@ public class ApplicantDetails {
         this.applicantPoliticalPartyFundingDetails = applicantPoliticalPartyFundingDetails;
     }
 
-    public boolean isApplicantMemberWithGamingExperience() {
+    public Boolean getApplicantMemberWithGamingExperience() {
         return applicantMemberWithGamingExperience;
     }
 
-    public void setApplicantMemberWithGamingExperience(boolean applicantMemberWithGamingExperience) {
+    public void setApplicantMemberWithGamingExperience(Boolean applicantMemberWithGamingExperience) {
         this.applicantMemberWithGamingExperience = applicantMemberWithGamingExperience;
     }
 
@@ -213,11 +212,11 @@ public class ApplicantDetails {
         this.applicantMemberGamingExperienceDetails = applicantMemberGamingExperienceDetails;
     }
 
-    public boolean isApplicantIndigenous() {
+    public Boolean getApplicantIndigenous() {
         return applicantIndigenous;
     }
 
-    public void setApplicantIndigenous(boolean applicantIndigenous) {
+    public void setApplicantIndigenous(Boolean applicantIndigenous) {
         this.applicantIndigenous = applicantIndigenous;
     }
 
