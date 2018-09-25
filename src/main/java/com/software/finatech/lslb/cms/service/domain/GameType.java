@@ -11,6 +11,15 @@ public class GameType extends EnumeratedFact {
     protected int institutionLicenseDurationMonths;
     protected int agentLicenseDurationMonths;
     protected int gamingMachineLicenseDurationMonths;
+    protected String shortCode;
+
+    public String getShortCode() {
+        return shortCode;
+    }
+
+    public void setShortCode(String shortCode) {
+        this.shortCode = shortCode;
+    }
 
     public int getAipDurationMonths() {
         return aipDurationMonths;
@@ -53,6 +62,7 @@ public class GameType extends EnumeratedFact {
         gameType.setLicenseDuration(String.valueOf(getInstitutionLicenseDurationMonths()));
         gameType.setAgentLicenseDuration(String.valueOf(getAgentLicenseDurationMonths()));
         gameType.setGamingMachineLicenseDuration(String.valueOf(getGamingMachineLicenseDurationMonths()));
+        gameType.setShortCode(getShortCode());
         return gameType;
     }
 

@@ -6,6 +6,15 @@ public class GameTypeDto extends EnumeratedFactDto {
     protected String licenseDuration;
     protected String agentLicenseDuration;
     protected String gamingMachineLicenseDuration;
+    protected String shortCode;
+
+    public String getShortCode() {
+        return shortCode;
+    }
+
+    public void setShortCode(String shortCode) {
+        this.shortCode = shortCode;
+    }
 
     public String getAgentLicenseDuration() {
         return agentLicenseDuration;

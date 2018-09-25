@@ -16,6 +16,7 @@ import com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatu
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
+import com.software.finatech.lslb.cms.service.util.NumberUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.ApplicationFormNotificationHelperAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
@@ -598,6 +599,13 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         ApplicationForm applicationForm = new ApplicationForm();
         applicationForm.setId(UUID.randomUUID().toString());
         BeanUtils.copyProperties(applicationFormCreateDto, applicationForm);
+        GameType gameType = applicationForm.getGameType();
+        String gameTypePref = "";
+        if (gameType != null && !StringUtils.isEmpty(gameType.getShortCode())) {
+            gameTypePref = String.format("-%s", gameType.getShortCode());
+        }
+        String applicationFormId = String.format("LSLB-APP%s-%s", gameTypePref, NumberUtil.getRandomNumberInRange(1000, 100000));
+        applicationForm.setApplicationFormId(applicationFormId);
         return applicationForm;
     }
 

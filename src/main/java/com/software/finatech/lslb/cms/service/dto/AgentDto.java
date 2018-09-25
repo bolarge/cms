@@ -1,14 +1,10 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import com.software.finatech.lslb.cms.service.domain.Institution;
-
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class AgentDto {
-    private List<AgentInstitutionDto> agentInstitutions =new ArrayList<>();
+    private List<AgentInstitutionDto> agentInstitutions = new ArrayList<>();
     private String firstName;
     private String lastName;
     private String residentialAddress;
@@ -22,11 +18,19 @@ public class AgentDto {
     private String id;
     private Boolean enabled;
     private List<EnumeratedFactDto> gameTypes = new ArrayList<>();
-    private List<Institution> institutions = new ArrayList<>();
+    private List<InstitutionDto> institutions = new ArrayList<>();
     private String title;
     private String bvn;
     private String agentId;
     private List<String> businessAddresses = new ArrayList<>();
+
+    public List<InstitutionDto> getInstitutions() {
+        return institutions;
+    }
+
+    public void setInstitutions(List<InstitutionDto> institutions) {
+        this.institutions = institutions;
+    }
 
     public List<AgentInstitutionDto> getAgentInstitutions() {
         return agentInstitutions;
@@ -138,14 +142,6 @@ public class AgentDto {
 
     public void setGameTypes(List<EnumeratedFactDto> gameTypes) {
         this.gameTypes = gameTypes;
-    }
-
-    public List<Institution> getInstitutions() {
-        return institutions;
-    }
-
-    public void setInstitutions(List<Institution> institutions) {
-        this.institutions = institutions;
     }
 
     public String getTitle() {
