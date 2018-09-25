@@ -4,7 +4,7 @@ import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailDto;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Map;
@@ -13,7 +13,7 @@ import java.util.Map;
 @Document(collection = "PaymentRecordDetail")
 public class PaymentRecordDetail extends AbstractFact {
     private String invoiceNumber;
-    private LocalDate paymentDate;
+    private LocalDateTime paymentDate;
     private String paymentStatusId;
     private double amount;
     private String modeOfPaymentId;
@@ -28,11 +28,11 @@ public class PaymentRecordDetail extends AbstractFact {
         this.vigiPayTransactionReference = vigiPayTransactionReference;
     }
 
-    public LocalDate getPaymentDate() {
+    public LocalDateTime getPaymentDate() {
         return paymentDate;
     }
 
-    public void setPaymentDate(LocalDate paymentDate) {
+    public void setPaymentDate(LocalDateTime paymentDate) {
         this.paymentDate = paymentDate;
     }
 
@@ -94,7 +94,7 @@ public class PaymentRecordDetail extends AbstractFact {
         }
 
         paymentRecordDetailDto.setCreationDate(getCreatedAt() != null ? getCreatedAt().toString("dd-MM-yyyy") : null);
-        paymentRecordDetailDto.setPaymentDate(paymentDate != null ? paymentDate.toString("dd-MM-yyyy") : null);
+        paymentRecordDetailDto.setPaymentDate(paymentDate != null ? paymentDate.toString("dd-MM-yyyy HH:mm:ss") : null);
         paymentRecordDetailDto.setInvoiceNumber(getInvoiceNumber());
         paymentRecordDetailDto.setVigiPayReference(getVigiPayTransactionReference());
         return paymentRecordDetailDto;

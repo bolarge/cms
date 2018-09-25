@@ -17,10 +17,11 @@ import com.software.finatech.lslb.cms.service.service.contracts.*;
 import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
 import com.software.finatech.lslb.cms.service.util.async_helpers.PaymentEmailNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
@@ -100,7 +101,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 updatePaymentRecord(paymentRecord);
             }
             existingPaymentRecordDetail.setInvoiceNumber(paymentRecordDetailUpdateDto.getInvoiceNumber());
-            existingPaymentRecordDetail.setPaymentDate(LocalDate.now());
+            existingPaymentRecordDetail.setPaymentDate(LocalDateTime.now());
             existingPaymentRecordDetail.setPaymentStatusId(paymentRecordDetailUpdateDto.getPaymentStatusId());
             existingPaymentRecordDetail.setVigiPayTransactionReference(paymentRecordDetailUpdateDto.getVigipayReference());
             savePaymentRecordDetail(existingPaymentRecordDetail);
@@ -300,6 +301,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         try {
             Query query = new Query();
             query.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));
+            query.with(new Sort(Sort.Direction.DESC, "paymentDate"));
             ArrayList<PaymentRecordDetail> paymentRecordDetails = (ArrayList<PaymentRecordDetail>) mongoRepositoryReactive.findAll(query, PaymentRecordDetail.class).toStream().collect(Collectors.toList());
             if (paymentRecordDetails.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
@@ -356,7 +358,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                         } else {
                             existingPaymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
                         }
-                        existingPaymentRecordDetail.setPaymentDate(LocalDate.now());
+                        existingPaymentRecordDetail.setPaymentDate(LocalDateTime.now());
                         existingPaymentRecordDetail.setVigiPayTransactionReference(vigiPayMessage.getPaymentReference());
                         existingPaymentRecordDetail.setInvoiceNumber(vigiPayMessage.getInvoiceNumber());
                         savePaymentRecordDetail(existingPaymentRecordDetail);
