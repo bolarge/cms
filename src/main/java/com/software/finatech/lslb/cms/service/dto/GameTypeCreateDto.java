@@ -14,8 +14,16 @@ public class GameTypeCreateDto {
     protected int agentLicenseDurationMonths;
     @Min(value = 0, message = "Please enter Gaming Machine License Duration in  months")
     protected int gamingMachineLicenseDurationMonths;
-
+    protected String shortCode;
     protected String description;
+
+    public String getShortCode() {
+        return shortCode;
+    }
+
+    public void setShortCode(String shortCode) {
+        this.shortCode = shortCode;
+    }
 
     public String getDescription() {
         return description;

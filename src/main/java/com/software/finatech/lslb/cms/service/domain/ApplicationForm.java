@@ -38,6 +38,15 @@ public class ApplicationForm extends AbstractFact {
     protected LslbAdminComment lslbAdminComment;
     protected String reasonForRejection;
     protected LocalDate submissionDate;
+    protected String applicationFormId;
+
+    public String getApplicationFormId() {
+        return applicationFormId;
+    }
+
+    public void setApplicationFormId(String applicationFormId) {
+        this.applicationFormId = applicationFormId;
+    }
 
     public LocalDate getSubmissionDate() {
         return submissionDate;
@@ -191,7 +200,7 @@ public class ApplicationForm extends AbstractFact {
         return (AuthInfo) mongoRepositoryReactive.findById(authInfoId, AuthInfo.class).block();
     }
 
-    private GameType getGameType() {
+    public GameType getGameType() {
         if (StringUtils.isEmpty(this.gameTypeId)) {
             return null;
         }
@@ -309,7 +318,7 @@ public class ApplicationForm extends AbstractFact {
         applicationFormDto.setFilledApplicantOtherInformation(getApplicantOtherInformation() != null);
         applicationFormDto.setFilledApplicantOutletInformation(getApplicantOutletInformation() != null);
         applicationFormDto.setFilledApplicantDetails(getApplicantDetails() != null);
-        applicationFormDto.setStatusId(applicationFormStatusId);
+        applicationFormDto.setApplicationFormId(getApplicationFormId());
         return applicationFormDto;
     }
 

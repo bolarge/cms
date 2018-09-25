@@ -4,6 +4,7 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.AgentDto;
 import com.software.finatech.lslb.cms.service.dto.AgentInstitutionDto;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
+import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.adapters.AgentInstitutionAdapter;
 import org.apache.commons.lang3.StringUtils;
@@ -263,18 +264,17 @@ public class Agent extends AbstractFact {
         return enumeratedFactDtos;
     }
 
-    public List<Institution> getInstitutions() {
-        List<Institution> institutionList = new ArrayList<>();
+    public List<InstitutionDto> getInstitutions() {
+        List<InstitutionDto> institutionList = new ArrayList<>();
         for (String institutionId : getInstitutionIds()) {
             Institution institution = getInstitution(institutionId);
             if (institution != null) {
-                Institution temp = new Institution();
+                InstitutionDto temp = new InstitutionDto();
                 temp.setId(institution.getId());
                 temp.setInstitutionName(institution.getInstitutionName());
                 institutionList.add(temp);
             }
         }
-
         return institutionList;
     }
 

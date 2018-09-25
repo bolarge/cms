@@ -8,10 +8,7 @@ import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReference
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
-import com.software.finatech.lslb.cms.service.util.ExpirationList;
-import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
-import com.software.finatech.lslb.cms.service.util.Mapstore;
-import com.software.finatech.lslb.cms.service.util.SendEmail;
+import com.software.finatech.lslb.cms.service.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -794,17 +791,11 @@ public class LicenseServiceImpl implements LicenseService {
         if (StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_ID, revenueNameId)) {
             prefix = prefix + "OP-";
         }
-        String randomDigit = String.valueOf(getRandomNumberInRange(10000, 1000000));
-        return String.format("%s%s", prefix, randomDigit);
-    }
-
-    private int getRandomNumberInRange(int min, int max) {
-
-        if (min >= max) {
-            throw new IllegalArgumentException("max must be greater than min");
+        String randomDigit = String.valueOf(NumberUtil.getRandomNumberInRange(10000, 1000000));
+        GameType gameType = paymentRecord.getGameType();
+        if (gameType != null && !StringUtils.isEmpty(gameType.getShortCode())){
+            prefix = prefix +gameType.getShortCode() + "-";
         }
-
-        Random r = new Random();
-        return r.nextInt((max - min) + 1) + min;
+            return String.format("%s%s", prefix, randomDigit);
     }
 }

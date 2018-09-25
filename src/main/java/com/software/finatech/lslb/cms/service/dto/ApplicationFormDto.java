@@ -26,7 +26,16 @@ public class ApplicationFormDto {
     private Boolean lslbAdminCommented;
     private String lslbAdminName;
     private String lslbAdminComment;
+    private String applicationFormId;
 
+
+    public String getApplicationFormId() {
+        return applicationFormId;
+    }
+
+    public void setApplicationFormId(String applicationFormId) {
+        this.applicationFormId = applicationFormId;
+    }
 
     public String getStatusId() {
         return statusId;

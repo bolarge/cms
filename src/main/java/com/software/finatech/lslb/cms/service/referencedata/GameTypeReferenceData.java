@@ -18,6 +18,7 @@ public class GameTypeReferenceData {
         }
         gameType1.setDescription("Public Online Lottery");
         gameType1.setName("Public Online Lottery");
+        gameType1.setShortCode("POL");
         gameType1.setAipDurationMonths(3);
         gameType1.setInstitutionLicenseDurationMonths(12);
         gameType1.setGamingMachineLicenseDurationMonths(12);
@@ -32,6 +33,7 @@ public class GameTypeReferenceData {
         }
         gameType2.setDescription("Online Sport Betting");
         gameType2.setName("Online Sport Betting");
+        gameType2.setShortCode("OSB");
         gameType2.setAipDurationMonths(3);
         gameType2.setInstitutionLicenseDurationMonths(12);
         gameType2.setGamingMachineLicenseDurationMonths(12);
@@ -44,6 +46,7 @@ public class GameTypeReferenceData {
         }
         gameType3.setDescription("A gaming machine operator (operator that has gaming machines)");
         gameType3.setName("GAMING_MACHINE");
+        gameType3.setShortCode("GM");
         gameType3.setAipDurationMonths(3);
         gameType3.setInstitutionLicenseDurationMonths(12);
         gameType3.setGamingMachineLicenseDurationMonths(12);
