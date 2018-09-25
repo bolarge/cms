@@ -258,7 +258,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
                 try {
                     mongoRepositoryReactive.delete(document);
                 } catch (Exception e) {
-                    logger.error("An error occurred while deleting document {}", document.getId());
+                    logger.error("An error occurred while deleting document {}", document.getId(),e);
                 }
             }
         }
@@ -272,6 +272,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
         Set<String> gameTypeIds = agent.getGameTypeIds();
         Set<String> institutionIds = agent.getInstitutionIds();
         List<AgentInstitution> agentInstitutions = agent.getAgentInstitutions();
+        List<String> agentBusinessAddresses = agent.getBusinessAddresses();
 
         String gameTypeId = agentApprovalRequest.getGameTypeId();
         String institutionId = agentApprovalRequest.getInstitutionId();
@@ -287,6 +288,8 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
         if (!institutionIds.contains(institutionId)) {
             institutionIds.add(institutionId);
         }
+        agentBusinessAddresses.addAll(agentApprovalRequest.getBusinessAddressList());
+        agent.setBusinessAddresses(agentBusinessAddresses);
         agent.setInstitutionIds(institutionIds);
         agent.setGameTypeIds(gameTypeIds);
         agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);

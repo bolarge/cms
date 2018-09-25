@@ -3,13 +3,17 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.AgentDto;
 import com.software.finatech.lslb.cms.service.dto.AgentInstitutionDto;
+import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.adapters.AgentInstitutionAdapter;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("serial")
 @Document(collection = "Agents")
@@ -22,9 +26,9 @@ public class Agent extends AbstractFact {
     protected String emailAddress;
     protected String phoneNumber;
     protected List<AgentInstitution> agentInstitutions = new ArrayList<>();
-    protected DateTime dateOfBirth;
+    protected LocalDate dateOfBirth;
     protected String residentialAddress;
-    protected Set<String> businessAddresses = new HashSet<>();
+    protected List<String> businessAddresses = new ArrayList<>();
     protected String meansOfId;
     protected String idNumber;
     protected String bvn;
@@ -76,11 +80,11 @@ public class Agent extends AbstractFact {
         this.vgPayCustomerCode = vgPayCustomerCode;
     }
 
-    public DateTime getDateOfBirth() {
+    public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(DateTime dateOfBirth) {
+    public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
@@ -188,40 +192,90 @@ public class Agent extends AbstractFact {
         this.agentInstitutions = agentInstitutions;
     }
 
-    public Set<String> getBusinessAddresses() {
+    public List<String> getBusinessAddresses() {
         return businessAddresses;
     }
 
-    public void setBusinessAddresses(Set<String> businessAddresses) {
+    public void setBusinessAddresses(List<String> businessAddresses) {
         this.businessAddresses = businessAddresses;
     }
 
     public AgentDto convertToDto() {
         AgentDto agentDto = new AgentDto();
-        if (getDateOfBirth() != null) {
-            agentDto.setDateOfBirth(getDateOfBirth().toString("dd-MM-yyyy"));
-        }
         agentDto.setEmailAddress(getEmailAddress());
-        agentDto.setResidentialAddress(getResidentialAddress());
-        agentDto.setFirstName(getFirstName());
         agentDto.setFullName(getFullName());
-        agentDto.setLastName(getLastName());
-        agentDto.setMeansOfId(getMeansOfId());
-        agentDto.setIdNumber(getIdNumber());
         agentDto.setPhoneNumber(getPhoneNumber());
-        agentDto.setAgentInstitutions(convertAgentInstitutions(getAgentInstitutions()));
         agentDto.setId(getId());
         agentDto.setEnabled(isEnabled());
+        agentDto.setTitle(getTitle());
+        return agentDto;
+    }
+
+    public AgentDto convertToFullDetailDto() {
+        AgentDto agentDto = new AgentDto();
+        agentDto.setEmailAddress(getEmailAddress());
+        agentDto.setFullName(getFullName());
+        agentDto.setPhoneNumber(getPhoneNumber());
+        agentDto.setId(getId());
+        agentDto.setEnabled(isEnabled());
+        agentDto.setMeansOfId(getMeansOfId());
+        agentDto.setIdNumber(getIdNumber());
+        agentDto.setLastName(getLastName());
+        agentDto.setFirstName(getFirstName());
+        agentDto.setResidentialAddress(getResidentialAddress());
+        agentDto.setBusinessAddresses(getBusinessAddresses());
+        agentDto.setTitle(getTitle());
+        agentDto.setBvn(getBvn());
+        LocalDate dateOfBirth = getDateOfBirth();
+        if (dateOfBirth != null) {
+            agentDto.setDateOfBirth(dateOfBirth.toString("dd-MM-yyyy"));
+        }
+        agentDto.setAgentId(getAgentId());
+        agentDto.setInstitutions(getInstitutions());
+        agentDto.setGameTypes(getGameTypes());
+        agentDto.setBusinessAddresses(getBusinessAddresses());
+        agentDto.setAgentInstitutions(convertAgentInstitutions());
         return agentDto;
     }
 
 
-    private Set<AgentInstitutionDto> convertAgentInstitutions(List<AgentInstitution> agentInstitutions) {
-        Set<AgentInstitutionDto> agentInstitutionDtos = new HashSet<>();
-        for (AgentInstitution agentInstitution : agentInstitutions) {
+    private List<AgentInstitutionDto> convertAgentInstitutions() {
+        List<AgentInstitutionDto> agentInstitutionDtos = new ArrayList<>();
+        for (AgentInstitution agentInstitution : getAgentInstitutions()) {
             agentInstitutionDtos.add(AgentInstitutionAdapter.convertAgentInstitutionToDto(agentInstitution, mongoRepositoryReactive));
         }
         return agentInstitutionDtos;
+    }
+
+
+    public List<EnumeratedFactDto> getGameTypes() {
+        List<EnumeratedFactDto> enumeratedFactDtos = new ArrayList<>();
+        for (String gameTypeId : getGameTypeIds()) {
+            GameType gameType = getGameType(gameTypeId);
+            if (gameType != null) {
+                EnumeratedFactDto enumeratedFactDto = new EnumeratedFactDto();
+                enumeratedFactDto.setId(gameType.getId());
+                enumeratedFactDto.setName(gameType.getName());
+                enumeratedFactDtos.add(enumeratedFactDto);
+            }
+        }
+
+        return enumeratedFactDtos;
+    }
+
+    public List<Institution> getInstitutions() {
+        List<Institution> institutionList = new ArrayList<>();
+        for (String institutionId : getInstitutionIds()) {
+            Institution institution = getInstitution(institutionId);
+            if (institution != null) {
+                Institution temp = new Institution();
+                temp.setId(institution.getId());
+                temp.setInstitutionName(institution.getInstitutionName());
+                institutionList.add(temp);
+            }
+        }
+
+        return institutionList;
     }
 
     @Override

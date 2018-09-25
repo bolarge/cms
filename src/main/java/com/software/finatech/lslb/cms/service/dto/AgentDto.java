@@ -1,54 +1,38 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import com.software.finatech.lslb.cms.service.domain.Institution;
+
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class AgentDto {
-    private Set<AgentInstitutionDto> agentInstitutions = new HashSet<>();
+    private List<AgentInstitutionDto> agentInstitutions =new ArrayList<>();
     private String firstName;
     private String lastName;
-    private Set<String> businessAddresses;
     private String residentialAddress;
+    private String fullName;
     private String emailAddress;
     private String phoneNumber;
     private String dateOfBirth;
     private String meansOfId;
     private String passportId;
-    private String fullName;
     private String idNumber;
     private String id;
     private Boolean enabled;
+    private List<EnumeratedFactDto> gameTypes = new ArrayList<>();
+    private List<Institution> institutions = new ArrayList<>();
+    private String title;
+    private String bvn;
+    private String agentId;
+    private List<String> businessAddresses = new ArrayList<>();
 
-    public Boolean getEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public Set<AgentInstitutionDto> getAgentInstitutions() {
+    public List<AgentInstitutionDto> getAgentInstitutions() {
         return agentInstitutions;
     }
 
-
-    public String getIdNumber() {
-        return idNumber;
-    }
-
-    public void setIdNumber(String idNumber) {
-        this.idNumber = idNumber;
-    }
-
-    public void setAgentInstitutions(Set<AgentInstitutionDto> agentInstitutions) {
+    public void setAgentInstitutions(List<AgentInstitutionDto> agentInstitutions) {
         this.agentInstitutions = agentInstitutions;
     }
 
@@ -68,20 +52,20 @@ public class AgentDto {
         this.lastName = lastName;
     }
 
-    public Set<String> getBusinessAddresses() {
-        return businessAddresses;
-    }
-
-    public void setBusinessAddresses(Set<String> businessAddresses) {
-        this.businessAddresses = businessAddresses;
-    }
-
     public String getResidentialAddress() {
         return residentialAddress;
     }
 
     public void setResidentialAddress(String residentialAddress) {
         this.residentialAddress = residentialAddress;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public String getEmailAddress() {
@@ -124,11 +108,75 @@ public class AgentDto {
         this.passportId = passportId;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getIdNumber() {
+        return idNumber;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public List<EnumeratedFactDto> getGameTypes() {
+        return gameTypes;
+    }
+
+    public void setGameTypes(List<EnumeratedFactDto> gameTypes) {
+        this.gameTypes = gameTypes;
+    }
+
+    public List<Institution> getInstitutions() {
+        return institutions;
+    }
+
+    public void setInstitutions(List<Institution> institutions) {
+        this.institutions = institutions;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getBvn() {
+        return bvn;
+    }
+
+    public void setBvn(String bvn) {
+        this.bvn = bvn;
+    }
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
+
+    public List<String> getBusinessAddresses() {
+        return businessAddresses;
+    }
+
+    public void setBusinessAddresses(List<String> businessAddresses) {
+        this.businessAddresses = businessAddresses;
     }
 }
