@@ -208,8 +208,10 @@ public class Agent extends AbstractFact {
         agentDto.setLastName(getLastName());
         agentDto.setMeansOfId(getMeansOfId());
         agentDto.setIdNumber(getIdNumber());
+        agentDto.setPhoneNumber(getPhoneNumber());
         agentDto.setAgentInstitutions(convertAgentInstitutions(getAgentInstitutions()));
         agentDto.setId(getId());
+        agentDto.setEnabled(isEnabled());
         return agentDto;
     }
 
