@@ -203,7 +203,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         }
 
         if (paymentRecordDetailCreateDto.isFirstPayment()) {
-            paymentRecord = newPaymentFromFee(fee, agent, institution);
+            paymentRecord = newPaymentFromFee(fee, agent, institution, paymentRecordDetailCreateDto.getGamingMachineId());
         }
 
 
@@ -274,7 +274,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 }
             }
             if (paymentRecordDetailCreateDto.isFirstPayment()) {
-                paymentRecord = newPaymentFromFee(fee, agent, institution);
+                paymentRecord = newPaymentFromFee(fee, agent, institution, paymentRecordDetailCreateDto.getGamingMachineId());
             }
 
             PaymentRecordDetail paymentRecordDetail = new PaymentRecordDetail();
@@ -547,7 +547,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         return paymentRecordsResponse.block().getStatusCode() != HttpStatus.NOT_FOUND;
     }
 
-    private PaymentRecord newPaymentFromFee(Fee fee, Agent agent, Institution institution) {
+    private PaymentRecord newPaymentFromFee(Fee fee, Agent agent, Institution institution, String gamingMachineId) {
         PaymentRecord paymentRecord = new PaymentRecord();
         paymentRecord.setId(UUID.randomUUID().toString());
         paymentRecord.setAmountOutstanding(fee.getAmount());
@@ -555,6 +555,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         paymentRecord.setAmountPaid(0);
         paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.UNPAID_STATUS_ID);
         paymentRecord.setFeeId(fee.getId());
+        paymentRecord.setGamingMachineId(gamingMachineId);
         paymentRecord.setGameTypeId(fee.getGameTypeId());
         paymentRecord.setRevenueNameId(fee.getRevenueNameId());
         paymentRecord.setFeePaymentTypeId(fee.getFeePaymentTypeId());

@@ -87,7 +87,7 @@ public class PaymentRecordDetailCreateDto {
     public boolean isGamingMachinePayment() {
         return StringUtils.isEmpty(this.getAgentId())
                 && !StringUtils.isEmpty(this.getGamingMachineId())
-                && StringUtils.isEmpty(this.getInstitutionId());
+                && !StringUtils.isEmpty(this.getInstitutionId());
 
     }
 
