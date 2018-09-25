@@ -4,6 +4,7 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.AgentDto;
 import com.software.finatech.lslb.cms.service.dto.AgentInstitutionDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import com.software.finatech.lslb.cms.service.util.adapters.AgentInstitutionAdapter;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -216,20 +217,7 @@ public class Agent extends AbstractFact {
     private Set<AgentInstitutionDto> convertAgentInstitutions(List<AgentInstitution> agentInstitutions) {
         Set<AgentInstitutionDto> agentInstitutionDtos = new HashSet<>();
         for (AgentInstitution agentInstitution : agentInstitutions) {
-            AgentInstitutionDto agentInstitutionDto = new AgentInstitutionDto();
-            GameType gameType = getGameType(agentInstitution.getGameTypeId());
-            if (gameType != null) {
-                agentInstitutionDto.setGameTypeId(gameType.getId());
-                agentInstitutionDto.setGameTypeName(gameType.getName());
-            }
-
-            Institution institution = getInstitution(agentInstitution.getInstitutionId());
-            if (institution != null) {
-                agentInstitutionDto.setInstitutionName(institution.getInstitutionName());
-                agentInstitutionDto.setInstitutionId(institution.getId());
-            }
-            agentInstitutionDto.setBusinessAddressList(agentInstitution.getBusinessAddressList());
-            agentInstitutionDtos.add(agentInstitutionDto);
+            agentInstitutionDtos.add(AgentInstitutionAdapter.convertAgentInstitutionToDto(agentInstitution, mongoRepositoryReactive));
         }
         return agentInstitutionDtos;
     }

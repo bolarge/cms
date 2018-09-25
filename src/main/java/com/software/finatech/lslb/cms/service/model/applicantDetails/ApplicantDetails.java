@@ -10,7 +10,7 @@ public class ApplicantDetails {
     private String shareCapital;
     private String emailAddress;
     private String phoneNumber;
-    private  boolean applicantHasPreviousName;
+    private boolean applicantHasPreviousName;
     private ApplicantPreviousName applicantPreviousName;
     private boolean applicantHasPreviousApplication;
     private ApplicantPreviousApplication applicantPreviousApplication;
@@ -19,13 +19,13 @@ public class ApplicantDetails {
     private boolean applicantHasOutsideLagosStateLicense;
     private OutsideLagosStateLicense outsideLagosStateLicense;
     private String periodApplicantHasBeenInOperation;
-    private boolean isApplicantMemberAffiliatedWithPoliticalParty;
+    private boolean applicantMemberAffiliatedWithPoliticalParty;
     private String applicantMemberPoliticalPartyAffiliationDetails;
-    private boolean isApplicantFundedByPoliticalParty;
+    private boolean applicantFundedByPoliticalParty;
     private String applicantPoliticalPartyFundingDetails;
-    private boolean isApplicantMemberWithGamingExperience;
+    private boolean applicantMemberWithGamingExperience;
     private String applicantMemberGamingExperienceDetails;
-    private boolean isApplicantIndigenous;
+    private boolean applicantIndigenous;
     private String applicantIndigenousDetails;
 
 
@@ -166,11 +166,11 @@ public class ApplicantDetails {
     }
 
     public boolean isApplicantMemberAffiliatedWithPoliticalParty() {
-        return isApplicantMemberAffiliatedWithPoliticalParty;
+        return applicantMemberAffiliatedWithPoliticalParty;
     }
 
     public void setApplicantMemberAffiliatedWithPoliticalParty(boolean applicantMemberAffiliatedWithPoliticalParty) {
-        isApplicantMemberAffiliatedWithPoliticalParty = applicantMemberAffiliatedWithPoliticalParty;
+        this.applicantMemberAffiliatedWithPoliticalParty = applicantMemberAffiliatedWithPoliticalParty;
     }
 
     public String getApplicantMemberPoliticalPartyAffiliationDetails() {
@@ -182,11 +182,11 @@ public class ApplicantDetails {
     }
 
     public boolean isApplicantFundedByPoliticalParty() {
-        return isApplicantFundedByPoliticalParty;
+        return applicantFundedByPoliticalParty;
     }
 
     public void setApplicantFundedByPoliticalParty(boolean applicantFundedByPoliticalParty) {
-        isApplicantFundedByPoliticalParty = applicantFundedByPoliticalParty;
+        this.applicantFundedByPoliticalParty = applicantFundedByPoliticalParty;
     }
 
     public String getApplicantPoliticalPartyFundingDetails() {
@@ -198,11 +198,11 @@ public class ApplicantDetails {
     }
 
     public boolean isApplicantMemberWithGamingExperience() {
-        return isApplicantMemberWithGamingExperience;
+        return applicantMemberWithGamingExperience;
     }
 
     public void setApplicantMemberWithGamingExperience(boolean applicantMemberWithGamingExperience) {
-        isApplicantMemberWithGamingExperience = applicantMemberWithGamingExperience;
+        this.applicantMemberWithGamingExperience = applicantMemberWithGamingExperience;
     }
 
     public String getApplicantMemberGamingExperienceDetails() {
@@ -214,11 +214,11 @@ public class ApplicantDetails {
     }
 
     public boolean isApplicantIndigenous() {
-        return isApplicantIndigenous;
+        return applicantIndigenous;
     }
 
     public void setApplicantIndigenous(boolean applicantIndigenous) {
-        isApplicantIndigenous = applicantIndigenous;
+        this.applicantIndigenous = applicantIndigenous;
     }
 
     public String getApplicantIndigenousDetails() {

@@ -10,18 +10,28 @@ public class AgentApprovalRequestDto {
     private String institutionId;
     private String gameTypeId;
     private String gameTypeName;
-
     private String requestTypeName;
     private String requestTypeId;
     private String requestStatusName;
     private String requestStatusId;
     private String creationDate;
     private String id;
-
     private String approverId;
     private String approverName;
     private String rejectorId;
     private String rejectorName;
+    private AgentInstitutionDto pendingAgentInstitution;
+    private AgentDto agent;
+    private List<String> businessAddressList = new ArrayList<>();
+
+
+    public AgentInstitutionDto getPendingAgentInstitution() {
+        return pendingAgentInstitution;
+    }
+
+    public void setPendingAgentInstitution(AgentInstitutionDto pendingAgentInstitution) {
+        this.pendingAgentInstitution = pendingAgentInstitution;
+    }
 
     public String getApproverId() {
         return approverId;
@@ -62,9 +72,6 @@ public class AgentApprovalRequestDto {
     public void setId(String id) {
         this.id = id;
     }
-
-    private AgentDto agent;
-    private List<String> businessAddressList = new ArrayList<>();
 
     public AgentDto getAgent() {
         return agent;
