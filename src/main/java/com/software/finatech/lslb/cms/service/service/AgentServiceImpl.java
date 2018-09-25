@@ -15,7 +15,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.LicenseValidatorUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AgentUserCreatorAsync;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -166,27 +166,16 @@ public class AgentServiceImpl implements AgentService {
                 }
             }
 
-            DateTime dateOfBirth = FORMATTER.parseDateTime(agentUpdateDto.getDateOfBirth());
+            LocalDate dateOfBirth = FORMATTER.parseLocalDate(agentUpdateDto.getDateOfBirth());
             agent.setDateOfBirth(dateOfBirth);
             agent.setResidentialAddress(agentUpdateDto.getResidentialAddress());
             agent.setEmailAddress(agentUpdateDto.getEmailAddress());
-            agent.setBusinessAddresses(agentUpdateDto.getBusinessAddresses());
             agent.setMeansOfId(agentUpdateDto.getMeansOfId());
             agent.setIdNumber(agentUpdateDto.getIdNumber());
             agent.setBvn(agentUpdateDto.getBvn());
-            agent.setPassportId(agentUpdateDto.getPassportId());
             agent.setLastName(agentUpdateDto.getLastName());
             agent.setFirstName(agentUpdateDto.getFirstName());
             agent.setPhoneNumber(agentUpdateDto.getPhoneNumber());
-            Set<String> gameTypeIds = new HashSet<>();
-            Set<String> institutionIds = new HashSet<>();
-            for (AgentInstitution agentInstitution : agentUpdateDto.getAgentInstitutions()) {
-                gameTypeIds.add(agentInstitution.getGameTypeId());
-                institutionIds.add(agentInstitution.getInstitutionId());
-            }
-            agent.setGameTypeIds(gameTypeIds);
-            agent.setInstitutionIds(institutionIds);
-            //  agent.setAgentInstitutions(agentUpdateDto.getAgentInstitutions());
             saveAgent(agent);
             return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -279,7 +268,7 @@ public class AgentServiceImpl implements AgentService {
         agent.setMeansOfId(agentCreateDto.getMeansOfId());
         agent.setIdNumber(agentCreateDto.getIdNumber());
         agent.setResidentialAddress(agentCreateDto.getResidentialAddress());
-        DateTime dateOfBirth = FORMATTER.parseDateTime(agentCreateDto.getDateOfBirth());
+        LocalDate dateOfBirth = FORMATTER.parseLocalDate(agentCreateDto.getDateOfBirth());
         agent.setDateOfBirth(dateOfBirth);
         Set<String> gameTypeIds = new HashSet<>();
         Set<String> institutionIds = new HashSet<>();
@@ -295,6 +284,7 @@ public class AgentServiceImpl implements AgentService {
         agent.setGameTypeIds(gameTypeIds);
         agent.setInstitutionIds(institutionIds);
         agent.setAgentInstitutions(agentInstitutions);
+        agent.setBusinessAddresses(agentInstitution.getBusinessAddressList());
         return agent;
     }
 
@@ -303,5 +293,18 @@ public class AgentServiceImpl implements AgentService {
         Query query = new Query();
         query.addCriteria(Criteria.where("customerCreatedOnVGPay").is(false));
         return (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
+    }
+
+    @Override
+    public Mono<ResponseEntity> getAgentFullDetailById(String agentId) {
+        try {
+            Agent agent = findById(agentId);
+            if (agent == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Agent with id %s does not exist", agentId), HttpStatus.BAD_REQUEST));
+            }
+            return Mono.just(new ResponseEntity<>(agent.convertToFullDetailDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while getting agent by id", e);
+        }
     }
 }

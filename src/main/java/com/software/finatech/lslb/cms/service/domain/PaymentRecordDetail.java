@@ -94,7 +94,7 @@ public class PaymentRecordDetail extends AbstractFact {
         }
 
         paymentRecordDetailDto.setCreationDate(getCreatedAt() != null ? getCreatedAt().toString("dd-MM-yyyy") : null);
-        paymentRecordDetailDto.setPaymentDate(paymentDate != null ? paymentDate.toString("dd-MM-yyyy HH:mm:ss") : null);
+        paymentRecordDetailDto.setPaymentDate(getPaymentDate() != null ? getPaymentDate().toString("dd-MM-yyyy HH:mm:ss") : null);
         paymentRecordDetailDto.setInvoiceNumber(getInvoiceNumber());
         paymentRecordDetailDto.setVigiPayReference(getVigiPayTransactionReference());
         return paymentRecordDetailDto;

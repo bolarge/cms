@@ -4,7 +4,9 @@ import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class AgentUpdateDto {
@@ -24,18 +26,13 @@ public class AgentUpdateDto {
     private String dateOfBirth;
     @NotEmpty(message = "please provide agent residential address")
     private String residentialAddress;
-    @NotEmpty(message = "please provide agent business addresses")
-    private Set<String> businessAddresses = new HashSet<>();
     @NotEmpty(message = "please provide agent means of id")
     private String meansOfId;
     @NotEmpty(message = "please provide agent id number")
     private String idNumber;
     @NotEmpty(message = "please provide agent BVN")
+    @Size(min = 12, message = "Phone number should not be less than 7 characters")
     private String bvn;
-    @NotEmpty(message = "please provide agent institutions")
-    private Set<AgentInstitution> agentInstitutions = new HashSet<>();
-    @NotEmpty(message = "please provide agent passport id")
-    private String passportId;
 
     public String getId() {
         return id;
@@ -101,14 +98,6 @@ public class AgentUpdateDto {
         this.residentialAddress = residentialAddress;
     }
 
-    public Set<String> getBusinessAddresses() {
-        return businessAddresses;
-    }
-
-    public void setBusinessAddresses(Set<String> businessAddresses) {
-        this.businessAddresses = businessAddresses;
-    }
-
     public String getMeansOfId() {
         return meansOfId;
     }
@@ -131,21 +120,5 @@ public class AgentUpdateDto {
 
     public void setBvn(String bvn) {
         this.bvn = bvn;
-    }
-
-    public Set<AgentInstitution> getAgentInstitutions() {
-        return agentInstitutions;
-    }
-
-    public void setAgentInstitutions(Set<AgentInstitution> agentInstitutions) {
-        this.agentInstitutions = agentInstitutions;
-    }
-
-    public String getPassportId() {
-        return passportId;
-    }
-
-    public void setPassportId(String passportId) {
-        this.passportId = passportId;
     }
 }

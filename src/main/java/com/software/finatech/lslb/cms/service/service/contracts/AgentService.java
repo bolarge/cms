@@ -31,4 +31,6 @@ public interface AgentService {
     void saveAgent(Agent agent);
 
     Mono<ResponseEntity> createAgentUnderInstitution(AgentInstitutionCreateDto agentInstitutionCreateDto);
+
+    Mono<ResponseEntity> getAgentFullDetailById(String agentId);
 }

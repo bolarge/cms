@@ -80,4 +80,16 @@ public class AgentController extends BaseController {
     public Mono<ResponseEntity> createAgentForInstitution(@RequestBody @Valid AgentInstitutionCreateDto agentInstitutionCreateDto) {
         return agentService.createAgentUnderInstitution(agentInstitutionCreateDto);
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{agentId}")
+    @ApiOperation(value = "Get Agent full detail by id", response = AgentDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> createAgentForInstitution(@PathVariable("agentId") String agentId) {
+        return agentService.getAgentFullDetailById(agentId);
+    }
+
 }
