@@ -5,6 +5,24 @@ import java.util.List;
 public class ApplicantCriminalityDetails {
     private List<MemberCriminalityDetail> memberCriminalityDetailList;
     private ApplicantPendingInvestigation applicantPendingInvestigation;
+    private Boolean applicantHasPendingInvestigation;
+    private Boolean applicantMemberHasCriminalOffence;
+
+    public Boolean getApplicantHasPendingInvestigation() {
+        return applicantHasPendingInvestigation;
+    }
+
+    public void setApplicantHasPendingInvestigation(Boolean applicantHasPendingInvestigation) {
+        this.applicantHasPendingInvestigation = applicantHasPendingInvestigation;
+    }
+
+    public Boolean getApplicantMemberHasCriminalOffence() {
+        return applicantMemberHasCriminalOffence;
+    }
+
+    public void setApplicantMemberHasCriminalOffence(Boolean applicantMemberHasCriminalOffence) {
+        this.applicantMemberHasCriminalOffence = applicantMemberHasCriminalOffence;
+    }
 
     public List<MemberCriminalityDetail> getMemberCriminalityDetailList() {
         return memberCriminalityDetailList;
