@@ -17,6 +17,15 @@ public class AgentDto {
     private String fullName;
     private String idNumber;
     private String id;
+    private Boolean enabled;
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
 
     public String getId() {
         return id;

@@ -247,10 +247,22 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
 
     private void rejectAgentCreationRequest(AgentApprovalRequest agentApprovalRequest, String userId, String rejectReason) {
         Agent agent = findById(agentApprovalRequest.getAgentId());
-        mongoRepositoryReactive.delete(agent);
         agentApprovalRequest.setRejectorId(userId);
         agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
         agentApprovalRequest.setRejectionReason(rejectReason);
+        Query queryForAgentDocument = new Query();
+        queryForAgentDocument.addCriteria(Criteria.where("entityId").is(agent.getId()));
+        ArrayList<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(queryForAgentDocument, Document.class).toStream().collect(Collectors.toList());
+        if (documents != null || !documents.isEmpty()) {
+            for (Document document : documents) {
+                try {
+                    mongoRepositoryReactive.delete(document);
+                } catch (Exception e) {
+                    logger.error("An error occurred while deleting document {}", document.getId());
+                }
+            }
+        }
+        mongoRepositoryReactive.delete(agent);
         mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
     }
 

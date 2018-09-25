@@ -122,7 +122,7 @@ public class AgentServiceImpl implements AgentService {
             saveAgent(agent);
             AgentApprovalRequest agentApprovalRequest = fromAgentCreateDto(agentCreateDto, agent);
             mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
-            return Mono.just(new ResponseEntity<>("Your request has been submitted for approval", HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format for date of birth , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
