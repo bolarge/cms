@@ -112,6 +112,7 @@ public class GamingMachine extends AbstractFact {
         gamingMachineDto.setSerialNumber(getSerialNumber());
         gamingMachineDto.setMachineAddress(getMachineAddress());
         gamingMachineDto.setInstitutionId(getInstitutionId());
+        gamingMachineDto.setId(getId());
         Institution institution = getInstitution();
         if (institution != null){
             gamingMachineDto.setInstitutionName(institution.getInstitutionName());
