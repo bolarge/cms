@@ -4,6 +4,7 @@ import com.software.finatech.lslb.cms.service.dto.AgentApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.referencedata.AgentApprovalRequestTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import com.software.finatech.lslb.cms.service.util.adapters.AgentInstitutionAdapter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -286,9 +287,16 @@ public class AgentApprovalRequest extends AbstractFact {
             agentApprovalRequestDto.setRejectorId(getRejectorId());
             agentApprovalRequestDto.setRejectorName(rejector.getFullName());
         }
+
+        if (isInstitutionAgentAdditionRequest()){
+            AgentInstitution  agentInstitution = new AgentInstitution();
+            agentInstitution.setInstitutionId(getInstitutionId());
+            agentInstitution.setGameTypeId(getGameTypeId());
+            agentInstitution.setBusinessAddressList(getBusinessAddressList());
+            agentApprovalRequestDto.setPendingAgentInstitution(AgentInstitutionAdapter.convertAgentInstitutionToDto(agentInstitution, mongoRepositoryReactive));
+        }
         return agentApprovalRequestDto;
     }
-
 
     @Override
     public String getFactName() {

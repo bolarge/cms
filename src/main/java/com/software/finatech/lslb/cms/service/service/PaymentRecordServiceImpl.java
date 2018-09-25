@@ -8,7 +8,6 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
-import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.SendEmail;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 
 @Service
@@ -114,7 +115,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             return Mono.just(new ResponseEntity<>(paymentRecordDtos, HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while trying to get all payment records";
-            return ErrorResponseUtil.logAndReturnError(logger, errorMsg, e);
+            return logAndReturnError(logger, errorMsg, e);
         }
     }
 
@@ -202,6 +203,19 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         queryForExistingConfirmedPaymentRecord.addCriteria(Criteria.where("feePaymentTypeId").is(applicationFeeTypeId));
         return (PaymentRecord) mongoRepositoryReactive.find(queryForExistingConfirmedPaymentRecord, PaymentRecord.class).block();
+    }
+
+    @Override
+    public Mono<ResponseEntity> findPaymentRecordById(String paymentRecordId) {
+        try {
+            PaymentRecord paymentRecord = findById(paymentRecordId);
+            if (paymentRecord == null) {
+                return Mono.just(new ResponseEntity(String.format("Payment record with id %s not found", paymentRecordId), HttpStatus.NOT_FOUND));
+            }
+            return Mono.just(new ResponseEntity(paymentRecord.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occured while getting payment record by id", e);
+        }
     }
 }
 

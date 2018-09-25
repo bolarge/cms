@@ -31,4 +31,6 @@ public interface PaymentRecordService {
     void savePaymentRecord(PaymentRecord paymentRecord);
 
     PaymentRecord findExistingConfirmedApplicationFeeForInstitutionAndGameType(String institutionId, String gameTypeId);
+
+    Mono<ResponseEntity> findPaymentRecordById(String paymentRecordId);
 }

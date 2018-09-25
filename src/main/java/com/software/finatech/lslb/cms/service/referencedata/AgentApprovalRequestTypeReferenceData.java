@@ -22,7 +22,7 @@ public class AgentApprovalRequestTypeReferenceData {
             agentApprovalRequestType2 = new AgentApprovalRequestType();
             agentApprovalRequestType2.setId(ADD_INSTITUTION_TO_AGENT_ID);
         }
-        agentApprovalRequestType2.setName("ADD OPERATOR FOR AGENT");
+        agentApprovalRequestType2.setName("ADD OPERATOR");
 
         mongoRepositoryReactive.saveOrUpdate(agentApprovalRequestType1);
         mongoRepositoryReactive.saveOrUpdate(agentApprovalRequestType2);
