@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 @Component
 public class PaymentEmailNotifierAsync {
@@ -52,6 +53,7 @@ public class PaymentEmailNotifierAsync {
         if (paymentRecordDetail.isSuccessfulPayment()) {
             sendPaymentNotificationToLSLBFianceAdmins(paymentRecordDetail, paymentRecord);
         }
+
     }
 
 

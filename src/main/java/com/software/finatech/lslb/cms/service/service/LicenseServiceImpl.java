@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferen
 import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.*;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AIPMailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -27,7 +28,10 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -41,6 +45,8 @@ public class LicenseServiceImpl implements LicenseService {
     SendEmail sendEmail;
     @Autowired
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
+    @Autowired
+    private AIPMailSenderAsync aipMailSenderAsync;
 
     @Autowired
     private AuthInfoServiceImpl authInfoService;
@@ -334,17 +340,17 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Override
     public boolean institutionIsLicensedForGameType(String institutionId, String gameTypeId) {
+        List<String> allowedLicenseStatusIds = getAllowedLicensedStatusIds();
         Query queryForLicensedInstitutionInGameType = new Query();
         LocalDate today = LocalDate.now();
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("institutionId").is(institutionId));
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID));
-        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").in(allowedLicenseStatusIds));
         queryForLicensedInstitutionInGameType.addCriteria(new Criteria().andOperator(Criteria.where("effectiveDate").lte(today), (Criteria.where("expiryDate").gte(today))));
         License licenseForInstitutionAndGameType = (License) mongoRepositoryReactive.find(queryForLicensedInstitutionInGameType, License.class).block();
         return licenseForInstitutionAndGameType != null;
     }
-
 
     @Override
     public Mono<ResponseEntity> getInstitutionAIPUploaded(String institutionId) {
@@ -616,6 +622,7 @@ public class LicenseServiceImpl implements LicenseService {
             license.setPaymentRecordId(paymentRecord.getId());
             //     license.setLicenseNumber(generateLicenseNumberForPaymentRecord(paymentRecord));
             mongoRepositoryReactive.saveOrUpdate(license);
+            aipMailSenderAsync.sendAipNotificationToInstitutionAdmins(paymentRecord);
         } catch (Exception e) {
             logger.error("An error occurred while creating AIP license for institution {}", paymentRecord.getInstitutionId(), e);
         }
@@ -721,6 +728,13 @@ public class LicenseServiceImpl implements LicenseService {
         }
     }
 
+    private List<String> getAllowedLicensedStatusIds(){
+        List<String> allowedLicenseStatusIds = new ArrayList<>();
+        allowedLicenseStatusIds.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+        allowedLicenseStatusIds.add(LicenseStatusReferenceData.AIP_COMPLETED);
+        return allowedLicenseStatusIds;
+    }
+
     private LocalDate getNewLicenseEndDate(License latestLicense, GameType gameType) throws Exception {
         LocalDate newLicenseStartDate = latestLicense.getExpiryDate();
         String licenseTypeId = latestLicense.getLicenseTypeId();
@@ -793,9 +807,9 @@ public class LicenseServiceImpl implements LicenseService {
         }
         String randomDigit = String.valueOf(NumberUtil.getRandomNumberInRange(10000, 1000000));
         GameType gameType = paymentRecord.getGameType();
-        if (gameType != null && !StringUtils.isEmpty(gameType.getShortCode())){
-            prefix = prefix +gameType.getShortCode() + "-";
+        if (gameType != null && !StringUtils.isEmpty(gameType.getShortCode())) {
+            prefix = prefix + gameType.getShortCode() + "-";
         }
-            return String.format("%s%s", prefix, randomDigit);
+        return String.format("%s%s", prefix, randomDigit);
     }
 }

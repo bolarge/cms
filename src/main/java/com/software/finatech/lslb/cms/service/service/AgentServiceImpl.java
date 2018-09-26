@@ -190,10 +190,10 @@ public class AgentServiceImpl implements AgentService {
             String gameTypeId = agentInstitutionCreateDto.getGameTypeId();
 
             //TODO: MAKE SURE VALIDATION IS MADE FOR INSTITUTION LICENSE AND GAME TYPE
-//            Mono<ResponseEntity> validateInstitutionLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
-//            if (validateInstitutionLicenseResponse != null) {
-//                return validateInstitutionLicenseResponse;
-//            }
+            Mono<ResponseEntity> validateInstitutionLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
+            if (validateInstitutionLicenseResponse != null) {
+                return validateInstitutionLicenseResponse;
+            }
 
             Query query = new Query();
             query.addCriteria(Criteria.where("emailAddress").is(agentInstitutionCreateDto.getAgentEmailAddress()));
@@ -246,10 +246,10 @@ public class AgentServiceImpl implements AgentService {
             return Mono.just(new ResponseEntity<>(String.format("An agent already exist with the email address %s", email), HttpStatus.BAD_REQUEST));
         }
         //TODO: VALIDATE THE INSTITUTION CREATING AN AGENT IF IT HAS LICENCE FOR THE CATEGORY
-//        Mono<ResponseEntity> validateLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(agentCreateDto.getInstitutionId(), agentCreateDto.getGameTypeId());
-//        if (validateLicenseResponse != null) {
-//            return validateLicenseResponse;
-//        }
+        Mono<ResponseEntity> validateLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(agentCreateDto.getInstitutionId(), agentCreateDto.getGameTypeId());
+        if (validateLicenseResponse != null) {
+            return validateLicenseResponse;
+        }
 
         return null;
     }

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <springProfile name="development">
+        <property name="LOGS" value="./logs" />
+
+        <appender name="Console"
+                  class="ch.qos.logback.core.ConsoleAppender">
+            <layout class="ch.qos.logback.classic.PatternLayout">
+                <Pattern>
+                    %black(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable
+                </Pattern>
+            </layout>
+        </appender>
+
+        <!-- LOG everything at INFO level -->
+        <root level="info">
+            <appender-ref ref="Console" />
+        </root>
+    </springProfile>
+
+    <springProfile name="test">
+        <property name="LOGS" value="./logs" />
+
+        <appender name="Console"
+                  class="ch.qos.logback.core.ConsoleAppender">
+            <layout class="ch.qos.logback.classic.PatternLayout">
+                <Pattern>
+                    %black(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable
+                </Pattern>
+            </layout>
+        </appender>
+
+        <appender name="Stackify"
+                  class="com.stackify.log.logback.StackifyLogAppender">
+            <apiKey>4Rg1Yv3Kr3To3Lq3Tf9Yj3Qw7Ka7Re9Is6Bb8Hh</apiKey>
+            <application>lslb-cms-service</application>
+            <environment>test</environment>
+        </appender>
+
+        <!-- LOG everything at INFO level -->
+        <root level="info">
+            <appender-ref ref="Stackify" />
+            <appender-ref ref="Console" />
+        </root>
+
+    </springProfile>
+
+    <springProfile name="staging">
+        <property name="LOGS" value="./logs" />
+
+        <appender name="Console"
+                  class="ch.qos.logback.core.ConsoleAppender">
+            <layout class="ch.qos.logback.classic.PatternLayout">
+                <Pattern>
+                    %black(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable
+                </Pattern>
+            </layout>
+        </appender>
+
+        <appender name="Stackify"
+                  class="com.stackify.log.logback.StackifyLogAppender">
+            <apiKey>4Rg1Yv3Kr3To3Lq3Tf9Yj3Qw7Ka7Re9Is6Bb8Hh</apiKey>
+            <application>lslb-cms-service</application>
+            <environment>staging</environment>
+        </appender>
+
+        <!-- LOG everything at INFO level -->
+        <root level="info">
+            <appender-ref ref="Stackify" />
+            <appender-ref ref="Console" />
+        </root>
+
+    </springProfile>
+
+
+    <springProfile name="production">
+        <property name="LOGS" value="./logs" />
+
+        <appender name="Console"
+                  class="ch.qos.logback.core.ConsoleAppender">
+            <layout class="ch.qos.logback.classic.PatternLayout">
+                <Pattern>
+                    %black(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable
+                </Pattern>
+            </layout>
+        </appender>
+
+        <appender name="Stackify"
+                  class="com.stackify.log.logback.StackifyLogAppender">
+            <apiKey>r4Rg1Yv3Kr3To3Lq3Tf9Yj3Qw7Ka7Re9Is6Bb8Hh</apiKey>
+            <application>lslb-cms-service</application>
+            <environment>production</environment>
+        </appender>
+
+        <!-- LOG everything at INFO level -->
+        <root level="info">
+            <appender-ref ref="Stackify" />
+            <appender-ref ref="Console" />
+        </root>
+    </springProfile>
+
+</configuration>
