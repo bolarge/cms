@@ -20,7 +20,6 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Api(value = "GameType", description = "", tags = "")
@@ -73,23 +72,7 @@ public class GameTypeController extends BaseController {
     }
     )
     public Mono<ResponseEntity> createGameType(@RequestBody @Valid GameTypeCreateDto gameTypeCreateDto) {
-        try {
-            GameType gameType = new GameType();
-            gameType.setId(UUID.randomUUID().toString());
-            gameType.setAipDurationMonths(gameTypeCreateDto.getAipDurationMonths());
-            gameType.setAgentLicenseDurationMonths(gameTypeCreateDto.getAgentLicenseDurationMonths());
-            gameType.setGamingMachineLicenseDurationMonths(gameTypeCreateDto.getGamingMachineLicenseDurationMonths());
-            gameType.setInstitutionLicenseDurationMonths(gameTypeCreateDto.getLicenseDurationMonths());
-            gameType.setName(gameTypeCreateDto.getName());
-            gameType.setDescription(gameTypeCreateDto.getDescription());
-            mongoRepositoryReactive.saveOrUpdate(gameType);
-
-            return Mono.just(new ResponseEntity<>(gameType.convertToDto(), HttpStatus.OK));
-        } catch (Exception ex) {
-            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
-
-        }
-
+        return gameTypeService.createGameType(gameTypeCreateDto);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/update")
@@ -138,7 +121,7 @@ public class GameTypeController extends BaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getGameTypesForAgent(@RequestParam("agentId")String agentId) {
+    public Mono<ResponseEntity> getGameTypesForAgent(@RequestParam("agentId") String agentId) {
         return gameTypeService.getAllGameTypesForAgent(agentId);
     }
 
