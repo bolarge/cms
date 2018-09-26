@@ -1,33 +1,45 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 public class PaymentRecordDto {
-    private String institutionName;
     private String institutionId;
     private String approverName;
     private String apprcverId;
     private String paymentStatusId;
     private String paymentStatusName;
-   // private EnumeratedFactDto paymentStatus;
     private String gameTypeName;
     private String gameTypeId;
     private String feeId;
-  //  private FeeDto fee;
     private double amountPaid;
     private double amountOutstanding;
     private double amount;
     private String id;
     private String parentLicenseId;
     private String agentId;
-    private String agentName;
+    private String ownerName;
     private String gamingMachineId;
-  //  private AgentDto agent;
-  //  private GamingMachineDto gamingMachine;
     private String startYear;
     private String endYear;
     private String feePaymentTypeName;
     private String feePaymentTypeId;
     private String revenueName;
     private String revenueNameId;
+    private String machineNumber;
+
+    public String getMachineNumber() {
+        return machineNumber;
+    }
+
+    public void setMachineNumber(String machineNumber) {
+        this.machineNumber = machineNumber;
+    }
+
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
 
     public String getFeePaymentTypeId() {
         return feePaymentTypeId;
@@ -71,14 +83,6 @@ public class PaymentRecordDto {
 
     public void setStartYear(String startYear) {
         this.startYear = startYear;
-    }
-
-    public String getInstitutionName() {
-        return institutionName;
-    }
-
-    public void setInstitutionName(String institutionName) {
-        this.institutionName = institutionName;
     }
 
     public String getParentLicenseId() {
@@ -191,14 +195,6 @@ public class PaymentRecordDto {
 
     public void setAgentId(String agentId) {
         this.agentId = agentId;
-    }
-
-    public String getAgentName() {
-        return agentName;
-    }
-
-    public void setAgentName(String agentName) {
-        this.agentName = agentName;
     }
 
     public String getGamingMachineId() {

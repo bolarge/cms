@@ -99,6 +99,14 @@ public class PaymentRecord extends AbstractFact {
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
 
+    public String getInstitutionName() {
+        Institution institution = getInstitution();
+        if (institution != null) {
+            return institution.getInstitutionName();
+        }
+        return "";
+    }
+
     public Fee getFee() {
         if (feeId == null) {
             return null;
@@ -254,6 +262,7 @@ public class PaymentRecord extends AbstractFact {
         PaymentRecordDto paymentRecordDto = new PaymentRecordDto();
         paymentRecordDto.setId(getId());
         paymentRecordDto.setFeeId(getFeeId());
+        String ownerName = "";
         RevenueName revenueName = getRevenueName();
         if (revenueName != null) {
             paymentRecordDto.setRevenueName(revenueName.getName());
@@ -273,15 +282,16 @@ public class PaymentRecord extends AbstractFact {
         Agent agent = getAgent();
         if (agent != null) {
             paymentRecordDto.setAgentId(getAgentId());
-            paymentRecordDto.setAgentName(agent.getFullName());
+            ownerName = agent.getFullName();
         }
         GamingMachine gamingMachine = getGamingMachine();
         if (gamingMachine != null) {
             paymentRecordDto.setGamingMachineId(getGamingMachineId());
+            paymentRecordDto.setMachineNumber(gamingMachine.getMachineNumber());
             paymentRecordDto.setInstitutionId(gamingMachine.getInstitutionId());
             Institution institution = gamingMachine.getInstitution();
             if (institution != null) {
-                paymentRecordDto.setInstitutionName(institution.getInstitutionName());
+                ownerName = institution.getInstitutionName();
             }
         }
 
@@ -291,26 +301,28 @@ public class PaymentRecord extends AbstractFact {
         Institution institution = getInstitution();
         if (institution != null) {
             paymentRecordDto.setInstitutionId(getInstitutionId());
-            paymentRecordDto.setInstitutionName(institution.getInstitutionName());
+            ownerName = institution.getInstitutionName();
         }
         GameType gameType = getGameType();
         if (gameType != null) {
             paymentRecordDto.setGameTypeId(getGameTypeId());
             paymentRecordDto.setGameTypeName(gameType.getName());
         }
+        paymentRecordDto.setOwnerName(ownerName);
         return paymentRecordDto;
     }
 
 
-    public boolean isInstitutionPayment(){
-        return StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_ID,this.revenueNameId);
-    }
-    public boolean isGamingMachinePayment(){
-        return StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_ID,this.revenueNameId);
+    public boolean isInstitutionPayment() {
+        return StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_ID, this.revenueNameId);
     }
 
-    public boolean isAgentPayment(){
-        return StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID,this.revenueNameId);
+    public boolean isGamingMachinePayment() {
+        return StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_ID, this.revenueNameId);
+    }
+
+    public boolean isAgentPayment() {
+        return StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID, this.revenueNameId);
     }
 
     @Override
