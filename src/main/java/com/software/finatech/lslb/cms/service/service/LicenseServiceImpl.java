@@ -702,7 +702,7 @@ public class LicenseServiceImpl implements LicenseService {
             newPendingApprovalRenewedLicense.setGamingMachineId(gamingMachineId);
             newPendingApprovalRenewedLicense.setInstitutionId(institutionId);
             newPendingApprovalRenewedLicense.setAgentId(agentId);
-            newPendingApprovalRenewedLicense.setEffectiveDate(newLicenseStartDate);
+            newPendingApprovalRenewedLicense.setEffectiveDate(newLicenseStartDate.plusDays(1));
             newPendingApprovalRenewedLicense.setExpiryDate(newLicenseEndDate);
             newPendingApprovalRenewedLicense.setPaymentRecordId(paymentRecord.getId());
             if (latestLicense.isInstitutionLicense()) {
