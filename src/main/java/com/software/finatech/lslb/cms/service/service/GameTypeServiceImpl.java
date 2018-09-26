@@ -138,7 +138,7 @@ public class GameTypeServiceImpl implements GameTypeService {
             return Mono.just(new ResponseEntity<>(String.format("Category with name %s already exist", name), HttpStatus.BAD_REQUEST));
         }
         if (gameTypeCreateDto.getAllowsGamingMachine() && (gameTypeCreateDto.getGamingMachineLicenseDurationMonths() == null || gameTypeCreateDto.getGamingMachineLicenseDurationMonths() <= 0)) {
-            return Mono.just(new ResponseEntity<>("Please specify gaming machine licence duration for category in months", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Gaming Machine licence duration should be at least one month", HttpStatus.BAD_REQUEST));
         }
         return null;
     }

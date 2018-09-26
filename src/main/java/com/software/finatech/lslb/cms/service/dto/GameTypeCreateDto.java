@@ -5,13 +5,13 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 public class GameTypeCreateDto {
-    @Min(value = 0, message = "Please enter AIP Duration")
+    @Min(value = 1, message = "AIP licence duration should be at least one month")
     protected int aipDurationMonths;
-    @Min(value = 0, message = "Please enter License Duration in months")
+    @Min(value = 1, message = "Institution licence duration should be at least one month")
     protected int licenseDurationMonths;
     @NotEmpty(message = "Please enter GameType Name")
     protected String name;
-    @Min(value = 0, message = "Please enter Agent License Duration in months")
+    @Min(value = 1, message = "Agent license duration should be at least one month")
     protected int agentLicenseDurationMonths;
     protected Integer gamingMachineLicenseDurationMonths;
     @NotNull(message = "Please enter if category allows gaming machine")

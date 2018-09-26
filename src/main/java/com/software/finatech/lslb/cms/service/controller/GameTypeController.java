@@ -63,7 +63,7 @@ public class GameTypeController extends BaseController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/new")
-    @ApiOperation(value = "Create new GameType", response = GameType.class, consumes = "application/json")
+    @ApiOperation(value = "Create new GameType", response = GameTypeDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
