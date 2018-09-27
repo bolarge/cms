@@ -345,8 +345,8 @@ public class LicenseServiceImpl implements LicenseService {
         LocalDate today = LocalDate.now();
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("institutionId").is(institutionId));
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID));
-        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").in(allowedLicenseStatusIds));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseStatusId").in(allowedLicenseStatusIds));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
         queryForLicensedInstitutionInGameType.addCriteria(new Criteria().andOperator(Criteria.where("effectiveDate").lte(today), (Criteria.where("expiryDate").gte(today))));
         License licenseForInstitutionAndGameType = (License) mongoRepositoryReactive.find(queryForLicensedInstitutionInGameType, License.class).block();
         return licenseForInstitutionAndGameType != null;
@@ -728,7 +728,7 @@ public class LicenseServiceImpl implements LicenseService {
         }
     }
 
-    private List<String> getAllowedLicensedStatusIds(){
+    private List<String> getAllowedLicensedStatusIds() {
         List<String> allowedLicenseStatusIds = new ArrayList<>();
         allowedLicenseStatusIds.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
         allowedLicenseStatusIds.add(LicenseStatusReferenceData.AIP_COMPLETED);
