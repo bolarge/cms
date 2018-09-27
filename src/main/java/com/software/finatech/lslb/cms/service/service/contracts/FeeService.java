@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
 import com.software.finatech.lslb.cms.service.domain.Fee;
+import com.software.finatech.lslb.cms.service.domain.FeePaymentType;
 import com.software.finatech.lslb.cms.service.dto.*;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
@@ -24,4 +25,8 @@ public interface FeeService {
     Mono<ResponseEntity> findAllFeePaymentTypeForRevenueName(String revenueNameId);
 
     Mono<ResponseEntity> findRevenueNameByParams(String institutionId, String agentId);
+
+    Fee findFeeByRevenueNameGameTypeAndFeePaymentType(String revenueNameId, String gameTypeId, String feePaymentTypeId);
+
+    FeePaymentType getFeePaymentTypeById(String feePaymentTypeId);
 }

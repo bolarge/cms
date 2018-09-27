@@ -514,8 +514,11 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         query.addCriteria(Criteria.where("revenueNameId").is(institutionRevenueNameId));
 
         PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.find(query, PaymentRecord.class).block();
-        if (paymentRecord != null) {
-            return Mono.just(new ResponseEntity<>("You have an existing payment for application for license  for the category specified", HttpStatus.BAD_REQUEST));
+        if (paymentRecord != null && StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, paymentRecord.getPaymentStatusId())) {
+            return Mono.just(new ResponseEntity<>("You have an existing application fee payment  for the category specified", HttpStatus.BAD_REQUEST));
+        }
+        if (paymentRecord != null && !StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, paymentRecord.getPaymentStatusId())) {
+            return Mono.just(new ResponseEntity<>("Please complete your existing application fee payment for category", HttpStatus.BAD_REQUEST));
         }
         return null;
     }

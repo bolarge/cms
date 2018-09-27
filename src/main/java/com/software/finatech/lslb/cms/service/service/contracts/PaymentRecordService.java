@@ -32,5 +32,11 @@ public interface PaymentRecordService {
 
     PaymentRecord findExistingConfirmedApplicationFeeForInstitutionAndGameType(String institutionId, String gameTypeId);
 
+    PaymentRecord findPaymentRecord(String gamingMachineId,
+                                    String gameTypeId,
+                                    String institutionId,
+                                    String feePaymentTypeId,
+                                    String revenueNameId);
+
     Mono<ResponseEntity> findPaymentRecordById(String paymentRecordId);
 }
