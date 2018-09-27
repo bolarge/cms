@@ -1,7 +1,10 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.RenewalFormDto;
+import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.Map;
 
 @SuppressWarnings("serial")
 @Document(collection = "RenewalForms")
@@ -9,6 +12,7 @@ public class RenewalForm extends AbstractFact {
     protected String paymentRecordId;
     protected String institutionId;
     protected String gameTypeId;
+    protected String licensedId;
     protected String checkStakeHoldersChange;
     protected String stakeHoldersChange;
     protected String checkSharesAquisition;
@@ -25,7 +29,23 @@ public class RenewalForm extends AbstractFact {
     protected String changeInGamingMachines;
     protected String checkNewInvestors;
     protected String newInvestors;
+    protected String formStatusId;
 
+    public String getLicensedId() {
+        return licensedId;
+    }
+
+    public void setLicensedId(String licensedId) {
+        this.licensedId = licensedId;
+    }
+
+    public String getFormStatusId() {
+        return formStatusId;
+    }
+
+    public void setFormStatusId(String formStatusId) {
+        this.formStatusId = formStatusId;
+    }
 
     public String getInstitutionId() {
         return institutionId;
@@ -179,6 +199,7 @@ public class RenewalForm extends AbstractFact {
         this.newInvestors = newInvestors;
     }
 
+
     public RenewalFormDto convertToDto(){
         RenewalFormDto renewalFormDto = new RenewalFormDto();
         renewalFormDto.setRenewalFormId(getId());
@@ -198,8 +219,23 @@ public class RenewalForm extends AbstractFact {
         renewalFormDto.setSharesAquisition(getSharesAquisition());
         renewalFormDto.setStakeHoldersChange(getStakeHoldersChange());
         renewalFormDto.setTechnicalPartner(getTechnicalPartner());
+        renewalFormDto.setLicenseId(getLicensedId());
         PaymentRecord paymentRecord= (PaymentRecord) mongoRepositoryReactive.findById(getPaymentRecordId(),PaymentRecord.class).block();
         renewalFormDto.setPaymentRecord(paymentRecord.convertToDto());
+        Map renewalFormStatusMap = Mapstore.STORE.get("RenewalFormStatus");
+
+        RenewalFormStatus renewalFormStatus= null;
+        if (renewalFormStatusMap != null) {
+            renewalFormStatus = (RenewalFormStatus) renewalFormStatusMap.get(formStatusId); }
+        if (renewalFormStatus == null) {
+            renewalFormStatus = (RenewalFormStatus) mongoRepositoryReactive.findById(formStatusId, RenewalFormStatus.class).block();
+            if (renewalFormStatus != null && renewalFormStatus != null) {
+                renewalFormStatusMap.put(formStatusId, renewalFormStatus);
+            }
+        }
+        if (renewalFormStatus != null) {
+           renewalFormDto.setRenewalFormStatusDto(renewalFormStatus.convertToDto());
+        }
         return renewalFormDto;
 
     }

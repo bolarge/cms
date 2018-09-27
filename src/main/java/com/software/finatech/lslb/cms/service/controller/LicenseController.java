@@ -311,7 +311,7 @@ public class LicenseController {
             License licenseRecords = licenseService.findRenewalLicense(institutionId, agentId, gamingMachineId, gameTypeId, licenseTypeId);
 
            if(licenseRecords==null){
-               return Mono.just(new ResponseEntity<>("No License Found", HttpStatus.BAD_REQUEST));
+               return Mono.just(new ResponseEntity<>("No Payment Record Found or An Incomplete Renewal Application Exists", HttpStatus.BAD_REQUEST));
 
            }else{
                return Mono.just(new ResponseEntity<>(licenseRecords.convertToDto(), HttpStatus.OK));
