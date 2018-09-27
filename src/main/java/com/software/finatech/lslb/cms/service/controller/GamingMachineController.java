@@ -1,9 +1,6 @@
 package com.software.finatech.lslb.cms.service.controller;
 
-import com.software.finatech.lslb.cms.service.dto.GamingMachineCreateDto;
-import com.software.finatech.lslb.cms.service.dto.GamingMachineDto;
-import com.software.finatech.lslb.cms.service.dto.GamingMachineUpdateDto;
-import com.software.finatech.lslb.cms.service.dto.UploadTransactionResponse;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.service.contracts.GamingMachineService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -80,5 +77,30 @@ public class GamingMachineController {
                                                           @RequestParam("gameTypeId") String gameTypeId,
                                                           @RequestParam("file") MultipartFile multipartFile) {
         return gamingMachineService.uploadMultipleGamingMachinesForInstitution(institutionId, gameTypeId, multipartFile);
+    }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/validate-multiple-license-payment")
+    @ApiOperation(value = "Validate payment for license for multiple gaming machines", response = GamingMachineMultiplePaymentResponse.class,
+            notes = "This returns the list of valid machines u can pay license for and list if invalid machines with the reason," +
+                    " also it returns the total amount of the valid license payments")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"), @ApiResponse(code = 404, message = "Not Found"),
+            @ApiResponse(code = 500, message = "Internal Server error")})
+    public Mono<ResponseEntity> validateMultipleGamingMachineLicensePayment(@RequestBody GamingMachineMultiplePaymentRequest gamingMachineMultiplePaymentRequest) {
+        return gamingMachineService.validateMultipleGamingMachineLicensePayment(gamingMachineMultiplePaymentRequest);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/validate-multiple-license-renewal-payment")
+    @ApiOperation(value = "Validate payment for license renewal for multiple gaming machines", response = GamingMachineMultiplePaymentResponse.class,
+            notes = "This returns the list of valid machines u can pay license renewal for and list if invalid machines with the reason," +
+                    " also it returns the total amount of the valid license renewal payments")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"), @ApiResponse(code = 404, message = "Not Found"),
+            @ApiResponse(code = 500, message = "Internal Server error")})
+    public Mono<ResponseEntity> validateMultipleGamingMachineLicenseRenewalPayment(@RequestBody GamingMachineMultiplePaymentRequest gamingMachineMultiplePaymentRequest) {
+        return gamingMachineService.validateMultipleGamingMachineLicenseRenewalPayment(gamingMachineMultiplePaymentRequest);
     }
 }

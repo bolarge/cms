@@ -144,5 +144,4 @@ public class AgentCreationNotifierAsync {
             logger.error("");
         }
     }
-
 }

@@ -85,18 +85,18 @@ public class GamingMachine extends AbstractFact {
     }
 
     public GameType getGameType() {
-        if (gameTypeId == null) {
+        if (this.gameTypeId == null) {
             return null;
         }
         Map gameTypeMap = Mapstore.STORE.get("GameType");
         GameType gameType = null;
         if (gameTypeMap != null) {
-            gameType = (GameType) gameTypeMap.get(gameTypeId);
+            gameType = (GameType) gameTypeMap.get(this.gameTypeId);
         }
         if (gameType == null) {
-            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
+            gameType = (GameType) mongoRepositoryReactive.findById(this.gameTypeId, GameType.class).block();
             if (gameType != null && gameTypeMap != null) {
-                gameTypeMap.put(gameTypeId, gameType);
+                gameTypeMap.put(this.gameTypeId, gameType);
             }
         }
         return gameType;

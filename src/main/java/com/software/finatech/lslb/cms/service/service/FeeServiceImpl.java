@@ -347,4 +347,33 @@ public class FeeServiceImpl implements FeeService {
             return logAndReturnError(logger, "An error occurred while finding revenue names by param", e);
         }
     }
+
+    @Override
+    public Fee findFeeByRevenueNameGameTypeAndFeePaymentType(String revenueNameId, String gameTypeId, String feePaymentTypeId){
+       Query query = new Query();
+       query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+       query.addCriteria(Criteria.where("revenueNameId").is(revenueNameId));
+       query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
+      return (Fee)mongoRepositoryReactive.find(query, Fee.class).block();
+    }
+
+
+    @Override
+    public FeePaymentType getFeePaymentTypeById(String feePaymentTypeId) {
+        if (feePaymentTypeId == null) {
+            return null;
+        }
+        Map feePaymentTypeMap = Mapstore.STORE.get("FeePaymentType");
+        FeePaymentType feePaymentType = null;
+        if (feePaymentTypeMap != null) {
+            feePaymentType = (FeePaymentType) feePaymentTypeMap.get(feePaymentTypeId);
+        }
+        if (feePaymentType == null) {
+            feePaymentType = (FeePaymentType) mongoRepositoryReactive.findById(feePaymentTypeId, FeePaymentType.class).block();
+            if (feePaymentType != null && feePaymentTypeMap != null) {
+                feePaymentTypeMap.put(feePaymentTypeId, feePaymentType);
+            }
+        }
+        return feePaymentType;
+    }
 }

@@ -205,6 +205,22 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         return (PaymentRecord) mongoRepositoryReactive.find(queryForExistingConfirmedPaymentRecord, PaymentRecord.class).block();
     }
 
+
+    @Override
+    public PaymentRecord findPaymentRecord(String gamingMachineId,
+                                           String gameTypeId,
+                                           String institutionId,
+                                           String feePaymentTypeId,
+                                           String revenueNameId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(institutionId));
+        query.addCriteria(Criteria.where("feePaymentTypeId").is(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID));
+        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        query.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
+        query.addCriteria(Criteria.where("revenueNameId").is(revenueNameId));
+        return (PaymentRecord) mongoRepositoryReactive.find(query, PaymentRecord.class).block();
+    }
+
     @Override
     public Mono<ResponseEntity> findPaymentRecordById(String paymentRecordId) {
         try {
@@ -214,7 +230,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             }
             return Mono.just(new ResponseEntity(paymentRecord.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
-            return logAndReturnError(logger, "An error occured while getting payment record by id", e);
+            return logAndReturnError(logger, "An error occurred while getting payment record by id", e);
         }
     }
 }

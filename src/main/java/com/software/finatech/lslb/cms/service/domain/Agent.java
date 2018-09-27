@@ -229,7 +229,7 @@ public class Agent extends AbstractFact {
         agentDto.setBvn(getBvn());
         LocalDate dateOfBirth = getDateOfBirth();
         if (dateOfBirth != null) {
-            agentDto.setDateOfBirth(dateOfBirth.toString("dd-MM-yyyy"));
+            agentDto.setDateOfBirth(dateOfBirth.toString("yyyy-MM-dd"));
         }
         agentDto.setAgentId(getAgentId());
         agentDto.setInstitutions(getInstitutions());

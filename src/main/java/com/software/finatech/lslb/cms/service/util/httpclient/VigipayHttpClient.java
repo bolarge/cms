@@ -69,7 +69,7 @@ public class VigipayHttpClient {
             logger.error("An error occurred while parsing the response body", e);
             return null;
         } catch (Exception e) {
-            logger.error("An error occurred while creating customer with vg pay", e);
+            logger.error("An error occurred while getting access token on vg pay", e);
             return null;
         }
     }

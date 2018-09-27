@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.service.contracts;
 
 import com.software.finatech.lslb.cms.service.domain.GamingMachine;
 import com.software.finatech.lslb.cms.service.dto.GamingMachineCreateDto;
+import com.software.finatech.lslb.cms.service.dto.GamingMachineMultiplePaymentRequest;
 import com.software.finatech.lslb.cms.service.dto.GamingMachineUpdateDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,4 +26,8 @@ public interface GamingMachineService {
     Mono<ResponseEntity> uploadMultipleGamingMachinesForInstitution(String institutionId,String gameTypeId, MultipartFile multipartFile);
 
     GamingMachine findById(String gamingMachineId);
+
+    Mono<ResponseEntity> validateMultipleGamingMachineLicensePayment(GamingMachineMultiplePaymentRequest gamingMachineMultiplePaymentRequest);
+
+    Mono<ResponseEntity> validateMultipleGamingMachineLicenseRenewalPayment(GamingMachineMultiplePaymentRequest gamingMachineMultiplePaymentRequest);
 }
