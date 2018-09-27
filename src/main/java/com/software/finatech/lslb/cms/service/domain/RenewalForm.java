@@ -12,6 +12,7 @@ public class RenewalForm extends AbstractFact {
     protected String paymentRecordId;
     protected String institutionId;
     protected String gameTypeId;
+    protected String licensedId;
     protected String checkStakeHoldersChange;
     protected String stakeHoldersChange;
     protected String checkSharesAquisition;
@@ -29,6 +30,14 @@ public class RenewalForm extends AbstractFact {
     protected String checkNewInvestors;
     protected String newInvestors;
     protected String formStatusId;
+
+    public String getLicensedId() {
+        return licensedId;
+    }
+
+    public void setLicensedId(String licensedId) {
+        this.licensedId = licensedId;
+    }
 
     public String getFormStatusId() {
         return formStatusId;
@@ -210,6 +219,7 @@ public class RenewalForm extends AbstractFact {
         renewalFormDto.setSharesAquisition(getSharesAquisition());
         renewalFormDto.setStakeHoldersChange(getStakeHoldersChange());
         renewalFormDto.setTechnicalPartner(getTechnicalPartner());
+        renewalFormDto.setLicenseId(getLicensedId());
         PaymentRecord paymentRecord= (PaymentRecord) mongoRepositoryReactive.findById(getPaymentRecordId(),PaymentRecord.class).block();
         renewalFormDto.setPaymentRecord(paymentRecord.convertToDto());
         Map renewalFormStatusMap = Mapstore.STORE.get("RenewalFormStatus");

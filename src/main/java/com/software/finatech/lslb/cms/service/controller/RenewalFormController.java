@@ -1,15 +1,14 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
-import com.software.finatech.lslb.cms.service.domain.GameType;
-import com.software.finatech.lslb.cms.service.domain.Institution;
-import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
-import com.software.finatech.lslb.cms.service.domain.RenewalForm;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.RenewalFormCreateDto;
 import com.software.finatech.lslb.cms.service.dto.RenewalFormDto;
+import com.software.finatech.lslb.cms.service.dto.RenewalFormStatusDto;
 import com.software.finatech.lslb.cms.service.dto.RenewalFormUpdateDto;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.RenewalFormStatusReferenceData;
+import com.software.finatech.lslb.cms.service.util.Mapstore;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -26,10 +25,7 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Api(value = "Renewal Form", description = "", tags = "")
@@ -37,7 +33,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/renewalForm")
 public class RenewalFormController extends BaseController {
 
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "gameTypeIds", "institutionId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "gameTypeIds", "institutionId","formStatusId"})
     @ApiOperation(value = "Get all Renewal Form", response = RenewalForm.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -52,6 +48,7 @@ public class RenewalFormController extends BaseController {
             @RequestParam("sortType") String sortType,
             @RequestParam("sortProperty") String sortParam,
             @RequestParam("institutionId") String institutionId,
+            @RequestParam("formStatusId") String formStatusId,
             @RequestParam("gameTypeIds") String gameTypeIds,
             HttpServletResponse httpServletResponse) {
         //   return institutionService.findAllInstitutions(page, pageSize, sortType, sortParam,institutionId, gameTypeIds, httpServletResponse);
@@ -64,6 +61,9 @@ public class RenewalFormController extends BaseController {
             }
             if (!StringUtils.isEmpty(institutionId)) {
                 query.addCriteria(Criteria.where("institutionId").in(institutionId));
+            }
+            if (!StringUtils.isEmpty(formStatusId)) {
+                query.addCriteria(Criteria.where("formStatusId").in(formStatusId));
             }
             if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, RenewalForm.class).block();
@@ -82,7 +82,7 @@ public class RenewalFormController extends BaseController {
             ArrayList<RenewalForm> renewalForms = (ArrayList<RenewalForm>) mongoRepositoryReactive
                     .findAll(query, Institution.class).toStream().collect(Collectors.toList());
             if (renewalForms.size() == 0) {
-                return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
+                return Mono.just(new ResponseEntity<>("No record found", HttpStatus.BAD_REQUEST));
             }
             ArrayList<RenewalFormDto> renewalFormDtos = new ArrayList<>();
             renewalForms.forEach(entry -> {
@@ -91,7 +91,8 @@ public class RenewalFormController extends BaseController {
             return Mono.just(new ResponseEntity<>(renewalFormDtos, HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while fetching all institutions";
-            return null;//logAndReturnError(errorMsg, errorMsg, e);
+            return Mono.just(new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST));
+
         }
     }
 
@@ -156,9 +157,13 @@ public class RenewalFormController extends BaseController {
             if (renewalFormCheck != null) {
                 return Mono.just(new ResponseEntity<>("An existing renewal application is tied to this payment", HttpStatus.BAD_REQUEST));
             }
+            Query queryLicense = new Query();
+            queryLicense.addCriteria(Criteria.where("paymentRecordId").is(renewalFormCreateDto.getPaymentRecordId()));
+            License license = (License) mongoRepositoryReactive.find(queryRenewal, License.class).block();
 
             RenewalForm renewalForm = new RenewalForm();
             renewalForm.setId(UUID.randomUUID().toString());
+            renewalForm.setLicensedId(license.getId());
             renewalForm.setPaymentRecordId(renewalFormCreateDto.getPaymentRecordId());
             renewalForm.setCheckChangeInGamingMachines(renewalFormCreateDto.getCheckChangeInGamingMachines());
             renewalForm.setCheckConvictedCrime(renewalFormCreateDto.getCheckConvictedCrime());
@@ -233,8 +238,8 @@ public class RenewalFormController extends BaseController {
 
 
 
-    @RequestMapping(method = RequestMethod.GET, value = "/get-pending-renewal-form-by-institution", params = {"institutionId"})
-    @ApiOperation(value = "Get all Institution with pending Renewal Form Document Upload", response = RenewalForm.class, responseContainer = "List", consumes = "application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "/get-renewal-form-statuses")
+    @ApiOperation(value = "Get all renewal form statuses", response = RenewalForm.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -242,35 +247,22 @@ public class RenewalFormController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> getPendingDocRenewalForms(
-
-            @RequestParam("institutionId") String institutionId
-    ) {
+    public Mono<ResponseEntity> getRenewalFormStatus() {
 
         try {
-            Query query = new Query();
+            List<RenewalFormStatus> renewalFormStatuses = (List<RenewalFormStatus>)mongoRepositoryReactive.findAll(new Query(), RenewalFormStatus.class).toStream().collect(Collectors.toList());
+            List<RenewalFormStatusDto> renewalFormStatusDtos = new ArrayList<>();
+          renewalFormStatuses.stream().forEach(renewalFormStatus ->{
+              renewalFormStatusDtos.add(renewalFormStatus.convertToDto());
+          } );
 
-            if (!StringUtils.isEmpty(institutionId)) {
-                query.addCriteria(Criteria.where("institutionId").in(institutionId));
-            }
-            query.addCriteria(Criteria.where("formStatusId").in(RenewalFormStatusReferenceData.PENDING_DOCUMENT_UPLOAD));
-
-            ArrayList<RenewalForm> renewalForms = (ArrayList<RenewalForm>) mongoRepositoryReactive
-                    .findAll(query, RenewalForm.class).toStream().collect(Collectors.toList());
-            if (renewalForms.size() == 0) {
-                return Mono.just(new ResponseEntity<>("No record found", HttpStatus.BAD_REQUEST));
-            }
-            ArrayList<RenewalFormDto> renewalFormDtos = new ArrayList<>();
-            renewalForms.forEach(entry -> {
-                renewalFormDtos.add(entry.convertToDto());
-            });
-            return Mono.just(new ResponseEntity<>(renewalFormDtos, HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(renewalFormStatusDtos, HttpStatus.OK));
         } catch (Exception e) {
-            String errorMsg = "An error occurred while fetching all institutions";
+            String errorMsg = "An error occurred while fetching all formStatuses";
             return Mono.just(new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST));
         }
     }
-    @RequestMapping(method = RequestMethod.GET, value = "/get-renewal-form-by-institution", params = {"institutionId","formStatusId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/get-renewal-form-by-institution", params = {"institutionId"})
     @ApiOperation(value = "Get all Institution Renewal Form", response = RenewalForm.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -281,7 +273,7 @@ public class RenewalFormController extends BaseController {
     )
     public Mono<ResponseEntity> getRenewalForms(
 
-            @RequestParam("institutionId") String institutionId, @RequestParam("formStatusId") String formStatusId
+            @RequestParam("institutionId") String institutionId
     ) {
 
         try {
@@ -290,9 +282,7 @@ public class RenewalFormController extends BaseController {
             if (!StringUtils.isEmpty(institutionId)) {
                 query.addCriteria(Criteria.where("institutionId").in(institutionId));
             }
-            if (!StringUtils.isEmpty(formStatusId)) {
-                query.addCriteria(Criteria.where("formStatusId").in(formStatusId));
-            }
+
             ArrayList<RenewalForm> renewalForms = (ArrayList<RenewalForm>) mongoRepositoryReactive
                     .findAll(query, RenewalForm.class).toStream().collect(Collectors.toList());
             if (renewalForms.size() == 0) {

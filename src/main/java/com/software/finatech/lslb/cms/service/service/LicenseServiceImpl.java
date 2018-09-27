@@ -3,10 +3,7 @@ package com.software.finatech.lslb.cms.service.service;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.*;
 import org.apache.commons.lang3.StringUtils;
@@ -472,6 +469,11 @@ public class LicenseServiceImpl implements LicenseService {
             if (license == null || !license.getLicenseStatusId().equals(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID)) {
                 return Mono.just(new ResponseEntity<>("Invalid payment record", HttpStatus.BAD_REQUEST));
             }
+            Query queryRenewalStatus = new Query();
+            queryRenewalStatus.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));
+            RenewalForm renewalForm = (RenewalForm)mongoRepositoryReactive.find(queryRenewalStatus,RenewalForm.class).block();
+            renewalForm.setFormStatusId(RenewalFormStatusReferenceData.SUBMITTED);
+            mongoRepositoryReactive.saveOrUpdate(renewalForm);
 
             license.setRenewalStatus("false");
 
