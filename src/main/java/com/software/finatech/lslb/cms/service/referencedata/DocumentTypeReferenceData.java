@@ -142,18 +142,6 @@ public class DocumentTypeReferenceData {
         documentType11.setActive(true);
         documentType11.setRequired(true);
 
-        DocumentType documentType12 = (DocumentType) mongoRepositoryReactive.findById("12", DocumentType.class).block();
-        if (documentType12 == null) {
-            documentType12 = new DocumentType();
-            documentType12.setId("12");
-        }
-        documentType12.setName("Certificate of Incorporation");
-        documentType12.setDocumentPurposeId(RENEWALDocumentPurposeId);
-        documentType12.setGameTypeIds(getOSbAndPolGameTypeIdSet());
-        documentType12.setActive(true);
-        documentType12.setRequired(true);
-
-
         String[] documentNames = {
                 "Certificate of Incorporation",
                 "Form CAC 2",
@@ -167,7 +155,7 @@ public class DocumentTypeReferenceData {
         };
         //documentNames.
         for(int i=0; i<documentNames.length; i++){
-            int id= i+13;
+            int id= i+12;
             DocumentType documentType13 = (DocumentType) mongoRepositoryReactive.findById(String.valueOf(id), DocumentType.class).block();
             if (documentType13 == null) {
                 documentType13 = new DocumentType();
@@ -203,7 +191,6 @@ public class DocumentTypeReferenceData {
         mongoRepositoryReactive.saveOrUpdate(documentType9);
         mongoRepositoryReactive.saveOrUpdate(documentType10);
         mongoRepositoryReactive.saveOrUpdate(documentType11);
-        mongoRepositoryReactive.saveOrUpdate(documentType12);
         mongoRepositoryReactive.saveOrUpdate(documentType22);
 
 

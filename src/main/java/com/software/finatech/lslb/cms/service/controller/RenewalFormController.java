@@ -63,7 +63,7 @@ public class RenewalFormController extends BaseController {
                 query.addCriteria(Criteria.where("institutionId").in(institutionId));
             }
             if (!StringUtils.isEmpty(formStatusId)) {
-                query.addCriteria(Criteria.where("formStatusId").in(formStatusId));
+                query.addCriteria(Criteria.where("formStatusId").is(formStatusId));
             }
             if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, RenewalForm.class).block();
@@ -79,8 +79,8 @@ public class RenewalFormController extends BaseController {
             query.with(PageRequest.of(page, pageSize, sort));
             query.with(sort);
 
-            ArrayList<RenewalForm> renewalForms = (ArrayList<RenewalForm>) mongoRepositoryReactive
-                    .findAll(query, Institution.class).toStream().collect(Collectors.toList());
+            List<RenewalForm> renewalForms = (List<RenewalForm>) mongoRepositoryReactive
+                    .findAll(query, RenewalForm.class).toStream().collect(Collectors.toList());
             if (renewalForms.size() == 0) {
                 return Mono.just(new ResponseEntity<>("No record found", HttpStatus.BAD_REQUEST));
             }
