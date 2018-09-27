@@ -516,15 +516,15 @@ public class LicenseServiceImpl implements LicenseService {
             queryGameType.addCriteria(Criteria.where("id").is(license.getGameTypeId()));
             GameType gameType = (GameType) mongoRepositoryReactive.find(queryGameType, GameType.class).block();
             int duration = gameType.getInstitutionLicenseDurationMonths();
-            int days_diff = 0;
+           /* int days_diff = 0;
             LocalDate licenseEndDate = LocalDate.now();
             if (license.getExpiryDate().isAfter(LocalDate.now())) {
                 days_diff = Days.daysBetween(LocalDate.now(), license.getExpiryDate()).getDays();
                 licenseEndDate = licenseEndDate.plusMonths(duration);
                 licenseEndDate = licenseEndDate.plusDays(days_diff);
-            } else {
-                licenseEndDate = license.getExpiryDate().plusMonths(duration);
-            }
+            } else {*/
+            LocalDate licenseEndDate = license.getExpiryDate().plusMonths(duration);
+           // }
             PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById(license.getPaymentRecordId(), PaymentRecord.class).block();
             String licenseNumber = "";
             if (paymentRecord != null) {
@@ -532,7 +532,7 @@ public class LicenseServiceImpl implements LicenseService {
                 createLicense.setLicenseNumber(licenseNumber);
             }
             createLicense.setId(UUID.randomUUID().toString());
-            createLicense.setEffectiveDate(LocalDate.now().plusDays(1));
+            createLicense.setEffectiveDate(license.getExpiryDate().plusDays(1));
             createLicense.setExpiryDate(licenseEndDate);
             createLicense.setRenewalStatus("false");
             createLicense.setInstitutionId(license.getInstitutionId());
@@ -590,7 +590,16 @@ public class LicenseServiceImpl implements LicenseService {
         queryLicense.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID));
 
         License licenses = (License) mongoRepositoryReactive.find(queryLicense, License.class).block();
-        return licenses;
+        if(licenses!=null){
+            Query queryRenewal = new Query();
+            queryRenewal.addCriteria(Criteria.where("paymentRecordId").is(licenses.getPaymentRecordId()));
+            RenewalForm renewalFormCheck = (RenewalForm) mongoRepositoryReactive.find(queryRenewal, RenewalForm.class).block();
+            if(renewalFormCheck==null){
+                return licenses;
+            }
+         }
+
+        return null;
 
     }
 

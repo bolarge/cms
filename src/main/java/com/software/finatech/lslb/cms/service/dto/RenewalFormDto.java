@@ -21,6 +21,15 @@ public class RenewalFormDto {
     protected String institutionId;
     protected String gameTypeId;
     protected String renewalFormId;
+   protected RenewalFormStatusDto renewalFormStatusDto;
+
+    public RenewalFormStatusDto getRenewalFormStatusDto() {
+        return renewalFormStatusDto;
+    }
+
+    public void setRenewalFormStatusDto(RenewalFormStatusDto renewalFormStatusDto) {
+        this.renewalFormStatusDto = renewalFormStatusDto;
+    }
 
     public String getRenewalFormId() {
         return renewalFormId;

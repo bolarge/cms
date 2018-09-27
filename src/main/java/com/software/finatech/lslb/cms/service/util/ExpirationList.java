@@ -87,6 +87,12 @@ public class ExpirationList {
                 }
 
             }
+        }else{
+            for(License license: licenses) {
+                license.setLicenseStatusId(LicenseStatusReferenceData.AIP_EXPIRED);
+                mongoRepositoryReactive.saveOrUpdate(license);
+            }
+
         }
 
         Query queryExpiredLicence= new Query();
