@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.RenewalFormDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Map;
@@ -222,20 +223,25 @@ public class RenewalForm extends AbstractFact {
         renewalFormDto.setLicenseId(getLicensedId());
         PaymentRecord paymentRecord= (PaymentRecord) mongoRepositoryReactive.findById(getPaymentRecordId(),PaymentRecord.class).block();
         renewalFormDto.setPaymentRecord(paymentRecord.convertToDto());
-        Map renewalFormStatusMap = Mapstore.STORE.get("RenewalFormStatus");
+        if(!StringUtils.isEmpty(formStatusId)){
+            Map renewalFormStatusMap = Mapstore.STORE.get("RenewalFormStatus");
 
-        RenewalFormStatus renewalFormStatus= null;
-        if (renewalFormStatusMap != null) {
-            renewalFormStatus = (RenewalFormStatus) renewalFormStatusMap.get(formStatusId); }
-        if (renewalFormStatus == null) {
-            renewalFormStatus = (RenewalFormStatus) mongoRepositoryReactive.findById(formStatusId, RenewalFormStatus.class).block();
-            if (renewalFormStatus != null && renewalFormStatus != null) {
-                renewalFormStatusMap.put(formStatusId, renewalFormStatus);
+            RenewalFormStatus renewalFormStatus= null;
+            if (renewalFormStatusMap != null) {
+
+                renewalFormStatus = (RenewalFormStatus) renewalFormStatusMap.get(formStatusId); }
+            if (renewalFormStatus == null) {
+                renewalFormStatus = (RenewalFormStatus) mongoRepositoryReactive.findById(formStatusId, RenewalFormStatus.class).block();
+                if (renewalFormStatus != null && renewalFormStatus != null) {
+                    renewalFormStatusMap.put(formStatusId, renewalFormStatus);
+                }
             }
+            if (renewalFormStatus != null) {
+                renewalFormDto.setRenewalFormStatusDto(renewalFormStatus.convertToDto());
+            }
+
         }
-        if (renewalFormStatus != null) {
-           renewalFormDto.setRenewalFormStatusDto(renewalFormStatus.convertToDto());
-        }
+
         return renewalFormDto;
 
     }
