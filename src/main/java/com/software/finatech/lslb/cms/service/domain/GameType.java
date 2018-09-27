@@ -8,10 +8,19 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class GameType extends EnumeratedFact {
 
     protected int aipDurationMonths;
+    protected boolean allowsGamingMachine;
     protected int institutionLicenseDurationMonths;
     protected int agentLicenseDurationMonths;
     protected int gamingMachineLicenseDurationMonths;
     protected String shortCode;
+
+    public boolean isAllowsGamingMachine() {
+        return allowsGamingMachine;
+    }
+
+    public void setAllowsGamingMachine(boolean allowsGamingMachine) {
+        this.allowsGamingMachine = allowsGamingMachine;
+    }
 
     public String getShortCode() {
         return shortCode;
@@ -63,6 +72,7 @@ public class GameType extends EnumeratedFact {
         gameType.setAgentLicenseDuration(String.valueOf(getAgentLicenseDurationMonths()));
         gameType.setGamingMachineLicenseDuration(String.valueOf(getGamingMachineLicenseDurationMonths()));
         gameType.setShortCode(getShortCode());
+        gameType.setAllowsGamingMachine(isAllowsGamingMachine());
         return gameType;
     }
 

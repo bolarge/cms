@@ -1,13 +1,7 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
-
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class AgentUpdateDto {
     @NotEmpty(message = "please provide agent id")
@@ -31,7 +25,7 @@ public class AgentUpdateDto {
     @NotEmpty(message = "please provide agent id number")
     private String idNumber;
     @NotEmpty(message = "please provide agent BVN")
-    @Size(min = 12, message = "Phone number should not be less than 7 characters")
+    @Size(min = 10, message = "BVN should not be less than 10 characters")
     private String bvn;
 
     public String getId() {

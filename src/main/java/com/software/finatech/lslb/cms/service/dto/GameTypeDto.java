@@ -7,6 +7,15 @@ public class GameTypeDto extends EnumeratedFactDto {
     protected String agentLicenseDuration;
     protected String gamingMachineLicenseDuration;
     protected String shortCode;
+    protected Boolean allowsGamingMachine;
+
+    public Boolean getAllowsGamingMachine() {
+        return allowsGamingMachine;
+    }
+
+    public void setAllowsGamingMachine(Boolean allowsGamingMachine) {
+        this.allowsGamingMachine = allowsGamingMachine;
+    }
 
     public String getShortCode() {
         return shortCode;
