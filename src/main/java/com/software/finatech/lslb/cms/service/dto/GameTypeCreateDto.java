@@ -2,20 +2,30 @@ package com.software.finatech.lslb.cms.service.dto;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 public class GameTypeCreateDto {
-    @Min(value = 0, message = "Please enter AIP Duration")
+    @Min(value = 1, message = "AIP licence duration should be at least one month")
     protected int aipDurationMonths;
-    @Min(value = 0, message = "Please enter License Duration in months")
+    @Min(value = 1, message = "Institution licence duration should be at least one month")
     protected int licenseDurationMonths;
     @NotEmpty(message = "Please enter GameType Name")
     protected String name;
-    @Min(value = 0, message = "Please enter Agent License Duration in months")
+    @Min(value = 1, message = "Agent license duration should be at least one month")
     protected int agentLicenseDurationMonths;
-    @Min(value = 0, message = "Please enter Gaming Machine License Duration in  months")
-    protected int gamingMachineLicenseDurationMonths;
+    protected Integer gamingMachineLicenseDurationMonths;
+    @NotNull(message = "Please enter if category allows gaming machine")
+    protected Boolean allowsGamingMachine;
     protected String shortCode;
     protected String description;
+
+    public Boolean getAllowsGamingMachine() {
+        return allowsGamingMachine;
+    }
+
+    public void setAllowsGamingMachine(Boolean allowsGamingMachine) {
+        this.allowsGamingMachine = allowsGamingMachine;
+    }
 
     public String getShortCode() {
         return shortCode;
@@ -65,11 +75,11 @@ public class GameTypeCreateDto {
         this.agentLicenseDurationMonths = agentLicenseDurationMonths;
     }
 
-    public int getGamingMachineLicenseDurationMonths() {
+    public Integer getGamingMachineLicenseDurationMonths() {
         return gamingMachineLicenseDurationMonths;
     }
 
-    public void setGamingMachineLicenseDurationMonths(int gamingMachineLicenseDurationMonths) {
+    public void setGamingMachineLicenseDurationMonths(Integer gamingMachineLicenseDurationMonths) {
         this.gamingMachineLicenseDurationMonths = gamingMachineLicenseDurationMonths;
     }
 }
