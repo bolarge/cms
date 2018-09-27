@@ -8,7 +8,6 @@ import com.software.finatech.lslb.cms.service.dto.RenewalFormStatusDto;
 import com.software.finatech.lslb.cms.service.dto.RenewalFormUpdateDto;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.RenewalFormStatusReferenceData;
-import com.software.finatech.lslb.cms.service.util.Mapstore;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -60,10 +59,10 @@ public class RenewalFormController extends BaseController {
                 query.addCriteria(Criteria.where("gameTypeId").in(gameTypeIdList));
             }
             if (!StringUtils.isEmpty(institutionId)) {
-                query.addCriteria(Criteria.where("institutionId").in(institutionId));
+                query.addCriteria(Criteria.where("institutionId").is(institutionId));
             }
             if (!StringUtils.isEmpty(formStatusId)) {
-                query.addCriteria(Criteria.where("formStatusId").in(formStatusId));
+                query.addCriteria(Criteria.where("formStatusId").is(formStatusId));
             }
             if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, RenewalForm.class).block();
@@ -80,7 +79,7 @@ public class RenewalFormController extends BaseController {
             query.with(sort);
 
             ArrayList<RenewalForm> renewalForms = (ArrayList<RenewalForm>) mongoRepositoryReactive
-                    .findAll(query, Institution.class).toStream().collect(Collectors.toList());
+                    .findAll(query, RenewalForm.class).toStream().collect(Collectors.toList());
             if (renewalForms.size() == 0) {
                 return Mono.just(new ResponseEntity<>("No record found", HttpStatus.BAD_REQUEST));
             }
