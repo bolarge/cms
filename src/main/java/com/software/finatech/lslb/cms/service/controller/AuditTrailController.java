@@ -1,7 +1,11 @@
 package com.software.finatech.lslb.cms.service.controller;
 
+import com.software.finatech.lslb.cms.service.domain.AuditAction;
 import com.software.finatech.lslb.cms.service.domain.AuditTrail;
+import com.software.finatech.lslb.cms.service.domain.FactObject;
+import com.software.finatech.lslb.cms.service.dto.AuditActionDto;
 import com.software.finatech.lslb.cms.service.dto.AuditTrailDto;
+import com.software.finatech.lslb.cms.service.util.Mapstore;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -25,6 +29,7 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Api(value = "AuditTrail", description = "", tags = "AuditTrail")
@@ -32,6 +37,33 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/auditTrail")
 public class AuditTrailController extends BaseController{
     private static Logger logger = LoggerFactory.getLogger(AuditTrailController.class);
+
+    /**
+     * @return Roles full information
+     */
+    @ApiOperation(value = "Get AuditAction", response = ArrayList.class, consumes="application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")
+    }
+    )
+    @RequestMapping(method= RequestMethod.GET, value="/auditActions", produces ="application/json")
+    public Mono<ResponseEntity> getAllAuditAction() {
+        List<FactObject> auditAction = Mapstore.STORE.get("AuditAction").values().stream().collect(Collectors.toList());
+        //ArrayList<FactObject> authRoles = (ArrayList<FactObject>) mongoRepositoryReactive.findAll(AuthRole.class).toStream().collect(Collectors.toList());
+        ArrayList<AuditActionDto> dto =  new ArrayList<>();
+        auditAction.forEach(entry->{
+            dto.add(((AuditAction)entry).convertToDto());
+        });
+
+        if(dto.size() == 0){
+            return  Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
+        }
+
+        return Mono.just(new ResponseEntity(dto, HttpStatus.OK));
+    }
 
     /**
      * @param id AffectedFact id
