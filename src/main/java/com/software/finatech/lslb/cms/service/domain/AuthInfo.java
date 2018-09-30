@@ -20,8 +20,8 @@ public class AuthInfo extends AbstractFact {
 	protected String phoneNumber ;
 	protected String verificationTokenId;
     protected String fullName;
-	protected Boolean enabled;
-	protected Boolean accountLocked;
+	protected boolean enabled;
+	protected boolean accountLocked;
 	protected DateTime accountExpirationTime;
 	protected DateTime credentialsExpirationTime;
 	protected String emailAddress;
@@ -154,19 +154,19 @@ public class AuthInfo extends AbstractFact {
 		this.fullName = fullName;
 	}
 
-	public Boolean getEnabled() {
+	public boolean getEnabled() {
 		return enabled;
 	}
 
-	public void setEnabled(Boolean enabled) {
+	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
 
-	public Boolean getAccountLocked() {
+	public boolean getAccountLocked() {
 		return accountLocked;
 	}
 
-	public void setAccountLocked(Boolean accountLocked) {
+	public void setAccountLocked(boolean accountLocked) {
 		this.accountLocked = accountLocked;
 	}
 
