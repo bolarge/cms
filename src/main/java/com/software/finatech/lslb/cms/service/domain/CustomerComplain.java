@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 
+import com.software.finatech.lslb.cms.service.dto.CustomerComplainActionDto;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
@@ -24,6 +25,15 @@ public class CustomerComplain extends AbstractFact {
     private String customerComplainStatusId;
     private String ticketId;
     private List<CustomerComplainAction> customerComplainActionList;
+    private LocalDateTime nextNotificationDateTime;
+
+    public LocalDateTime getNextNotificationDateTime() {
+        return nextNotificationDateTime;
+    }
+
+    public void setNextNotificationDateTime(LocalDateTime nextNotificationDateTime) {
+        this.nextNotificationDateTime = nextNotificationDateTime;
+    }
 
     public String getTicketId() {
         return ticketId;
@@ -126,13 +136,13 @@ public class CustomerComplain extends AbstractFact {
     public CustomerComplainDto convertToFullDetailDto() {
         CustomerComplainDto dto = convertToDto();
         dto.setComplainDetails(getComplainDetails());
-        dto.setCustomerComplainActions(getCustomerComplainActionsStrings());
+        dto.setCustomerComplainActions(getCustomerComplainActions());
         return dto;
     }
 
 
-    private List<String> getCustomerComplainActionsStrings() {
-        List<String> complainActions = new ArrayList<>();
+    private List<CustomerComplainActionDto> getCustomerComplainActions() {
+        List<CustomerComplainActionDto> complainActions = new ArrayList<>();
         for (CustomerComplainAction customerComplainAction : getCustomerComplainActionList()) {
             AuthInfo user = getUser(customerComplainAction.getUserId());
             CustomerComplainStatus customerComplainStatus = getCustomerComplainStatus(customerComplainAction.getComplainStatusId());
@@ -141,7 +151,12 @@ public class CustomerComplain extends AbstractFact {
                 String actionString = String.format("%s moved this to %s at %s", user.getFullName(),
                         customerComplainStatus.getName(), actionDateTime.toString("dd-MM-yyyy HH:mm:ss"));
                 actionString = StringCapitalizer.convertToTitleCaseIteratingChars(actionString);
-                complainActions.add(actionString);
+                CustomerComplainActionDto actionDto = new CustomerComplainActionDto();
+                actionDto.setActionString(actionString);
+                actionDto.setUserFullName(user.getFullName());
+                actionDto.setComplainStatus(customerComplainStatus.getName());
+                actionDto.setDatePerformed(actionDateTime.toString("dd-MM-yyyy HH:mm:ss"));
+                complainActions.add(actionDto);
             }
         }
         return complainActions;

@@ -54,24 +54,25 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public JwtAuthenticationTokenFilter authenticationTokenFilterBean() {
         //@TODO add this config to yml
         List<String> pathsToSkip = Arrays.asList("/actuator/**",
-        "/api/v1/referencedata/**",
-        "/api/v1/authInfo/complete",
-        "/api/v1/authInfo/confirmPasswordReset",
-        "/api/v1/authInfo/resetpasswordvalidation",
-        "/api/v1/authInfo/resetPassword",
-        "/api/v1/authInfo/resendToken",
-        "/api/v1/authInfo/login",
-        "/api/v1/authInfo/confirm",
-        "/api/v1/authInfo/new-gaming-operator",
-        "/api/v1/gameType/allgametypes",
-        "/api/v1/authInfo/new-applicant-user",
-        "/api/v1/payment-record-details/vigipay-in-branch-payment-notification",
-        "/v2/api-docs",
-         "/configuration/ui", 
-         "/swagger-resources/**", 
-         "/configuration/security", 
-         "/docApi/**",
-          "/webjars/**",
+                "/api/v1/referencedata/**",
+                "/api/v1/authInfo/complete",
+                "/api/v1/authInfo/confirmPasswordReset",
+                "/api/v1/authInfo/resetpasswordvalidation",
+                "/api/v1/authInfo/resetPassword",
+                "/api/v1/authInfo/resendToken",
+                "/api/v1/authInfo/login",
+                "/api/v1/authInfo/confirm",
+                "/api/v1/authInfo/new-gaming-operator",
+                "/api/v1/gameType/allgametypes",
+                "/api/v1/authInfo/new-applicant-user",
+                "/api/v1/customer-complains/create",
+                "/api/v1/payment-record-details/vigipay-in-branch-payment-notification",
+                "/v2/api-docs",
+                "/configuration/ui",
+                "/swagger-resources/**",
+                "/configuration/security",
+                "/docApi/**",
+                "/webjars/**",
                 "/test/**");
         SkipPathRequestMatcher matcher = new SkipPathRequestMatcher(pathsToSkip, "/**");
 
@@ -130,7 +131,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         configuration.setAllowCredentials(true);
         // setAllowedHeaders is important! Without it, OPTIONS preflight request
         // will fail with 403 Invalid CORS request
-        configuration.setAllowedHeaders(ImmutableList.of("Authorization", "Cache-Control", "Content-Type", "x-xsrf-token", "TenantId","TotalCount"));
+        configuration.setAllowedHeaders(ImmutableList.of("Authorization", "Cache-Control", "Content-Type", "x-xsrf-token", "TenantId", "TotalCount"));
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

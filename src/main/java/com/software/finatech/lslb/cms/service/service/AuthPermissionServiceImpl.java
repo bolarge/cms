@@ -1,8 +1,9 @@
-package com.software.finatech.lslb.cms.service.service.contracts;
+package com.software.finatech.lslb.cms.service.service;
 
 
 import com.software.finatech.lslb.cms.service.domain.AuthPermission;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.service.contracts.AuthPermissionService;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

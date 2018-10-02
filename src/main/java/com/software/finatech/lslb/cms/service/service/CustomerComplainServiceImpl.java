@@ -10,7 +10,7 @@ import com.software.finatech.lslb.cms.service.referencedata.CustomerComplainStat
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.CustomerComplainService;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
-import com.software.finatech.lslb.cms.service.util.async_helpers.CustomerComplaintEmailSenderAsync;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.CustomerComplaintEmailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
@@ -38,6 +38,8 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerComplainServiceImpl.class);
 
+    private static final int MAX_DAYS_BEFORE_COMPLAIN_REMINDER = 7;
+
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private AuthInfoService authInfoService;
     private CustomerComplaintEmailSenderAsync customerComplaintEmailSenderAsync;
@@ -57,15 +59,15 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
     }
 
-    // @Override
-    public Mono<ResponseEntity> findAllApplicationForm(int page,
-                                                       int pageSize,
-                                                       String sortDirection,
-                                                       String sortProperty,
-                                                       String customerEmail,
-                                                       String customerPhone,
-                                                       String customerComplainStatusId,
-                                                       HttpServletResponse httpServletResponse) {
+    @Override
+    public Mono<ResponseEntity> findAllCustomerComplains(int page,
+                                                         int pageSize,
+                                                         String sortDirection,
+                                                         String sortProperty,
+                                                         String customerEmail,
+                                                         String customerPhone,
+                                                         String customerComplainStatusId,
+                                                         HttpServletResponse httpServletResponse) {
 
         try {
             Query query = new Query();
@@ -109,6 +111,20 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
         }
     }
 
+
+    @Override
+    public Mono<ResponseEntity> createCustomerComplain(CustomerComplainCreateDto customerComplainCreateDto) {
+        try {
+            CustomerComplain customerComplain = fromCreateCustomerComplain(customerComplainCreateDto);
+            saveCustomerComplain(customerComplain);
+            customerComplaintEmailSenderAsync.sendInitialNotificationsForCustomerComplain(customerComplain);
+            return Mono.just(new ResponseEntity<>(customerComplain.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while creating customer complain", e);
+        }
+    }
+
+    @Override
     public Mono<ResponseEntity> getCustomerComplainFullDetail(String customerComplainId) {
         try {
             if (StringUtils.isEmpty(customerComplainId)) {
@@ -125,7 +141,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
         }
     }
 
-
+    @Override
     public Mono<ResponseEntity> resolveCustomerComplain(String userId, String customerComplainId) {
         try {
             if (StringUtils.isEmpty(userId) || StringUtils.isEmpty(customerComplainId)) {
@@ -135,7 +151,9 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             if (user == null) {
                 return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", userId), HttpStatus.BAD_REQUEST));
             }
-            //TODO: VALIDATE USER ROLE
+            if (!user.canResolveCustomerComplains()) {
+                return Mono.just(new ResponseEntity<>("User does not have permission to resolve customer complains", HttpStatus.BAD_REQUEST));
+            }
             CustomerComplain existingCustomerComplain = findCustomerComplainById(customerComplainId);
             if (existingCustomerComplain == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Customer complain with id %s not found", customerComplainId), HttpStatus.BAD_REQUEST));
@@ -156,13 +174,14 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             existingCustomerComplainActions.add(customerComplainAction);
             existingCustomerComplain.setCustomerComplainActionList(existingCustomerComplainActions);
             mongoRepositoryReactive.saveOrUpdate(existingCustomerComplain);
+            customerComplaintEmailSenderAsync.sendResolvedCustomerComplainToCustomer(existingCustomerComplain);
             return Mono.just(new ResponseEntity<>(existingCustomerComplain.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, String.format("An error occurred while resolving customer complain %s with user id %s", customerComplainId, userId), e);
         }
     }
 
-
+    @Override
     public Mono<ResponseEntity> closeCustomerComplain(String userId, String customerComplainId) {
         try {
             if (StringUtils.isEmpty(userId) || StringUtils.isEmpty(customerComplainId)) {
@@ -172,7 +191,9 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             if (user == null) {
                 return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", userId), HttpStatus.BAD_REQUEST));
             }
-            //TODO: VALIDATE USER ROLE
+            if (!user.canResolveCustomerComplains()) {
+                return Mono.just(new ResponseEntity<>("User does not have permission to resolve customer complains", HttpStatus.BAD_REQUEST));
+            }
             CustomerComplain existingCustomerComplain = findCustomerComplainById(customerComplainId);
             if (existingCustomerComplain == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Customer complain with id %s not found", customerComplainId), HttpStatus.BAD_REQUEST));
@@ -190,21 +211,10 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             existingCustomerComplainActions.add(customerComplainAction);
             existingCustomerComplain.setCustomerComplainActionList(existingCustomerComplainActions);
             mongoRepositoryReactive.saveOrUpdate(existingCustomerComplain);
+            customerComplaintEmailSenderAsync.sendClosedCustomerComplaintToCustomer(existingCustomerComplain);
             return Mono.just(new ResponseEntity<>(existingCustomerComplain.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, String.format("An error occurred while resolving customer complain %s with user id %s", customerComplainId, userId), e);
-        }
-    }
-
-
-    public Mono<ResponseEntity> createCustomerComplain(CustomerComplainCreateDto customerComplainCreateDto) {
-        try {
-            CustomerComplain customerComplain = fromCreateCustomerComplain(customerComplainCreateDto);
-            saveCustomerComplain(customerComplain);
-
-            return Mono.just(new ResponseEntity<>(customerComplain.convertToDto(), HttpStatus.OK));
-        } catch (Exception e) {
-            return logAndReturnError(logger, "An error occurred while creating customer complain", e);
         }
     }
 
@@ -218,6 +228,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
         customerComplain.setCustomerFullName(customerComplainCreateDto.getFullName());
         customerComplain.setCustomerPhoneNumber(customerComplainCreateDto.getPhoneNumber());
         customerComplain.setTicketId(generateTicketId());
+        customerComplain.setNextNotificationDateTime(LocalDateTime.now().plusDays(MAX_DAYS_BEFORE_COMPLAIN_REMINDER));
         return customerComplain;
     }
 
@@ -228,7 +239,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
 
     public String generateTicketId() {
         int randomInt = NumberUtil.getRandomNumberInRange(3000, 300000000);
-        return String.format("LSLB-CM-%s", randomInt);
+        return String.format("LS-CMTK-%s", randomInt);
     }
 
     public CustomerComplain findCustomerComplainById(String customerComplainId) {

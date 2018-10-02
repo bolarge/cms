@@ -1,5 +1,7 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import com.software.finatech.lslb.cms.service.domain.CustomerComplainAction;
+
 import java.util.List;
 
 public class CustomerComplainDto {
@@ -11,7 +13,7 @@ public class CustomerComplainDto {
     private String complainDetails;
     private String customerComplainStatusId;
     private String customerComplainStatusName;
-    private List<String> customerComplainActions;
+    private List<CustomerComplainActionDto> customerComplainActions;
     private String ticketId;
 
     public String getTicketId() {
@@ -86,11 +88,11 @@ public class CustomerComplainDto {
         this.customerComplainStatusName = customerComplainStatusName;
     }
 
-    public List<String> getCustomerComplainActions() {
+    public List<CustomerComplainActionDto> getCustomerComplainActions() {
         return customerComplainActions;
     }
 
-    public void setCustomerComplainActions(List<String> customerComplainActions) {
+    public void setCustomerComplainActions(List<CustomerComplainActionDto> customerComplainActions) {
         this.customerComplainActions = customerComplainActions;
     }
 }

@@ -9,10 +9,13 @@ import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingDto;
 import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingUpdateDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingStatusReferenceData;
+import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.ScheduledMeetingService;
+import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -43,16 +46,26 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
     private AuthInfoService authInfoService;
     private MailContentBuilderService mailContentBuilderService;
     private EmailService emailService;
+    private FrontEndPropertyHelper frontEndPropertyHelper;
+    private ApplicationFormService applicationFormService;
+
+    private static final int NUMBER_OF_DAYS_BEFORE_MEETING_REMINDER = 1;
+    private static final int POST_MEETING_REMINDER_DAYS = 7;
+
 
     @Autowired
     public ScheduledMeetingServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                                        AuthInfoService authInfoService,
                                        MailContentBuilderService mailContentBuilderService,
-                                       EmailService emailService) {
+                                       EmailService emailService,
+                                       FrontEndPropertyHelper frontEndPropertyHelper,
+                                       ApplicationFormService applicationFormService) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.authInfoService = authInfoService;
         this.mailContentBuilderService = mailContentBuilderService;
         this.emailService = emailService;
+        this.frontEndPropertyHelper = frontEndPropertyHelper;
+        this.applicationFormService = applicationFormService;
     }
 
     @Override
@@ -133,7 +146,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                 return Mono.just(new ResponseEntity<>("Invited institution does not exist", badRequestStatus));
             }
             String applicationFormId = scheduledMeetingCreateDto.getApplicationFormId();
-            ApplicationForm applicationForm = getApplicationForm(applicationFormId);
+            ApplicationForm applicationForm = applicationFormService.findApplicationFormById(applicationFormId);
             if (applicationForm == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Application form with id %s  does not exist", applicationFormId), badRequestStatus));
             }
@@ -148,11 +161,11 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             String creatorMailSubject = String.format("Scheduled meeting with %s", invitedInstitution.getInstitutionName());
             //    sendMeetingNotificationEmailToMeetingCreator(creatorMailSubject, "ScheduledMeetingInitialNotificationForLslbAdmin", scheduledMeeting);
 
+            String mailContent = buildMeetingAttendeeEmailContent("scheduleMeeting-GA-new", scheduledMeeting);
             for (AuthInfo gamingOperatorAdmin : gamingOperatorAdminsForInstitution) {
-                sendMeetingNotificationEmailToAttendee("Meeting Invite With Lagos State Lotteries Board", "scheduleMeeting-GA-new", gamingOperatorAdmin, scheduledMeeting);
+                sendMeetingNotificationEmailToAttendee("Meeting Invite With Lagos State Lotteries Board", creatorMailSubject, gamingOperatorAdmin);
             }
 
-         //   sendInitialNotificationToMeetingParticipants(scheduledMeeting);
             return Mono.just(new ResponseEntity<>(scheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format for meeting date , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
@@ -176,11 +189,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             scheduledMeeting.setScheduledMeetingStatusId(canceledMeetingStatusId);
             scheduledMeeting.setCancelerId(cancelerId);
             saveScheduledMeeting(scheduledMeeting);
-
-            ArrayList<AuthInfo> gamingOperatorAdminsForInstitution = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(scheduledMeeting.getInstitutionId());
-            for (AuthInfo gamingOperatorAdmin : gamingOperatorAdminsForInstitution) {
-                sendMeetingNotificationEmailToAttendee("Update on Meeting Invite With Lagos State Lotteries Board", "schedule-meeting-cancel", gamingOperatorAdmin, scheduledMeeting);
-            }
+            sendMeetingNotificationEmailToMeetingAttendees("Update on Meeting Invite With Lagos State Lotteries Board", "schedule-meeting-cancel", scheduledMeeting);
             return Mono.just(new ResponseEntity<>(scheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while canceling the scheduled meeting", e);
@@ -213,13 +222,14 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             existingScheduledMeeting.setMeetingSubject(scheduledMeetingUpdateDto.getMeetingTitle());
             existingScheduledMeeting.setVenue(scheduledMeetingUpdateDto.getVenue());
             existingScheduledMeeting.setMeetingDescription(scheduledMeetingUpdateDto.getAdditionalNotes());
-            existingScheduledMeeting.setMeetingDate(FORMATTER.parseDateTime(scheduledMeetingUpdateDto.getMeetingDate()));
+            LocalDateTime meetingDate = FORMATTER.parseLocalDateTime(scheduledMeetingUpdateDto.getMeetingDate());
+            existingScheduledMeeting.setMeetingDate(meetingDate);
+            existingScheduledMeeting.setNextPostMeetingReminderDate(meetingDate.plusDays(POST_MEETING_REMINDER_DAYS));
+            existingScheduledMeeting.setMeetingReminderDate(meetingDate.minusDays(NUMBER_OF_DAYS_BEFORE_MEETING_REMINDER));
+            existingScheduledMeeting.setReminderSent(false);
             saveScheduledMeeting(existingScheduledMeeting);
 
-            ArrayList<AuthInfo> gamingOperatorAdminsForInstitution = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(existingScheduledMeeting.getInstitutionId());
-            for (AuthInfo gamingOperatorAdmin : gamingOperatorAdminsForInstitution) {
-                sendMeetingNotificationEmailToAttendee("Update on Meeting Invite With Lagos State Lotteries Board", "scheduleMeeting-reschedule-GA-new", gamingOperatorAdmin, existingScheduledMeeting);
-            }
+            sendMeetingNotificationEmailToMeetingAttendees("Update on Meeting Invite With Lagos State Lotteries Board", "scheduleMeeting-reschedule-GA-new", existingScheduledMeeting);
             return Mono.just(new ResponseEntity<>(existingScheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format for meeting date , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
@@ -238,8 +248,10 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
         scheduledMeeting.setApplicationFormId(scheduledMeetingCreateDto.getApplicationFormId());
         String pendingScheduledMeetingStatusId = ScheduledMeetingStatusReferenceData.PENDING_STATUS_ID;
         scheduledMeeting.setScheduledMeetingStatusId(pendingScheduledMeetingStatusId);
-        DateTime meetingDate = FORMATTER.parseDateTime(scheduledMeetingCreateDto.getMeetingDate());
+        LocalDateTime meetingDate = FORMATTER.parseLocalDateTime(scheduledMeetingCreateDto.getMeetingDate());
         scheduledMeeting.setMeetingDate(meetingDate);
+        scheduledMeeting.setNextPostMeetingReminderDate(meetingDate.plusDays(POST_MEETING_REMINDER_DAYS));
+        scheduledMeeting.setMeetingReminderDate(meetingDate.minusDays(NUMBER_OF_DAYS_BEFORE_MEETING_REMINDER));
         return scheduledMeeting;
     }
 
@@ -259,67 +271,60 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
 
-    private ApplicationForm getApplicationForm(String applicationFormId) {
-        return (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
-    }
-
-    public void sendInitialNotificationToMeetingParticipants(ScheduledMeeting scheduledMeeting) {
-        Institution institution = getInstitution(scheduledMeeting.getInstitutionId());
-        String creatorMailSubject = String.format("Scheduled meeting with %s", institution.getInstitutionName());
-        sendMeetingNotificationEmailToMeetingCreator(creatorMailSubject, "ScheduledMeetingInitialNotificationForLslbAdmin", scheduledMeeting);
+    @Override
+    public void sendMeetingNotificationEmailToMeetingAttendees(String mailSubject, String templateName, ScheduledMeeting scheduledMeeting) {
         ArrayList<AuthInfo> gamingOperatorAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(scheduledMeeting.getInstitutionId());
+        String content = buildMeetingAttendeeEmailContent("ScheduledMeetingReminderNotificationForGamingOperator", scheduledMeeting);
         for (AuthInfo gamingOperatorAdmin : gamingOperatorAdmins) {
-            sendMeetingNotificationEmailToAttendee("Meeting Invite With Lagos State Lotteries Board", "ScheduledMeetingInitialNotificationForGamingOperator", gamingOperatorAdmin, scheduledMeeting);
+            sendMeetingNotificationEmailToAttendee(mailSubject, content, gamingOperatorAdmin);
         }
     }
 
     @Override
-    public void sendMeetingNotificationEmailToAttendee(String mailSubject, String templateName, AuthInfo invitee, ScheduledMeeting scheduledMeeting) {
+    public void sendMeetingNotificationEmailToAttendee(String mailSubject, String content, AuthInfo invitee) {
         try {
-            HashMap<String, Object> model = new HashMap<>();
-            ApplicationForm applicationForm = getApplicationForm(scheduledMeeting.getApplicationFormId());
-            String gameTypeName = "";
-            if (applicationForm != null) {
-                gameTypeName = applicationForm.getGameTypeName();
-            }
-
-            String meetingDateString = scheduledMeeting.getMeetingDate().toString("dd-MM-yyyy");
-            String presentDateString = DateTime.now().toString("dd/MM/yyyy");
-            String meetingTimeString = scheduledMeeting.getMeetingDate().toString("HH:mm:ss a");
-            model.put("name", invitee.getFullName());
-            model.put("gameType", gameTypeName);
-            model.put("meetingDate", meetingDateString);
-            model.put("meetingTitle", scheduledMeeting.getMeetingSubject());
-            model.put("venue", scheduledMeeting.getVenue());
-            model.put("time",meetingTimeString);
-            model.put("additionalNotes", scheduledMeeting.getMeetingDescription());
-            model.put("date", presentDateString);
-
-            String content = mailContentBuilderService.build(model, templateName);
+            logger.info("Sending meeting email to {}", invitee.getEmailAddress());
             emailService.sendEmail(content, mailSubject, invitee.getEmailAddress());
         } catch (Exception e) {
             logger.error("An error occurred while sending email to user {}", invitee.getFullName(), e);
         }
     }
 
+    private String buildMeetingAttendeeEmailContent(String templateName, ScheduledMeeting scheduledMeeting) {
+        HashMap<String, Object> model = new HashMap<>();
+        String gameTypeName = scheduledMeeting.getGameTypeName();
+        String meetingDateString = scheduledMeeting.getMeetingDate().toString("dd-MM-yyyy");
+        String presentDateString = DateTime.now().toString("dd-MM-yyyy");
+        String meetingTimeString = scheduledMeeting.getMeetingDate().toString("HH:mm:ss a");
+        model.put("gameType", gameTypeName);
+        model.put("meetingDate", meetingDateString);
+        model.put("meetingTitle", scheduledMeeting.getMeetingSubject());
+        model.put("venue", scheduledMeeting.getVenue());
+        model.put("time", meetingTimeString);
+        model.put("additionalNotes", scheduledMeeting.getMeetingDescription());
+        model.put("date", presentDateString);
+        return mailContentBuilderService.build(model, templateName);
+    }
+
     @Override
     public void sendMeetingNotificationEmailToMeetingCreator(String mailSubject, String templateName, ScheduledMeeting scheduledMeeting) {
         AuthInfo inviter = getUser(scheduledMeeting.getCreatorId());
+        logger.info("Sending meeting email to {}", inviter.getEmailAddress());
         try {
             Institution institution = getInstitution(scheduledMeeting.getInstitutionId());
-
+            String meetingUrl = String.format("%s/schedule-presentation-view/%s", frontEndPropertyHelper.getFrontEndUrl(), scheduledMeeting.getId());
             String institutionName = institution.getInstitutionName();
             HashMap<String, Object> model = new HashMap<>();
-            String meetingDateString = scheduledMeeting.getMeetingDate().toString("dd/MM/yyyy HH:mm:ss");
-            String presentDateString = DateTime.now().toString("dd/MM/yyyy");
+            String meetingDateString = scheduledMeeting.getMeetingDate().toString("dd-MM-yyyy HH:mm:ss");
+            String presentDateString = DateTime.now().toString("dd-MM-yyyy");
 
-            model.put("name", inviter.getFullName());
             model.put("institutionName", institutionName);
             model.put("meetingDate", meetingDateString);
             model.put("meetingTitle", scheduledMeeting.getMeetingSubject());
             model.put("meetingVenue", scheduledMeeting.getVenue());
             model.put("additionalNotes", scheduledMeeting.getMeetingDescription());
             model.put("date", presentDateString);
+            model.put("frontEndUrl", meetingUrl);
 
             String content = mailContentBuilderService.build(model, templateName);
             emailService.sendEmail(content, mailSubject, inviter.getEmailAddress());

@@ -17,7 +17,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormS
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
-import com.software.finatech.lslb.cms.service.util.async_helpers.ApplicationFormEmailSenderAsync;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApplicationFormEmailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -589,6 +589,14 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
         ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.find(query, ApplicationForm.class).block();
         return applicationForm != null;
+    }
+
+    @Override
+    public ApplicationForm findApplicationFormById(String applicationFormId) {
+        if (StringUtils.isEmpty(applicationFormId)) {
+            return null;
+        }
+        return (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
     }
 
     private ApplicationForm fromCreateDto(ApplicationFormCreateDto applicationFormCreateDto) {

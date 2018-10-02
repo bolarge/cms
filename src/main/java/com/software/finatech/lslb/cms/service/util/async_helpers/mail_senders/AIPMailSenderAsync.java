@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.service.util.async_helpers;
+package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
