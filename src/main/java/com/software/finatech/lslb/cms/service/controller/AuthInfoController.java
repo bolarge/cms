@@ -659,7 +659,9 @@ public class AuthInfoController extends BaseController {
 
 
         AuthInfo AuthInfo = (AuthInfo) mongoRepositoryReactive.find(new Query(Criteria.where("id").is(verificationToken.getAuthInfoId())), AuthInfo.class).block();
-
+        if (AuthInfo.getSsoUserId() != null) {
+            return Mono.just(new ResponseEntity("Registration Already Completed", HttpStatus.BAD_REQUEST));
+        }
         String appUrl =
                 appHostPort +
                         request.getContextPath();
