@@ -1,5 +1,8 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class AuthInfoDto {
     protected String id;
     protected String firstName;
@@ -18,6 +21,16 @@ public class AuthInfoDto {
     protected String gameTypeName;
     protected String institutionName;
     protected String agentId;
+    private Set<AuthPermissionDto> authPermissions = new HashSet<>();
+
+
+    public Set<AuthPermissionDto> getAuthPermissions() {
+        return authPermissions;
+    }
+
+    public void setAuthPermissions(Set<AuthPermissionDto> authPermissions) {
+        this.authPermissions = authPermissions;
+    }
 
     public String getAgentId() {
         return agentId;

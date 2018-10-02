@@ -10,7 +10,7 @@ import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatu
 import com.software.finatech.lslb.cms.service.service.contracts.AgentApprovalRequestService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AgentCreationNotifierAsync;
-import com.software.finatech.lslb.cms.service.util.async_helpers.AgentUserCreatorAsync;
+import com.software.finatech.lslb.cms.service.util.AgentUserCreator;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,13 +38,13 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
     private static final Logger logger = LoggerFactory.getLogger(AgentApprovalRequestServiceImpl.class);
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private AuthInfoService authInfoService;
-    private AgentUserCreatorAsync agentUserCreatorAsync;
+    private AgentUserCreator agentUserCreatorAsync;
     private AgentCreationNotifierAsync agentCreationNotifierAsync;
 
     @Autowired
     public AgentApprovalRequestServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                                            AuthInfoService authInfoService,
-                                           AgentUserCreatorAsync agentUserCreatorAsync,
+                                           AgentUserCreator agentUserCreatorAsync,
                                            AgentCreationNotifierAsync agentCreationNotifierAsync) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.authInfoService = authInfoService;
@@ -305,7 +305,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
         agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
         agentApprovalRequest.setApproverId(userId);
         mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
-        agentUserCreatorAsync.createUserAndCustomerCodeForAgentAsync(agent);
+        agentUserCreatorAsync.createUserAndCustomerCodeForAgent(agent);
     }
 
 

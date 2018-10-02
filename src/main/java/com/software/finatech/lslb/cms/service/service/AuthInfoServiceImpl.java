@@ -1,15 +1,18 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.AuthPermission;
 import com.software.finatech.lslb.cms.service.domain.AuthRole;
 import com.software.finatech.lslb.cms.service.domain.VerificationToken;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoCompleteDto;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
 import com.software.finatech.lslb.cms.service.dto.CreateApplicantAuthInfoDto;
+import com.software.finatech.lslb.cms.service.dto.UserAuthPermissionDto;
 import com.software.finatech.lslb.cms.service.dto.sso.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
+import com.software.finatech.lslb.cms.service.service.contracts.AuthPermissionService;
 import com.software.finatech.lslb.cms.service.util.async_helpers.NewUserEmailNotifierAsync;
 import io.advantageous.boon.json.JsonFactory;
 import io.advantageous.boon.json.ObjectMapper;
@@ -65,6 +68,9 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     private MailContentBuilderService mailContentBuilderService;
     @Autowired
     private NewUserEmailNotifierAsync newUserEmailNotifierAsync;
+
+    @Autowired
+    private AuthPermissionService authPermissionService;
 
     @Autowired
     private EmailService emailService;
@@ -689,6 +695,34 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         query.addCriteria(Criteria.where("authRoleId").is(LSLBAuthRoleReferenceData.LSLB_GM_ROLE_ID));
         query.addCriteria(Criteria.where("enabled").is(true));
         return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
+    }
+
+    @Override
+    public Mono<ResponseEntity> addPermissionsToUser(UserAuthPermissionDto userAuthPermissionDto) {
+        try {
+            String userId = userAuthPermissionDto.getUserId();
+            Set<String> newPermissionIds = userAuthPermissionDto.getAuthPermissionIds();
+            AuthInfo user = getUserById(userId);
+            if (user == null) {
+                return Mono.just(new ResponseEntity<>(String.format("User with id %s not found", userId), HttpStatus.BAD_REQUEST));
+            }
+            Set<String> allUserPermissionIdsForUser = user.getAllUserPermissionIdsForUser();
+            Set<String> userSpecificPermissionIdsForUser = user.getAuthPermissionIds();
+            for (String newPermissionId : newPermissionIds) {
+                AuthPermission authPermission = authPermissionService.findAuthPermissionById(newPermissionId);
+                if (authPermission == null) {
+                    return Mono.just(new ResponseEntity<>(String.format("Auth Permission with id %s does not exist", newPermissionId), HttpStatus.BAD_REQUEST));
+                }
+                if (!allUserPermissionIdsForUser.contains(newPermissionId)) {
+                    userSpecificPermissionIdsForUser.add(newPermissionId);
+                }
+            }
+            user.setAuthPermissionIds(userSpecificPermissionIdsForUser);
+            mongoRepositoryReactive.saveOrUpdate(user);
+            return Mono.just(new ResponseEntity<>(user.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding permissions to user ", e);
+        }
     }
 
     public ArrayList<String> getAllGamingOperatorAdminAndUserRoles() {

@@ -71,7 +71,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
          "/swagger-resources/**", 
          "/configuration/security", 
          "/docApi/**",
-          "/webjars/**");
+          "/webjars/**",
+                "/test/**");
         SkipPathRequestMatcher matcher = new SkipPathRequestMatcher(pathsToSkip, "/**");
 
         JwtAuthenticationTokenFilter authenticationTokenFilter = new JwtAuthenticationTokenFilter(matcher);

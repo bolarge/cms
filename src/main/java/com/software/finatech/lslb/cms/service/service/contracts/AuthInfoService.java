@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.domain.VerificationToken;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoCompleteDto;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
 import com.software.finatech.lslb.cms.service.dto.CreateApplicantAuthInfoDto;
+import com.software.finatech.lslb.cms.service.dto.UserAuthPermissionDto;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOChangePasswordModel;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOPasswordResetModel;
 import org.springframework.http.ResponseEntity;
@@ -41,4 +42,6 @@ public interface AuthInfoService {
     AuthInfo getUserById(String userId);
 
     AuthInfo getUserByAgentId(String agentId);
+
+    Mono<ResponseEntity> addPermissionsToUser(UserAuthPermissionDto userAuthPermissionDto);
 }
