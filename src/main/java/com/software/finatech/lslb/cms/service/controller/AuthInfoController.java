@@ -682,6 +682,19 @@ public class AuthInfoController extends BaseController {
     }
 
 
+    @RequestMapping(method = RequestMethod.GET, value = "/add-permission-to-user")
+    @ApiOperation(value = "Add permissions to user", response = AuthInfoDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")
+    }
+    )
+    public Mono<ResponseEntity> addPermissionsToUser(@RequestBody UserAuthPermissionDto userAuthPermissionDto){
+        return authInfoService.addPermissionsToUser(userAuthPermissionDto);
+    }
+
     public String getAppHostPort() {
         return this.appHostPort;
     }

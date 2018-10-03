@@ -207,11 +207,11 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
 
 
     @Override
-    public PaymentRecord findPaymentRecord(String gamingMachineId,
-                                           String gameTypeId,
-                                           String institutionId,
-                                           String feePaymentTypeId,
-                                           String revenueNameId) {
+    public PaymentRecord findPaymentRecordForGamingMachine(String gamingMachineId,
+                                                           String gameTypeId,
+                                                           String institutionId,
+                                                           String feePaymentTypeId,
+                                                           String revenueNameId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
         query.addCriteria(Criteria.where("feePaymentTypeId").is(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID));

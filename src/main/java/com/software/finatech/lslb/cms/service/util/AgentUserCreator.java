@@ -1,36 +1,34 @@
-package com.software.finatech.lslb.cms.service.util.async_helpers;
+package com.software.finatech.lslb.cms.service.util;
 
 import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
-import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.CustomerCodeCreatorAsync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AgentUserCreatorAsync {
+public class AgentUserCreator {
 
-    private static final Logger logger = LoggerFactory.getLogger(AgentUserCreatorAsync.class);
+    private static final Logger logger = LoggerFactory.getLogger(AgentUserCreator.class);
 
     private AuthInfoService authInfoService;
     private FrontEndPropertyHelper frontEndPropertyHelper;
     private CustomerCodeCreatorAsync customerCodeCreatorAsync;
 
     @Autowired
-    public AgentUserCreatorAsync(AuthInfoService authInfoService,
-                                 FrontEndPropertyHelper frontEndPropertyHelper,
-                                 CustomerCodeCreatorAsync customerCodeCreatorAsync) {
+    public AgentUserCreator(AuthInfoService authInfoService,
+                            FrontEndPropertyHelper frontEndPropertyHelper,
+                            CustomerCodeCreatorAsync customerCodeCreatorAsync) {
         this.authInfoService = authInfoService;
         this.frontEndPropertyHelper = frontEndPropertyHelper;
         this.customerCodeCreatorAsync = customerCodeCreatorAsync;
     }
 
-    @Async
-    public void createUserAndCustomerCodeForAgentAsync(Agent agent) {
+    public void createUserAndCustomerCodeForAgent(Agent agent) {
         try {
             AuthInfoCreateDto agentUserCreateDto = createAuthInfoDtoFromAgent(agent);
             authInfoService.createAuthInfo(agentUserCreateDto, frontEndPropertyHelper.getFrontEndUrl()).block();

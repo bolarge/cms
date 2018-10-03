@@ -17,7 +17,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormS
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
-import com.software.finatech.lslb.cms.service.util.async_helpers.ApplicationFormNotificationHelperAsync;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApplicationFormEmailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -50,13 +50,13 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private AuthInfoService authInfoService;
     private PaymentRecordService paymentRecordService;
-    private ApplicationFormNotificationHelperAsync applicationFormNotificationHelperAsync;
+    private ApplicationFormEmailSenderAsync applicationFormNotificationHelperAsync;
 
     @Autowired
     public ApplicationFormServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                                       AuthInfoService authInfoService,
                                       PaymentRecordService paymentRecordService,
-                                      ApplicationFormNotificationHelperAsync applicationFormAsyncNotificationHelper) {
+                                      ApplicationFormEmailSenderAsync applicationFormAsyncNotificationHelper) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.authInfoService = authInfoService;
         this.paymentRecordService = paymentRecordService;
@@ -495,11 +495,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationForm.setApplicationFormStatusId(inReviewApplicationFormStatusId);
             applicationForm.setSubmissionDate(LocalDate.now());
             saveApplicationForm(applicationForm);
-
             applicationFormNotificationHelperAsync.sendApplicationFormSubmissionMailToLSLBAdmins(applicationForm);
-            if (isResubmit) {
-                applicationFormNotificationHelperAsync.sendCompleteApplicationNotificationToLslbAdmin(applicationForm);
-            }
             return Mono.just(new ResponseEntity<>("Application completed successfully and now in review", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while completing application form", e);
@@ -593,6 +589,14 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
         ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.find(query, ApplicationForm.class).block();
         return applicationForm != null;
+    }
+
+    @Override
+    public ApplicationForm findApplicationFormById(String applicationFormId) {
+        if (StringUtils.isEmpty(applicationFormId)) {
+            return null;
+        }
+        return (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
     }
 
     private ApplicationForm fromCreateDto(ApplicationFormCreateDto applicationFormCreateDto) {

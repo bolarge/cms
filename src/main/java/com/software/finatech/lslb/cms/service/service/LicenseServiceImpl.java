@@ -6,7 +6,7 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.*;
-import com.software.finatech.lslb.cms.service.util.async_helpers.AIPMailSenderAsync;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.AIPMailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;

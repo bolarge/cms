@@ -27,8 +27,10 @@ public interface ScheduledMeetingService {
                                                   String cancelerId,
                                                   HttpServletResponse httpServletResponse);
 
-    void sendMeetingNotificationEmailToAttendee(String mailSubject,String templateName, AuthInfo invitee, ScheduledMeeting scheduledMeeting);
+    void sendMeetingNotificationEmailToMeetingAttendees(String mailSubject, String templateName, ScheduledMeeting scheduledMeeting);
 
-    void sendMeetingNotificationEmailToMeetingCreator(String mailSubject,String templateName, ScheduledMeeting scheduledMeeting);
+    void sendMeetingNotificationEmailToAttendee(String mailSubject, String content, AuthInfo invitee);
+
+    void sendMeetingNotificationEmailToMeetingCreator(String mailSubject, String templateName, ScheduledMeeting scheduledMeeting);
 }
 

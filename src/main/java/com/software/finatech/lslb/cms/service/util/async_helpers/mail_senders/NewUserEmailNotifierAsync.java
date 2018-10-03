@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.service.util.async_helpers;
+package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
@@ -60,7 +60,7 @@ public class NewUserEmailNotifierAsync {
             model.put("userEmail", newSSOClientAdmin.getEmailAddress());
             model.put("userFullName", newSSOClientAdmin.getFullName());
             String content = mailContentBuilderService.build(model, "VGG-Admin-SSO-Client-Admin-Notification");
-            emailService.sendEmail(content, "New user on LSLB CMS", vggAdminUser.getEmailAddress());
+            emailService.sendEmail(content, "New SSO Client Admin User on LSLB CMS", vggAdminUser.getEmailAddress());
         } catch (Exception e) {
             logger.error("An error occurred while sending email to user -> {}", vggAdminUser.getEmailAddress(), e);
         }
