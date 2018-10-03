@@ -24,8 +24,18 @@ public class CustomerComplain extends AbstractFact {
     private String complainDetails;
     private String customerComplainStatusId;
     private String ticketId;
+    private LocalDateTime timeReported;
     private List<CustomerComplainAction> customerComplainActionList;
     private LocalDateTime nextNotificationDateTime;
+
+
+    public LocalDateTime getTimeReported() {
+        return timeReported;
+    }
+
+    public void setTimeReported(LocalDateTime timeReported) {
+        this.timeReported = timeReported;
+    }
 
     public LocalDateTime getNextNotificationDateTime() {
         return nextNotificationDateTime;
@@ -125,6 +135,10 @@ public class CustomerComplain extends AbstractFact {
         dto.setCustomerPhone(getCustomerPhoneNumber());
         dto.setComplainSubject(getComplainSubject());
         dto.setTicketId(getTicketId());
+        LocalDateTime timeReported= getTimeReported();
+        if(timeReported != null){
+            dto.setTimeReported(timeReported.toString("dd-MM-yyyy HH:mm:ss"));
+        }
         CustomerComplainStatus customerComplainStatus = getCustomerComplainStatus(getCustomerComplainStatusId());
         if (customerComplainStatus != null) {
             dto.setCustomerComplainStatusId(getCustomerComplainStatusId());

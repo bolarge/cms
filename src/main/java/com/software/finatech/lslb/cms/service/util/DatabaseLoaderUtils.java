@@ -72,8 +72,6 @@ public class DatabaseLoaderUtils {
         RenewalFormStatusReferenceData.load(mongoRepositoryReactive);
         AuditActionReferenceData.load(mongoRepositoryReactive);
         CustomerComplainStatusReferenceData.load(mongoRepositoryReactive);
-        // PaymentRecordUpdater.updatePaymentRecords(mongoRepositoryReactive);
-        // AdeTestData.LoadTestData(mongoRepositoryReactive);
     }
 
     // @Profile("test")

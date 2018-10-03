@@ -15,6 +15,15 @@ public class CustomerComplainDto {
     private String customerComplainStatusName;
     private List<CustomerComplainActionDto> customerComplainActions;
     private String ticketId;
+    private String timeReported;
+
+    public String getTimeReported() {
+        return timeReported;
+    }
+
+    public void setTimeReported(String timeReported) {
+        this.timeReported = timeReported;
+    }
 
     public String getTicketId() {
         return ticketId;

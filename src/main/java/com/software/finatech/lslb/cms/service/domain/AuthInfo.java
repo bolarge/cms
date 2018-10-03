@@ -11,6 +11,7 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("serial")
@@ -236,7 +237,6 @@ public class AuthInfo extends AbstractFact {
         authInfoDto.setAccountLocked(getAccountLocked());
         authInfoDto.setEmailAddress(getEmailAddress());
         authInfoDto.setId(getId());
-        authInfoDto.setAttachmentId(getAttachmentId());
         authInfoDto.setPhoneNumber(getPhoneNumber());
         authInfoDto.setFirstName(getFirstName());
         authInfoDto.setLastName(getLastName());
@@ -251,6 +251,7 @@ public class AuthInfo extends AbstractFact {
             authInfoDto.setInstitutionName(userInstitution.getInstitutionName());
         }
         authInfoDto.setAgentId(getAgentId());
+        authInfoDto.setAuthPermissions(getAllPermissionsForUser());
         return authInfoDto;
     }
 
@@ -280,12 +281,14 @@ public class AuthInfo extends AbstractFact {
         if (StringUtils.isEmpty(this.authRoleId)) {
             return null;
         }
-
-        AuthRole authRole = (AuthRole) Mapstore.STORE.get("AuthRole").get(authRoleId);
+        Map authRoleMap = Mapstore.STORE.get("AuthRole");
+        if (authRoleMap != null) {
+            AuthRole authRole = (AuthRole) authRoleMap.get(this.authRoleId);
+        }
         if (authRole == null) {
-            authRole = (AuthRole) mongoRepositoryReactive.findById(authRoleId, AuthRole.class).block();
-            if (authRole != null) {
-                Mapstore.STORE.get("AuthRole").put(authRole.getId(), authRole);
+            authRole = (AuthRole) mongoRepositoryReactive.findById(this.authRoleId, AuthRole.class).block();
+            if (authRole != null && authRoleMap != null) {
+                authRoleMap.put(authRole.getId(), authRole);
             }
         }
         return authRole;

@@ -7,12 +7,15 @@ import com.software.finatech.lslb.cms.service.domain.VerificationToken;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.dto.sso.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthPermissionService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthRoleService;
+import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.NewUserEmailNotifierAsync;
 import io.advantageous.boon.json.JsonFactory;
 import io.advantageous.boon.json.ObjectMapper;
@@ -29,6 +32,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +45,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -71,7 +76,8 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
     @Autowired
     private AuthPermissionService authPermissionService;
-
+    @Autowired
+    private AuditLogHelper auditLogHelper;
     @Autowired
     private AuthRoleService authRoleService;
 
@@ -583,7 +589,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
      * @return
      */
     @Override
-    public Mono<ResponseEntity> loginToken(String userName, String password, AuthInfo authInfo) {
+    public Mono<ResponseEntity> loginToken(String userName, String password, AuthInfo authInfo, HttpServletRequest request) {
         try {
             HttpClient httpclient = HttpClientBuilder.create().build();
             // URI urlObject = new URI(baseIdentityURL+"/connect/token");
@@ -609,9 +615,11 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 // everything is fine, handle the response
                 SSOToken token = mapper.readValue(stringResponse, SSOToken.class);
                 token.setAuthInfo(authInfo.convertToDto());
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Successful Login Attempt"));
 
                 return Mono.just(new ResponseEntity<>((token), HttpStatus.OK));
             } else {
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> Response From SSO : \n" + stringResponse));
                 return Mono.just(new ResponseEntity<>(stringResponse, HttpStatus.valueOf(responseCode)));
             }
         } catch (Throwable e) {

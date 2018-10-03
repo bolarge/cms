@@ -4,6 +4,7 @@ import com.software.finatech.lslb.cms.service.domain.AuthRole;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 
 import java.util.Arrays;
+import java.util.Set;
 
 public class LSLBAuthRoleReferenceData {
     public static final String LSLB_ADMIN_ID = "4";
@@ -27,7 +28,8 @@ public class LSLBAuthRoleReferenceData {
         role4.setDescription("LSLB Admin");
         role4.setName("LSLB ADMIN");
         role4.setSsoRoleMapping(SSO_CLIENT_ADMIN);
-        role4.getAuthPermissionIds().addAll(Arrays.asList("13", "14", "15", "16", "17"));
+        Set<String> permissionIds = LSLBAuthPermissionReferenceData.getLSLBAdminPermissions();
+        role4.setAuthPermissionIds(permissionIds);
 
         AuthRole role5 = (AuthRole) mongoRepositoryReactive.findById(LSLB_USER_ID, AuthRole.class).block();
         if (role5 == null) {
@@ -36,8 +38,9 @@ public class LSLBAuthRoleReferenceData {
         }
         role5.setDescription("LSLB user");
         role5.setName("LSLB USER");
-        role5.setSsoRoleMapping(SSO_CLIENT_ADMIN);
-        role5.getAuthPermissionIds().addAll(Arrays.asList("13", "14", "15", "16", "17"));
+        role5.setSsoRoleMapping(SSO_CLIENT_USER);
+        permissionIds = LSLBAuthPermissionReferenceData.getLSLBUserPermissions();
+        role5.setAuthPermissionIds(permissionIds);
 
 
         AuthRole role6 = (AuthRole) mongoRepositoryReactive.findById(GAMING_OPERATOR_ADMIN_ROLE_ID, AuthRole.class).block();
@@ -48,7 +51,8 @@ public class LSLBAuthRoleReferenceData {
         role6.setDescription("GAMING OPERATOR ADMIN (Is in charge of the registration of the gaming operator)");
         role6.setName("GAMING OPERATOR ADMIN");
         role6.setSsoRoleMapping(SSO_CLIENT_USER);
-        role6.getAuthPermissionIds().addAll(Arrays.asList("1", "2"));
+        permissionIds = LSLBAuthPermissionReferenceData.getGamingOperatorAdminPermissions();
+        role6.setAuthPermissionIds(permissionIds);
 
 
         AuthRole role7 = (AuthRole) mongoRepositoryReactive.findById(GAMING_OPERATOR_USER_ROLE_ID, AuthRole.class).block();
@@ -59,7 +63,8 @@ public class LSLBAuthRoleReferenceData {
         role7.setDescription("GAMING OPERATOR USER(Is in charge of managing gaming operator agents)");
         role7.setName("GAMING OPERATOR USER");
         role7.setSsoRoleMapping(SSO_CLIENT_USER);
-        role7.getAuthPermissionIds().addAll(Arrays.asList("1", "2"));
+        permissionIds = LSLBAuthPermissionReferenceData.getGamingOperatorUserPermissions();
+        role7.setAuthPermissionIds(permissionIds);
 
         AuthRole role8 = (AuthRole) mongoRepositoryReactive.findById(AGENT_ROLE_ID, AuthRole.class).block();
         if (role8 == null) {
@@ -69,7 +74,8 @@ public class LSLBAuthRoleReferenceData {
         role8.setDescription("AGENT");
         role8.setName("AGENT");
         role8.setSsoRoleMapping(SSO_CLIENT_USER);
-        role8.getAuthPermissionIds().addAll(Arrays.asList("1", "2"));
+        permissionIds = LSLBAuthPermissionReferenceData.getAllAgentPermissions();
+        role8.setAuthPermissionIds(permissionIds);
 
 
         AuthRole role9 = (AuthRole) mongoRepositoryReactive.findById(APPLICANT_ROLE_ID, AuthRole.class).block();

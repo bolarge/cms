@@ -11,6 +11,7 @@ import com.software.finatech.lslb.cms.service.dto.sso.SSOPasswordResetModel;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 
 public interface AuthInfoService {
@@ -30,7 +31,7 @@ public interface AuthInfoService {
 
     Mono<String> getToken();
 
-    Mono<ResponseEntity> loginToken(String userName, String password, AuthInfo authInfo);
+    Mono<ResponseEntity> loginToken(String userName, String password, AuthInfo authInfo, HttpServletRequest request);
 
     Mono<ResponseEntity> completeRegistration(VerificationToken verificationToken, AuthInfoCompleteDto authInfoCompleteDto, AuthInfo authInfo);
 
