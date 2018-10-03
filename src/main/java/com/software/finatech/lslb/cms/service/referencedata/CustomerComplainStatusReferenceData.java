@@ -4,18 +4,19 @@ import com.software.finatech.lslb.cms.service.domain.CustomerComplainStatus;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 
 public class CustomerComplainStatusReferenceData {
-    public static final String PENDING_ID = "1";
+    public static final String OPEN_ID = "1";
     public static final String RESOLVED_ID = "2";
     public static final String CLOSED_ID = "3";
+    public static final String UNRESOLVED_ID = "4";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
 
-        CustomerComplainStatus customerComplainStatus1 = (CustomerComplainStatus) mongoRepositoryReactive.findById(PENDING_ID, CustomerComplainStatus.class).block();
+        CustomerComplainStatus customerComplainStatus1 = (CustomerComplainStatus) mongoRepositoryReactive.findById(OPEN_ID, CustomerComplainStatus.class).block();
         if (customerComplainStatus1 == null) {
             customerComplainStatus1 = new CustomerComplainStatus();
-            customerComplainStatus1.setId(PENDING_ID);
+            customerComplainStatus1.setId(OPEN_ID);
         }
-        customerComplainStatus1.setName("PENDING");
+        customerComplainStatus1.setName("OPEN");
 
         CustomerComplainStatus customerComplainStatus2 = (CustomerComplainStatus) mongoRepositoryReactive.findById(RESOLVED_ID, CustomerComplainStatus.class).block();
         if (customerComplainStatus2 == null) {
@@ -31,8 +32,17 @@ public class CustomerComplainStatusReferenceData {
         }
         customerComplainStatus3.setName("CLOSED");
 
+        CustomerComplainStatus customerComplainStatus4 = (CustomerComplainStatus) mongoRepositoryReactive.findById(UNRESOLVED_ID, CustomerComplainStatus.class).block();
+        if (customerComplainStatus4 == null) {
+            customerComplainStatus4 = new CustomerComplainStatus();
+            customerComplainStatus4.setId(UNRESOLVED_ID);
+        }
+        customerComplainStatus4.setName("UNRESOLVED");
+
+
         mongoRepositoryReactive.saveOrUpdate(customerComplainStatus1);
         mongoRepositoryReactive.saveOrUpdate(customerComplainStatus2);
         mongoRepositoryReactive.saveOrUpdate(customerComplainStatus3);
+        mongoRepositoryReactive.saveOrUpdate(customerComplainStatus4);
     }
 }

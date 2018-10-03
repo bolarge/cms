@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainCreateDto;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainDto;
+import com.software.finatech.lslb.cms.service.dto.CustomerComplainUpdateDto;
 import com.software.finatech.lslb.cms.service.service.contracts.CustomerComplainService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -90,6 +91,17 @@ public class CustomerComplainController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> closeCustomerComplain(@PathVariable("id") String complainId) {
         return customerComplainService.getCustomerComplainFullDetail(complainId);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/update", produces = "application/json")
+    @ApiOperation(value = "Update Customer complain status", response = CustomerComplainDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> updateCustomerComplain(@RequestBody CustomerComplainUpdateDto customerComplainUpdateDto) {
+        return customerComplainService.updateCustomerComplainStatus(customerComplainUpdateDto);
     }
 }
 

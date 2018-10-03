@@ -298,7 +298,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 model.put("date", LocalDate.now().toString("dd-MM-YYYY"));
                 url = appUrl + "/authInfo/confirm?token=" + verificationToken.getConfirmationToken();
                 model.put("CallbackUrl", url);
-                model.put("isApplicant", false);
+                model.put("isApplicant", true);
                 String content = mailContentBuilderService.build(model, "continueRegistration-new");
                 content = content.replaceAll("CallbackUrl", url);
                 emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());

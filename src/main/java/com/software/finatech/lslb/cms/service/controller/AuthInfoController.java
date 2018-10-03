@@ -682,7 +682,7 @@ public class AuthInfoController extends BaseController {
     }
 
 
-    @RequestMapping(method = RequestMethod.GET, value = "/add-permission-to-user")
+    @RequestMapping(method = RequestMethod.POST, value = "/add-permission-to-user")
     @ApiOperation(value = "Add permissions to user", response = AuthInfoDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),

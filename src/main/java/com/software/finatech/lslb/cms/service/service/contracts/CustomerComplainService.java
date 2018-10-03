@@ -1,6 +1,8 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
+import com.software.finatech.lslb.cms.service.domain.CustomerComplain;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainCreateDto;
+import com.software.finatech.lslb.cms.service.dto.CustomerComplainUpdateDto;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
@@ -23,4 +25,10 @@ public interface CustomerComplainService {
     Mono<ResponseEntity> closeCustomerComplain(String userId, String customerComplainId);
 
     Mono<ResponseEntity> createCustomerComplain(CustomerComplainCreateDto customerComplainCreateDto);
+
+    CustomerComplain findCustomerComplainById(String customerComplainId);
+
+    Mono<ResponseEntity> updateCustomerComplainStatus(CustomerComplainUpdateDto customerComplainUpdateDto);
+
+    Mono<ResponseEntity> getAllCustomerComplainStatus();
 }

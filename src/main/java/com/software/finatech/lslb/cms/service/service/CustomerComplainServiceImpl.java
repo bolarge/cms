@@ -3,8 +3,11 @@ package com.software.finatech.lslb.cms.service.service;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.CustomerComplain;
 import com.software.finatech.lslb.cms.service.domain.CustomerComplainAction;
+import com.software.finatech.lslb.cms.service.domain.CustomerComplainStatus;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainCreateDto;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainDto;
+import com.software.finatech.lslb.cms.service.dto.CustomerComplainUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.CustomerComplainStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
@@ -182,6 +185,14 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
     }
 
     @Override
+    public CustomerComplain findCustomerComplainById(String customerComplainId) {
+        if (StringUtils.isEmpty(customerComplainId)) {
+            return null;
+        }
+        return (CustomerComplain) mongoRepositoryReactive.findById(customerComplainId, CustomerComplain.class).block();
+    }
+
+    @Override
     public Mono<ResponseEntity> closeCustomerComplain(String userId, String customerComplainId) {
         try {
             if (StringUtils.isEmpty(userId) || StringUtils.isEmpty(customerComplainId)) {
@@ -218,10 +229,74 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
         }
     }
 
+    @Override
+    public Mono<ResponseEntity> updateCustomerComplainStatus(CustomerComplainUpdateDto customerComplainUpdateDto) {
+        try {
+            String userId = customerComplainUpdateDto.getUserId();
+            String customerComplainId = customerComplainUpdateDto.getCustomerComplainId();
+            String customerComplainStatusId = customerComplainUpdateDto.getCustomerComplainStatusId();
+            AuthInfo user = authInfoService.getUserById(userId);
+            if (user == null) {
+                return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", userId), HttpStatus.BAD_REQUEST));
+            }
+            if (!user.canResolveCustomerComplains()) {
+                return Mono.just(new ResponseEntity<>("User does not have permission to resolve customer complains", HttpStatus.BAD_REQUEST));
+            }
+            CustomerComplain existingCustomerComplain = findCustomerComplainById(customerComplainId);
+            if (existingCustomerComplain == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Customer complain with id %s not found", customerComplainId), HttpStatus.BAD_REQUEST));
+            }
+            String existingCustomerComplainStatusId = existingCustomerComplain.getCustomerComplainStatusId();
+            if (StringUtils.equals(CustomerComplainStatusReferenceData.CLOSED_ID, existingCustomerComplainStatusId)) {
+                return Mono.just(new ResponseEntity<>("The customer complain is already closed", HttpStatus.BAD_REQUEST));
+            }
+
+            CustomerComplainAction customerComplainAction = new CustomerComplainAction();
+            customerComplainAction.setActionTime(LocalDateTime.now());
+            customerComplainAction.setComplainStatusId(customerComplainStatusId);
+            customerComplainAction.setUserId(userId);
+            existingCustomerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.CLOSED_ID);
+            List<CustomerComplainAction> existingCustomerComplainActions = existingCustomerComplain.getCustomerComplainActionList();
+            existingCustomerComplainActions.add(customerComplainAction);
+            existingCustomerComplain.setCustomerComplainActionList(existingCustomerComplainActions);
+            mongoRepositoryReactive.saveOrUpdate(existingCustomerComplain);
+            if (customerComplainUpdateDto.isClosedUpdate()) {
+                customerComplaintEmailSenderAsync.sendClosedCustomerComplaintToCustomer(existingCustomerComplain);
+            }
+            if (customerComplainUpdateDto.isResolvedUpdate()) {
+                customerComplaintEmailSenderAsync.sendResolvedCustomerComplainToCustomer(existingCustomerComplain);
+            }
+            return Mono.just(new ResponseEntity(existingCustomerComplain.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while changing complain status", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> getAllCustomerComplainStatus() {
+        try {
+            ArrayList<CustomerComplainStatus> customerComplainStatuses = (ArrayList<CustomerComplainStatus>) mongoRepositoryReactive
+                    .findAll(new Query(), CustomerComplainStatus.class).toStream().collect(Collectors.toList());
+
+            if (customerComplainStatuses == null || customerComplainStatuses.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));
+            }
+            List<EnumeratedFactDto> enumeratedFactDtos = new ArrayList<>();
+            customerComplainStatuses.forEach(customerComplainStatus -> {
+                enumeratedFactDtos.add(customerComplainStatus.convertToDto());
+            });
+
+            return Mono.just(new ResponseEntity<>(enumeratedFactDtos, HttpStatus.OK));
+        } catch (Exception e) {
+            String errorMsg = "An error occurred while getting all customer complain statuses";
+            return logAndReturnError(logger, errorMsg, e);
+        }
+    }
+
     private CustomerComplain fromCreateCustomerComplain(CustomerComplainCreateDto customerComplainCreateDto) {
         CustomerComplain customerComplain = new CustomerComplain();
         customerComplain.setId(UUID.randomUUID().toString());
-        customerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.PENDING_ID);
+        customerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.OPEN_ID);
         customerComplain.setComplainDetails(customerComplainCreateDto.getComplainDetail());
         customerComplain.setCustomerEmailAddress(customerComplainCreateDto.getEmailAddress());
         customerComplain.setComplainSubject(customerComplainCreateDto.getComplainSubject());
@@ -232,20 +307,12 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
         return customerComplain;
     }
 
-    public void saveCustomerComplain(CustomerComplain customerComplain) {
+    private void saveCustomerComplain(CustomerComplain customerComplain) {
         mongoRepositoryReactive.saveOrUpdate(customerComplain);
     }
 
-
-    public String generateTicketId() {
+    private String generateTicketId() {
         int randomInt = NumberUtil.getRandomNumberInRange(3000, 300000000);
         return String.format("LS-CMTK-%s", randomInt);
-    }
-
-    public CustomerComplain findCustomerComplainById(String customerComplainId) {
-        if (StringUtils.isEmpty(customerComplainId)) {
-            return null;
-        }
-        return (CustomerComplain) mongoRepositoryReactive.findById(customerComplainId, CustomerComplain.class).block();
     }
 }
