@@ -158,7 +158,7 @@ public class RenewalFormController extends BaseController {
             }
             Query queryLicense = new Query();
             queryLicense.addCriteria(Criteria.where("paymentRecordId").is(renewalFormCreateDto.getPaymentRecordId()));
-            License license = (License) mongoRepositoryReactive.find(queryRenewal, License.class).block();
+            License license = (License) mongoRepositoryReactive.find(queryLicense, License.class).block();
 
             RenewalForm renewalForm = new RenewalForm();
             renewalForm.setId(UUID.randomUUID().toString());

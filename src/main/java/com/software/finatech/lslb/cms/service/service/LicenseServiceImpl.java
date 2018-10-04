@@ -17,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
@@ -38,6 +41,9 @@ public class LicenseServiceImpl implements LicenseService {
     private static final Logger logger = LoggerFactory.getLogger(LicenseServiceImpl.class);
     @Autowired
     ExpirationList expirationList;
+    @Autowired
+    protected MongoTemplate mongoTemplate;
+
     @Autowired
     SendEmail sendEmail;
     @Autowired
@@ -306,6 +312,48 @@ public class LicenseServiceImpl implements LicenseService {
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("renewalStatus").is("true"));
         List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryForLicensedInstitutionInGameType, License.class).toStream().collect(Collectors.toList());
+        if (licenses.size() == 0) {
+            return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+        }
+        List<LicenseDto> licenseDtos = new ArrayList<>();
+        licenses.stream().forEach(license -> {
+            licenseDtos.add(license.convertToDto());
+        });
+        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
+    }
+    @Override
+    public Mono<ResponseEntity> getAgentLicensesCloseToExpiration(String agentId) {
+        Query queryForLicensedAgentInGameType = new Query();
+        if (!StringUtils.isEmpty(agentId)) {
+            queryForLicensedAgentInGameType.addCriteria(Criteria.where("agentId").is(agentId));
+        }
+        queryForLicensedAgentInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.AGENT));
+        LocalDateTime dateTime = new LocalDateTime();
+        dateTime=dateTime.plusDays(90);
+        queryForLicensedAgentInGameType.addCriteria(Criteria.where("expiryDate").lt(dateTime));
+
+        List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryForLicensedAgentInGameType, License.class).toStream().collect(Collectors.toList());
+        if (licenses.size() == 0) {
+            return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+        }
+        List<LicenseDto> licenseDtos = new ArrayList<>();
+        licenses.stream().forEach(license -> {
+            licenseDtos.add(license.convertToDto());
+        });
+        return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
+    }
+    @Override
+    public Mono<ResponseEntity> getGamingMachineLicensesCloseToExpiration(String gamingMachineId) {
+        Query queryForLicensedAgentInGameType = new Query();
+        if (!StringUtils.isEmpty(gamingMachineId)) {
+            queryForLicensedAgentInGameType.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
+        }
+        queryForLicensedAgentInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.GAMING_MACHINE));
+        LocalDateTime dateTime = new LocalDateTime();
+        dateTime=dateTime.plusDays(90);
+        queryForLicensedAgentInGameType.addCriteria(Criteria.where("expiryDate").lt(dateTime));
+
+        List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryForLicensedAgentInGameType, License.class).toStream().collect(Collectors.toList());
         if (licenses.size() == 0) {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
         }
