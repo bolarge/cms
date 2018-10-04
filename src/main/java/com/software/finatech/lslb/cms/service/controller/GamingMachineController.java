@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-@Api(value = "Gaming machines", description = "For everything related to gaming machines", tags = "")
+@Api(value = "Gaming machines", description = "For everything related to gaming machines", tags = "Gaming Machine Controller")
 @RestController
 @RequestMapping("/api/v1/gaming-machines")
 public class GamingMachineController {

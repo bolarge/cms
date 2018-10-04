@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-@Api(value = "License", description = "For everything related to gaming operators licenses", tags = "")
+@Api(value = "License", description = "For everything related to gaming operators licenses", tags = "Licence Controller")
 @RestController
 @RequestMapping("/api/v1/license")
 public class LicenseController {

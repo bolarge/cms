@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.controller;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainCreateDto;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainDto;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.service.contracts.CustomerComplainService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -14,8 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
-@Api(value = "Customer Complains", description = "For everything related to customer complains on th CMS platform", tags = "")
+@Api(value = "Customer Complains", description = "For everything related to customer complains on th CMS platform", tags = "Customer Complain Controller")
 @RestController
 @RequestMapping("/api/v1/customer-complains")
 public class CustomerComplainController {
@@ -28,7 +30,7 @@ public class CustomerComplainController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize",
-            "sortType", "sortProperty", "customerEmail", "customerPhone", "statusId"})
+            "sortType", "sortProperty", "customerEmail", "customerPhone", "statusId", "startDate", "endDate"})
     @ApiOperation(value = "Get all customer complains", response = CustomerComplainDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -42,8 +44,10 @@ public class CustomerComplainController {
                                                        @RequestParam("customerEmail") String customerEmail,
                                                        @RequestParam("customerPhone") String customerPhone,
                                                        @RequestParam("statusId") String statusId,
+                                                       @RequestParam("startDate") String startDate,
+                                                       @RequestParam("endDate") String endDate,
                                                        HttpServletResponse httpServletResponse) {
-        return customerComplainService.findAllCustomerComplains(page, pageSize, sortType, sortParam, customerEmail, customerPhone, statusId, httpServletResponse);
+        return customerComplainService.findAllCustomerComplains(page, pageSize, sortType, sortParam, customerEmail, customerPhone, statusId, startDate, endDate, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create", produces = "application/json")
@@ -53,7 +57,7 @@ public class CustomerComplainController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createNewCustomerComplain(@RequestBody CustomerComplainCreateDto customerComplainCreateDto) {
+    public Mono<ResponseEntity> createNewCustomerComplain(@RequestBody @Valid CustomerComplainCreateDto customerComplainCreateDto) {
         return customerComplainService.createCustomerComplain(customerComplainCreateDto);
     }
 
@@ -100,8 +104,19 @@ public class CustomerComplainController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> updateCustomerComplain(@RequestBody CustomerComplainUpdateDto customerComplainUpdateDto) {
+    public Mono<ResponseEntity> updateCustomerComplain(@RequestBody @Valid CustomerComplainUpdateDto customerComplainUpdateDto) {
         return customerComplainService.updateCustomerComplainStatus(customerComplainUpdateDto);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/all-customer-complain-status", produces = "application/json")
+    @ApiOperation(value = "Get all customer complain status", response = EnumeratedFactDto.class,  responseContainer = "List",consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllCustomerComplainStatus() {
+        return customerComplainService.getAllCustomerComplainStatus();
     }
 }
 

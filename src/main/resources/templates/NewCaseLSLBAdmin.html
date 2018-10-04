@@ -561,12 +561,19 @@
                                                                             </h3>
                                                                             <div mc:edit="body"
                                                                                  style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
-                                                                                A new complaint has been submitted on
+                                                                                A new case has been logged on the LSLB
+                                                                                Customer Management System by
                                                                                 LSLB Customer Management System by <span
-                                                                                    th:text="${customerNameEmail}"></span> with ticket id <span th:text="${ticketId}"></span>.
+                                                                                    th:text="${reporterName}"></span>
+                                                                                against <span
+                                                                                    th:text="${reportedName}"></span>
+                                                                                with ticket id <span
+                                                                                    th:text="${ticketId}"></span>.
                                                                                 <br>
                                                                                 <br>
-                                                                                <p>Kindly click the link below to view the complaint details</p>
+                                                                                <p>Kindly click the link below to view
+                                                                                    the
+                                                                                    logged case details</p>
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -604,7 +611,8 @@
                                                                                         style="padding-top:15px;padding-bottom:15px;padding-right:15px;padding-left:15px;">
                                                                                         <a style="color:#FFFFFF;text-decoration:none;font-family:Helvetica,Arial,sans-serif;font-size:20px;line-height:135%;"
                                                                                            th:href="@{${frontEndUrl}}"
-                                                                                           target="_blank">View Complain
+                                                                                           target="_blank">View Logged
+                                                                                            Case
                                                                                         </a>
                                                                                     </td>
                                                                                 </tr>

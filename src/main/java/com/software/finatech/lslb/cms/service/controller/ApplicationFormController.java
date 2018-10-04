@@ -22,7 +22,8 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-@Api(value = "Application Form", description = "For everything related to gaming operators application forms", tags = "")
+@Api(value = "Application Form", description = "For everything related to gaming operators application forms",
+        tags = "Application Form Controller")
 @RestController
 @RequestMapping("/api/v1/application-form")
 public class ApplicationFormController {

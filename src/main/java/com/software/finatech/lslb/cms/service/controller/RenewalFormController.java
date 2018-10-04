@@ -27,7 +27,7 @@ import javax.validation.Valid;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Api(value = "Renewal Form", description = "", tags = "")
+@Api(value = "Renewal Form", description = "", tags = "Renewal Form Controller")
 @RestController
 @RequestMapping("/api/v1/renewalForm")
 public class RenewalFormController extends BaseController {

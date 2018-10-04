@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 import java.util.List;
 
-@Api(value = "Fees", description = "For everything related to fees configurations", tags = "")
+@Api(value = "Fees", description = "For everything related to fees configurations", tags = "Fee Controller")
 @RestController
 @RequestMapping("/api/v1/fees")
 public class FeeController extends BaseController {

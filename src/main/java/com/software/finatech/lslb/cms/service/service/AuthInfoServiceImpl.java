@@ -716,7 +716,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     @Override
     public ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveCustomerComplainNotification() {
         ArrayList<AuthInfo> validMembers = new ArrayList<>();
-        for (AuthInfo lslbMember : getAllLSLBMembers()) {
+        for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
             Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();
             if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECEIVE_CUSTOMER_COMPLAIN_ID)) {
                 validMembers.add(lslbMember);
@@ -728,7 +728,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     @Override
     public ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveApplicationSubmissionNotification() {
         ArrayList<AuthInfo> validMembers = new ArrayList<>();
-        for (AuthInfo lslbMember : getAllLSLBMembers()) {
+        for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
             Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();
             if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECEIVE_APPLICATION_ID)) {
                 validMembers.add(lslbMember);
@@ -740,7 +740,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     @Override
     public ArrayList<AuthInfo> findAllLSLBMembersThatCanReceivePaymentNotification() {
         ArrayList<AuthInfo> validMembers = new ArrayList<>();
-        for (AuthInfo lslbMember : getAllLSLBMembers()) {
+        for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
             Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();
             if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECEIVE_PAYMENT_NOTIFICATION_ID)) {
                 validMembers.add(lslbMember);
@@ -752,19 +752,31 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     @Override
     public ArrayList<AuthInfo> findAllLSLBMembersThatCanApproveAgentApprovals() {
         ArrayList<AuthInfo> validMembers = new ArrayList<>();
-        for (AuthInfo lslbMember : getAllLSLBMembers()) {
+        for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
             Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();
-            if (userPermissions.contains(LSLBAuthPermissionReferenceData.APPROVE_AGENT_REQUEST_ID)) {
+            if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECIEVE_AGENT_APPROVAL_AGENT_REQUEST_ID)) {
                 validMembers.add(lslbMember);
             }
         }
         return validMembers;
     }
 
-    private ArrayList<AuthInfo> getAllLSLBMembers() {
+    @Override
+    public ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveNewCaseNotification() {
+        ArrayList<AuthInfo> validMembers = new ArrayList<>();
+        for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
+            Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();
+            if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECEIVE_CASE_NOTIFICATION_ID)) {
+                validMembers.add(lslbMember);
+            }
+        }
+        return validMembers;
+    }
+
+    private ArrayList<AuthInfo> getAllEnabledLSLBMembers() {
         Query query = new Query();
         query.addCriteria(Criteria.where("enabled").is(true));
-        query.addCriteria(Criteria.where("authRoleId").in(getAllLSLBRoleIds()));
+        query.addCriteria(Criteria.where("authRoleId").in(LSLBAuthRoleReferenceData.getLslbRoles()));
         return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
     }
 
@@ -794,13 +806,6 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding permissions to user ", e);
         }
-    }
-
-    private List<String> getAllLSLBRoleIds() {
-        List<String> lslbRoleIds = new ArrayList<>();
-        lslbRoleIds.add(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID);
-        lslbRoleIds.add(LSLBAuthRoleReferenceData.LSLB_USER_ID);
-        return lslbRoleIds;
     }
 
     public ArrayList<String> getAllGamingOperatorAdminAndUserRoles() {

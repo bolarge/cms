@@ -13,6 +13,7 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.List;
 
 public interface AuthInfoService {
     Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl);
@@ -50,4 +51,6 @@ public interface AuthInfoService {
     ArrayList<AuthInfo> findAllLSLBMembersThatCanApproveAgentApprovals();
 
     Mono<ResponseEntity> addPermissionsToUser(UserAuthPermissionDto userAuthPermissionDto);
+
+    ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveNewCaseNotification();
 }

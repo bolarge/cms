@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
-@Api(value = "AuthInfo", description = "", tags = "")
+@Api(value = "AuthInfo", description = "", tags = "AuthInfo Controller")
 @RestController
 @RequestMapping("/api/v1/authInfo")
 public class AuthInfoController extends BaseController {

@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-@Api(value = "Scheduled meetings", description = "For everything related to scheduled meetings with gaming operators", tags = "")
+@Api(value = "Scheduled meetings", description = "For everything related to scheduled meetings with gaming operators", tags = "Scheduled ")
 @RestController
 @RequestMapping("/api/v1/scheduled-meetings")
 public class ScheduledMeetingController {
