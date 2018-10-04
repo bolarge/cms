@@ -5,11 +5,13 @@ import com.software.finatech.lslb.cms.service.domain.AuditAction;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 
 public class AuditActionReferenceData {
+    public static final String LOGIN_ID = "1";
+
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive){
-        AuditAction action = (AuditAction) mongoRepositoryReactive.findById("1",AuditAction.class).block();
+        AuditAction action = (AuditAction) mongoRepositoryReactive.findById(LOGIN_ID,AuditAction.class).block();
         if(action==null){
             action = new AuditAction();
-            action.setId("1");
+            action.setId(LOGIN_ID);
         }
         action.setDescription("Login");
         action.setName("Login");

@@ -6,7 +6,7 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.*;
-import com.software.finatech.lslb.cms.service.util.async_helpers.AIPMailSenderAsync;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.AIPMailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -525,7 +525,7 @@ public class LicenseServiceImpl implements LicenseService {
             }
             Query queryRenewalStatus = new Query();
             queryRenewalStatus.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));
-            RenewalForm renewalForm = (RenewalForm)mongoRepositoryReactive.find(queryRenewalStatus,RenewalForm.class).block();
+            RenewalForm renewalForm = (RenewalForm) mongoRepositoryReactive.find(queryRenewalStatus, RenewalForm.class).block();
             renewalForm.setFormStatusId(RenewalFormStatusReferenceData.SUBMITTED);
             mongoRepositoryReactive.saveOrUpdate(renewalForm);
 
@@ -580,7 +580,7 @@ public class LicenseServiceImpl implements LicenseService {
                 licenseEndDate = licenseEndDate.plusDays(days_diff);
             } else {*/
             LocalDate licenseEndDate = license.getExpiryDate().plusMonths(duration);
-           // }
+            // }
             PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById(license.getPaymentRecordId(), PaymentRecord.class).block();
             String licenseNumber = "";
             if (paymentRecord != null) {
@@ -646,14 +646,14 @@ public class LicenseServiceImpl implements LicenseService {
         queryLicense.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID));
 
         License licenses = (License) mongoRepositoryReactive.find(queryLicense, License.class).block();
-        if(licenses!=null){
+        if (licenses != null) {
             Query queryRenewal = new Query();
             queryRenewal.addCriteria(Criteria.where("paymentRecordId").is(licenses.getPaymentRecordId()));
             RenewalForm renewalFormCheck = (RenewalForm) mongoRepositoryReactive.find(queryRenewal, RenewalForm.class).block();
-            if(renewalFormCheck==null){
+            if (renewalFormCheck == null) {
                 return licenses;
             }
-         }
+        }
 
         return null;
 
@@ -753,8 +753,9 @@ public class LicenseServiceImpl implements LicenseService {
             String agentId = paymentRecord.getAgentId();
             String gamingMachineId = paymentRecord.getGamingMachineId();
             String gameTypeId = paymentRecord.getGameTypeId();
+            String licenseTypeId = getLicenseTypeIdFromRevenueNameId(paymentRecord.getRevenueNameId());
 
-            List<License> licenseList = getPreviousConfirmedLicenses(institutionId, agentId, gamingMachineId, gameTypeId);
+            List<License> licenseList = getPreviousConfirmedLicenses(institutionId, agentId, gamingMachineId, gameTypeId, licenseTypeId);
             if (licenseList == null || licenseList.isEmpty()) {
                 return;
             }
@@ -777,7 +778,7 @@ public class LicenseServiceImpl implements LicenseService {
             if (latestLicense.isAgentLicense() || latestLicense.isGamingMachineLicense()) {
                 newPendingApprovalRenewedLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
             }
-            newPendingApprovalRenewedLicense.setLicenseTypeId(getLicenseTypeFromRevenueNameId(paymentRecord.getRevenueNameId()));
+            newPendingApprovalRenewedLicense.setLicenseTypeId(getLicenseTypeIdFromRevenueNameId(paymentRecord.getRevenueNameId()));
             newPendingApprovalRenewedLicense.setGameTypeId(paymentRecord.getGameTypeId());
             newPendingApprovalRenewedLicense.setParentLicenseId(latestLicense.getId());
             newPendingApprovalRenewedLicense.setLicenseNumber(latestLicense.getLicenseNumber());
@@ -809,7 +810,7 @@ public class LicenseServiceImpl implements LicenseService {
         throw new Exception();
     }
 
-    private String getLicenseTypeFromRevenueNameId(String revenueNameId) {
+    private String getLicenseTypeIdFromRevenueNameId(String revenueNameId) {
         if (StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID, revenueNameId)) {
             return LicenseTypeReferenceData.AGENT;
         }
@@ -825,7 +826,8 @@ public class LicenseServiceImpl implements LicenseService {
     public List<License> getPreviousConfirmedLicenses(String institutionId,
                                                       String agentId,
                                                       String gamingMachineId,
-                                                      String gameTypeId) {
+                                                      String gameTypeId,
+                                                      String licenseTypeId) {
         Query query = new Query();
         if (!StringUtils.isEmpty(institutionId)) {
             query.addCriteria(Criteria.where("institutionId").is(institutionId));
@@ -838,6 +840,9 @@ public class LicenseServiceImpl implements LicenseService {
         }
         if (!StringUtils.isEmpty(gameTypeId)) {
             query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        }
+        if (!StringUtils.isEmpty(licenseTypeId)) {
+            query.addCriteria(Criteria.where("licenseTypeId").is(gameTypeId));
         }
 
         List<String> licenseStatuIds = new ArrayList<>();

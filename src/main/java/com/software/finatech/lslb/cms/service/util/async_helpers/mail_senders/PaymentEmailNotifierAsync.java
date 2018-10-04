@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.service.util.async_helpers;
+package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 @Component
 public class PaymentEmailNotifierAsync {
@@ -51,20 +50,20 @@ public class PaymentEmailNotifierAsync {
         }
 
         if (paymentRecordDetail.isSuccessfulPayment()) {
-            sendPaymentNotificationToLSLBFianceAdmins(paymentRecordDetail, paymentRecord);
+            sendPaymentNotificationToLSLBUsers(paymentRecordDetail, paymentRecord);
         }
 
     }
 
 
-    private void sendPaymentNotificationToLSLBFianceAdmins(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
-        ArrayList<AuthInfo> lslbFinaceAdmins = authInfoService.getAllActiveLSLBFinanceAdmins();
-        if (lslbFinaceAdmins == null || lslbFinaceAdmins.isEmpty()) {
+    private void sendPaymentNotificationToLSLBUsers(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
+        ArrayList<AuthInfo> lslbMembersForPaymentNotification = authInfoService.findAllLSLBMembersThatCanReceivePaymentNotification();
+        if (lslbMembersForPaymentNotification == null || lslbMembersForPaymentNotification.isEmpty()) {
             logger.info("No LSLB finance admin found, skipping email");
             return;
         }
-        for (AuthInfo fianceAdmin : lslbFinaceAdmins) {
-            sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, fianceAdmin.getEmailAddress(), "PaymentNotificationLSLBFinance");
+        for (AuthInfo lslbMember : lslbMembersForPaymentNotification) {
+            sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, lslbMember.getEmailAddress(), "PaymentNotificationLSLBFinance");
         }
     }
 

@@ -88,9 +88,9 @@ public class AuthRole extends EnumeratedFact {
         authRoleDto.setName(getName());
         authRoleDto.setSsoRoleMapping(getSsoRoleMapping());
         authRoleDto.setId(getId());
-        getAuthPermissions().stream().forEach(entry -> {
-            authRoleDto.getAuthPermissions().add(entry.convertToDto());
-        });
+//        getAuthPermissions().stream().forEach(entry -> {
+//            authRoleDto.getAuthPermissions().add(entry.convertToDto());
+//        });
 
         return authRoleDto;
     }

@@ -4,7 +4,7 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
+import org.joda.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Map;
@@ -14,7 +14,7 @@ import java.util.Map;
 public class ScheduledMeeting extends AbstractFact {
 
     private String creatorId;
-    private DateTime meetingDate;
+    private LocalDateTime meetingDate;
     private String meetingDescription;
     private String meetingSubject;
     private String institutionId;
@@ -26,6 +26,34 @@ public class ScheduledMeeting extends AbstractFact {
     private boolean firstReminderMailSent;
     private boolean secondReminderMailSent;
     private String applicationFormId;
+    private LocalDateTime meetingReminderDate;
+    private LocalDateTime nextPostMeetingReminderDate;
+    private int reminderNotificationCount = 0;
+    private boolean reminderSent;
+
+    public boolean isReminderSent() {
+        return reminderSent;
+    }
+
+    public void setReminderSent(boolean reminderSent) {
+        this.reminderSent = reminderSent;
+    }
+
+    public LocalDateTime getMeetingReminderDate() {
+        return meetingReminderDate;
+    }
+
+    public void setMeetingReminderDate(LocalDateTime meetingReminderDate) {
+        this.meetingReminderDate = meetingReminderDate;
+    }
+
+    public int getReminderNotificationCount() {
+        return reminderNotificationCount;
+    }
+
+    public void setReminderNotificationCount(int reminderNotificationCount) {
+        this.reminderNotificationCount = reminderNotificationCount;
+    }
 
     public String getApplicationFormId() {
         return applicationFormId;
@@ -99,12 +127,20 @@ public class ScheduledMeeting extends AbstractFact {
         this.creatorId = creatorId;
     }
 
-    public DateTime getMeetingDate() {
+    public LocalDateTime getMeetingDate() {
         return meetingDate;
     }
 
-    public void setMeetingDate(DateTime meetingDate) {
+    public void setMeetingDate(LocalDateTime meetingDate) {
         this.meetingDate = meetingDate;
+    }
+
+    public LocalDateTime getNextPostMeetingReminderDate() {
+        return nextPostMeetingReminderDate;
+    }
+
+    public void setNextPostMeetingReminderDate(LocalDateTime nextPostMeetingReminderDate) {
+        this.nextPostMeetingReminderDate = nextPostMeetingReminderDate;
     }
 
     public String getMeetingDescription() {
@@ -132,7 +168,18 @@ public class ScheduledMeeting extends AbstractFact {
     }
 
     public Institution getInstitution() {
+        if (StringUtils.isEmpty(this.institutionId)) {
+            return null;
+        }
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+    }
+
+    public String getInstitutionName() {
+        Institution institution = getInstitution();
+        if (institution != null) {
+            return institution.getInstitutionName();
+        }
+        return null;
     }
 
     private String getCreatorFullName() {
@@ -170,7 +217,7 @@ public class ScheduledMeeting extends AbstractFact {
         scheduledMeetingDto.setId(getId());
         scheduledMeetingDto.setMeetingTitle(getMeetingSubject());
         scheduledMeetingDto.setAdditionalNotes(getMeetingDescription());
-        scheduledMeetingDto.setMeetingDate(getMeetingDate().toString("dd/MM/yyyy HH:mm:ss"));
+        scheduledMeetingDto.setMeetingDate(getMeetingDate().toString("dd-MM-yyyy HH:mm:ss"));
         ScheduledMeetingStatus scheduledMeetingStatus = getMeetingStatus();
         if (scheduledMeetingStatus != null) {
             scheduledMeetingDto.setMeetingStatusId(getScheduledMeetingStatusId());
@@ -184,6 +231,21 @@ public class ScheduledMeeting extends AbstractFact {
         scheduledMeetingDto.setCreatorFullName(getCreatorFullName());
         scheduledMeetingDto.setVenue(getVenue());
         return scheduledMeetingDto;
+    }
+
+    public String getGameTypeName() {
+        ApplicationForm applicationForm = getApplicationForm();
+        if (applicationForm != null) {
+            return applicationForm.getGameTypeName();
+        }
+        return null;
+    }
+
+    public ApplicationForm getApplicationForm() {
+        if (StringUtils.isEmpty(this.applicationFormId)) {
+            return null;
+        }
+        return (ApplicationForm) mongoRepositoryReactive.findById(this.applicationFormId, ApplicationForm.class).block();
     }
 
     @Override

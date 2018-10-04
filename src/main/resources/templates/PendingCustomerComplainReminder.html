@@ -557,16 +557,19 @@
                                                                             <h3 mc:edit="header"
                                                                                 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;;margin-bottom:10px;">
                                                                                 Dear
-                                                                                [[${name}]],
+                                                                                Sir/Madam,
                                                                             </h3>
                                                                             <div mc:edit="body"
                                                                                  style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
-                                                                                An account has been created for you on
-                                                                                LSLB Customer Management Portal. Click
-                                                                                the link below to login with this email
-                                                                                address
-                                                                                and your existing Venture Garden Group
-                                                                                password.
+                                                                                This is to inform you that customer
+                                                                                complain with ticket id <span
+                                                                                    th:text="${ticketId}"></span>
+                                                                                is still pending.
+                                                                                <br>
+                                                                                <br>
+                                                                                <p>Kindly click the link below to view the
+                                                                                    complaint and change the state of the
+                                                                                    complaint if it has been resolved or closed.</p>
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -604,8 +607,7 @@
                                                                                         style="padding-top:15px;padding-bottom:15px;padding-right:15px;padding-left:15px;">
                                                                                         <a style="color:#FFFFFF;text-decoration:none;font-family:Helvetica,Arial,sans-serif;font-size:20px;line-height:135%;"
                                                                                            th:href="@{${frontEndUrl}}"
-                                                                                           target="_blank">
-                                                                                            <span>Go to LSLB CMS</span>
+                                                                                           target="_blank">View Complain
                                                                                         </a>
                                                                                     </td>
                                                                                 </tr>

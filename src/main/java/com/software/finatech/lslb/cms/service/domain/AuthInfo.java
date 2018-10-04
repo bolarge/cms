@@ -1,295 +1,361 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
+import com.software.finatech.lslb.cms.service.dto.AuthPermissionDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("serial")
 @Document(collection = "AuthInfo")
 public class AuthInfo extends AbstractFact {
-	protected String passwordResetToken;
-	protected String attachmentId;
-	protected String institutionId;
-	protected String firstName ;
-	protected String lastName ;
-	protected String phoneNumber ;
-	protected String verificationTokenId;
+    protected String passwordResetToken;
+    protected String attachmentId;
+    protected String institutionId;
+    protected String firstName;
+    protected String lastName;
+    protected String phoneNumber;
+    protected String verificationTokenId;
     protected String fullName;
-	protected boolean enabled;
-	protected boolean accountLocked;
-	protected DateTime accountExpirationTime;
-	protected DateTime credentialsExpirationTime;
-	protected String emailAddress;
-	protected String authRoleId;
-	protected String ssoUserId;
-	protected String title;
-	protected String agentId;
-	//UI application level field settings
-	protected Set<String> authViews = new java.util.HashSet<>();
-	protected String gameTypeId;
+    protected boolean enabled;
+    protected boolean accountLocked;
+    protected DateTime accountExpirationTime;
+    protected DateTime credentialsExpirationTime;
+    protected String emailAddress;
+    protected String authRoleId;
+    protected String ssoUserId;
+    protected String title;
+    protected String agentId;
+    //UI application level field settings
+    protected Set<String> authViews = new java.util.HashSet<>();
+    protected String gameTypeId;
+    protected Set<String> authPermissionIds = new HashSet<>();
+    @Transient
+    protected AuthRole authRole;
+    @Transient
+    protected String gameTypeName;
 
-	@Transient
-	protected AuthRole authRole;
-	@Transient
-	protected String gameTypeName;
+    public String getGameTypeName() {
+        GameType gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
+        if (gameType != null) {
+            this.gameTypeName = gameType.name;
+        }
+        return this.gameTypeName;
+    }
 
-	public String getGameTypeName() {
-		GameType gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
-		if(gameType != null){
-			this.gameTypeName = gameType.name;
-		}
-		return this.gameTypeName;
-	}
+    public Set<String> getAuthPermissionIds() {
+        return authPermissionIds;
+    }
 
-	public void setGameTypeName(String gameTypeName) {
-		this.gameTypeName = gameTypeName;
-	}
+    public void setAuthPermissionIds(Set<String> authPermissionIds) {
+        this.authPermissionIds = authPermissionIds;
+    }
 
-	public String getAgentId() {
-		return agentId;
-	}
+    public void setGameTypeName(String gameTypeName) {
+        this.gameTypeName = gameTypeName;
+    }
 
-	public void setAgentId(String agentId) {
-		this.agentId = agentId;
-	}
+    public String getAgentId() {
+        return agentId;
+    }
 
-	public String getGameTypeId() {
-		return gameTypeId;
-	}
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
 
-	public void setGameTypeId(String gameTypeId) {
-		this.gameTypeId = gameTypeId;
-	}
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
 
-	public String getPasswordResetToken() {
-		return passwordResetToken;
-	}
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
 
-	public void setPasswordResetToken(String passwordResetToken) {
-		this.passwordResetToken = passwordResetToken;
-	}
+    public String getPasswordResetToken() {
+        return passwordResetToken;
+    }
 
-	public AuthRole getAuthRole() {
-		return authRole;
-	}
+    public void setPasswordResetToken(String passwordResetToken) {
+        this.passwordResetToken = passwordResetToken;
+    }
 
-	public void setAuthRole(AuthRole authRole) {
-		this.authRole = authRole;
-	}
 
-	public String getSsoUserId() {
-		return ssoUserId;
-	}
+    public void setAuthRole(AuthRole authRole) {
+        this.authRole = authRole;
+    }
 
-	public void setSsoUserId(String ssoUserId) {
-		this.ssoUserId = ssoUserId;
-	}
+    public String getSsoUserId() {
+        return ssoUserId;
+    }
 
-	public String getInstitutionId() {
-		return institutionId;
-	}
+    public void setSsoUserId(String ssoUserId) {
+        this.ssoUserId = ssoUserId;
+    }
 
-	public void setInstitutionId(String institutionId) {
-		this.institutionId = institutionId;
-	}
+    public String getInstitutionId() {
+        return institutionId;
+    }
 
-	public String getAttachmentId() {
-		return attachmentId;
-	}
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
 
-	public void setAttachmentId(String attachmentId) {
-		this.attachmentId = attachmentId;
-	}
+    public String getAttachmentId() {
+        return attachmentId;
+    }
 
-	public String getVerificationTokenId() {
-		return verificationTokenId;
-	}
+    public void setAttachmentId(String attachmentId) {
+        this.attachmentId = attachmentId;
+    }
 
-	public void setVerificationTokenId(String verificationTokenId) {
-		this.verificationTokenId = verificationTokenId;
-	}
+    public String getVerificationTokenId() {
+        return verificationTokenId;
+    }
 
-	public String getFirstName() {
-		return firstName;
-	}
+    public void setVerificationTokenId(String verificationTokenId) {
+        this.verificationTokenId = verificationTokenId;
+    }
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
+    public String getFirstName() {
+        return firstName;
+    }
 
-	public String getLastName() {
-		return lastName;
-	}
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+    public String getLastName() {
+        return lastName;
+    }
 
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
 
-	public String getFullName() {
-		return fullName;
-	}
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 
-	public String getTitle() {
-		return title;
-	}
+    public String getFullName() {
+        return fullName;
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public String getTitle() {
+        return title;
+    }
 
-	public void setFullName(String fullName) {
-		this.fullName = fullName;
-	}
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-	public boolean getEnabled() {
-		return enabled;
-	}
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
 
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
-	}
+    public boolean getEnabled() {
+        return enabled;
+    }
 
-	public boolean getAccountLocked() {
-		return accountLocked;
-	}
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
-	public void setAccountLocked(boolean accountLocked) {
-		this.accountLocked = accountLocked;
-	}
+    public boolean getAccountLocked() {
+        return accountLocked;
+    }
 
-	public DateTime getAccountExpirationTime() {
-		return accountExpirationTime;
-	}
+    public void setAccountLocked(boolean accountLocked) {
+        this.accountLocked = accountLocked;
+    }
 
-	public void setAccountExpirationTime(DateTime accountExpirationTime) {
-		this.accountExpirationTime = accountExpirationTime;
-	}
+    public DateTime getAccountExpirationTime() {
+        return accountExpirationTime;
+    }
 
-	public DateTime getCredentialsExpirationTime() {
-		return credentialsExpirationTime;
-	}
+    public void setAccountExpirationTime(DateTime accountExpirationTime) {
+        this.accountExpirationTime = accountExpirationTime;
+    }
 
-	public void setCredentialsExpirationTime(DateTime credentialsExpirationTime) {
-		this.credentialsExpirationTime = credentialsExpirationTime;
-	}
+    public DateTime getCredentialsExpirationTime() {
+        return credentialsExpirationTime;
+    }
 
-	public String getEmailAddress() {
-		return emailAddress;
-	}
+    public void setCredentialsExpirationTime(DateTime credentialsExpirationTime) {
+        this.credentialsExpirationTime = credentialsExpirationTime;
+    }
 
-	public void setEmailAddress(String emailAddress) {
-		this.emailAddress = emailAddress;
-	}
+    public String getEmailAddress() {
+        return emailAddress;
+    }
 
-	public String getAuthRoleId() {
-		return authRoleId;
-	}
+    public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
+    }
 
-	public void setAuthRoleId(String authRoleId) {
-		this.authRoleId = authRoleId;
-	}
+    public String getAuthRoleId() {
+        return authRoleId;
+    }
 
-	public Set<String> getAuthViews() {
-		return authViews;
-	}
+    public void setAuthRoleId(String authRoleId) {
+        this.authRoleId = authRoleId;
+    }
 
-	public void setAuthViews(Set<String> authViews) {
-		this.authViews = authViews;
-	}
+    public Set<String> getAuthViews() {
+        return authViews;
+    }
 
-	@Override
-	public String getFactName() {
-		return "AuthInfo";
-	}
+    public void setAuthViews(Set<String> authViews) {
+        this.authViews = authViews;
+    }
 
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		return super.clone();
-	}
+    @Override
+    public String getFactName() {
+        return "AuthInfo";
+    }
 
-	public AuthInfoDto convertToDto(){
-		AuthInfoDto authInfoDto = new AuthInfoDto();
-		authInfoDto.setEnabled(getEnabled());
-		authInfoDto.setAuthRoleId(getAuthRoleId());
-		authInfoDto.setAccountLocked(getAccountLocked());
-		authInfoDto.setEmailAddress(getEmailAddress());
-		authInfoDto.setId(getId());
-		authInfoDto.setAttachmentId(getAttachmentId());
-		authInfoDto.setPhoneNumber(getPhoneNumber());
-		authInfoDto.setFirstName(getFirstName());
-		authInfoDto.setLastName(getLastName());
-		authInfoDto.setFullName(getFullName());
-		authInfoDto.setInstitutionId(getInstitutionId());
-		authInfoDto.setSsoUserId(getSsoUserId());
-		authInfoDto.setGameTypeId(getGameTypeId());
-		authInfoDto.setGameTypeName(getGameTypeName());
-		authInfoDto.setAuthRole(getAuthRole()==null?null:getAuthRole().convertToDto());
-		Institution userInstitution= getInstition();
-		if (userInstitution != null){
-			authInfoDto.setInstitutionName(userInstitution.getInstitutionName());
-		}
-		authInfoDto.setAgentId(getAgentId());
-		return authInfoDto;
-	}
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 
-	public void setAssociatedProperties() throws FactNotFoundException {
-		if (authRoleId != null) {
-			AuthRole authRole = (AuthRole) Mapstore.STORE.get("AuthRole").get(authRoleId);
-			if (authRole == null) {
-				authRole = (AuthRole) mongoRepositoryReactive.findById(authRoleId, AuthRole.class).block();
-				if (authRole == null) {
-					throw new FactNotFoundException("AuthRole", authRoleId);
-				} else {
-					Mapstore.STORE.get("AuthRole").put(authRole.getId(), authRole);
-				}
-			}
-			setAuthRole(authRole);
-		}
+    public AuthInfoDto convertToDto() {
+        AuthInfoDto authInfoDto = new AuthInfoDto();
+        authInfoDto.setEnabled(getEnabled());
+        authInfoDto.setAuthRoleId(getAuthRoleId());
+        authInfoDto.setAccountLocked(getAccountLocked());
+        authInfoDto.setEmailAddress(getEmailAddress());
+        authInfoDto.setId(getId());
+        authInfoDto.setPhoneNumber(getPhoneNumber());
+        authInfoDto.setFirstName(getFirstName());
+        authInfoDto.setLastName(getLastName());
+        authInfoDto.setFullName(getFullName());
+        authInfoDto.setInstitutionId(getInstitutionId());
+        authInfoDto.setSsoUserId(getSsoUserId());
+        authInfoDto.setGameTypeId(getGameTypeId());
+        authInfoDto.setGameTypeName(getGameTypeName());
+        authInfoDto.setAuthRole(getAuthRole() == null ? null : getAuthRole().convertToDto());
+        Institution userInstitution = getInstitution();
+        if (userInstitution != null) {
+            authInfoDto.setInstitutionName(userInstitution.getInstitutionName());
+        }
+        authInfoDto.setAgentId(getAgentId());
+        authInfoDto.setAuthPermissions(getAllPermissionsForUser());
+        return authInfoDto;
+    }
 
-		if(gameTypeId != null){
-			GameType gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
-			if(gameType != null){
-				gameTypeName = gameType.name;
-			}
-		}
-	}
+    public void setAssociatedProperties() throws FactNotFoundException {
+        if (authRoleId != null) {
+            AuthRole authRole = (AuthRole) Mapstore.STORE.get("AuthRole").get(authRoleId);
+            if (authRole == null) {
+                authRole = (AuthRole) mongoRepositoryReactive.findById(authRoleId, AuthRole.class).block();
+                if (authRole == null) {
+                    throw new FactNotFoundException("AuthRole", authRoleId);
+                } else {
+                    Mapstore.STORE.get("AuthRole").put(authRole.getId(), authRole);
+                }
+            }
+            setAuthRole(authRole);
+        }
 
-	private Institution getInstition(){
-		return (Institution)mongoRepositoryReactive.findById(institutionId,Institution.class).block();
-	}
+        if (gameTypeId != null) {
+            GameType gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
+            if (gameType != null) {
+                gameTypeName = gameType.name;
+            }
+        }
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof AuthInfo == false) {
-			return false;
-		}
+    public AuthRole getAuthRole() {
+        if (StringUtils.isEmpty(this.authRoleId)) {
+            return null;
+        }
+        Map authRoleMap = Mapstore.STORE.get("AuthRole");
+        if (authRoleMap != null) {
+            AuthRole authRole = (AuthRole) authRoleMap.get(this.authRoleId);
+        }
+        if (authRole == null) {
+            authRole = (AuthRole) mongoRepositoryReactive.findById(this.authRoleId, AuthRole.class).block();
+            if (authRole != null && authRoleMap != null) {
+                authRoleMap.put(authRole.getId(), authRole);
+            }
+        }
+        return authRole;
+    }
 
-		if (this == obj) {
-			return true;
-		}
+    private Institution getInstitution() {
+        return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+    }
 
-		AuthInfo that = (AuthInfo) obj;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof AuthInfo == false) {
+            return false;
+        }
 
-		Object thisObject = this.getId();
-		Object thatObject = that.getId();
+        if (this == obj) {
+            return true;
+        }
 
-		if ((thisObject != null) && (thatObject != null)) {
-			return thisObject.equals(thatObject);
-		} else {
-			return false;
-		}
-	}
+        AuthInfo that = (AuthInfo) obj;
+
+        Object thisObject = this.getId();
+        Object thatObject = that.getId();
+
+        if ((thisObject != null) && (thatObject != null)) {
+            return thisObject.equals(thatObject);
+        } else {
+            return false;
+        }
+    }
+
+    private Set<AuthPermissionDto> getAllPermissionsForUser() {
+        Set<String> authPermissionIds = getAllUserPermissionIdsForUser();
+        if (authPermissionIds.isEmpty()) {
+            return new HashSet<>();
+        }
+        Set<AuthPermissionDto> authPermissionDtos = new HashSet<>();
+        for (String authPermissionId : authPermissionIds) {
+            AuthPermission authPermission = getAuthPermission(authPermissionId);
+            if (authPermission != null) {
+                authPermissionDtos.add(authPermission.convertToDto());
+            }
+        }
+        return authPermissionDtos;
+    }
+
+    public Set<String> getAllUserPermissionIdsForUser() {
+        Set<String> authPermissions = getAuthPermissionIds();
+        AuthRole userRole = getAuthRole();
+        if (userRole != null) {
+            authPermissions.addAll(userRole.getAuthPermissionIds());
+        }
+        return authPermissions;
+    }
+
+    private AuthPermission getAuthPermission(String authPermissionId) {
+        AuthPermission authPermission = (AuthPermission) Mapstore.STORE.get("AuthPermission").get(authPermissionId);
+        if (authPermission == null) {
+            authPermission = (AuthPermission) mongoRepositoryReactive.findById(authPermissionId, AuthPermission.class).block();
+            if (authPermission != null) {
+                Mapstore.STORE.get("AuthPermission").put(authPermission.getId(), authPermission);
+            }
+        }
+        return authPermission;
+    }
+
+    public boolean canResolveCustomerComplains() {
+        return getAllUserPermissionIdsForUser().contains(LSLBAuthPermissionReferenceData.RECEIVE_CUSTOMER_COMPLAIN_ID);
+    }
 }

@@ -90,7 +90,7 @@ public class AuditTrailController extends BaseController{
     /**
      * @return All AuditTrails full information
      */
-    @RequestMapping(method= RequestMethod.GET, value="/all",produces ="application/json" ,params = {"healthInstitutionId","keyword","auditActionId","fromDate","toDate", "page", "size","sorting","sortProperty" })
+    @RequestMapping(method= RequestMethod.GET, value="/all",produces ="application/json" ,params = {"keyword","auditActionId","fromDate","toDate", "page", "size","sorting","sortProperty" })
     @ApiOperation(value = "Get AuditTrails", response = AuditTrailDto.class, consumes="application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -104,16 +104,15 @@ public class AuditTrailController extends BaseController{
                                                @Param( "fromDate" ) String fromDate,
                                                @Param( "toDate" ) String toDate,
                                                @Param( "auditActionId" ) String auditActionId,
-                                               @Param( "healthInstitutionId" ) String healthInstitutionId,
                                                @Param( "page" ) @NotNull int page, @Param( "size" )  @NotNull int size, @Param( "size" )  String sortProperty, @Param( "sorting" ) String sorting, HttpServletResponse response) {
         try{
             //@TODO validate request params
             Query query = new Query();
             Criteria criteria = new Criteria();
 
-            if(healthInstitutionId != null && !healthInstitutionId.isEmpty()) {
+            /*if(healthInstitutionId != null && !healthInstitutionId.isEmpty()) {
                 query.addCriteria(Criteria.where("healthInstitutionId").is(healthInstitutionId));
-            }
+            }*/
             if(keyword != null && !keyword.isEmpty()) {
                 //"*.ab.*"
                 //keyword = "*."+keyword+".*";

@@ -51,6 +51,7 @@ public class CustomerCodeCreatorAsync {
         }
     }
 
+    @Async
     public void createVigipayCustomerCodeForAgent(Agent agent) {
         logger.info("Trying to get customer code for agent {} -> {}", agent.getFullName(), agent.getId());
         String customerCode = vigipayService.createCustomerCodeForAgent(agent);

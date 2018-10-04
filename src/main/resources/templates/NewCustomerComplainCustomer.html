@@ -557,16 +557,14 @@
                                                                             <h3 mc:edit="header"
                                                                                 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;;margin-bottom:10px;">
                                                                                 Dear
-                                                                                [[${name}]],
+                                                                                Sir/Madam,
                                                                             </h3>
                                                                             <div mc:edit="body"
                                                                                  style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
-                                                                                An account has been created for you on
-                                                                                LSLB Customer Management Portal. Click
-                                                                                the link below to login with this email
-                                                                                address
-                                                                                and your existing Venture Garden Group
-                                                                                password.
+                                                                               This is to inform you that your complain on our platform has been successfully logged with ticket id <span
+                                                                                    th:text="${ticketId}"></span> and we are working to help you resolve the issue.
+                                                                                <br>
+                                                                                <br>
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -594,22 +592,6 @@
                                                                             class="flexibleContainerCell">
 
                                                                             <!-- CONTENT TABLE // -->
-                                                                            <table border="0" cellpadding="0"
-                                                                                   cellspacing="0" width="60%"
-                                                                                   class="emailButton"
-                                                                                   style="background-color: #3498DB;border-radius: 10px;">
-                                                                                <tr>
-                                                                                    <td align="center" valign="middle"
-                                                                                        class="buttonContent"
-                                                                                        style="padding-top:15px;padding-bottom:15px;padding-right:15px;padding-left:15px;">
-                                                                                        <a style="color:#FFFFFF;text-decoration:none;font-family:Helvetica,Arial,sans-serif;font-size:20px;line-height:135%;"
-                                                                                           th:href="@{${frontEndUrl}}"
-                                                                                           target="_blank">
-                                                                                            <span>Go to LSLB CMS</span>
-                                                                                        </a>
-                                                                                    </td>
-                                                                                </tr>
-                                                                            </table>
                                                                             <!-- // CONTENT TABLE -->
 
                                                                         </td>

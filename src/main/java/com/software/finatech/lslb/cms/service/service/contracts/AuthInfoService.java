@@ -5,11 +5,13 @@ import com.software.finatech.lslb.cms.service.domain.VerificationToken;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoCompleteDto;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
 import com.software.finatech.lslb.cms.service.dto.CreateApplicantAuthInfoDto;
+import com.software.finatech.lslb.cms.service.dto.UserAuthPermissionDto;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOChangePasswordModel;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOPasswordResetModel;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 
 public interface AuthInfoService {
@@ -18,27 +20,34 @@ public interface AuthInfoService {
     AuthInfo createApplicantAuthInfo(CreateApplicantAuthInfoDto createApplicantAuthInfoDto, String appUrl);
 
     Mono<String> updateAuthInfo();
+
     String resetPasswordToken(String email);
+
     Mono<ResponseEntity> resetPassword(SSOPasswordResetModel ssoPasswordResetModel);
+
     Mono<ResponseEntity> changePassword(String token, SSOChangePasswordModel model);
+
     Mono<String> deactivateAuthInfo();
+
     Mono<String> getToken();
-    Mono<ResponseEntity> loginToken(String userName, String password,AuthInfo authInfo);
+
+    Mono<ResponseEntity> loginToken(String userName, String password, AuthInfo authInfo, HttpServletRequest request);
+
     Mono<ResponseEntity> completeRegistration(VerificationToken verificationToken, AuthInfoCompleteDto authInfoCompleteDto, AuthInfo authInfo);
 
     ArrayList<AuthInfo> getAllActiveGamingOperatorAdminsAndUsersForInstitution(String institutionId);
 
     ArrayList<AuthInfo> getAllActiveGamingOperatorAdminsForInstitution(String institutionId);
 
-    ArrayList<AuthInfo> getAllActiveLSLBFinanceAdmins();
-
-    ArrayList<AuthInfo> getAllActiveLSLBITAdmins();
-
-    ArrayList<AuthInfo> getAllActiveLSLBLegalAdmins();
-
-    ArrayList<AuthInfo> getAllActiveLSLBGeneralManagers();
-
     AuthInfo getUserById(String userId);
 
-    AuthInfo getUserByAgentId(String agentId);
+    ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveCustomerComplainNotification();
+
+    ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveApplicationSubmissionNotification();
+
+    ArrayList<AuthInfo> findAllLSLBMembersThatCanReceivePaymentNotification();
+
+    ArrayList<AuthInfo> findAllLSLBMembersThatCanApproveAgentApprovals();
+
+    Mono<ResponseEntity> addPermissionsToUser(UserAuthPermissionDto userAuthPermissionDto);
 }

@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.service.util;
+package com.software.finatech.lslb.cms.service.util.async_helpers;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.AuditTrail;
@@ -25,7 +25,5 @@ public class AuditLogHelper {
         logger.info("Logging Action  - " + auditTrail.getActionPerformed());
         //auditTrail.setPerformedBy(springSecurityAuditorAware.getCurrentAuditor().get());
         mongoRepositoryReactive.saveOrUpdate(auditTrail);
-
-
     }
 }

@@ -16,7 +16,7 @@ public class AgentCreateDto {
     @Email
     @NotEmpty(message = "please provide agent email address")
     private String emailAddress;
-    @Size(min = 9, message = "Phone number should be at least 9 characaters")
+    @Size(min = 9, message = "Phone number should be at least 9 characters")
     @NotEmpty(message = "please provide agent phone number")
     private String phoneNumber;
     @NotEmpty(message = "please provide agent date of birth")
