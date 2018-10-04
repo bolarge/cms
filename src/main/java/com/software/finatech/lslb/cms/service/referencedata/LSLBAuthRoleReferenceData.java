@@ -86,7 +86,9 @@ public class LSLBAuthRoleReferenceData {
         role9.setDescription("Applicant user for gaming operators");
         role9.setName("APPLICANT");
         role9.setSsoRoleMapping(SSO_CLIENT_USER);
-        role9.getAuthPermissionIds().addAll(Arrays.asList("1", "2"));
+        permissionIds = LSLBAuthPermissionReferenceData.getApplicantPermissions();
+        role9.setAuthPermissionIds(permissionIds);
+
 
 
         mongoRepositoryReactive.saveOrUpdate(role4);

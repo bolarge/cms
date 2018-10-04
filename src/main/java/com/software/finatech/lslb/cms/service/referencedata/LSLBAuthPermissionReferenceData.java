@@ -20,8 +20,8 @@ public class LSLBAuthPermissionReferenceData {
             permission1 = new AuthPermission();
             permission1.setId("1");
         }
-        permission1.setName("UPDATE USER PROFILE");
-        permission1.setDescription("Update a users email, phone, role etc");
+        permission1.setName("CREATE USER PROFILE");
+        permission1.setDescription("Create user and update users email, phone, role etc");
 
         AuthPermission permission2 = (AuthPermission) mongoRepositoryReactive.findById("2", AuthPermission.class).block();
         if (permission2 == null) {
@@ -102,8 +102,8 @@ public class LSLBAuthPermissionReferenceData {
             permission11 = new AuthPermission();
             permission11.setId("11");
         }
-        permission11.setName("UPDATE GAMING CATEGORIES");
-        permission11.setDescription("Update properties of categories");
+        permission11.setName("CREATE GAMING CATEGORIES");
+        permission11.setDescription("Create and update properties of categories");
 
         AuthPermission permission12 = (AuthPermission) mongoRepositoryReactive.findById("12", AuthPermission.class).block();
         if (permission12 == null) {
@@ -118,8 +118,8 @@ public class LSLBAuthPermissionReferenceData {
             permission13 = new AuthPermission();
             permission13.setId("13");
         }
-        permission13.setName("UPDATE FEES");
-        permission13.setDescription("Update fees configured on system");
+        permission13.setName("CREATE FEES");
+        permission13.setDescription("Create and update fees configured on system");
 
 
         AuthPermission permission14 = (AuthPermission) mongoRepositoryReactive.findById("14", AuthPermission.class).block();
@@ -136,8 +136,8 @@ public class LSLBAuthPermissionReferenceData {
             permission15 = new AuthPermission();
             permission15.setId("15");
         }
-        permission15.setName("UPDATE REVENUE LINES");
-        permission15.setDescription("Update Revenue lines configured on system");
+        permission15.setName("CREATE REVENUE LINES");
+        permission15.setDescription("Create and update Revenue lines configured on system");
 
         AuthPermission permission16 = (AuthPermission) mongoRepositoryReactive.findById("16", AuthPermission.class).block();
         if (permission16 == null) {
@@ -176,8 +176,8 @@ public class LSLBAuthPermissionReferenceData {
             permission20 = new AuthPermission();
             permission20.setId("20");
         }
-        permission20.setName("UPDATE DOCUMENT TYPES");
-        permission20.setDescription("Update document types configured on system");
+        permission20.setName("CREATE DOCUMENT TYPES");
+        permission20.setDescription("Create and update document types configured on system");
 
         AuthPermission permission21 = (AuthPermission) mongoRepositoryReactive.findById("21", AuthPermission.class).block();
         if (permission21 == null) {
@@ -192,8 +192,8 @@ public class LSLBAuthPermissionReferenceData {
             permission22 = new AuthPermission();
             permission22.setId("22");
         }
-        permission22.setName("UPDATE DOCUMENT PURPOSES");
-        permission22.setDescription("Update Document purposes");
+        permission22.setName("CREATE DOCUMENT PURPOSES");
+        permission22.setDescription("Create and update Document purposes");
 
         AuthPermission permission23 = (AuthPermission) mongoRepositoryReactive.findById("23", AuthPermission.class).block();
         if (permission23 == null) {
@@ -342,6 +342,54 @@ public class LSLBAuthPermissionReferenceData {
         permission40.setName("VIEW INSTITUTIONS");
         permission40.setDescription("Can View institutions on the system");
 
+        AuthPermission permission41 = (AuthPermission) mongoRepositoryReactive.findById("41", AuthPermission.class).block();
+        if (permission41 == null) {
+            permission41 = new AuthPermission();
+            permission41.setId("41");
+        }
+        permission41.setName("CREATE GAMING MACHINE");
+        permission41.setDescription("Create gaming machine");
+
+        AuthPermission permission42 = (AuthPermission) mongoRepositoryReactive.findById("42", AuthPermission.class).block();
+        if (permission42 == null) {
+            permission42 = new AuthPermission();
+            permission42.setId("42");
+        }
+        permission42.setName("VIEW GAMING MACHINES");
+        permission42.setDescription("View gaming machine");
+
+        AuthPermission permission43 = (AuthPermission) mongoRepositoryReactive.findById("43", AuthPermission.class).block();
+        if (permission43 == null) {
+            permission43 = new AuthPermission();
+            permission43.setId("43");
+        }
+        permission43.setName("ADD PERMISSION_TO USER");
+        permission43.setDescription("Add permission to user ");
+
+        AuthPermission permission44 = (AuthPermission) mongoRepositoryReactive.findById("44", AuthPermission.class).block();
+        if (permission44 == null) {
+            permission44 = new AuthPermission();
+            permission44.setId("44");
+        }
+        permission44.setName("START LICENCE RENEWAL");
+        permission44.setDescription("Create and update licence renewals");
+
+        AuthPermission permission45 = (AuthPermission) mongoRepositoryReactive.findById("45", AuthPermission.class).block();
+        if (permission45 == null) {
+            permission45 = new AuthPermission();
+            permission45.setId("45");
+        }
+        permission45.setName("VIEW LICENCE RENEWALS");
+        permission45.setDescription("Add permission to user ");
+
+        AuthPermission permission46 = (AuthPermission) mongoRepositoryReactive.findById("46", AuthPermission.class).block();
+        if (permission46 == null) {
+            permission46 = new AuthPermission();
+            permission46.setId("46");
+        }
+        permission46.setName("APPROVE LICENCE RENEWALS");
+        permission46.setDescription("Approve licence renewals");
+
         mongoRepositoryReactive.saveOrUpdate(permission1);
         mongoRepositoryReactive.saveOrUpdate(permission2);
         mongoRepositoryReactive.saveOrUpdate(permission3);
@@ -382,6 +430,12 @@ public class LSLBAuthPermissionReferenceData {
         mongoRepositoryReactive.saveOrUpdate(permission38);
         mongoRepositoryReactive.saveOrUpdate(permission39);
         mongoRepositoryReactive.saveOrUpdate(permission40);
+        mongoRepositoryReactive.saveOrUpdate(permission41);
+        mongoRepositoryReactive.saveOrUpdate(permission42);
+        mongoRepositoryReactive.saveOrUpdate(permission43);
+        mongoRepositoryReactive.saveOrUpdate(permission44);
+        mongoRepositoryReactive.saveOrUpdate(permission45);
+        mongoRepositoryReactive.saveOrUpdate(permission46);
     }
 
 
@@ -420,6 +474,10 @@ public class LSLBAuthPermissionReferenceData {
         permissions.add("37");
         permissions.add("38");
         permissions.add("40");
+        permissions.add("42");
+        permissions.add("43");
+        permissions.add("45");
+        permissions.add("46");
         return permissions;
     }
 
@@ -446,6 +504,8 @@ public class LSLBAuthPermissionReferenceData {
         permissions.add("37");
         permissions.add("38");
         permissions.add("40");
+        permissions.add("42");
+        permissions.add("45");
         return permissions;
     }
 
@@ -471,6 +531,10 @@ public class LSLBAuthPermissionReferenceData {
         permissions.add("38");
         permissions.add("39");
         permissions.add("40");
+        permissions.add("42");
+        permissions.add("41");
+        permissions.add("44");
+        permissions.add("45");
         return permissions;
     }
 
@@ -493,6 +557,8 @@ public class LSLBAuthPermissionReferenceData {
         permissions.add("37");
         permissions.add("38");
         permissions.add("40");
+        permissions.add("42");
+        permissions.add("45");
         return permissions;
     }
 
@@ -512,7 +578,7 @@ public class LSLBAuthPermissionReferenceData {
     public static Set<String> getAllVGGSuperAdminPermissions() {
         Set<String> permissions = new HashSet<>();
         List<String> codeGeneratedPermissionIds = getCodeUsedPermissions();
-        for (int i = 1; i <= 40; i++) {
+        for (int i = 1; i <= 46; i++) {
             if (!codeGeneratedPermissionIds.contains(String.valueOf(i))) {
                 permissions.add(String.valueOf(i));
             }
@@ -543,11 +609,20 @@ public class LSLBAuthPermissionReferenceData {
         permissions.add("37");
         permissions.add("38");
         permissions.add("40");
+        permissions.add("42");
+        permissions.add("43");
+        permissions.add("45");
         return permissions;
     }
 
     public static Set<String> getAllVGGUserPermissions() {
         return getAllVGGAdminPermissions();
+    }
+
+    public static Set<String> getApplicantPermissions() {
+        Set<String> permissions = new HashSet<>();
+        permissions.add("39");
+        return permissions;
     }
 
     private static List<String> getCodeUsedPermissions() {
