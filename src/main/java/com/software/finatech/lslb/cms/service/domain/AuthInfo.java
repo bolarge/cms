@@ -274,8 +274,9 @@ public class AuthInfo extends AbstractFact {
             return null;
         }
         Map authRoleMap = Mapstore.STORE.get("AuthRole");
+        AuthRole authRole = null;
         if (authRoleMap != null) {
-            AuthRole authRole = (AuthRole) authRoleMap.get(this.authRoleId);
+            authRole = (AuthRole) authRoleMap.get(this.authRoleId);
         }
         if (authRole == null) {
             authRole = (AuthRole) mongoRepositoryReactive.findById(this.authRoleId, AuthRole.class).block();
@@ -338,6 +339,7 @@ public class AuthInfo extends AbstractFact {
                 dto.setDescription(authPermission.getDescription());
                 dto.setUsedBySystem(authPermission.isUsedBySystem());
                 dto.setBelongsToUser(true);
+                authPermissionDtos.add(dto);
             }
         }
         return authPermissionDtos;
@@ -358,6 +360,7 @@ public class AuthInfo extends AbstractFact {
                 dto.setDescription(authPermission.getDescription());
                 dto.setUsedBySystem(authPermission.isUsedBySystem());
                 dto.setBelongsToUser(false);
+                authPermissionDtos.add(dto);
             }
         }
         return authPermissionDtos;
