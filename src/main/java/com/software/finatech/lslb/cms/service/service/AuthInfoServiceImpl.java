@@ -156,6 +156,8 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
             // user exist so we add claims
             if (userExists) {
+                SSOUserDetailInfo ssoUserDetailInfo = SSOUserDetail.getData().get(0);
+
                 AuthRole authRole = authRoleService.findRoleById(authInfo.getAuthRoleId());
                 if (authRole == null) {
                     return Mono.just(new ResponseEntity<>(String.format("Role with id %s not found", authInfo.getAuthRoleId()), HttpStatus.BAD_REQUEST));
@@ -201,6 +203,9 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 String content = mailContentBuilderService.build(model, "ExistingUserRegistrationEmail");
                 emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
                 authInfo.setEnabled(true);
+                if (ssoUserDetailInfo != null) {
+                    authInfo.setSsoUserId(ssoUserDetailInfo.getId());
+                }
                 mongoRepositoryReactive.saveOrUpdate(authInfo);
                 return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
             } else {
@@ -754,7 +759,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         ArrayList<AuthInfo> validMembers = new ArrayList<>();
         for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
             Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();
-            if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECIEVE_AGENT_APPROVAL_AGENT_REQUEST_ID)) {
+            if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECEIVE_AGENT_APPROVAL_AGENT_REQUEST_ID)) {
                 validMembers.add(lslbMember);
             }
         }
@@ -806,6 +811,11 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding permissions to user ", e);
         }
+    }
+
+    @Override
+    public Mono<ResponseEntity> removePermissionFromUser(UserAuthPermissionDto userAuthPermissionDto) {
+        return null;
     }
 
     public ArrayList<String> getAllGamingOperatorAdminAndUserRoles() {

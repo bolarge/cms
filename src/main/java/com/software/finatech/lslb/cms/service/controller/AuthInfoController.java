@@ -703,6 +703,19 @@ public class AuthInfoController extends BaseController {
         return authInfoService.addPermissionsToUser(userAuthPermissionDto);
     }
 
+    @RequestMapping(method = RequestMethod.POST, value = "/remove-permission-from-user")
+    @ApiOperation(value = "Remove permissions from user", response = AuthInfoDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")
+    }
+    )
+    public Mono<ResponseEntity> removePermissionsFromUser(@RequestBody UserAuthPermissionDto userAuthPermissionDto){
+        return authInfoService.removePermissionFromUser(userAuthPermissionDto);
+    }
+
     public String getAppHostPort() {
         return this.appHostPort;
     }

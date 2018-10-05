@@ -12,8 +12,8 @@ public class LSLBAuthPermissionReferenceData {
     public static final String RECEIVE_APPLICATION_ID = "31";
     public static final String RECEIVE_PAYMENT_NOTIFICATION_ID = "32";
     public static final String RECEIVE_CUSTOMER_COMPLAIN_ID = "33";
-    public static final String RECIEVE_AGENT_APPROVAL_AGENT_REQUEST_ID = "48";
-    public static final String RECEIVE_CASE_NOTIFICATION_ID = "47";
+    public static final String RECEIVE_AGENT_APPROVAL_AGENT_REQUEST_ID = "48";
+    public static final String RECEIVE_CASE_NOTIFICATION_ID = "51";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         AuthPermission permission1 = (AuthPermission) mongoRepositoryReactive.findById("1", AuthPermission.class).block();
@@ -268,6 +268,7 @@ public class LSLBAuthPermissionReferenceData {
         }
         permission31.setDescription("Can receive application form submissions notifications");
         permission31.setName("CAN RECEIVE APPLICATION SUBMISSION NOTIFICATION");
+        permission31.setUsedBySystem(true);
 
         AuthPermission permission32 = (AuthPermission) mongoRepositoryReactive.findById(RECEIVE_PAYMENT_NOTIFICATION_ID, AuthPermission.class).block();
         if (permission32 == null) {
@@ -277,6 +278,7 @@ public class LSLBAuthPermissionReferenceData {
 
         permission32.setDescription("Can receive payment notification");
         permission32.setName("RECEIVE PAYMENT NOTIFICATION");
+        permission32.setUsedBySystem(true);
 
         AuthPermission permission33 = (AuthPermission) mongoRepositoryReactive.findById(RECEIVE_CUSTOMER_COMPLAIN_ID, AuthPermission.class).block();
         if (permission33 == null) {
@@ -285,6 +287,7 @@ public class LSLBAuthPermissionReferenceData {
         }
         permission33.setDescription("Can receive customer complains  notifications (new and reminder)");
         permission33.setName("RECEIVE CUSTOMER COMPLAIN NOTIFICATION");
+        permission33.setUsedBySystem(true);
 
         AuthPermission permission34 = (AuthPermission) mongoRepositoryReactive.findById("34", AuthPermission.class).block();
         if (permission34 == null) {
@@ -391,7 +394,7 @@ public class LSLBAuthPermissionReferenceData {
         permission46.setName("APPROVE LICENCE RENEWALS");
         permission46.setDescription("Approve licence renewals");
 
-        AuthPermission permission47 = (AuthPermission) mongoRepositoryReactive.findById("46", AuthPermission.class).block();
+        AuthPermission permission47 = (AuthPermission) mongoRepositoryReactive.findById("47", AuthPermission.class).block();
         if (permission47 == null) {
             permission47 = new AuthPermission();
             permission47.setId("47");
@@ -399,13 +402,39 @@ public class LSLBAuthPermissionReferenceData {
         permission47.setName("RECEIVE NEW CASE NOTIFICATION");
         permission47.setDescription("Receive new case Notification");
 
-        AuthPermission permission48 = (AuthPermission) mongoRepositoryReactive.findById(RECIEVE_AGENT_APPROVAL_AGENT_REQUEST_ID, AuthPermission.class).block();
+        AuthPermission permission48 = (AuthPermission) mongoRepositoryReactive.findById(RECEIVE_AGENT_APPROVAL_AGENT_REQUEST_ID, AuthPermission.class).block();
         if (permission48 == null) {
             permission48 = new AuthPermission();
-            permission48.setId(RECIEVE_AGENT_APPROVAL_AGENT_REQUEST_ID);
+            permission48.setId(RECEIVE_AGENT_APPROVAL_AGENT_REQUEST_ID);
         }
         permission48.setName("RECEIVE NEW AGENT APPROVAL REQUEST NOTIFICATION");
         permission48.setDescription("Receive new agent approval request Notification");
+        permission48.setUsedBySystem(true);
+
+        AuthPermission permission49 = (AuthPermission) mongoRepositoryReactive.findById("49", AuthPermission.class).block();
+        if (permission49 == null) {
+            permission49 = new AuthPermission();
+            permission49.setId("49");
+        }
+        permission49.setName("VIEW ROLES");
+        permission49.setDescription("View roles on system");
+
+        AuthPermission permission50 = (AuthPermission) mongoRepositoryReactive.findById("50", AuthPermission.class).block();
+        if (permission50 == null) {
+            permission50 = new AuthPermission();
+            permission50.setId("50");
+        }
+        permission50.setName("ADD PERMISSIONS TO ROLE");
+        permission50.setDescription("Can add permissions to roles and update roles");
+
+        AuthPermission permission51 = (AuthPermission) mongoRepositoryReactive.findById(RECEIVE_CASE_NOTIFICATION_ID, AuthPermission.class).block();
+        if (permission51 == null) {
+            permission51 = new AuthPermission();
+            permission51.setId(RECEIVE_CASE_NOTIFICATION_ID);
+        }
+        permission51.setName("RECEIVE NEW CASE NOTIFICATION");
+        permission51.setDescription("Can receive case notification (new and reminder)");
+        permission51.setUsedBySystem(true);
 
         mongoRepositoryReactive.saveOrUpdate(permission1);
         mongoRepositoryReactive.saveOrUpdate(permission2);
@@ -455,6 +484,9 @@ public class LSLBAuthPermissionReferenceData {
         mongoRepositoryReactive.saveOrUpdate(permission46);
         mongoRepositoryReactive.saveOrUpdate(permission47);
         mongoRepositoryReactive.saveOrUpdate(permission48);
+        mongoRepositoryReactive.saveOrUpdate(permission49);
+        mongoRepositoryReactive.saveOrUpdate(permission50);
+        mongoRepositoryReactive.saveOrUpdate(permission51);
     }
 
 
@@ -597,7 +629,7 @@ public class LSLBAuthPermissionReferenceData {
     public static Set<String> getAllVGGSuperAdminPermissions() {
         Set<String> permissions = new HashSet<>();
         List<String> codeGeneratedPermissionIds = getCodeUsedPermissions();
-        for (int i = 1; i <= 46; i++) {
+        for (int i = 1; i <= 51; i++) {
             if (!codeGeneratedPermissionIds.contains(String.valueOf(i))) {
                 permissions.add(String.valueOf(i));
             }
@@ -631,6 +663,8 @@ public class LSLBAuthPermissionReferenceData {
         permissions.add("42");
         permissions.add("43");
         permissions.add("45");
+        permissions.add("49");
+        permissions.add("50");
         return permissions;
     }
 
@@ -649,7 +683,7 @@ public class LSLBAuthPermissionReferenceData {
         codePermissions.add(RECEIVE_APPLICATION_ID);
         codePermissions.add(RECEIVE_CUSTOMER_COMPLAIN_ID);
         codePermissions.add(RECEIVE_PAYMENT_NOTIFICATION_ID);
-        codePermissions.add(RECIEVE_AGENT_APPROVAL_AGENT_REQUEST_ID);
+        codePermissions.add(RECEIVE_AGENT_APPROVAL_AGENT_REQUEST_ID);
         codePermissions.add(RECEIVE_CASE_NOTIFICATION_ID);
         return codePermissions;
     }
