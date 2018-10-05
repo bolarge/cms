@@ -9,7 +9,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,7 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Api(value = "Dashboard", description = "For everything related to dashboard requests", tags = "")
 @RestController
@@ -201,6 +204,71 @@ public class DashboardController extends BaseController {
 
         return Mono.just(new ResponseEntity<>(paymentRecordDashboardSummaryStatusDto, HttpStatus.OK));
 
+    }
+    @RequestMapping(method = RequestMethod.GET, value = "/institution-summary", params={"institutionId"})
+    @ApiOperation(value = "Get operator summary ", response = InstitutionDashboardSummaryDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getInstitutionSummary(@RequestParam ("institutionId") String institutionId) {
+       Query queryLicense= new Query();
+       queryLicense.addCriteria(Criteria.where("institutionId").is(institutionId));
+
+        List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicense, License.class).toStream().collect(Collectors.toList());
+        List<InstitutionDashboardSummaryDto> institutionDashboardSummaryDtos = new ArrayList<>();
+        if (licenses.size() == 0) {
+            return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+
+        }
+        for (License license : licenses) {
+            InstitutionDashboardSummaryDto institutionDashboardSummaryDto = new InstitutionDashboardSummaryDto();
+
+            institutionDashboardSummaryDto.setInstitutionId(institutionId);
+            institutionDashboardSummaryDto.setLicenseNumber(license.getLicenseNumber());
+            institutionDashboardSummaryDto.setInstitutionName(getInstitution(institutionId).getInstitutionName());
+            institutionDashboardSummaryDto.setLicenseStatus(license.getLicenseStatusId());
+            institutionDashboardSummaryDto.setLicenseStatus(getLicenseStatus(license.getLicenseStatusId()).getName());
+            institutionDashboardSummaryDto.setEffectiveDate(license.getEffectiveDate().toString("dd-MM-yyyy"));
+            institutionDashboardSummaryDto.setExpirtyDate(license.getExpiryDate().toString("dd-MM-yyyy"));
+            institutionDashboardSummaryDto.setGameType(getGameType(license.getGameTypeId()).getName());
+            institutionDashboardSummaryDto.setNumberOfAgents(getAgentCountForInstitution(institutionId));
+            institutionDashboardSummaryDto.setNumberOfGamingMachines(getGamingMachineCountForInstitution(institutionId));
+            institutionDashboardSummaryDtos.add(institutionDashboardSummaryDto);
+        }
+
+        return Mono.just(new ResponseEntity<>(institutionDashboardSummaryDtos, HttpStatus.OK));
+    }
+
+    public Institution getInstitution(String institutionId) {
+
+        return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+    }
+    public GameType getGameType(String gameTypeId) {
+
+        Map gameTypeMap = Mapstore.STORE.get("GameType");
+        GameType gameType = null;
+        if (gameTypeMap != null) {
+            gameType = (GameType) gameTypeMap.get(gameTypeId);
+        }
+        if (gameType == null) {
+            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
+            if (gameType != null && gameTypeMap != null) {
+                gameTypeMap.put(gameTypeId, gameType);
+            }
+        }
+        return gameType;
+    }
+    public long getAgentCountForInstitution(String institutionId){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionIds").in(institutionId));
+        return mongoRepositoryReactive.count(query, Agent.class).block();
+    }
+    public long getGamingMachineCountForInstitution(String institutionId){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionIds").in(institutionId));
+        return mongoRepositoryReactive.count(query, GamingMachine.class).block();
     }
 
 }
