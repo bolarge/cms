@@ -1,7 +1,7 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 public class PaymentRecordStatusDto {
-    protected String _id;
+
     protected String paymentStatusId;
     protected long paymentStatusCount;
     protected double paymentTotalSum;
@@ -15,13 +15,6 @@ public class PaymentRecordStatusDto {
         this.paymentOutstandingTotalSum = paymentOutstandingTotalSum;
     }
 
-    public String get_id() {
-        return _id;
-    }
-
-    public void set_id(String _id) {
-        this._id = _id;
-    }
 
     public String getPaymentStatusId() {
         return paymentStatusId;
