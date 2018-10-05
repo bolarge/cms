@@ -1,12 +1,9 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-public class PaymentRecordDashboardSummaryStatusDto {
+public class PaymentRecordDashboardStatusCountDto {
     protected long partPaymentTotalCount;
-    protected double partPaymentTotalAmount;
     protected long fullPaymentTotalCount;
-    protected double fullPaymentTotalAmount;
-    protected double unPaidTotalAmount;
-    protected long  unPaidTotalCount;
+    protected long unPaidTotalCount;
     protected long totalInvoices;
 
 
@@ -16,14 +13,6 @@ public class PaymentRecordDashboardSummaryStatusDto {
 
     public void setTotalInvoices(long totalInvoices) {
         this.totalInvoices = totalInvoices;
-    }
-
-    public double getUnPaidTotalAmount() {
-        return unPaidTotalAmount;
-    }
-
-    public void setUnPaidTotalAmount(double unPaidTotalAmount) {
-        this.unPaidTotalAmount = unPaidTotalAmount;
     }
 
     public long getUnPaidTotalCount() {
@@ -42,14 +31,6 @@ public class PaymentRecordDashboardSummaryStatusDto {
         this.partPaymentTotalCount = partPaymentTotalCount;
     }
 
-    public double getPartPaymentTotalAmount() {
-        return partPaymentTotalAmount;
-    }
-
-    public void setPartPaymentTotalAmount(double partPaymentTotalAmount) {
-        this.partPaymentTotalAmount = partPaymentTotalAmount;
-    }
-
     public long getFullPaymentTotalCount() {
         return fullPaymentTotalCount;
     }
@@ -58,13 +39,7 @@ public class PaymentRecordDashboardSummaryStatusDto {
         this.fullPaymentTotalCount = fullPaymentTotalCount;
     }
 
-    public double getFullPaymentTotalAmount() {
-        return fullPaymentTotalAmount;
-    }
 
-    public void setFullPaymentTotalAmount(double fullPaymentTotalAmount) {
-        this.fullPaymentTotalAmount = fullPaymentTotalAmount;
-    }
 
 
 }
