@@ -210,7 +210,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
                     uploadTransactionResponse.setFailedTransactions(failedLines);
                     uploadTransactionResponse.setFailedTransactionCount(failedLines.size());
                     uploadTransactionResponse.setMessage(String.format(
-                            "Upload Failed, You have %s lines with invalid format, please review with sample file and re upload",
+                            "Please review with sample file and re upload",
                             failedLines.size()));
                     return Mono.just(new ResponseEntity<>(uploadTransactionResponse, HttpStatus.BAD_REQUEST));
                 } else {

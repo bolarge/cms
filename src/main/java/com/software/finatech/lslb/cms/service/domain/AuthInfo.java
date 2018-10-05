@@ -3,7 +3,6 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
 import com.software.finatech.lslb.cms.service.dto.AuthPermissionDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
-import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -251,7 +250,7 @@ public class AuthInfo extends AbstractFact {
             authInfoDto.setInstitutionName(userInstitution.getInstitutionName());
         }
         authInfoDto.setAgentId(getAgentId());
-        authInfoDto.setAuthPermissions(getAllPermissionsForUser());
+        authInfoDto.setAuthPermissions(getTotalPermissionDtosForUser());
         return authInfoDto;
     }
 
@@ -325,6 +324,48 @@ public class AuthInfo extends AbstractFact {
                 authPermissionDtos.add(authPermission.convertToDto());
             }
         }
+        return authPermissionDtos;
+    }
+
+    private Set<AuthPermissionDto> getAllPermissionDtosForUser() {
+        Set<AuthPermissionDto> authPermissionDtos = new HashSet<>();
+        for (String userPermissionId : getAuthPermissionIds()) {
+            AuthPermission authPermission = getAuthPermission(userPermissionId);
+            AuthPermissionDto dto = new AuthPermissionDto();
+            if (authPermission != null) {
+                dto.setId(authPermission.getId());
+                dto.setName(authPermission.getName());
+                dto.setDescription(authPermission.getDescription());
+                dto.setUsedBySystem(authPermission.isUsedBySystem());
+                dto.setBelongsToUser(true);
+            }
+        }
+        return authPermissionDtos;
+    }
+
+    private Set<AuthPermissionDto> getAllPermissionDtosFromUserRole() {
+        Set<AuthPermissionDto> authPermissionDtos = new HashSet<>();
+        AuthRole authRole = getAuthRole();
+        if (authRole == null) {
+            return new HashSet<>();
+        }
+        for (String userPermissionId : authRole.getAuthPermissionIds()) {
+            AuthPermission authPermission = getAuthPermission(userPermissionId);
+            AuthPermissionDto dto = new AuthPermissionDto();
+            if (authPermission != null) {
+                dto.setId(authPermission.getId());
+                dto.setName(authPermission.getName());
+                dto.setDescription(authPermission.getDescription());
+                dto.setUsedBySystem(authPermission.isUsedBySystem());
+                dto.setBelongsToUser(false);
+            }
+        }
+        return authPermissionDtos;
+    }
+
+    private Set<AuthPermissionDto> getTotalPermissionDtosForUser() {
+        Set<AuthPermissionDto> authPermissionDtos = getAllPermissionDtosForUser();
+        authPermissionDtos.addAll(getAllPermissionDtosFromUserRole());
         return authPermissionDtos;
     }
 
