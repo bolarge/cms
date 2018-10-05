@@ -9,12 +9,15 @@ import com.software.finatech.lslb.cms.service.dto.CustomerComplainDto;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainUpdateDto;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.CustomerComplainStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.CustomerComplainService;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.CustomerComplaintEmailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +73,8 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
                                                          String customerEmail,
                                                          String customerPhone,
                                                          String customerComplainStatusId,
+                                                         String startDate,
+                                                         String endDate,
                                                          HttpServletResponse httpServletResponse) {
 
         try {
@@ -83,11 +88,15 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             if (!StringUtils.isEmpty(customerComplainStatusId)) {
                 query.addCriteria(Criteria.where("customerComplainStatusId").is(customerComplainStatusId));
             }
+            if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
+                LocalDate fromDate = new LocalDate(startDate);
+                LocalDate toDate = new LocalDate(endDate).plusDays(1);
+                query.addCriteria(Criteria.where("timeReported").gte(fromDate).lte(toDate));
+            }
             if (page == 0) {
                 Long count = mongoRepositoryReactive.count(query, CustomerComplain.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
             }
-
             Sort sort;
             if (!StringUtils.isEmpty(sortDirection) && !StringUtils.isEmpty(sortProperty)) {
                 sort = new Sort((sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC),
@@ -154,8 +163,8 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             if (user == null) {
                 return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", userId), HttpStatus.BAD_REQUEST));
             }
-            if (!user.canResolveCustomerComplains()) {
-                return Mono.just(new ResponseEntity<>("User does not have permission to resolve customer complains", HttpStatus.BAD_REQUEST));
+            if (!userCanResolveCustomerComplain(user)) {
+                return Mono.just(new ResponseEntity<>("User does not have permission to update customer complains", HttpStatus.BAD_REQUEST));
             }
             CustomerComplain existingCustomerComplain = findCustomerComplainById(customerComplainId);
             if (existingCustomerComplain == null) {
@@ -178,7 +187,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             existingCustomerComplain.setCustomerComplainActionList(existingCustomerComplainActions);
             mongoRepositoryReactive.saveOrUpdate(existingCustomerComplain);
             customerComplaintEmailSenderAsync.sendResolvedCustomerComplainToCustomer(existingCustomerComplain);
-            return Mono.just(new ResponseEntity<>(existingCustomerComplain.convertToDto(), HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(existingCustomerComplain.convertToFullDetailDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, String.format("An error occurred while resolving customer complain %s with user id %s", customerComplainId, userId), e);
         }
@@ -202,8 +211,8 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             if (user == null) {
                 return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", userId), HttpStatus.BAD_REQUEST));
             }
-            if (!user.canResolveCustomerComplains()) {
-                return Mono.just(new ResponseEntity<>("User does not have permission to resolve customer complains", HttpStatus.BAD_REQUEST));
+            if (!userCanResolveCustomerComplain(user)) {
+                return Mono.just(new ResponseEntity<>("User does not have permission to update customer complains", HttpStatus.BAD_REQUEST));
             }
             CustomerComplain existingCustomerComplain = findCustomerComplainById(customerComplainId);
             if (existingCustomerComplain == null) {
@@ -223,7 +232,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             existingCustomerComplain.setCustomerComplainActionList(existingCustomerComplainActions);
             mongoRepositoryReactive.saveOrUpdate(existingCustomerComplain);
             customerComplaintEmailSenderAsync.sendClosedCustomerComplaintToCustomer(existingCustomerComplain);
-            return Mono.just(new ResponseEntity<>(existingCustomerComplain.convertToDto(), HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(existingCustomerComplain.convertToFullDetailDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, String.format("An error occurred while resolving customer complain %s with user id %s", customerComplainId, userId), e);
         }
@@ -239,8 +248,8 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             if (user == null) {
                 return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", userId), HttpStatus.BAD_REQUEST));
             }
-            if (!user.canResolveCustomerComplains()) {
-                return Mono.just(new ResponseEntity<>("User does not have permission to resolve customer complains", HttpStatus.BAD_REQUEST));
+            if (!userCanResolveCustomerComplain(user)) {
+                return Mono.just(new ResponseEntity<>("User does not have permission to update customer complains", HttpStatus.BAD_REQUEST));
             }
             CustomerComplain existingCustomerComplain = findCustomerComplainById(customerComplainId);
             if (existingCustomerComplain == null) {
@@ -255,7 +264,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             customerComplainAction.setActionTime(LocalDateTime.now());
             customerComplainAction.setComplainStatusId(customerComplainStatusId);
             customerComplainAction.setUserId(userId);
-            existingCustomerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.CLOSED_ID);
+            existingCustomerComplain.setCustomerComplainStatusId(customerComplainStatusId);
             List<CustomerComplainAction> existingCustomerComplainActions = existingCustomerComplain.getCustomerComplainActionList();
             existingCustomerComplainActions.add(customerComplainAction);
             existingCustomerComplain.setCustomerComplainActionList(existingCustomerComplainActions);
@@ -266,7 +275,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             if (customerComplainUpdateDto.isResolvedUpdate()) {
                 customerComplaintEmailSenderAsync.sendResolvedCustomerComplainToCustomer(existingCustomerComplain);
             }
-            return Mono.just(new ResponseEntity(existingCustomerComplain.convertToDto(), HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(existingCustomerComplain.convertToFullDetailDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while changing complain status", e);
         }
@@ -314,5 +323,15 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
     private String generateTicketId() {
         int randomInt = NumberUtil.getRandomNumberInRange(3000, 300000000);
         return String.format("LS-CMTK-%s", randomInt);
+    }
+
+    private boolean userCanResolveCustomerComplain(AuthInfo user) {
+        return user.getEnabled() && getValidRoleIds().contains(user.getAuthRoleId());
+    }
+
+    private List<String> getValidRoleIds() {
+        List<String> validRolesIds = LSLBAuthRoleReferenceData.getLslbRoles();
+        validRolesIds.add(AuthRoleReferenceData.SUPER_ADMIN_ID);
+        return validRolesIds;
     }
 }

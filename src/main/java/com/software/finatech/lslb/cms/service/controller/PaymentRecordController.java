@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
 
-@Api(value = "Payment Records", description = "For everything related to payment records", tags = "")
+@Api(value = "Payment Records", description = "For everything related to payment records", tags = "Payment Record Controller")
 @RestController
 @RequestMapping("/api/v1/payment-records")
 public class PaymentRecordController extends BaseController {

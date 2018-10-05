@@ -7,14 +7,14 @@ import java.util.Set;
 
 public class AuthRoleReferenceData {
     public static final String VGG_ADMIN_ID = "2";
+    public static final String SUPER_ADMIN_ID = "1";
 
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
-        AuthRole role1 = (AuthRole) mongoRepositoryReactive.findById("1", AuthRole.class).block();
+        AuthRole role1 = (AuthRole) mongoRepositoryReactive.findById(SUPER_ADMIN_ID, AuthRole.class).block();
         if (role1 == null) {
             role1 = new AuthRole();
-            role1.setId("1");
-
+            role1.setId(SUPER_ADMIN_ID);
         }
         role1.setDescription("VGG SUPER ADMIN");
         role1.setName("VGG SUPER ADMIN");

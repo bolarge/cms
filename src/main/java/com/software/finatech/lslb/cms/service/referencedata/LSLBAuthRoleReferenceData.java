@@ -3,7 +3,8 @@ package com.software.finatech.lslb.cms.service.referencedata;
 import com.software.finatech.lslb.cms.service.domain.AuthRole;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class LSLBAuthRoleReferenceData {
@@ -90,13 +91,19 @@ public class LSLBAuthRoleReferenceData {
         role9.setAuthPermissionIds(permissionIds);
 
 
-
         mongoRepositoryReactive.saveOrUpdate(role4);
         mongoRepositoryReactive.saveOrUpdate(role5);
         mongoRepositoryReactive.saveOrUpdate(role6);
         mongoRepositoryReactive.saveOrUpdate(role7);
         mongoRepositoryReactive.saveOrUpdate(role8);
         mongoRepositoryReactive.saveOrUpdate(role9);
+    }
+
+    public static List<String> getLslbRoles() {
+        List<String> validRoles = new ArrayList<>();
+        validRoles.add(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID);
+        validRoles.add(LSLBAuthRoleReferenceData.LSLB_USER_ID);
+        return validRoles;
     }
 }
 

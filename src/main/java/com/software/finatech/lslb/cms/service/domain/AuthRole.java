@@ -82,6 +82,14 @@ public class AuthRole extends EnumeratedFact {
     }
 
     public AuthRoleDto convertToDto() {
+        AuthRoleDto authRoleDto = convertToHalfDto();
+        getAuthPermissions().stream().forEach(entry -> {
+            authRoleDto.getAuthPermissions().add(entry.convertToDto());
+        });
+        return authRoleDto;
+    }
+
+    public AuthRoleDto convertToHalfDto() {
         AuthRoleDto authRoleDto = new AuthRoleDto();
         authRoleDto.setCode(getCode());
         authRoleDto.setDescription(getDescription());
@@ -91,7 +99,6 @@ public class AuthRole extends EnumeratedFact {
 //        getAuthPermissions().stream().forEach(entry -> {
 //            authRoleDto.getAuthPermissions().add(entry.convertToDto());
 //        });
-
         return authRoleDto;
     }
 

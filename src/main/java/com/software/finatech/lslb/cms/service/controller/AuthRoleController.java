@@ -4,6 +4,7 @@ import com.software.finatech.lslb.cms.service.domain.AuthPermission;
 import com.software.finatech.lslb.cms.service.domain.AuthRole;
 import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.service.contracts.AuthRoleService;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -11,6 +12,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
@@ -26,7 +28,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Api(value = "AuthRole", description = "", tags = "")
+@Api(value = "AuthRole", description = "", tags = "AuthRole Controller")
 @RestController
 @RequestMapping("/api/v1/authrole")
 public class AuthRoleController extends BaseController {
@@ -36,6 +38,9 @@ public class AuthRoleController extends BaseController {
     private MailContentBuilderService mailContentBuilderService;*/
 
     private static Logger logger = LoggerFactory.getLogger(AuthRoleController.class);
+
+    @Autowired
+    private AuthRoleService authRoleService;
 
     /**
      * @param id AuthInfo id
@@ -217,6 +222,19 @@ public class AuthRoleController extends BaseController {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/permission/code-used")
+    @ApiOperation(value = "Get Code used permissions", response = AuthPermissionDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")
+    }
+    )
+    public Mono<ResponseEntity> codePermissions() {
+        return authRoleService.getAllCodePermissions();
     }
 
     /**

@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 
-@Api(value = "Payment Record Details", description = "For everything related to payment record details", tags = "")
+@Api(value = "Payment Record Details", description = "For everything related to payment record details", tags = "Payment Record Detail Controller")
 @RestController
 @RequestMapping("/api/v1/payment-record-details")
 public class PaymentRecordDetailController extends BaseController {

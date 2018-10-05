@@ -16,6 +16,8 @@ public interface CustomerComplainService {
                                                   String customerEmail,
                                                   String customerPhone,
                                                   String customerComplainStatusId,
+                                                  String startDate,
+                                                  String endDate,
                                                   HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getCustomerComplainFullDetail(String customerComplainId);

@@ -12,7 +12,8 @@ public class LSLBAuthPermissionReferenceData {
     public static final String RECEIVE_APPLICATION_ID = "31";
     public static final String RECEIVE_PAYMENT_NOTIFICATION_ID = "32";
     public static final String RECEIVE_CUSTOMER_COMPLAIN_ID = "33";
-    public static final String APPROVE_AGENT_REQUEST_ID = "4";
+    public static final String RECIEVE_AGENT_APPROVAL_AGENT_REQUEST_ID = "48";
+    public static final String RECEIVE_CASE_NOTIFICATION_ID = "47";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         AuthPermission permission1 = (AuthPermission) mongoRepositoryReactive.findById("1", AuthPermission.class).block();
@@ -390,6 +391,22 @@ public class LSLBAuthPermissionReferenceData {
         permission46.setName("APPROVE LICENCE RENEWALS");
         permission46.setDescription("Approve licence renewals");
 
+        AuthPermission permission47 = (AuthPermission) mongoRepositoryReactive.findById("46", AuthPermission.class).block();
+        if (permission47 == null) {
+            permission47 = new AuthPermission();
+            permission47.setId("47");
+        }
+        permission47.setName("RECEIVE NEW CASE NOTIFICATION");
+        permission47.setDescription("Receive new case Notification");
+
+        AuthPermission permission48 = (AuthPermission) mongoRepositoryReactive.findById(RECIEVE_AGENT_APPROVAL_AGENT_REQUEST_ID, AuthPermission.class).block();
+        if (permission48 == null) {
+            permission48 = new AuthPermission();
+            permission48.setId(RECIEVE_AGENT_APPROVAL_AGENT_REQUEST_ID);
+        }
+        permission48.setName("RECEIVE NEW AGENT APPROVAL REQUEST NOTIFICATION");
+        permission48.setDescription("Receive new agent approval request Notification");
+
         mongoRepositoryReactive.saveOrUpdate(permission1);
         mongoRepositoryReactive.saveOrUpdate(permission2);
         mongoRepositoryReactive.saveOrUpdate(permission3);
@@ -436,6 +453,8 @@ public class LSLBAuthPermissionReferenceData {
         mongoRepositoryReactive.saveOrUpdate(permission44);
         mongoRepositoryReactive.saveOrUpdate(permission45);
         mongoRepositoryReactive.saveOrUpdate(permission46);
+        mongoRepositoryReactive.saveOrUpdate(permission47);
+        mongoRepositoryReactive.saveOrUpdate(permission48);
     }
 
 
@@ -625,12 +644,13 @@ public class LSLBAuthPermissionReferenceData {
         return permissions;
     }
 
-    private static List<String> getCodeUsedPermissions() {
+    public static List<String> getCodeUsedPermissions() {
         List<String> codePermissions = new ArrayList<>();
         codePermissions.add(RECEIVE_APPLICATION_ID);
         codePermissions.add(RECEIVE_CUSTOMER_COMPLAIN_ID);
         codePermissions.add(RECEIVE_PAYMENT_NOTIFICATION_ID);
-        codePermissions.add(APPROVE_AGENT_REQUEST_ID);
+        codePermissions.add(RECIEVE_AGENT_APPROVAL_AGENT_REQUEST_ID);
+        codePermissions.add(RECEIVE_CASE_NOTIFICATION_ID);
         return codePermissions;
     }
 }

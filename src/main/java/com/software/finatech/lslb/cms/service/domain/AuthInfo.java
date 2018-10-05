@@ -245,7 +245,7 @@ public class AuthInfo extends AbstractFact {
         authInfoDto.setSsoUserId(getSsoUserId());
         authInfoDto.setGameTypeId(getGameTypeId());
         authInfoDto.setGameTypeName(getGameTypeName());
-        authInfoDto.setAuthRole(getAuthRole() == null ? null : getAuthRole().convertToDto());
+        authInfoDto.setAuthRole(getAuthRole() == null ? null : getAuthRole().convertToHalfDto());
         Institution userInstitution = getInstitution();
         if (userInstitution != null) {
             authInfoDto.setInstitutionName(userInstitution.getInstitutionName());
@@ -353,9 +353,5 @@ public class AuthInfo extends AbstractFact {
             }
         }
         return authPermission;
-    }
-
-    public boolean canResolveCustomerComplains() {
-        return getAllUserPermissionIdsForUser().contains(LSLBAuthPermissionReferenceData.RECEIVE_CUSTOMER_COMPLAIN_ID);
     }
 }
