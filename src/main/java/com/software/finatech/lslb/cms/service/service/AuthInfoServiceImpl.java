@@ -14,6 +14,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthPermissionService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthRoleService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
+import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.NewUserEmailNotifierAsync;
@@ -815,7 +816,29 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
     @Override
     public Mono<ResponseEntity> removePermissionFromUser(UserAuthPermissionDto userAuthPermissionDto) {
-        return null;
+        try {
+            String userId = userAuthPermissionDto.getUserId();
+            Set<String> removedPermissionIds = userAuthPermissionDto.getAuthPermissionIds();
+            AuthInfo user = getUserById(userId);
+            if (user == null) {
+                return Mono.just(new ResponseEntity<>(String.format("User with id %s not found", userId), HttpStatus.BAD_REQUEST));
+            }
+            Set<String> userMappedPermissions = user.getAuthPermissionIds();
+            for (String removedPermissionId : removedPermissionIds) {
+                AuthPermission authPermission = authPermissionService.findAuthPermissionById(removedPermissionId);
+                if (authPermission == null) {
+                    return Mono.just(new ResponseEntity<>(String.format("Auth Permission with id %s does not exist", removedPermissionId), HttpStatus.BAD_REQUEST));
+                }
+                if (userMappedPermissions.contains(removedPermissionId)) {
+                    userMappedPermissions.remove(removedPermissionId);
+                }
+            }
+            user.setAuthPermissionIds(userMappedPermissions);
+            mongoRepositoryReactive.saveOrUpdate(user);
+            return Mono.just(new ResponseEntity<>(user.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while removing permission from user", e);
+        }
     }
 
     public ArrayList<String> getAllGamingOperatorAdminAndUserRoles() {
