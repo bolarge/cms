@@ -140,7 +140,7 @@ public class DashboardController extends BaseController {
         return licenseStatus;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/payment-summary", params = {"licenseTypeId","gameTypeId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/payment-summary", params = {"institutionId","licenseTypeId","gameTypeId"})
     @ApiOperation(value = "Get dashboard payment summary ", response = PaymentRecordDashboardSummaryStatusDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -148,7 +148,8 @@ public class DashboardController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getPaymentSummary(@RequestParam("licenseTypeId") String revenueNameId,
-                                                  @RequestParam("gameTypeId") String gameTypeId) {
+                                                  @RequestParam("gameTypeId") String gameTypeId,
+                                                  @RequestParam("institutionId") String institutionId) {
 
        Criteria criteria = new Criteria();
         List<Criteria> filterCriteria = new ArrayList<>();
@@ -158,6 +159,9 @@ public class DashboardController extends BaseController {
 
         if (revenueNameId != null && !revenueNameId.isEmpty()) {
             filterCriteria.add(Criteria.where("revenueNameId").is(revenueNameId));
+        }
+        if (institutionId != null && !institutionId.isEmpty()) {
+            filterCriteria.add(Criteria.where("institutionId").is(institutionId));
         }
 
         if (filterCriteria.size() > 0) {
