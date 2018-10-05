@@ -53,4 +53,6 @@ public interface AuthInfoService {
     Mono<ResponseEntity> addPermissionsToUser(UserAuthPermissionDto userAuthPermissionDto);
 
     ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveNewCaseNotification();
+
+    Mono<ResponseEntity> removePermissionFromUser(UserAuthPermissionDto userAuthPermissionDto);
 }
