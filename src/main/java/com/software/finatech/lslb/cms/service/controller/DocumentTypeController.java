@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Api(value = "Document", description = "For everything related to documents", tags = "")
+@Api(value = "Document", description = "For everything related to documents", tags = "Document Type Controller")
 @RestController
 @RequestMapping("/api/v1/documentType")
 public class DocumentTypeController extends BaseController{

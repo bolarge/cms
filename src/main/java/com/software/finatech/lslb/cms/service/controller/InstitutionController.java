@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-@Api(value = "AuthInfo", description = "", tags = "")
+@Api(value = "AuthInfo", description = "", tags = "Institution Controller")
 @RestController
 @RequestMapping("/api/v1/institution")
 public class InstitutionController extends BaseController {

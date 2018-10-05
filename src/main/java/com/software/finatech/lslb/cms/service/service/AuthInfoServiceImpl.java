@@ -1,16 +1,22 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.AuthPermission;
 import com.software.finatech.lslb.cms.service.domain.AuthRole;
 import com.software.finatech.lslb.cms.service.domain.VerificationToken;
-import com.software.finatech.lslb.cms.service.dto.AuthInfoCompleteDto;
-import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
-import com.software.finatech.lslb.cms.service.dto.CreateApplicantAuthInfoDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.dto.sso.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
-import com.software.finatech.lslb.cms.service.util.async_helpers.NewUserEmailNotifierAsync;
+import com.software.finatech.lslb.cms.service.service.contracts.AuthPermissionService;
+import com.software.finatech.lslb.cms.service.service.contracts.AuthRoleService;
+import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
+import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.NewUserEmailNotifierAsync;
 import io.advantageous.boon.json.JsonFactory;
 import io.advantageous.boon.json.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +32,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +45,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -67,7 +75,16 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     private NewUserEmailNotifierAsync newUserEmailNotifierAsync;
 
     @Autowired
+    private AuthPermissionService authPermissionService;
+    @Autowired
+    private AuditLogHelper auditLogHelper;
+    @Autowired
+    private AuthRoleService authRoleService;
+
+    @Autowired
     private EmailService emailService;
+    @Autowired
+    private FrontEndPropertyHelper frontEndPropertyHelper;
     private static Logger logger = LoggerFactory.getLogger(AuthInfoServiceImpl.class);
     @Autowired
     protected MongoRepositoryReactiveImpl mongoRepositoryReactive;
@@ -139,13 +156,53 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
             // user exist so we add claims
             if (userExists) {
+                AuthRole authRole = authRoleService.findRoleById(authInfo.getAuthRoleId());
+                if (authRole == null) {
+                    return Mono.just(new ResponseEntity<>(String.format("Role with id %s not found", authInfo.getAuthRoleId()), HttpStatus.BAD_REQUEST));
+                }
                 userDetail = SSOUserDetail.getData().get(0);
+
+                SSOClaim applicationClaim = new SSOClaim();
+                applicationClaim.setType("application");
+                applicationClaim.setValue("lslb-cms");
+
+                SSOClaim roleClaim1 = new SSOClaim();
+                roleClaim1.setType("role");
+                roleClaim1.setValue(authRole.getSsoRoleMapping());
+
+                SSOClaim roleClaim2 = new SSOClaim();
+                roleClaim2.setType("role");
+                roleClaim2.setValue(authRole.getName());
+                SSOUserAddClaim ssoUserAddClaim = new SSOUserAddClaim();
+                ssoUserAddClaim.setUserId(userDetail.getId());
+                ssoUserAddClaim.getClaims().add(applicationClaim);
+                ssoUserAddClaim.getClaims().add(roleClaim1);
+                ssoUserAddClaim.getClaims().add(roleClaim2);
+
+                //Add claims
+                url = baseAPIURL + "/account/addclaims";
+                httpPost = new HttpPost(url);
+                //final com.fasterxml.jackson.databind.ObjectMapper mapperJson = new com.fasterxml.jackson.databind.ObjectMapper();
+                String json = mapper.toJson(ssoUserAddClaim);
+                httpPost.setEntity(new StringEntity(json));
+                httpPost.addHeader("Authorization", "Bearer " + apiToken);
+                httpPost.addHeader("client-id", clientId);
+                httpPost.addHeader("Content-Type", "application/json");
+
+                response = httpclient.execute(httpPost);
+                responseCode = response.getStatusLine().getStatusCode();
+                String stringResponse = EntityUtils.toString(response.getEntity());
+
+                if (responseCode != 200) {
+                    return Mono.just(new ResponseEntity<>(stringResponse, HttpStatus.valueOf(responseCode)));
+                }
                 model.put("name", authInfo.getFirstName() + " " + authInfo.getLastName());
+                model.put("frontEndUrl", frontEndPropertyHelper.getFrontEndUrl());
                 String content = mailContentBuilderService.build(model, "ExistingUserRegistrationEmail");
                 emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
                 authInfo.setEnabled(true);
                 mongoRepositoryReactive.saveOrUpdate(authInfo);
-
+                return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
             } else {
 
                 VerificationToken verificationToken = new VerificationToken();
@@ -167,11 +224,11 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 String content = mailContentBuilderService.build(model, "continueRegistration-new");
                 content = content.replaceAll("CallbackUrl", url);
                 emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
-            }
 
-            return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
+                return Mono.just(new ResponseEntity<>(toCreateAuthInfoResponse(authInfo, verificationToken), HttpStatus.OK));
+            }
         } catch (Exception e) {
-            String errorMsg = "An error occured when trying to create user";
+            String errorMsg = "An error occurred when trying to create user";
             return logAndReturnError(logger, errorMsg, e);
         }
     }
@@ -247,7 +304,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 model.put("date", LocalDate.now().toString("dd-MM-YYYY"));
                 url = appUrl + "/authInfo/confirm?token=" + verificationToken.getConfirmationToken();
                 model.put("CallbackUrl", url);
-                model.put("isApplicant", false);
+                model.put("isApplicant", true);
                 String content = mailContentBuilderService.build(model, "continueRegistration-new");
                 content = content.replaceAll("CallbackUrl", url);
                 emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
@@ -532,7 +589,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
      * @return
      */
     @Override
-    public Mono<ResponseEntity> loginToken(String userName, String password, AuthInfo authInfo) {
+    public Mono<ResponseEntity> loginToken(String userName, String password, AuthInfo authInfo, HttpServletRequest request) {
         try {
             HttpClient httpclient = HttpClientBuilder.create().build();
             // URI urlObject = new URI(baseIdentityURL+"/connect/token");
@@ -558,9 +615,11 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 // everything is fine, handle the response
                 SSOToken token = mapper.readValue(stringResponse, SSOToken.class);
                 token.setAuthInfo(authInfo.convertToDto());
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Successful Login Attempt"));
 
                 return Mono.just(new ResponseEntity<>((token), HttpStatus.OK));
             } else {
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> Response From SSO : \n" + stringResponse));
                 return Mono.just(new ResponseEntity<>(stringResponse, HttpStatus.valueOf(responseCode)));
             }
         } catch (Throwable e) {
@@ -655,40 +714,98 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public AuthInfo getUserByAgentId(String agentId) {
-        return null;
+    public ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveCustomerComplainNotification() {
+        ArrayList<AuthInfo> validMembers = new ArrayList<>();
+        for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
+            Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();
+            if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECEIVE_CUSTOMER_COMPLAIN_ID)) {
+                validMembers.add(lslbMember);
+            }
+        }
+        return validMembers;
     }
 
     @Override
-    public ArrayList<AuthInfo> getAllActiveLSLBFinanceAdmins() {
+    public ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveApplicationSubmissionNotification() {
+        ArrayList<AuthInfo> validMembers = new ArrayList<>();
+        for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
+            Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();
+            if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECEIVE_APPLICATION_ID)) {
+                validMembers.add(lslbMember);
+            }
+        }
+        return validMembers;
+    }
+
+    @Override
+    public ArrayList<AuthInfo> findAllLSLBMembersThatCanReceivePaymentNotification() {
+        ArrayList<AuthInfo> validMembers = new ArrayList<>();
+        for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
+            Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();
+            if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECEIVE_PAYMENT_NOTIFICATION_ID)) {
+                validMembers.add(lslbMember);
+            }
+        }
+        return validMembers;
+    }
+
+    @Override
+    public ArrayList<AuthInfo> findAllLSLBMembersThatCanApproveAgentApprovals() {
+        ArrayList<AuthInfo> validMembers = new ArrayList<>();
+        for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
+            Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();
+            if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECIEVE_AGENT_APPROVAL_AGENT_REQUEST_ID)) {
+                validMembers.add(lslbMember);
+            }
+        }
+        return validMembers;
+    }
+
+    @Override
+    public ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveNewCaseNotification() {
+        ArrayList<AuthInfo> validMembers = new ArrayList<>();
+        for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
+            Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();
+            if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECEIVE_CASE_NOTIFICATION_ID)) {
+                validMembers.add(lslbMember);
+            }
+        }
+        return validMembers;
+    }
+
+    private ArrayList<AuthInfo> getAllEnabledLSLBMembers() {
         Query query = new Query();
-        query.addCriteria(Criteria.where("authRoleId").is(LSLBAuthRoleReferenceData.LSLB_FINANCE_ADMIN_ID));
         query.addCriteria(Criteria.where("enabled").is(true));
+        query.addCriteria(Criteria.where("authRoleId").in(LSLBAuthRoleReferenceData.getLslbRoles()));
         return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
     }
 
     @Override
-    public ArrayList<AuthInfo> getAllActiveLSLBITAdmins() {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("authRoleId").is(LSLBAuthRoleReferenceData.LSLB_IT_ADMIN_ID));
-        query.addCriteria(Criteria.where("enabled").is(true));
-        return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
-    }
-
-    @Override
-    public ArrayList<AuthInfo> getAllActiveLSLBLegalAdmins() {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("authRoleId").is(LSLBAuthRoleReferenceData.LSLB_LEGAL_ADMIN_ID));
-        query.addCriteria(Criteria.where("enabled").is(true));
-        return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
-    }
-
-    @Override
-    public ArrayList<AuthInfo> getAllActiveLSLBGeneralManagers() {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("authRoleId").is(LSLBAuthRoleReferenceData.LSLB_GM_ROLE_ID));
-        query.addCriteria(Criteria.where("enabled").is(true));
-        return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
+    public Mono<ResponseEntity> addPermissionsToUser(UserAuthPermissionDto userAuthPermissionDto) {
+        try {
+            String userId = userAuthPermissionDto.getUserId();
+            Set<String> newPermissionIds = userAuthPermissionDto.getAuthPermissionIds();
+            AuthInfo user = getUserById(userId);
+            if (user == null) {
+                return Mono.just(new ResponseEntity<>(String.format("User with id %s not found", userId), HttpStatus.BAD_REQUEST));
+            }
+            Set<String> allUserPermissionIdsForUser = user.getAllUserPermissionIdsForUser();
+            Set<String> userSpecificPermissionIdsForUser = user.getAuthPermissionIds();
+            for (String newPermissionId : newPermissionIds) {
+                AuthPermission authPermission = authPermissionService.findAuthPermissionById(newPermissionId);
+                if (authPermission == null) {
+                    return Mono.just(new ResponseEntity<>(String.format("Auth Permission with id %s does not exist", newPermissionId), HttpStatus.BAD_REQUEST));
+                }
+                if (!allUserPermissionIdsForUser.contains(newPermissionId)) {
+                    userSpecificPermissionIdsForUser.add(newPermissionId);
+                }
+            }
+            user.setAuthPermissionIds(userSpecificPermissionIdsForUser);
+            mongoRepositoryReactive.saveOrUpdate(user);
+            return Mono.just(new ResponseEntity<>(user.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding permissions to user ", e);
+        }
     }
 
     public ArrayList<String> getAllGamingOperatorAdminAndUserRoles() {
@@ -698,5 +815,27 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         gamingOperatorLimitedRoles.add(gamingOperatorAdminRoleId);
         gamingOperatorLimitedRoles.add(gamingOperatorUserRoleId);
         return gamingOperatorLimitedRoles;
+    }
+
+    private CreateAuthInfoResponse toCreateAuthInfoResponse(AuthInfo authInfo, VerificationToken verificationToken) {
+        CreateAuthInfoResponse createAuthInfoResponse = new CreateAuthInfoResponse();
+        createAuthInfoResponse.setEnabled(authInfo.getEnabled());
+        createAuthInfoResponse.setAuthRoleId(authInfo.getAuthRoleId());
+        createAuthInfoResponse.setAccountLocked(authInfo.getAccountLocked());
+        createAuthInfoResponse.setEmailAddress(authInfo.getEmailAddress());
+        createAuthInfoResponse.setId(authInfo.getId());
+        createAuthInfoResponse.setAttachmentId(authInfo.getAttachmentId());
+        createAuthInfoResponse.setPhoneNumber(authInfo.getPhoneNumber());
+        createAuthInfoResponse.setFirstName(authInfo.getFirstName());
+        createAuthInfoResponse.setLastName(authInfo.getLastName());
+        createAuthInfoResponse.setFullName(authInfo.getFullName());
+        createAuthInfoResponse.setAgentId(authInfo.getAgentId());
+        createAuthInfoResponse.setInstitutionId(authInfo.getInstitutionId());
+        createAuthInfoResponse.setSsoUserId(authInfo.getSsoUserId());
+        createAuthInfoResponse.setTitle(authInfo.getTitle());
+        createAuthInfoResponse.setAuthRole(authInfo.getAuthRole() == null ? null : authInfo.getAuthRole().convertToDto());
+        createAuthInfoResponse.setExpiryDate(verificationToken.getExpiryDate().toString("dd/MM/yyy HH:mm:ss"));
+        createAuthInfoResponse.setVerificationToken(verificationToken.getConfirmationToken());
+        return createAuthInfoResponse;
     }
 }

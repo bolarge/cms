@@ -8,9 +8,12 @@ import com.software.finatech.lslb.cms.service.dto.sso.SSOPasswordResetModel;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOToken;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOUserConfirmResetPasswordRequest;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.service.AuthInfoServiceImpl;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
+import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -18,6 +21,7 @@ import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +47,7 @@ import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
-@Api(value = "AuthInfo", description = "", tags = "")
+@Api(value = "AuthInfo", description = "", tags = "AuthInfo Controller")
 @RestController
 @RequestMapping("/api/v1/authInfo")
 public class AuthInfoController extends BaseController {
@@ -51,9 +55,11 @@ public class AuthInfoController extends BaseController {
     private AuthInfoServiceImpl authInfoService;
     @Autowired
     private MailContentBuilderService mailContentBuilderService;
-
+    @Autowired
+    private AuditLogHelper auditLogHelper;
     private static Logger logger = LoggerFactory.getLogger(AuthInfoController.class);
 
+    private static final String LOGIN = AuditActionReferenceData.LOGIN_ID;
     /**
      * @param id AuthInfo id
      * @return AuthInfo full information
@@ -126,7 +132,7 @@ public class AuthInfoController extends BaseController {
         try {
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.find(new Query(Criteria.where("emailAddress").is(emailAddress)), AuthInfo.class).block();
             if (authInfo == null) {
-                return Mono.just(new ResponseEntity("Invalid EmailAddress", HttpStatus.BAD_REQUEST));
+                 return Mono.just(new ResponseEntity("Invalid EmailAddress", HttpStatus.BAD_REQUEST));
             }
 
             if (authInfo.getSsoUserId() == null || authInfo.getSsoUserId().isEmpty()) {
@@ -249,6 +255,7 @@ public class AuthInfoController extends BaseController {
 
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.find(new Query(Criteria.where("emailAddress").is(loginDto.getUserName())), AuthInfo.class).block();
             if (authInfo == null) {
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, loginDto.getUserName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User not found"));
                 return Mono.just(new ResponseEntity("Invalid Username/Password", HttpStatus.UNAUTHORIZED));
             }
 
@@ -259,10 +266,11 @@ public class AuthInfoController extends BaseController {
             }
 
             if (authInfo.getEnabled() != true) {
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User Deactivated"));
                 return Mono.just(new ResponseEntity("User Deactivated", HttpStatus.UNAUTHORIZED));
             }
 
-            return authInfoService.loginToken(loginDto.getUserName(), loginDto.getPassword(), authInfo);
+            return authInfoService.loginToken(loginDto.getUserName(), loginDto.getPassword(), authInfo, request);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -659,7 +667,9 @@ public class AuthInfoController extends BaseController {
 
 
         AuthInfo AuthInfo = (AuthInfo) mongoRepositoryReactive.find(new Query(Criteria.where("id").is(verificationToken.getAuthInfoId())), AuthInfo.class).block();
-
+        if (AuthInfo.getSsoUserId() != null) {
+            return Mono.just(new ResponseEntity("Registration Already Completed", HttpStatus.BAD_REQUEST));
+        }
         String appUrl =
                 appHostPort +
                         request.getContextPath();
@@ -679,6 +689,19 @@ public class AuthInfoController extends BaseController {
         return Mono.just(new ResponseEntity("Token Resent", HttpStatus.CREATED));
     }
 
+
+    @RequestMapping(method = RequestMethod.POST, value = "/add-permission-to-user")
+    @ApiOperation(value = "Add permissions to user", response = AuthInfoDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")
+    }
+    )
+    public Mono<ResponseEntity> addPermissionsToUser(@RequestBody UserAuthPermissionDto userAuthPermissionDto){
+        return authInfoService.addPermissionsToUser(userAuthPermissionDto);
+    }
 
     public String getAppHostPort() {
         return this.appHostPort;

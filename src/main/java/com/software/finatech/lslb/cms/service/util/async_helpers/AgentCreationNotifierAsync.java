@@ -53,8 +53,10 @@ public class AgentCreationNotifierAsync {
             return;
         }
 
+
+        String emailContent = buildAgentCreationNotificationContent(agentApprovalRequest);
         for (AuthInfo institutionAdmin : institutionAdmins) {
-            sendAgentCreationNotificationEmailToInstitutionAdmin(agentApprovalRequest, institutionAdmin);
+            sendAgentCreationNotificationEmailToInstitutionAdmin(institutionAdmin.getEmailAddress(), emailContent);
         }
 
         if (agentApprovalRequest.isApprovedRequest() && agentApprovalRequest.isInstitutionAgentAdditionRequest()) {
@@ -67,45 +69,11 @@ public class AgentCreationNotifierAsync {
     }
 
 
-    private void sendAgentCreationNotificationEmailToInstitutionAdmin(AgentApprovalRequest agentApprovalRequest, AuthInfo institutionAdmin) {
+    private void sendAgentCreationNotificationEmailToInstitutionAdmin(String institutionAdminEmail,String emailContent) {
         try {
-            Agent agent = agentApprovalRequest.getAgent();
-            boolean isApprovedRequest = agentApprovalRequest.isApprovedRequest();
-            String institutionName = agentApprovalRequest.getInstitutionName();
-            String gameTypeName = agentApprovalRequest.getGameTypeName();
-            String rejectionReason = agentApprovalRequest.getRejectionReason();
-            String presentDateString = LocalDate.now().toString("dd-MM-YYYY");
-            String agentName = agent.getFullName();
-            String agentEmail = agent.getEmailAddress();
-            List<String> businessAddresses = new ArrayList<>();
-            if (agentApprovalRequest.isAgentCreationRequest()) {
-
-                AgentInstitution agentInstitution = agent.getAgentInstitutions().get(0);
-                if (agentInstitution != null) {
-                    businessAddresses = agentInstitution.getBusinessAddressList();
-                }
-            }
-
-            if (agentApprovalRequest.isInstitutionAgentAdditionRequest()) {
-                businessAddresses = agentApprovalRequest.getBusinessAddressList();
-            }
-
-
-            HashMap<String, Object> model = new HashMap<>();
-            model.put("institutionName", institutionName);
-            model.put("date", presentDateString);
-            model.put("agentName", agentName);
-            model.put("rejectionReason", rejectionReason);
-            model.put("gameType", gameTypeName);
-            model.put("isApproved", isApprovedRequest);
-            model.put("businessAddressList", businessAddresses);
-            model.put("agentEmail", agentEmail);
-
-            String content = mailContentBuilderService.build(model, "agent-creation-notification");
-            emailService.sendEmail(content, "LSLB Agent Creation Notification", institutionAdmin.getEmailAddress());
-
+            emailService.sendEmail(emailContent, "LSLB Agent Creation Notification", institutionAdminEmail);
         } catch (Exception e) {
-            logger.error("An error occurred while sending agent creation notification email to user with email -> {}", institutionAdmin.getEmailAddress(), e);
+            logger.error("An error occurred while sending agent creation notification email to user with email -> {}", institutionAdminEmail, e);
         }
     }
 
@@ -143,5 +111,40 @@ public class AgentCreationNotifierAsync {
         } catch (Exception e) {
             logger.error("");
         }
+    }
+
+    private String buildAgentCreationNotificationContent(AgentApprovalRequest agentApprovalRequest) {
+        Agent agent = agentApprovalRequest.getAgent();
+        boolean isApprovedRequest = agentApprovalRequest.isApprovedRequest();
+        String institutionName = agentApprovalRequest.getInstitutionName();
+        String gameTypeName = agentApprovalRequest.getGameTypeName();
+        String rejectionReason = agentApprovalRequest.getRejectionReason();
+        String presentDateString = LocalDate.now().toString("dd-MM-YYYY");
+        String agentName = agent.getFullName();
+        String agentEmail = agent.getEmailAddress();
+        List<String> businessAddresses = new ArrayList<>();
+        if (agentApprovalRequest.isAgentCreationRequest()) {
+
+            AgentInstitution agentInstitution = agent.getAgentInstitutions().get(0);
+            if (agentInstitution != null) {
+                businessAddresses = agentInstitution.getBusinessAddressList();
+            }
+        }
+
+        if (agentApprovalRequest.isInstitutionAgentAdditionRequest()) {
+            businessAddresses = agentApprovalRequest.getBusinessAddressList();
+        }
+
+
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("institutionName", institutionName);
+        model.put("date", presentDateString);
+        model.put("agentName", agentName);
+        model.put("rejectionReason", rejectionReason);
+        model.put("gameType", gameTypeName);
+        model.put("isApproved", isApprovedRequest);
+        model.put("businessAddressList", businessAddresses);
+        model.put("agentEmail", agentEmail);
+        return mailContentBuilderService.build(model, "agent-creation-notification");
     }
 }

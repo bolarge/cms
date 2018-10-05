@@ -17,7 +17,8 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-@Api(value = "Agents", description = "For everything related to agents", tags = "")
+@Api(value = "Agents", description = "For everything related to agents",
+        tags = "Agent Controller")
 @RestController
 @RequestMapping("/api/v1/agents")
 public class AgentController extends BaseController {

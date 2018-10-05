@@ -1,7 +1,7 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
-import com.software.finatech.lslb.cms.service.domain.Agent;
+import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordDetailService;
@@ -23,11 +23,11 @@ public class TestController extends BaseController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/create-customer")
     public String testGetCustomerCode(@RequestParam("inst") String institutionId) {
-        Agent agent = (Agent) mongoRepositoryReactive.findById(institutionId, Agent.class).block();
-        String customerCode = vigipayService.createCustomerCodeForAgent(agent);
+        Institution institution = (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+        String customerCode = vigipayService.createCustomerCodeForInstitution(institution);
         if (customerCode != null) {
-            agent.setVgPayCustomerCode(customerCode);
-            mongoRepositoryReactive.saveOrUpdate(agent);
+            institution.setVgPayCustomerCode(customerCode);
+            mongoRepositoryReactive.saveOrUpdate(institution);
         }
         return "Hello";
     }

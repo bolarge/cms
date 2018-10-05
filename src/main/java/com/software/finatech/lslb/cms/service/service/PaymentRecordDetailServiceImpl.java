@@ -12,7 +12,7 @@ import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferen
 import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.*;
 import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
-import com.software.finatech.lslb.cms.service.util.async_helpers.PaymentEmailNotifierAsync;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.PaymentEmailNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
@@ -467,7 +467,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         }
 
         if (existingLicensePaymentRecordDto != null && StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, existingLicensePaymentRecordDto.getPaymentStatusId())) {
-            return Mono.just(new ResponseEntity<>("You have an existing licence payment for category, renewal payment is what you can pay for", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("You  have an existing license payment for this category and can only proceed to make payment for renewal", HttpStatus.BAD_REQUEST));
         }
 
         if (paymentRecordDetailCreateDto.isInstitutionPayment()) {

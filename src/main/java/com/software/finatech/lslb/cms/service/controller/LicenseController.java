@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-@Api(value = "License", description = "For everything related to gaming operators licenses", tags = "")
+@Api(value = "License", description = "For everything related to gaming operators licenses", tags = "Licence Controller")
 @RestController
 @RequestMapping("/api/v1/license")
 public class LicenseController {
@@ -215,7 +215,36 @@ public class LicenseController {
 
         }
     }
+    @RequestMapping(method = RequestMethod.GET, value = "/get-agent-licenses-close-to-expiration", params = {"agentId"})
+    @ApiOperation(value = "Get Agent Licenses that are close to expiration", response = License.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllAgentCloseToExpirationLicenses(@RequestParam("agentId") String agentId) {
+        try {
+            return licenseService.getAgentLicensesCloseToExpiration(agentId);
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
+        }
+    }
+    @RequestMapping(method = RequestMethod.GET, value = "/get-gaming-machine-licenses-close-to-expiration", params = {"gamingMachineId"})
+    @ApiOperation(value = "Get Gaming Machine Licenses that are close to expiration", response = License.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllGamingMachinesCloseToExpirationLicenses(@RequestParam("gamingMachineId") String gamingMachineId) {
+        try {
+            return licenseService.getGamingMachineLicensesCloseToExpiration(gamingMachineId);
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
+
+        }
+    }
     @RequestMapping(method = RequestMethod.GET, value = "/update-to-aip-document", params = {"licensedId"})
     @ApiOperation(value = "Update AIP to AIP Document Upload Status", response = String.class, consumes = "application/json")
     @ApiResponses(value = {

@@ -13,7 +13,7 @@ import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatu
 import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.LicenseValidatorUtil;
-import com.software.finatech.lslb.cms.service.util.async_helpers.AgentUserCreatorAsync;
+import com.software.finatech.lslb.cms.service.util.AgentUserCreator;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -41,7 +41,7 @@ public class AgentServiceImpl implements AgentService {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private AuthInfoService authInfoService;
     private LicenseValidatorUtil licenseValidatorUtil;
-    private AgentUserCreatorAsync agentUserCreatorAsync;
+    private AgentUserCreator agentUserCreatorAsync;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static final Logger logger = LoggerFactory.getLogger(AgentServiceImpl.class);
@@ -51,7 +51,7 @@ public class AgentServiceImpl implements AgentService {
     public AgentServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                             AuthInfoService authInfoService,
                             LicenseValidatorUtil licenseValidatorUtil,
-                            AgentUserCreatorAsync agentUserCreatorAsync) {
+                            AgentUserCreator agentUserCreatorAsync) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.authInfoService = authInfoService;
         this.licenseValidatorUtil = licenseValidatorUtil;

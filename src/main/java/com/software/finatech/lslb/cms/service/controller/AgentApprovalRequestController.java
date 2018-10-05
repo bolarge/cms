@@ -16,7 +16,8 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-@Api(value = "Agent Approval Requests", description = "For everything related to agent approval requests", tags = "")
+@Api(value = "Agent Approval Requests",
+        description = "For everything related to agent approval requests", tags = "Agent Approval Requests Controller")
 @RestController
 @RequestMapping("/api/v1/agent-approval-requests")
 public class AgentApprovalRequestController {

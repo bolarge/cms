@@ -50,18 +50,6 @@ public class FeeServiceImpl implements FeeService {
             query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
             query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             query.addCriteria(Criteria.where("revenueNameId").is(feeCreateDto.getRevenueNameId()));
-            if (StringUtils.isEmpty(feePaymentTypeId)) {
-                return Mono.just(new ResponseEntity<>("FeePayment Type ID is required", HttpStatus.BAD_REQUEST));
-            }
-            if (StringUtils.isEmpty(gameTypeId)) {
-                return Mono.just(new ResponseEntity<>("GameType ID is required", HttpStatus.BAD_REQUEST));
-            }
-            if (StringUtils.isEmpty(feeCreateDto.getRevenueNameId())) {
-                return Mono.just(new ResponseEntity<>("Revenue Name ID is required", HttpStatus.BAD_REQUEST));
-            }
-            if (StringUtils.isEmpty(feeCreateDto.getAmount())) {
-                return Mono.just(new ResponseEntity<>("Amount is required", HttpStatus.BAD_REQUEST));
-            }
             Fee existingFeeWithGameTypeAndFeePaymentType = (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
             if (existingFeeWithGameTypeAndFeePaymentType != null) {
                 return Mono.just(new ResponseEntity<>("A fee setting already exist with the Fee Type and Game Type please update it", HttpStatus.BAD_REQUEST));
@@ -108,7 +96,7 @@ public class FeeServiceImpl implements FeeService {
                 return Mono.just(new ResponseEntity<>("This Fee setting does not exist", HttpStatus.BAD_REQUEST));
             }
             fee.setAmount(Double.valueOf(feeUpdateDto.getAmount()));
-            fee.setActive(feeUpdateDto.isActive());
+            //fee.setActive(feeUpdateDto.isActive());
             mongoRepositoryReactive.saveOrUpdate(fee);
             return Mono.just(new ResponseEntity<>(fee.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -142,14 +130,16 @@ public class FeeServiceImpl implements FeeService {
         try {
             Query query = new Query();
             query.addCriteria(Criteria.where("name").is(feeTypeCreateDto.getName()));
-            FeePaymentType existingFeeWithGameTypeAndFeePaymentType = (FeePaymentType) mongoRepositoryReactive.find(query, FeePaymentType.class).block();
-            if (existingFeeWithGameTypeAndFeePaymentType != null) {
+            FeePaymentType existingFeePaymentTypeWithName = (FeePaymentType) mongoRepositoryReactive.find(query, FeePaymentType.class).block();
+            if (existingFeePaymentTypeWithName != null) {
                 return Mono.just(new ResponseEntity<>("This FeePayment setting exist", HttpStatus.BAD_REQUEST));
             }
             FeePaymentType feePaymentType = new FeePaymentType();
             feePaymentType.setId(UUID.randomUUID().toString());
             feePaymentType.setDescription(feeTypeCreateDto.getDescription());
             feePaymentType.setName(feeTypeCreateDto.getName());
+            Map feePaymentTypeMap = Mapstore.STORE.get("FeePaymentType");
+            feePaymentTypeMap.put(feePaymentType.getId(), feePaymentType);
             mongoRepositoryReactive.saveOrUpdate(feePaymentType);
             return Mono.just(new ResponseEntity<>(feePaymentType.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -163,8 +153,8 @@ public class FeeServiceImpl implements FeeService {
         try {
             Query query = new Query();
             query.addCriteria(Criteria.where("name").is(revenueNameDto.getName()));
-            RevenueName existingRevenueNameWithGameTypeAndFeePaymentType = (RevenueName) mongoRepositoryReactive.find(query, RevenueName.class).block();
-            if (existingRevenueNameWithGameTypeAndFeePaymentType != null) {
+            RevenueName existingRevenueNameWithName = (RevenueName) mongoRepositoryReactive.find(query, RevenueName.class).block();
+            if (existingRevenueNameWithName != null) {
                 return Mono.just(new ResponseEntity<>("This RevenueName setting exist", HttpStatus.BAD_REQUEST));
             }
             RevenueName revenueName = new RevenueName();
@@ -172,6 +162,8 @@ public class FeeServiceImpl implements FeeService {
             revenueName.setDescription(revenueNameDto.getDescription());
             revenueName.setName(revenueNameDto.getName());
             mongoRepositoryReactive.saveOrUpdate(revenueName);
+            Map revenueNameMap = Mapstore.STORE.get("RevenueName");
+            revenueNameMap.put(revenueName.getId(), revenueName);
             return Mono.just(new ResponseEntity<>(revenueName.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while creating the fee setting";
@@ -226,6 +218,7 @@ public class FeeServiceImpl implements FeeService {
             return feeDtos;
         } catch (Exception e) {
             String errorMsg = "An error occurred while getting all fees";
+            logger.error(errorMsg, e);
             return null;
         }
     }
@@ -349,12 +342,12 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public Fee findFeeByRevenueNameGameTypeAndFeePaymentType(String revenueNameId, String gameTypeId, String feePaymentTypeId){
-       Query query = new Query();
-       query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-       query.addCriteria(Criteria.where("revenueNameId").is(revenueNameId));
-       query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
-      return (Fee)mongoRepositoryReactive.find(query, Fee.class).block();
+    public Fee findFeeByRevenueNameGameTypeAndFeePaymentType(String revenueNameId, String gameTypeId, String feePaymentTypeId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        query.addCriteria(Criteria.where("revenueNameId").is(revenueNameId));
+        query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
+        return (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
     }
 
 

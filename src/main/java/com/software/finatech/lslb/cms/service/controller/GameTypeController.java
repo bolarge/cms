@@ -22,7 +22,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-@Api(value = "GameType", description = "", tags = "")
+@Api(value = "GameType", description = "", tags = "Game Type Controller")
 @RestController
 @RequestMapping("/api/v1/gameType")
 public class GameTypeController extends BaseController {

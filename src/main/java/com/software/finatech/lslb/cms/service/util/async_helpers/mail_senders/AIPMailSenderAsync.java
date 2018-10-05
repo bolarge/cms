@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.service.util.async_helpers;
+package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
@@ -42,25 +42,31 @@ public class AIPMailSenderAsync {
             return;
         }
 
+        String gameTypeName = paymentRecord.getGameTypeName();
+        String institutionName = paymentRecord.getInstitutionName();
+        String emailContent = makeAIPNotificationEmailContent(institutionName, gameTypeName);
         for (AuthInfo institutionAdmin : institutionAdmins) {
-            String gameTypeName = paymentRecord.getGameTypeName();
-            String institutionName = paymentRecord.getInstitutionName();
             String institutionAdminEmail = institutionAdmin.getEmailAddress();
-            sendAipNotificationToInstitutionAdmin(institutionAdminEmail, institutionName, gameTypeName);
+            sendAipNotificationToInstitutionAdmin(institutionAdminEmail, emailContent);
         }
     }
 
-    private void sendAipNotificationToInstitutionAdmin(String institutionAdminEmail, String institutionName, String gameTypeName) {
+    private void sendAipNotificationToInstitutionAdmin(String institutionAdminEmail, String content) {
         try {
-            String presentDateString = DateTime.now().toString("dd-MM-yyyy");
-            HashMap<String, Object> model = new HashMap<>();
-            model.put("gameType", gameTypeName);
-            model.put("date", presentDateString);
-            model.put("institutionName", institutionName);
-            String content = mailContentBuilderService.build(model, "aip-license-notification");
             emailService.sendEmail(content, "LSLB AIP NOTIFICATION", institutionAdminEmail);
         } catch (Exception e) {
             logger.error("An error occurred while sending AIP notification to user");
         }
     }
+
+    private String makeAIPNotificationEmailContent(String institutionName, String gameTypeName) {
+        String presentDateString = DateTime.now().toString("dd-MM-yyyy");
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("gameType", gameTypeName);
+        model.put("date", presentDateString);
+        model.put("institutionName", institutionName);
+        String content = mailContentBuilderService.build(model, "aip-license-notification");
+        return content;
+    }
+
 }

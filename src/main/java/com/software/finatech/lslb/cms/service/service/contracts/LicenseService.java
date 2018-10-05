@@ -38,6 +38,8 @@ public interface LicenseService {
     Mono<ResponseEntity> updateAIPDocToLicense(LicenseUpdateAIPToLicenseDto licenseUpdateDto);
     Mono<ResponseEntity> updateInReviewToLicense(String licenseId);
     Mono<ResponseEntity> getInstitutionCloseToExpirationLicenses(String institutionId);
+    Mono<ResponseEntity> getAgentLicensesCloseToExpiration(String agentId);
+    Mono<ResponseEntity> getGamingMachineLicensesCloseToExpiration(String gamingMachineId);
     Mono<ResponseEntity>updateRenewalLicenseToReview(String paymentRecordId);
     Mono<ResponseEntity> getInstitutionAIPUploaded(String institutionId);
     Mono<ResponseEntity> getLicensesInRenewalInReview(String institutionId);

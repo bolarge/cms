@@ -35,7 +35,7 @@ import javax.validation.constraints.NotEmpty;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Api(value = "Document", description = "For everything related to documents", tags = "")
+@Api(value = "Document", description = "For everything related to documents", tags = "Document Controller")
 @RestController
 @RequestMapping("/api/v1/document")
 public class DocumentController extends BaseController {
