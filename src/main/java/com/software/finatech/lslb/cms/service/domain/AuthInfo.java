@@ -268,13 +268,6 @@ public class AuthInfo extends AbstractFact {
             }
             setAuthRole(authRole);
         }
-
-        if (gameTypeId != null) {
-            GameType gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
-            if (gameType != null) {
-                gameTypeName = gameType.name;
-            }
-        }
     }
 
     public AuthRole getAuthRole() {
