@@ -2,6 +2,8 @@ package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LoggedCaseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
@@ -211,6 +213,7 @@ public class DashboardController extends BaseController {
     public Mono<ResponseEntity> getInstitutionSummary(@RequestParam ("institutionId") String institutionId) {
        Query queryLicense= new Query();
        queryLicense.addCriteria(Criteria.where("institutionId").is(institutionId));
+       queryLicense.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
 
         List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicense, License.class).toStream().collect(Collectors.toList());
         List<InstitutionDashboardSummaryDto> institutionDashboardSummaryDtos = new ArrayList<>();
