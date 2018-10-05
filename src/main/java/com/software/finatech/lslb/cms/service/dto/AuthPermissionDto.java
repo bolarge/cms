@@ -2,13 +2,13 @@ package com.software.finatech.lslb.cms.service.dto;
 
 public class AuthPermissionDto extends EnumeratedFactDto {
     private Boolean usedBySystem;
-    private boolean  belongsToUser;
+    private Boolean  belongsToUser;
 
-    public boolean isBelongsToUser() {
+    public Boolean getBelongsToUser() {
         return belongsToUser;
     }
 
-    public void setBelongsToUser(boolean belongsToUser) {
+    public void setBelongsToUser(Boolean belongsToUser) {
         this.belongsToUser = belongsToUser;
     }
 
