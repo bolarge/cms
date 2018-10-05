@@ -9,7 +9,5 @@ public interface AuthRoleService {
 
     AuthRole findRoleById(String authRoleId);
 
-    Mono<ResponseEntity> getAllCodePermissions();
-
     AuthPermission findAuthPermissionById(String authPermissionId);
 }

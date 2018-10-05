@@ -224,19 +224,6 @@ public class AuthRoleController extends BaseController {
         return null;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/permission/code-used")
-    @ApiOperation(value = "Get Code used permissions", response = AuthPermissionDto.class, consumes = "application/json")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 404, message = "Not Found")
-    }
-    )
-    public Mono<ResponseEntity> codePermissions() {
-        return authRoleService.getAllCodePermissions();
-    }
-
     /**
      * @param authPermissionCreateDto
      * @param request
@@ -357,7 +344,6 @@ public class AuthRoleController extends BaseController {
 
         return Mono.just(new ResponseEntity(authRoleDtos, HttpStatus.OK));
     }
-
 
     private ArrayList<AuthRoleDto> authRoleDtoListFromAuthRoleList(List<FactObject> authRoles) {
         ArrayList<AuthRoleDto> authRoleDtos = new ArrayList<>();

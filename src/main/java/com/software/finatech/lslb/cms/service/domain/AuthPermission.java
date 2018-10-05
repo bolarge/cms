@@ -9,25 +9,35 @@ import org.springframework.data.mongodb.core.mapping.Document;
  */
 @SuppressWarnings("serial")
 @Document(collection = "AuthPermissions")
-public class AuthPermission extends EnumeratedFact  {
+public class AuthPermission extends EnumeratedFact {
 
-	@Override
-	public String getFactName() {
-		return null;
-	}
+    private boolean usedBySystem;
 
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		return super.clone();
-	}
+    public boolean isUsedBySystem() {
+        return usedBySystem;
+    }
 
-	public AuthPermissionDto convertToDto() {
-		AuthPermissionDto authPermissionDto = new AuthPermissionDto();
-		authPermissionDto.setCode(getCode());
-		authPermissionDto.setDescription(getDescription());
-		authPermissionDto.setName(getName());
-		authPermissionDto.setId(getId());
+    public void setUsedBySystem(boolean usedBySystem) {
+        this.usedBySystem = usedBySystem;
+    }
 
-		return authPermissionDto;
-	}
+    @Override
+    public String getFactName() {
+        return null;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
+    public AuthPermissionDto convertToDto() {
+        AuthPermissionDto authPermissionDto = new AuthPermissionDto();
+        authPermissionDto.setCode(getCode());
+        authPermissionDto.setDescription(getDescription());
+        authPermissionDto.setName(getName());
+        authPermissionDto.setId(getId());
+        authPermissionDto.setUsedBySystem(isUsedBySystem());
+        return authPermissionDto;
+    }
 }

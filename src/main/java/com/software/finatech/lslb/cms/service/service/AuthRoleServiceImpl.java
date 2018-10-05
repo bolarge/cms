@@ -65,25 +65,6 @@ public class AuthRoleServiceImpl implements AuthRoleService {
         }
     }
 
-    @Override
-    public Mono<ResponseEntity> getAllCodePermissions() {
-        try {
-            List<String> codePermissions = LSLBAuthPermissionReferenceData.getCodeUsedPermissions();
-            if (codePermissions == null || codePermissions.isEmpty()) {
-                return Mono.just(new ResponseEntity<>("No record found", HttpStatus.BAD_REQUEST));
-            }
-            ArrayList<EnumeratedFactDto> enumeratedFactDtos = new ArrayList<>();
-            for (String permissionId : codePermissions) {
-                AuthPermission permission = findAuthPermissionById(permissionId);
-                if (permission != null) {
-                    enumeratedFactDtos.add(permission.convertToDto());
-                }
-            }
-            return Mono.just(new ResponseEntity<>(enumeratedFactDtos, HttpStatus.OK));
-        } catch (Exception e) {
-            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while getting all permissions used in code", e);
-        }
-    }
 
     @Override
     public AuthPermission findAuthPermissionById(String authPermissionId) {
