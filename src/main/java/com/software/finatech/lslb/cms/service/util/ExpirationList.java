@@ -89,7 +89,7 @@ public class ExpirationList {
             }
         }else{
             for(License license: licenses) {
-                license.setLicenseStatusId(LicenseStatusReferenceData.AIP_EXPIRED);
+                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_RUNNING);
                 mongoRepositoryReactive.saveOrUpdate(license);
             }
 

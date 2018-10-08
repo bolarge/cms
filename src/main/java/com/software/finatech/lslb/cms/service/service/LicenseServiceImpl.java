@@ -551,6 +551,46 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
     @Override
+    public Mono<ResponseEntity> updateRenewalReviewToInProgress(RenewalFormCommentDto renewalFormCommentDto) {
+        try {
+            Query queryLicenceStatus = new Query();
+            queryLicenceStatus.addCriteria(Criteria.where("paymentRecordId").is(renewalFormCommentDto.getPaymentRecordId()));
+            queryLicenceStatus.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.RENEWAL_LICENSE_IN_REVIEW));
+            License license = (License) mongoRepositoryReactive.find(queryLicenceStatus, License.class).block();
+            if (license == null) {
+                return Mono.just(new ResponseEntity<>("Invalid payment record", HttpStatus.BAD_REQUEST));
+            }
+            Query queryRenewalStatus = new Query();
+            queryRenewalStatus.addCriteria(Criteria.where("paymentRecordId").is(renewalFormCommentDto.getPaymentRecordId()));
+            RenewalForm renewalForm = (RenewalForm) mongoRepositoryReactive.find(queryRenewalStatus, RenewalForm.class).block();
+            renewalForm.setFormStatusId(RenewalFormStatusReferenceData.PENDING);
+            renewalForm.setComment(renewalFormCommentDto.getComment());
+            mongoRepositoryReactive.saveOrUpdate(renewalForm);
+
+            license.setLicenseStatusId(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
+            mongoRepositoryReactive.saveOrUpdate(license);
+            List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
+            institutionAdmins.stream().forEach(institutionAdmin->{
+                    NotificationDto notificationDto = new NotificationDto();
+                    notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
+                    notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
+                    notificationDto.setTemplate("LicenseUpdate");
+                    notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ", " +renewalFormCommentDto.getComment()
+                            );
+                    notificationDto.setInstitutionEmail(institutionAdmin.getEmailAddress());
+                sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
+            });
+
+
+            return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Error while moving to renewal license in progress", HttpStatus.BAD_REQUEST));
+
+        }
+    }
+
+
+    @Override
     public Mono<ResponseEntity> updateAIPDocToLicense(LicenseUpdateAIPToLicenseDto licenseUpdateDto) {
         try {
 

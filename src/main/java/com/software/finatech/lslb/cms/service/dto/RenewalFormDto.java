@@ -1,5 +1,7 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import com.software.finatech.lslb.cms.service.domain.LicenseStatus;
+
 public class RenewalFormDto {
     protected PaymentRecordDto paymentRecord;
     protected String checkStakeHoldersChange;
@@ -14,6 +16,7 @@ public class RenewalFormDto {
     protected String politicalParty;
     protected String checkTechnicalPartner;
     protected String technicalPartner;
+    protected LicenseStatusDto licenseStatus;
     protected String checkChangeInGamingMachines;
     protected String changeInGamingMachines;
     protected String checkNewInvestors;
@@ -21,8 +24,16 @@ public class RenewalFormDto {
     protected String institutionId;
     protected String gameTypeId;
     protected String renewalFormId;
-   protected RenewalFormStatusDto renewalFormStatusDto;
+   protected RenewalFormStatusDto renewalFormStatus;
    protected String licenseId;
+
+    public LicenseStatusDto getLicenseStatus() {
+        return licenseStatus;
+    }
+
+    public void setLicenseStatus(LicenseStatusDto licenseStatus) {
+        this.licenseStatus= licenseStatus;
+    }
 
     public String getLicenseId() {
         return licenseId;
@@ -32,12 +43,12 @@ public class RenewalFormDto {
         this.licenseId = licenseId;
     }
 
-    public RenewalFormStatusDto getRenewalFormStatusDto() {
-        return renewalFormStatusDto;
+    public RenewalFormStatusDto getRenewalFormStatus() {
+        return renewalFormStatus;
     }
 
-    public void setRenewalFormStatusDto(RenewalFormStatusDto renewalFormStatusDto) {
-        this.renewalFormStatusDto = renewalFormStatusDto;
+    public void setRenewalFormStatus(RenewalFormStatusDto renewalFormStatus) {
+        this.renewalFormStatus = renewalFormStatus;
     }
 
     public String getRenewalFormId() {
