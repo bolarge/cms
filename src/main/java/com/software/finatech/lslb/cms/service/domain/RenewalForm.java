@@ -4,6 +4,8 @@ import com.software.finatech.lslb.cms.service.dto.RenewalFormDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.Map;
 
@@ -230,8 +232,13 @@ public class RenewalForm extends AbstractFact {
         renewalFormDto.setStakeHoldersChange(getStakeHoldersChange());
         renewalFormDto.setTechnicalPartner(getTechnicalPartner());
         renewalFormDto.setLicenseId(getLicensedId());
-        License license= (License) mongoRepositoryReactive.findById(getLicensedId(),License.class).block();
-        renewalFormDto.setLicenseStatusDto(license.getLicenseStatus().convertToDto());
+        Query query=new Query();
+        query.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));
+        License license= (License) mongoRepositoryReactive.find(query,License.class).block();
+        if(license!=null){
+            renewalFormDto.setLicenseStatusDto(license.getLicenseStatus().convertToDto());
+
+        }
         PaymentRecord paymentRecord= (PaymentRecord) mongoRepositoryReactive.findById(getPaymentRecordId(),PaymentRecord.class).block();
         renewalFormDto.setPaymentRecord(paymentRecord.convertToDto());
         if(!StringUtils.isEmpty(formStatusId)){
@@ -248,7 +255,7 @@ public class RenewalForm extends AbstractFact {
                 }
             }
             if (renewalFormStatus != null) {
-                renewalFormDto.setRenewalFormStatusDto(renewalFormStatus.convertToDto());
+                renewalFormDto.setRenewalFormStatus(renewalFormStatus.convertToDto());
             }
 
         }

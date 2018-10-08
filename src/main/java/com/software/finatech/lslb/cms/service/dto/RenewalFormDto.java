@@ -24,7 +24,7 @@ public class RenewalFormDto {
     protected String institutionId;
     protected String gameTypeId;
     protected String renewalFormId;
-   protected RenewalFormStatusDto renewalFormStatusDto;
+   protected RenewalFormStatusDto renewalFormStatus;
    protected String licenseId;
 
     public LicenseStatusDto getLicenseStatusDto() {
@@ -43,12 +43,12 @@ public class RenewalFormDto {
         this.licenseId = licenseId;
     }
 
-    public RenewalFormStatusDto getRenewalFormStatusDto() {
-        return renewalFormStatusDto;
+    public RenewalFormStatusDto getRenewalFormStatus() {
+        return renewalFormStatus;
     }
 
-    public void setRenewalFormStatusDto(RenewalFormStatusDto renewalFormStatusDto) {
-        this.renewalFormStatusDto = renewalFormStatusDto;
+    public void setRenewalFormStatus(RenewalFormStatusDto renewalFormStatus) {
+        this.renewalFormStatus = renewalFormStatus;
     }
 
     public String getRenewalFormId() {
