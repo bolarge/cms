@@ -65,21 +65,22 @@ racs:
 
 
 vigipay:
-  client-id: LAGOS_STATE_LOTTERIES_BOARD_TEST_API1DH9V9PLSI4W
-  client-secret: vgPsvZAUJMLmHHhe
+  client_id: LAGOS_STATE_LOTTERIES_BOARD_API1DHHBDDWJ1MT
+  client-secret: EybYKnXXRQv4LiNE
   username: adeboludeyi@gmail.com
   password: vigipayP@ssw0rd
   scope: ebipsgatewayapi offline_access roles profile
   grant-type: password
-  token-url: https://ebipssso.test.vggdev.com/core/connect/token
-  loop-base-url: https://ebipsgateway.test.vggdev.com/api
+  token-url: https://ebipssso.staging.vggdev.com/core/connect/token
+  loop-base-url: https://ebipsgateway.staging.vggdev.com/api
   country-code: 566
-  location-code: LSG
+  location-code: LOC
   currency-code: NGN
-  corporate-revenue-code: 1234
+  corporate-revenue-code: 12345
 
 
 email-host: smtp.gmail.com
 email-username: lslbcms@gmail.com
 email-password: password@123456
 email-port: 587
+
