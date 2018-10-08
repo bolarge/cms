@@ -1,5 +1,7 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import com.software.finatech.lslb.cms.service.domain.LicenseStatus;
+
 public class RenewalFormDto {
     protected PaymentRecordDto paymentRecord;
     protected String checkStakeHoldersChange;
@@ -14,6 +16,7 @@ public class RenewalFormDto {
     protected String politicalParty;
     protected String checkTechnicalPartner;
     protected String technicalPartner;
+    protected LicenseStatusDto licenseStatusDto;
     protected String checkChangeInGamingMachines;
     protected String changeInGamingMachines;
     protected String checkNewInvestors;
@@ -23,6 +26,14 @@ public class RenewalFormDto {
     protected String renewalFormId;
    protected RenewalFormStatusDto renewalFormStatusDto;
    protected String licenseId;
+
+    public LicenseStatusDto getLicenseStatusDto() {
+        return licenseStatusDto;
+    }
+
+    public void setLicenseStatusDto(LicenseStatusDto licenseStatusDto) {
+        this.licenseStatusDto = licenseStatusDto;
+    }
 
     public String getLicenseId() {
         return licenseId;
