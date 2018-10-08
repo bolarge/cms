@@ -18,8 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
@@ -321,6 +319,7 @@ public class LicenseServiceImpl implements LicenseService {
         });
         return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
     }
+
     @Override
     public Mono<ResponseEntity> getAgentLicensesCloseToExpiration(String agentId) {
         Query queryForLicensedAgentInGameType = new Query();
@@ -329,7 +328,7 @@ public class LicenseServiceImpl implements LicenseService {
         }
         queryForLicensedAgentInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.AGENT));
         LocalDateTime dateTime = new LocalDateTime();
-        dateTime=dateTime.plusDays(90);
+        dateTime = dateTime.plusDays(90);
         queryForLicensedAgentInGameType.addCriteria(Criteria.where("expiryDate").lt(dateTime));
 
         List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryForLicensedAgentInGameType, License.class).toStream().collect(Collectors.toList());
@@ -342,6 +341,7 @@ public class LicenseServiceImpl implements LicenseService {
         });
         return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
     }
+
     @Override
     public Mono<ResponseEntity> getGamingMachineLicensesCloseToExpiration(String gamingMachineId) {
         Query queryForLicensedAgentInGameType = new Query();
@@ -350,7 +350,7 @@ public class LicenseServiceImpl implements LicenseService {
         }
         queryForLicensedAgentInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.GAMING_MACHINE));
         LocalDateTime dateTime = new LocalDateTime();
-        dateTime=dateTime.plusDays(90);
+        dateTime = dateTime.plusDays(90);
         queryForLicensedAgentInGameType.addCriteria(Criteria.where("expiryDate").lt(dateTime));
 
         List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryForLicensedAgentInGameType, License.class).toStream().collect(Collectors.toList());
@@ -755,12 +755,12 @@ public class LicenseServiceImpl implements LicenseService {
             String gameTypeId = paymentRecord.getGameTypeId();
             String licenseTypeId = getLicenseTypeIdFromRevenueNameId(paymentRecord.getRevenueNameId());
 
-            List<License> licenseList = getPreviousConfirmedLicenses(institutionId, agentId, gamingMachineId, gameTypeId, licenseTypeId);
-            if (licenseList == null || licenseList.isEmpty()) {
+            License latestLicense =  getPreviousConfirmedLicenses(institutionId, agentId, gamingMachineId, gameTypeId, licenseTypeId);
+            if (latestLicense == null) {
+               logger.info("There is no previous license found for the payment record with id {}",paymentRecord.getId());
                 return;
             }
 
-            License latestLicense = licenseList.get(0);
             LocalDate newLicenseStartDate = latestLicense.getExpiryDate();
             LocalDate newLicenseEndDate = getNewLicenseEndDate(latestLicense, gameType);
 
@@ -784,7 +784,7 @@ public class LicenseServiceImpl implements LicenseService {
             newPendingApprovalRenewedLicense.setLicenseNumber(latestLicense.getLicenseNumber());
             mongoRepositoryReactive.saveOrUpdate(newPendingApprovalRenewedLicense);
         } catch (Exception e) {
-            logger.error("An error occurred while creating renewed license for gaming machine {}", paymentRecord.getGamingMachineId(), e);
+            logger.error("An error occurred while creating renewed license for payment record {}", paymentRecord.getId(), e);
         }
     }
 
@@ -823,7 +823,7 @@ public class LicenseServiceImpl implements LicenseService {
         return null;
     }
 
-    public List<License> getPreviousConfirmedLicenses(String institutionId,
+    public License getPreviousConfirmedLicenses(String institutionId,
                                                       String agentId,
                                                       String gamingMachineId,
                                                       String gameTypeId,
@@ -842,19 +842,19 @@ public class LicenseServiceImpl implements LicenseService {
             query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         }
         if (!StringUtils.isEmpty(licenseTypeId)) {
-            query.addCriteria(Criteria.where("licenseTypeId").is(gameTypeId));
+            query.addCriteria(Criteria.where("licenseTypeId").is(licenseTypeId));
         }
 
-        List<String> licenseStatuIds = new ArrayList<>();
-        licenseStatuIds.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
-        licenseStatuIds.add(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
-        query.addCriteria(Criteria.where("licenseStatusId").in(licenseStatuIds));
+        List<String> licenseStatusIds = new ArrayList<>();
+        licenseStatusIds.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+        licenseStatusIds.add(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
+        query.addCriteria(Criteria.where("licenseStatusId").in(licenseStatusIds));
         Sort sort = new Sort(Sort.Direction.DESC, "effectiveDate");
 
         query.with(PageRequest.of(0, 10000, sort));
         query.with(sort);
 
-        return (List<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
+        return (License) mongoRepositoryReactive.find(query, License.class).block();
     }
 
     private String generateLicenseNumberForPaymentRecord(PaymentRecord paymentRecord) {

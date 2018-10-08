@@ -24,6 +24,15 @@ public class PaymentRecordDto {
     private String revenueName;
     private String revenueNameId;
     private String machineNumber;
+    private String paymentReference;
+
+    public String getPaymentReference() {
+        return paymentReference;
+    }
+
+    public void setPaymentReference(String paymentReference) {
+        this.paymentReference = paymentReference;
+    }
 
     public String getMachineNumber() {
         return machineNumber;
