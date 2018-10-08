@@ -2,10 +2,7 @@ package com.software.finatech.lslb.cms.service.controller;
 
 
 import com.software.finatech.lslb.cms.service.domain.License;
-import com.software.finatech.lslb.cms.service.dto.AIPCheckDto;
-import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
-import com.software.finatech.lslb.cms.service.dto.LicenseDto;
-import com.software.finatech.lslb.cms.service.dto.LicenseUpdateAIPToLicenseDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -272,6 +269,23 @@ public class LicenseController {
     public Mono<ResponseEntity> updateInProgressToInReview(@RequestParam("paymentRecordId") String paymentRecordId) {
         try {
             return licenseService.updateRenewalLicenseToReview(paymentRecordId);
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Error! Please contact Admin", HttpStatus.BAD_REQUEST));
+
+        }
+    }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/update-renewal-in-review-to-in-progress")
+    @ApiOperation(value = "Update Renewal In Review to Renewal In Progress", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> updateInReviewToInProgress(@RequestBody @Valid RenewalFormCommentDto renewalFormCommentDto) {
+        try {
+            return licenseService.updateRenewalReviewToInProgress(renewalFormCommentDto);
         } catch (Exception ex) {
             return Mono.just(new ResponseEntity<>("Error! Please contact Admin", HttpStatus.BAD_REQUEST));
 

@@ -18,6 +18,8 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
@@ -28,9 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Api(value = "Dashboard", description = "For everything related to dashboard requests", tags = "")
@@ -217,37 +217,41 @@ public class DashboardController extends BaseController {
     public Mono<ResponseEntity> getInstitutionSummary(@RequestParam ("institutionId") String institutionId) {
        Query queryLicense= new Query();
        queryLicense.addCriteria(Criteria.where("institutionId").is(institutionId));
-       queryLicense.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
+        Sort sort = new Sort(Sort.Direction.DESC,"expiryDate");
+        queryLicense.with(sort);
+        Map<String, InstitutionDashboardSummaryDto> institutionDashboardSummaryDtoHashMap= new HashMap<>();
 
         List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicense, License.class).toStream().collect(Collectors.toList());
-        List<InstitutionDashboardSummaryDto> institutionDashboardSummaryDtos = new ArrayList<>();
-        if (licenses.size() == 0) {
+         if (licenses.size() == 0) {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
 
         }
         for (License license : licenses) {
-            InstitutionDashboardSummaryDto institutionDashboardSummaryDto = new InstitutionDashboardSummaryDto();
+            if (institutionDashboardSummaryDtoHashMap.get(license.getGameTypeId()) == null) {
+                InstitutionDashboardSummaryDto institutionDashboardSummaryDto = new InstitutionDashboardSummaryDto();
 
-            institutionDashboardSummaryDto.setInstitutionId(institutionId);
-            institutionDashboardSummaryDto.setLicenseNumber(license.getLicenseNumber());
-            institutionDashboardSummaryDto.setInstitutionName(getInstitution(institutionId).getInstitutionName());
-            institutionDashboardSummaryDto.setLicenseStatus(license.getLicenseStatusId());
-            institutionDashboardSummaryDto.setLicenseStatus(getLicenseStatus(license.getLicenseStatusId()).getName());
-            institutionDashboardSummaryDto.setEffectiveDate(license.getEffectiveDate().toString("dd-MM-yyyy"));
-            institutionDashboardSummaryDto.setExpirtyDate(license.getExpiryDate().toString("dd-MM-yyyy"));
-            institutionDashboardSummaryDto.setGameType(getGameType(license.getGameTypeId()).getName());
-            institutionDashboardSummaryDto.setNumberOfAgents(getAgentCountForInstitution(institutionId));
-            institutionDashboardSummaryDto.setNumberOfGamingMachines(getGamingMachineCountForInstitution(institutionId));
-            institutionDashboardSummaryDtos.add(institutionDashboardSummaryDto);
+                institutionDashboardSummaryDto.setInstitutionId(institutionId);
+                institutionDashboardSummaryDto.setLicenseNumber(license.getLicenseNumber());
+                institutionDashboardSummaryDto.setInstitutionName(getInstitution(institutionId).getInstitutionName());
+                institutionDashboardSummaryDto.setLicenseStatus(license.getLicenseStatusId());
+                institutionDashboardSummaryDto.setLicenseStatus(getLicenseStatus(license.getLicenseStatusId()).getName());
+                institutionDashboardSummaryDto.setEffectiveDate(license.getEffectiveDate().toString("dd-MM-yyyy"));
+                institutionDashboardSummaryDto.setExpirtyDate(license.getExpiryDate().toString("dd-MM-yyyy"));
+                institutionDashboardSummaryDto.setGameType(getGameType(license.getGameTypeId()).getName());
+                institutionDashboardSummaryDto.setNumberOfAgents(getAgentCountForInstitution(institutionId));
+                institutionDashboardSummaryDto.setNumberOfGamingMachines(getGamingMachineCountForInstitution(institutionId));
+                institutionDashboardSummaryDtoHashMap.put(license.getGameTypeId(), institutionDashboardSummaryDto);
+
+            }
+        }
+        if(institutionDashboardSummaryDtoHashMap.values().size()==0){
+            return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
         }
 
-        return Mono.just(new ResponseEntity<>(institutionDashboardSummaryDtos, HttpStatus.OK));
+        return Mono.just(new ResponseEntity<>(institutionDashboardSummaryDtoHashMap.values(), HttpStatus.OK));
     }
 
-    public Institution getInstitution(String institutionId) {
 
-        return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
-    }
     public GameType getGameType(String gameTypeId) {
 
         Map gameTypeMap = Mapstore.STORE.get("GameType");
@@ -262,6 +266,10 @@ public class DashboardController extends BaseController {
             }
         }
         return gameType;
+    }
+    public Institution getInstitution(String institutionId) {
+
+        return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
     public long getAgentCountForInstitution(String institutionId){
         Query query = new Query();
@@ -381,5 +389,171 @@ public class DashboardController extends BaseController {
         return Mono.just(new ResponseEntity<>(casesDashboardStatusCountDto, HttpStatus.OK));
 
     }
+
+    ///////////////////////////////
+
+    @RequestMapping(method = RequestMethod.GET, value = "/agent-loggedcases-summary", params = {"agentId"})
+    @ApiOperation(value = "Get agent dashboard Logged Cases summary ", response = CasesDashboardStatusCountDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAgentCasesSummary(@RequestParam("agentId") String agentId) {
+
+        Criteria criteria = new Criteria();
+        List<Criteria> filterCriteria = new ArrayList<>();
+
+        if (!StringUtils.isEmpty(agentId)) {
+            filterCriteria.add(Criteria.where("agentId").is(agentId));
+        }
+
+        if (filterCriteria.size() > 0) {
+            criteria.andOperator(filterCriteria.toArray(new Criteria[filterCriteria.size()]));
+        }
+
+        Aggregation agg = Aggregation.newAggregation(
+                Aggregation.match(criteria),
+                Aggregation.group("loggedCaseStatusId").count().as("loggedStatusCount"),
+                Aggregation.project("loggedStatusCount").and("loggedCaseStatusId").previousOperation()
+
+        );
+        List<DashboardLoggedCaseStatusDto> dashboardLoggedCaseStatusDtos = mongoTemplate.aggregate(agg, LoggedCase.class, DashboardLoggedCaseStatusDto.class).getMappedResults();
+        CasesDashboardStatusCountDto casesDashboardStatusCountDto = new CasesDashboardStatusCountDto();
+
+        dashboardLoggedCaseStatusDtos.stream().forEach(result->{
+
+            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.OPEN_ID)){
+                casesDashboardStatusCountDto.setOpenedCount(result==null?0:result.getLoggedStatusCount());
+            }
+            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.CLOSED_ID)){
+                casesDashboardStatusCountDto.setClosedCount(result==null?0:result.getLoggedStatusCount());
+            }
+
+            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.OPEN_ID)){
+                casesDashboardStatusCountDto.setPendingCount(result==null?0:result.getLoggedStatusCount());
+            }
+
+        });
+        Query query = new Query();
+        query.addCriteria(Criteria.where("agentId").is(agentId));
+        long totalCount=mongoRepositoryReactive.count(query, LoggedCase.class).block();
+        casesDashboardStatusCountDto.setTotalCount(totalCount);
+
+        return Mono.just(new ResponseEntity<>(casesDashboardStatusCountDto, HttpStatus.OK));
+
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/agent-invoice-summary", params = {"agentId"})
+    @ApiOperation(value = "Get Agent dashboard invoice summary ", response = PaymentRecordDashboardStatusCountDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAgentPaymentSummary(@RequestParam("agentId") String agentId) {
+
+        Criteria criteria = new Criteria();
+        List<Criteria> filterCriteria = new ArrayList<>();
+
+        if (!StringUtils.isEmpty(agentId)) {
+            filterCriteria.add(Criteria.where("agentId").is(agentId));
+        }
+
+        if (filterCriteria.size() > 0) {
+            criteria.andOperator(filterCriteria.toArray(new Criteria[filterCriteria.size()]));
+        }
+
+        Aggregation agg = Aggregation.newAggregation(
+                Aggregation.match(criteria),
+                Aggregation.group("paymentStatusId").count().as("paymentStatusCount"),
+                Aggregation.project("paymentStatusCount").and("paymentStatusId").previousOperation()
+
+        );
+        List<PaymentRecordStatusDto> paymentRecordStatusDtoAggregationResults = mongoTemplate.aggregate(agg, PaymentRecord.class, PaymentRecordStatusDto.class).getMappedResults();
+        PaymentRecordDashboardStatusCountDto paymentRecordDashboardStatusCountDto = new PaymentRecordDashboardStatusCountDto();
+
+        paymentRecordStatusDtoAggregationResults.stream().forEach(result->{
+
+            if(result.getPaymentStatusId().equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID)){
+                paymentRecordDashboardStatusCountDto.setFullPaymentTotalCount(
+                        result==null?0: result.getPaymentStatusCount());
+            }
+            if(result.getPaymentStatusId().equals(PaymentStatusReferenceData.PARTIALLY_PAID_STATUS_ID)){
+                paymentRecordDashboardStatusCountDto.setPartPaymentTotalCount(
+                        result==null?0:result.getPaymentStatusCount());
+            }
+
+            if(result.getPaymentStatusId().equals(PaymentStatusReferenceData.UNPAID_STATUS_ID)){
+                paymentRecordDashboardStatusCountDto.setUnPaidTotalCount(
+                        result==null?0:result.getPaymentStatusCount());
+            }
+
+        });
+        Query query = new Query();
+        query.addCriteria(Criteria.where("agentId").is(agentId));
+        long totalCount=mongoRepositoryReactive.count(query, PaymentRecord.class).block();
+        paymentRecordDashboardStatusCountDto.setTotalInvoices(totalCount);
+
+        return Mono.just(new ResponseEntity<>(paymentRecordDashboardStatusCountDto, HttpStatus.OK));
+
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/agent-summary", params={"agentId"})
+    @ApiOperation(value = "Get operator summary ", response = AgentDashboardSummaryDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAgentSummary(@RequestParam ("agentId") String agentId) {
+        Query queryLicense= new Query();
+        queryLicense.addCriteria(Criteria.where("agentId").is(agentId));
+        Sort sort = new Sort(Sort.Direction.DESC,"expiryDate");
+        queryLicense.with(sort);
+        Map<String, AgentDashboardSummaryDto> agentDashboardSummaryDtoHashMap= new HashMap<>();
+        List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicense, License.class).toStream().collect(Collectors.toList());
+        if (licenses.size() == 0) {
+            return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+
+        }
+
+        for (License license : licenses) {
+            if(agentDashboardSummaryDtoHashMap.get(license.getGameTypeId())==null){
+                AgentDashboardSummaryDto agentDashboardSummaryDto = new AgentDashboardSummaryDto();
+                agentDashboardSummaryDto.setAgentId(agentId);
+                agentDashboardSummaryDto.setLicenseNumber(license.getLicenseNumber());
+                agentDashboardSummaryDto.setAgentName(getAgent(agentId).getFullName());
+                agentDashboardSummaryDto.setLicenseStatus(license.getLicenseStatusId());
+                agentDashboardSummaryDto.setLicenseStatus(getLicenseStatus(license.getLicenseStatusId()).getName());
+                agentDashboardSummaryDto.setEffectiveDate(license.getEffectiveDate().toString("dd-MM-yyyy"));
+                agentDashboardSummaryDto.setExpirtyDate(license.getExpiryDate().toString("dd-MM-yyyy"));
+                agentDashboardSummaryDto.setGameType(getGameType(license.getGameTypeId()).getName());
+                agentDashboardSummaryDto.setNumberOfInstitutions(getInstitutionCountForAgent(agentId));
+                agentDashboardSummaryDtoHashMap.put(license.getGameTypeId(), agentDashboardSummaryDto);
+
+            }
+
+        }
+        if(agentDashboardSummaryDtoHashMap.values().size()==0){
+            return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+        }
+
+
+
+        return Mono.just(new ResponseEntity<>(agentDashboardSummaryDtoHashMap.values(), HttpStatus.OK));
+    }
+    public Agent getAgent(String agentId) {
+
+        return (Agent) mongoRepositoryReactive.findById(agentId, Agent.class).block();
+    }
+    public long getInstitutionCountForAgent(String agentId){
+
+        Agent agent= (Agent) mongoRepositoryReactive.findById(agentId, Agent.class).block();
+
+        return agent.getInstitutionIds().size();
+    }
+
+
 
 }

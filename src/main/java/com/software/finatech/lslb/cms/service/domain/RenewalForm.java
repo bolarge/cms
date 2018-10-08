@@ -31,6 +31,15 @@ public class RenewalForm extends AbstractFact {
     protected String checkNewInvestors;
     protected String newInvestors;
     protected String formStatusId;
+    protected String comment;
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 
     public String getLicensedId() {
         return licensedId;
@@ -221,6 +230,8 @@ public class RenewalForm extends AbstractFact {
         renewalFormDto.setStakeHoldersChange(getStakeHoldersChange());
         renewalFormDto.setTechnicalPartner(getTechnicalPartner());
         renewalFormDto.setLicenseId(getLicensedId());
+        License license= (License) mongoRepositoryReactive.findById(getLicensedId(),License.class).block();
+        renewalFormDto.setLicenseStatusDto(license.getLicenseStatus().convertToDto());
         PaymentRecord paymentRecord= (PaymentRecord) mongoRepositoryReactive.findById(getPaymentRecordId(),PaymentRecord.class).block();
         renewalFormDto.setPaymentRecord(paymentRecord.convertToDto());
         if(!StringUtils.isEmpty(formStatusId)){
