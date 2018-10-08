@@ -255,7 +255,7 @@ public class RenewalForm extends AbstractFact {
                 }
             }
             if (renewalFormStatus != null) {
-                renewalFormDto.setRenewalFormStatusDto(renewalFormStatus.convertToDto());
+                renewalFormDto.setRenewalFormStatus(renewalFormStatus.convertToDto());
             }
 
         }
