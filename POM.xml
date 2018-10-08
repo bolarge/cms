@@ -36,7 +36,15 @@
           <version>3.0.0</version>
       </dependency>
 
+<!-- Flying saucer for pdf-->
+    <dependency>
+      <groupId>org.xhtmlrenderer</groupId>
+      <artifactId>flying-saucer-pdf</artifactId>
+      <version>9.1.4</version>
+    </dependency>
 
+
+    <!-- Stackify for logging-->
     <dependency>
       <groupId>com.stackify</groupId>
       <artifactId>stackify-log-logback</artifactId>
@@ -50,6 +58,7 @@
     </dependency>
 
 
+    <!--Shedlock for locking tasks -->
     <dependency>
     <groupId>net.javacrumbs.shedlock</groupId>
     <artifactId>shedlock-spring</artifactId>

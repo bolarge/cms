@@ -8,6 +8,8 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+
 @Component("emailService")
 public class EmailService {
     @Autowired
@@ -30,6 +32,23 @@ public class EmailService {
         }
     }
 
+
+    @Async("threadPoolTaskExecutor")
+    public void sendEmailWithAttachment(String content, String subject, String to, File file) {
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom("noreply@lslbcms.com");
+            messageHelper.setTo(to);
+            messageHelper.setSubject(subject);
+            messageHelper.setText(content, true);
+            messageHelper.addAttachment(file.getName(), file);
+        };
+        try {
+            mailSender.send(messagePreparator);
+        } catch (MailException e) {
+            e.printStackTrace();
+        }
+    }
    /* @Async("threadPoolTaskExecutor")
     public void sendEmail(SimpleMailMessage email) {
         mailSender.send(email);

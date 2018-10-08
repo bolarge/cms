@@ -465,17 +465,24 @@ public class GamingMachineServiceImpl implements GamingMachineService {
     }
 
     private Mono<ResponseEntity> makeMultipleGamingMachineLicensePayment(GamingMachineMultiplePaymentRequest gamingMachineMultiplePaymentRequest) {
-        String revenueNameId = RevenueNameReferenceData.GAMING_MACHINE_ID;
-        String feePaymentTypeId = FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID;
-        double amountTotal =0;
         try {
+            double amountTotal = 0;
             List<String> gamingMachineIdList = gamingMachineMultiplePaymentRequest.getGamingMachineIdList();
+            List<PaymentRecordDetailCreateDto> paymentRecordDetailCreateDtoList = new ArrayList<>();
+            String revenueNameId = RevenueNameReferenceData.GAMING_MACHINE_ID;
+            String feePaymentTypeId = FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID;
+            String institutionId = null;
+
+            if (gamingMachineIdList.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("Empty gaming machine ids supplied", HttpStatus.BAD_REQUEST));
+            }
+
             for (String gamingMachineId : gamingMachineIdList) {
                 GamingMachine gamingMachine = findById(gamingMachineId);
                 if (gamingMachine == null) {
                     return Mono.just(new ResponseEntity<>(String.format("Gaming machine with id %s does not exist", gamingMachineId), HttpStatus.BAD_REQUEST));
                 }
-                String institutionId = gamingMachine.getInstitutionId();
+                institutionId = gamingMachine.getInstitutionId();
                 String gameTypeId = gamingMachine.getGameTypeId();
                 PaymentRecord existingLicensePayment = findLicensePaymentForGamingMachine(gamingMachineId, institutionId, gameTypeId);
                 if (existingLicensePayment != null) {
@@ -485,25 +492,47 @@ public class GamingMachineServiceImpl implements GamingMachineService {
                 if (fee == null) {
                     GameType gameType = gamingMachine.getGameType();
                     String gameTypeName = gameType != null ? gameType.getName() : gameTypeId;
-                    return Mono.just(new ResponseEntity<>(String.format("Licencing fees for gaming machines for category %s",gameTypeName), HttpStatus.BAD_REQUEST));
+                    return Mono.just(new ResponseEntity<>(String.format("Licencing fees for gaming machines for category %s does not exist", gameTypeName), HttpStatus.BAD_REQUEST));
                 }
 
                 double paymentAmount = fee.getAmount();
-               amountTotal = amountTotal + paymentAmount;
-                PaymentRecord paymentRecord = new PaymentRecord();
-                paymentRecord.setId(UUID.randomUUID().toString());
-                paymentRecord.setRevenueNameId(revenueNameId);
-                paymentRecord.setFeePaymentTypeId(feePaymentTypeId);
-                paymentRecord.setGameTypeId(gameTypeId);
-                paymentRecord.setGamingMachineId(gamingMachineId);
-                paymentRecord.setInstitutionId(institutionId);
-                paymentRecord.setAmount(paymentAmount);
-                paymentRecord.setAmountOutstanding(paymentAmount);
-                paymentRecord.setAmountPaid(0);
+                amountTotal = amountTotal + paymentAmount;
 
+                PaymentRecordDetailCreateDto paymentRecordDetailCreateDto = new PaymentRecordDetailCreateDto();
+                paymentRecordDetailCreateDto.setFeeId(fee.getId());
+                paymentRecordDetailCreateDto.setInstitutionId(institutionId);
+                paymentRecordDetailCreateDto.setGamingMachineId(gamingMachineId);
+                paymentRecordDetailCreateDtoList.add(paymentRecordDetailCreateDto);
+            }
+            if (amountTotal != gamingMachineMultiplePaymentRequest.getTotalAmount()) {
+                return Mono.just(new ResponseEntity<>("Amount supplied is not equal to total amount", HttpStatus.BAD_REQUEST));
             }
 
-                 return null;
+            paymentRecordDetailCreateDtoList.forEach(paymentRecordDetailCreateDto -> {
+                PaymentRecord paymentRecord = new PaymentRecord();
+                paymentRecord.setId(UUID.randomUUID().toString());
+                Fee fee = feeService.findFeeById(paymentRecordDetailCreateDto.getFeeId());
+                if (fee == null) {
+                    return;
+                }
+                paymentRecord.setGameTypeId(fee.getGameTypeId());
+                paymentRecord.setFeeId(fee.getId());
+                paymentRecord.setAmount(fee.getAmount());
+                paymentRecord.setAmountPaid(0);
+                paymentRecord.setAmountOutstanding(fee.getAmount());
+                paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.UNPAID_STATUS_ID);
+                paymentRecord.setInstitutionId(paymentRecordDetailCreateDto.getInstitutionId());
+                paymentRecord.setGamingMachineId(paymentRecordDetailCreateDto.getGamingMachineId());
+
+                PaymentRecordDetail paymentRecordDetail = new PaymentRecordDetail();
+                paymentRecordDetail.setId(UUID.randomUUID().toString());
+                paymentRecordDetail.setPaymentRecordId(paymentRecord.getId());
+                paymentRecordDetail.setAmount(fee.getAmount());
+
+
+            });
+
+            return null;
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while creating multiple gaming machine license payments", e);
         }
@@ -512,5 +541,9 @@ public class GamingMachineServiceImpl implements GamingMachineService {
 
     private PaymentRecord findLicensePaymentForGamingMachine(String gamingMachineId, String institutionId, String gameTypeId) {
         return paymentRecordService.findPaymentRecordForGamingMachine(gamingMachineId, gameTypeId, institutionId, FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, RevenueNameReferenceData.GAMING_MACHINE_ID);
+    }
+
+
+    private void createWebPaymentRecordsForGamingMachine(String gamingMachineId) {
     }
 }

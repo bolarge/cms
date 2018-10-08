@@ -2,7 +2,6 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
 import com.software.finatech.lslb.cms.service.dto.AuthPermissionDto;
-import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -254,21 +253,6 @@ public class AuthInfo extends AbstractFact {
         return authInfoDto;
     }
 
-    public void setAssociatedProperties() throws FactNotFoundException {
-        if (authRoleId != null) {
-            AuthRole authRole = (AuthRole) Mapstore.STORE.get("AuthRole").get(authRoleId);
-            if (authRole == null) {
-                authRole = (AuthRole) mongoRepositoryReactive.findById(authRoleId, AuthRole.class).block();
-                if (authRole == null) {
-                    throw new FactNotFoundException("AuthRole", authRoleId);
-                } else {
-                    Mapstore.STORE.get("AuthRole").put(authRole.getId(), authRole);
-                }
-            }
-            setAuthRole(authRole);
-        }
-    }
-
     public AuthRole getAuthRole() {
         if (StringUtils.isEmpty(this.authRoleId)) {
             return null;
@@ -382,11 +366,20 @@ public class AuthInfo extends AbstractFact {
     }
 
     private AuthPermission getAuthPermission(String authPermissionId) {
-        AuthPermission authPermission = (AuthPermission) Mapstore.STORE.get("AuthPermission").get(authPermissionId);
+        if (StringUtils.isEmpty(authPermissionId)) {
+            return null;
+        }
+        AuthPermission authPermission = null;
+        Map authPermissionMap = Mapstore.STORE.get("AuthPermission");
+
+        if (authPermissionMap != null) {
+            authPermission = (AuthPermission) authPermissionMap.get(authPermissionId);
+        }
+
         if (authPermission == null) {
             authPermission = (AuthPermission) mongoRepositoryReactive.findById(authPermissionId, AuthPermission.class).block();
-            if (authPermission != null) {
-                Mapstore.STORE.get("AuthPermission").put(authPermission.getId(), authPermission);
+            if (authPermission != null && authPermissionMap != null) {
+                authPermissionMap.put(authPermission.getId(), authPermission);
             }
         }
         return authPermission;

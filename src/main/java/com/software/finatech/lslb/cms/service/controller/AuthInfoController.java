@@ -259,12 +259,6 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity("Invalid Username/Password", HttpStatus.UNAUTHORIZED));
             }
 
-            try {
-                authInfo.setAssociatedProperties();
-            } catch (FactNotFoundException e) {
-                e.printStackTrace();
-            }
-
             if (authInfo.getEnabled() != true) {
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User Deactivated"));
                 return Mono.just(new ResponseEntity("User Deactivated", HttpStatus.UNAUTHORIZED));
@@ -568,11 +562,6 @@ public class AuthInfoController extends BaseController {
 
             ArrayList<AuthInfoDto> authInfoDto = new ArrayList<>();
             authInfos.forEach(entry -> {
-                try {
-                    entry.setAssociatedProperties();
-                } catch (FactNotFoundException e) {
-                    e.printStackTrace();
-                }
                 authInfoDto.add(entry.convertToDto());
             });
 

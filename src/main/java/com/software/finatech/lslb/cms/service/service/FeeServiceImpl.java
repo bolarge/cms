@@ -70,42 +70,6 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public Mono<ResponseEntity> updateFee(FeeUpdateDto feeUpdateDto) {
-        try {
-            if (StringUtils.isEmpty(feeUpdateDto.getFeePaymentTypeId())) {
-                return Mono.just(new ResponseEntity<>("FeePayment Type ID is required", HttpStatus.BAD_REQUEST));
-            }
-            if (StringUtils.isEmpty(feeUpdateDto.getGameTypeId())) {
-                return Mono.just(new ResponseEntity<>("GameType ID is required", HttpStatus.BAD_REQUEST));
-            }
-            if (StringUtils.isEmpty(feeUpdateDto.getRevenueNameId())) {
-                return Mono.just(new ResponseEntity<>("Revenue Name ID is required", HttpStatus.BAD_REQUEST));
-            }
-            if (StringUtils.isEmpty(feeUpdateDto.getId())) {
-                return Mono.just(new ResponseEntity<>("Fee ID is required", HttpStatus.BAD_REQUEST));
-            }
-
-            String feeId = feeUpdateDto.getId();
-            Query query = new Query();
-            query.addCriteria(Criteria.where("id").is(feeId));
-            query.addCriteria(Criteria.where("gameTypeId").is(feeUpdateDto.getGameTypeId()));
-            query.addCriteria(Criteria.where("revenueNameId").is(feeUpdateDto.getRevenueNameId()));
-            query.addCriteria(Criteria.where("feePaymentTypeId").is(feeUpdateDto.getFeePaymentTypeId()));
-            Fee fee = (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
-            if (fee == null) {
-                return Mono.just(new ResponseEntity<>("This Fee setting does not exist", HttpStatus.BAD_REQUEST));
-            }
-            fee.setAmount(Double.valueOf(feeUpdateDto.getAmount()));
-            //fee.setActive(feeUpdateDto.isActive());
-            mongoRepositoryReactive.saveOrUpdate(fee);
-            return Mono.just(new ResponseEntity<>(fee.convertToDto(), HttpStatus.OK));
-        } catch (Exception e) {
-            String errorMsg = "An error occurred while creating the fee setting";
-            return logAndReturnError(logger, errorMsg, e);
-        }
-    }
-
-    @Override
     public Mono<ResponseEntity> updateFeePaymentType(FeePaymentTypeDto feeTypeUpdateDto) {
         try {
             String feePaymentTypeId = feeTypeUpdateDto.getId();

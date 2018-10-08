@@ -10,7 +10,6 @@ import java.util.List;
 
 public interface FeeService {
     Mono<ResponseEntity> createFee(FeeCreateDto feeCreateDto);
-    Mono<ResponseEntity> updateFee(FeeUpdateDto feeUpdateDto);
     Mono<ResponseEntity> getAllFees(String feePaymentTypeId, String gameTypeId, String revenueNameId);
     Mono<ResponseEntity> getAllFeePaymentType();
     Mono<ResponseEntity> updateFeePaymentType(FeePaymentTypeDto feeTypeCreateDto);

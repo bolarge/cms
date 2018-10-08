@@ -26,6 +26,16 @@ public class PaymentRecord extends AbstractFact {
     private String gameTypeId;
     private String feePaymentTypeId;
     private String revenueNameId;
+    private String paymentReference;
+
+
+    public String getPaymentReference() {
+        return paymentReference;
+    }
+
+    public void setPaymentReference(String paymentReference) {
+        this.paymentReference = paymentReference;
+    }
 
     public String getRevenueNameId() {
         return revenueNameId;
@@ -309,6 +319,7 @@ public class PaymentRecord extends AbstractFact {
             paymentRecordDto.setGameTypeName(gameType.getName());
         }
         paymentRecordDto.setOwnerName(ownerName);
+        paymentRecordDto.setPaymentReference(getPaymentReference());
         return paymentRecordDto;
     }
 
