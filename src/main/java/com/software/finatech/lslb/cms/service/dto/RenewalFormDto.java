@@ -16,7 +16,7 @@ public class RenewalFormDto {
     protected String politicalParty;
     protected String checkTechnicalPartner;
     protected String technicalPartner;
-    protected LicenseStatusDto licenseStatusDto;
+    protected LicenseStatusDto licenseStatus;
     protected String checkChangeInGamingMachines;
     protected String changeInGamingMachines;
     protected String checkNewInvestors;
@@ -27,12 +27,12 @@ public class RenewalFormDto {
    protected RenewalFormStatusDto renewalFormStatus;
    protected String licenseId;
 
-    public LicenseStatusDto getLicenseStatusDto() {
-        return licenseStatusDto;
+    public LicenseStatusDto getLicenseStatus() {
+        return licenseStatus;
     }
 
-    public void setLicenseStatusDto(LicenseStatusDto licenseStatusDto) {
-        this.licenseStatusDto = licenseStatusDto;
+    public void setLicenseStatus(LicenseStatusDto licenseStatus) {
+        this.licenseStatus= licenseStatus;
     }
 
     public String getLicenseId() {

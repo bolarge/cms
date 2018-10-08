@@ -236,7 +236,7 @@ public class RenewalForm extends AbstractFact {
         query.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));
         License license= (License) mongoRepositoryReactive.find(query,License.class).block();
         if(license!=null){
-            renewalFormDto.setLicenseStatusDto(license.getLicenseStatus().convertToDto());
+            renewalFormDto.setLicenseStatus(license.getLicenseStatus().convertToDto());
 
         }
         PaymentRecord paymentRecord= (PaymentRecord) mongoRepositoryReactive.findById(getPaymentRecordId(),PaymentRecord.class).block();
