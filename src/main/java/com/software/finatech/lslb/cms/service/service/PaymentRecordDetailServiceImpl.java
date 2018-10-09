@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigiPayMessage;
@@ -11,6 +12,7 @@ import com.software.finatech.lslb.cms.service.referencedata.ModeOfPaymentReferen
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.*;
+import com.software.finatech.lslb.cms.service.util.NumberUtil;
 import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.PaymentEmailNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +51,9 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     private LicenseService licenseService;
     private ApplicationFormService applicationFormService;
     private PaymentEmailNotifierAsync paymentEmailNotifierAsync;
+
+    @Autowired
+    private SpringSecurityAuditorAware springSecurityAuditorAware;
 
     @Autowired
     public PaymentRecordDetailServiceImpl(FeeService feeService,
@@ -290,7 +295,6 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             paymentRecordDetailIds.add(paymentRecordDetail.getId());
             paymentRecord.setPaymentRecordDetailIds(paymentRecordDetailIds);
             paymentRecordService.savePaymentRecord(paymentRecord);
-
             return Mono.just(new ResponseEntity<>(paymentRecordDetail.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while creating payment record detail", e);
@@ -584,6 +588,16 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         paymentRecord.setGameTypeId(fee.getGameTypeId());
         paymentRecord.setRevenueNameId(fee.getRevenueNameId());
         paymentRecord.setFeePaymentTypeId(fee.getFeePaymentTypeId());
+
+        LocalDateTime presentDateTime = LocalDateTime.now();
+        String paymentReference = String.format("%s%s%s%s%s%s%s", NumberUtil.getRandomNumberInRange(20, 5000),
+                presentDateTime.getDayOfMonth(),
+                presentDateTime.getMonthOfYear(),
+                presentDateTime.getYear(),
+                presentDateTime.getHourOfDay(),
+                presentDateTime.getMinuteOfHour(),
+                presentDateTime.getSecondOfMinute());
+        paymentRecord.setPaymentReference(paymentReference);
         if (agent != null) {
             paymentRecord.setAgentId(agent.getId());
         }
