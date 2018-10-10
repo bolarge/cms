@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -67,8 +68,8 @@ public class ScheduledMeetingController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createScheduledMeeting(@RequestBody @Valid ScheduledMeetingCreateDto scheduledMeetingCreateDto) {
-        return scheduledMeetingService.createScheduledMeeting(scheduledMeetingCreateDto);
+    public Mono<ResponseEntity> createScheduledMeeting(@RequestBody @Valid ScheduledMeetingCreateDto scheduledMeetingCreateDto, HttpServletRequest request) {
+        return scheduledMeetingService.createScheduledMeeting(scheduledMeetingCreateDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/update")
@@ -89,8 +90,8 @@ public class ScheduledMeetingController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> cancelScheduledMeeting(@RequestParam("meetingId") String meetingId, @RequestParam("cancelerId") String cancelerId) {
-        return scheduledMeetingService.cancelScheduledMeeting(meetingId, cancelerId);
+    public Mono<ResponseEntity> cancelScheduledMeeting(@RequestParam("meetingId") String meetingId, @RequestParam("cancelerId") String cancelerId, HttpServletRequest request) {
+        return scheduledMeetingService.cancelScheduledMeeting(meetingId, cancelerId, request);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/complete")
@@ -100,7 +101,7 @@ public class ScheduledMeetingController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> completeScheduledMeeting(@RequestParam("meetingId") String meetingId) {
-        return scheduledMeetingService.completeScheduledMeeting(meetingId);
+    public Mono<ResponseEntity> completeScheduledMeeting(@RequestParam("meetingId") String meetingId, HttpServletRequest request) {
+        return scheduledMeetingService.completeScheduledMeeting(meetingId, request);
     }
 }

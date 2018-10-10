@@ -31,7 +31,8 @@ public class LicenseController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize",
-            "sortType", "sortProperty", "institutionId", "gamingMachineId", "agentId", "licenseStatusId", "gameTypeId", "paymentRecordId", "licenseTypeId", "date"})
+            "sortType", "sortProperty", "institutionId", "gamingMachineId",
+            "agentId", "licenseStatusId", "gameTypeId", "paymentRecordId", "licenseTypeId", "date", "licenseNumber"})
     @ApiOperation(value = "Get all licenses", response = LicenseDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -50,9 +51,10 @@ public class LicenseController {
                                                @RequestParam("gameTypeId") String gameTypeId,
                                                @RequestParam("paymentRecordId") String paymentRecordId,
                                                @RequestParam("date") String date,
+                                               @RequestParam("licenseNumber") String licenseNumber,
                                                HttpServletResponse httpServletResponse) {
         return licenseService.findAllLicense(page, pageSize, sortType, sortParam, institutionId,
-                agentId, gamingMachineId, licenseStatusId, gameTypeId, paymentRecordId, date, licenseType, httpServletResponse);
+                agentId, gamingMachineId, licenseStatusId, gameTypeId, paymentRecordId, date, licenseType,licenseNumber, httpServletResponse);
     }
 
 

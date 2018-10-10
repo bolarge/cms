@@ -31,7 +31,7 @@ public class AgentUserCreator {
     public void createUserAndCustomerCodeForAgent(Agent agent) {
         try {
             AuthInfoCreateDto agentUserCreateDto = createAuthInfoDtoFromAgent(agent);
-            authInfoService.createAuthInfo(agentUserCreateDto, frontEndPropertyHelper.getFrontEndUrl()).block();
+            authInfoService.createAuthInfo(agentUserCreateDto, frontEndPropertyHelper.getFrontEndUrl(), null).block();
         } catch (Exception e) {
             logger.error("An error occurred while creating user for agent {} -> {}", agent.getId(), agent.getFullName(), e);
         }

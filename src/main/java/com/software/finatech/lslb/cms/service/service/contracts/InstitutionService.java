@@ -8,14 +8,17 @@ import com.software.finatech.lslb.cms.service.dto.InstitutionUpdateDto;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public interface InstitutionService {
     Mono<ResponseEntity> createInstitution(InstitutionCreateDto institutionCreateDto);
 
-    Mono<ResponseEntity> updateInstitution(InstitutionUpdateDto institutionUpdateDto);
+    Mono<ResponseEntity> updateInstitution(InstitutionUpdateDto institutionUpdateDto, HttpServletRequest request);
 
-    Mono<ResponseEntity> disableInstitution(InstitutionDto institutionDto);
+    Mono<ResponseEntity> disableInstitution(InstitutionDto institutionDto, HttpServletRequest request);
+
+    Mono<ResponseEntity> enableInstitution(InstitutionDto institutionDto, HttpServletRequest request);
 
     Mono<ResponseEntity> findAllInstitutions(int page,
                                              int pageSize,

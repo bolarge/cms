@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -59,8 +60,8 @@ public class AgentApprovalRequestController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createAgent(@RequestBody @Valid AgentApprovalRequestOperationtDto agentApprovalRequestOperationtDto) {
-        return agentApprovalRequestService.approveRequest(agentApprovalRequestOperationtDto);
+    public Mono<ResponseEntity> createAgent(@RequestBody @Valid AgentApprovalRequestOperationtDto agentApprovalRequestOperationtDto, HttpServletRequest request) {
+        return agentApprovalRequestService.approveRequest(agentApprovalRequestOperationtDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/reject")
@@ -71,8 +72,8 @@ public class AgentApprovalRequestController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> rejectAgentApprovalRequest(@RequestBody @Valid AgentApprovalRequestOperationtDto agentApprovalRequestOperationtDto) {
-        return agentApprovalRequestService.rejectRequest(agentApprovalRequestOperationtDto);
+    public Mono<ResponseEntity> rejectAgentApprovalRequest(@RequestBody @Valid AgentApprovalRequestOperationtDto agentApprovalRequestOperationtDto, HttpServletRequest request) {
+        return agentApprovalRequestService.rejectRequest(agentApprovalRequestOperationtDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/all-agent-approval-request-types")

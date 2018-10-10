@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -50,8 +51,8 @@ public class GamingMachineController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createGamingMachine(@RequestBody @Valid GamingMachineCreateDto gamingMachineCreateDto) {
-        return gamingMachineService.createGamingMachine(gamingMachineCreateDto);
+    public Mono<ResponseEntity> createGamingMachine(@RequestBody @Valid GamingMachineCreateDto gamingMachineCreateDto, HttpServletRequest request) {
+        return gamingMachineService.createGamingMachine(gamingMachineCreateDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/update")
@@ -61,8 +62,8 @@ public class GamingMachineController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> updateGamingMachine(@RequestBody @Valid GamingMachineUpdateDto gamingMachineUpdateDto) {
-        return gamingMachineService.updateGamingMachine(gamingMachineUpdateDto);
+    public Mono<ResponseEntity> updateGamingMachine(@RequestBody @Valid GamingMachineUpdateDto gamingMachineUpdateDto, HttpServletRequest request) {
+        return gamingMachineService.updateGamingMachine(gamingMachineUpdateDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/upload-multiple", params = {"institutionId", "gameTypeId"})
@@ -75,8 +76,8 @@ public class GamingMachineController {
             @ApiResponse(code = 500, message = "Internal Server error(error occurred while parsing file)")})
     public Mono<ResponseEntity> uploadTransactionsFromCsv(@RequestParam("institutionId") String institutionId,
                                                           @RequestParam("gameTypeId") String gameTypeId,
-                                                          @RequestParam("file") MultipartFile multipartFile) {
-        return gamingMachineService.uploadMultipleGamingMachinesForInstitution(institutionId, gameTypeId, multipartFile);
+                                                          @RequestParam("file") MultipartFile multipartFile, HttpServletRequest request) {
+        return gamingMachineService.uploadMultipleGamingMachinesForInstitution(institutionId, gameTypeId, multipartFile, request);
     }
 
 

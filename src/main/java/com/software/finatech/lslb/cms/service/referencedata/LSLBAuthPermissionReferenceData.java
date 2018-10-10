@@ -580,7 +580,6 @@ public class LSLBAuthPermissionReferenceData {
         permissions.add("36");
         permissions.add("37");
         permissions.add("38");
-        permissions.add("39");
         permissions.add("40");
         permissions.add("42");
         permissions.add("41");

@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -71,8 +72,8 @@ public class GameTypeController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> createGameType(@RequestBody @Valid GameTypeCreateDto gameTypeCreateDto) {
-        return gameTypeService.createGameType(gameTypeCreateDto);
+    public Mono<ResponseEntity> createGameType(@RequestBody @Valid GameTypeCreateDto gameTypeCreateDto, HttpServletRequest request) {
+        return gameTypeService.createGameType(gameTypeCreateDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/update")

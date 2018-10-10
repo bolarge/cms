@@ -76,6 +76,7 @@ public class LicenseServiceImpl implements LicenseService {
                                                String gameTypeId,
                                                String paymentRecordId,
                                                String date,
+                                               String licenseNumber,
                                                String licenseTypeId, HttpServletResponse httpServletResponse) {
 
         try {
@@ -100,6 +101,9 @@ public class LicenseServiceImpl implements LicenseService {
             }
             if (!StringUtils.isEmpty(licenseTypeId)) {
                 query.addCriteria(Criteria.where("licenseTypeId").is(licenseTypeId));
+            }
+            if (!StringUtils.isEmpty(licenseNumber)) {
+                query.addCriteria(Criteria.where("licenseNumber").is(licenseNumber));
             }
 
             if (!StringUtils.isEmpty(date)) {
@@ -601,14 +605,14 @@ public class LicenseServiceImpl implements LicenseService {
 //                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage);
 
             List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
-            institutionAdmins.stream().forEach(institutionAdmin->{
-                    NotificationDto notificationDto = new NotificationDto();
-                    notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
-                    notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
-                    notificationDto.setTemplate("LicenseUpdate");
-                    notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ", " +renewalFormCommentDto.getComment()
-                            );
-                    notificationDto.setInstitutionEmail(institutionAdmin.getEmailAddress());
+            institutionAdmins.stream().forEach(institutionAdmin -> {
+                NotificationDto notificationDto = new NotificationDto();
+                notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
+                notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
+                notificationDto.setTemplate("LicenseUpdate");
+                notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ", " + renewalFormCommentDto.getComment()
+                );
+                notificationDto.setInstitutionEmail(institutionAdmin.getEmailAddress());
                 sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
             });
 
@@ -826,9 +830,9 @@ public class LicenseServiceImpl implements LicenseService {
             String gameTypeId = paymentRecord.getGameTypeId();
             String licenseTypeId = getLicenseTypeIdFromRevenueNameId(paymentRecord.getRevenueNameId());
 
-            License latestLicense =  getPreviousConfirmedLicenses(institutionId, agentId, gamingMachineId, gameTypeId, licenseTypeId);
+            License latestLicense = getPreviousConfirmedLicenses(institutionId, agentId, gamingMachineId, gameTypeId, licenseTypeId);
             if (latestLicense == null) {
-               logger.info("There is no previous license found for the payment record with id {}",paymentRecord.getId());
+                logger.info("There is no previous license found for the payment record with id {}", paymentRecord.getId());
                 return;
             }
 
@@ -863,6 +867,7 @@ public class LicenseServiceImpl implements LicenseService {
         List<String> allowedLicenseStatusIds = new ArrayList<>();
         allowedLicenseStatusIds.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
         allowedLicenseStatusIds.add(LicenseStatusReferenceData.AIP_COMPLETED);
+        allowedLicenseStatusIds.add(LicenseStatusReferenceData.RENEWED_ID);
         return allowedLicenseStatusIds;
     }
 
@@ -895,10 +900,10 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
     public License getPreviousConfirmedLicenses(String institutionId,
-                                                      String agentId,
-                                                      String gamingMachineId,
-                                                      String gameTypeId,
-                                                      String licenseTypeId) {
+                                                String agentId,
+                                                String gamingMachineId,
+                                                String gameTypeId,
+                                                String licenseTypeId) {
         Query query = new Query();
         if (!StringUtils.isEmpty(institutionId)) {
             query.addCriteria(Criteria.where("institutionId").is(institutionId));

@@ -8,7 +8,7 @@ public class AuditActionReferenceData {
     public static final String LOGIN_ID = "1";
     public static final String USER_ID = "2";
     public static final String APPLICATION_ID = "4";
-    public static final String FEE_ID = "5";
+    public static final String CONFIGURATIONS_ID = "5";
     public static final String SCHEDULED_MEETING_ID = "6";
     public static final String LICENCE_ID = "7";
     public static final String CASE_ID = "8";
@@ -16,6 +16,8 @@ public class AuditActionReferenceData {
     public static final String CUSTOMER_COMPLAIN = "10";
     public static final String GAMING_MACHINE_ID = "11";
     public static final String AGENT_ID = "12";
+    public static final String ROLE_ID = "13";
+    public static final String INSTITUTION = "14";
 
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
@@ -55,13 +57,13 @@ public class AuditActionReferenceData {
         action.setName("Application");
         mongoRepositoryReactive.saveOrUpdate(action);
 
-        action = (AuditAction) mongoRepositoryReactive.findById(FEE_ID, AuditAction.class).block();
+        action = (AuditAction) mongoRepositoryReactive.findById(CONFIGURATIONS_ID, AuditAction.class).block();
         if (action == null) {
             action = new AuditAction();
-            action.setId(FEE_ID);
+            action.setId(CONFIGURATIONS_ID);
         }
-        action.setDescription("Fee Configurations");
-        action.setName("Fee");
+        action.setDescription("Fee and Category Configurations");
+        action.setName("Configurations");
         mongoRepositoryReactive.saveOrUpdate(action);
 
         action = (AuditAction) mongoRepositoryReactive.findById(SCHEDULED_MEETING_ID, AuditAction.class).block();
@@ -123,8 +125,26 @@ public class AuditActionReferenceData {
             action = new AuditAction();
             action.setId(AGENT_ID);
         }
-        action.setDescription("AGENT");
-        action.setName("AGENT");
+        action.setDescription("Agent");
+        action.setName("Agent");
+        mongoRepositoryReactive.saveOrUpdate(action);
+
+        action = (AuditAction) mongoRepositoryReactive.findById(ROLE_ID, AuditAction.class).block();
+        if (action == null) {
+            action = new AuditAction();
+            action.setId(ROLE_ID);
+        }
+        action.setDescription("Role");
+        action.setName("Role");
+        mongoRepositoryReactive.saveOrUpdate(action);
+
+        action = (AuditAction) mongoRepositoryReactive.findById(INSTITUTION, AuditAction.class).block();
+        if (action == null) {
+            action = new AuditAction();
+            action.setId(INSTITUTION);
+        }
+        action.setDescription("Institution");
+        action.setName("Institution");
         mongoRepositoryReactive.saveOrUpdate(action);
     }
 }

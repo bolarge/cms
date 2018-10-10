@@ -25,7 +25,7 @@ public class CustomerComplain extends AbstractFact {
     private String customerComplainStatusId;
     private String ticketId;
     private LocalDateTime timeReported;
-    private List<CustomerComplainAction> customerComplainActionList;
+    private List<CustomerComplainAction> customerComplainActionList = new ArrayList<>();
     private LocalDateTime nextNotificationDateTime;
 
 

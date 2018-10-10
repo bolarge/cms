@@ -13,13 +13,13 @@ import java.util.Set;
 @SuppressWarnings("serial")
 @Document(collection = "GamingMachines")
 public class GamingMachine extends AbstractFact {
-   protected String institutionId;
-   protected String manufacturer;
-   protected String serialNumber;
-   protected Set<GamingMachineGameDetails> gameDetailsList = new HashSet<>();
-   protected String machineNumber;
-   private String machineAddress;
-   private String gameTypeId;
+    protected String institutionId;
+    protected String manufacturer;
+    protected String serialNumber;
+    protected Set<GamingMachineGameDetails> gameDetailsList = new HashSet<>();
+    protected String machineNumber;
+    private String machineAddress;
+    private String gameTypeId;
 
     public String getGameTypeId() {
         return gameTypeId;
@@ -78,10 +78,18 @@ public class GamingMachine extends AbstractFact {
     }
 
     public Institution getInstitution() {
-        if(StringUtils.isEmpty(this.institutionId)){
+        if (StringUtils.isEmpty(this.institutionId)) {
             return null;
         }
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+    }
+
+    public String getInstitutionName() {
+        Institution institution = getInstitution();
+        if (institution != null) {
+            return institution.getInstitutionName();
+        }
+        return null;
     }
 
     public GameType getGameType() {
@@ -103,7 +111,7 @@ public class GamingMachine extends AbstractFact {
     }
 
 
-    public GamingMachineDto convertToDto(){
+    public GamingMachineDto convertToDto() {
         GamingMachineDto gamingMachineDto = new GamingMachineDto();
         gamingMachineDto.setGameDetailsList(getGameDetailsList());
         gamingMachineDto.setInstitutionId(getInstitutionId());
@@ -114,11 +122,11 @@ public class GamingMachine extends AbstractFact {
         gamingMachineDto.setInstitutionId(getInstitutionId());
         gamingMachineDto.setId(getId());
         Institution institution = getInstitution();
-        if (institution != null){
+        if (institution != null) {
             gamingMachineDto.setInstitutionName(institution.getInstitutionName());
         }
         GameType gameType = getGameType();
-        if (gameType != null){
+        if (gameType != null) {
             gamingMachineDto.setGameTypeId(getGameTypeId());
             gamingMachineDto.setGameTypeName(gameType.getName());
         }

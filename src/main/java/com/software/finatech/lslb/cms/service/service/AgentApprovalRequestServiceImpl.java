@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.AgentApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.dto.AgentApprovalRequestOperationtDto;
@@ -7,11 +8,16 @@ import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AgentApprovalRequestTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentApprovalRequestService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
+import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AgentCreationNotifierAsync;
 import com.software.finatech.lslb.cms.service.util.AgentUserCreator;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,16 +47,24 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
     private AuthInfoService authInfoService;
     private AgentUserCreator agentUserCreatorAsync;
     private AgentCreationNotifierAsync agentCreationNotifierAsync;
+    private SpringSecurityAuditorAware springSecurityAuditorAware;
+    private AuditLogHelper auditLogHelper;
+
+    private static  final String agentAuditActionId = AuditActionReferenceData.AGENT_ID;
 
     @Autowired
     public AgentApprovalRequestServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                                            AuthInfoService authInfoService,
                                            AgentUserCreator agentUserCreatorAsync,
-                                           AgentCreationNotifierAsync agentCreationNotifierAsync) {
+                                           AgentCreationNotifierAsync agentCreationNotifierAsync,
+                                           SpringSecurityAuditorAware springSecurityAuditorAware,
+                                           AuditLogHelper auditLogHelper) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.authInfoService = authInfoService;
         this.agentUserCreatorAsync = agentUserCreatorAsync;
         this.agentCreationNotifierAsync = agentCreationNotifierAsync;
+        this.springSecurityAuditorAware = springSecurityAuditorAware;
+        this.auditLogHelper = auditLogHelper;
     }
 
     @Override
@@ -165,7 +180,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
     }
 
     @Override
-    public Mono<ResponseEntity> approveRequest(AgentApprovalRequestOperationtDto agentApprovalRequestOperationtDto) {
+    public Mono<ResponseEntity> approveRequest(AgentApprovalRequestOperationtDto agentApprovalRequestOperationtDto, HttpServletRequest request) {
         String agentApprovalRequestId = agentApprovalRequestOperationtDto.getAgentApprovalRequestId();
         String userId = agentApprovalRequestOperationtDto.getUserId();
         try {
@@ -184,6 +199,12 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.ADD_INSTITUTION_TO_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
                 approveAddInstitutionToAgentRequest(agentApprovalRequest, userId);
             }
+
+            String verbiage = String.format("Approved agent approval request -> Type: %s ",agentApprovalRequest.getAgentApprovalRequestTypeName());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(),agentApprovalRequest.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsAndLslbOnAgentRequestCreation(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>("Request successfully approved", HttpStatus.OK));
         } catch (Exception e) {
@@ -192,7 +213,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
     }
 
     @Override
-    public Mono<ResponseEntity> rejectRequest(AgentApprovalRequestOperationtDto agentApprovalRequestRejectDto) {
+    public Mono<ResponseEntity> rejectRequest(AgentApprovalRequestOperationtDto agentApprovalRequestRejectDto, HttpServletRequest request) {
         try {
             if (StringUtils.isEmpty(agentApprovalRequestRejectDto.getReason())) {
                 return Mono.just(new ResponseEntity<>("Rejection reason must not be empty", HttpStatus.BAD_REQUEST));
@@ -216,6 +237,11 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.ADD_INSTITUTION_TO_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
                 rejectAddInstitutionToAgentRequest(agentApprovalRequest, userId, rejectReason);
             }
+
+            String verbiage = String.format("Rejected agent approval request -> Type: %s ",agentApprovalRequest.getId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(),agentApprovalRequest.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsAndLslbOnAgentRequestCreation(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>("Request successfully rejected", HttpStatus.OK));

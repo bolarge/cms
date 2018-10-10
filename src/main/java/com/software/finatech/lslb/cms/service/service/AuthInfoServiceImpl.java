@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.AuthPermission;
 import com.software.finatech.lslb.cms.service.domain.AuthRole;
@@ -80,6 +81,8 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     @Autowired
     private AuditLogHelper auditLogHelper;
     @Autowired
+    private SpringSecurityAuditorAware springSecurityAuditorAware;
+    @Autowired
     private AuthRoleService authRoleService;
 
     @Autowired
@@ -91,6 +94,8 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     protected MongoRepositoryReactiveImpl mongoRepositoryReactive;
     protected ObjectMapper mapper;
 
+    private static final String userAuditActionId = AuditActionReferenceData.USER_ID;
+
     /**
      * Initialize class
      */
@@ -100,7 +105,11 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl) {
+    public Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl, HttpServletRequest request) {
+        String requestIpAddress = null;
+        if (request != null) {
+            requestIpAddress = request.getRemoteAddr();
+        }
 
         if (!StringUtils.isEmpty(authInfoCreateDto.getInstitutionId())) {
             Mono<ResponseEntity> validateCreateAuthInfo = validateCreateGamingOperatorAuthInfo(authInfoCreateDto);
@@ -208,6 +217,12 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                     authInfo.setSsoUserId(ssoUserDetailInfo.getId());
                 }
                 mongoRepositoryReactive.saveOrUpdate(authInfo);
+
+                String verbiage = String.format("Create user  -> Name : %s ", authInfo.getFullName());
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
+                        springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
+                        LocalDateTime.now(), LocalDate.now(), true, requestIpAddress, verbiage));
+
                 return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
             } else {
 
@@ -231,6 +246,12 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 content = content.replaceAll("CallbackUrl", url);
                 emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
 
+
+                String verbiage = String.format("Create user  -> Name : %s ", authInfo.getFullName());
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
+                        springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
+                        LocalDateTime.now(), LocalDate.now(), true, requestIpAddress, verbiage));
+
                 return Mono.just(new ResponseEntity<>(toCreateAuthInfoResponse(authInfo, verificationToken), HttpStatus.OK));
             }
         } catch (Exception e) {
@@ -241,7 +262,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
 
     @Override
-    public AuthInfo createApplicantAuthInfo(CreateApplicantAuthInfoDto createApplicantAuthInfoDto, String appUrl) {
+    public AuthInfo createApplicantAuthInfo(CreateApplicantAuthInfoDto createApplicantAuthInfoDto, String appUrl, HttpServletRequest request) {
         AuthInfo authInfo = new AuthInfo();
         authInfo.setId(UUID.randomUUID().toString());
         authInfo.setEnabled(true);
@@ -316,6 +337,11 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
             }
 
+            String verbiage = String.format("Create user  -> Name : %s ", authInfo.getFullName());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return authInfo;
         } catch (Exception e) {
             logger.error("An error occurred when trying to confirm if user exists", e);
@@ -330,7 +356,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public String resetPasswordToken(String emailAddress) {
+    public String resetPasswordToken(String emailAddress, HttpServletRequest request) {
         try {
             HttpClient httpclient = HttpClientBuilder.create().build();
             HttpGet httpGet = null;
@@ -355,6 +381,11 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 return null;
             }
 
+            String verbiage = String.format("Reset password for user  -> Email : %s ", emailAddress);
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return SSOPasswordReset.getResponse().getPasswordToken();
 
         } catch (Throwable e) {
@@ -365,7 +396,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public Mono<ResponseEntity> resetPassword(SSOPasswordResetModel ssoPasswordResetModel) {
+    public Mono<ResponseEntity> resetPassword(SSOPasswordResetModel ssoPasswordResetModel, HttpServletRequest request) {
         try {
             HttpClient httpclient = HttpClientBuilder.create().build();
             HttpPost httpPost = null;
@@ -393,9 +424,21 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
             String stringResponse = EntityUtils.toString(response.getEntity());
 
+            String userFullName = springSecurityAuditorAware.getCurrentAuditorNotNull();
             if (responseCode == 200) {
+                String verbiage = String.format("Successful password reset  -> User : %s ", userFullName);
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
+                        userFullName, userFullName, LocalDateTime.now(),
+                        LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
                 return Mono.just(new ResponseEntity<>("Success", HttpStatus.OK));
             } else {
+
+                String verbiage = String.format("Unsuccessful password reset  -> User : %s ", userFullName);
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
+                        userFullName, userFullName, LocalDateTime.now(),
+                        LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
                 return Mono.just(new ResponseEntity<>(stringResponse, HttpStatus.valueOf(responseCode)));
             }
         } catch (Throwable e) {
@@ -405,7 +448,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public Mono<ResponseEntity> changePassword(String token, SSOChangePasswordModel model) {
+    public Mono<ResponseEntity> changePassword(String token, SSOChangePasswordModel model, HttpServletRequest request) {
 
         try {
             HttpClient httpclient = HttpClientBuilder.create().build();
@@ -427,10 +470,21 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
             response = httpclient.execute(httpPost);
             responseCode = response.getStatusLine().getStatusCode();
-
+            String userFullName = springSecurityAuditorAware.getCurrentAuditorNotNull();
             if (responseCode == 200) {
+                String verbiage = String.format("Successful password change  -> User : %s ", userFullName);
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
+                        userFullName, userFullName, LocalDateTime.now(),
+                        LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+
                 return Mono.just(new ResponseEntity<>("Success", HttpStatus.OK));
             } else {
+                String verbiage = String.format("Unsuccessful password change  -> User : %s ", userFullName);
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
+                        userFullName, userFullName, LocalDateTime.now(),
+                        LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
                 return Mono.just(new ResponseEntity<>(EntityUtils.toString(response.getEntity()), HttpStatus.valueOf(responseCode)));
             }
         } catch (Throwable e) {
@@ -541,6 +595,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 response = httpclient.execute(httpPost);
                 responseCode = response.getStatusLine().getStatusCode();
                 if (responseCode != 200) {
+
                     return Mono.just(new ResponseEntity<>(EntityUtils.toString(response.getEntity()), HttpStatus.valueOf(responseCode)));
                 }
             } else {
@@ -756,7 +811,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public ArrayList<AuthInfo> findAllLSLBMembersThatCanApproveAgentApprovals() {
+    public ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveAgentApprovalsNotification() {
         ArrayList<AuthInfo> validMembers = new ArrayList<>();
         for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
             Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();

@@ -139,7 +139,7 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity("User has not been created on SSO", HttpStatus.BAD_REQUEST));
             }
 
-            String token = authInfoService.resetPasswordToken(emailAddress);
+            String token = authInfoService.resetPasswordToken(emailAddress, request);
 
             if (token == null) {
                 return Mono.just(new ResponseEntity("Invalid EmailAddress", HttpStatus.BAD_REQUEST));
@@ -195,7 +195,7 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity<>("Invalid User", HttpStatus.BAD_REQUEST));
             }
             model.setToken(authInfo.getPasswordResetToken());
-            return authInfoService.resetPassword(model);
+            return authInfoService.resetPassword(model, request);
         } catch (Exception e) {
             String errorMsg = "An error occurred while resetting user password";
             return logAndReturnError(logger, errorMsg, e);
@@ -227,7 +227,7 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity("Invalid Username/Password", HttpStatus.BAD_REQUEST));
             }
 
-            return authInfoService.changePassword(token, ssoChangePasswordModel);
+            return authInfoService.changePassword(token, ssoChangePasswordModel, request);
         } catch (Exception e) {
             String errorMsg = "An error occurred while changing user password";
             return logAndReturnError(logger, errorMsg, e);
@@ -300,7 +300,7 @@ public class AuthInfoController extends BaseController {
                             ":" + request.getServerPort() +
                             request.getContextPath();*/
             String appUrl = appHostPort + request.getContextPath();
-            return authInfoService.createAuthInfo(authInfoCreateDto, appUrl);
+            return authInfoService.createAuthInfo(authInfoCreateDto, appUrl,request);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -334,7 +334,7 @@ public class AuthInfoController extends BaseController {
 
             String appUrl = appHostPort + request.getContextPath();
 
-            AuthInfo authInfo = authInfoService.createApplicantAuthInfo(createGameOperatorAuthInfoDto, appUrl);
+            AuthInfo authInfo = authInfoService.createApplicantAuthInfo(createGameOperatorAuthInfoDto, appUrl, request);
             return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {

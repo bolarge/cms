@@ -1,18 +1,23 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.dto.InstitutionCreateDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionUpdateDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
+import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.CustomerCodeCreatorAsync;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -22,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,19 +40,19 @@ import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logA
 @Service
 public class InstitutionServiceImpl implements InstitutionService {
 
+    private static final String institutionAuditActionId = AuditActionReferenceData.INSTITUTION;
     private static final Logger logger = LoggerFactory.getLogger(InstitutionServiceImpl.class);
 
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private CustomerCodeCreatorAsync customerCodeCreatorAsync;
+    private AuditLogHelper auditLogHelper;
+    private SpringSecurityAuditorAware springSecurityAuditorAware;
 
-    @Autowired
-    public void setCustomerCodeCreatorAsync(CustomerCodeCreatorAsync customerCodeCreatorAsync) {
-        this.customerCodeCreatorAsync = customerCodeCreatorAsync;
-    }
-
-    @Autowired
-    public void setMongoRepositoryReactive(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
+    public InstitutionServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive, CustomerCodeCreatorAsync customerCodeCreatorAsync, AuditLogHelper auditLogHelper, SpringSecurityAuditorAware springSecurityAuditorAware) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
+        this.customerCodeCreatorAsync = customerCodeCreatorAsync;
+        this.auditLogHelper = auditLogHelper;
+        this.springSecurityAuditorAware = springSecurityAuditorAware;
     }
 
     @Override
@@ -66,7 +72,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public Mono<ResponseEntity> updateInstitution(InstitutionUpdateDto institutionUpdateDto) {
+    public Mono<ResponseEntity> updateInstitution(InstitutionUpdateDto institutionUpdateDto, HttpServletRequest request) {
         Query queryForId = new Query();
         String institutionId = institutionUpdateDto.getId();
         String institutionName = institutionUpdateDto.getInstitutionName();
@@ -76,6 +82,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         if (existingInstitution == null) {
             return Mono.just(new ResponseEntity<>(String.format("Institution with id %s does not exist", institutionId), HttpStatus.BAD_REQUEST));
         }
+        String existingInstitutionName = existingInstitution.getInstitutionName();
         if (!StringUtils.equals(existingInstitution.getInstitutionName(), institutionUpdateDto.getInstitutionName())) {
             Query queryForName = new Query();
             queryForName.addCriteria(Criteria.where("institutionName").is(institutionName));
@@ -100,17 +107,74 @@ public class InstitutionServiceImpl implements InstitutionService {
         existingInstitution.setInstitutionName(institutionUpdateDto.getInstitutionName());
         try {
             mongoRepositoryReactive.saveOrUpdate(existingInstitution);
+
+            String verbiage = String.format("Updated Institution , Name -> %s ", institutionName);
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(institutionAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), existingInstitutionName,
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
             return Mono.just(new ResponseEntity<>(existingInstitution.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while updating the institution";
             return logAndReturnError(logger, errorMsg, e);
         }
-
     }
 
     @Override
-    public Mono<ResponseEntity> disableInstitution(InstitutionDto institutionDto) {
-        return null;
+    public Mono<ResponseEntity> disableInstitution(InstitutionDto institutionDto, HttpServletRequest request) {
+        try {
+            String institutionId = institutionDto.getId();
+            if (StringUtils.isEmpty(institutionId)) {
+                return Mono.just(new ResponseEntity<>("Institution Id should not be empty", HttpStatus.BAD_REQUEST));
+            }
+            Institution existingInstitution = (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+            if (existingInstitution == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Institution with id %s does not exist", institutionId), HttpStatus.BAD_REQUEST));
+            }
+
+            if (!existingInstitution.getActive()) {
+                return Mono.just(new ResponseEntity<>("Operator is already disabled", HttpStatus.BAD_REQUEST));
+            }
+            existingInstitution.setActive(false);
+            mongoRepositoryReactive.saveOrUpdate(existingInstitution);
+
+            String verbiage = String.format("Disabled institution, Name -> %s ", existingInstitution.getInstitutionName());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(institutionAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), existingInstitution.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            return Mono.just(new ResponseEntity<>(existingInstitution.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while disabling institution", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> enableInstitution(InstitutionDto institutionDto, HttpServletRequest request) {
+        try {
+            String institutionId = institutionDto.getId();
+            if (StringUtils.isEmpty(institutionId)) {
+                return Mono.just(new ResponseEntity<>("Institution Id should not be empty", HttpStatus.BAD_REQUEST));
+            }
+            Institution existingInstitution = (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+            if (existingInstitution == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Institution with id %s does not exist", institutionId), HttpStatus.BAD_REQUEST));
+            }
+
+            if (existingInstitution.getActive()) {
+                return Mono.just(new ResponseEntity<>("Operator is already active", HttpStatus.BAD_REQUEST));
+            }
+            existingInstitution.setActive(true);
+            mongoRepositoryReactive.saveOrUpdate(existingInstitution);
+
+            String verbiage = String.format("Enabled institution, Name -> %s ", existingInstitution.getInstitutionName());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(institutionAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), existingInstitution.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            return Mono.just(new ResponseEntity<>(existingInstitution.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while disabling institution", e);
+        }
     }
 
     @Override

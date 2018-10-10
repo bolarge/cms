@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -63,8 +64,8 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createApplicationForm(@RequestBody @Valid ApplicationFormCreateDto applicationFormCreateDto) {
-        return applicationFormService.createApplicationForm(applicationFormCreateDto);
+    public Mono<ResponseEntity> createApplicationForm(@RequestBody @Valid ApplicationFormCreateDto applicationFormCreateDto, HttpServletRequest request) {
+        return applicationFormService.createApplicationForm(applicationFormCreateDto, request);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-application-form-status")
@@ -108,8 +109,8 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> saveApplicantDetails(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantDetails applicantDetails) {
-        return applicationFormService.saveApplicantDetails(applicationFormId, applicantDetails);
+    public Mono<ResponseEntity> saveApplicantDetails(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantDetails applicantDetails, HttpServletRequest request) {
+        return applicationFormService.saveApplicantDetails(applicationFormId, applicantDetails, request);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/get-applicant-members-details", params = {"applicationFormId"})
@@ -130,8 +131,8 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> saveApplicantMemberDetails(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantMemberDetails applicantMemberDetails) {
-        return applicationFormService.saveApplicantMembersDetails(applicationFormId, applicantMemberDetails);
+    public Mono<ResponseEntity> saveApplicantMemberDetails(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantMemberDetails applicantMemberDetails, HttpServletRequest request) {
+        return applicationFormService.saveApplicantMembersDetails(applicationFormId, applicantMemberDetails, request);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/get-applicant-contact-details", params = {"applicationFormId"})
@@ -152,8 +153,8 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> saveApplicantContactDetails(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantContactDetails applicantContactDetails) {
-        return applicationFormService.saveApplicantContactDetails(applicationFormId, applicantContactDetails);
+    public Mono<ResponseEntity> saveApplicantContactDetails(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantContactDetails applicantContactDetails, HttpServletRequest request) {
+        return applicationFormService.saveApplicantContactDetails(applicationFormId, applicantContactDetails, request);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/get-applicant-criminality-details", params = {"applicationFormId"})
@@ -174,8 +175,8 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> saveApplicantCriminalityDetails(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantCriminalityDetails applicantCriminalityDetails) {
-        return applicationFormService.saveApplicantCriminalityDetails(applicationFormId, applicantCriminalityDetails);
+    public Mono<ResponseEntity> saveApplicantCriminalityDetails(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantCriminalityDetails applicantCriminalityDetails, HttpServletRequest request) {
+        return applicationFormService.saveApplicantCriminalityDetails(applicationFormId, applicantCriminalityDetails, request);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/get-applicant-declaration-details", params = {"applicationFormId"})
@@ -196,8 +197,8 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> saveApplicantDeclarationDetails(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantDeclarationDetails applicantDeclarationDetails) {
-        return applicationFormService.saveApplicantDeclarationDetails(applicationFormId, applicantDeclarationDetails);
+    public Mono<ResponseEntity> saveApplicantDeclarationDetails(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantDeclarationDetails applicantDeclarationDetails, HttpServletRequest request) {
+        return applicationFormService.saveApplicantDeclarationDetails(applicationFormId, applicantDeclarationDetails, request);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/get-applicant-other-information", params = {"applicationFormId"})
@@ -218,8 +219,8 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> saveApplicantOtherInformation(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantOtherInformation applicantOtherInformation) {
-        return applicationFormService.saveApplicantOtherInformation(applicationFormId, applicantOtherInformation);
+    public Mono<ResponseEntity> saveApplicantOtherInformation(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantOtherInformation applicantOtherInformation, HttpServletRequest request) {
+        return applicationFormService.saveApplicantOtherInformation(applicationFormId, applicantOtherInformation, request);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/get-applicant-outlet-information", params = {"applicationFormId"})
@@ -240,8 +241,8 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> saveApplicantOutletInformation(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantOutletInformation applicantOutletInformation) {
-        return applicationFormService.saveApplicantOutletInformation(applicationFormId, applicantOutletInformation);
+    public Mono<ResponseEntity> saveApplicantOutletInformation(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantOutletInformation applicantOutletInformation, HttpServletRequest request) {
+        return applicationFormService.saveApplicantOutletInformation(applicationFormId, applicantOutletInformation, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/approve-application-form", params = {"applicationFormId", "userId"})
@@ -251,8 +252,8 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> approveApplicationForm(@RequestParam("applicationFormId") String applicationFormId, @RequestParam("userId") String approverId) {
-        return applicationFormService.approveApplicationForm(applicationFormId, approverId);
+    public Mono<ResponseEntity> approveApplicationForm(@RequestParam("applicationFormId") String applicationFormId, @RequestParam("userId") String approverId, HttpServletRequest request) {
+        return applicationFormService.approveApplicationForm(applicationFormId, approverId, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/reject-application-form", params = {"applicationFormId"})
@@ -262,8 +263,8 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> rejectApplicationForm(@RequestParam("applicationFormId") String applicationFormId, @RequestBody @Valid ApplicationFormRejectDto applicationFormRejectDto) {
-        return applicationFormService.rejectApplicationForm(applicationFormId, applicationFormRejectDto);
+    public Mono<ResponseEntity> rejectApplicationForm(@RequestParam("applicationFormId") String applicationFormId, @RequestBody @Valid ApplicationFormRejectDto applicationFormRejectDto, HttpServletRequest request) {
+        return applicationFormService.rejectApplicationForm(applicationFormId, applicationFormRejectDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/complete-application-form", params = {"applicationFormId"})
@@ -273,8 +274,8 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> completeApplicationForm(@RequestParam("applicationFormId") String applicationFormId, @RequestParam("isResubmit") boolean isResubmit) {
-        return applicationFormService.completeApplicationForm(applicationFormId, isResubmit);
+    public Mono<ResponseEntity> completeApplicationForm(@RequestParam("applicationFormId") String applicationFormId, @RequestParam("isResubmit") boolean isResubmit, HttpServletRequest request) {
+        return applicationFormService.completeApplicationForm(applicationFormId, isResubmit, request);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/payment-records", params = {"applicationFormId"})
@@ -296,8 +297,8 @@ public class ApplicationFormController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> createApplicationFormComment(@RequestParam("applicationFormId") String applicationFormId,
-                                                             @RequestBody @Valid ApplicationFormCreateCommentDto applicationFormCreateCommentDto) {
-        return applicationFormService.addCommentsToFormFromLslbAdmin(applicationFormId, applicationFormCreateCommentDto);
+                                                             @RequestBody @Valid ApplicationFormCreateCommentDto applicationFormCreateCommentDto, HttpServletRequest request) {
+        return applicationFormService.addCommentsToFormFromLslbAdmin(applicationFormId, applicationFormCreateCommentDto, request);
     }
 
     /*@RequestMapping(method = RequestMethod.GET, value = "/{applicationFormId}/get-document-types", params = {"applicationFormId"})

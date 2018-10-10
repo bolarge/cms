@@ -1,5 +1,7 @@
 package com.software.finatech.lslb.cms.service.util;
 
+import org.joda.time.LocalDateTime;
+
 import java.util.Random;
 
 public class NumberUtil {
@@ -11,5 +13,16 @@ public class NumberUtil {
 
         Random r = new Random();
         return r.nextInt((max - min) + 1) + min;
+    }
+
+    public static String generateTransactionReferenceForPaymentRecord() {
+        LocalDateTime presentDateTime = LocalDateTime.now();
+        return String.format("%s%s%s%s%s%s%s", getRandomNumberInRange(20, 5000),
+                presentDateTime.getDayOfMonth(),
+                presentDateTime.getMonthOfYear(),
+                presentDateTime.getYear(),
+                presentDateTime.getHourOfDay(),
+                presentDateTime.getMinuteOfHour(),
+                presentDateTime.getSecondOfMinute());
     }
 }

@@ -10,4 +10,9 @@ public class RevenueName extends EnumeratedFact {
     public String getFactName() {
         return "RevenueName";
     }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

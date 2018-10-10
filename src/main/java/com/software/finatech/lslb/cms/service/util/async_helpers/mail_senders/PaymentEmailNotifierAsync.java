@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 @Component
 public class PaymentEmailNotifierAsync {
@@ -118,5 +119,12 @@ public class PaymentEmailNotifierAsync {
         } catch (Exception e) {
             logger.error(String.format("An error occurred while sending payment notification email to user -> %s", userEmail), e);
         }
+    }
+
+    private String buildMultiplePaymentRecordEmail(List<PaymentRecord> paymentRecordList) {
+        HashMap<String, Object> model = new HashMap<>();
+
+
+        return null;
     }
 }

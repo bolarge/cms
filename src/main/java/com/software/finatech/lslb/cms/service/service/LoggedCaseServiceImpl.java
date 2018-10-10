@@ -1,14 +1,18 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LoggedCaseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LoggedCaseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.LoggedCaseService;
+import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.LoggedCaseMailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
@@ -25,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,26 +41,24 @@ import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logA
 @Service
 public class LoggedCaseServiceImpl implements LoggedCaseService {
     private static final Logger logger = LoggerFactory.getLogger(LoggedCaseServiceImpl.class);
+    private static final String loggedCaseAuditActionId = AuditActionReferenceData.CASE_ID;
 
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private AuthInfoService authInfoService;
     private LoggedCaseMailSenderAsync loggedCaseMailSenderAsync;
+    private AuditLogHelper auditLogHelper;
+    private SpringSecurityAuditorAware springSecurityAuditorAware;
 
     @Autowired
-    public void setMongoRepositoryReactive(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
+    public LoggedCaseServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
+                                 AuthInfoService authInfoService, LoggedCaseMailSenderAsync loggedCaseMailSenderAsync,
+                                 AuditLogHelper auditLogHelper, SpringSecurityAuditorAware springSecurityAuditorAware) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
-    }
-
-    @Autowired
-    public void setAuthInfoService(AuthInfoService authInfoService) {
         this.authInfoService = authInfoService;
-    }
-
-    @Autowired
-    public void setLoggedCaseMailSenderAsync(LoggedCaseMailSenderAsync loggedCaseMailSenderAsync) {
         this.loggedCaseMailSenderAsync = loggedCaseMailSenderAsync;
+        this.auditLogHelper = auditLogHelper;
+        this.springSecurityAuditorAware = springSecurityAuditorAware;
     }
-
 
     @Override
     public Mono<ResponseEntity> findAllLoggedCases(int page,
@@ -121,7 +124,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
     }
 
     @Override
-    public Mono<ResponseEntity> createCase(LoggedCaseCreateDto loggedCaseCreateDto) {
+    public Mono<ResponseEntity> createCase(LoggedCaseCreateDto loggedCaseCreateDto, HttpServletRequest request) {
         try {
             String userId = loggedCaseCreateDto.getUserId();
             if (!loggedCaseCreateDto.isValid()) {
@@ -129,13 +132,18 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             }
             AuthInfo user = authInfoService.getUserById(userId);
             if (user == null) {
-                return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", user), HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", userId), HttpStatus.BAD_REQUEST));
             }
             if (!userCanUpdateCase(user)) {
                 return Mono.just(new ResponseEntity<>("User  cannot create logged case, please check user role and user status", HttpStatus.BAD_REQUEST));
             }
             LoggedCase loggedCase = fromLoggedCaseCreateDto(loggedCaseCreateDto);
             mongoRepositoryReactive.saveOrUpdate(loggedCase);
+            String verbiage = String.format("Created logged case ,Ticket id : -> %s ", loggedCase.getTicketId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(loggedCaseAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), loggedCase.getReportedEntityName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             loggedCaseMailSenderAsync.sendNewCaseNotificationToLslbUsersThatCanReceive(loggedCase);
             return Mono.just(new ResponseEntity<>(loggedCase.convertToFullDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -144,7 +152,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
     }
 
     @Override
-    public Mono<ResponseEntity> addLoggedCaseAction(LoggedCaseActionCreateDto caseActionCreateDto) {
+    public Mono<ResponseEntity> addLoggedCaseAction(LoggedCaseActionCreateDto caseActionCreateDto, HttpServletRequest request) {
         try {
             String caseId = caseActionCreateDto.getCaseId();
             String userId = caseActionCreateDto.getUserId();
@@ -154,6 +162,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
                 return Mono.just(new ResponseEntity<>(String.format("LoggedCase with is %s not found", caseId), HttpStatus.BAD_REQUEST));
             }
 
+            LoggedCaseStatus oldCaseStatus = existingCase.getCaseStatus(existingCase.getLoggedCaseStatusId());
             if (existingCase.isClosed()) {
                 return Mono.just(new ResponseEntity<>("The logged case is already closed", HttpStatus.BAD_REQUEST));
             }
@@ -172,8 +181,15 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             caseAction.setActionTime(LocalDateTime.now());
             caseAction.setUserId(userId);
             caseAction.setLslbCaseStatusId(caseStatusId);
+            existingCase.setLoggedCaseStatusId(caseStatusId);
             existingCase.getCaseActions().add(caseAction);
             mongoRepositoryReactive.saveOrUpdate(existingCase);
+            String verbiage = String.format("Changed logged case status , Ticket id:  -> %s ,Old status -> %s,  New Status -> %s, ",
+                    existingCase.getTicketId(), oldCaseStatus, existingCase.getCaseStatus(existingCase.getLoggedCaseStatusId()));
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(loggedCaseAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), existingCase.getReportedEntityName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(existingCase.convertToFullDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding action to case", e);
@@ -181,7 +197,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
     }
 
     @Override
-    public Mono<ResponseEntity> addLoggedCaseComment(LoggedCaseCommentCreateDto caseCommentCreateDto) {
+    public Mono<ResponseEntity> addLoggedCaseComment(LoggedCaseCommentCreateDto caseCommentCreateDto, HttpServletRequest request) {
         try {
             String caseId = caseCommentCreateDto.getCaseId();
             String userId = caseCommentCreateDto.getUserId();
@@ -206,6 +222,12 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             caseComment.setCommentTime(LocalDateTime.now());
             existingCase.getCaseComments().add(caseComment);
             mongoRepositoryReactive.saveOrUpdate(existingCase);
+
+            String verbiage = String.format("Added Comment to Logged Case, Ticket id: -> %s ,Comment -> \"%s\"",
+                    existingCase.getTicketId(), caseComment.getComment());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(loggedCaseAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), existingCase.getReportedEntityName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
             return Mono.just(new ResponseEntity<>(existingCase.convertToFullDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding comment to logged case", e);
@@ -257,7 +279,8 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
 
     private String generateTicketId() {
         int randomNumber = NumberUtil.getRandomNumberInRange(100, 3000099);
-        return String.format("LS-CA-%s", randomNumber);
+        LocalDateTime presentDateTime = LocalDateTime.now();
+        return String.format("LS-CA-%s%s%s", randomNumber, presentDateTime.getHourOfDay(), presentDateTime.getMinuteOfHour(), presentDateTime.getSecondOfMinute());
     }
 
     private boolean userCanUpdateCase(AuthInfo user) {
