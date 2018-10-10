@@ -510,7 +510,7 @@ public class LicenseServiceImpl implements LicenseService {
             if (license == null) {
                 return Mono.just(new ResponseEntity<>("No License Record", HttpStatus.BAD_REQUEST));
             }
-            //license.setLicenseStatusId(LicenseStatusReferenceData.);
+            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
             mongoRepositoryReactive.saveOrUpdate(license);
             List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
             institutionAdmins.stream().forEach(institutionAdmin->{
