@@ -18,5 +18,9 @@ public interface VigipayService {
 
     String createInBranchInvoiceForInstitution(Institution institution, List<AuthInfo> adminsForInstitution, VigipayInvoiceItem vigipayInvoiceItem);
 
+    String createInBranchMultipleItemInvoiceForInstitution(Institution institution,
+                                                           List<AuthInfo> adminsForInstitution,
+                                                           List<VigipayInvoiceItem> vigipayInvoiceItems);
+
     boolean isConfirmedInvoicePayment(String invoiceNumber) throws VigiPayServiceException;
 }

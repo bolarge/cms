@@ -5,6 +5,8 @@ import com.software.finatech.lslb.cms.service.dto.GameTypeCreateDto;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
+
 public interface GameTypeService {
 
     GameType findById(String gameTypeId);
@@ -13,5 +15,5 @@ public interface GameTypeService {
 
     Mono<ResponseEntity> getAllGameTypesForAgent(String agentId);
 
-    Mono<ResponseEntity> createGameType(GameTypeCreateDto gameTypeCreateDto);
+    Mono<ResponseEntity> createGameType(GameTypeCreateDto gameTypeCreateDto, HttpServletRequest request);
 }

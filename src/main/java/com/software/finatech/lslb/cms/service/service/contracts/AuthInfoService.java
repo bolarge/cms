@@ -16,17 +16,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface AuthInfoService {
-    Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl);
+    Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl, HttpServletRequest request);
 
-    AuthInfo createApplicantAuthInfo(CreateApplicantAuthInfoDto createApplicantAuthInfoDto, String appUrl);
+    AuthInfo createApplicantAuthInfo(CreateApplicantAuthInfoDto createApplicantAuthInfoDto, String appUrl, HttpServletRequest request);
 
     Mono<String> updateAuthInfo();
 
-    String resetPasswordToken(String email);
+    String resetPasswordToken(String email, HttpServletRequest request);
 
-    Mono<ResponseEntity> resetPassword(SSOPasswordResetModel ssoPasswordResetModel);
+    Mono<ResponseEntity> resetPassword(SSOPasswordResetModel ssoPasswordResetModel, HttpServletRequest request);
 
-    Mono<ResponseEntity> changePassword(String token, SSOChangePasswordModel model);
+    Mono<ResponseEntity> changePassword(String token, SSOChangePasswordModel model, HttpServletRequest request);
 
     Mono<String> deactivateAuthInfo();
 

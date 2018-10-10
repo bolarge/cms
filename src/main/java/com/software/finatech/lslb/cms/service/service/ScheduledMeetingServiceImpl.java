@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.Institution;
@@ -8,19 +9,24 @@ import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingCreateDto;
 import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingDto;
 import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingUpdateDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.ScheduledMeetingService;
+import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -28,8 +34,10 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.HandlerMapping;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,10 +56,12 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
     private EmailService emailService;
     private FrontEndPropertyHelper frontEndPropertyHelper;
     private ApplicationFormService applicationFormService;
+    private AuditLogHelper auditLogHelper;
+    private SpringSecurityAuditorAware springSecurityAuditorAware;
 
     private static final int NUMBER_OF_DAYS_BEFORE_MEETING_REMINDER = 1;
     private static final int POST_MEETING_REMINDER_DAYS = 7;
-
+    public static final String scheduleMeetingAuditActionId = AuditActionReferenceData.SCHEDULED_MEETING_ID;
 
     @Autowired
     public ScheduledMeetingServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
@@ -59,14 +69,19 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                                        MailContentBuilderService mailContentBuilderService,
                                        EmailService emailService,
                                        FrontEndPropertyHelper frontEndPropertyHelper,
-                                       ApplicationFormService applicationFormService) {
+                                       ApplicationFormService applicationFormService,
+                                       AuditLogHelper auditLogHelper,
+                                       SpringSecurityAuditorAware springSecurityAuditorAware) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.authInfoService = authInfoService;
         this.mailContentBuilderService = mailContentBuilderService;
         this.emailService = emailService;
         this.frontEndPropertyHelper = frontEndPropertyHelper;
         this.applicationFormService = applicationFormService;
+        this.auditLogHelper = auditLogHelper;
+        this.springSecurityAuditorAware = springSecurityAuditorAware;
     }
+
 
     @Override
     public Mono<ResponseEntity> findAllScheduledMeetings(int page,
@@ -132,7 +147,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
     }
 
     @Override
-    public Mono<ResponseEntity> createScheduledMeeting(ScheduledMeetingCreateDto scheduledMeetingCreateDto) {
+    public Mono<ResponseEntity> createScheduledMeeting(ScheduledMeetingCreateDto scheduledMeetingCreateDto, HttpServletRequest request) {
         try {
             HttpStatus badRequestStatus = HttpStatus.BAD_REQUEST;
             AuthInfo creator = getUser(scheduledMeetingCreateDto.getCreatorId());
@@ -166,6 +181,13 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                 sendMeetingNotificationEmailToAttendee("Meeting Invite With Lagos State Lotteries Board", creatorMailSubject, gamingOperatorAdmin);
             }
 
+            String institutionName = scheduledMeeting.getInstitutionName();
+            String verbiage = String.format("Created Scheduled Meeting, Institution Name-> %s , Meeting Date -> %s, Venue -> %s",
+                   institutionName, scheduledMeeting.getMeetingDateString(), scheduledMeeting.getVenue());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(scheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format for meeting date , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
@@ -175,7 +197,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
     }
 
     @Override
-    public Mono<ResponseEntity> cancelScheduledMeeting(String scheduledMeetingId, String cancelerId) {
+    public Mono<ResponseEntity> cancelScheduledMeeting(String scheduledMeetingId, String cancelerId, HttpServletRequest request) {
         try {
             ScheduledMeeting scheduledMeeting = findScheduledMeetingById(scheduledMeetingId);
             if (scheduledMeeting == null) {
@@ -190,6 +212,13 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             scheduledMeeting.setCancelerId(cancelerId);
             saveScheduledMeeting(scheduledMeeting);
             sendMeetingNotificationEmailToMeetingAttendees("Update on Meeting Invite With Lagos State Lotteries Board", "schedule-meeting-cancel", scheduledMeeting);
+
+            String institutionName = scheduledMeeting.getInstitutionName();
+            String verbiage = String.format("Canceled Scheduled Meeting, Institution Name-> %s , Meeting Date -> %s, Venue -> %s",
+                    institutionName, scheduledMeeting.getMeetingDateString(), scheduledMeeting.getVenue());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
             return Mono.just(new ResponseEntity<>(scheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while canceling the scheduled meeting", e);
@@ -197,7 +226,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
     }
 
     @Override
-    public Mono<ResponseEntity> completeScheduledMeeting(String scheduledMeetingId) {
+    public Mono<ResponseEntity> completeScheduledMeeting(String scheduledMeetingId, HttpServletRequest request) {
         try {
             ScheduledMeeting scheduledMeeting = findScheduledMeetingById(scheduledMeetingId);
             if (scheduledMeeting == null) {
@@ -206,6 +235,13 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             String completedMeetingStatusId = ScheduledMeetingStatusReferenceData.COMPLETED_STATUS_ID;
             scheduledMeeting.setScheduledMeetingStatusId(completedMeetingStatusId);
             saveScheduledMeeting(scheduledMeeting);
+            String institutionName = scheduledMeeting.getInstitutionName();
+            String verbiage = String.format("Completed Scheduled Meeting, Institution Name-> %s , Meeting Date -> %s, Venue -> %s",
+                    institutionName, scheduledMeeting.getMeetingDateString(), scheduledMeeting.getVenue());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(scheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while completing the scheduled meeting", e);

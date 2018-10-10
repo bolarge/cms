@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -54,8 +55,8 @@ public class AgentController extends BaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createAgent(@RequestBody @Valid AgentCreateDto agentCreateDto) {
-        return agentService.createAgent(agentCreateDto);
+    public Mono<ResponseEntity> createAgent(@RequestBody @Valid AgentCreateDto agentCreateDto, HttpServletRequest request) {
+        return agentService.createAgent(agentCreateDto, request);
     }
 
 
@@ -66,8 +67,8 @@ public class AgentController extends BaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> updateAgent(@RequestBody @Valid AgentUpdateDto agentUpdateDto) {
-        return agentService.updateAgent(agentUpdateDto);
+    public Mono<ResponseEntity> updateAgent(@RequestBody @Valid AgentUpdateDto agentUpdateDto, HttpServletRequest request) {
+        return agentService.updateAgent(agentUpdateDto, request);
     }
 
 
@@ -78,8 +79,8 @@ public class AgentController extends BaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createAgentForInstitution(@RequestBody @Valid AgentInstitutionCreateDto agentInstitutionCreateDto) {
-        return agentService.createAgentUnderInstitution(agentInstitutionCreateDto);
+    public Mono<ResponseEntity> createAgentForInstitution(@RequestBody @Valid AgentInstitutionCreateDto agentInstitutionCreateDto, HttpServletRequest request) {
+        return agentService.createAgentUnderInstitution(agentInstitutionCreateDto, request);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{agentId}")

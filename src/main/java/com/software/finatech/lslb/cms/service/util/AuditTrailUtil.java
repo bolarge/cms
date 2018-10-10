@@ -8,7 +8,14 @@ import java.util.UUID;
 
 public class AuditTrailUtil {
 
-    public static AuditTrail createAuditTrail(String auditActionId, String performedBy, String owner, LocalDateTime auditDateTime, LocalDate auditDate, Boolean viaAPI, String remoteAddress, String actionPerformed){
+    public static AuditTrail createAuditTrail(String auditActionId,
+                                              String performedBy,
+                                              String owner,
+                                              LocalDateTime auditDateTime,
+                                              LocalDate auditDate,
+                                              Boolean viaAPI,
+                                              String remoteAddress,
+                                              String actionPerformed){
         AuditTrail auditTrail =  new AuditTrail();
         auditTrail.setActionPerformed(actionPerformed);
         auditTrail.setAuditActionId(auditActionId);

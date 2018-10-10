@@ -1,11 +1,13 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.*;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.AIPMailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Days;
@@ -25,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +44,12 @@ public class LicenseServiceImpl implements LicenseService {
     ExpirationList expirationList;
     @Autowired
     protected MongoTemplate mongoTemplate;
-
+    @Autowired
+    private AuditLogHelper auditLogHelper;
+    @Autowired
+    protected SpringSecurityAuditorAware springSecurityAuditorAware;
+    @Autowired
+    private HttpServletRequest request;
     @Autowired
     SendEmail sendEmail;
     @Autowired
@@ -506,9 +514,20 @@ public class LicenseServiceImpl implements LicenseService {
             if (license == null) {
                 return Mono.just(new ResponseEntity<>("No License Record", HttpStatus.BAD_REQUEST));
             }
-
-            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+            //license.setLicenseStatusId(LicenseStatusReferenceData.);
             mongoRepositoryReactive.saveOrUpdate(license);
+            List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
+            institutionAdmins.stream().forEach(institutionAdmin->{
+                NotificationDto notificationDto = new NotificationDto();
+                notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
+                notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
+                notificationDto.setTemplate("LicenseUpdate");
+                notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ", renewal application for " +
+                        notificationDto.getGameType()+" have been approved.");
+                notificationDto.setInstitutionEmail(institutionAdmin.getEmailAddress());
+                sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
+            });
+
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
 
         } catch (Exception ex) {
@@ -557,6 +576,7 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public Mono<ResponseEntity> updateRenewalReviewToInProgress(RenewalFormCommentDto renewalFormCommentDto) {
         try {
+            String verbiage;
             Query queryLicenceStatus = new Query();
             queryLicenceStatus.addCriteria(Criteria.where("paymentRecordId").is(renewalFormCommentDto.getPaymentRecordId()));
             queryLicenceStatus.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.RENEWAL_LICENSE_IN_REVIEW));
@@ -570,9 +590,20 @@ public class LicenseServiceImpl implements LicenseService {
             renewalForm.setFormStatusId(RenewalFormStatusReferenceData.PENDING);
             renewalForm.setComment(renewalFormCommentDto.getComment());
             mongoRepositoryReactive.saveOrUpdate(renewalForm);
+//            verbiage = "Moved : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " renewal form  status from submitted to pending";
+//            //auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.U,
+//                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
+//                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+
 
             license.setLicenseStatusId(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
             mongoRepositoryReactive.saveOrUpdate(license);
+//            verbiage = "Moved : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from Renewal In Review to Renewal In Progress";
+//             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_FORM_UPDATE,
+//                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
+//                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage);
+
             List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
             institutionAdmins.stream().forEach(institutionAdmin -> {
                 NotificationDto notificationDto = new NotificationDto();

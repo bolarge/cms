@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -55,8 +56,8 @@ public class LoggedCaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createNewLoggedCase(@RequestBody @Valid LoggedCaseCreateDto loggedCaseCreateDto) {
-        return loggedCaseService.createCase(loggedCaseCreateDto);
+    public Mono<ResponseEntity> createNewLoggedCase(@RequestBody @Valid LoggedCaseCreateDto loggedCaseCreateDto, HttpServletRequest request) {
+        return loggedCaseService.createCase(loggedCaseCreateDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/add-action", produces = "application/json")
@@ -66,8 +67,8 @@ public class LoggedCaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createNewActionToLoggedCase(@RequestBody @Valid LoggedCaseActionCreateDto loggedCaseActionCreateDto) {
-        return loggedCaseService.addLoggedCaseAction(loggedCaseActionCreateDto);
+    public Mono<ResponseEntity> createNewActionToLoggedCase(@RequestBody @Valid LoggedCaseActionCreateDto loggedCaseActionCreateDto, HttpServletRequest request) {
+        return loggedCaseService.addLoggedCaseAction(loggedCaseActionCreateDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/add-comment", produces = "application/json")
@@ -77,8 +78,8 @@ public class LoggedCaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createNewCommentToLoggedCase(@RequestBody @Valid LoggedCaseCommentCreateDto loggedCaseCommentCreateDto) {
-        return loggedCaseService.addLoggedCaseComment(loggedCaseCommentCreateDto);
+    public Mono<ResponseEntity> createNewCommentToLoggedCase(@RequestBody @Valid LoggedCaseCommentCreateDto loggedCaseCommentCreateDto, HttpServletRequest request) {
+        return loggedCaseService.addLoggedCaseComment(loggedCaseCommentCreateDto, request);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-logged-case-status", produces = "application/json")

@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -75,8 +76,8 @@ public class InstitutionController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> updateInstitution(@RequestBody @Valid InstitutionUpdateDto institutionUpdateDto) {
-        return institutionService.updateInstitution(institutionUpdateDto);
+    public Mono<ResponseEntity> updateInstitution(@RequestBody @Valid InstitutionUpdateDto institutionUpdateDto, HttpServletRequest request) {
+        return institutionService.updateInstitution(institutionUpdateDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/new-applicant-institution")

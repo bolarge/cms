@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -57,8 +58,8 @@ public class CustomerComplainController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createNewCustomerComplain(@RequestBody @Valid CustomerComplainCreateDto customerComplainCreateDto) {
-        return customerComplainService.createCustomerComplain(customerComplainCreateDto);
+    public Mono<ResponseEntity> createNewCustomerComplain(@RequestBody @Valid CustomerComplainCreateDto customerComplainCreateDto, HttpServletRequest request) {
+        return customerComplainService.createCustomerComplain(customerComplainCreateDto, request);
     }
 
 
@@ -70,8 +71,8 @@ public class CustomerComplainController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> resolveCustomerComplain(@RequestParam("userId") String userId,
-                                                        @RequestParam("complaintId") String complaintId) {
-        return customerComplainService.resolveCustomerComplain(userId, complaintId);
+                                                        @RequestParam("complaintId") String complaintId, HttpServletRequest request) {
+        return customerComplainService.resolveCustomerComplain(userId, complaintId, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/close", produces = "application/json")
@@ -82,8 +83,8 @@ public class CustomerComplainController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> closeCustomerComplain(@RequestParam("userId") String userId,
-                                                      @RequestParam("complaintId") String complaintId) {
-        return customerComplainService.closeCustomerComplain(userId, complaintId);
+                                                      @RequestParam("complaintId") String complaintId, HttpServletRequest request) {
+        return customerComplainService.closeCustomerComplain(userId, complaintId, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{id}", produces = "application/json")
@@ -104,8 +105,8 @@ public class CustomerComplainController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> updateCustomerComplain(@RequestBody @Valid CustomerComplainUpdateDto customerComplainUpdateDto) {
-        return customerComplainService.updateCustomerComplainStatus(customerComplainUpdateDto);
+    public Mono<ResponseEntity> updateCustomerComplain(@RequestBody @Valid CustomerComplainUpdateDto customerComplainUpdateDto, HttpServletRequest request) {
+        return customerComplainService.updateCustomerComplainStatus(customerComplainUpdateDto, request);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-customer-complain-status", produces = "application/json")

@@ -14,11 +14,12 @@ import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantO
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public interface ApplicationFormService {
 
-    Mono<ResponseEntity> createApplicationForm(ApplicationFormCreateDto applicationFormCreateDto);
+    Mono<ResponseEntity> createApplicationForm(ApplicationFormCreateDto applicationFormCreateDto, HttpServletRequest request);
 
     Mono<ResponseEntity> findAllApplicationForm(int page,
                                                 int pageSize,
@@ -34,34 +35,34 @@ public interface ApplicationFormService {
     Mono<ResponseEntity> getAllApprovers();
 
     Mono<ResponseEntity> getApplicantDetails(String applicationFormId);
-    Mono<ResponseEntity> saveApplicantDetails(String applicationFormId, ApplicantDetails applicantDetails);
+    Mono<ResponseEntity> saveApplicantDetails(String applicationFormId, ApplicantDetails applicantDetails, HttpServletRequest request);
 
     Mono<ResponseEntity> getApplicantMembersDetails(String applicationFormId);
-    Mono<ResponseEntity> saveApplicantMembersDetails(String applicationFormId, ApplicantMemberDetails applicantMemberDetails);
+    Mono<ResponseEntity> saveApplicantMembersDetails(String applicationFormId, ApplicantMemberDetails applicantMemberDetails, HttpServletRequest request);
 
     Mono<ResponseEntity> getApplicantContactDetails(String applicationFormId);
-    Mono<ResponseEntity> saveApplicantContactDetails(String applicationFormId, ApplicantContactDetails applicantContactDetails);
+    Mono<ResponseEntity> saveApplicantContactDetails(String applicationFormId, ApplicantContactDetails applicantContactDetails, HttpServletRequest request);
 
     Mono<ResponseEntity> getApplicantCriminalityDetails(String applicationFormId);
-    Mono<ResponseEntity> saveApplicantCriminalityDetails(String applicationFormId, ApplicantCriminalityDetails applicantCriminalityDetails);
+    Mono<ResponseEntity> saveApplicantCriminalityDetails(String applicationFormId, ApplicantCriminalityDetails applicantCriminalityDetails, HttpServletRequest request);
 
     Mono<ResponseEntity> getApplicantDeclarationDetails(String applicationFormId);
-    Mono<ResponseEntity> saveApplicantDeclarationDetails(String applicationFormId, ApplicantDeclarationDetails applicantDeclarationDetails);
+    Mono<ResponseEntity> saveApplicantDeclarationDetails(String applicationFormId, ApplicantDeclarationDetails applicantDeclarationDetails, HttpServletRequest request);
 
     Mono<ResponseEntity> getApplicantOtherInformation(String applicationFormId);
-    Mono<ResponseEntity> saveApplicantOtherInformation(String applicationFormId, ApplicantOtherInformation applicantOtherInformation);
+    Mono<ResponseEntity> saveApplicantOtherInformation(String applicationFormId, ApplicantOtherInformation applicantOtherInformation, HttpServletRequest request);
 
     Mono<ResponseEntity> getApplicantOutletInformation(String applicationFormId);
-    Mono<ResponseEntity> saveApplicantOutletInformation(String applicationFormId, ApplicantOutletInformation applicantOutletInformation);
+    Mono<ResponseEntity> saveApplicantOutletInformation(String applicationFormId, ApplicantOutletInformation applicantOutletInformation, HttpServletRequest request);
 
-    Mono<ResponseEntity> approveApplicationForm(String applicationFormId, String  approverId);
-    Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, ApplicationFormRejectDto applicationFormRejectDto);
-    Mono<ResponseEntity> completeApplicationForm(String applicationFormId, boolean isResubmit);
+    Mono<ResponseEntity> approveApplicationForm(String applicationFormId, String  approverId, HttpServletRequest request);
+    Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, ApplicationFormRejectDto applicationFormRejectDto, HttpServletRequest request);
+    Mono<ResponseEntity> completeApplicationForm(String applicationFormId, boolean isResubmit, HttpServletRequest request);
     Mono<ResponseEntity> getPaymentRecordsForApplicationForm(String applicationFormId);
 
     boolean institutionHasCompletedApplicationForGameType(String institutionId, String gameTypeId);
 
     ApplicationForm findApplicationFormById(String applicationFormId);
 
-    Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String applicationFormId,ApplicationFormCreateCommentDto applicationFormCreateCommentDto);
+    Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String applicationFormId,ApplicationFormCreateCommentDto applicationFormCreateCommentDto, HttpServletRequest request);
 }

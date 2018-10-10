@@ -120,6 +120,22 @@ public class Fee extends AbstractFact {
         return feePaymentType;
     }
 
+    public String getRevenueNameName() {
+        RevenueName revenueName = getRevenueName();
+        if (revenueName != null) {
+            return revenueName.getName();
+        }
+        return null;
+    }
+
+    public String getFeePaymentTypeName() {
+        FeePaymentType feePaymentType = getFeePaymentType();
+        if (feePaymentType != null) {
+            return feePaymentType.getName();
+        }
+        return null;
+    }
+
     public FeeDto convertToDto() {
         FeeDto feeDto = new FeeDto();
         feeDto.setAmount(getAmount());

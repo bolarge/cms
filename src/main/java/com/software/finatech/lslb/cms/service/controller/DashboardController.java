@@ -100,16 +100,16 @@ public class DashboardController extends BaseController {
         Query queryCasesTotalCount = new Query();
         Query queryAgentTotalCount = new Query();
         if(!StringUtils.isEmpty(gameTypeId)){
-            query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+            query.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
             queryAgentTotalCount.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
         }if(!StringUtils.isEmpty(institutionId)){
-            query.addCriteria(Criteria.where("institutionId").is(institutionId));
+            query.addCriteria(Criteria.where("id").is(institutionId));
             queryAgentTotalCount.addCriteria(Criteria.where("institutionIds").in(institutionId));
 
         }
         long institutionTotalCount=mongoRepositoryReactive.count(query, Institution.class).block();
         long gamingMachineTotalCount=mongoRepositoryReactive.count(query, GamingMachine.class).block();
-        long agentTotalCount=mongoRepositoryReactive.count(query, Agent.class).block();
+        long agentTotalCount=mongoRepositoryReactive.count(queryAgentTotalCount, Agent.class).block();
         long casesTotalCount=mongoRepositoryReactive.count(queryCasesTotalCount, LoggedCase.class).block();
 
         // long gamingTerminalTotalCount=mongoRepositoryReactive.count(query, GamingTerminal.class).block();

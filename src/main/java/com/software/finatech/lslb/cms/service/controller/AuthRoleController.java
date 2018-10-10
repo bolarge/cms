@@ -1,15 +1,21 @@
 package com.software.finatech.lslb.cms.service.controller;
 
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.AuthPermission;
 import com.software.finatech.lslb.cms.service.domain.AuthRole;
 import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthRoleService;
+import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +44,15 @@ public class AuthRoleController extends BaseController {
     private MailContentBuilderService mailContentBuilderService;*/
 
     private static Logger logger = LoggerFactory.getLogger(AuthRoleController.class);
+    private static final String roleAuditActionId = AuditActionReferenceData.ROLE_ID;
 
     @Autowired
     private AuthRoleService authRoleService;
+
+    @Autowired
+    private AuditLogHelper auditLogHelper;
+    @Autowired
+    private SpringSecurityAuditorAware springSecurityAuditorAware;
 
     /**
      * @param id AuthInfo id
@@ -107,6 +119,10 @@ public class AuthRoleController extends BaseController {
 
             Mapstore.STORE.get("AuthRole").put(authRole.getId(), authRole);
 
+            String verbiage = String.format("Created Role -> Role Name : %s ", authRole.getName());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(roleAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity(authRole.convertToDto(), HttpStatus.OK));
 
@@ -130,7 +146,7 @@ public class AuthRoleController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request")
     }
     )
-    public Mono<ResponseEntity> updateAuthRole(@Valid @RequestBody AuthRoleUpdateDto authRoleUpdateDto) {
+    public Mono<ResponseEntity> updateAuthRole(@Valid @RequestBody AuthRoleUpdateDto authRoleUpdateDto, HttpServletRequest request) {
         try {
             AuthRole authRole = (AuthRole) Mapstore.STORE.get("AuthRole").get(authRoleUpdateDto.getId());
             if (authRole == null) {
@@ -148,6 +164,13 @@ public class AuthRoleController extends BaseController {
             Mapstore.STORE.get("AuthRole").put(authRole.getId(), authRole);
 
             authRole.setAssociatedProperties();
+
+
+            String verbiage = String.format("Updated Role, Role Name: %s ", authRole.getName());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(roleAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
 
             return Mono.just(new ResponseEntity(authRole.convertToDto(), HttpStatus.OK));
 
@@ -280,13 +303,14 @@ public class AuthRoleController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request")
     }
     )
-    public Mono<ResponseEntity> updateAuthRole(@Valid @RequestBody AuthPermissionUpdateDto authPermissionUpdateDto) {
+    public Mono<ResponseEntity> updateAuthRole(@Valid @RequestBody AuthPermissionUpdateDto authPermissionUpdateDto, HttpServletRequest request) {
         try {
+
             AuthPermission authPermission = (AuthPermission) mongoRepositoryReactive.findById(authPermissionUpdateDto.getId(), AuthRole.class).block();
             if (authPermission == null) {
                 return Mono.just(new ResponseEntity("Bad Request", HttpStatus.BAD_REQUEST));
             }
-
+            String permissionName = authPermission.getName();
             if (authPermissionUpdateDto.getId() != null && !authPermissionUpdateDto.getId().isEmpty()) {
                 authPermission.setId(authPermissionUpdateDto.getId());
             } else if (authPermissionUpdateDto.getName() != null && !authPermissionUpdateDto.getName().isEmpty()) {
@@ -295,6 +319,11 @@ public class AuthRoleController extends BaseController {
 
             mongoRepositoryReactive.saveOrUpdate(authPermission);
             Mapstore.STORE.get("AuthPermission").put(authPermission.getId(), authPermission);
+
+            String verbiage = String.format("Updated Permission, Permission name: %s ", permissionName);
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(roleAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity(authPermission.convertToDto(), HttpStatus.OK));
 

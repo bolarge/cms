@@ -7,6 +7,7 @@ import com.software.finatech.lslb.cms.service.dto.LoggedCaseCreateDto;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public interface LoggedCaseService {
@@ -24,11 +25,11 @@ public interface LoggedCaseService {
                                             String endDate,
                                             HttpServletResponse httpServletResponse);
 
-    Mono<ResponseEntity> createCase(LoggedCaseCreateDto loggedCaseCreateDto);
+    Mono<ResponseEntity> createCase(LoggedCaseCreateDto loggedCaseCreateDto, HttpServletRequest request);
 
-    Mono<ResponseEntity> addLoggedCaseAction(LoggedCaseActionCreateDto caseActionCreateDto);
+    Mono<ResponseEntity> addLoggedCaseAction(LoggedCaseActionCreateDto caseActionCreateDto, HttpServletRequest request);
 
-    Mono<ResponseEntity> addLoggedCaseComment(LoggedCaseCommentCreateDto caseCommentCreateDto);
+    Mono<ResponseEntity> addLoggedCaseComment(LoggedCaseCommentCreateDto caseCommentCreateDto, HttpServletRequest request);
 
     Mono<ResponseEntity> getAllLoggedCaseStatus();
 

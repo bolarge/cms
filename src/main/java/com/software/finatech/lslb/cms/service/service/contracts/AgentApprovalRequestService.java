@@ -4,6 +4,7 @@ import com.software.finatech.lslb.cms.service.dto.AgentApprovalRequestOperationt
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public interface AgentApprovalRequestService {
@@ -25,9 +26,9 @@ public interface AgentApprovalRequestService {
 
     Mono<ResponseEntity> getAllApprovalRequestStatus();
 
-    Mono<ResponseEntity> approveRequest(AgentApprovalRequestOperationtDto agentApprovalRequestOperationtDto);
+    Mono<ResponseEntity> approveRequest(AgentApprovalRequestOperationtDto agentApprovalRequestOperationtDto, HttpServletRequest request);
 
-    Mono<ResponseEntity> rejectRequest(AgentApprovalRequestOperationtDto agentApprovalRequestRejectDto);
+    Mono<ResponseEntity> rejectRequest(AgentApprovalRequestOperationtDto agentApprovalRequestRejectDto, HttpServletRequest request);
 
     Mono<ResponseEntity> getAgentApprovalRequestFullDetail(String agentApprovalRequestId);
 }

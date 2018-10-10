@@ -6,7 +6,7 @@ import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 /**
  * Created by davidjaiyeola on 3/6/16.
  */
-public  class EnumeratedFact extends AbstractFact{
+public class EnumeratedFact extends AbstractFact {
     protected String name;
     protected String description;
     protected String code;
@@ -48,5 +48,10 @@ public  class EnumeratedFact extends AbstractFact{
     @Override
     public String getFactName() {
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 }

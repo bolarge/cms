@@ -71,6 +71,16 @@ public class VigipayServiceImpl implements VigipayService {
     }
 
     @Override
+    public String createInBranchMultipleItemInvoiceForInstitution(Institution institution,
+                                                      List<AuthInfo> adminsForInstitution,
+                                                      List<VigipayInvoiceItem> vigipayInvoiceItems) {
+        VigipayCreateInvoice vigipayCreateInvoice = createMultipleItemInvoiceFromInstitution(institution, adminsForInstitution, vigipayInvoiceItems);
+        return vigipayHttpClient.createInvoice(vigipayCreateInvoice);
+    }
+
+
+
+    @Override
     public boolean isConfirmedInvoicePayment(String invoiceNumber) throws VigiPayServiceException {
         return vigipayHttpClient.validateInvoicePaid(invoiceNumber);
     }
@@ -81,7 +91,7 @@ public class VigipayServiceImpl implements VigipayService {
         vigipayCreateCustomer.setContactPersonEmail(agent.getEmailAddress());
         vigipayCreateCustomer.setName(agent.getFullName());
         vigipayCreateCustomer.setCustomerCorporateCode(customerCorporateCode);
-        vigipayCreateCustomer.setContactPersonTitle(!StringUtils.isEmpty(agent.getTitle())? agent.getTitle() : "Mr");
+        vigipayCreateCustomer.setContactPersonTitle(!StringUtils.isEmpty(agent.getTitle()) ? agent.getTitle() : "Mr");
         vigipayCreateCustomer.setContactPersonFirstName(agent.getFirstName());
         vigipayCreateCustomer.setContactPersonLastName(agent.getLastName());
         vigipayCreateCustomer.setContactPersonPhone(agent.getPhoneNumber());
@@ -106,6 +116,7 @@ public class VigipayServiceImpl implements VigipayService {
         return vigipayCreateCustomer;
     }
 
+
     private VigipayCreateInvoice createInvoiceFromInstitution(Institution institution, List<AuthInfo> authInfos,
                                                               VigipayInvoiceItem vigipayInvoiceItem) {
         VigipayCreateInvoice vigipayCreateInvoice = new VigipayCreateInvoice();
@@ -118,6 +129,28 @@ public class VigipayServiceImpl implements VigipayService {
         List<VigipayInvoiceItem> invoiceItems = new ArrayList<>();
         invoiceItems.add(vigipayInvoiceItem);
         vigipayCreateInvoice.setInvoiceItems(invoiceItems);
+        vigipayCreateInvoice.setCorporateRevenueCode(corporateRevenueCode);
+        DateTime today = DateTime.now();
+        DateTime next7days = today.plusDays(7);
+        vigipayCreateInvoice.setInvoiceDate(today.toString("yyyy-MM-dd"));
+        vigipayCreateInvoice.setDueDate(next7days.toString("yyyy-MM-dd"));
+        vigipayCreateInvoice.setEnforceDueDate(false);
+        vigipayCreateInvoice.setInvoiceType(1);
+        vigipayCreateInvoice.setInvoiceAction(2);
+        vigipayCreateInvoice.setCreateContacts(true);
+        return vigipayCreateInvoice;
+    }
+
+    private VigipayCreateInvoice createMultipleItemInvoiceFromInstitution(Institution institution, List<AuthInfo> authInfos,
+                                                                          List<VigipayInvoiceItem> vigipayInvoiceItems) {
+        VigipayCreateInvoice vigipayCreateInvoice = new VigipayCreateInvoice();
+        vigipayCreateInvoice.setCustomerCode(institution.getVgPayCustomerCode());
+        vigipayCreateInvoice.setRecipients(vigipayRecipientListFromAdmins(authInfos));
+        vigipayCreateInvoice.setLocationCode(locationCode);
+        vigipayCreateInvoice.setCurrencyCode(currencyCode);
+        vigipayCreateInvoice.setNote("From Lagos State Lotteries Board");
+
+        vigipayCreateInvoice.setInvoiceItems(new ArrayList<>(vigipayInvoiceItems));
         vigipayCreateInvoice.setCorporateRevenueCode(corporateRevenueCode);
         DateTime today = DateTime.now();
         DateTime next7days = today.plusDays(7);

@@ -4,7 +4,9 @@ import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +29,15 @@ public class PaymentRecord extends AbstractFact {
     private String feePaymentTypeId;
     private String revenueNameId;
     private String paymentReference;
+    private String batchPaymentId;
 
+    public String getBatchPaymentId() {
+        return batchPaymentId;
+    }
+
+    public void setBatchPaymentId(String batchPaymentId) {
+        this.batchPaymentId = batchPaymentId;
+    }
 
     public String getPaymentReference() {
         return paymentReference;
@@ -335,6 +345,14 @@ public class PaymentRecord extends AbstractFact {
     public boolean isAgentPayment() {
         return StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID, this.revenueNameId);
     }
+
+    public Pair<String, String> getLicenseStartAndEndDate() {
+        Query query = new Query();
+
+
+        return null;
+    }
+
 
     @Override
     public String getFactName() {

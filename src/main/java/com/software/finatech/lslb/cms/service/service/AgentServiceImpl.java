@@ -1,21 +1,22 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.domain.AgentApprovalRequest;
 import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
-import com.software.finatech.lslb.cms.service.dto.AgentCreateDto;
-import com.software.finatech.lslb.cms.service.dto.AgentDto;
-import com.software.finatech.lslb.cms.service.dto.AgentInstitutionCreateDto;
-import com.software.finatech.lslb.cms.service.dto.AgentUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AgentApprovalRequestTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
-import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
+import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.LicenseValidatorUtil;
-import com.software.finatech.lslb.cms.service.util.AgentUserCreator;
+import com.software.finatech.lslb.cms.service.util.NumberUtil;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,23 +41,24 @@ import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logA
 @Service
 public class AgentServiceImpl implements AgentService {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
-    private AuthInfoService authInfoService;
     private LicenseValidatorUtil licenseValidatorUtil;
-    private AgentUserCreator agentUserCreatorAsync;
+    private SpringSecurityAuditorAware springSecurityAuditorAware;
+    private AuditLogHelper auditLogHelper;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static final Logger logger = LoggerFactory.getLogger(AgentServiceImpl.class);
+    private static final String agentAuditActionId = AuditActionReferenceData.AGENT_ID;
 
 
     @Autowired
     public AgentServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
-                            AuthInfoService authInfoService,
                             LicenseValidatorUtil licenseValidatorUtil,
-                            AgentUserCreator agentUserCreatorAsync) {
+                            SpringSecurityAuditorAware springSecurityAuditorAware,
+                            AuditLogHelper auditLogHelper) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
-        this.authInfoService = authInfoService;
         this.licenseValidatorUtil = licenseValidatorUtil;
-        this.agentUserCreatorAsync = agentUserCreatorAsync;
+        this.springSecurityAuditorAware = springSecurityAuditorAware;
+        this.auditLogHelper = auditLogHelper;
     }
 
     @Override
@@ -111,8 +114,10 @@ public class AgentServiceImpl implements AgentService {
         }
     }
 
+
+    //Creates an agent approval request to create  a new agent
     @Override
-    public Mono<ResponseEntity> createAgent(AgentCreateDto agentCreateDto) {
+    public Mono<ResponseEntity> createAgent(AgentCreateDto agentCreateDto, HttpServletRequest request) {
         try {
             Mono<ResponseEntity> validateCreateAgent = validateCreateAgent(agentCreateDto);
             if (validateCreateAgent != null) {
@@ -122,6 +127,12 @@ public class AgentServiceImpl implements AgentService {
             saveAgent(agent);
             AgentApprovalRequest agentApprovalRequest = fromAgentCreateDto(agentCreateDto, agent);
             mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
+
+            String verbiage = String.format("Created agent approval request ->  Type :%s", agentApprovalRequest.getAgentApprovalRequestTypeName());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), agentApprovalRequest.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format for date of birth , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
@@ -149,52 +160,39 @@ public class AgentServiceImpl implements AgentService {
     }
 
     @Override
-    public Mono<ResponseEntity> updateAgent(AgentUpdateDto agentUpdateDto) {
+    public Mono<ResponseEntity> updateAgent(AgentUpdateDto agentUpdateDto, HttpServletRequest request) {
         try {
             String agentId = agentUpdateDto.getId();
             Agent agent = findById(agentId);
             if (agent == null) {
                 return Mono.just(new ResponseEntity<>(String.format("No agent found with id %s", agentId), HttpStatus.BAD_REQUEST));
             }
-            if (!StringUtils.equals(agent.getEmailAddress(), agentUpdateDto.getEmailAddress())) {
-                String email = agentUpdateDto.getEmailAddress();
-                Query queryForAgentWithExistingEmail = new Query();
-                queryForAgentWithExistingEmail.addCriteria(Criteria.where("emailAddress").is(email));
-                Agent existingAgentWithEmail = (Agent) mongoRepositoryReactive.find(queryForAgentWithExistingEmail, Agent.class).block();
-                if (existingAgentWithEmail != null) {
-                    return Mono.just(new ResponseEntity<>(String.format("There is an existing agent with email %s", email), HttpStatus.BAD_REQUEST));
-                }
-            }
-
-            LocalDate dateOfBirth = FORMATTER.parseLocalDate(agentUpdateDto.getDateOfBirth());
-            agent.setDateOfBirth(dateOfBirth);
             agent.setResidentialAddress(agentUpdateDto.getResidentialAddress());
-            agent.setEmailAddress(agentUpdateDto.getEmailAddress());
-            agent.setMeansOfId(agentUpdateDto.getMeansOfId());
-            agent.setIdNumber(agentUpdateDto.getIdNumber());
-            agent.setBvn(agentUpdateDto.getBvn());
-            agent.setLastName(agentUpdateDto.getLastName());
-            agent.setFirstName(agentUpdateDto.getFirstName());
             agent.setPhoneNumber(agentUpdateDto.getPhoneNumber());
             saveAgent(agent);
+
+            String verbiage = String.format("Updated Agent Details -> Agent Id: %s ", agent.getAgentId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while updating agent", e);
         }
     }
 
+
+    //creates an agent approval request to add agent to institution
     @Override
-    public Mono<ResponseEntity> createAgentUnderInstitution(AgentInstitutionCreateDto agentInstitutionCreateDto) {
+    public Mono<ResponseEntity> createAgentUnderInstitution(AgentInstitutionCreateDto agentInstitutionCreateDto, HttpServletRequest request) {
         try {
             String institutionId = agentInstitutionCreateDto.getInstitutionId();
             String gameTypeId = agentInstitutionCreateDto.getGameTypeId();
-
-            //TODO: MAKE SURE VALIDATION IS MADE FOR INSTITUTION LICENSE AND GAME TYPE
             Mono<ResponseEntity> validateInstitutionLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
             if (validateInstitutionLicenseResponse != null) {
                 return validateInstitutionLicenseResponse;
             }
-
             Query query = new Query();
             query.addCriteria(Criteria.where("emailAddress").is(agentInstitutionCreateDto.getAgentEmailAddress()));
             query.addCriteria(Criteria.where("enabled").is(true));
@@ -205,9 +203,38 @@ public class AgentServiceImpl implements AgentService {
 
             AgentApprovalRequest agentApprovalRequest = fromAgentInstitutionCreate(agentInstitutionCreateDto, agentWithEmail);
             mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
+
+            String verbiage = String.format("Created Agent approval request ->  Type :%s", agentApprovalRequest.getAgentApprovalRequestTypeName());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), agentApprovalRequest.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>("Agent creation has been submitted for approval", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while trying to create agent under institution", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> validateAgentProfileOnSystem(AgentValidationDto agentValidationDto) {
+        try {
+            String email = agentValidationDto.getEmail();
+            String bvn = agentValidationDto.getBvn();
+            String institutionId = agentValidationDto.getInstitutionId();
+            String gameTypeId = agentValidationDto.getGameTypeId();
+            Mono<ResponseEntity> validateInstitutionLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
+            if (validateInstitutionLicenseResponse != null) {
+                return validateInstitutionLicenseResponse;
+            }
+            Query query = Query.query(new Criteria().orOperator(Criteria.where("emailAddress").is(email), Criteria.where("bvn").is(bvn)));
+            Agent agent = (Agent) mongoRepositoryReactive.find(query, Agent.class).block();
+            if (agent != null) {
+                return Mono.just(new ResponseEntity<>("No Record found", HttpStatus.NOT_FOUND));
+            } else {
+                return Mono.just(new ResponseEntity<>(agent.convertToFullDetailDto(), HttpStatus.OK));
+            }
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while validating agent", e);
         }
     }
 
@@ -241,16 +268,22 @@ public class AgentServiceImpl implements AgentService {
         String email = agentCreateDto.getEmailAddress();
         Query queryForAgentWithEmail = new Query();
         queryForAgentWithEmail.addCriteria(Criteria.where("emailAddress").is(email));
-        Agent agent = (Agent) mongoRepositoryReactive.find(queryForAgentWithEmail, Agent.class).block();
-        if (agent != null) {
+        Agent agentWithEmail = (Agent) mongoRepositoryReactive.find(queryForAgentWithEmail, Agent.class).block();
+        if (agentWithEmail != null) {
             return Mono.just(new ResponseEntity<>(String.format("An agent already exist with the email address %s", email), HttpStatus.BAD_REQUEST));
         }
-        //TODO: VALIDATE THE INSTITUTION CREATING AN AGENT IF IT HAS LICENCE FOR THE CATEGORY
+
+        //check if agent exist with bvn
+        String bvn = agentCreateDto.getBvn();
+        Query queryForAgentWithBvn = Query.query(Criteria.where("bvn").is(bvn));
+        Agent agentWithBvn = (Agent) mongoRepositoryReactive.find(queryForAgentWithBvn, Agent.class).block();
+        if (agentWithBvn != null) {
+            return Mono.just(new ResponseEntity<>(String.format("An agent already exist with the bvn %s", bvn), HttpStatus.BAD_REQUEST));
+        }
         Mono<ResponseEntity> validateLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(agentCreateDto.getInstitutionId(), agentCreateDto.getGameTypeId());
         if (validateLicenseResponse != null) {
             return validateLicenseResponse;
         }
-
         return null;
     }
 
@@ -285,14 +318,8 @@ public class AgentServiceImpl implements AgentService {
         agent.setInstitutionIds(institutionIds);
         agent.setAgentInstitutions(agentInstitutions);
         agent.setBusinessAddresses(agentInstitution.getBusinessAddressList());
+        agent.setAgentId(generateAgentId());
         return agent;
-    }
-
-    @Override
-    public List<Agent> getAllUncreatedOnVGPay() {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("customerCreatedOnVGPay").is(false));
-        return (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
     }
 
     @Override
@@ -306,5 +333,9 @@ public class AgentServiceImpl implements AgentService {
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while getting agent by id", e);
         }
+    }
+
+    private String generateAgentId() {
+        return String.format("LAGOS-AG-%s", NumberUtil.getRandomNumberInRange(20, 45578994));
     }
 }

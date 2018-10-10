@@ -60,7 +60,7 @@ public class AuditActionReferenceData {
         action = (AuditAction) mongoRepositoryReactive.findById(CONFIGURATIONS_ID, AuditAction.class).block();
         if (action == null) {
             action = new AuditAction();
-            action.setId(APPLICATION_ID);
+            action.setId(FEE_ID);
         }
         action.setDescription("Fee and Category Configurations");
         action.setName("Configurations");

@@ -144,6 +144,14 @@ public class AgentApprovalRequest extends AbstractFact {
         return agentApprovalRequestType;
     }
 
+    public String getAgentApprovalRequestTypeName() {
+        AgentApprovalRequestType agentApprovalRequestType = getAgentApprovalRequestType();
+        if (agentApprovalRequestType == null) {
+            return null;
+        }
+        return agentApprovalRequestType.getName();
+    }
+
     private ApprovalRequestStatus getApprovalRequestStatus() {
         if (StringUtils.isEmpty(this.approvalRequestStatusId)) {
             return null;
@@ -277,19 +285,19 @@ public class AgentApprovalRequest extends AbstractFact {
         agentApprovalRequestDto.setBusinessAddressList(getBusinessAddressList());
 
         AuthInfo approver = getUser(this.approverId);
-        if (approver != null){
+        if (approver != null) {
             agentApprovalRequestDto.setApproverId(getApproverId());
             agentApprovalRequestDto.setApproverName(approver.getFullName());
         }
 
         AuthInfo rejector = getUser(this.rejectorId);
-        if (rejector != null){
+        if (rejector != null) {
             agentApprovalRequestDto.setRejectorId(getRejectorId());
             agentApprovalRequestDto.setRejectorName(rejector.getFullName());
         }
 
-        if (isInstitutionAgentAdditionRequest()){
-            AgentInstitution  agentInstitution = new AgentInstitution();
+        if (isInstitutionAgentAdditionRequest()) {
+            AgentInstitution agentInstitution = new AgentInstitution();
             agentInstitution.setInstitutionId(getInstitutionId());
             agentInstitution.setGameTypeId(getGameTypeId());
             agentInstitution.setBusinessAddressList(getBusinessAddressList());

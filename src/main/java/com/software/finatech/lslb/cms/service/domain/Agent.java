@@ -209,23 +209,19 @@ public class Agent extends AbstractFact {
         agentDto.setId(getId());
         agentDto.setEnabled(isEnabled());
         agentDto.setTitle(getTitle());
+        agentDto.setAgentId(getAgentId());
+        agentDto.setId(getId());
         return agentDto;
     }
 
     public AgentDto convertToFullDetailDto() {
-        AgentDto agentDto = new AgentDto();
-        agentDto.setEmailAddress(getEmailAddress());
-        agentDto.setFullName(getFullName());
-        agentDto.setPhoneNumber(getPhoneNumber());
-        agentDto.setId(getId());
-        agentDto.setEnabled(isEnabled());
+        AgentDto agentDto = convertToDto();
         agentDto.setMeansOfId(getMeansOfId());
         agentDto.setIdNumber(getIdNumber());
         agentDto.setLastName(getLastName());
         agentDto.setFirstName(getFirstName());
         agentDto.setResidentialAddress(getResidentialAddress());
         agentDto.setBusinessAddresses(getBusinessAddresses());
-        agentDto.setTitle(getTitle());
         agentDto.setBvn(getBvn());
         LocalDate dateOfBirth = getDateOfBirth();
         if (dateOfBirth != null) {

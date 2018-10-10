@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public interface GamingMachineService {
@@ -19,11 +20,11 @@ public interface GamingMachineService {
                                                String institutionId,
                                                HttpServletResponse httpServletResponse);
 
-    Mono<ResponseEntity> createGamingMachine(GamingMachineCreateDto gamingMachineCreateDto);
+    Mono<ResponseEntity> createGamingMachine(GamingMachineCreateDto gamingMachineCreateDto, HttpServletRequest request);
 
-    Mono<ResponseEntity> updateGamingMachine(GamingMachineUpdateDto gamingMachineUpdateDto);
+    Mono<ResponseEntity> updateGamingMachine(GamingMachineUpdateDto gamingMachineUpdateDto, HttpServletRequest request);
 
-    Mono<ResponseEntity> uploadMultipleGamingMachinesForInstitution(String institutionId,String gameTypeId, MultipartFile multipartFile);
+    Mono<ResponseEntity> uploadMultipleGamingMachinesForInstitution(String institutionId,String gameTypeId, MultipartFile multipartFile, HttpServletRequest request);
 
     GamingMachine findById(String gamingMachineId);
 
