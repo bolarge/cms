@@ -514,7 +514,7 @@ public class LicenseServiceImpl implements LicenseService {
             if (license == null) {
                 return Mono.just(new ResponseEntity<>("No License Record", HttpStatus.BAD_REQUEST));
             }
-            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+            license.setLicenseStatusId(LicenseStatusReferenceData.RENEWED_ID);
             mongoRepositoryReactive.saveOrUpdate(license);
             List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
             institutionAdmins.stream().forEach(institutionAdmin->{
@@ -523,7 +523,8 @@ public class LicenseServiceImpl implements LicenseService {
                 notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
                 notificationDto.setTemplate("LicenseUpdate");
                 notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ", renewal application for " +
-                        notificationDto.getGameType()+" have been approved.");
+                        notificationDto.getGameType()+" have been approved. License is valid from "+license.getEffectiveDate().toString("dd/MM/YYY")+" to" +
+                        notificationDto.getEndDate());
                 notificationDto.setInstitutionEmail(institutionAdmin.getEmailAddress());
                 sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
             });
