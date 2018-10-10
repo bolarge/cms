@@ -8,8 +8,8 @@ public class AgentValidationDto {
     @Email
     @NotEmpty(message = "Please provide agent email")
     private String email;
-    @NotEmpty(message = "Please provide agent bvn")
-    private String bvn;
+    @NotEmpty(message = "Please provide agent id")
+    private String agentId;
     @NotEmpty
     private String gameTypeId;
     @NotEmpty
@@ -39,11 +39,11 @@ public class AgentValidationDto {
         this.email = email;
     }
 
-    public String getBvn() {
-        return bvn;
+    public String getAgentId() {
+        return agentId;
     }
 
-    public void setBvn(String bvn) {
-        this.bvn = bvn;
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
     }
 }

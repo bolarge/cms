@@ -107,8 +107,8 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     @Override
     public Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl, HttpServletRequest request) {
         String requestIpAddress = null;
-        if (request != null){
-            requestIpAddress= request.getRemoteAddr();
+        if (request != null) {
+            requestIpAddress = request.getRemoteAddr();
         }
 
         if (!StringUtils.isEmpty(authInfoCreateDto.getInstitutionId())) {
@@ -221,7 +221,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 String verbiage = String.format("Create user  -> Name : %s ", authInfo.getFullName());
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                         springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
-                        LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                        LocalDateTime.now(), LocalDate.now(), true, requestIpAddress, verbiage));
 
                 return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
             } else {
@@ -250,7 +250,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 String verbiage = String.format("Create user  -> Name : %s ", authInfo.getFullName());
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                         springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
-                        LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                        LocalDateTime.now(), LocalDate.now(), true, requestIpAddress, verbiage));
 
                 return Mono.just(new ResponseEntity<>(toCreateAuthInfoResponse(authInfo, verificationToken), HttpStatus.OK));
             }
@@ -811,7 +811,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public ArrayList<AuthInfo> findAllLSLBMembersThatCanApproveAgentApprovals() {
+    public ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveAgentApprovalsNotification() {
         ArrayList<AuthInfo> validMembers = new ArrayList<>();
         for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
             Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();

@@ -48,7 +48,7 @@ public interface AuthInfoService {
 
     ArrayList<AuthInfo> findAllLSLBMembersThatCanReceivePaymentNotification();
 
-    ArrayList<AuthInfo> findAllLSLBMembersThatCanApproveAgentApprovals();
+    ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveAgentApprovalsNotification();
 
     Mono<ResponseEntity> addPermissionsToUser(UserAuthPermissionDto userAuthPermissionDto);
 

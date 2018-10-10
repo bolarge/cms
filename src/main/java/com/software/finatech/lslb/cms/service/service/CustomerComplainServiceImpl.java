@@ -139,7 +139,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
 
             String verbiage = String.format("Created customer complain -> Ticket Id : %s ", customerComplain.getTicketId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(customerComplainAuditActionId,
-              customerComplain.getCustomerFullName(), customerComplain.getCustomerEmailAddress(),
+                    customerComplain.getCustomerFullName(), customerComplain.getCustomerEmailAddress(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity<>(customerComplain.convertToDto(), HttpStatus.OK));
@@ -194,9 +194,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             customerComplainAction.setComplainStatusId(CustomerComplainStatusReferenceData.RESOLVED_ID);
             customerComplainAction.setUserId(userId);
             existingCustomerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.RESOLVED_ID);
-            List<CustomerComplainAction> existingCustomerComplainActions = existingCustomerComplain.getCustomerComplainActionList();
-            existingCustomerComplainActions.add(customerComplainAction);
-            existingCustomerComplain.setCustomerComplainActionList(existingCustomerComplainActions);
+            existingCustomerComplain.getCustomerComplainActionList().add(customerComplainAction);
             mongoRepositoryReactive.saveOrUpdate(existingCustomerComplain);
             customerComplaintEmailSenderAsync.sendResolvedCustomerComplainToCustomer(existingCustomerComplain);
 
@@ -245,9 +243,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             customerComplainAction.setComplainStatusId(CustomerComplainStatusReferenceData.CLOSED_ID);
             customerComplainAction.setUserId(userId);
             existingCustomerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.CLOSED_ID);
-            List<CustomerComplainAction> existingCustomerComplainActions = existingCustomerComplain.getCustomerComplainActionList();
-            existingCustomerComplainActions.add(customerComplainAction);
-            existingCustomerComplain.setCustomerComplainActionList(existingCustomerComplainActions);
+            existingCustomerComplain.getCustomerComplainActionList().add(customerComplainAction);
             mongoRepositoryReactive.saveOrUpdate(existingCustomerComplain);
             customerComplaintEmailSenderAsync.sendClosedCustomerComplaintToCustomer(existingCustomerComplain);
 
@@ -290,9 +286,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             customerComplainAction.setComplainStatusId(customerComplainStatusId);
             customerComplainAction.setUserId(userId);
             existingCustomerComplain.setCustomerComplainStatusId(customerComplainStatusId);
-            List<CustomerComplainAction> existingCustomerComplainActions = existingCustomerComplain.getCustomerComplainActionList();
-            existingCustomerComplainActions.add(customerComplainAction);
-            existingCustomerComplain.setCustomerComplainActionList(existingCustomerComplainActions);
+            existingCustomerComplain.getCustomerComplainActionList().add(customerComplainAction);
             mongoRepositoryReactive.saveOrUpdate(existingCustomerComplain);
             if (customerComplainUpdateDto.isClosedUpdate()) {
                 customerComplaintEmailSenderAsync.sendClosedCustomerComplaintToCustomer(existingCustomerComplain);
@@ -305,8 +299,6 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(customerComplainAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-
-
 
             return Mono.just(new ResponseEntity<>(existingCustomerComplain.convertToFullDetailDto(), HttpStatus.OK));
         } catch (Exception e) {

@@ -108,15 +108,15 @@ public class ApplicationFormEmailSenderAsync {
 
     @Async
     public void sendApplicationFormSubmissionMailToLSLBAdmins(ApplicationForm applicationForm) {
-        List<String> adminEmails = new ArrayList<>();
-        //TODO:: VALIDATE EMAILS TO SEND  APPLICATION SUBMISSION EMAIL TO
-        if (adminEmails.isEmpty()) {
+        List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatCanReceiveApplicationSubmissionNotification();
+        if (lslbAdmins.isEmpty()) {
             logger.info("No LSLB Admin staff found, Skipping email sending");
             return;
         }
         String mailSubject = "New Application submitted on LSLB Customer Management System";
         String emailContent = buildApplicationFormSubmissionEmailContent(applicationForm);
-        for (String adminEmail : adminEmails) {
+        for (AuthInfo lslbAdmin : lslbAdmins) {
+            String adminEmail = lslbAdmin.getEmailAddress();
             logger.info("Sending email to LSLB admin with email -> {}", adminEmail);
             sendApplicationFormSubmissionNotificationToLSLSBAdmin(adminEmail, mailSubject, emailContent);
         }

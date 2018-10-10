@@ -13,6 +13,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.LicenseValidatorUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AgentCreationNotifierAsync;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
@@ -44,6 +45,7 @@ public class AgentServiceImpl implements AgentService {
     private LicenseValidatorUtil licenseValidatorUtil;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
+    private AgentCreationNotifierAsync agentCreationNotifierAsync;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static final Logger logger = LoggerFactory.getLogger(AgentServiceImpl.class);
@@ -54,11 +56,13 @@ public class AgentServiceImpl implements AgentService {
     public AgentServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                             LicenseValidatorUtil licenseValidatorUtil,
                             SpringSecurityAuditorAware springSecurityAuditorAware,
-                            AuditLogHelper auditLogHelper) {
+                            AuditLogHelper auditLogHelper,
+                            AgentCreationNotifierAsync agentCreationNotifierAsync) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.licenseValidatorUtil = licenseValidatorUtil;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.auditLogHelper = auditLogHelper;
+        this.agentCreationNotifierAsync = agentCreationNotifierAsync;
     }
 
     @Override
@@ -133,6 +137,7 @@ public class AgentServiceImpl implements AgentService {
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), agentApprovalRequest.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
+            agentCreationNotifierAsync.sendNewAgentApprovalRequestToLSLBAdmin(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format for date of birth , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
@@ -208,7 +213,7 @@ public class AgentServiceImpl implements AgentService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), agentApprovalRequest.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-
+            agentCreationNotifierAsync.sendNewAgentApprovalRequestToLSLBAdmin(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>("Agent creation has been submitted for approval", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while trying to create agent under institution", e);
@@ -219,14 +224,14 @@ public class AgentServiceImpl implements AgentService {
     public Mono<ResponseEntity> validateAgentProfileOnSystem(AgentValidationDto agentValidationDto) {
         try {
             String email = agentValidationDto.getEmail();
-            String bvn = agentValidationDto.getBvn();
+            String agentId = agentValidationDto.getAgentId();
             String institutionId = agentValidationDto.getInstitutionId();
             String gameTypeId = agentValidationDto.getGameTypeId();
             Mono<ResponseEntity> validateInstitutionLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
             if (validateInstitutionLicenseResponse != null) {
                 return validateInstitutionLicenseResponse;
             }
-            Query query = Query.query(new Criteria().orOperator(Criteria.where("emailAddress").is(email), Criteria.where("bvn").is(bvn)));
+            Query query = Query.query(new Criteria().orOperator(Criteria.where("emailAddress").is(email), Criteria.where("agentId").is(agentId)));
             Agent agent = (Agent) mongoRepositoryReactive.find(query, Agent.class).block();
             if (agent != null) {
                 return Mono.just(new ResponseEntity<>("No Record found", HttpStatus.NOT_FOUND));
