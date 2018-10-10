@@ -14,7 +14,9 @@ import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReference
 import com.software.finatech.lslb.cms.service.service.contracts.*;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
 import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.PaymentEmailNotifierAsync;
+import net.bytebuddy.asm.Advice;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
@@ -51,9 +53,10 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     private LicenseService licenseService;
     private ApplicationFormService applicationFormService;
     private PaymentEmailNotifierAsync paymentEmailNotifierAsync;
-
     @Autowired
     private SpringSecurityAuditorAware springSecurityAuditorAware;
+    @Autowired
+    private AuditLogHelper auditLogHelper;
 
     @Autowired
     public PaymentRecordDetailServiceImpl(FeeService feeService,
@@ -130,12 +133,16 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             String invoiceNumber = null;
             Agent agent = null;
             Institution institution = null;
+            GamingMachine gamingMachine = null;
             String feeId = paymentRecordDetailCreateDto.getFeeId();
             Fee fee = feeService.findFeeById(feeId);
             if (fee == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Fee with id %s not found", feeId), HttpStatus.BAD_REQUEST));
             }
 
+            if (paymentRecordDetailCreateDto.isGamingMachinePayment()) {
+                gamingMachine = gamingMachineService.findById(paymentRecordDetailCreateDto.getGamingMachineId());
+            }
             if (paymentRecordDetailCreateDto.isFirstPayment()) {
                 Mono<ResponseEntity> validateFirstPaymentResponse = validateFirstPayment(paymentRecordDetailCreateDto, fee);
                 if (validateFirstPaymentResponse != null) {
@@ -147,12 +154,15 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             String feeName = feeDto.getFeePaymentTypeName();
             String gameTypeName = feeDto.getGameTypeName();
             String revenueName = feeDto.getRevenueName();
-            String feeDescription = String.format("%s for %ss for category : %s ", feeName, revenueName, gameTypeName);
+            String suffix = "";
+            if (paymentRecordDetailCreateDto.isGamingMachinePayment() && gamingMachine != null) {
+                suffix = String.format(" for Machine %s", gamingMachine.getMachineNumber());
+            }
+            String feeDescription = String.format("%s for %ss for category : %s %s", feeName, revenueName, gameTypeName, suffix);
             feeDescription = StringCapitalizer.convertToTitleCaseIteratingChars(feeDescription);
             if (paymentRecordDetailCreateDto.getAmount() < fee.getAmount()) {
                 feeDescription = String.format("%s (Part Payment)", feeDescription);
             }
-
 
             PaymentRecord paymentRecord = new PaymentRecord();
             String paymentRecordId = paymentRecordDetailCreateDto.getPaymentRecordId();
@@ -181,8 +191,9 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             }
 
             if (paymentRecordDetailCreateDto.isGamingMachinePayment()) {
-                GamingMachine gamingMachine = gamingMachineService.findById(paymentRecordDetailCreateDto.getGamingMachineId());
-                if (gamingMachine != null) {
+                if (gamingMachine == null) {
+                    return Mono.just(new ResponseEntity<>(String.format("Gaming machine with id %s does not exist", paymentRecordDetailCreateDto.getGamingMachineId()), HttpStatus.BAD_REQUEST));
+                } else {
                     institution = institutionService.findById(gamingMachine.getInstitutionId());
                     institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institution.getId());
                     if (institutionAdmins.isEmpty()) {
@@ -498,7 +509,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         int pageSize = 10000;
         String sortDirection = "DESC";
         String sortProperty = "createdAt";
-        Mono<ResponseEntity> findLicenseResponse = licenseService.findAllLicense(page, pageSize, sortDirection, sortProperty, institutionId, agentId, gamingMachineId, null, gameTypeId, null, null, null, null);
+        Mono<ResponseEntity> findLicenseResponse = licenseService.findAllLicense(page, pageSize, sortDirection, sortProperty, institutionId, agentId, gamingMachineId, null, gameTypeId, null, null, null, null, null);
         if (findLicenseResponse.block().getStatusCode() != HttpStatus.OK) {
             String categoryName = fee.getGameTypeName();
             return Mono.just(new ResponseEntity<>(String.format("You do not have an existing license for category %s, please get licensed for category %s before attempting to pay for license renewal for the category", categoryName, categoryName), HttpStatus.BAD_REQUEST));
@@ -589,15 +600,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         paymentRecord.setRevenueNameId(fee.getRevenueNameId());
         paymentRecord.setFeePaymentTypeId(fee.getFeePaymentTypeId());
 
-        LocalDateTime presentDateTime = LocalDateTime.now();
-        String paymentReference = String.format("%s%s%s%s%s%s%s", NumberUtil.getRandomNumberInRange(20, 5000),
-                presentDateTime.getDayOfMonth(),
-                presentDateTime.getMonthOfYear(),
-                presentDateTime.getYear(),
-                presentDateTime.getHourOfDay(),
-                presentDateTime.getMinuteOfHour(),
-                presentDateTime.getSecondOfMinute());
-        paymentRecord.setPaymentReference(paymentReference);
+        paymentRecord.setPaymentReference(NumberUtil.generateTransactionReferenceForPaymentRecord());
         if (agent != null) {
             paymentRecord.setAgentId(agent.getId());
         }

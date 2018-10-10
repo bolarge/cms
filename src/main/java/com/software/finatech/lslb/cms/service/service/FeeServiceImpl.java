@@ -1,16 +1,22 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.domain.FeePaymentType;
 import com.software.finatech.lslb.cms.service.domain.RevenueName;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
+import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.MapValues;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +38,23 @@ import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logA
 
 @Service
 public class FeeServiceImpl implements FeeService {
-    private MongoRepositoryReactiveImpl mongoRepositoryReactive;
+
     private static final Logger logger = LoggerFactory.getLogger(FeeServiceImpl.class);
+    public static final String feeAuditActionId = AuditActionReferenceData.CONFIGURATIONS_ID;
+
+    private MongoRepositoryReactiveImpl mongoRepositoryReactive;
+    private SpringSecurityAuditorAware springSecurityAuditorAware;
+    private AuditLogHelper auditLogHelper;
+
+    @Autowired
+    public void setSpringSecurityAuditorAware(SpringSecurityAuditorAware springSecurityAuditorAware) {
+        this.springSecurityAuditorAware = springSecurityAuditorAware;
+    }
+
+    @Autowired
+    public void setAuditLogHelper(AuditLogHelper auditLogHelper) {
+        this.auditLogHelper = auditLogHelper;
+    }
 
     @Autowired
     public void setMongoRepositoryReactive(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
@@ -42,7 +64,7 @@ public class FeeServiceImpl implements FeeService {
     @Autowired
     MapValues mapValues;
 
-    public Mono<ResponseEntity> createFee(FeeCreateDto feeCreateDto) {
+    public Mono<ResponseEntity> createFee(FeeCreateDto feeCreateDto, HttpServletRequest request) {
         try {
             String gameTypeId = feeCreateDto.getGameTypeId();
             String feePaymentTypeId = feeCreateDto.getFeePaymentTypeId();
@@ -50,9 +72,11 @@ public class FeeServiceImpl implements FeeService {
             query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
             query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             query.addCriteria(Criteria.where("revenueNameId").is(feeCreateDto.getRevenueNameId()));
+            query.addCriteria(Criteria.where("active").is(true));
             Fee existingFeeWithGameTypeAndFeePaymentType = (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
             if (existingFeeWithGameTypeAndFeePaymentType != null) {
-                return Mono.just(new ResponseEntity<>("A fee setting already exist with the Fee Type and Game Type please update it", HttpStatus.BAD_REQUEST));
+                existingFeeWithGameTypeAndFeePaymentType.setActive(false);
+                mongoRepositoryReactive.saveOrUpdate(existingFeeWithGameTypeAndFeePaymentType);
             }
             Fee fee = new Fee();
             fee.setId(UUID.randomUUID().toString());
@@ -62,6 +86,12 @@ public class FeeServiceImpl implements FeeService {
             fee.setRevenueNameId(feeCreateDto.getRevenueNameId());
             fee.setActive(true);
             mongoRepositoryReactive.saveOrUpdate(fee);
+
+            String verbiage = String.format("Created Fee -> RevenueName : %s, FeePaymentType -> %s, Category -> %s ", fee.getRevenueName(), fee.getFeePaymentType(), fee.getGameType());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(fee.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while creating the fee setting";
@@ -70,7 +100,7 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public Mono<ResponseEntity> updateFeePaymentType(FeePaymentTypeDto feeTypeUpdateDto) {
+    public Mono<ResponseEntity> updateFeePaymentType(FeePaymentTypeDto feeTypeUpdateDto, HttpServletRequest request) {
         try {
             String feePaymentTypeId = feeTypeUpdateDto.getId();
             Query query = new Query();
@@ -79,9 +109,16 @@ public class FeeServiceImpl implements FeeService {
             if (feePaymentType == null) {
                 return Mono.just(new ResponseEntity<>("This FeePayment setting does not exist", HttpStatus.BAD_REQUEST));
             }
+            String feePaymentTypeName = feePaymentType.getName();
             feePaymentType.setDescription(feeTypeUpdateDto.getDescription());
             feePaymentType.setName(feeTypeUpdateDto.getName());
             mongoRepositoryReactive.saveOrUpdate(feePaymentType);
+
+            String verbiage = String.format("Updated Fee Payment Type, Name -> %s ", feePaymentTypeName);
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(feePaymentType.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while creating the fee setting";
@@ -90,7 +127,7 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public Mono<ResponseEntity> createFeePaymentType(FeePaymentTypeDto feeTypeCreateDto) {
+    public Mono<ResponseEntity> createFeePaymentType(FeePaymentTypeDto feeTypeCreateDto, HttpServletRequest request) {
         try {
             Query query = new Query();
             query.addCriteria(Criteria.where("name").is(feeTypeCreateDto.getName()));
@@ -105,6 +142,12 @@ public class FeeServiceImpl implements FeeService {
             Map feePaymentTypeMap = Mapstore.STORE.get("FeePaymentType");
             feePaymentTypeMap.put(feePaymentType.getId(), feePaymentType);
             mongoRepositoryReactive.saveOrUpdate(feePaymentType);
+
+            String verbiage = String.format("Updated Fee Payment Type, Name -> %s ", feePaymentType);
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(feePaymentType.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while creating the fee setting";
@@ -113,7 +156,7 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public Mono<ResponseEntity> createRevenueName(RevenueNameDto revenueNameDto) {
+    public Mono<ResponseEntity> createRevenueName(RevenueNameDto revenueNameDto, HttpServletRequest request) {
         try {
             Query query = new Query();
             query.addCriteria(Criteria.where("name").is(revenueNameDto.getName()));
@@ -128,6 +171,12 @@ public class FeeServiceImpl implements FeeService {
             mongoRepositoryReactive.saveOrUpdate(revenueName);
             Map revenueNameMap = Mapstore.STORE.get("RevenueName");
             revenueNameMap.put(revenueName.getId(), revenueName);
+
+            String verbiage = String.format("Created Revenue Name, Name -> %s ",revenueName);
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(revenueName.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while creating the fee setting";

@@ -1,14 +1,20 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.domain.GameType;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.dto.GameTypeCreateDto;
 import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
+import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -26,8 +33,21 @@ import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logA
 @Service
 public class GameTypeServiceImpl implements GameTypeService {
     private static final Logger logger = LoggerFactory.getLogger(GameTypeServiceImpl.class);
+    private static  final String configurationsAuditActionId = AuditActionReferenceData.CONFIGURATIONS_ID;
 
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
+    private SpringSecurityAuditorAware springSecurityAuditorAware;
+    private AuditLogHelper auditLogHelper;
+
+    @Autowired
+    public void setSpringSecurityAuditorAware(SpringSecurityAuditorAware springSecurityAuditorAware) {
+        this.springSecurityAuditorAware = springSecurityAuditorAware;
+    }
+
+    @Autowired
+    public void setAuditLogHelper(AuditLogHelper auditLogHelper) {
+        this.auditLogHelper = auditLogHelper;
+    }
 
     @Autowired
     public void setMongoRepositoryReactive(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
@@ -103,7 +123,7 @@ public class GameTypeServiceImpl implements GameTypeService {
     }
 
     @Override
-    public Mono<ResponseEntity> createGameType(GameTypeCreateDto gameTypeCreateDto) {
+    public Mono<ResponseEntity> createGameType(GameTypeCreateDto gameTypeCreateDto, HttpServletRequest request) {
         try {
             Mono<ResponseEntity> validateCreateGameTypeResponse = validateCreateGameType(gameTypeCreateDto);
             if (validateCreateGameTypeResponse != null) {
@@ -111,6 +131,12 @@ public class GameTypeServiceImpl implements GameTypeService {
             }
             GameType gameType = fromGameTypeCreateDto(gameTypeCreateDto);
             mongoRepositoryReactive.saveOrUpdate(gameType);
+
+            String verbiage = String.format("Created category, Name -> %s ", gameType);
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(configurationsAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(gameType.convertToDto(), HttpStatus.OK));
         } catch (Exception ex) {
             return logAndReturnError(logger, String.format("An error occurred while creating game type %s", gameTypeCreateDto.getName()), ex);

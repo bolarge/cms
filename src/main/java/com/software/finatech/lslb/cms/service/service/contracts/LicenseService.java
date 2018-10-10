@@ -24,6 +24,7 @@ public interface LicenseService {
                                         String gameTypeId,
                                         String paymentRecordId,
                                         String date,
+                                        String licenseNumber,
                                         String licenseTypeId, HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getAllLicenseStatus();

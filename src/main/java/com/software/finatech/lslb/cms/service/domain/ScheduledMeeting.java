@@ -217,7 +217,7 @@ public class ScheduledMeeting extends AbstractFact {
         scheduledMeetingDto.setId(getId());
         scheduledMeetingDto.setMeetingTitle(getMeetingSubject());
         scheduledMeetingDto.setAdditionalNotes(getMeetingDescription());
-        scheduledMeetingDto.setMeetingDate(getMeetingDate().toString("dd-MM-yyyy HH:mm:ss"));
+        scheduledMeetingDto.setMeetingDate(getMeetingDateString());
         ScheduledMeetingStatus scheduledMeetingStatus = getMeetingStatus();
         if (scheduledMeetingStatus != null) {
             scheduledMeetingDto.setMeetingStatusId(getScheduledMeetingStatusId());
@@ -246,6 +246,14 @@ public class ScheduledMeeting extends AbstractFact {
             return null;
         }
         return (ApplicationForm) mongoRepositoryReactive.findById(this.applicationFormId, ApplicationForm.class).block();
+    }
+
+    public String getMeetingDateString() {
+        LocalDateTime meetingDateTime = getMeetingDate();
+        if (meetingDateTime != null) {
+            return meetingDateTime.toString("dd-MM-yyyy HH:mm:ss");
+        }
+        return null;
     }
 
     @Override

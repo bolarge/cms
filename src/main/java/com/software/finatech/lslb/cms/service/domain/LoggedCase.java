@@ -116,7 +116,7 @@ public class LoggedCase extends AbstractFact {
         return (AuthInfo) mongoRepositoryReactive.findById(userId, AuthInfo.class).block();
     }
 
-    private LoggedCaseStatus getCaseStatus(String caseStatusId) {
+    public LoggedCaseStatus getCaseStatus(String caseStatusId) {
         if (StringUtils.isEmpty(this.loggedCaseStatusId)) {
             return null;
         }

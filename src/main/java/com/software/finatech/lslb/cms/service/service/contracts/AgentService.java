@@ -4,9 +4,11 @@ import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.dto.AgentCreateDto;
 import com.software.finatech.lslb.cms.service.dto.AgentInstitutionCreateDto;
 import com.software.finatech.lslb.cms.service.dto.AgentUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.AgentValidationDto;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
@@ -20,17 +22,17 @@ public interface AgentService {
                                        String gameTypeIds,
                                        HttpServletResponse httpServletResponse);
 
-    Mono<ResponseEntity> createAgent(AgentCreateDto agentCreateDto);
+    Mono<ResponseEntity> createAgent(AgentCreateDto agentCreateDto, HttpServletRequest request);
 
-    Mono<ResponseEntity> updateAgent(AgentUpdateDto agentUpdateDto);
+    Mono<ResponseEntity> updateAgent(AgentUpdateDto agentUpdateDto, HttpServletRequest request);
 
     Agent findById(String agentId);
 
-    List<Agent> getAllUncreatedOnVGPay();
-
     void saveAgent(Agent agent);
 
-    Mono<ResponseEntity> createAgentUnderInstitution(AgentInstitutionCreateDto agentInstitutionCreateDto);
+    Mono<ResponseEntity> createAgentUnderInstitution(AgentInstitutionCreateDto agentInstitutionCreateDto, HttpServletRequest request);
 
     Mono<ResponseEntity> getAgentFullDetailById(String agentId);
+
+    Mono<ResponseEntity> validateAgentProfileOnSystem(AgentValidationDto agentValidationDto);
 }

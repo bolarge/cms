@@ -29,19 +29,16 @@ public class AgentCreationNotifierAsync {
     private MailContentBuilderService mailContentBuilderService;
     private EmailService emailService;
     private AuthInfoService authInfoService;
-    private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private FrontEndPropertyHelper frontEndPropertyHelper;
 
     @Autowired
     public AgentCreationNotifierAsync(MailContentBuilderService mailContentBuilderService,
                                       EmailService emailService,
                                       AuthInfoService authInfoService,
-                                      MongoRepositoryReactiveImpl mongoRepositoryReactive,
                                       FrontEndPropertyHelper frontEndPropertyHelper) {
         this.mailContentBuilderService = mailContentBuilderService;
         this.emailService = emailService;
         this.authInfoService = authInfoService;
-        this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.frontEndPropertyHelper = frontEndPropertyHelper;
     }
 
@@ -53,7 +50,6 @@ public class AgentCreationNotifierAsync {
             return;
         }
 
-
         String emailContent = buildAgentCreationNotificationContent(agentApprovalRequest);
         for (AuthInfo institutionAdmin : institutionAdmins) {
             sendAgentCreationNotificationEmailToInstitutionAdmin(institutionAdmin.getEmailAddress(), emailContent);
@@ -62,35 +58,48 @@ public class AgentCreationNotifierAsync {
         if (agentApprovalRequest.isApprovedRequest() && agentApprovalRequest.isInstitutionAgentAdditionRequest()) {
             sendAgentCreationNotificationToAgent(agentApprovalRequest);
         }
-
-
-        //TODO::validate lslb admin emails
-        sendNewAgentRequestToLslbAdmin(agentApprovalRequest, "lslbcms@gmail.com");
     }
 
 
-    private void sendAgentCreationNotificationEmailToInstitutionAdmin(String institutionAdminEmail,String emailContent) {
+    @Async
+    public void sendNewAgentApprovalRequestToLSLBAdmin(AgentApprovalRequest agentApprovalRequest) {
+        List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatCanReceiveAgentApprovalsNotification();
+        if (lslbAdmins == null || lslbAdmins.isEmpty()) {
+            logger.info("No LSLB member can receive new agent approval request , skipping emails");
+            return;
+        }
+        String content = buildNewAgentRequestLSLBAdminContent(agentApprovalRequest);
+        for (AuthInfo lslbAdmin : lslbAdmins) {
+            sendNewAgentRequestToLslbAdmin(content, lslbAdmin.getEmailAddress());
+        }
+    }
+
+    private void sendAgentCreationNotificationEmailToInstitutionAdmin(String institutionAdminEmail, String emailContent) {
         try {
+            logger.info("Sending agent approval request notification to institution admin with email {}", institutionAdminEmail);
             emailService.sendEmail(emailContent, "LSLB Agent Creation Notification", institutionAdminEmail);
         } catch (Exception e) {
             logger.error("An error occurred while sending agent creation notification email to user with email -> {}", institutionAdminEmail, e);
         }
     }
 
-    private void sendNewAgentRequestToLslbAdmin(AgentApprovalRequest agentApprovalRequest, String lslbAdminEmail) {
+    private void sendNewAgentRequestToLslbAdmin(String content, String lslbAdminEmail) {
         try {
-            String frontEndUrl = String.format("%s/agent-approval-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), agentApprovalRequest.getId());
-            String presentDateString = LocalDate.now().toString("dd-MM-YYYY");
-            HashMap<String, Object> model = new HashMap<>();
-            model.put("institutionName", agentApprovalRequest.getInstitutionName());
-            model.put("date", presentDateString);
-            model.put("frontEndUrl", frontEndUrl);
-
-            String content = mailContentBuilderService.build(model, "Lslb-CreateAgent-Notification");
-            emailService.sendEmail(content, "LSLB Agent Creation Notification", lslbAdminEmail);
+            logger.info("Sending new Agent approval request to lslb admin with email {}", lslbAdminEmail);
+            emailService.sendEmail(content, "New Agent Creation Request on LSLB CMS", lslbAdminEmail);
         } catch (Exception e) {
             logger.error("");
         }
+    }
+
+    private String buildNewAgentRequestLSLBAdminContent(AgentApprovalRequest agentApprovalRequest) {
+        String frontEndUrl = String.format("%s/agent-approval-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), agentApprovalRequest.getId());
+        String presentDateString = LocalDate.now().toString("dd-MM-YYYY");
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("institutionName", agentApprovalRequest.getInstitutionName());
+        model.put("date", presentDateString);
+        model.put("frontEndUrl", frontEndUrl);
+        return mailContentBuilderService.build(model, "Lslb-CreateAgent-Notification");
     }
 
     private void sendAgentCreationNotificationToAgent(AgentApprovalRequest agentApprovalRequest) {

@@ -43,7 +43,7 @@ public class AuthRoleReferenceData {
         role3.setName("VGG USER");
         role3.setSsoRoleMapping("vgg_user");
         permissionIds = LSLBAuthPermissionReferenceData.getAllVGGUserPermissions();
-        role3.setAuthPermissionIds(permissionIds);
+     //   role3.setAuthPermissionIds(permissionIds);
 
         mongoRepositoryReactive.saveOrUpdate(role1);
         mongoRepositoryReactive.saveOrUpdate(role2);

@@ -6,15 +6,16 @@ import com.software.finatech.lslb.cms.service.dto.*;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface FeeService {
-    Mono<ResponseEntity> createFee(FeeCreateDto feeCreateDto);
+    Mono<ResponseEntity> createFee(FeeCreateDto feeCreateDto, HttpServletRequest request);
     Mono<ResponseEntity> getAllFees(String feePaymentTypeId, String gameTypeId, String revenueNameId);
     Mono<ResponseEntity> getAllFeePaymentType();
-    Mono<ResponseEntity> updateFeePaymentType(FeePaymentTypeDto feeTypeCreateDto);
-    Mono<ResponseEntity> createFeePaymentType(FeePaymentTypeDto feeTypeCreateDto);
-    Mono<ResponseEntity> createRevenueName(RevenueNameDto revenueNameDto);
+    Mono<ResponseEntity> updateFeePaymentType(FeePaymentTypeDto feeTypeCreateDto, HttpServletRequest request);
+    Mono<ResponseEntity> createFeePaymentType(FeePaymentTypeDto feeTypeCreateDto, HttpServletRequest request);
+    Mono<ResponseEntity> createRevenueName(RevenueNameDto revenueNameDto, HttpServletRequest request);
     List<EnumeratedFactDto> getRevenueNames();
     List<FeesTypeDto>  getAllFeesType();
 

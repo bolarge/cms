@@ -7,13 +7,14 @@ import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingUpdateDto;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public interface ScheduledMeetingService {
 
-    Mono<ResponseEntity> createScheduledMeeting(ScheduledMeetingCreateDto scheduledMeetingCreateDto);
-    Mono<ResponseEntity> cancelScheduledMeeting(String scheduledMeetingId, String cancelerId);
-    Mono<ResponseEntity> completeScheduledMeeting(String scheduledMeetingId);
+    Mono<ResponseEntity> createScheduledMeeting(ScheduledMeetingCreateDto scheduledMeetingCreateDto, HttpServletRequest request);
+    Mono<ResponseEntity> cancelScheduledMeeting(String scheduledMeetingId, String cancelerId, HttpServletRequest httpServletRequest);
+    Mono<ResponseEntity> completeScheduledMeeting(String scheduledMeetingId, HttpServletRequest request);
     Mono<ResponseEntity> updateScheduledMeting(ScheduledMeetingUpdateDto scheduledMeetingUpdateDto);
     Mono<ResponseEntity> findAllScheduledMeetings(int page,
                                                   int pageSize,

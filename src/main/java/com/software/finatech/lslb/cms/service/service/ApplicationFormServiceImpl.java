@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.service;
 
 import com.mongodb.reactivestreams.client.DistinctPublisher;
 import com.mongodb.reactivestreams.client.MongoCollection;
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
@@ -13,13 +14,17 @@ import com.software.finatech.lslb.cms.service.model.otherInformation.ApplicantOt
 import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantOutletInformation;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
+import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApplicationFormEmailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -34,6 +39,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,20 +57,28 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     private AuthInfoService authInfoService;
     private PaymentRecordService paymentRecordService;
     private ApplicationFormEmailSenderAsync applicationFormNotificationHelperAsync;
+    private SpringSecurityAuditorAware springSecurityAuditorAware;
+    private AuditLogHelper auditLogHelper;
+
+    private static final String applicationAuditActionId = AuditActionReferenceData.APPLICATION_ID;
 
     @Autowired
     public ApplicationFormServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                                       AuthInfoService authInfoService,
                                       PaymentRecordService paymentRecordService,
-                                      ApplicationFormEmailSenderAsync applicationFormAsyncNotificationHelper) {
+                                      ApplicationFormEmailSenderAsync applicationFormNotificationHelperAsync,
+                                      SpringSecurityAuditorAware springSecurityAuditorAware,
+                                      AuditLogHelper auditLogHelper) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.authInfoService = authInfoService;
         this.paymentRecordService = paymentRecordService;
-        this.applicationFormNotificationHelperAsync = applicationFormAsyncNotificationHelper;
+        this.applicationFormNotificationHelperAsync = applicationFormNotificationHelperAsync;
+        this.springSecurityAuditorAware = springSecurityAuditorAware;
+        this.auditLogHelper = auditLogHelper;
     }
 
     @Override
-    public Mono<ResponseEntity> createApplicationForm(ApplicationFormCreateDto applicationFormCreateDto) {
+    public Mono<ResponseEntity> createApplicationForm(ApplicationFormCreateDto applicationFormCreateDto, HttpServletRequest request) {
         try {
             Mono<ResponseEntity> validateCreateApplicationFormResponse = validateCreateApplicationForm(applicationFormCreateDto);
             if (validateCreateApplicationFormResponse != null) {
@@ -74,6 +88,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             ApplicationForm applicationForm = fromCreateDto(applicationFormCreateDto);
             applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.CREATED_STATUS_ID);
             saveApplicationForm(applicationForm);
+
+            String verbiage = String.format("Created application form : %s ->  Category :%s",
+                    applicationForm.getApplicationFormId(), applicationForm.getGameTypeName());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while creating the application form";
@@ -232,7 +252,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> saveApplicantDetails(String applicationFormId, ApplicantDetails applicantDetails) {
+    public Mono<ResponseEntity> saveApplicantDetails(String applicationFormId, ApplicantDetails applicantDetails, HttpServletRequest request) {
         try {
             ApplicationForm applicationForm = getApplicationFormById(applicationFormId);
             if (applicationForm == null) {
@@ -241,6 +261,11 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationForm.setApplicantDetails(applicantDetails);
             applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.IN_PROGRESS_STATUS_ID);
             saveApplicationForm(applicationForm);
+
+            String verbiage = String.format("Saved applicant details for application form : %s ", applicationForm.getApplicationFormId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant details", e);
@@ -267,7 +292,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> saveApplicantMembersDetails(String applicationFormId, ApplicantMemberDetails applicantMemberDetails) {
+    public Mono<ResponseEntity> saveApplicantMembersDetails(String applicationFormId, ApplicantMemberDetails applicantMemberDetails, HttpServletRequest request) {
         try {
             ApplicationForm applicationForm = getApplicationFormById(applicationFormId);
             if (applicationForm == null) {
@@ -276,6 +301,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationForm.setApplicantMemberDetails(applicantMemberDetails);
             applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.IN_PROGRESS_STATUS_ID);
             saveApplicationForm(applicationForm);
+
+            String verbiage = String.format("Saved applicant members details for application form : %s", applicationForm.getApplicationFormId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant members details", e);
@@ -303,7 +334,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> saveApplicantContactDetails(String applicationFormId, ApplicantContactDetails applicantContactDetails) {
+    public Mono<ResponseEntity> saveApplicantContactDetails(String applicationFormId, ApplicantContactDetails applicantContactDetails, HttpServletRequest request) {
         try {
             ApplicationForm applicationForm = getApplicationFormById(applicationFormId);
             if (applicationForm == null) {
@@ -312,6 +343,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationForm.setApplicantContactDetails(applicantContactDetails);
             applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.IN_PROGRESS_STATUS_ID);
             saveApplicationForm(applicationForm);
+
+            String verbiage = String.format("Saved applicant contact details for application form : %s ->  ", applicationForm.getApplicationFormId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant contact details", e);
@@ -338,7 +375,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> saveApplicantCriminalityDetails(String applicationFormId, ApplicantCriminalityDetails applicantCriminalityDetails) {
+    public Mono<ResponseEntity> saveApplicantCriminalityDetails(String applicationFormId, ApplicantCriminalityDetails applicantCriminalityDetails, HttpServletRequest request) {
         try {
             ApplicationForm applicationForm = getApplicationFormById(applicationFormId);
             if (applicationForm == null) {
@@ -347,6 +384,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationForm.setApplicantCriminalityDetails(applicantCriminalityDetails);
             applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.IN_PROGRESS_STATUS_ID);
             saveApplicationForm(applicationForm);
+
+            String verbiage = String.format("Saved applicant criminality details for application form : %s ->  ", applicationForm.getApplicationFormId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant criminality details", e);
@@ -373,7 +416,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> saveApplicantDeclarationDetails(String applicationFormId, ApplicantDeclarationDetails applicantDeclarationDetails) {
+    public Mono<ResponseEntity> saveApplicantDeclarationDetails(String applicationFormId, ApplicantDeclarationDetails applicantDeclarationDetails, HttpServletRequest request) {
         try {
             ApplicationForm applicationForm = getApplicationFormById(applicationFormId);
             if (applicationForm == null) {
@@ -382,6 +425,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationForm.setApplicantDeclarationDetails(applicantDeclarationDetails);
             applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.IN_PROGRESS_STATUS_ID);
             saveApplicationForm(applicationForm);
+
+            String verbiage = String.format("Saved applicant declaration details for application form : %s ->  ", applicationForm.getApplicationFormId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant declaration details", e);
@@ -408,7 +457,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> saveApplicantOtherInformation(String applicationFormId, ApplicantOtherInformation applicantOtherInformation) {
+    public Mono<ResponseEntity> saveApplicantOtherInformation(String applicationFormId, ApplicantOtherInformation applicantOtherInformation, HttpServletRequest request) {
         try {
             ApplicationForm applicationForm = getApplicationFormById(applicationFormId);
             if (applicationForm == null) {
@@ -417,6 +466,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationForm.setApplicantOtherInformation(applicantOtherInformation);
             applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.IN_PROGRESS_STATUS_ID);
             saveApplicationForm(applicationForm);
+
+            String verbiage = String.format("Saved applicant other information for application form : %s ->  ", applicationForm.getApplicationFormId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant other details", e);
@@ -443,7 +498,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> saveApplicantOutletInformation(String applicationFormId, ApplicantOutletInformation applicantOutletInformation) {
+    public Mono<ResponseEntity> saveApplicantOutletInformation(String applicationFormId, ApplicantOutletInformation applicantOutletInformation, HttpServletRequest request) {
         try {
             ApplicationForm applicationForm = getApplicationFormById(applicationFormId);
             if (applicationForm == null) {
@@ -452,6 +507,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationForm.setApplicantOutletInformation(applicantOutletInformation);
             applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.IN_PROGRESS_STATUS_ID);
             saveApplicationForm(applicationForm);
+
+            String verbiage = String.format("Saved applicant outlet information for application form : %s ->  ", applicationForm.getApplicationFormId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant outlet details", e);
@@ -459,7 +520,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> approveApplicationForm(String applicationFormId, String approverId) {
+    public Mono<ResponseEntity> approveApplicationForm(String applicationFormId, String approverId, HttpServletRequest request) {
         try {
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(approverId, AuthInfo.class).block();
             if (authInfo == null) {
@@ -477,6 +538,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String approvedApplicationFormStatusId = ApplicationFormStatusReferenceData.APPROVED_STATUS_ID;
             applicationForm.setApplicationFormStatusId(approvedApplicationFormStatusId);
             saveApplicationForm(applicationForm);
+
+            String verbiage = String.format("Approved application form : %s ->  ", applicationForm.getApplicationFormId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             applicationFormNotificationHelperAsync.sendApprovedMailToInstitutionAdmins(applicationForm);
             return Mono.just(new ResponseEntity<>("Application form approved successfully", HttpStatus.OK));
         } catch (Exception e) {
@@ -485,7 +552,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> completeApplicationForm(String applicationFormId, boolean isResubmit) {
+    public Mono<ResponseEntity> completeApplicationForm(String applicationFormId, boolean isResubmit, HttpServletRequest request) {
         try {
             ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
             if (applicationForm == null) {
@@ -495,6 +562,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationForm.setApplicationFormStatusId(inReviewApplicationFormStatusId);
             applicationForm.setSubmissionDate(LocalDate.now());
             saveApplicationForm(applicationForm);
+
+            String verbiage = String.format("Submitted application form : %s ->  ", applicationForm.getApplicationFormId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             applicationFormNotificationHelperAsync.sendApplicationFormSubmissionMailToLSLBAdmins(applicationForm);
             return Mono.just(new ResponseEntity<>("Application completed successfully and now in review", HttpStatus.OK));
         } catch (Exception e) {
@@ -527,7 +600,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, ApplicationFormRejectDto applicationFormRejectDto) {
+    public Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, ApplicationFormRejectDto applicationFormRejectDto, HttpServletRequest request) {
         try {
             String rejectorId = applicationFormRejectDto.getUserId();
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(rejectorId, AuthInfo.class).block();
@@ -547,6 +620,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationForm.setReasonForRejection(applicationFormRejectDto.getReason());
             applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.REJECTED_STATUS_ID);
             saveApplicationForm(applicationForm);
+
+            String verbiage = String.format("Rejected application form : %s ->  ", applicationForm.getApplicationFormId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             applicationFormNotificationHelperAsync.sendRejectionMailToInstitutionAdmins(applicationForm);
             return Mono.just(new ResponseEntity<>("Application form rejected successfully", HttpStatus.OK));
 
@@ -556,7 +635,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String applicationFormId, ApplicationFormCreateCommentDto applicationFormCreateCommentDto) {
+    public Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String applicationFormId, ApplicationFormCreateCommentDto applicationFormCreateCommentDto, HttpServletRequest request) {
         try {
             ApplicationForm applicationForm = getApplicationFormById(applicationFormId);
             if (applicationForm == null) {
@@ -573,6 +652,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationForm.setLslbAdminComment(lslbAdminComment);
             applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.PENDING_RESUBMISSON_ID);
             saveApplicationForm(applicationForm);
+
+            String verbiage = String.format("Added comment to application form : %s ->  ", applicationForm.getApplicationFormId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             applicationFormNotificationHelperAsync.sendAdminCommentNotificationToInstitutionAdmins(applicationForm, lslbAdminComment.getComment());
             return Mono.just(new ResponseEntity<>("Comment added successfully", HttpStatus.OK));
         } catch (Exception e) {

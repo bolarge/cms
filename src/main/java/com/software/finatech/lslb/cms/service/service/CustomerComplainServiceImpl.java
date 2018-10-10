@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.CustomerComplain;
 import com.software.finatech.lslb.cms.service.domain.CustomerComplainAction;
@@ -9,12 +10,15 @@ import com.software.finatech.lslb.cms.service.dto.CustomerComplainDto;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainUpdateDto;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.CustomerComplainStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.CustomerComplainService;
+import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.CustomerComplaintEmailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
@@ -31,6 +35,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,24 +50,25 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
     private static final Logger logger = LoggerFactory.getLogger(CustomerComplainServiceImpl.class);
 
     private static final int MAX_DAYS_BEFORE_COMPLAIN_REMINDER = 7;
+    private static final String customerComplainAuditActionId = AuditActionReferenceData.CUSTOMER_COMPLAIN;
 
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private AuthInfoService authInfoService;
     private CustomerComplaintEmailSenderAsync customerComplaintEmailSenderAsync;
+    private AuditLogHelper auditLogHelper;
+    private SpringSecurityAuditorAware springSecurityAuditorAware;
 
     @Autowired
-    public void setCustomerComplaintEmailSenderAsync(CustomerComplaintEmailSenderAsync customerComplaintEmailSenderAsync) {
-        this.customerComplaintEmailSenderAsync = customerComplaintEmailSenderAsync;
-    }
-
-    @Autowired
-    public void setAuthInfoService(AuthInfoService authInfoService) {
-        this.authInfoService = authInfoService;
-    }
-
-    @Autowired
-    public void setMongoRepositoryReactive(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
+    public CustomerComplainServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
+                                       AuthInfoService authInfoService,
+                                       CustomerComplaintEmailSenderAsync customerComplaintEmailSenderAsync,
+                                       AuditLogHelper auditLogHelper,
+                                       SpringSecurityAuditorAware springSecurityAuditorAware) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
+        this.authInfoService = authInfoService;
+        this.customerComplaintEmailSenderAsync = customerComplaintEmailSenderAsync;
+        this.auditLogHelper = auditLogHelper;
+        this.springSecurityAuditorAware = springSecurityAuditorAware;
     }
 
     @Override
@@ -125,11 +131,17 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
 
 
     @Override
-    public Mono<ResponseEntity> createCustomerComplain(CustomerComplainCreateDto customerComplainCreateDto) {
+    public Mono<ResponseEntity> createCustomerComplain(CustomerComplainCreateDto customerComplainCreateDto, HttpServletRequest request) {
         try {
             CustomerComplain customerComplain = fromCreateCustomerComplain(customerComplainCreateDto);
             saveCustomerComplain(customerComplain);
             customerComplaintEmailSenderAsync.sendInitialNotificationsForCustomerComplain(customerComplain);
+
+            String verbiage = String.format("Created customer complain -> Ticket Id : %s ", customerComplain.getTicketId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(customerComplainAuditActionId,
+                    customerComplain.getCustomerFullName(), customerComplain.getCustomerEmailAddress(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(customerComplain.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while creating customer complain", e);
@@ -154,7 +166,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
     }
 
     @Override
-    public Mono<ResponseEntity> resolveCustomerComplain(String userId, String customerComplainId) {
+    public Mono<ResponseEntity> resolveCustomerComplain(String userId, String customerComplainId, HttpServletRequest request) {
         try {
             if (StringUtils.isEmpty(userId) || StringUtils.isEmpty(customerComplainId)) {
                 return Mono.just(new ResponseEntity<>("User id and customer complain id  should not be empty", HttpStatus.BAD_REQUEST));
@@ -182,11 +194,15 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             customerComplainAction.setComplainStatusId(CustomerComplainStatusReferenceData.RESOLVED_ID);
             customerComplainAction.setUserId(userId);
             existingCustomerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.RESOLVED_ID);
-            List<CustomerComplainAction> existingCustomerComplainActions = existingCustomerComplain.getCustomerComplainActionList();
-            existingCustomerComplainActions.add(customerComplainAction);
-            existingCustomerComplain.setCustomerComplainActionList(existingCustomerComplainActions);
+            existingCustomerComplain.getCustomerComplainActionList().add(customerComplainAction);
             mongoRepositoryReactive.saveOrUpdate(existingCustomerComplain);
             customerComplaintEmailSenderAsync.sendResolvedCustomerComplainToCustomer(existingCustomerComplain);
+
+            String verbiage = String.format("Resolved Customer complain -> Ticket Id: %s ", existingCustomerComplain.getTicketId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(customerComplainAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(existingCustomerComplain.convertToFullDetailDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, String.format("An error occurred while resolving customer complain %s with user id %s", customerComplainId, userId), e);
@@ -202,7 +218,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
     }
 
     @Override
-    public Mono<ResponseEntity> closeCustomerComplain(String userId, String customerComplainId) {
+    public Mono<ResponseEntity> closeCustomerComplain(String userId, String customerComplainId, HttpServletRequest request) {
         try {
             if (StringUtils.isEmpty(userId) || StringUtils.isEmpty(customerComplainId)) {
                 return Mono.just(new ResponseEntity<>("User id and customer complain id  should not be empty", HttpStatus.BAD_REQUEST));
@@ -227,11 +243,16 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             customerComplainAction.setComplainStatusId(CustomerComplainStatusReferenceData.CLOSED_ID);
             customerComplainAction.setUserId(userId);
             existingCustomerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.CLOSED_ID);
-            List<CustomerComplainAction> existingCustomerComplainActions = existingCustomerComplain.getCustomerComplainActionList();
-            existingCustomerComplainActions.add(customerComplainAction);
-            existingCustomerComplain.setCustomerComplainActionList(existingCustomerComplainActions);
+            existingCustomerComplain.getCustomerComplainActionList().add(customerComplainAction);
             mongoRepositoryReactive.saveOrUpdate(existingCustomerComplain);
             customerComplaintEmailSenderAsync.sendClosedCustomerComplaintToCustomer(existingCustomerComplain);
+
+            String verbiage = String.format("Closed customer complain -> Ticket Id: %s ", existingCustomerComplain.getTicketId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(customerComplainAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+
             return Mono.just(new ResponseEntity<>(existingCustomerComplain.convertToFullDetailDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, String.format("An error occurred while resolving customer complain %s with user id %s", customerComplainId, userId), e);
@@ -239,7 +260,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
     }
 
     @Override
-    public Mono<ResponseEntity> updateCustomerComplainStatus(CustomerComplainUpdateDto customerComplainUpdateDto) {
+    public Mono<ResponseEntity> updateCustomerComplainStatus(CustomerComplainUpdateDto customerComplainUpdateDto, HttpServletRequest request) {
         try {
             String userId = customerComplainUpdateDto.getUserId();
             String customerComplainId = customerComplainUpdateDto.getCustomerComplainId();
@@ -265,9 +286,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             customerComplainAction.setComplainStatusId(customerComplainStatusId);
             customerComplainAction.setUserId(userId);
             existingCustomerComplain.setCustomerComplainStatusId(customerComplainStatusId);
-            List<CustomerComplainAction> existingCustomerComplainActions = existingCustomerComplain.getCustomerComplainActionList();
-            existingCustomerComplainActions.add(customerComplainAction);
-            existingCustomerComplain.setCustomerComplainActionList(existingCustomerComplainActions);
+            existingCustomerComplain.getCustomerComplainActionList().add(customerComplainAction);
             mongoRepositoryReactive.saveOrUpdate(existingCustomerComplain);
             if (customerComplainUpdateDto.isClosedUpdate()) {
                 customerComplaintEmailSenderAsync.sendClosedCustomerComplaintToCustomer(existingCustomerComplain);
@@ -275,6 +294,12 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             if (customerComplainUpdateDto.isResolvedUpdate()) {
                 customerComplaintEmailSenderAsync.sendResolvedCustomerComplainToCustomer(existingCustomerComplain);
             }
+
+            String verbiage = String.format("Updated Customer complain status -> Ticket Id: %s ", existingCustomerComplain.getTicketId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(customerComplainAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(existingCustomerComplain.convertToFullDetailDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while changing complain status", e);
@@ -322,7 +347,8 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
 
     private String generateTicketId() {
         int randomInt = NumberUtil.getRandomNumberInRange(3000, 300000000);
-        return String.format("LS-CMTK-%s", randomInt);
+        LocalDateTime dateTime = LocalDateTime.now();
+        return String.format("LS-CMTK-%s%s%s%s", randomInt, dateTime.getHourOfDay(), dateTime.getMinuteOfHour(), dateTime.getSecondOfMinute());
     }
 
     private boolean userCanResolveCustomerComplain(AuthInfo user) {

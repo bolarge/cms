@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -63,8 +64,8 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createFee(@RequestBody @Valid FeeCreateDto feeCreateDto) {
-        return feeService.createFee(feeCreateDto);
+    public Mono<ResponseEntity> createFee(@RequestBody @Valid FeeCreateDto feeCreateDto, HttpServletRequest request) {
+        return feeService.createFee(feeCreateDto, request);
     }
 
 
@@ -75,8 +76,8 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> updateFeePaymentType(@RequestBody @Valid FeePaymentTypeDto feeUpdateDto) {
-        return feeService.updateFeePaymentType(feeUpdateDto);
+    public Mono<ResponseEntity> updateFeePaymentType(@RequestBody @Valid FeePaymentTypeDto feeUpdateDto, HttpServletRequest request) {
+        return feeService.updateFeePaymentType(feeUpdateDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/createFeePayment")
@@ -86,8 +87,8 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createFee(@RequestBody @Valid FeePaymentTypeDto feeCreateDto) {
-        return feeService.createFeePaymentType(feeCreateDto);
+    public Mono<ResponseEntity> createFee(@RequestBody @Valid FeePaymentTypeDto feeCreateDto, HttpServletRequest request) {
+        return feeService.createFeePaymentType(feeCreateDto, request);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-revenue-names")

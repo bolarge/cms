@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.dto.CustomerComplainUpdateDto;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public interface CustomerComplainService {
@@ -22,15 +23,15 @@ public interface CustomerComplainService {
 
     Mono<ResponseEntity> getCustomerComplainFullDetail(String customerComplainId);
 
-    Mono<ResponseEntity> resolveCustomerComplain(String userId, String customerComplainId);
+    Mono<ResponseEntity> resolveCustomerComplain(String userId, String customerComplainId, HttpServletRequest request);
 
-    Mono<ResponseEntity> closeCustomerComplain(String userId, String customerComplainId);
+    Mono<ResponseEntity> closeCustomerComplain(String userId, String customerComplainId, HttpServletRequest request);
 
-    Mono<ResponseEntity> createCustomerComplain(CustomerComplainCreateDto customerComplainCreateDto);
+    Mono<ResponseEntity> createCustomerComplain(CustomerComplainCreateDto customerComplainCreateDto, HttpServletRequest request);
 
     CustomerComplain findCustomerComplainById(String customerComplainId);
 
-    Mono<ResponseEntity> updateCustomerComplainStatus(CustomerComplainUpdateDto customerComplainUpdateDto);
+    Mono<ResponseEntity> updateCustomerComplainStatus(CustomerComplainUpdateDto customerComplainUpdateDto, HttpServletRequest request);
 
     Mono<ResponseEntity> getAllCustomerComplainStatus();
 }

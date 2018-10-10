@@ -2,10 +2,12 @@ package com.software.finatech.lslb.cms.service.dto;
 
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class GamingMachineMultiplePaymentRequest {
-    private List<String> gamingMachineIdList = new ArrayList<>();
+    private Set<String> gamingMachineIdList = new HashSet<>();
     private double totalAmount ;
 
     public double getTotalAmount() {
@@ -16,11 +18,11 @@ public class GamingMachineMultiplePaymentRequest {
         this.totalAmount = totalAmount;
     }
 
-    public List<String> getGamingMachineIdList() {
+    public Set<String> getGamingMachineIdList() {
         return gamingMachineIdList;
     }
 
-    public void setGamingMachineIdList(List<String> gamingMachineIdList) {
+    public void setGamingMachineIdList(Set<String> gamingMachineIdList) {
         this.gamingMachineIdList = gamingMachineIdList;
     }
 }
