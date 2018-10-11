@@ -94,7 +94,6 @@ public class VigipayHttpClient {
                     JSONObject responseJson = new JSONObject(responseBody);
                     return responseJson.getString("Code");
                 }
-                logger.info(responseEntity.getBody());
                 return null;
             }
             return null;
