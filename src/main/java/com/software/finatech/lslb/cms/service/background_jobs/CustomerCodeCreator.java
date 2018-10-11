@@ -46,6 +46,7 @@ public class CustomerCodeCreator {
             if (gamingOperatorAdmins.isEmpty()) {
                 continue;
             }
+            logger.info("Attempting to create customer for {}", institution.getInstitutionName());
             String customerCode = vigipayService.createCustomerCodeForInstitution(institution);
             if (!StringUtils.isEmpty(customerCode)) {
                 logger.info("Gotten customer code {}", customerCode);
