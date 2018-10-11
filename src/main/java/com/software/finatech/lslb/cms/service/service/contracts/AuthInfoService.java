@@ -2,10 +2,7 @@ package com.software.finatech.lslb.cms.service.service.contracts;
 
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.VerificationToken;
-import com.software.finatech.lslb.cms.service.dto.AuthInfoCompleteDto;
-import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
-import com.software.finatech.lslb.cms.service.dto.CreateApplicantAuthInfoDto;
-import com.software.finatech.lslb.cms.service.dto.UserAuthPermissionDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOChangePasswordModel;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOPasswordResetModel;
 import org.springframework.http.ResponseEntity;
@@ -55,4 +52,6 @@ public interface AuthInfoService {
     ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveNewCaseNotification();
 
     Mono<ResponseEntity> removePermissionFromUser(UserAuthPermissionDto userAuthPermissionDto);
+
+    Mono<ResponseEntity> updateUserRole(UserRoleUpdateDto userRoleUpdateDto);
 }

@@ -21,10 +21,7 @@ public class ScheduledMeeting extends AbstractFact {
     private String scheduledMeetingStatusId;
     private String venue;
     private String cancelerId;
-    private boolean expirationEmailSent;
     private String entityId;
-    private boolean firstReminderMailSent;
-    private boolean secondReminderMailSent;
     private String applicationFormId;
     private LocalDateTime meetingReminderDate;
     private LocalDateTime nextPostMeetingReminderDate;
@@ -63,29 +60,6 @@ public class ScheduledMeeting extends AbstractFact {
         this.applicationFormId = applicationFormId;
     }
 
-    public boolean isFirstReminderMailSent() {
-        return firstReminderMailSent;
-    }
-
-    public void setFirstReminderMailSent(boolean firstReminderMailSent) {
-        this.firstReminderMailSent = firstReminderMailSent;
-    }
-
-    public boolean isSecondReminderMailSent() {
-        return secondReminderMailSent;
-    }
-
-    public void setSecondReminderMailSent(boolean secondReminderMailSent) {
-        this.secondReminderMailSent = secondReminderMailSent;
-    }
-
-    public boolean isExpirationEmailSent() {
-        return expirationEmailSent;
-    }
-
-    public void setExpirationEmailSent(boolean expirationEmailSent) {
-        this.expirationEmailSent = expirationEmailSent;
-    }
 
     public String getEntityId() {
         return entityId;

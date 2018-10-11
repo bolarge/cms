@@ -153,7 +153,6 @@ public class AuthRoleController extends BaseController {
                 return Mono.just(new ResponseEntity("Role does not exist", HttpStatus.BAD_REQUEST));
             }
             authRole.getAuthPermissionIds().clear();
-            authRole.getAuthPermissions().clear();
 
             authRole.setDescription(authRoleUpdateDto.getDescription());
             authRole.setName(authRoleUpdateDto.getName());
@@ -163,7 +162,6 @@ public class AuthRoleController extends BaseController {
             mongoRepositoryReactive.saveOrUpdate(authRole);
             Mapstore.STORE.get("AuthRole").put(authRole.getId(), authRole);
 
-            authRole.setAssociatedProperties();
 
 
             String verbiage = String.format("Updated Role, Role Name: %s ", authRole.getName());
@@ -364,7 +362,6 @@ public class AuthRoleController extends BaseController {
 
         ArrayList<AuthRoleDto> authRoleDtos = new ArrayList<>();
         eligibleRoles.forEach(authRole -> {
-            authRole.setAssociatedProperties();
             authRoleDtos.add(authRole.convertToDto());
         });
         if (authRoleDtos.size() == 0) {
@@ -377,7 +374,6 @@ public class AuthRoleController extends BaseController {
     private ArrayList<AuthRoleDto> authRoleDtoListFromAuthRoleList(List<FactObject> authRoles) {
         ArrayList<AuthRoleDto> authRoleDtos = new ArrayList<>();
         authRoles.forEach(entry -> {
-            ((AuthRole) entry).setAssociatedProperties();
             authRoleDtos.add(((AuthRole) entry).convertToDto());
         });
         return authRoleDtos;

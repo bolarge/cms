@@ -6,20 +6,10 @@ import org.apache.commons.lang3.StringUtils;
 import javax.validation.constraints.NotEmpty;
 
 public class CustomerComplainUpdateDto {
-    @NotEmpty(message = "user id cannot be empty")
-    private String userId;
     @NotEmpty(message = "customer complain id cannot be empty")
     private String customerComplainId;
     @NotEmpty(message = "customer complain status id cannot be empty")
     private String customerComplainStatusId;
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
 
     public String getCustomerComplainId() {
         return customerComplainId;

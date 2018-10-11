@@ -8,7 +8,6 @@ import com.software.finatech.lslb.cms.service.referencedata.AuditActionReference
 import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LoggedCaseStatusReferenceData;
-import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.LoggedCaseService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
@@ -44,17 +43,15 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
     private static final String loggedCaseAuditActionId = AuditActionReferenceData.CASE_ID;
 
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
-    private AuthInfoService authInfoService;
     private LoggedCaseMailSenderAsync loggedCaseMailSenderAsync;
     private AuditLogHelper auditLogHelper;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
 
     @Autowired
     public LoggedCaseServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
-                                 AuthInfoService authInfoService, LoggedCaseMailSenderAsync loggedCaseMailSenderAsync,
+                                 LoggedCaseMailSenderAsync loggedCaseMailSenderAsync,
                                  AuditLogHelper auditLogHelper, SpringSecurityAuditorAware springSecurityAuditorAware) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
-        this.authInfoService = authInfoService;
         this.loggedCaseMailSenderAsync = loggedCaseMailSenderAsync;
         this.auditLogHelper = auditLogHelper;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
@@ -130,11 +127,11 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             if (!loggedCaseCreateDto.isValid()) {
                 return Mono.just(new ResponseEntity<>("Please provide either agent id or institution id alone", HttpStatus.BAD_REQUEST));
             }
-            AuthInfo user = authInfoService.getUserById(userId);
+            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
             if (user == null) {
-                return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", userId), HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
-            if (!userCanUpdateCase(user)) {
+            if (!canUpdateCase(user)) {
                 return Mono.just(new ResponseEntity<>("User  cannot create logged case, please check user role and user status", HttpStatus.BAD_REQUEST));
             }
             LoggedCase loggedCase = fromLoggedCaseCreateDto(loggedCaseCreateDto);
@@ -155,7 +152,6 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
     public Mono<ResponseEntity> addLoggedCaseAction(LoggedCaseActionCreateDto caseActionCreateDto, HttpServletRequest request) {
         try {
             String caseId = caseActionCreateDto.getCaseId();
-            String userId = caseActionCreateDto.getUserId();
             String caseStatusId = caseActionCreateDto.getCaseStatusId();
             LoggedCase existingCase = findCaseById(caseId);
             if (existingCase == null) {
@@ -166,11 +162,11 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             if (existingCase.isClosed()) {
                 return Mono.just(new ResponseEntity<>("The logged case is already closed", HttpStatus.BAD_REQUEST));
             }
-            AuthInfo user = authInfoService.getUserById(userId);
+            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
             if (user == null) {
-                return Mono.just(new ResponseEntity<>(String.format("User with is %s not found", userId), HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
-            if (!userCanUpdateCase(user)) {
+            if (!canUpdateCase(user)) {
                 return Mono.just(new ResponseEntity<>("User cannot change logged case status, please check user role and user status", HttpStatus.BAD_REQUEST));
             }
 
@@ -179,7 +175,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             }
             LoggedCaseAction caseAction = new LoggedCaseAction();
             caseAction.setActionTime(LocalDateTime.now());
-            caseAction.setUserId(userId);
+            caseAction.setUserId(user.getId());
             caseAction.setLslbCaseStatusId(caseStatusId);
             existingCase.setLoggedCaseStatusId(caseStatusId);
             existingCase.getCaseActions().add(caseAction);
@@ -200,7 +196,6 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
     public Mono<ResponseEntity> addLoggedCaseComment(LoggedCaseCommentCreateDto caseCommentCreateDto, HttpServletRequest request) {
         try {
             String caseId = caseCommentCreateDto.getCaseId();
-            String userId = caseCommentCreateDto.getUserId();
             LoggedCase existingCase = findCaseById(caseId);
             if (existingCase == null) {
                 return Mono.just(new ResponseEntity<>(String.format("LoggedCase with is %s not found", caseId), HttpStatus.BAD_REQUEST));
@@ -208,16 +203,16 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             if (existingCase.isClosed()) {
                 return Mono.just(new ResponseEntity<>("The logged case is already closed", HttpStatus.BAD_REQUEST));
             }
-            AuthInfo user = authInfoService.getUserById(userId);
+            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
             if (user == null) {
-                return Mono.just(new ResponseEntity<>(String.format("User with is %s not found", userId), HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
-            if (!userCanUpdateCase(user)) {
+            if (!canUpdateCase(user)) {
                 return Mono.just(new ResponseEntity<>("User cannot add comment to logged case,please check user role and user status", HttpStatus.BAD_REQUEST));
             }
 
             LoggedCaseComment caseComment = new LoggedCaseComment();
-            caseComment.setUserId(userId);
+            caseComment.setUserId(user.getId());
             caseComment.setComment(caseCommentCreateDto.getComment());
             caseComment.setCommentTime(LocalDateTime.now());
             existingCase.getCaseComments().add(caseComment);
@@ -283,7 +278,10 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
         return String.format("LS-CA-%s%s%s", randomNumber, presentDateTime.getHourOfDay(), presentDateTime.getMinuteOfHour(), presentDateTime.getSecondOfMinute());
     }
 
-    private boolean userCanUpdateCase(AuthInfo user) {
+    private boolean canUpdateCase(AuthInfo user) {
+        if (user == null) {
+            return false;
+        }
         return user.getEnabled() && getValidRoleIds().contains(user.getAuthRoleId());
     }
 

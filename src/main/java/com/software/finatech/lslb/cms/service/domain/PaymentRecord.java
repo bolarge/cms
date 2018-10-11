@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReference
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -30,6 +31,24 @@ public class PaymentRecord extends AbstractFact {
     private String revenueNameId;
     private String paymentReference;
     private String batchPaymentId;
+    private LocalDate startDate;
+    private LocalDate endDate;
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
 
     public String getBatchPaymentId() {
         return batchPaymentId;
@@ -348,8 +367,22 @@ public class PaymentRecord extends AbstractFact {
 
     public Pair<String, String> getLicenseStartAndEndDate() {
         Query query = new Query();
+        return null;
+    }
 
-
+    public String getOwnerName() {
+        if (isGamingMachinePayment() || isInstitutionPayment()) {
+            Institution institution = getInstitution();
+            if (institution != null) {
+                return institution.getInstitutionName();
+            }
+        }
+        if (isAgentPayment()) {
+            Agent agent = getAgent();
+            if (agent != null) {
+                return agent.getFullName();
+            }
+        }
         return null;
     }
 

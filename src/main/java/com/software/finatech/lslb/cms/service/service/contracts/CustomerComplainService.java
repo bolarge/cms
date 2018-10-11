@@ -23,9 +23,9 @@ public interface CustomerComplainService {
 
     Mono<ResponseEntity> getCustomerComplainFullDetail(String customerComplainId);
 
-    Mono<ResponseEntity> resolveCustomerComplain(String userId, String customerComplainId, HttpServletRequest request);
+    Mono<ResponseEntity> resolveCustomerComplain(String customerComplainId, HttpServletRequest request);
 
-    Mono<ResponseEntity> closeCustomerComplain(String userId, String customerComplainId, HttpServletRequest request);
+    Mono<ResponseEntity> closeCustomerComplain(String customerComplainId, HttpServletRequest request);
 
     Mono<ResponseEntity> createCustomerComplain(CustomerComplainCreateDto customerComplainCreateDto, HttpServletRequest request);
 

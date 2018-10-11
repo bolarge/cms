@@ -1,8 +1,10 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
-import com.software.finatech.lslb.cms.service.dto.AgentApprovalRequestOperationtDto;
+import com.software.finatech.lslb.cms.service.dto.AgentApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
+import com.software.finatech.lslb.cms.service.dto.ApprovalRequestOperationtDto;
+import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentApprovalRequestService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -60,7 +62,7 @@ public class AgentApprovalRequestController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createAgent(@RequestBody @Valid AgentApprovalRequestOperationtDto agentApprovalRequestOperationtDto, HttpServletRequest request) {
+    public Mono<ResponseEntity> approveRequest(@RequestBody @Valid ApprovalRequestOperationtDto agentApprovalRequestOperationtDto, HttpServletRequest request) {
         return agentApprovalRequestService.approveRequest(agentApprovalRequestOperationtDto, request);
     }
 
@@ -72,7 +74,7 @@ public class AgentApprovalRequestController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> rejectAgentApprovalRequest(@RequestBody @Valid AgentApprovalRequestOperationtDto agentApprovalRequestOperationtDto, HttpServletRequest request) {
+    public Mono<ResponseEntity> rejectAgentApprovalRequest(@RequestBody @Valid ApprovalRequestOperationtDto agentApprovalRequestOperationtDto, HttpServletRequest request) {
         return agentApprovalRequestService.rejectRequest(agentApprovalRequestOperationtDto, request);
     }
 
@@ -88,7 +90,7 @@ public class AgentApprovalRequestController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/all-approval-request-status")
-    @ApiOperation(value = "Get all agent approval request statuses", response = String.class, consumes = "application/json")
+    @ApiOperation(value = "Get all agent approval request statuses", response =EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -99,7 +101,7 @@ public class AgentApprovalRequestController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{id}")
-    @ApiOperation(value = "Get all agent approval request statuses", response = String.class, consumes = "application/json")
+    @ApiOperation(value = "Get Agent approval request full detail", response = AgentApprovalRequestDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),

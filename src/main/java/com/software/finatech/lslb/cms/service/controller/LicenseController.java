@@ -54,7 +54,7 @@ public class LicenseController {
                                                @RequestParam("licenseNumber") String licenseNumber,
                                                HttpServletResponse httpServletResponse) {
         return licenseService.findAllLicense(page, pageSize, sortType, sortParam, institutionId,
-                agentId, gamingMachineId, licenseStatusId, gameTypeId, paymentRecordId, date, licenseType,licenseNumber, httpServletResponse);
+                agentId, gamingMachineId, licenseStatusId, gameTypeId, paymentRecordId, date, licenseNumber,licenseType, httpServletResponse);
     }
 
 

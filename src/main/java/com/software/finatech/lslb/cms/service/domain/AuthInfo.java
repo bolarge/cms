@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
 import com.software.finatech.lslb.cms.service.dto.AuthPermissionDto;
+import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -383,5 +384,9 @@ public class AuthInfo extends AbstractFact {
             }
         }
         return authPermission;
+    }
+
+    public boolean isSuperAdmin() {
+        return StringUtils.equals(AuthRoleReferenceData.SUPER_ADMIN_ID, this.authRoleId);
     }
 }
