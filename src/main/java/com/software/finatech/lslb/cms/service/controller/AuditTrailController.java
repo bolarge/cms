@@ -35,13 +35,13 @@ import java.util.stream.Collectors;
 @Api(value = "AuditTrail", description = "", tags = "AuditTrail")
 @RestController
 @RequestMapping("/api/v1/auditTrail")
-public class AuditTrailController extends BaseController{
+public class AuditTrailController extends BaseController {
     private static Logger logger = LoggerFactory.getLogger(AuditTrailController.class);
 
     /**
      * @return Roles full information
      */
-    @ApiOperation(value = "Get AuditAction", response = ArrayList.class, consumes="application/json")
+    @ApiOperation(value = "Get AuditAction", response = ArrayList.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -49,17 +49,17 @@ public class AuditTrailController extends BaseController{
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    @RequestMapping(method= RequestMethod.GET, value="/auditActions", produces ="application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "/auditActions", produces = "application/json")
     public Mono<ResponseEntity> getAllAuditAction() {
         List<FactObject> auditAction = Mapstore.STORE.get("AuditAction").values().stream().collect(Collectors.toList());
         //ArrayList<FactObject> authRoles = (ArrayList<FactObject>) mongoRepositoryReactive.findAll(AuthRole.class).toStream().collect(Collectors.toList());
-        ArrayList<AuditActionDto> dto =  new ArrayList<>();
-        auditAction.forEach(entry->{
-            dto.add(((AuditAction)entry).convertToDto());
+        ArrayList<AuditActionDto> dto = new ArrayList<>();
+        auditAction.forEach(entry -> {
+            dto.add(((AuditAction) entry).convertToDto());
         });
 
-        if(dto.size() == 0){
-            return  Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
+        if (dto.size() == 0) {
+            return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
         }
 
         return Mono.just(new ResponseEntity(dto, HttpStatus.OK));
@@ -69,7 +69,7 @@ public class AuditTrailController extends BaseController{
      * @param id AffectedFact id
      * @return AffectedFact full information
      */
-    @ApiOperation(value = "Get AuditTrail By Id", response = AuditTrailDto.class, consumes="application/json")
+    @ApiOperation(value = "Get AuditTrail By Id", response = AuditTrailDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -77,11 +77,11 @@ public class AuditTrailController extends BaseController{
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    @RequestMapping(method= RequestMethod.GET, value="/{id}", produces ="application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}", produces = "application/json")
     public Mono<ResponseEntity> getById(@PathVariable String id) {
-        AuditTrail auditTrail = (AuditTrail) mongoRepositoryReactive.findById(id,AuditTrail.class).block();
-        if(auditTrail == null){
-            return  Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
+        AuditTrail auditTrail = (AuditTrail) mongoRepositoryReactive.findById(id, AuditTrail.class).block();
+        if (auditTrail == null) {
+            return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
         }
 
         return Mono.just(new ResponseEntity(auditTrail.convertToDto(), HttpStatus.OK));
@@ -90,8 +90,8 @@ public class AuditTrailController extends BaseController{
     /**
      * @return All AuditTrails full information
      */
-    @RequestMapping(method= RequestMethod.GET, value="/all",produces ="application/json" ,params = {"keyword","auditActionId","fromDate","toDate", "page", "size","sorting","sortProperty" })
-    @ApiOperation(value = "Get AuditTrails", response = AuditTrailDto.class, consumes="application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "/all", produces = "application/json", params = {"keyword", "auditActionId", "fromDate", "toDate", "page", "size", "sorting", "sortProperty"})
+    @ApiOperation(value = "Get AuditTrails", response = AuditTrailDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -100,12 +100,12 @@ public class AuditTrailController extends BaseController{
     }
     )
     //For multi-search invoice we use json to receive the fields and param
-    public Mono<ResponseEntity> getAuditTrails(@Param( "keyword" ) String keyword,
-                                               @Param( "fromDate" ) String fromDate,
-                                               @Param( "toDate" ) String toDate,
-                                               @Param( "auditActionId" ) String auditActionId,
-                                               @Param( "page" ) @NotNull int page, @Param( "size" )  @NotNull int size, @Param( "size" )  String sortProperty, @Param( "sorting" ) String sorting, HttpServletResponse response) {
-        try{
+    public Mono<ResponseEntity> getAuditTrails(@Param("keyword") String keyword,
+                                               @Param("fromDate") String fromDate,
+                                               @Param("toDate") String toDate,
+                                               @Param("auditActionId") String auditActionId,
+                                               @Param("page") @NotNull int page, @Param("size") @NotNull int size, @Param("sortProperty") String sortProperty, @Param("sorting") String sorting, HttpServletResponse response) {
+        try {
             //@TODO validate request params
             Query query = new Query();
             Criteria criteria = new Criteria();
@@ -113,16 +113,19 @@ public class AuditTrailController extends BaseController{
             /*if(healthInstitutionId != null && !healthInstitutionId.isEmpty()) {
                 query.addCriteria(Criteria.where("healthInstitutionId").is(healthInstitutionId));
             }*/
-            if(keyword != null && !keyword.isEmpty()) {
+            if (keyword != null && !keyword.isEmpty()) {
                 //"*.ab.*"
                 //keyword = "*."+keyword+".*";
                 //keyword = "/.*"+keyword+".*/";
-                criteria.orOperator(Criteria.where("actionPerformed").regex(keyword,"i"),Criteria.where("performedBy").regex(keyword,"i"),Criteria.where("remoteAddress").regex(keyword,"i"));
+                criteria.orOperator(Criteria.where("actionPerformed").regex(keyword, "i"),
+                        Criteria.where("performedBy").regex(keyword, "i"),
+                        Criteria.where("remoteAddress").regex(keyword, "i"),
+                        Criteria.where("owner").regex(keyword, "i"));
             }
-            if(auditActionId != null && !auditActionId.isEmpty()) {
+            if (auditActionId != null && !auditActionId.isEmpty()) {
                 criteria.andOperator(Criteria.where("auditActionId").is(auditActionId));
             }
-            if((toDate != null && !toDate.isEmpty()) && (fromDate != null && !fromDate.isEmpty())) {
+            if ((toDate != null && !toDate.isEmpty()) && (fromDate != null && !fromDate.isEmpty())) {
                 //Parse to Date first
                 LocalDate from = new LocalDate(fromDate);
                 LocalDate to = new LocalDate(toDate);
@@ -132,28 +135,30 @@ public class AuditTrailController extends BaseController{
             query.addCriteria(criteria);
 
             //For the very firstPage we send the totalCount
-            if(page == 0){
-                long count = mongoRepositoryReactive.count(query,AuditTrail.class).block();
-                response.setHeader("TotalCount",String.valueOf(count));
+            if (page == 0) {
+                long count = mongoRepositoryReactive.count(query, AuditTrail.class).block();
+                response.setHeader("TotalCount", String.valueOf(count));
             }
 
             Sort sort = null;
-            if(sorting != null  && !sorting.isEmpty() && sortProperty != null  && !sortProperty.isEmpty()) {
+            if (sorting != null && !sorting.isEmpty() && sortProperty != null && !sortProperty.isEmpty()) {
                 sort = new Sort((sorting.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC), sortProperty);
-            }else{
+            } else {
                 sort = new Sort(Sort.Direction.ASC, "id");
             }
-            query.with(PageRequest.of(page,size,sort));
+            query.with(PageRequest.of(page, size, sort));
             query.with(sort);
 
-            ArrayList<AuditTrail> auditTrails = (ArrayList<AuditTrail>) mongoRepositoryReactive.findAll(query,AuditTrail.class).toStream().collect(Collectors.toList());
+            ArrayList<AuditTrail> auditTrails = (ArrayList<AuditTrail>) mongoRepositoryReactive.findAll(query, AuditTrail.class).toStream().collect(Collectors.toList());
 
-            ArrayList<AuditTrailDto> auditTrailsDTO =  new ArrayList<>();
-
-            if(auditTrailsDTO.size() == 0){
-                return  Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
+            if (auditTrails == null || auditTrails.isEmpty()) {
+                return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
             }
 
+            ArrayList<AuditTrailDto> auditTrailsDTO = new ArrayList<>();
+            for (AuditTrail auditTrail : auditTrails) {
+                auditTrailsDTO.add(auditTrail.convertToDto());
+            }
             return Mono.just(new ResponseEntity(auditTrailsDTO, HttpStatus.OK));
 
         } catch (Exception e) {
@@ -161,5 +166,4 @@ public class AuditTrailController extends BaseController{
         }
         return null;
     }
-
 }
