@@ -85,6 +85,7 @@ public class VigipayHttpClient {
                 headers.setContentType(MediaType.APPLICATION_JSON);
                 headers.set("Authorization", "Bearer " + accessToken);
                 String requestJson = OBJECT_MAPPER.writeValueAsString(vigipayCreateCustomer);
+                logger.info("Creating customer on Vigipay \n Customer Name {} \n\n Request -> \n {}", vigipayCreateCustomer.getName(), requestJson);
                 HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
                 ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, entity, String.class);
                 logger.info(" response from Vigipay -> {}", responseEntity.getBody());
