@@ -1,13 +1,14 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 
+import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @SuppressWarnings("serial")
 @Document(collection = "PendingAuthInfo")
 public class PendingAuthInfo extends AuthInfo {
 
-    public String userApprovalRequestStatusId;
+    private String userApprovalRequestStatusId = ApprovalRequestStatusReferenceData.PENDING_ID;
 
     public String getUserApprovalRequestStatusId() {
         return userApprovalRequestStatusId;

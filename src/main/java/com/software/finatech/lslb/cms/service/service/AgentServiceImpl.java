@@ -4,6 +4,7 @@ import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.domain.AgentApprovalRequest;
 import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
+import com.software.finatech.lslb.cms.service.domain.PendingAgent;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AgentApprovalRequestTypeReferenceData;
@@ -129,7 +130,7 @@ public class AgentServiceImpl implements AgentService {
             if (validateCreateAgent != null) {
                 return validateCreateAgent;
             }
-            Agent agent = fromCreateAgentDto(agentCreateDto);
+            PendingAgent agent = fromCreateAgentDto(agentCreateDto);
             saveAgent(agent);
             AgentApprovalRequest agentApprovalRequest = fromAgentCreateDto(agentCreateDto, agent);
             mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
@@ -152,7 +153,7 @@ public class AgentServiceImpl implements AgentService {
     private AgentApprovalRequest fromAgentCreateDto(AgentCreateDto agentCreateDto, Agent agent) {
         AgentApprovalRequest agentApprovalRequest = new AgentApprovalRequest();
         agentApprovalRequest.setId(UUID.randomUUID().toString());
-        agentApprovalRequest.setAgentId(agent.getId());
+        agentApprovalRequest.setPendingAgentId(agent.getId());
         agentApprovalRequest.setGameTypeId(agentCreateDto.getGameTypeId());
         agentApprovalRequest.setInstitutionId(agentCreateDto.getInstitutionId());
         agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
@@ -298,10 +299,10 @@ public class AgentServiceImpl implements AgentService {
         return null;
     }
 
-    private Agent fromCreateAgentDto(AgentCreateDto agentCreateDto) {
+    private PendingAgent fromCreateAgentDto(AgentCreateDto agentCreateDto) {
         String gameTypeId = agentCreateDto.getGameTypeId();
         String institutionId = agentCreateDto.getInstitutionId();
-        Agent agent = new Agent();
+        PendingAgent agent = new PendingAgent();
         agent.setId(UUID.randomUUID().toString());
         agent.setFirstName(agentCreateDto.getFirstName());
         agent.setLastName(agentCreateDto.getLastName());
@@ -332,6 +333,7 @@ public class AgentServiceImpl implements AgentService {
         agent.setAgentId(generateAgentId());
         return agent;
     }
+
 
     @Override
     public Mono<ResponseEntity> getAgentFullDetailById(String agentId) {
