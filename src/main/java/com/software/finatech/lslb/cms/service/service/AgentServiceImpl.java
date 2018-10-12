@@ -4,6 +4,7 @@ import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.domain.AgentApprovalRequest;
 import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
+import com.software.finatech.lslb.cms.service.domain.PendingAgent;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AgentApprovalRequestTypeReferenceData;
@@ -16,6 +17,8 @@ import com.software.finatech.lslb.cms.service.util.NumberUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AgentCreationNotifierAsync;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -75,7 +78,6 @@ public class AgentServiceImpl implements AgentService {
                                               HttpServletResponse httpServletResponse) {
         try {
             Query query = new Query();
-            query.addCriteria(Criteria.where("enabled").is(true));
             if (!StringUtils.isEmpty(institutionIds)) {
                 List<String> institutionIdList = Arrays.asList(institutionIds.split(","));
                 query.addCriteria(Criteria.where("institutionIds").in(institutionIdList));
@@ -127,7 +129,7 @@ public class AgentServiceImpl implements AgentService {
             if (validateCreateAgent != null) {
                 return validateCreateAgent;
             }
-            Agent agent = fromCreateAgentDto(agentCreateDto);
+            PendingAgent agent = fromCreateAgentDto(agentCreateDto);
             saveAgent(agent);
             AgentApprovalRequest agentApprovalRequest = fromAgentCreateDto(agentCreateDto, agent);
             mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
@@ -150,7 +152,7 @@ public class AgentServiceImpl implements AgentService {
     private AgentApprovalRequest fromAgentCreateDto(AgentCreateDto agentCreateDto, Agent agent) {
         AgentApprovalRequest agentApprovalRequest = new AgentApprovalRequest();
         agentApprovalRequest.setId(UUID.randomUUID().toString());
-        agentApprovalRequest.setAgentId(agent.getId());
+        agentApprovalRequest.setPendingAgentId(agent.getId());
         agentApprovalRequest.setGameTypeId(agentCreateDto.getGameTypeId());
         agentApprovalRequest.setInstitutionId(agentCreateDto.getInstitutionId());
         agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
@@ -172,15 +174,19 @@ public class AgentServiceImpl implements AgentService {
             if (agent == null) {
                 return Mono.just(new ResponseEntity<>(String.format("No agent found with id %s", agentId), HttpStatus.BAD_REQUEST));
             }
+
+            Pair<String, String> oldPhoneAndAddress = new ImmutablePair<>(agent.getPhoneNumber(), agent.getResidentialAddress());
             agent.setResidentialAddress(agentUpdateDto.getResidentialAddress());
             agent.setPhoneNumber(agentUpdateDto.getPhoneNumber());
             saveAgent(agent);
 
+            Pair<String, String> newPhoneAndAddress = new ImmutablePair<>(agent.getPhoneNumber(), agent.getResidentialAddress());
             String verbiage = String.format("Updated Agent Details -> Agent Id: %s ", agent.getAgentId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
+            agentCreationNotifierAsync.sentAgentUpdateEmailToAgentInstitutions(agent, oldPhoneAndAddress, newPhoneAndAddress);
             return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while updating agent", e);
@@ -292,10 +298,10 @@ public class AgentServiceImpl implements AgentService {
         return null;
     }
 
-    private Agent fromCreateAgentDto(AgentCreateDto agentCreateDto) {
+    private PendingAgent fromCreateAgentDto(AgentCreateDto agentCreateDto) {
         String gameTypeId = agentCreateDto.getGameTypeId();
         String institutionId = agentCreateDto.getInstitutionId();
-        Agent agent = new Agent();
+        PendingAgent agent = new PendingAgent();
         agent.setId(UUID.randomUUID().toString());
         agent.setFirstName(agentCreateDto.getFirstName());
         agent.setLastName(agentCreateDto.getLastName());
@@ -326,6 +332,7 @@ public class AgentServiceImpl implements AgentService {
         agent.setAgentId(generateAgentId());
         return agent;
     }
+
 
     @Override
     public Mono<ResponseEntity> getAgentFullDetailById(String agentId) {

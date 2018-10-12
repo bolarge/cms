@@ -333,6 +333,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
         customerComplain.setCustomerFullName(customerComplainCreateDto.getFullName());
         customerComplain.setCustomerPhoneNumber(customerComplainCreateDto.getPhoneNumber());
         customerComplain.setTicketId(generateTicketId());
+        customerComplain.setTimeReported(LocalDateTime.now());
         customerComplain.setNextNotificationDateTime(LocalDateTime.now().plusDays(MAX_DAYS_BEFORE_COMPLAIN_REMINDER));
         return customerComplain;
     }

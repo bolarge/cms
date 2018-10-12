@@ -5,11 +5,11 @@ import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.domain.AgentApprovalRequest;
 import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class AgentCreationNotifierAsync {
@@ -155,5 +156,45 @@ public class AgentCreationNotifierAsync {
         model.put("businessAddressList", businessAddresses);
         model.put("agentEmail", agentEmail);
         return mailContentBuilderService.build(model, "agent-creation-notification");
+    }
+
+    @Async
+    public void sentAgentUpdateEmailToAgentInstitutions(Agent agent, Pair<String, String> oldPhoneAndAddressPair, Pair<String, String> newPhoneAndAddressPair) {
+        Set<String> agentInstitutionIds = agent.getInstitutionIds();
+        String mailContent = buildAgentAddressChangeNotificationEmailContent(agent, oldPhoneAndAddressPair, newPhoneAndAddressPair);
+        for (String institutionId : agentInstitutionIds) {
+            ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institutionId);
+            for (AuthInfo institutionAdmin : institutionAdmins) {
+                sendAgentAddressChangeToInstitutionAdmin(mailContent, institutionAdmin.getEmailAddress());
+            }
+        }
+    }
+
+    private String buildAgentAddressChangeNotificationEmailContent(Agent agent, Pair<String, String> oldPhoneAndAddressPair, Pair<String, String> newPhoneAndAddressPair) {
+        String oldPhoneNumber = oldPhoneAndAddressPair.getKey();
+        String oldResidentialAddress = oldPhoneAndAddressPair.getValue();
+        String newPhoneNumber = newPhoneAndAddressPair.getKey();
+        String newResidentialAddress = newPhoneAndAddressPair.getValue();
+        String agentId = agent.getAgentId();
+        String agentFullName = agent.getFullName();
+        String frontEndUrl = String.format("%s/agent-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), agent.getId());
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("oldPhoneNumber", oldPhoneNumber);
+        model.put("oldResidentialAddress", oldResidentialAddress);
+        model.put("newPhoneNumber", newPhoneNumber);
+        model.put("newResidentialAddress", newResidentialAddress);
+        model.put("agentId", agentId);
+        model.put("agentFullName", agentFullName);
+        model.put("frontEndUrl", frontEndUrl);
+        return mailContentBuilderService.build(model, "Agent-Profile-Update-Operator-Admin");
+    }
+
+    private void sendAgentAddressChangeToInstitutionAdmin(String mailContent, String institutionAdminEmail) {
+        try {
+            logger.info("Sending agent update email to {}", institutionAdminEmail);
+            emailService.sendEmail(mailContent, "Agent Update Notification", institutionAdminEmail);
+        } catch (Exception e) {
+            logger.error(String.format("An error occurred while sending agent update notification to institution admin with email %s", institutionAdminEmail), e);
+        }
     }
 }

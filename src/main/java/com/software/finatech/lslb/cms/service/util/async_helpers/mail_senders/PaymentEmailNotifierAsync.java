@@ -102,6 +102,7 @@ public class PaymentEmailNotifierAsync {
             String gameTypeName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getGameTypeName());
             String paymentDate = paymentRecordDetail.getPaymentDate().toString("dd-MM-yyyy");
             boolean isPartPayment = paymentRecord.getAmount() > paymentRecordDetail.getAmount();
+            boolean isCompletePayment = paymentRecord.isCompletedPayment();
 
             model.put("amount", amount);
             model.put("date", presentDateString);
@@ -113,18 +114,12 @@ public class PaymentEmailNotifierAsync {
             model.put("isSuccessPayment", isSuccessPayment);
             model.put("paymentInitiator", paymentInitiator);
             model.put("isPartPayment", isPartPayment);
+            model.put("isCompletePayment", isCompletePayment);
 
             String content = mailContentBuilderService.build(model, templateName);
             emailService.sendEmail(content, "LSLB Payment Notification", userEmail);
         } catch (Exception e) {
             logger.error(String.format("An error occurred while sending payment notification email to user -> %s", userEmail), e);
         }
-    }
-
-    private String buildMultiplePaymentRecordEmail(List<PaymentRecord> paymentRecordList) {
-        HashMap<String, Object> model = new HashMap<>();
-
-
-        return null;
     }
 }

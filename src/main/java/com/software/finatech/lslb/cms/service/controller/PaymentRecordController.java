@@ -1,8 +1,8 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
-import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
+import com.software.finatech.lslb.cms.service.dto.PaymentReceiptResponse;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import io.swagger.annotations.Api;
@@ -84,5 +84,17 @@ public class PaymentRecordController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getPaymentRecordById(@PathVariable("paymentRecordId") String paymentRecordId) {
         return paymentRecordService.findPaymentRecordById(paymentRecordId);
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/get-receipt-details/{paymentRecordId}")
+    @ApiOperation(value = "Get Payment Record Receipt Details By Id", response = PaymentReceiptResponse.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getPaymentRecordReceiptById(@PathVariable("paymentRecordId") String paymentRecordId) {
+        return paymentRecordService.getPaymentReceiptDetails(paymentRecordId);
     }
 }

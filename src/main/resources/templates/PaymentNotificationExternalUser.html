@@ -558,7 +558,7 @@
                                                                                     <tr>
                                                                                         <td>Amount</td>
                                                                                         <td> : </td>
-                                                                                        <td>N<span th:text="${amount}"></span></td>
+                                                                                        <td>NGN<span th:text="${amount}"></span></td>
                                                                                     </tr>
                                                                                     <tr>
                                                                                         <td>Payment Date</td>
@@ -582,6 +582,14 @@
                                                                                         <td> : </td>
                                                                                         <td><span th:if="${isPartPayment == false}">Full Payment </span>
                                                                                             <span th:if="${isPartPayment == true}">Partial Payment</span>
+                                                                                        </td>
+                                                                                    </tr>
+
+                                                                                    <tr>
+                                                                                        <td>Completed Payment ?</td>
+                                                                                        <td> : </td>
+                                                                                        <td><span th:if="${isCompletePayment == false}">NO</span>
+                                                                                            <span th:if="${isCompletePayment == true}">YES</span>
                                                                                         </td>
                                                                                     </tr>
                                                                                 </table>

@@ -25,6 +25,15 @@ public class AgentApprovalRequest extends AbstractFact {
     private String approvalRequestStatusId;
     private String rejectorId;
     private String rejectionReason;
+    private String pendingAgentId;
+
+    public String getPendingAgentId() {
+        return pendingAgentId;
+    }
+
+    public void setPendingAgentId(String pendingAgentId) {
+        this.pendingAgentId = pendingAgentId;
+    }
 
     public void setBusinessAddressList(List<String> businessAddressList) {
         this.businessAddressList = businessAddressList;
@@ -201,6 +210,13 @@ public class AgentApprovalRequest extends AbstractFact {
         return "";
     }
 
+    private PendingAgent getPendingAgent() {
+        if (StringUtils.isEmpty(this.pendingAgentId)) {
+            return null;
+        }
+        return (PendingAgent) mongoRepositoryReactive.findById(this.pendingAgentId, PendingAgent.class).block();
+    }
+
     private AuthInfo getUser(String userId) {
         if (StringUtils.isEmpty(userId)) {
             return null;
@@ -229,6 +245,10 @@ public class AgentApprovalRequest extends AbstractFact {
         if (agent != null) {
             agentApprovalRequestDto.setAgentId(getAgentId());
             agentApprovalRequestDto.setAgentName(agent.getFullName());
+        }
+        PendingAgent pendingAgent = getPendingAgent();
+        if (pendingAgent != null){
+            agentApprovalRequestDto.setAgentName(pendingAgent.getFullName());
         }
         GameType gameType = getGameType();
         if (gameType != null) {
@@ -265,6 +285,12 @@ public class AgentApprovalRequest extends AbstractFact {
             agentApprovalRequestDto.setAgentName(agent.getFullName());
             agentApprovalRequestDto.setAgent(agent.convertToFullDetailDto());
         }
+        PendingAgent pendingAgent = getPendingAgent();
+        if (pendingAgent != null){
+            agentApprovalRequestDto.setAgent(pendingAgent.convertToDto());
+            agentApprovalRequestDto.setAgentName(pendingAgent.getFullName());
+        }
+
         GameType gameType = getGameType();
         if (gameType != null) {
             agentApprovalRequestDto.setGameTypeId(getGameTypeId());
