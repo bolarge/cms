@@ -246,6 +246,10 @@ public class AgentApprovalRequest extends AbstractFact {
             agentApprovalRequestDto.setAgentId(getAgentId());
             agentApprovalRequestDto.setAgentName(agent.getFullName());
         }
+        PendingAgent pendingAgent = getPendingAgent();
+        if (pendingAgent != null){
+            agentApprovalRequestDto.setAgentName(pendingAgent.getFullName());
+        }
         GameType gameType = getGameType();
         if (gameType != null) {
             agentApprovalRequestDto.setGameTypeId(getGameTypeId());
