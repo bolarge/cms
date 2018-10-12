@@ -1,18 +1,25 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.RenewalFormCreateDto;
 import com.software.finatech.lslb.cms.service.dto.RenewalFormDto;
 import com.software.finatech.lslb.cms.service.dto.RenewalFormStatusDto;
 import com.software.finatech.lslb.cms.service.dto.RenewalFormUpdateDto;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.RenewalFormStatusReferenceData;
+import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -22,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.*;
@@ -31,6 +39,11 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1/renewalForm")
 public class RenewalFormController extends BaseController {
+    private AuditLogHelper auditLogHelper;
+    @Autowired
+    protected SpringSecurityAuditorAware springSecurityAuditorAware;
+    @Autowired
+    private HttpServletRequest request;
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "gameTypeIds", "institutionId","formStatusId"})
     @ApiOperation(value = "Get all Renewal Form", response = RenewalFormDto.class, responseContainer = "List", consumes = "application/json")
@@ -184,6 +197,11 @@ public class RenewalFormController extends BaseController {
             renewalForm.setGameTypeId(renewalFormCreateDto.getGameTypeId());
             renewalForm.setFormStatusId(RenewalFormStatusReferenceData.PENDING_DOCUMENT_UPLOAD);
             mongoRepositoryReactive.saveOrUpdate(renewalForm);
+            String verbiage = getInstitution(license.getInstitutionId()).getInstitutionName() + " submitted a renewal form";
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
+                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(renewalForm.convertToDto(), HttpStatus.OK));
         } catch (Exception ex) {
             return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
@@ -228,6 +246,11 @@ public class RenewalFormController extends BaseController {
             renewalForm.setFormStatusId(RenewalFormStatusReferenceData.PENDING_DOCUMENT_UPLOAD);
 
             mongoRepositoryReactive.saveOrUpdate(renewalForm);
+            String verbiage = getInstitution(renewalForm.getInstitutionId()).getInstitutionName() + " updated its renewal form";
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
+                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(renewalForm.getInstitutionId()).getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(renewalForm.convertToDto(), HttpStatus.OK));
         } catch (Exception ex) {
             return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
@@ -297,4 +320,8 @@ public class RenewalFormController extends BaseController {
             return Mono.just(new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST));
         }
     }
+    public Institution getInstitution(String institutionId) {
+        return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+    }
+
 }
