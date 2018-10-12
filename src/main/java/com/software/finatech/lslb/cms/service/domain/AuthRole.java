@@ -1,14 +1,15 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 
+import com.software.finatech.lslb.cms.service.dto.AuthPermissionDto;
 import com.software.finatech.lslb.cms.service.dto.AuthRoleDto;
-import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -19,9 +20,6 @@ import java.util.Set;
 public class AuthRole extends EnumeratedFact {
     protected String ssoRoleMapping;
     protected Set<String> authPermissionIds = new java.util.HashSet<>();
-
-    @Transient
-    protected Set<AuthPermission> authPermissions = new java.util.HashSet<>();
 
     public String getSsoRoleMapping() {
         return ssoRoleMapping;
@@ -39,14 +37,6 @@ public class AuthRole extends EnumeratedFact {
         this.authPermissionIds = authPermissionIds;
     }
 
-    public Set<AuthPermission> getAuthPermissions() {
-        return authPermissions;
-    }
-
-    public void setAuthPermissions(Set<AuthPermission> authPermissions) {
-        this.authPermissions = authPermissions;
-    }
-
     @Override
     public String getFactName() {
         return "AuthRole";
@@ -57,35 +47,37 @@ public class AuthRole extends EnumeratedFact {
         return super.clone();
     }
 
-    public void setAssociatedProperties() {
-        if (authPermissionIds.size() > 0) {
-            authPermissionIds.stream().forEach(authPermissionId -> {
-                AuthPermission authPermission = (AuthPermission) Mapstore.STORE.get("AuthPermission").get(authPermissionId);
-                if (authPermission == null) {
-                    authPermission = (AuthPermission) mongoRepositoryReactive.findById(authPermissionId, AuthPermission.class).block();
-                    if (authPermission == null) {
-                        try {
-                            throw new FactNotFoundException("AuthPermission", authPermissionId);
-                        } catch (FactNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        Mapstore.STORE.get("AuthPermission").put(authPermission.getId(), authPermission);
-                    }
-                }
-                getAuthPermissions().add(authPermission);
-
-            });
-
-            //setAuthRole(authPer);
+    private AuthPermission getAuthPermission(String authPermissionId) {
+        if (StringUtils.isEmpty(authPermissionId)) {
+            return null;
         }
+        AuthPermission authPermission = null;
+        Map authPermissionMap = Mapstore.STORE.get("AuthPermission");
+        if (authPermissionMap != null) {
+            authPermission = (AuthPermission) authPermissionMap.get(authPermissionId);
+        }
+        if (authPermission == null)
+            authPermission = (AuthPermission) mongoRepositoryReactive.findById(authPermissionId, AuthPermission.class).block();
+        if (authPermission != null && authPermissionMap != null) {
+            Mapstore.STORE.get("AuthPermission").put(authPermission.getId(), authPermission);
+        }
+        return authPermission;
+    }
+
+    private Set<AuthPermissionDto> getAuthPermissionDtos() {
+        Set<AuthPermissionDto> authPermissionDtos = new HashSet<>();
+        for (String permissionId : authPermissionIds) {
+            AuthPermission authPermission = getAuthPermission(permissionId);
+            if (authPermission != null) {
+                authPermissionDtos.add(authPermission.convertToDto());
+            }
+        }
+        return authPermissionDtos;
     }
 
     public AuthRoleDto convertToDto() {
         AuthRoleDto authRoleDto = convertToHalfDto();
-        getAuthPermissions().stream().forEach(entry -> {
-            authRoleDto.getAuthPermissions().add(entry.convertToDto());
-        });
+        authRoleDto.setAuthPermissions(getAuthPermissionDtos());
         return authRoleDto;
     }
 
@@ -96,9 +88,6 @@ public class AuthRole extends EnumeratedFact {
         authRoleDto.setName(getName());
         authRoleDto.setSsoRoleMapping(getSsoRoleMapping());
         authRoleDto.setId(getId());
-//        getAuthPermissions().stream().forEach(entry -> {
-//            authRoleDto.getAuthPermissions().add(entry.convertToDto());
-//        });
         return authRoleDto;
     }
 

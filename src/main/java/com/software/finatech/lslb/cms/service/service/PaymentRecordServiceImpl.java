@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.service;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.domain.PaymentStatus;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
+import com.software.finatech.lslb.cms.service.dto.PaymentReceiptResponse;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
@@ -10,6 +11,7 @@ import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferen
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.SendEmail;
+import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -231,6 +233,24 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             return Mono.just(new ResponseEntity(paymentRecord.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while getting payment record by id", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> getPaymentReceiptDetails(String paymentRecordId) {
+        try {
+            PaymentRecord paymentRecord = findById(paymentRecordId);
+            if (paymentRecord == null) {
+                return Mono.just(new ResponseEntity<>(String.format("There is no payment record with id %s", paymentRecordId), HttpStatus.BAD_REQUEST));
+            }
+
+            PaymentReceiptResponse paymentReceiptResponse = new PaymentReceiptResponse();
+            paymentReceiptResponse.setGameTypeName(StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getGameTypeName()));
+            paymentReceiptResponse.setFeePaymentTypeName(StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getFeePaymentTypeName()));
+            paymentReceiptResponse.setOwnerName(StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getOwnerName()));
+        return null;
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while fetching payment receipt details", e);
         }
     }
 }

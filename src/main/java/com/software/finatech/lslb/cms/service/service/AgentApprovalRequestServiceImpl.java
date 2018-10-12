@@ -3,17 +3,15 @@ package com.software.finatech.lslb.cms.service.service;
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.AgentApprovalRequestDto;
-import com.software.finatech.lslb.cms.service.dto.AgentApprovalRequestOperationtDto;
+import com.software.finatech.lslb.cms.service.dto.ApprovalRequestOperationtDto;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.AgentApprovalRequestTypeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentApprovalRequestService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
+import com.software.finatech.lslb.cms.service.util.AgentUserCreator;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AgentCreationNotifierAsync;
-import com.software.finatech.lslb.cms.service.util.AgentUserCreator;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
@@ -50,7 +48,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
 
-    private static  final String agentAuditActionId = AuditActionReferenceData.AGENT_ID;
+    private static final String agentAuditActionId = AuditActionReferenceData.AGENT_ID;
 
     @Autowired
     public AgentApprovalRequestServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
@@ -180,29 +178,32 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
     }
 
     @Override
-    public Mono<ResponseEntity> approveRequest(AgentApprovalRequestOperationtDto agentApprovalRequestOperationtDto, HttpServletRequest request) {
-        String agentApprovalRequestId = agentApprovalRequestOperationtDto.getAgentApprovalRequestId();
-        String userId = agentApprovalRequestOperationtDto.getUserId();
+    public Mono<ResponseEntity> approveRequest(ApprovalRequestOperationtDto agentApprovalRequestOperationtDto, HttpServletRequest request) {
+        String agentApprovalRequestId = agentApprovalRequestOperationtDto.getApprovalRequestId();
         try {
             AgentApprovalRequest agentApprovalRequest = findAgentApprovalRequestById(agentApprovalRequestId);
             if (agentApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Agent approval request with id %s does not exist", agentApprovalRequestId), HttpStatus.BAD_REQUEST));
             }
-            AuthInfo approvingUser = authInfoService.getUserById(userId);
+            AuthInfo approvingUser = springSecurityAuditorAware.getLoggedInUser();
             if (approvingUser == null) {
-                return Mono.just(new ResponseEntity<>(String.format("USer with id %s not found", userId), HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
+            if (!canApproveRequest(approvingUser)) {
+                return Mono.just(new ResponseEntity<>("User is not authorized to approve request", HttpStatus.BAD_REQUEST));
+            }
+
 
             if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.CREATE_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
-                approveAgentCreationRequest(agentApprovalRequest, userId);
+                approveAgentCreationRequest(agentApprovalRequest, approvingUser.getId());
             }
             if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.ADD_INSTITUTION_TO_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
-                approveAddInstitutionToAgentRequest(agentApprovalRequest, userId);
+                approveAddInstitutionToAgentRequest(agentApprovalRequest, approvingUser.getId());
             }
 
-            String verbiage = String.format("Approved agent approval request -> Type: %s ",agentApprovalRequest.getAgentApprovalRequestTypeName());
+            String verbiage = String.format("Approved agent approval request -> Type: %s ", agentApprovalRequest.getAgentApprovalRequestTypeName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
-                    springSecurityAuditorAware.getCurrentAuditorNotNull(),agentApprovalRequest.getInstitutionName(),
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), agentApprovalRequest.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsAndLslbOnAgentRequestCreation(agentApprovalRequest);
@@ -213,34 +214,37 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
     }
 
     @Override
-    public Mono<ResponseEntity> rejectRequest(AgentApprovalRequestOperationtDto agentApprovalRequestRejectDto, HttpServletRequest request) {
+    public Mono<ResponseEntity> rejectRequest(ApprovalRequestOperationtDto agentApprovalRequestRejectDto, HttpServletRequest request) {
         try {
             if (StringUtils.isEmpty(agentApprovalRequestRejectDto.getReason())) {
                 return Mono.just(new ResponseEntity<>("Rejection reason must not be empty", HttpStatus.BAD_REQUEST));
             }
 
-            String agentApprovalRequestId = agentApprovalRequestRejectDto.getAgentApprovalRequestId();
-            String userId = agentApprovalRequestRejectDto.getUserId();
+            String agentApprovalRequestId = agentApprovalRequestRejectDto.getApprovalRequestId();
             String rejectReason = agentApprovalRequestRejectDto.getReason();
             AgentApprovalRequest agentApprovalRequest = findAgentApprovalRequestById(agentApprovalRequestId);
             if (agentApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Agent approval request with id %s does not exist", agentApprovalRequestId), HttpStatus.BAD_REQUEST));
             }
-            AuthInfo approvingUser = authInfoService.getUserById(userId);
-            if (approvingUser == null) {
-                return Mono.just(new ResponseEntity<>(String.format("USer with id %s not found", userId), HttpStatus.BAD_REQUEST));
+            AuthInfo rejectingUser = springSecurityAuditorAware.getLoggedInUser();
+            if (rejectingUser == null) {
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
+            }
+
+            if (!canApproveRequest(rejectingUser)) {
+                return Mono.just(new ResponseEntity<>("User is not authorized to reject request", HttpStatus.BAD_REQUEST));
             }
 
             if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.CREATE_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
-                rejectAgentCreationRequest(agentApprovalRequest, userId, rejectReason);
+                rejectAgentCreationRequest(agentApprovalRequest, rejectingUser.getId(), rejectReason);
             }
             if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.ADD_INSTITUTION_TO_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
-                rejectAddInstitutionToAgentRequest(agentApprovalRequest, userId, rejectReason);
+                rejectAddInstitutionToAgentRequest(agentApprovalRequest, rejectingUser.getId(), rejectReason);
             }
 
-            String verbiage = String.format("Rejected agent approval request -> Type: %s ",agentApprovalRequest.getId());
+            String verbiage = String.format("Rejected agent approval request -> Type: %s ", agentApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
-                    springSecurityAuditorAware.getCurrentAuditorNotNull(),agentApprovalRequest.getInstitutionName(),
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), agentApprovalRequest.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsAndLslbOnAgentRequestCreation(agentApprovalRequest);
@@ -284,7 +288,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
                 try {
                     mongoRepositoryReactive.delete(document);
                 } catch (Exception e) {
-                    logger.error("An error occurred while deleting document {}", document.getId(),e);
+                    logger.error("An error occurred while deleting document {}", document.getId(), e);
                 }
             }
         }
@@ -345,5 +349,19 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
 
     private Agent findById(String agentId) {
         return (Agent) mongoRepositoryReactive.findById(agentId, Agent.class).block();
+    }
+
+    private boolean canApproveRequest(AuthInfo authInfo) {
+        if (authInfo == null) {
+            return false;
+        }
+        return authInfo.getEnabled() && getAllowedRoleIds().contains(authInfo.getAuthRoleId());
+    }
+
+    public List<String> getAllowedRoleIds() {
+        List<String> allowedIds = new ArrayList<>();
+        allowedIds.add(AuthRoleReferenceData.SUPER_ADMIN_ID);
+        allowedIds.add(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID);
+        return allowedIds;
     }
 }

@@ -70,9 +70,8 @@ public class CustomerComplainController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> resolveCustomerComplain(@RequestParam("userId") String userId,
-                                                        @RequestParam("complaintId") String complaintId, HttpServletRequest request) {
-        return customerComplainService.resolveCustomerComplain(userId, complaintId, request);
+    public Mono<ResponseEntity> resolveCustomerComplain(@RequestParam("complaintId") String complaintId, HttpServletRequest request) {
+        return customerComplainService.resolveCustomerComplain(complaintId, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/close", produces = "application/json")
@@ -82,9 +81,9 @@ public class CustomerComplainController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> closeCustomerComplain(@RequestParam("userId") String userId,
-                                                      @RequestParam("complaintId") String complaintId, HttpServletRequest request) {
-        return customerComplainService.closeCustomerComplain(userId, complaintId, request);
+    public Mono<ResponseEntity> closeCustomerComplain(
+            @RequestParam("complaintId") String complaintId, HttpServletRequest request) {
+        return customerComplainService.closeCustomerComplain(complaintId, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{id}", produces = "application/json")

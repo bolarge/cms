@@ -27,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,8 @@ public class LicenseServiceImpl implements LicenseService {
     private AuditLogHelper auditLogHelper;
     @Autowired
     protected SpringSecurityAuditorAware springSecurityAuditorAware;
+    @Autowired
+    private HttpServletRequest request;
     @Autowired
     SendEmail sendEmail;
     @Autowired
@@ -511,16 +514,17 @@ public class LicenseServiceImpl implements LicenseService {
             if (license == null) {
                 return Mono.just(new ResponseEntity<>("No License Record", HttpStatus.BAD_REQUEST));
             }
-            //license.setLicenseStatusId(LicenseStatusReferenceData.);
+            license.setLicenseStatusId(LicenseStatusReferenceData.RENEWED_ID);
             mongoRepositoryReactive.saveOrUpdate(license);
             List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
-            institutionAdmins.stream().forEach(institutionAdmin -> {
+            institutionAdmins.stream().forEach(institutionAdmin->{
                 NotificationDto notificationDto = new NotificationDto();
                 notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
                 notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
                 notificationDto.setTemplate("LicenseUpdate");
                 notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ", renewal application for " +
-                        notificationDto.getGameType() + " have been approved.");
+                        notificationDto.getGameType()+" have been approved. License is valid from "+license.getEffectiveDate().toString("dd/MM/YYY")+" to" +
+                        notificationDto.getEndDate());
                 notificationDto.setInstitutionEmail(institutionAdmin.getEmailAddress());
                 sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
             });
@@ -591,6 +595,7 @@ public class LicenseServiceImpl implements LicenseService {
 //            //auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.U,
 //                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
 //                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
 
 
             license.setLicenseStatusId(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
@@ -676,7 +681,7 @@ public class LicenseServiceImpl implements LicenseService {
             notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
             notificationDto.setTemplate("LicenseUpdate");
             notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ",  License for " +
-                    notificationDto.getGameType() + " has been approved.\n License Number is: " + licenseNumber);
+                    notificationDto.getGameType() + " has been approved.\n License Number is: " + licenseNumber+". \nDo pick up the original hard copy of this license at LSLB Office.");
 
             ArrayList<AuthInfo> authInfos = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
             for (AuthInfo authInfo : authInfos) {
