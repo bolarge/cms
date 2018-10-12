@@ -101,7 +101,7 @@ public class LoggedCaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getLoggedCaseFullDetail(@PathVariable("id") String complainId) {
-        return customerComplainService.getCustomerComplainFullDetail(complainId);
+    public Mono<ResponseEntity> getLoggedCaseFullDetail(@PathVariable("id") String caseId) {
+        return loggedCaseService.getLoggedCaseFullDetail(caseId);
     }
 }
