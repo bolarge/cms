@@ -681,7 +681,7 @@ public class LicenseServiceImpl implements LicenseService {
             notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
             notificationDto.setTemplate("LicenseUpdate");
             notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ",  License for " +
-                    notificationDto.getGameType() + " has been approved.\n License Number is: " + licenseNumber);
+                    notificationDto.getGameType() + " has been approved.\n License Number is: " + licenseNumber+". \nDo pick up the original hard copy of this license at LSLB Office.");
 
             ArrayList<AuthInfo> authInfos = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
             for (AuthInfo authInfo : authInfos) {
