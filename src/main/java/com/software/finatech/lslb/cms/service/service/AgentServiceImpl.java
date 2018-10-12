@@ -78,7 +78,6 @@ public class AgentServiceImpl implements AgentService {
                                               HttpServletResponse httpServletResponse) {
         try {
             Query query = new Query();
-            query.addCriteria(Criteria.where("enabled").is(true));
             if (!StringUtils.isEmpty(institutionIds)) {
                 List<String> institutionIdList = Arrays.asList(institutionIds.split(","));
                 query.addCriteria(Criteria.where("institutionIds").in(institutionIdList));
