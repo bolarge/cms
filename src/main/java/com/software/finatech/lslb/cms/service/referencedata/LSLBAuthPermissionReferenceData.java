@@ -436,6 +436,15 @@ public class LSLBAuthPermissionReferenceData {
         permission51.setDescription("Can receive case notification (new and reminder)");
         permission51.setUsedBySystem(true);
 
+        AuthPermission permission52 = (AuthPermission) mongoRepositoryReactive.findById("52", AuthPermission.class).block();
+        if (permission52 == null) {
+            permission52 = new AuthPermission();
+            permission52.setId("52");
+        }
+        permission51.setName("VIEW USER APPROVAL REQUESTS");
+        permission51.setDescription("Can view user approval requests");
+        permission51.setUsedBySystem(false);
+
         mongoRepositoryReactive.saveOrUpdate(permission1);
         mongoRepositoryReactive.saveOrUpdate(permission2);
         mongoRepositoryReactive.saveOrUpdate(permission3);
@@ -487,6 +496,7 @@ public class LSLBAuthPermissionReferenceData {
         mongoRepositoryReactive.saveOrUpdate(permission49);
         mongoRepositoryReactive.saveOrUpdate(permission50);
         mongoRepositoryReactive.saveOrUpdate(permission51);
+        mongoRepositoryReactive.saveOrUpdate(permission52);
     }
 
 

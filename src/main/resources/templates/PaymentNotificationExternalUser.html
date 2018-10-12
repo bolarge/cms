@@ -584,6 +584,14 @@
                                                                                             <span th:if="${isPartPayment == true}">Partial Payment</span>
                                                                                         </td>
                                                                                     </tr>
+
+                                                                                    <tr>
+                                                                                        <td>Completed Payment ?</td>
+                                                                                        <td> : </td>
+                                                                                        <td><span th:if="${isCompletePayment == false}">NO</span>
+                                                                                            <span th:if="${isCompletePayment == true}">YES</span>
+                                                                                        </td>
+                                                                                    </tr>
                                                                                 </table>
                                                                                 </div>
                                                                         </td>
