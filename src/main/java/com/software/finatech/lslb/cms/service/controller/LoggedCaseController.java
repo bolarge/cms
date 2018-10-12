@@ -93,4 +93,15 @@ public class LoggedCaseController {
         return loggedCaseService.getAllLoggedCaseStatus();
     }
 
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}", produces = "application/json")
+    @ApiOperation(value = "Get logged case full detail", response = LoggedCaseDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getLoggedCaseFullDetail(@PathVariable("id") String complainId) {
+        return customerComplainService.getCustomerComplainFullDetail(complainId);
+    }
 }
