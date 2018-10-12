@@ -105,7 +105,6 @@ public class DashboardController extends BaseController {
         }if(!StringUtils.isEmpty(institutionId)){
             query.addCriteria(Criteria.where("id").is(institutionId));
             queryAgentTotalCount.addCriteria(Criteria.where("institutionIds").in(institutionId));
-
         }
         long institutionTotalCount=mongoRepositoryReactive.count(query, Institution.class).block();
         long gamingMachineTotalCount=mongoRepositoryReactive.count(query, GamingMachine.class).block();
