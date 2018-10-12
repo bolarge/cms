@@ -18,6 +18,8 @@ public class AuditActionReferenceData {
     public static final String AGENT_ID = "12";
     public static final String ROLE_ID = "13";
     public static final String INSTITUTION = "14";
+    public static final String AIP_ID= "15";
+    public static final String RENEWAL_ID= "16";
 
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
@@ -145,6 +147,24 @@ public class AuditActionReferenceData {
         }
         action.setDescription("Institution");
         action.setName("Institution");
+        mongoRepositoryReactive.saveOrUpdate(action);
+
+        action = (AuditAction) mongoRepositoryReactive.findById(AIP_ID, AuditAction.class).block();
+        if (action == null) {
+            action = new AuditAction();
+            action.setId(AIP_ID);
+        }
+        action.setDescription("AIP");
+        action.setName("AIP");
+        mongoRepositoryReactive.saveOrUpdate(action);
+
+        action = (AuditAction) mongoRepositoryReactive.findById(RENEWAL_ID, AuditAction.class).block();
+        if (action == null) {
+            action = new AuditAction();
+            action.setId(RENEWAL_ID);
+        }
+        action.setDescription("RENEWAL");
+        action.setName("RENEWAL");
         mongoRepositoryReactive.saveOrUpdate(action);
     }
 }
