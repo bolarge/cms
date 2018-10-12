@@ -589,19 +589,19 @@ public class LicenseServiceImpl implements LicenseService {
             renewalForm.setFormStatusId(RenewalFormStatusReferenceData.PENDING);
             renewalForm.setComment(renewalFormCommentDto.getComment());
             mongoRepositoryReactive.saveOrUpdate(renewalForm);
-//            verbiage = "Moved : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " renewal form  status from submitted to pending";
-//            //auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.U,
-//                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
-//                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            verbiage = "Moved : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " renewal form  status from submitted to pending";
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
+                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
 
 
             license.setLicenseStatusId(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
             mongoRepositoryReactive.saveOrUpdate(license);
-//            verbiage = "Moved : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from Renewal In Review to Renewal In Progress";
-//             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_FORM_UPDATE,
-//                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
-//                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage);
+            verbiage = "Moved : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from Renewal In Review back to Renewal In Progress";
+             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
+                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
             institutionAdmins.stream().forEach(institutionAdmin -> {
@@ -627,7 +627,7 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public Mono<ResponseEntity> updateAIPDocToLicense(LicenseUpdateAIPToLicenseDto licenseUpdateDto) {
         try {
-
+            String verbiage;
             Query queryLicence = new Query();
             queryLicence.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
             queryLicence.addCriteria(Criteria.where("gameTypeId").is(licenseUpdateDto.getGameTypeId()));
@@ -672,7 +672,15 @@ public class LicenseServiceImpl implements LicenseService {
             createLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION);
             createLicense.setPaymentRecordId(license.getPaymentRecordId());
             mongoRepositoryReactive.saveOrUpdate(license);
+            verbiage = "UPDATED : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from AIP DOC UPLOADED to AIP COMPLETED";
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.AIP_ID,
+                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
             mongoRepositoryReactive.saveOrUpdate(createLicense);
+            verbiage = getInstitution(license.getInstitutionId()).getInstitutionName() + " is Licensed ";
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LICENCE_ID,
+                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             NotificationDto notificationDto = new NotificationDto();
             notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
@@ -755,6 +763,11 @@ public class LicenseServiceImpl implements LicenseService {
             license.setPaymentRecordId(paymentRecord.getId());
             //     license.setLicenseNumber(generateLicenseNumberForPaymentRecord(paymentRecord));
             mongoRepositoryReactive.saveOrUpdate(license);
+//           String verbiage = "Moved : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status to AIP";
+//            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.AIP_ID,
+//                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
+//                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             aipMailSenderAsync.sendAipNotificationToInstitutionAdmins(paymentRecord);
         } catch (Exception e) {
             logger.error("An error occurred while creating AIP license for institution {}", paymentRecord.getInstitutionId(), e);
@@ -857,6 +870,12 @@ public class LicenseServiceImpl implements LicenseService {
             newPendingApprovalRenewedLicense.setParentLicenseId(latestLicense.getId());
             newPendingApprovalRenewedLicense.setLicenseNumber(latestLicense.getLicenseNumber());
             mongoRepositoryReactive.saveOrUpdate(newPendingApprovalRenewedLicense);
+
+//            verbiage = "UPDATED : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from AIP DOC UPLOADED to AIP COMPLETED";
+//            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.AIP_ID,
+//                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
+//                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
         } catch (Exception e) {
             logger.error("An error occurred while creating renewed license for payment record {}", paymentRecord.getId(), e);
         }

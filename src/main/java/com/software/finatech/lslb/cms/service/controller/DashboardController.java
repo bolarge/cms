@@ -105,6 +105,7 @@ public class DashboardController extends BaseController {
         }if(!StringUtils.isEmpty(institutionId)){
             query.addCriteria(Criteria.where("id").is(institutionId));
             queryAgentTotalCount.addCriteria(Criteria.where("institutionIds").in(institutionId));
+            queryCasesTotalCount.addCriteria(Criteria.where("institutionId").is(institutionId));
         }
         long institutionTotalCount=mongoRepositoryReactive.count(query, Institution.class).block();
         long gamingMachineTotalCount=mongoRepositoryReactive.count(query, GamingMachine.class).block();
@@ -277,7 +278,7 @@ public class DashboardController extends BaseController {
     }
     public long getGamingMachineCountForInstitution(String institutionId){
         Query query = new Query();
-        query.addCriteria(Criteria.where("institutionIds").in(institutionId));
+        query.addCriteria(Criteria.where("institutionId").in(institutionId));
         return mongoRepositoryReactive.count(query, GamingMachine.class).block();
     }
 
