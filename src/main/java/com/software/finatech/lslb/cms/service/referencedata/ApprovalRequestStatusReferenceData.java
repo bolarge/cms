@@ -23,7 +23,7 @@ public class ApprovalRequestStatusReferenceData {
             approvalRequestStatus2 = new ApprovalRequestStatus();
             approvalRequestStatus2.setId(PENDING_ID);
         }
-        approvalRequestStatus2.setName("PENDING");
+        approvalRequestStatus2.setName("PENDING APPROVAL");
 
         ApprovalRequestStatus approvalRequestStatus3 = (ApprovalRequestStatus) mongoRepositoryReactive.findById(REJECTED_ID, ApprovalRequestStatus.class).block();
         if (approvalRequestStatus3 == null) {

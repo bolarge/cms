@@ -1,12 +1,12 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
+import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.ArrayList;
@@ -31,24 +31,6 @@ public class PaymentRecord extends AbstractFact {
     private String revenueNameId;
     private String paymentReference;
     private String batchPaymentId;
-    private LocalDate startDate;
-    private LocalDate endDate;
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
 
     public String getBatchPaymentId() {
         return batchPaymentId;
@@ -365,9 +347,9 @@ public class PaymentRecord extends AbstractFact {
         return StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID, this.revenueNameId);
     }
 
-    public Pair<String, String> getLicenseStartAndEndDate() {
-        Query query = new Query();
-        return null;
+
+    public License getLicense() {
+        return (License) mongoRepositoryReactive.find(Query.query(Criteria.where("paymentRecordId").is(this.id)), License.class).block();
     }
 
     public String getOwnerName() {
@@ -386,6 +368,9 @@ public class PaymentRecord extends AbstractFact {
         return null;
     }
 
+    public boolean isCompletedPayment() {
+        return StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, this.paymentStatusId);
+    }
 
     @Override
     public String getFactName() {

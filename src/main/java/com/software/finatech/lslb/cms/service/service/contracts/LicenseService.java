@@ -56,6 +56,4 @@ public interface LicenseService {
     void createFirstLicenseForGamingMachinePayment(PaymentRecord paymentRecord);
 
     void createRenewedLicenseForPayment(PaymentRecord paymentRecord);
-
-
 }

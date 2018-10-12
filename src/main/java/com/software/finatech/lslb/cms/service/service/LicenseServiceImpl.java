@@ -434,8 +434,6 @@ public class LicenseServiceImpl implements LicenseService {
         });
 
         return Mono.just(new ResponseEntity<>(aipCheckDtos, HttpStatus.OK));
-
-
     }
 
     @Override

@@ -16,6 +16,8 @@ import com.software.finatech.lslb.cms.service.util.NumberUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AgentCreationNotifierAsync;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -172,15 +174,19 @@ public class AgentServiceImpl implements AgentService {
             if (agent == null) {
                 return Mono.just(new ResponseEntity<>(String.format("No agent found with id %s", agentId), HttpStatus.BAD_REQUEST));
             }
+
+            Pair<String, String> oldPhoneAndAddress = new ImmutablePair<>(agent.getPhoneNumber(), agent.getResidentialAddress());
             agent.setResidentialAddress(agentUpdateDto.getResidentialAddress());
             agent.setPhoneNumber(agentUpdateDto.getPhoneNumber());
             saveAgent(agent);
 
+            Pair<String, String> newPhoneAndAddress = new ImmutablePair<>(agent.getPhoneNumber(), agent.getResidentialAddress());
             String verbiage = String.format("Updated Agent Details -> Agent Id: %s ", agent.getAgentId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
+            agentCreationNotifierAsync.sentAgentUpdateEmailToAgentInstitutions(agent, oldPhoneAndAddress, newPhoneAndAddress);
             return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while updating agent", e);

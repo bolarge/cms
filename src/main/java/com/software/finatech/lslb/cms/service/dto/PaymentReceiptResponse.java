@@ -10,9 +10,8 @@ public class PaymentReceiptResponse {
     private String paymentTime;
     private String feePaymentTypeName;
     private String gameTypeName;
-    private String modeOfPayment;
+    private String lastModeOfPayment;
     private String revenueName;
-
 
     public String getPaymentReference() {
         return paymentReference;
@@ -86,12 +85,12 @@ public class PaymentReceiptResponse {
         this.gameTypeName = gameTypeName;
     }
 
-    public String getModeOfPayment() {
-        return modeOfPayment;
+    public String getLastModeOfPayment() {
+        return lastModeOfPayment;
     }
 
-    public void setModeOfPayment(String modeOfPayment) {
-        this.modeOfPayment = modeOfPayment;
+    public void setLastModeOfPayment(String lastModeOfPayment) {
+        this.lastModeOfPayment = lastModeOfPayment;
     }
 
     public String getRevenueName() {
