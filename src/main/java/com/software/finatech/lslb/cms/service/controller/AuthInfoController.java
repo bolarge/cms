@@ -1,14 +1,18 @@
 package com.software.finatech.lslb.cms.service.controller;
 
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.PendingAuthInfo;
+import com.software.finatech.lslb.cms.service.domain.UserApprovalRequest;
 import com.software.finatech.lslb.cms.service.domain.VerificationToken;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOChangePasswordModel;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOPasswordResetModel;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOToken;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOUserConfirmResetPasswordRequest;
-import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
+import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.UserApprovalRequestTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.AuthInfoServiceImpl;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
@@ -59,7 +63,11 @@ public class AuthInfoController extends BaseController {
     private AuditLogHelper auditLogHelper;
     private static Logger logger = LoggerFactory.getLogger(AuthInfoController.class);
 
+    @Autowired
+    private SpringSecurityAuditorAware springSecurityAuditorAware;
+
     private static final String LOGIN = AuditActionReferenceData.LOGIN_ID;
+
     /**
      * @param id AuthInfo id
      * @return AuthInfo full information
@@ -132,7 +140,7 @@ public class AuthInfoController extends BaseController {
         try {
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.find(new Query(Criteria.where("emailAddress").is(emailAddress)), AuthInfo.class).block();
             if (authInfo == null) {
-                 return Mono.just(new ResponseEntity("Invalid EmailAddress", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity("Invalid EmailAddress", HttpStatus.BAD_REQUEST));
             }
 
             if (authInfo.getSsoUserId() == null || authInfo.getSsoUserId().isEmpty()) {
@@ -295,12 +303,41 @@ public class AuthInfoController extends BaseController {
             if (authInfoExists != null) {
                 return Mono.just(new ResponseEntity("Email already registered", HttpStatus.BAD_REQUEST));
             }
+
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not fimf logged in user", HttpStatus.BAD_REQUEST));
+            }
+
+            PendingAuthInfo pendingAuthInfo = new PendingAuthInfo();
+            pendingAuthInfo.setId(UUID.randomUUID().toString());
+            pendingAuthInfo.setFirstName(authInfoCreateDto.getFirstName());
+            pendingAuthInfo.setLastName(authInfoCreateDto.getLastName());
+            pendingAuthInfo.setInstitutionId(authInfoCreateDto.getInstitutionId());
+            pendingAuthInfo.setAgentId(authInfoCreateDto.getAgentId());
+            pendingAuthInfo.setEmailAddress(authInfoCreateDto.getEmailAddress());
+            pendingAuthInfo.setTitle(authInfoCreateDto.getTitle());
+            pendingAuthInfo.setPhoneNumber(authInfoCreateDto.getPhoneNumber());
+            pendingAuthInfo.setAuthRoleId(authInfoCreateDto.getAuthRoleId());
+            mongoRepositoryReactive.saveOrUpdate(pendingAuthInfo);
+
+            UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
+            userApprovalRequest.setId(UUID.randomUUID().toString());
+            userApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
+            userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.CREATE_USER_ID);
+            userApprovalRequest.setInitiatorId(loggedInUser.getId());
+            userApprovalRequest.setPendingAuthInfoId(pendingAuthInfo.getId());
+            userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+            mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
+
             /*String appUrl =
                     "http://" + request.getServerName() +
                             ":" + request.getServerPort() +
                             request.getContextPath();*/
-            String appUrl = appHostPort + request.getContextPath();
-            return authInfoService.createAuthInfo(authInfoCreateDto, appUrl,request);
+//            String appUrl = appHostPort + request.getContextPath();
+//            return authInfoService.createAuthInfo(authInfoCreateDto, appUrl, request);
+           return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -407,7 +444,6 @@ public class AuthInfoController extends BaseController {
             }
 
 
-
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(verificationToken.getAuthInfoId(), AuthInfo.class).block();
             //authInfo.setOldFact(authInfo);
             authInfo.setEnabled(true);
@@ -440,12 +476,29 @@ public class AuthInfoController extends BaseController {
             if (authInfo == null) {
                 return Mono.just(new ResponseEntity("Invalid EmailAddress", HttpStatus.BAD_REQUEST));
             }
+//
+//            authInfo.setEnabled(false);
+//            mongoRepositoryReactive.saveOrUpdate(authInfo);
+//
+//            return Mono.just(new ResponseEntity("Success", HttpStatus.OK));
 
-            authInfo.setEnabled(false);
-            mongoRepositoryReactive.saveOrUpdate(authInfo);
+            if (!authInfo.getEnabled()) {
+                return Mono.just(new ResponseEntity<>("User already deactivated", HttpStatus.BAD_REQUEST));
+            }
 
-            return Mono.just(new ResponseEntity("Success", HttpStatus.OK));
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
+            userApprovalRequest.setId(UUID.randomUUID().toString());
+            userApprovalRequest.setAuthInfoId(authInfo.getId());
+            if (loggedInUser != null) {
+                userApprovalRequest.setInitiatorId(loggedInUser.getId());
+                userApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
+            }
+            userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.DEACTIVATE_USER_ID);
+            userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+            mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
 
+            return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -474,12 +527,31 @@ public class AuthInfoController extends BaseController {
             if (authInfo == null) {
                 return Mono.just(new ResponseEntity("Invalid EmailAddress", HttpStatus.BAD_REQUEST));
             }
+//
+//            authInfo.setEnabled(true);
+//            mongoRepositoryReactive.saveOrUpdate(authInfo);
+//
+//
+//
+//            return Mono.just(new ResponseEntity("Success", HttpStatus.OK));
 
-            authInfo.setEnabled(true);
-            mongoRepositoryReactive.saveOrUpdate(authInfo);
+            if (authInfo.getEnabled()) {
+                return Mono.just(new ResponseEntity<>("User already activated", HttpStatus.BAD_REQUEST));
+            }
 
-            return Mono.just(new ResponseEntity("Success", HttpStatus.OK));
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
+            userApprovalRequest.setId(UUID.randomUUID().toString());
+            userApprovalRequest.setAuthInfoId(authInfo.getId());
+            if (loggedInUser != null) {
+                userApprovalRequest.setInitiatorId(loggedInUser.getId());
+                userApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
+            }
+            userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.ACTIVATE_USER_ID);
+            userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+            mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
 
+            return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -596,30 +668,18 @@ public class AuthInfoController extends BaseController {
             if (authInfo == null) {
                 return Mono.just(new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST));
             }
+//            if (authInfoUpdateDto.getAuthRoleId() != null && !authInfoUpdateDto.getAuthRoleId().isEmpty()) {
+//                authInfo.setAuthRoleId(authInfoUpdateDto.getAuthRoleId());
+//            } else
 
-            List<String> gamingOperatorRoles = authInfoService.getAllGamingOperatorAdminAndUserRoles();
-            if (!StringUtils.equals(authInfoUpdateDto.getAuthRoleId(), authInfo.getAuthRoleId())
-                    && !StringUtils.isEmpty(authInfo.getInstitutionId())
-                    && gamingOperatorRoles.contains(authInfoUpdateDto.getAuthRoleId())) {
-                int maxNumberOfGamingOperatorUsers = 3;
-                List<AuthInfo> authInfoListWithGamingOperatorLimitedRoles = authInfoService.getAllActiveGamingOperatorAdminsAndUsersForInstitution(authInfo.getInstitutionId());
-                if (authInfoListWithGamingOperatorLimitedRoles.size() >= maxNumberOfGamingOperatorUsers) {
-                    return Mono.just(new ResponseEntity<>("Number of users for gaming operator exceeded", HttpStatus.BAD_REQUEST));
-                }
-            }
-
-            if (authInfoUpdateDto.getAuthRoleId() != null && !authInfoUpdateDto.getAuthRoleId().isEmpty()) {
-                authInfo.setAuthRoleId(authInfoUpdateDto.getAuthRoleId());
-            } else if (authInfoUpdateDto.getFirstName() != null && !authInfoUpdateDto.getFirstName().isEmpty()) {
+            if (authInfoUpdateDto.getFirstName() != null && !authInfoUpdateDto.getFirstName().isEmpty()) {
                 authInfo.setFirstName(authInfoUpdateDto.getFirstName());
             } else if (authInfoUpdateDto.getLastName() != null && !authInfoUpdateDto.getLastName().isEmpty()) {
                 authInfo.setLastName(authInfoUpdateDto.getLastName());
             } else if (authInfoUpdateDto.getPhoneNumber() != null && !authInfoUpdateDto.getPhoneNumber().isEmpty()) {
                 authInfo.setPhoneNumber(authInfoUpdateDto.getPhoneNumber());
             }
-
             mongoRepositoryReactive.saveOrUpdate(authInfo);
-
             return Mono.just(new ResponseEntity(authInfo.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {
@@ -628,6 +688,21 @@ public class AuthInfoController extends BaseController {
 
         return null;
     }
+
+
+    @RequestMapping(value = "/update-role", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update an authInfo role", response = UserApprovalRequestDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request")
+    }
+    )
+    public Mono<ResponseEntity> updateUserRole(@Valid @RequestBody UserRoleUpdateDto userRoleUpdateDto) {
+        return authInfoService.updateUserRole(userRoleUpdateDto);
+    }
+
 
     @RequestMapping(value = "/resendToken", method = RequestMethod.GET, produces = "application/json", params = {"token"})
     @ResponseBody
@@ -688,7 +763,7 @@ public class AuthInfoController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> addPermissionsToUser(@RequestBody UserAuthPermissionDto userAuthPermissionDto){
+    public Mono<ResponseEntity> addPermissionsToUser(@RequestBody UserAuthPermissionDto userAuthPermissionDto) {
         return authInfoService.addPermissionsToUser(userAuthPermissionDto);
     }
 
@@ -701,7 +776,7 @@ public class AuthInfoController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> removePermissionsFromUser(@RequestBody UserAuthPermissionDto userAuthPermissionDto){
+    public Mono<ResponseEntity> removePermissionsFromUser(@RequestBody UserAuthPermissionDto userAuthPermissionDto) {
         return authInfoService.removePermissionFromUser(userAuthPermissionDto);
     }
 

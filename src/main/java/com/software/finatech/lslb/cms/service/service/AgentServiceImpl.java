@@ -233,7 +233,7 @@ public class AgentServiceImpl implements AgentService {
             }
             Query query = Query.query(new Criteria().orOperator(Criteria.where("emailAddress").is(email), Criteria.where("agentId").is(agentId)));
             Agent agent = (Agent) mongoRepositoryReactive.find(query, Agent.class).block();
-            if (agent != null) {
+            if (agent == null) {
                 return Mono.just(new ResponseEntity<>("No Record found", HttpStatus.NOT_FOUND));
             } else {
                 return Mono.just(new ResponseEntity<>(agent.convertToFullDetailDto(), HttpStatus.OK));

@@ -178,7 +178,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
 
             String mailContent = buildMeetingAttendeeEmailContent("scheduleMeeting-GA-new", scheduledMeeting);
             for (AuthInfo gamingOperatorAdmin : gamingOperatorAdminsForInstitution) {
-                sendMeetingNotificationEmailToAttendee("Meeting Invite With Lagos State Lotteries Board", creatorMailSubject, gamingOperatorAdmin);
+                sendMeetingNotificationEmailToAttendee("Meeting Invite With Lagos State Lotteries Board",mailContent, gamingOperatorAdmin);
             }
 
             String institutionName = scheduledMeeting.getInstitutionName();

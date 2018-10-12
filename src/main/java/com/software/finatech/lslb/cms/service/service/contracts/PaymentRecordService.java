@@ -39,4 +39,6 @@ public interface PaymentRecordService {
                                                     String revenueNameId);
 
     Mono<ResponseEntity> findPaymentRecordById(String paymentRecordId);
+
+    Mono<ResponseEntity> getPaymentReceiptDetails(String paymentRecordId);
 }

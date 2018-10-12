@@ -1,8 +1,12 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import javax.validation.constraints.NotEmpty;
+
 public class LoggedCaseActionCreateDto {
-    private String userId;
+
+    @NotEmpty(message = "Please provide logged case status")
     private String caseStatusId;
+    @NotEmpty(message = "please provide loggged case id")
     private String caseId;
 
     public String getCaseId() {
@@ -11,14 +15,6 @@ public class LoggedCaseActionCreateDto {
 
     public void setCaseId(String caseId) {
         this.caseId = caseId;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 
     public String getCaseStatusId() {

@@ -53,19 +53,16 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
     private static final String customerComplainAuditActionId = AuditActionReferenceData.CUSTOMER_COMPLAIN;
 
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
-    private AuthInfoService authInfoService;
     private CustomerComplaintEmailSenderAsync customerComplaintEmailSenderAsync;
     private AuditLogHelper auditLogHelper;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
 
     @Autowired
     public CustomerComplainServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
-                                       AuthInfoService authInfoService,
                                        CustomerComplaintEmailSenderAsync customerComplaintEmailSenderAsync,
                                        AuditLogHelper auditLogHelper,
                                        SpringSecurityAuditorAware springSecurityAuditorAware) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
-        this.authInfoService = authInfoService;
         this.customerComplaintEmailSenderAsync = customerComplaintEmailSenderAsync;
         this.auditLogHelper = auditLogHelper;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
@@ -166,16 +163,16 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
     }
 
     @Override
-    public Mono<ResponseEntity> resolveCustomerComplain(String userId, String customerComplainId, HttpServletRequest request) {
+    public Mono<ResponseEntity> resolveCustomerComplain(String customerComplainId, HttpServletRequest request) {
         try {
-            if (StringUtils.isEmpty(userId) || StringUtils.isEmpty(customerComplainId)) {
-                return Mono.just(new ResponseEntity<>("User id and customer complain id  should not be empty", HttpStatus.BAD_REQUEST));
+            if (StringUtils.isEmpty(customerComplainId)) {
+                return Mono.just(new ResponseEntity<>("Customer complain id  should not be empty", HttpStatus.BAD_REQUEST));
             }
-            AuthInfo user = authInfoService.getUserById(userId);
+            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
             if (user == null) {
-                return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", userId), HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
-            if (!userCanResolveCustomerComplain(user)) {
+            if (!canResolveCustomerComplain(user)) {
                 return Mono.just(new ResponseEntity<>("User does not have permission to update customer complains", HttpStatus.BAD_REQUEST));
             }
             CustomerComplain existingCustomerComplain = findCustomerComplainById(customerComplainId);
@@ -192,7 +189,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             CustomerComplainAction customerComplainAction = new CustomerComplainAction();
             customerComplainAction.setActionTime(LocalDateTime.now());
             customerComplainAction.setComplainStatusId(CustomerComplainStatusReferenceData.RESOLVED_ID);
-            customerComplainAction.setUserId(userId);
+            customerComplainAction.setUserId(user.getId());
             existingCustomerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.RESOLVED_ID);
             existingCustomerComplain.getCustomerComplainActionList().add(customerComplainAction);
             mongoRepositoryReactive.saveOrUpdate(existingCustomerComplain);
@@ -205,7 +202,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
 
             return Mono.just(new ResponseEntity<>(existingCustomerComplain.convertToFullDetailDto(), HttpStatus.OK));
         } catch (Exception e) {
-            return logAndReturnError(logger, String.format("An error occurred while resolving customer complain %s with user id %s", customerComplainId, userId), e);
+            return logAndReturnError(logger, String.format("An error occurred while resolving customer complain %s", customerComplainId), e);
         }
     }
 
@@ -218,16 +215,16 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
     }
 
     @Override
-    public Mono<ResponseEntity> closeCustomerComplain(String userId, String customerComplainId, HttpServletRequest request) {
+    public Mono<ResponseEntity> closeCustomerComplain(String customerComplainId, HttpServletRequest request) {
         try {
-            if (StringUtils.isEmpty(userId) || StringUtils.isEmpty(customerComplainId)) {
-                return Mono.just(new ResponseEntity<>("User id and customer complain id  should not be empty", HttpStatus.BAD_REQUEST));
+            if (StringUtils.isEmpty(customerComplainId)) {
+                return Mono.just(new ResponseEntity<>("Customer complain id  should not be empty", HttpStatus.BAD_REQUEST));
             }
-            AuthInfo user = authInfoService.getUserById(userId);
+            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
             if (user == null) {
-                return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", userId), HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
-            if (!userCanResolveCustomerComplain(user)) {
+            if (!canResolveCustomerComplain(user)) {
                 return Mono.just(new ResponseEntity<>("User does not have permission to update customer complains", HttpStatus.BAD_REQUEST));
             }
             CustomerComplain existingCustomerComplain = findCustomerComplainById(customerComplainId);
@@ -241,7 +238,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             CustomerComplainAction customerComplainAction = new CustomerComplainAction();
             customerComplainAction.setActionTime(LocalDateTime.now());
             customerComplainAction.setComplainStatusId(CustomerComplainStatusReferenceData.CLOSED_ID);
-            customerComplainAction.setUserId(userId);
+            customerComplainAction.setUserId(user.getId());
             existingCustomerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.CLOSED_ID);
             existingCustomerComplain.getCustomerComplainActionList().add(customerComplainAction);
             mongoRepositoryReactive.saveOrUpdate(existingCustomerComplain);
@@ -255,21 +252,20 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
 
             return Mono.just(new ResponseEntity<>(existingCustomerComplain.convertToFullDetailDto(), HttpStatus.OK));
         } catch (Exception e) {
-            return logAndReturnError(logger, String.format("An error occurred while resolving customer complain %s with user id %s", customerComplainId, userId), e);
+            return logAndReturnError(logger, String.format("An error occurred while resolving customer complain %s", customerComplainId), e);
         }
     }
 
     @Override
     public Mono<ResponseEntity> updateCustomerComplainStatus(CustomerComplainUpdateDto customerComplainUpdateDto, HttpServletRequest request) {
         try {
-            String userId = customerComplainUpdateDto.getUserId();
             String customerComplainId = customerComplainUpdateDto.getCustomerComplainId();
             String customerComplainStatusId = customerComplainUpdateDto.getCustomerComplainStatusId();
-            AuthInfo user = authInfoService.getUserById(userId);
+            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
             if (user == null) {
-                return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", userId), HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
-            if (!userCanResolveCustomerComplain(user)) {
+            if (!canResolveCustomerComplain(user)) {
                 return Mono.just(new ResponseEntity<>("User does not have permission to update customer complains", HttpStatus.BAD_REQUEST));
             }
             CustomerComplain existingCustomerComplain = findCustomerComplainById(customerComplainId);
@@ -284,7 +280,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             CustomerComplainAction customerComplainAction = new CustomerComplainAction();
             customerComplainAction.setActionTime(LocalDateTime.now());
             customerComplainAction.setComplainStatusId(customerComplainStatusId);
-            customerComplainAction.setUserId(userId);
+            customerComplainAction.setUserId(user.getId());
             existingCustomerComplain.setCustomerComplainStatusId(customerComplainStatusId);
             existingCustomerComplain.getCustomerComplainActionList().add(customerComplainAction);
             mongoRepositoryReactive.saveOrUpdate(existingCustomerComplain);
@@ -351,7 +347,10 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
         return String.format("LS-CMTK-%s%s%s%s", randomInt, dateTime.getHourOfDay(), dateTime.getMinuteOfHour(), dateTime.getSecondOfMinute());
     }
 
-    private boolean userCanResolveCustomerComplain(AuthInfo user) {
+    private boolean canResolveCustomerComplain(AuthInfo user) {
+        if (user == null) {
+            return false;
+        }
         return user.getEnabled() && getValidRoleIds().contains(user.getAuthRoleId());
     }
 

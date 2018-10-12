@@ -2,15 +2,13 @@ package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.domain.AuthPermission;
 import com.software.finatech.lslb.cms.service.domain.AuthRole;
+import com.software.finatech.lslb.cms.service.domain.UserApprovalRequest;
 import com.software.finatech.lslb.cms.service.domain.VerificationToken;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.dto.sso.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthPermissionService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthRoleService;
@@ -844,26 +842,48 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     @Override
     public Mono<ResponseEntity> addPermissionsToUser(UserAuthPermissionDto userAuthPermissionDto) {
         try {
-            String userId = userAuthPermissionDto.getUserId();
-            Set<String> newPermissionIds = userAuthPermissionDto.getAuthPermissionIds();
-            AuthInfo user = getUserById(userId);
-            if (user == null) {
-                return Mono.just(new ResponseEntity<>(String.format("User with id %s not found", userId), HttpStatus.BAD_REQUEST));
+//            String userId = userAuthPermissionDto.getUserId();
+//            Set<String> newPermissionIds = userAuthPermissionDto.getAuthPermissionIds();
+//            AuthInfo user = getUserById(userId);
+//            if (user == null) {
+//                return Mono.just(new ResponseEntity<>(String.format("User with id %s not found", userId), HttpStatus.BAD_REQUEST));
+//            }
+//            Set<String> allUserPermissionIdsForUser = user.getAllUserPermissionIdsForUser();
+//            Set<String> userSpecificPermissionIdsForUser = user.getAuthPermissionIds();
+//            for (String newPermissionId : newPermissionIds) {
+//                AuthPermission authPermission = authPermissionService.findAuthPermissionById(newPermissionId);
+//                if (authPermission == null) {
+//                    return Mono.just(new ResponseEntity<>(String.format("Auth Permission with id %s does not exist", newPermissionId), HttpStatus.BAD_REQUEST));
+//                }
+//                if (!allUserPermissionIdsForUser.contains(newPermissionId)) {
+//                    userSpecificPermissionIdsForUser.add(newPermissionId);
+//                }
+//            }
+//            user.setAuthPermissionIds(userSpecificPermissionIdsForUser);
+//            mongoRepositoryReactive.saveOrUpdate(user);
+//            return Mono.just(new ResponseEntity<>(user.convertToDto(), HttpStatus.OK));
+            String loggedInUserId = userAuthPermissionDto.getLoggedInUserId();
+            String subjectUserId = userAuthPermissionDto.getUserId();
+            AuthInfo loggedInUser = getUserById(loggedInUserId);
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>(String.format("User with Id %s does not exist", loggedInUserId), HttpStatus.BAD_REQUEST));
             }
-            Set<String> allUserPermissionIdsForUser = user.getAllUserPermissionIdsForUser();
-            Set<String> userSpecificPermissionIdsForUser = user.getAuthPermissionIds();
-            for (String newPermissionId : newPermissionIds) {
-                AuthPermission authPermission = authPermissionService.findAuthPermissionById(newPermissionId);
-                if (authPermission == null) {
-                    return Mono.just(new ResponseEntity<>(String.format("Auth Permission with id %s does not exist", newPermissionId), HttpStatus.BAD_REQUEST));
-                }
-                if (!allUserPermissionIdsForUser.contains(newPermissionId)) {
-                    userSpecificPermissionIdsForUser.add(newPermissionId);
-                }
+            AuthInfo subjectUser = getUserById(subjectUserId);
+            if (subjectUser == null) {
+                return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", subjectUserId), HttpStatus.BAD_REQUEST));
             }
-            user.setAuthPermissionIds(userSpecificPermissionIdsForUser);
-            mongoRepositoryReactive.saveOrUpdate(user);
-            return Mono.just(new ResponseEntity<>(user.convertToDto(), HttpStatus.OK));
+
+            UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
+            userApprovalRequest.setId(UUID.randomUUID().toString());
+            userApprovalRequest.setInitiatorId(loggedInUserId);
+            userApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
+            userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+            userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.ADD_PERMISSION_TO_USER_ID);
+            userApprovalRequest.setNewPermissionIds(userAuthPermissionDto.getAuthPermissionIds());
+            userApprovalRequest.setAuthInfoId(subjectUserId);
+            mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
+            return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
+
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding permissions to user ", e);
         }
@@ -872,29 +892,85 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     @Override
     public Mono<ResponseEntity> removePermissionFromUser(UserAuthPermissionDto userAuthPermissionDto) {
         try {
-            String userId = userAuthPermissionDto.getUserId();
-            Set<String> removedPermissionIds = userAuthPermissionDto.getAuthPermissionIds();
-            AuthInfo user = getUserById(userId);
-            if (user == null) {
-                return Mono.just(new ResponseEntity<>(String.format("User with id %s not found", userId), HttpStatus.BAD_REQUEST));
+//            String userId = userAuthPermissionDto.getUserId();
+//            Set<String> removedPermissionIds = userAuthPermissionDto.getAuthPermissionIds();
+//            AuthInfo user = getUserById(userId);
+//            if (user == null) {
+//                return Mono.just(new ResponseEntity<>(String.format("User with id %s not found", userId), HttpStatus.BAD_REQUEST));
+//            }
+//            Set<String> userMappedPermissions = user.getAuthPermissionIds();
+//            for (String removedPermissionId : removedPermissionIds) {
+//                AuthPermission authPermission = authPermissionService.findAuthPermissionById(removedPermissionId);
+//                if (authPermission == null) {
+//                    return Mono.just(new ResponseEntity<>(String.format("Auth Permission with id %s does not exist", removedPermissionId), HttpStatus.BAD_REQUEST));
+//                }
+//                if (userMappedPermissions.contains(removedPermissionId)) {
+//                    userMappedPermissions.remove(removedPermissionId);
+//                }
+//            }
+//            user.setAuthPermissionIds(userMappedPermissions);
+//            mongoRepositoryReactive.saveOrUpdate(user);
+            //     return Mono.just(new ResponseEntity<>(user.convertToDto(), HttpStatus.OK));
+
+            String loggedInUserId = userAuthPermissionDto.getLoggedInUserId();
+            String subjectUserId = userAuthPermissionDto.getUserId();
+            AuthInfo loggedInUser = getUserById(loggedInUserId);
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>(String.format("User with Id %s does not exist", loggedInUserId), HttpStatus.BAD_REQUEST));
             }
-            Set<String> userMappedPermissions = user.getAuthPermissionIds();
-            for (String removedPermissionId : removedPermissionIds) {
-                AuthPermission authPermission = authPermissionService.findAuthPermissionById(removedPermissionId);
-                if (authPermission == null) {
-                    return Mono.just(new ResponseEntity<>(String.format("Auth Permission with id %s does not exist", removedPermissionId), HttpStatus.BAD_REQUEST));
-                }
-                if (userMappedPermissions.contains(removedPermissionId)) {
-                    userMappedPermissions.remove(removedPermissionId);
-                }
+            AuthInfo subjectUser = getUserById(subjectUserId);
+            if (subjectUser == null) {
+                return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", subjectUserId), HttpStatus.BAD_REQUEST));
             }
-            user.setAuthPermissionIds(userMappedPermissions);
-            mongoRepositoryReactive.saveOrUpdate(user);
-            return Mono.just(new ResponseEntity<>(user.convertToDto(), HttpStatus.OK));
+
+            UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
+            userApprovalRequest.setId(UUID.randomUUID().toString());
+            userApprovalRequest.setInitiatorId(loggedInUserId);
+            userApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
+            userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+            userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.REMOVE_PERMISSION_FROM_USER_ID);
+            userApprovalRequest.setRemovedPermissionIds(userAuthPermissionDto.getAuthPermissionIds());
+            userApprovalRequest.setAuthInfoId(subjectUserId);
+            mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
+            return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
             return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while removing permission from user", e);
         }
     }
+
+    @Override
+    public Mono<ResponseEntity> updateUserRole(UserRoleUpdateDto userRoleUpdateDto) {
+        try {
+            String subjectUserId = userRoleUpdateDto.getUserId();
+            String newRoleId = userRoleUpdateDto.getNewRoleId();
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo subjectUser = getUserById(subjectUserId);
+            if (subjectUser == null) {
+                return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", subjectUserId), HttpStatus.BAD_REQUEST));
+            }
+            AuthRole newRole = authRoleService.findRoleById(newRoleId);
+            if (newRole == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Role with id %s not found", newRoleId), HttpStatus.BAD_REQUEST));
+            }
+
+            UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
+            userApprovalRequest.setId(UUID.randomUUID().toString());
+            userApprovalRequest.setAuthInfoId(subjectUserId);
+            userApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
+            userApprovalRequest.setInitiatorId(loggedInUser.getId());
+            userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.CHANGE_USER_ROLE_ID);
+            userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+            userApprovalRequest.setNewAuthRoleId(newRoleId);
+            mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
+            return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while updating user role", e);
+        }
+    }
+
 
     public ArrayList<String> getAllGamingOperatorAdminAndUserRoles() {
         String gamingOperatorAdminRoleId = LSLBAuthRoleReferenceData.GAMING_OPERATOR_ADMIN_ROLE_ID;
