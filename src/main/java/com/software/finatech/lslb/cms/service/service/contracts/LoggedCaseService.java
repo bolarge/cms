@@ -33,5 +33,7 @@ public interface LoggedCaseService {
 
     Mono<ResponseEntity> getAllLoggedCaseStatus();
 
+    Mono<ResponseEntity> getLoggedCaseFullDetail(String loggedCaseId);
+
     LoggedCase findCaseById(String caseId);
 }

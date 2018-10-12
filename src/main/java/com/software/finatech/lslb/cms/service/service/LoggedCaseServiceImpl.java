@@ -258,6 +258,20 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
         return (LoggedCase) mongoRepositoryReactive.findById(caseId, LoggedCase.class).block();
     }
 
+    @Override
+    public Mono<ResponseEntity> getLoggedCaseFullDetail(String loggedCaseId) {
+        try {
+            LoggedCase loggedCase = findCaseById(loggedCaseId);
+            if (loggedCase == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Case with id %s does not exist", loggedCaseId), HttpStatus.BAD_REQUEST));
+            }
+
+            return Mono.just(new ResponseEntity<>(loggedCase.convertToFullDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while getting logged case full detail", e);
+        }
+    }
+
     private LoggedCase fromLoggedCaseCreateDto(LoggedCaseCreateDto caseCreateDto) {
         LoggedCase newCase = new LoggedCase();
         newCase.setId(UUID.randomUUID().toString());
