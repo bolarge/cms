@@ -18,6 +18,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -276,12 +277,12 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
     }
 
     private void rejectAgentCreationRequest(AgentApprovalRequest agentApprovalRequest, String userId, String rejectReason) {
-        Agent agent = findById(agentApprovalRequest.getAgentId());
+        PendingAgent pendingAgent = findPendingAgentById(agentApprovalRequest.getPendingAgentId());
         agentApprovalRequest.setRejectorId(userId);
         agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
         agentApprovalRequest.setRejectionReason(rejectReason);
         Query queryForAgentDocument = new Query();
-        queryForAgentDocument.addCriteria(Criteria.where("entityId").is(agent.getId()));
+        queryForAgentDocument.addCriteria(Criteria.where("entityId").is(pendingAgent.getId()));
         ArrayList<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(queryForAgentDocument, Document.class).toStream().collect(Collectors.toList());
         if (documents != null || !documents.isEmpty()) {
             for (Document document : documents) {
@@ -292,7 +293,9 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
                 }
             }
         }
-        mongoRepositoryReactive.delete(agent);
+        pendingAgent.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
+        pendingAgent.setEnabled(false);
+        mongoRepositoryReactive.saveOrUpdate(pendingAgent);
         mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
     }
 
@@ -329,15 +332,27 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
     }
 
     private void approveAgentCreationRequest(AgentApprovalRequest agentApprovalRequest, String userId) {
-        Agent agent = findById(agentApprovalRequest.getAgentId());
+        PendingAgent pendingAgent = findPendingAgentById(agentApprovalRequest.getPendingAgentId());
+        pendingAgent.setEnabled(true);
+        pendingAgent.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
+        mongoRepositoryReactive.saveOrUpdate(pendingAgent);
+        Agent agent = new Agent();
+        BeanUtils.copyProperties(pendingAgent, agent);
         agent.setEnabled(true);
-        mongoRepositoryReactive.saveOrUpdate(agent);
         agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
         agentApprovalRequest.setApproverId(userId);
         mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
+        mongoRepositoryReactive.saveOrUpdate(agent);
         agentUserCreatorAsync.createUserAndCustomerCodeForAgent(agent);
     }
 
+
+    private PendingAgent findPendingAgentById(String pendingAgentId) {
+        if (StringUtils.isEmpty(pendingAgentId)) {
+            return null;
+        }
+        return (PendingAgent) mongoRepositoryReactive.findById(pendingAgentId, PendingAgent.class).block();
+    }
 
     private AgentApprovalRequest findAgentApprovalRequestById(String agentApprovalRequestId) {
         if (StringUtils.isEmpty(agentApprovalRequestId)) {

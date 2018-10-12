@@ -240,27 +240,31 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             if (user == null) {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
-        if (!canApproveRequest(user)) {
-            return Mono.just(new ResponseEntity<>("User does not have permission to reject request", HttpStatus.BAD_REQUEST));
+            if (!canApproveRequest(user)) {
+                return Mono.just(new ResponseEntity<>("User does not have permission to reject request", HttpStatus.BAD_REQUEST));
+            }
+
+            if (userApprovalRequest.isCreateUser()) {
+              rejectCreateUserRequest(userApprovalRequest);
+            }
+
+            userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
+            userApprovalRequest.setRejectorId(user.getId());
+            userApprovalRequest.setRejectionReason(requestOperationtDto.getReason());
+            mongoRepositoryReactive.save(userApprovalRequest);
+            String verbiage = String.format("Rejected User approval request ->  Type : %s", userApprovalRequest.getUserApprovalRequestType());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), userApprovalRequest.getSubjectUserName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
+        } catch (
+                Exception e)
+
+        {
+            return logAndReturnError(logger, "An error occurred while approving user approval request ", e);
         }
 
-        userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
-        userApprovalRequest.setRejectorId(user.getId());
-        userApprovalRequest.setRejectionReason(requestOperationtDto.getReason());
-        mongoRepositoryReactive.save(userApprovalRequest);
-        String verbiage = String.format("Rejected User approval request ->  Type : %s", userApprovalRequest.getUserApprovalRequestType());
-        auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
-                springSecurityAuditorAware.getCurrentAuditorNotNull(), userApprovalRequest.getSubjectUserName(),
-                LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-        return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
-    } catch(
-    Exception e)
-
-    {
-        return logAndReturnError(logger, "An error occurred while approving user approval request ", e);
     }
-
-}
 
     @Override
     public Mono<ResponseEntity> getUserApprovalRequestFullDetail(String userApprovalRequestId) {
@@ -280,6 +284,8 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
         if (pendingAuthInfo != null) {
             AuthInfoCreateDto authInfoCreateDto = pendingAuthInfoToCreateAuthInfo(pendingAuthInfo);
             authInfoService.createAuthInfo(authInfoCreateDto, frontEndPropertyHelper.getFrontEndUrl(), null).block();
+            pendingAuthInfo.setUserApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
+            mongoRepositoryReactive.saveOrUpdate(pendingAuthInfo);
         }
     }
 
@@ -339,6 +345,14 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             }
             user.setAuthPermissionIds(userMappedPermissions);
             mongoRepositoryReactive.saveOrUpdate(user);
+        }
+    }
+
+    private void rejectCreateUserRequest(UserApprovalRequest userApprovalRequest) {
+        PendingAuthInfo pendingAuthInfo = userApprovalRequest.getPendingAuthInfo(userApprovalRequest.getPendingAuthInfoId());
+        if (pendingAuthInfo != null) {
+            pendingAuthInfo.setUserApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
+            mongoRepositoryReactive.saveOrUpdate(pendingAuthInfo);
         }
     }
 
