@@ -28,7 +28,6 @@ public class CustomerComplain extends AbstractFact {
     private List<CustomerComplainAction> customerComplainActionList = new ArrayList<>();
     private LocalDateTime nextNotificationDateTime;
 
-
     public LocalDateTime getTimeReported() {
         return timeReported;
     }

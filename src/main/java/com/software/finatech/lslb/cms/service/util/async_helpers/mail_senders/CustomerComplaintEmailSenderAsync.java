@@ -135,7 +135,7 @@ public class CustomerComplaintEmailSenderAsync {
         model.put("date", presentDateString);
         model.put("frontEndUrl", frontEndUrl);
         model.put("ticketId", customerComplain.getTicketId());
-        return mailContentBuilderService.build(model, "NewCustomerComplainLSLBAdmin");
+        return mailContentBuilderService.build(model, "PendingCustomerComplainReminder");
     }
 
     private void sendPendingCustomerComplaintToLSLBAdmin(String lslbAdminEmail, String mailContent) {
