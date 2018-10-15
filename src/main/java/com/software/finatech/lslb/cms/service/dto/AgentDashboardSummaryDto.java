@@ -8,7 +8,7 @@ public class AgentDashboardSummaryDto {
     protected String licenseStatusId;
     protected String licenseStatus;
     protected String effectiveDate;
-    protected String expirtyDate;
+    protected String expiryDate;
     protected String gameType;
 
 
@@ -78,11 +78,11 @@ public class AgentDashboardSummaryDto {
         this.effectiveDate = effectiveDate;
     }
 
-    public String getExpirtyDate() {
-        return expirtyDate;
+    public String getExpiryDate() {
+        return expiryDate;
     }
 
-    public void setExpirtyDate(String expirtyDate) {
-        this.expirtyDate = expirtyDate;
+    public void setExpiryDate(String expiryDate) {
+        this.expiryDate = expiryDate;
     }
 }
