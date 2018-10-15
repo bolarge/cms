@@ -18,6 +18,15 @@ public class InspectionForm extends AbstractFact {
     protected String userRoleId;
     protected String agentId;
     protected String gamingMachineId;
+    protected String subject;
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
 
     public String getAgentId() {
         return agentId;
@@ -87,6 +96,7 @@ public class InspectionForm extends AbstractFact {
     public InspectionFormDto convertToDto(){
         InspectionFormDto inspectionFormDto = new InspectionFormDto();
         inspectionFormDto.setComment(getComment());
+        inspectionFormDto.setSubject(getSubject());
         Agent agent =(Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
         if(agent!=null){
             inspectionFormDto.setAgent(agent.convertToDto());
