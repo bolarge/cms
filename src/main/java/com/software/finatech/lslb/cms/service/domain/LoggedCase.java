@@ -169,6 +169,7 @@ public class LoggedCase extends AbstractFact {
             dto.setLoggedCaseStatusId(this.loggedCaseStatusId);
             dto.setLoggedCaseStatusName(caseStatus.getName());
         }
+        dto.setTicketId(getTicketId());
         return dto;
     }
 

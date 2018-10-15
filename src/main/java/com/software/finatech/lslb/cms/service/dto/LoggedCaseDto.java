@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class LoggedCaseDto {
     private String id;
-    private String caseId;
+    private String ticketId;
     private String reporterId;
     private String reporterName;
     private String agentId;
@@ -51,12 +51,12 @@ public class LoggedCaseDto {
         this.id = id;
     }
 
-    public String getCaseId() {
-        return caseId;
+    public String getTicketId() {
+        return ticketId;
     }
 
-    public void setCaseId(String caseId) {
-        this.caseId = caseId;
+    public void setTicketId(String ticketId) {
+        this.ticketId = ticketId;
     }
 
     public String getReporterId() {

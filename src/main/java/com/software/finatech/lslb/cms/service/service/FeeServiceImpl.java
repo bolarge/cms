@@ -87,7 +87,7 @@ public class FeeServiceImpl implements FeeService {
             fee.setActive(true);
             mongoRepositoryReactive.saveOrUpdate(fee);
 
-            String verbiage = String.format("Created Fee -> RevenueName : %s, FeePaymentType -> %s, Category -> %s ", fee.getRevenueName(), fee.getFeePaymentType(), fee.getGameType());
+            String verbiage = String.format("Created Fee -> RevenueName : %s, FeePaymentType -> %s, Category -> %s, Amount -> %s", fee.getRevenueName(), fee.getFeePaymentType(), fee.getGameType(), fee.getAmount());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
