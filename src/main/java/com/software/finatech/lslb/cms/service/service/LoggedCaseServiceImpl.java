@@ -233,7 +233,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
     public Mono<ResponseEntity> getAllLoggedCaseStatus() {
         try {
             ArrayList<LoggedCaseStatus> loggedCaseStatuses = (ArrayList<LoggedCaseStatus>) mongoRepositoryReactive
-                    .findAll(new Query(), CustomerComplainStatus.class).toStream().collect(Collectors.toList());
+                    .findAll(new Query(), LoggedCaseStatus.class).toStream().collect(Collectors.toList());
 
             if (loggedCaseStatuses == null || loggedCaseStatuses.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));
