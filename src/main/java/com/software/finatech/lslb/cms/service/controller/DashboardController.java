@@ -236,7 +236,7 @@ public class DashboardController extends BaseController {
                 institutionDashboardSummaryDto.setLicenseStatus(license.getLicenseStatusId());
                 institutionDashboardSummaryDto.setLicenseStatus(getLicenseStatus(license.getLicenseStatusId()).getName());
                 institutionDashboardSummaryDto.setEffectiveDate(license.getEffectiveDate().toString("dd-MM-yyyy"));
-                institutionDashboardSummaryDto.setExpirtyDate(license.getExpiryDate().toString("dd-MM-yyyy"));
+                institutionDashboardSummaryDto.setExpiryDate(license.getExpiryDate().toString("dd-MM-yyyy"));
                 institutionDashboardSummaryDto.setGameType(getGameType(license.getGameTypeId()).getName());
                 institutionDashboardSummaryDto.setNumberOfAgents(getAgentCountForInstitution(institutionId));
                 institutionDashboardSummaryDto.setNumberOfGamingMachines(getGamingMachineCountForInstitution(institutionId));
@@ -527,7 +527,7 @@ public class DashboardController extends BaseController {
                 agentDashboardSummaryDto.setLicenseStatus(license.getLicenseStatusId());
                 agentDashboardSummaryDto.setLicenseStatus(getLicenseStatus(license.getLicenseStatusId()).getName());
                 agentDashboardSummaryDto.setEffectiveDate(license.getEffectiveDate().toString("dd-MM-yyyy"));
-                agentDashboardSummaryDto.setExpirtyDate(license.getExpiryDate().toString("dd-MM-yyyy"));
+                agentDashboardSummaryDto.setExpiryDate(license.getExpiryDate().toString("dd-MM-yyyy"));
                 agentDashboardSummaryDto.setGameType(getGameType(license.getGameTypeId()).getName());
                 agentDashboardSummaryDto.setNumberOfInstitutions(getInstitutionCountForAgent(agentId));
                 agentDashboardSummaryDtoHashMap.put(license.getGameTypeId(), agentDashboardSummaryDto);

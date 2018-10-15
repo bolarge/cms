@@ -5,7 +5,6 @@ import javax.validation.constraints.NotEmpty;
 
 public class InspectionFormCreateDto {
     protected String institutionId;
-    @NotEmpty(message = "Provide Game Type")
     protected String gameTypeId;
     @NotEmpty(message = "Provide Comment")
     protected String comment;
