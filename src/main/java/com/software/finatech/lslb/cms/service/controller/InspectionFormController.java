@@ -123,13 +123,12 @@ public class InspectionFormController extends BaseController {
 
             }
             InspectionForm inspectionForm = new InspectionForm();
-
             inspectionForm.setId(UUID.randomUUID().toString());
             inspectionForm.setAgentId(inspectionFormCreateDto.getAgentId());
             inspectionForm.setComment(inspectionFormCreateDto.getComment());
             inspectionForm.setGameTypeId(inspectionFormCreateDto.getGameTypeId());
             inspectionForm.setGamingMachineId(inspectionFormCreateDto.getGamingMachineId());
-
+            inspectionForm.setSubject(inspectionFormCreateDto.getSubject());
             inspectionForm.setInspectionDate(fromDate);
             inspectionForm.setUserRoleId(inspectionFormCreateDto.getUserRoleId());
             inspectionForm.setInstitutionId(inspectionFormCreateDto.getInstitutionId());
@@ -137,7 +136,7 @@ public class InspectionFormController extends BaseController {
 
             return Mono.just(new ResponseEntity<>(inspectionForm.convertToDto(), HttpStatus.OK));
         }catch (Exception ex){
-            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Error! Please Contact Admin", HttpStatus.BAD_REQUEST));
 
         }
 

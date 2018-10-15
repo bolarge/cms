@@ -10,6 +10,15 @@ public class InspectionFormDto {
     protected AgentDto agent;
     protected GamingMachineDto gamingMachine;
     protected String id;
+    protected String subject;
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
 
     public AgentDto getAgent() {
         return agent;
