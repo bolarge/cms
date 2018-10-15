@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1/renewalForm")
 public class RenewalFormController extends BaseController {
+    @Autowired
     private AuditLogHelper auditLogHelper;
     @Autowired
     protected SpringSecurityAuditorAware springSecurityAuditorAware;
