@@ -287,9 +287,9 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
     }
 
     private String generateTicketId() {
-        int randomNumber = NumberUtil.getRandomNumberInRange(100, 3000099);
+        int randomNumber = NumberUtil.getRandomNumberInRange(100, 3000);
         LocalDateTime presentDateTime = LocalDateTime.now();
-        return String.format("LS-CA-%s%s%s", randomNumber, presentDateTime.getHourOfDay(), presentDateTime.getMinuteOfHour(), presentDateTime.getSecondOfMinute());
+        return String.format("LS-CA-%s%s%s%s", randomNumber, presentDateTime.getHourOfDay(), presentDateTime.getMinuteOfHour(), presentDateTime.getSecondOfMinute());
     }
 
     private boolean canUpdateCase(AuthInfo user) {

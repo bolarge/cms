@@ -343,7 +343,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
     }
 
     private String generateTicketId() {
-        int randomInt = NumberUtil.getRandomNumberInRange(3000, 300000000);
+        int randomInt = NumberUtil.getRandomNumberInRange(100, 3000);
         LocalDateTime dateTime = LocalDateTime.now();
         return String.format("LS-CMTK-%s%s%s%s", randomInt, dateTime.getHourOfDay(), dateTime.getMinuteOfHour(), dateTime.getSecondOfMinute());
     }
