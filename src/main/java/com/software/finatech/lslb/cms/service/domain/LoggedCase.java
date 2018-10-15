@@ -151,7 +151,7 @@ public class LoggedCase extends AbstractFact {
     public LoggedCaseDto convertToDto() {
         LoggedCaseDto dto = new LoggedCaseDto();
         dto.setId(getId());
-        dto.setRepotee(getReportedEntityName());
+        dto.setReportee(getReportedEntityName());
         dto.setAgentId(getAgentId());
         dto.setInstitutionId(getInstitutionId());
         LocalDateTime reportTime = getDateTimeReported();

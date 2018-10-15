@@ -14,7 +14,7 @@ public class LoggedCaseDto {
     private String loggedCaseStatusName;
     private String caseSubject;
     private String caseDetails;
-    private String repotee;
+    private String reportee;
     private String dateReported;
     private Set<LoggedCaseActionDto> caseActions = new HashSet<>();
     private Set<LoggedCaseCommentDto> caseComments = new HashSet<>();
@@ -35,12 +35,12 @@ public class LoggedCaseDto {
         this.dateReported = dateReported;
     }
 
-    public String getRepotee() {
-        return repotee;
+    public String getReportee() {
+        return reportee;
     }
 
-    public void setRepotee(String repotee) {
-        this.repotee = repotee;
+    public void setReportee(String reportee) {
+        this.reportee = reportee;
     }
 
     public String getId() {
