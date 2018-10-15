@@ -123,7 +123,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
     @Override
     public Mono<ResponseEntity> createCase(LoggedCaseCreateDto loggedCaseCreateDto, HttpServletRequest request) {
         try {
-            String userId = loggedCaseCreateDto.getUserId();
+          //  String userId = loggedCaseCreateDto.getUserId();
             if (!loggedCaseCreateDto.isValid()) {
                 return Mono.just(new ResponseEntity<>("Please provide either agent id or institution id alone", HttpStatus.BAD_REQUEST));
             }
