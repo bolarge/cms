@@ -31,4 +31,6 @@ public interface GamingMachineService {
     Mono<ResponseEntity> validateMultipleGamingMachineLicensePayment(GamingMachineMultiplePaymentRequest gamingMachineMultiplePaymentRequest);
 
     Mono<ResponseEntity> validateMultipleGamingMachineLicenseRenewalPayment(GamingMachineMultiplePaymentRequest gamingMachineMultiplePaymentRequest);
+
+    Mono<ResponseEntity> findGamingMachineBySearchKey(String searchKey);
 }

@@ -399,6 +399,32 @@ public class GamingMachineServiceImpl implements GamingMachineService {
         }
     }
 
+    @Override
+    public Mono<ResponseEntity> findGamingMachineBySearchKey(String searchKey) {
+        try {
+            Query query = new Query();
+            if (!StringUtils.isEmpty(searchKey)) {
+                query.addCriteria(Criteria.where("serialNumber").regex(searchKey, "i"));
+            }
+            query.with(PageRequest.of(0, 20));
+            ArrayList<GamingMachine> gamingMachines = (ArrayList<GamingMachine>) mongoRepositoryReactive.findAll(query, GamingMachine.class).toStream().collect(Collectors.toList());
+            if (gamingMachines == null || gamingMachines.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
+            }
+            ArrayList<GamingMachineDto> gamingMachineDtos = new ArrayList<>();
+            gamingMachines.forEach(gamingMachine -> {
+                GamingMachineDto dto = new GamingMachineDto();
+                dto.setId(gamingMachine.getId());
+                dto.setSerialNumber(gamingMachine.getSerialNumber());
+                gamingMachineDtos.add(dto);
+            });
+            return Mono.just(new ResponseEntity<>(gamingMachineDtos, HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while searching gaming machines by key", e);
+        }
+    }
+
+
     private Pair<ValidGamingMachinePayment, InvalidGamingMachinePayment> getMachinePaymentPairForLicensePayment(String gamingMachineId, String feePaymentTypeName) {
         ValidGamingMachinePayment validGamingMachinePayment = new ValidGamingMachinePayment();
         InvalidGamingMachinePayment invalidGamingMachinePayment = new InvalidGamingMachinePayment();

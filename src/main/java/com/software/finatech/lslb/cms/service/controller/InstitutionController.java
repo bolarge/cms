@@ -114,4 +114,16 @@ public class InstitutionController extends BaseController {
     public Mono<ResponseEntity> uploadMultipleInstitutions(@RequestParam("file") MultipartFile multipartFile, HttpServletRequest request) {
         return institutionService.uploadMultipleExistingLicensedInstitutions(multipartFile, request);
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/search", params = {"searchKey"})
+    @ApiOperation(value = "Search for institutions on system", response = InstitutionDto.class, responseContainer = "List", consumes = "application/json",
+            notes = "Search for agent on system using a search key that matches institution name")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> searchInstitutions(@RequestParam("searchKey") String searchKey) {
+        return institutionService.findInstitutionsBySearchKey(searchKey);
+    }
 }

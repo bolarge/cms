@@ -35,4 +35,6 @@ public interface InstitutionService {
     Mono<ResponseEntity> createApplicantInstitution(InstitutionCreateDto institutionCreateDto, AuthInfo applicantUser);
 
     Mono<ResponseEntity> uploadMultipleExistingLicensedInstitutions(MultipartFile multipartFile, HttpServletRequest request);
+
+    Mono<ResponseEntity> findInstitutionsBySearchKey(String searchKey);
 }

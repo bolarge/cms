@@ -346,6 +346,31 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
     }
 
+    @Override
+    public Mono<ResponseEntity> findInstitutionsBySearchKey(String searchKey) {
+        try {
+            Query query = new Query();
+            if (!StringUtils.isEmpty(searchKey)) {
+                query.addCriteria(Criteria.where("institutionName").regex(searchKey, "i"));
+            }
+            query.with(PageRequest.of(0, 20));
+            ArrayList<Institution> institutions = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
+            if (institutions == null || institutions.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
+            }
+            ArrayList<InstitutionDto> institutionDtos = new ArrayList<>();
+            institutionDtos.forEach(institution -> {
+                InstitutionDto institutionDto = new InstitutionDto();
+                institutionDto.setId(institution.getId());
+                institutionDto.setInstitutionName(institution.getInstitutionName());
+                institutionDtos.add(institutionDto);
+            });
+            return Mono.just(new ResponseEntity<>(institutionDtos, HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while searching institutions by key", e);
+        }
+    }
+
     private UploadTransactionResponse saveInstitutionUploads(List<InstitutionUpload> institutionUploadList) {
         List<FailedLine> failedLineList = new ArrayList<>();
         UploadTransactionResponse uploadTransactionResponse = new UploadTransactionResponse();
