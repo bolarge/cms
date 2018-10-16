@@ -3,16 +3,16 @@ package com.software.finatech.lslb.cms.service.dto;
 import java.util.List;
 
 public class UploadTransactionResponse {
-    private List<String> failedTransactions;
     private int failedTransactionCount;
     private String message;
+    private List<FailedLine> failedLines;
 
-    public List<String> getFailedTransactions() {
-        return failedTransactions;
+    public List<FailedLine> getFailedLines() {
+        return failedLines;
     }
 
-    public void setFailedTransactions(List<String> failedTransactions) {
-        this.failedTransactions = failedTransactions;
+    public void setFailedLines(List<FailedLine> failedLines) {
+        this.failedLines = failedLines;
     }
 
     public int getFailedTransactionCount() {
@@ -29,5 +29,11 @@ public class UploadTransactionResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public static UploadTransactionResponse fromMessage(String message) {
+        UploadTransactionResponse uploadTransactionResponse = new UploadTransactionResponse();
+        uploadTransactionResponse.setMessage(message);
+        return uploadTransactionResponse;
     }
 }

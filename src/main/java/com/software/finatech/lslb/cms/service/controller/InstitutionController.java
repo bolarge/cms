@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.dto.InstitutionCreateDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.UploadTransactionResponse;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
@@ -81,7 +83,7 @@ public class InstitutionController extends BaseController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/new-applicant-institution")
-    @ApiOperation(value = "Create new Institution for an applicant  ",response = InstitutionDto.class, consumes = "application/json",
+    @ApiOperation(value = "Create new Institution for an applicant  ", response = InstitutionDto.class, consumes = "application/json",
             notes = "Creates a new institution for an applicant, then makes the applicant a gaming-operator-admin of the institution")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -100,5 +102,16 @@ public class InstitutionController extends BaseController {
             return Mono.just(new ResponseEntity<>("Applicant user does not exist", HttpStatus.BAD_REQUEST));
         }
         return institutionService.createApplicantInstitution(institutionCreateDto, applicantUser);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/upload-multiple-existing-licenced-operators")
+    @ApiOperation(value = "Upload multiple licenced institutions", response = UploadTransactionResponse.class,
+            notes = "Upload multiple institutions that are already existing in LSLB records and are already licensed")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"), @ApiResponse(code = 404, message = "Not Found"),
+            @ApiResponse(code = 500, message = "Internal Server error(error occurred while parsing file)")})
+    public Mono<ResponseEntity> uploadMultipleInstitutions(@RequestParam("file") MultipartFile multipartFile, HttpServletRequest request) {
+        return institutionService.uploadMultipleExistingLicensedInstitutions(multipartFile, request);
     }
 }
