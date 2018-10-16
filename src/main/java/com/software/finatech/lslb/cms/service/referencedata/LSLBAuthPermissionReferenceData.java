@@ -441,9 +441,27 @@ public class LSLBAuthPermissionReferenceData {
             permission52 = new AuthPermission();
             permission52.setId("52");
         }
-        permission51.setName("VIEW USER APPROVAL REQUESTS");
-        permission51.setDescription("Can view user approval requests");
-        permission51.setUsedBySystem(false);
+        permission52.setName("VIEW USER APPROVAL REQUESTS");
+        permission52.setDescription("Can view user approval requests");
+        permission52.setUsedBySystem(false);
+
+        AuthPermission permission53 = (AuthPermission) mongoRepositoryReactive.findById("53", AuthPermission.class).block();
+        if (permission53 == null) {
+            permission53 = new AuthPermission();
+            permission53.setId("53");
+        }
+        permission53.setName("VIEW CUSTOMER COMPLAINS");
+        permission53.setDescription("Can view customer complains");
+        permission53.setUsedBySystem(false);
+
+        AuthPermission permission54 = (AuthPermission) mongoRepositoryReactive.findById("54", AuthPermission.class).block();
+        if (permission54 == null) {
+            permission54 = new AuthPermission();
+            permission54.setId("54");
+        }
+        permission54.setName("UPDATE CUSTOMER COMPLAINS");
+        permission54.setDescription("Can update customer complains");
+        permission54.setUsedBySystem(false);
 
         mongoRepositoryReactive.saveOrUpdate(permission1);
         mongoRepositoryReactive.saveOrUpdate(permission2);
@@ -497,6 +515,8 @@ public class LSLBAuthPermissionReferenceData {
         mongoRepositoryReactive.saveOrUpdate(permission50);
         mongoRepositoryReactive.saveOrUpdate(permission51);
         mongoRepositoryReactive.saveOrUpdate(permission52);
+        mongoRepositoryReactive.saveOrUpdate(permission53);
+        mongoRepositoryReactive.saveOrUpdate(permission54);
     }
 
 

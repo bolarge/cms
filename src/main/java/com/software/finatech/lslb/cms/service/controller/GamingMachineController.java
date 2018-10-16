@@ -74,9 +74,9 @@ public class GamingMachineController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"), @ApiResponse(code = 404, message = "Not Found"),
             @ApiResponse(code = 500, message = "Internal Server error(error occurred while parsing file)")})
-    public Mono<ResponseEntity> uploadTransactionsFromCsv(@RequestParam("institutionId") String institutionId,
-                                                          @RequestParam("gameTypeId") String gameTypeId,
-                                                          @RequestParam("file") MultipartFile multipartFile, HttpServletRequest request) {
+    public Mono<ResponseEntity> uploadMachinesFromCsv(@RequestParam("institutionId") String institutionId,
+                                                      @RequestParam("gameTypeId") String gameTypeId,
+                                                      @RequestParam("file") MultipartFile multipartFile, HttpServletRequest request) {
         return gamingMachineService.uploadMultipleGamingMachinesForInstitution(institutionId, gameTypeId, multipartFile, request);
     }
 
@@ -103,5 +103,17 @@ public class GamingMachineController {
             @ApiResponse(code = 500, message = "Internal Server error")})
     public Mono<ResponseEntity> validateMultipleGamingMachineLicenseRenewalPayment(@RequestBody GamingMachineMultiplePaymentRequest gamingMachineMultiplePaymentRequest) {
         return gamingMachineService.validateMultipleGamingMachineLicenseRenewalPayment(gamingMachineMultiplePaymentRequest);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/search", params = {"searchKey"})
+    @ApiOperation(value = "Search for gaming machines on system", response = GamingMachineDto.class, responseContainer = "List", consumes = "application/json",
+            notes = "Search for agent on system using a search key that matches machine serial number")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> searchGamingMachines(@RequestParam("searchKey") String searchKey) {
+        return gamingMachineService.findGamingMachineBySearchKey(searchKey);
     }
 }

@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.dto.InstitutionCreateDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionUpdateDto;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,4 +33,8 @@ public interface InstitutionService {
     void saveInstitution(Institution institution);
 
     Mono<ResponseEntity> createApplicantInstitution(InstitutionCreateDto institutionCreateDto, AuthInfo applicantUser);
+
+    Mono<ResponseEntity> uploadMultipleExistingLicensedInstitutions(MultipartFile multipartFile, HttpServletRequest request);
+
+    Mono<ResponseEntity> findInstitutionsBySearchKey(String searchKey);
 }

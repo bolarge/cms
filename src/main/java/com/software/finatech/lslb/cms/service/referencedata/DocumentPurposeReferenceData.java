@@ -10,6 +10,9 @@ public class DocumentPurposeReferenceData {
     public static final String AIP_LICENSE_ID = "3";
     public static final String RENEWAL_LICENSE_ID = "4";
     public static final String AGENT_UPLOADS = "5";
+    public static final String CUSTOMER_COMPLAIN_ID = "6";
+    public static final String LOGGED_CASE_ID = "7";
+
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         DocumentPurpose purpose1 = (DocumentPurpose) mongoRepositoryReactive.findById(APPLICATION_FORM_DOCUMENT_PURPOSE_ID, DocumentPurpose.class).block();
         if (purpose1 == null) {
@@ -57,10 +60,32 @@ public class DocumentPurposeReferenceData {
         purpose5.setDescription("AGENTS UPLOAD IMAGES");
         purpose5.setName("AGENTS UPLOAD IMAGES");
 
+
+        DocumentPurpose purpose6 = (DocumentPurpose) mongoRepositoryReactive.findById(CUSTOMER_COMPLAIN_ID, DocumentPurpose.class).block();
+        if (purpose6 == null) {
+            purpose6 = new DocumentPurpose();
+            purpose6.setId(CUSTOMER_COMPLAIN_ID);
+
+        }
+        purpose6.setDescription("Customer complains");
+        purpose6.setName("CUSTOMER COMPLAIN FILES");
+
+        DocumentPurpose purpose7 = (DocumentPurpose) mongoRepositoryReactive.findById(LOGGED_CASE_ID, DocumentPurpose.class).block();
+        if (purpose7 == null) {
+            purpose7 = new DocumentPurpose();
+            purpose7.setId(LOGGED_CASE_ID);
+
+        }
+        purpose7.setDescription("Logged case");
+        purpose7.setName("LOGGED CASE FILES");
+
+
         mongoRepositoryReactive.saveOrUpdate(purpose1);
         mongoRepositoryReactive.saveOrUpdate(purpose2);
         mongoRepositoryReactive.saveOrUpdate(purpose3);
         mongoRepositoryReactive.saveOrUpdate(purpose4);
         mongoRepositoryReactive.saveOrUpdate(purpose5);
+        mongoRepositoryReactive.saveOrUpdate(purpose6);
+        mongoRepositoryReactive.saveOrUpdate(purpose7);
     }
 }

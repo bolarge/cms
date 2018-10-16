@@ -22,6 +22,8 @@ public interface AgentService {
                                        String gameTypeIds,
                                        HttpServletResponse httpServletResponse);
 
+    Mono<ResponseEntity> findAgentsBySearchKey(String searchKey);
+
     Mono<ResponseEntity> createAgent(AgentCreateDto agentCreateDto, HttpServletRequest request);
 
     Mono<ResponseEntity> updateAgent(AgentUpdateDto agentUpdateDto, HttpServletRequest request);

@@ -192,7 +192,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
         }
 
         List<GamingMachine> gamingMachineList = new ArrayList<>();
-        List<String> failedLines = new ArrayList<>();
+        List<FailedLine> failedLines = new ArrayList<>();
         UploadTransactionResponse uploadTransactionResponse = new UploadTransactionResponse();
         if (!multipartFile.isEmpty()) {
             try {
@@ -203,7 +203,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
                 for (int i = 1; i < rows.length; i++) {
                     String[] columns = rows[i].split(",");
                     if (columns.length < 6) {
-                        failedLines.add(rows[i]);
+                        failedLines.add(FailedLine.fromLineAndReason(rows[i], "Line has less than 6 fields"));
                     } else {
                         try {
                             GamingMachine gamingMachine = getGamingMachineBySerialNumber(columns[0], gamingMachineMap);
@@ -233,13 +233,13 @@ public class GamingMachineServiceImpl implements GamingMachineService {
                             gamingMachineMap.put(gamingMachine.getSerialNumber(), gamingMachine);
                         } catch (Exception e) {
                             logger.error(String.format("Error parsing line %s", rows[i]), e);
-                            failedLines.add(rows[i]);
+                            failedLines.add(FailedLine.fromLineAndReason(rows[i], "An error occurred while parsing line"));
                         }
                     }
                 }
 
                 if (!failedLines.isEmpty()) {
-                    uploadTransactionResponse.setFailedTransactions(failedLines);
+                    uploadTransactionResponse.setFailedLines(failedLines);
                     uploadTransactionResponse.setFailedTransactionCount(failedLines.size());
                     uploadTransactionResponse.setMessage(String.format(
                             "Please review with sample file and re upload",
@@ -251,18 +251,19 @@ public class GamingMachineServiceImpl implements GamingMachineService {
                             saveGamingMachine(gamingMachine);
                         } catch (Exception e) {
                             logger.error("An error occurred while saving gaming machine with serial number {}", gamingMachine.getSerialNumber());
-                            failedLines.add(String.format("%s,%s,%s,%s", gamingMachine.getSerialNumber(), gamingMachine.getManufacturer(), gamingMachine.getMachineNumber(), gamingMachine.getMachineAddress()));
+                            String line = String.format("%s,%s,%s,%s", gamingMachine.getSerialNumber(), gamingMachine.getManufacturer(), gamingMachine.getMachineNumber(), gamingMachine.getMachineAddress());
+                            failedLines.add(FailedLine.fromLineAndReason(line, "An error occurred while saving line"));
                         }
                     }
                     if (!failedLines.isEmpty()) {
                         uploadTransactionResponse.setMessage("Upload partially successful, please see failed records");
-                        uploadTransactionResponse.setFailedTransactions(failedLines);
+                        uploadTransactionResponse.setFailedLines(failedLines);
                         uploadTransactionResponse.setFailedTransactionCount(failedLines.size());
                     } else {
                         uploadTransactionResponse.setMessage("Upload successful");
                     }
 
-                    String verbiage ="Uploaded multiple gaming machines ";
+                    String verbiage = "Uploaded multiple gaming machines ";
                     auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(gamingMachineAuditActionId,
                             springSecurityAuditorAware.getCurrentAuditorNotNull(), institution.getInstitutionName(),
                             LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
@@ -397,6 +398,32 @@ public class GamingMachineServiceImpl implements GamingMachineService {
             return logAndReturnError(logger, "An error occurred while validating multiple gaming machine license renewal payment ", e);
         }
     }
+
+    @Override
+    public Mono<ResponseEntity> findGamingMachineBySearchKey(String searchKey) {
+        try {
+            Query query = new Query();
+            if (!StringUtils.isEmpty(searchKey)) {
+                query.addCriteria(Criteria.where("serialNumber").regex(searchKey, "i"));
+            }
+            query.with(PageRequest.of(0, 20));
+            ArrayList<GamingMachine> gamingMachines = (ArrayList<GamingMachine>) mongoRepositoryReactive.findAll(query, GamingMachine.class).toStream().collect(Collectors.toList());
+            if (gamingMachines == null || gamingMachines.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
+            }
+            ArrayList<GamingMachineDto> gamingMachineDtos = new ArrayList<>();
+            gamingMachines.forEach(gamingMachine -> {
+                GamingMachineDto dto = new GamingMachineDto();
+                dto.setId(gamingMachine.getId());
+                dto.setSerialNumber(gamingMachine.getSerialNumber());
+                gamingMachineDtos.add(dto);
+            });
+            return Mono.just(new ResponseEntity<>(gamingMachineDtos, HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while searching gaming machines by key", e);
+        }
+    }
+
 
     private Pair<ValidGamingMachinePayment, InvalidGamingMachinePayment> getMachinePaymentPairForLicensePayment(String gamingMachineId, String feePaymentTypeName) {
         ValidGamingMachinePayment validGamingMachinePayment = new ValidGamingMachinePayment();

@@ -515,13 +515,13 @@ public class LicenseServiceImpl implements LicenseService {
             license.setLicenseStatusId(LicenseStatusReferenceData.RENEWED_ID);
             mongoRepositoryReactive.saveOrUpdate(license);
             List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
-            institutionAdmins.stream().forEach(institutionAdmin->{
+            institutionAdmins.stream().forEach(institutionAdmin -> {
                 NotificationDto notificationDto = new NotificationDto();
                 notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
                 notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
                 notificationDto.setTemplate("LicenseUpdate");
                 notificationDto.setDescription("Renewal application for " +
-                        notificationDto.getGameType()+" has been approved. License is valid from "+license.getEffectiveDate().toString("dd/MM/YYY")+" to " +
+                        notificationDto.getGameType() + " has been approved. License is valid from " + license.getEffectiveDate().toString("dd/MM/YYY") + " to " +
                         notificationDto.getEndDate());
                 notificationDto.setInstitutionEmail(institutionAdmin.getEmailAddress());
                 sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
@@ -595,11 +595,10 @@ public class LicenseServiceImpl implements LicenseService {
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
 
-
             license.setLicenseStatusId(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
             mongoRepositoryReactive.saveOrUpdate(license);
             verbiage = "Moved : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from Renewal In Review back to Renewal In Progress";
-             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
                     springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
@@ -687,7 +686,7 @@ public class LicenseServiceImpl implements LicenseService {
             notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
             notificationDto.setTemplate("LicenseUpdate");
             notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ",  License for " +
-                    notificationDto.getGameType() + " has been approved.\n License Number is: " + licenseNumber+". \nDo pick up the original hard copy of this license at LSLB Office.");
+                    notificationDto.getGameType() + " has been approved.\n License Number is: " + licenseNumber + ". \nDo pick up the original hard copy of this license at LSLB Office.");
 
             ArrayList<AuthInfo> authInfos = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
             for (AuthInfo authInfo : authInfos) {
@@ -963,11 +962,11 @@ public class LicenseServiceImpl implements LicenseService {
         if (StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_ID, revenueNameId)) {
             prefix = prefix + "OP-";
         }
-        String randomDigit = String.valueOf(NumberUtil.getRandomNumberInRange(10000, 1000000));
+        String randomDigit = String.valueOf(NumberUtil.getRandomNumberInRange(100, 1000));
         GameType gameType = paymentRecord.getGameType();
         if (gameType != null && !StringUtils.isEmpty(gameType.getShortCode())) {
             prefix = prefix + gameType.getShortCode() + "-";
         }
-        return String.format("%s%s", prefix, randomDigit);
+        return String.format("%s%s%s", prefix, randomDigit, LocalDateTime.now().getSecondOfMinute());
     }
 }
