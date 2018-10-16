@@ -10,7 +10,7 @@ public class CustomerComplainCreateDto {
     @Email
     @NotEmpty(message = "please provide agent email address")
     private String emailAddress;
-    @Size(min = 9, message = "Phone number should be at least 9 characters")
+   // @Size(min = 9, message = "Phone number should be at least 9 characters")
     @NotEmpty(message = "please provide agent phone number")
     private String phoneNumber;
     @NotEmpty(message = "Please provide complain subject")
