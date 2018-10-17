@@ -4,8 +4,8 @@ public class InspectionFormDto {
     protected InstitutionDto institution;
     protected GameTypeDto gameType;
     protected String comment;
-    protected AuthInfoDto user;
-    protected AuthRoleDto userRole;
+    protected String reporter;
+    //protected AuthRoleDto userRole;
     protected String inspectionDate;
     protected AgentDto agent;
     protected GamingMachineDto gamingMachine;
@@ -19,6 +19,14 @@ public class InspectionFormDto {
 
     public void setOwnerName(String ownerName) {
         this.ownerName = ownerName;
+    }
+
+    public String getReporter() {
+        return reporter;
+    }
+
+    public void setReporter(String reporter) {
+        this.reporter = reporter;
     }
 
     public String getSubject() {
@@ -63,21 +71,7 @@ public class InspectionFormDto {
     }
 
 
-    public AuthInfoDto getUser() {
-        return user;
-    }
 
-    public void setUser(AuthInfoDto user) {
-        this.user = user;
-    }
-
-    public AuthRoleDto getUserRole() {
-        return userRole;
-    }
-
-    public void setUserRole(AuthRoleDto userRole) {
-        this.userRole = userRole;
-    }
 
     public String getId() {
         return id;
