@@ -120,10 +120,9 @@ public class InspectionForm extends AbstractFact {
         if(gamingMachine!=null){
             inspectionFormDto.setGamingMachine(gamingMachine.convertToDto());
         }if(!StringUtils.isEmpty(institutionId)){
-            this.owner=institution.getInstitutionName();
-
+            inspectionFormDto.setOwner(institution.getInstitutionName());
         }if(!StringUtils.isEmpty(agentId)){
-            this.owner=agent.getFullName();
+            inspectionFormDto.setOwner(agent.getFullName());
         }
         Map gameTypeMap = Mapstore.STORE.get("GameType");
 
