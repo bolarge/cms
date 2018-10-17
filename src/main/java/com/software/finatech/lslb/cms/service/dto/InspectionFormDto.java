@@ -11,6 +11,15 @@ public class InspectionFormDto {
     protected GamingMachineDto gamingMachine;
     protected String id;
     protected String subject;
+    protected String owner;
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
 
     public String getSubject() {
         return subject;
