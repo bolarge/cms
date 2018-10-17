@@ -11,7 +11,7 @@ public class DocumentTypeReferenceData {
     private static String applicationFormDocumentPurposeId = DocumentPurposeReferenceData.APPLICATION_FORM_DOCUMENT_PURPOSE_ID;
     private static String AIPDocumentPurposeId = DocumentPurposeReferenceData.AIP_LICENSE_ID;
     private static String RENEWALDocumentPurposeId = DocumentPurposeReferenceData.RENEWAL_LICENSE_ID;
-
+    private static String INSPECTION_ID = DocumentPurposeReferenceData.INSPECTION_ID;
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
 
         DocumentType documentType1 = (DocumentType) mongoRepositoryReactive.findById("1", DocumentType.class).block();
@@ -180,6 +180,18 @@ public class DocumentTypeReferenceData {
         documentType22.setActive(true);
         documentType22.setRequired(true);
 
+
+        DocumentType documentType23 = (DocumentType) mongoRepositoryReactive.findById("23", DocumentType.class).block();
+        if (documentType23 == null) {
+            documentType23 = new DocumentType();
+            documentType23.setId("23");
+        }
+        documentType23.setName("INSPECTION FORM");
+        documentType23.setDocumentPurposeId(DocumentPurposeReferenceData.INSPECTION_ID);
+        documentType23.setGameTypeIds(getOSbAndPolGameTypeIdSet());
+        documentType23.setActive(true);
+        documentType23.setRequired(true);
+
         mongoRepositoryReactive.saveOrUpdate(documentType1);
         mongoRepositoryReactive.saveOrUpdate(documentType2);
         mongoRepositoryReactive.saveOrUpdate(documentType3);
@@ -192,6 +204,7 @@ public class DocumentTypeReferenceData {
         mongoRepositoryReactive.saveOrUpdate(documentType10);
         mongoRepositoryReactive.saveOrUpdate(documentType11);
         mongoRepositoryReactive.saveOrUpdate(documentType22);
+        mongoRepositoryReactive.saveOrUpdate(documentType23);
 
 
     }

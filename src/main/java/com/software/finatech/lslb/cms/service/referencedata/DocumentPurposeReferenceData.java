@@ -12,6 +12,7 @@ public class DocumentPurposeReferenceData {
     public static final String AGENT_UPLOADS = "5";
     public static final String CUSTOMER_COMPLAIN_ID = "6";
     public static final String LOGGED_CASE_ID = "7";
+    public static final String INSPECTION_ID = "8";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         DocumentPurpose purpose1 = (DocumentPurpose) mongoRepositoryReactive.findById(APPLICATION_FORM_DOCUMENT_PURPOSE_ID, DocumentPurpose.class).block();
@@ -80,6 +81,16 @@ public class DocumentPurposeReferenceData {
         purpose7.setName("LOGGED CASE FILES");
 
 
+        DocumentPurpose purpose8 = (DocumentPurpose) mongoRepositoryReactive.findById(INSPECTION_ID, DocumentPurpose.class).block();
+        if (purpose8 == null) {
+            purpose8 = new DocumentPurpose();
+            purpose8.setId(INSPECTION_ID);
+
+        }
+        purpose8.setDescription("Inspection");
+        purpose8.setName("Inspection");
+
+
         mongoRepositoryReactive.saveOrUpdate(purpose1);
         mongoRepositoryReactive.saveOrUpdate(purpose2);
         mongoRepositoryReactive.saveOrUpdate(purpose3);
@@ -87,5 +98,6 @@ public class DocumentPurposeReferenceData {
         mongoRepositoryReactive.saveOrUpdate(purpose5);
         mongoRepositoryReactive.saveOrUpdate(purpose6);
         mongoRepositoryReactive.saveOrUpdate(purpose7);
+        mongoRepositoryReactive.saveOrUpdate(purpose8);
     }
 }
