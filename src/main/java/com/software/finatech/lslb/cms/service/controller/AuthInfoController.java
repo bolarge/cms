@@ -304,39 +304,39 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity("Email already registered", HttpStatus.BAD_REQUEST));
             }
 
-            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
-            if (loggedInUser == null) {
-                return Mono.just(new ResponseEntity<>("Could not fimf logged in user", HttpStatus.BAD_REQUEST));
-            }
-
-            PendingAuthInfo pendingAuthInfo = new PendingAuthInfo();
-            pendingAuthInfo.setId(UUID.randomUUID().toString());
-            pendingAuthInfo.setFirstName(authInfoCreateDto.getFirstName());
-            pendingAuthInfo.setLastName(authInfoCreateDto.getLastName());
-            pendingAuthInfo.setInstitutionId(authInfoCreateDto.getInstitutionId());
-            pendingAuthInfo.setAgentId(authInfoCreateDto.getAgentId());
-            pendingAuthInfo.setEmailAddress(authInfoCreateDto.getEmailAddress());
-            pendingAuthInfo.setTitle(authInfoCreateDto.getTitle());
-            pendingAuthInfo.setPhoneNumber(authInfoCreateDto.getPhoneNumber());
-            pendingAuthInfo.setAuthRoleId(authInfoCreateDto.getAuthRoleId());
-            mongoRepositoryReactive.saveOrUpdate(pendingAuthInfo);
-
-            UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
-            userApprovalRequest.setId(UUID.randomUUID().toString());
-            userApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
-            userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.CREATE_USER_ID);
-            userApprovalRequest.setInitiatorId(loggedInUser.getId());
-            userApprovalRequest.setPendingAuthInfoId(pendingAuthInfo.getId());
-            userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
-            mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
+//            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+//            if (loggedInUser == null) {
+//                return Mono.just(new ResponseEntity<>("Could not fimf logged in user", HttpStatus.BAD_REQUEST));
+//            }
+//
+//            PendingAuthInfo pendingAuthInfo = new PendingAuthInfo();
+//            pendingAuthInfo.setId(UUID.randomUUID().toString());
+//            pendingAuthInfo.setFirstName(authInfoCreateDto.getFirstName());
+//            pendingAuthInfo.setLastName(authInfoCreateDto.getLastName());
+//            pendingAuthInfo.setInstitutionId(authInfoCreateDto.getInstitutionId());
+//            pendingAuthInfo.setAgentId(authInfoCreateDto.getAgentId());
+//            pendingAuthInfo.setEmailAddress(authInfoCreateDto.getEmailAddress());
+//            pendingAuthInfo.setTitle(authInfoCreateDto.getTitle());
+//            pendingAuthInfo.setPhoneNumber(authInfoCreateDto.getPhoneNumber());
+//            pendingAuthInfo.setAuthRoleId(authInfoCreateDto.getAuthRoleId());
+//            mongoRepositoryReactive.saveOrUpdate(pendingAuthInfo);
+//
+//            UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
+//            userApprovalRequest.setId(UUID.randomUUID().toString());
+//            userApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
+//            userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.CREATE_USER_ID);
+//            userApprovalRequest.setInitiatorId(loggedInUser.getId());
+//            userApprovalRequest.setPendingAuthInfoId(pendingAuthInfo.getId());
+//            userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+//            mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
 
             /*String appUrl =
                     "http://" + request.getServerName() +
                             ":" + request.getServerPort() +
                             request.getContextPath();*/
-//            String appUrl = appHostPort + request.getContextPath();
-//            return authInfoService.createAuthInfo(authInfoCreateDto, appUrl, request);
-           return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
+            String appUrl = appHostPort + request.getContextPath();
+            return authInfoService.createAuthInfo(authInfoCreateDto, appUrl, request);
+        //   return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
 
         } catch (Exception e) {
             e.printStackTrace();
