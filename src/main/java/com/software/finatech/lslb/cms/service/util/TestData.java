@@ -247,7 +247,7 @@ public class TestData {
                 gamingMachine = new GamingMachine();
                 gamingMachine.setId(String.valueOf(i));
             }
-
+            gamingMachine.setSerialNumber(String.format("%s%s%s%s", String.valueOf(i), String.valueOf(i + 1), String.valueOf(i + 2), String.valueOf(i + 3)));
             gamingMachine.setMachineNumber(String.valueOf(i));
             gamingMachine.setInstitutionId(String.valueOf(i));
 

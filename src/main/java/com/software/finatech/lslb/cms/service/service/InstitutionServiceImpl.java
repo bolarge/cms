@@ -350,16 +350,18 @@ public class InstitutionServiceImpl implements InstitutionService {
     public Mono<ResponseEntity> findInstitutionsBySearchKey(String searchKey) {
         try {
             Query query = new Query();
+            Criteria criteria = new Criteria();
             if (!StringUtils.isEmpty(searchKey)) {
-                query.addCriteria(Criteria.where("institutionName").regex(searchKey, "i"));
+                criteria.orOperator(Criteria.where("institutionName").regex(searchKey, "i"));
             }
+            query.addCriteria(criteria);
             query.with(PageRequest.of(0, 20));
             ArrayList<Institution> institutions = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
             if (institutions == null || institutions.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
             }
             ArrayList<InstitutionDto> institutionDtos = new ArrayList<>();
-            institutionDtos.forEach(institution -> {
+            institutions.forEach(institution -> {
                 InstitutionDto institutionDto = new InstitutionDto();
                 institutionDto.setId(institution.getId());
                 institutionDto.setInstitutionName(institution.getInstitutionName());
