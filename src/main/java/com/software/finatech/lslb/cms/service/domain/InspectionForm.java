@@ -158,7 +158,7 @@ public class InspectionForm extends AbstractFact {
             inspectionFormDto.setGameType(gameType.convertToDto());
         }
         inspectionFormDto.setId(getId());
-        AuthInfo authInfo =(AuthInfo) mongoRepositoryReactive.findById(getUserId(), AuthInfo.class).block();
+        AuthInfo authInfo =(AuthInfo) mongoRepositoryReactive.findById(userId, AuthInfo.class).block();
         if(authInfo!=null){
             inspectionFormDto.setReporter(authInfo.getFullName());
         }
