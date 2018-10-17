@@ -90,7 +90,7 @@ public class InspectionFormController extends BaseController {
             return Mono.just(new ResponseEntity<>(inspectionFormDtos, HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while fetching all institutions";
-          return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
+          return Mono.just(new ResponseEntity<>("An error occurred while fetching data", HttpStatus.BAD_REQUEST));
       }
     }
 
