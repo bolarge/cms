@@ -1,6 +1,8 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
@@ -347,9 +349,11 @@ public class PaymentRecord extends AbstractFact {
         return StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID, this.revenueNameId);
     }
 
-
     public License getLicense() {
-        return (License) mongoRepositoryReactive.find(Query.query(Criteria.where("paymentRecordId").is(this.id)), License.class).block();
+        Query query = new Query();
+        query.addCriteria(Criteria.where("paymentRecordId").is(this.id));
+        query.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID));
+        return (License) mongoRepositoryReactive.find(query, License.class).block();
     }
 
     public String getOwnerName() {
@@ -375,5 +379,18 @@ public class PaymentRecord extends AbstractFact {
     @Override
     public String getFactName() {
         return "PaymentRecord";
+    }
+
+    private String getLicenseTypeId() {
+        if (StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_ID, this.revenueNameId)) {
+            return LicenseTypeReferenceData.GAMING_MACHINE;
+        }
+        if (StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID, this.revenueNameId)) {
+            return LicenseTypeReferenceData.AGENT;
+        }
+        if (StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_ID, this.revenueNameId)) {
+            return LicenseTypeReferenceData.INSTITUTION;
+        }
+        return null;
     }
 }
