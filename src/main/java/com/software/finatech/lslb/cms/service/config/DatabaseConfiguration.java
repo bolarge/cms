@@ -9,26 +9,32 @@ import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.SimpleReactiveMongoDatabaseFactory;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Created by djaiyeola on 9/20/17.
  */
 @Configuration
 @EnableMongoAuditing
-public class DatabaseConfiguration{
+public class DatabaseConfiguration {
     @Value("${mongodb.host}")
     private String mongoHost;
     private static Logger logger = LoggerFactory.getLogger(DatabaseConfiguration.class);
-
+    @Autowired
+    private Environment environment;
 
     @Value("${mongodb.port}")
     private String mongoPort;
@@ -47,7 +53,7 @@ public class DatabaseConfiguration{
         //mongodb://cloud:Jdk19Version@54.191.139.8:27017
         StringBuffer uri = new StringBuffer();
         uri.append("mongodb://");
-        if((password!=null && !password.isEmpty()) && (username!=null && !username.isEmpty())) {
+        if ((password != null && !password.isEmpty()) && (username != null && !username.isEmpty())) {
             uri.append(username);
             uri.append(":");
             uri.append(password);
@@ -57,8 +63,10 @@ public class DatabaseConfiguration{
         uri.append(mongoHost);
         uri.append(":");
         uri.append(mongoPort);
-//        uri.append("/");
-//        uri.append(mongoDatabase);
+        if (getActiveProfiles().contains("staging")) {
+            uri.append("/");
+            uri.append(mongoDatabase);
+        }
 
         //logger.info(uri.toString());
         ConnectionString connectionString = new ConnectionString(uri.toString());
@@ -107,7 +115,7 @@ public class DatabaseConfiguration{
         //mongodb://cloud:Jdk19Version@54.191.139.8:27017
         StringBuffer uri = new StringBuffer();
         uri.append("mongodb://");
-        if((password!=null && !password.isEmpty()) && (username!=null && !username.isEmpty())) {
+        if ((password != null && !password.isEmpty()) && (username != null && !username.isEmpty())) {
             uri.append(username);
             uri.append(":");
             uri.append(password);
@@ -117,8 +125,10 @@ public class DatabaseConfiguration{
         uri.append(mongoHost);
         uri.append(":");
         uri.append(mongoPort);
-//        uri.append("/");
-//        uri.append(mongoDatabase);
+        if (getActiveProfiles().contains("staging")) {
+            uri.append("/");
+            uri.append(mongoDatabase);
+        }
 
         //logger.info("Mongo template:   "+uri.toString());
         return new com.mongodb.MongoClient(new MongoClientURI(uri.toString()));
@@ -135,4 +145,8 @@ public class DatabaseConfiguration{
         return new SpringSecurityAuditorAware();
     }*/
 
+    private List<String> getActiveProfiles() {
+        String[] activeProfileArray = environment.getActiveProfiles();
+        return Arrays.asList(activeProfileArray);
+    }
 }
