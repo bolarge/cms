@@ -130,7 +130,7 @@ public class InspectionFormController extends BaseController {
             inspectionForm.setGamingMachineId(inspectionFormCreateDto.getGamingMachineId());
             inspectionForm.setSubject(inspectionFormCreateDto.getSubject());
             inspectionForm.setInspectionDate(fromDate);
-            inspectionForm.setUserRoleId(inspectionFormCreateDto.getUserRoleId());
+            //inspectionForm.setUserRoleId(inspectionFormCreateDto.getUserRoleId());
             inspectionForm.setInstitutionId(inspectionFormCreateDto.getInstitutionId());
             mongoRepositoryReactive.saveOrUpdate(inspectionForm);
 
