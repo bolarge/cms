@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.InspectionFormDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -19,6 +20,15 @@ public class InspectionForm extends AbstractFact {
     protected String agentId;
     protected String gamingMachineId;
     protected String subject;
+    protected String owner;
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
 
     public String getSubject() {
         return subject;
@@ -97,6 +107,7 @@ public class InspectionForm extends AbstractFact {
         InspectionFormDto inspectionFormDto = new InspectionFormDto();
         inspectionFormDto.setComment(getComment());
         inspectionFormDto.setSubject(getSubject());
+        inspectionFormDto.setOwner(getOwner());
         Agent agent =(Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
         if(agent!=null){
             inspectionFormDto.setAgent(agent.convertToDto());
@@ -108,6 +119,11 @@ public class InspectionForm extends AbstractFact {
         GamingMachine gamingMachine =(GamingMachine) mongoRepositoryReactive.findById(getGamingMachineId(), GamingMachine.class).block();
         if(gamingMachine!=null){
             inspectionFormDto.setGamingMachine(gamingMachine.convertToDto());
+        }if(!StringUtils.isEmpty(institutionId)){
+            this.owner=institution.getInstitutionName();
+
+        }if(!StringUtils.isEmpty(agentId)){
+            this.owner=agent.getFullName();
         }
         Map gameTypeMap = Mapstore.STORE.get("GameType");
 
