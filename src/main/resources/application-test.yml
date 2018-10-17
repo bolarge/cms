@@ -30,8 +30,8 @@ security:
     enabled: false
 mongodb:
   host: db2.mlnx.test.vggdev.com
-  username: finatech-user
-  password: finatechuser
+  username: useradmin
+  password: f1nat3ch
   database: LslbCMSDb
   port: 27017
 logging:
