@@ -45,7 +45,7 @@ public class GameTypeReferenceData {
             gameType3.setId(GAMING_MACHINE_OPERATOR_ID);
         }
         gameType3.setDescription("A gaming machine operator (operator that has gaming machines)");
-        gameType3.setName("GAMING_MACHINE");
+        gameType3.setName("Gaming Machine");
         gameType3.setShortCode("GM");
         gameType3.setAipDurationMonths(3);
         gameType3.setInstitutionLicenseDurationMonths(12);

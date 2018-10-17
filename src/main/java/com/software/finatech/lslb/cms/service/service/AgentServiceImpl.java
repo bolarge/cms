@@ -121,6 +121,33 @@ public class AgentServiceImpl implements AgentService {
     }
 
 
+    @Override
+    public Mono<ResponseEntity> findAgentsBySearchKey(String searchKey) {
+        try {
+            Query query = new Query();
+            Criteria criteria = new Criteria();
+            if (!StringUtils.isEmpty(searchKey)) {
+                criteria.orOperator(Criteria.where("agentId").regex(searchKey, "i"), Criteria.where("fullName").regex(searchKey, "i"));
+            }
+            query.addCriteria(criteria);
+            query.with(PageRequest.of(0, 20));
+            ArrayList<Agent> agents = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
+            if (agents == null || agents.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
+            }
+            ArrayList<AgentDto> agentDtos = new ArrayList<>();
+            agents.forEach(agent -> {
+                AgentDto dto = new AgentDto();
+                dto.setId(agent.getId());
+                dto.setFullName(agent.getFullName());
+                agentDtos.add(dto);
+            });
+            return Mono.just(new ResponseEntity<>(agentDtos, HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while searching agents by key", e);
+        }
+    }
+
     //Creates an agent approval request to create  a new agent
     @Override
     public Mono<ResponseEntity> createAgent(AgentCreateDto agentCreateDto, HttpServletRequest request) {
@@ -146,7 +173,6 @@ public class AgentServiceImpl implements AgentService {
         } catch (Exception e) {
             return logAndReturnError(logger, "an error occurred when creating agent", e);
         }
-
     }
 
     private AgentApprovalRequest fromAgentCreateDto(AgentCreateDto agentCreateDto, Agent agent) {
@@ -348,6 +374,6 @@ public class AgentServiceImpl implements AgentService {
     }
 
     private String generateAgentId() {
-        return String.format("LAGOS-AG-%s", NumberUtil.getRandomNumberInRange(20, 45578994));
+        return String.format("LAGOS-AG-%s%s", NumberUtil.getRandomNumberInRange(20, 1000), LocalDateTime.now().secondOfMinute());
     }
 }

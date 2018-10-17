@@ -493,7 +493,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
 
             boolean institutionHasApprovedForm = applicationFormService.institutionHasCompletedApplicationForGameType(institutionId, gameTypeId);
             if (!institutionHasApprovedForm) {
-                String errorMsg = "Kindly make sure you have an approved application in category before paying for licence before proceeding";
+                String errorMsg = "Kindly make sure you have an approved application in the selected category before proceeding to pay for licence";
                 return Mono.just(new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST));
             }
         }
