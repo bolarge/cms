@@ -15,15 +15,27 @@ public class InspectionForm extends AbstractFact {
     protected String institutionId;
     protected String gameTypeId;
     protected String comment;
+
     protected String userId;
     protected LocalDate inspectionDate;
-    protected String userRoleId;
     protected String agentId;
     protected String gamingMachineId;
     protected String subject;
 
     @Transient
     protected String ownerName;
+
+    @Transient
+    protected String reporter;
+
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public String getOwnerName() {
         return ownerName;
@@ -57,20 +69,12 @@ public class InspectionForm extends AbstractFact {
         this.gamingMachineId = gamingMachineId;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getReporter() {
+        return reporter;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getUserRoleId() {
-        return userRoleId;
-    }
-
-    public void setUserRoleId(String userRoleId) {
-        this.userRoleId = userRoleId;
+    public void setReporter(String reporter) {
+        this.reporter = reporter;
     }
 
     public String getInstitutionId() {
@@ -156,12 +160,9 @@ public class InspectionForm extends AbstractFact {
         inspectionFormDto.setId(getId());
         AuthInfo authInfo =(AuthInfo) mongoRepositoryReactive.findById(getUserId(), AuthInfo.class).block();
         if(authInfo!=null){
-            inspectionFormDto.setUser(authInfo.convertToDto());
+            inspectionFormDto.setReporter(authInfo.getFullName());
         }
-        AuthRole authRole =(AuthRole) mongoRepositoryReactive.findById(getUserRoleId(), AuthRole.class).block();
-        if(authRole!=null){
-            inspectionFormDto.setUserRole(authRole.convertToDto());
-        }
+
         inspectionFormDto.setInspectionDate(getInspectionDate().toString("dd/MM/yyyy"));
         return inspectionFormDto;
 
