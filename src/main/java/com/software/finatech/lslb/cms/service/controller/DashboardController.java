@@ -87,6 +87,45 @@ public class DashboardController extends BaseController {
             return Mono.just(new ResponseEntity<>(licenseStatusSummaryDtos, HttpStatus.OK));
 
         }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/loggedcases-summary")
+    @ApiOperation(value = "Get dashboard Logged Cases summary ", response = CasesDashboardStatusCountDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllCasesSummary() {
+
+        Aggregation agg = Aggregation.newAggregation(
+                 Aggregation.group("loggedCaseStatusId").count().as("loggedStatusCount"),
+                Aggregation.project("loggedStatusCount").and("loggedCaseStatusId").previousOperation()
+
+        );
+        List<DashboardLoggedCaseStatusDto> dashboardLoggedCaseStatusDtos = mongoTemplate.aggregate(agg, LoggedCase.class, DashboardLoggedCaseStatusDto.class).getMappedResults();
+        CasesDashboardStatusCountDto casesDashboardStatusCountDto = new CasesDashboardStatusCountDto();
+
+        dashboardLoggedCaseStatusDtos.stream().forEach(result->{
+
+            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.OPEN_ID)){
+                casesDashboardStatusCountDto.setOpenedCount(result==null?0:result.getLoggedStatusCount());
+            }
+            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.CLOSED_ID)){
+                casesDashboardStatusCountDto.setClosedCount(result==null?0:result.getLoggedStatusCount());
+            }
+
+            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.OPEN_ID)){
+                casesDashboardStatusCountDto.setPendingCount(result==null?0:result.getLoggedStatusCount());
+            }
+
+        });
+        Query query = new Query();
+        long totalCount=mongoRepositoryReactive.count(query, LoggedCase.class).block();
+        casesDashboardStatusCountDto.setTotalCount(totalCount);
+
+        return Mono.just(new ResponseEntity<>(casesDashboardStatusCountDto, HttpStatus.OK));
+
+    }
     @RequestMapping(method = RequestMethod.GET, value = "/dashboard-summary", params = {"institutionId","gameTypeId"})
     @ApiOperation(value = "Get all dashboard summary count", response = DashboardSummaryDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
