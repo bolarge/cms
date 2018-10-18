@@ -13,7 +13,17 @@ public class Fee extends AbstractFact {
     protected double amount;
     protected String gameTypeId;
     protected String feePaymentTypeId;
-    protected String revenueNameId;
+    protected String licenseTypeId;
+
+    private String revenueNameId;
+
+    public String getRevenueNameId() {
+        return revenueNameId;
+    }
+
+    public void setRevenueNameId(String revenueNameId) {
+        this.revenueNameId = revenueNameId;
+    }
 
     public boolean isActive() {
         return active;
@@ -23,12 +33,12 @@ public class Fee extends AbstractFact {
         this.active = active;
     }
 
-    public String getRevenueNameId() {
-        return revenueNameId;
+    public String getLicenseTypeId() {
+        return licenseTypeId;
     }
 
-    public void setRevenueNameId(String revenueNameId) {
-        this.revenueNameId = revenueNameId;
+    public void setLicenseTypeId(String licenseTypeId) {
+        this.licenseTypeId = licenseTypeId;
     }
 
     public double getAmount() {
@@ -55,24 +65,23 @@ public class Fee extends AbstractFact {
         this.feePaymentTypeId = feePaymentTypeId;
     }
 
-
-    public RevenueName getRevenueName() {
-        if (revenueNameId == null) {
+    public LicenseType getLicenseType() {
+        if (licenseTypeId == null) {
             return null;
         }
-        Map revenueNameMap = Mapstore.STORE.get("RevenueName");
+        Map licenseTypeMap = Mapstore.STORE.get("LicenseType");
 
-        RevenueName revenueName = null;
-        if (revenueNameMap != null) {
-            revenueName = (RevenueName) revenueNameMap.get(revenueNameId);
+        LicenseType licenseType = null;
+        if (licenseTypeMap != null) {
+            licenseType = (LicenseType) licenseTypeMap.get(licenseTypeId);
         }
-        if (revenueName == null) {
-            revenueName = (RevenueName) mongoRepositoryReactive.findById(revenueNameId, RevenueName.class).block();
-            if (revenueName != null && revenueNameMap != null) {
-                revenueNameMap.put(revenueNameId, revenueName);
+        if (licenseType == null) {
+            licenseType = (LicenseType) mongoRepositoryReactive.findById(licenseTypeId, LicenseType.class).block();
+            if (licenseType != null && licenseTypeMap != null) {
+                licenseTypeMap.put(licenseTypeId, licenseType);
             }
         }
-        return revenueName;
+        return licenseType;
     }
 
     public GameType getGameType() {
@@ -120,14 +129,6 @@ public class Fee extends AbstractFact {
         return feePaymentType;
     }
 
-    public String getRevenueNameName() {
-        RevenueName revenueName = getRevenueName();
-        if (revenueName != null) {
-            return revenueName.getName();
-        }
-        return null;
-    }
-
     public String getFeePaymentTypeName() {
         FeePaymentType feePaymentType = getFeePaymentType();
         if (feePaymentType != null) {
@@ -141,10 +142,10 @@ public class Fee extends AbstractFact {
         feeDto.setAmount(getAmount());
         feeDto.setId(getId());
         feeDto.setActive(isActive());
-        RevenueName revenueName = getRevenueName();
-        if (revenueName != null) {
-            feeDto.setRevenueName(revenueName.getName());
-            feeDto.setRevenueId(getRevenueNameId());
+        LicenseType licenseType = getLicenseType();
+        if (licenseType != null) {
+            feeDto.setRevenueName(licenseType.toString());
+            feeDto.setRevenueId(getLicenseTypeId());
         }
         GameType gameType = getGameType();
         if (gameType != null) {

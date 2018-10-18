@@ -18,9 +18,8 @@ public class AuditActionReferenceData {
     public static final String AGENT_ID = "12";
     public static final String ROLE_ID = "13";
     public static final String INSTITUTION = "14";
-    public static final String AIP_ID= "15";
-    public static final String RENEWAL_ID= "16";
-
+    public static final String AIP_ID = "15";
+    public static final String RENEWAL_ID = "16";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         AuditAction action = (AuditAction) mongoRepositoryReactive.findById(LOGIN_ID, AuditAction.class).block();

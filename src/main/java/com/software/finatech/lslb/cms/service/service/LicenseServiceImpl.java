@@ -319,7 +319,7 @@ public class LicenseServiceImpl implements LicenseService {
         if (!StringUtils.isEmpty(institutionId)) {
             queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("institutionId").is(institutionId));
         }
-        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("renewalStatus").is("true"));
         List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryForLicensedInstitutionInGameType, License.class).toStream().collect(Collectors.toList());
         if (licenses.size() == 0) {
@@ -338,7 +338,7 @@ public class LicenseServiceImpl implements LicenseService {
         if (!StringUtils.isEmpty(agentId)) {
             queryForLicensedAgentInGameType.addCriteria(Criteria.where("agentId").is(agentId));
         }
-        queryForLicensedAgentInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.AGENT));
+        queryForLicensedAgentInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.AGENT_ID));
         LocalDateTime dateTime = new LocalDateTime();
         dateTime = dateTime.plusDays(90);
         queryForLicensedAgentInGameType.addCriteria(Criteria.where("expiryDate").lt(dateTime));
@@ -360,7 +360,7 @@ public class LicenseServiceImpl implements LicenseService {
         if (!StringUtils.isEmpty(gamingMachineId)) {
             queryForLicensedAgentInGameType.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
         }
-        queryForLicensedAgentInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.GAMING_MACHINE));
+        queryForLicensedAgentInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.GAMING_MACHINE_ID));
         LocalDateTime dateTime = new LocalDateTime();
         dateTime = dateTime.plusDays(90);
         queryForLicensedAgentInGameType.addCriteria(Criteria.where("expiryDate").lt(dateTime));
@@ -382,7 +382,7 @@ public class LicenseServiceImpl implements LicenseService {
         if (!StringUtils.isEmpty(institutionId)) {
             queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("institutionId").is(institutionId));
         }
-        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.RENEWAL_LICENSE_IN_REVIEW));
         List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryForLicensedInstitutionInGameType, License.class).toStream().collect(Collectors.toList());
         if (licenses.size() == 0) {
@@ -403,7 +403,7 @@ public class LicenseServiceImpl implements LicenseService {
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("institutionId").is(institutionId));
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseStatusId").in(allowedLicenseStatusIds));
-        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
         queryForLicensedInstitutionInGameType.addCriteria(new Criteria().andOperator(Criteria.where("effectiveDate").lte(today), (Criteria.where("expiryDate").gte(today))));
         License licenseForInstitutionAndGameType = (License) mongoRepositoryReactive.find(queryForLicensedInstitutionInGameType, License.class).block();
         return licenseForInstitutionAndGameType != null;
@@ -416,7 +416,7 @@ public class LicenseServiceImpl implements LicenseService {
             queryForInstitutionAIP.addCriteria(Criteria.where("institutionId").is(institutionId));
         }
         queryForInstitutionAIP.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID));
-        queryForInstitutionAIP.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
+        queryForInstitutionAIP.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
         List<License> aipsForInstitution = (List<License>) mongoRepositoryReactive.findAll(queryForInstitutionAIP, License.class).toStream().collect(Collectors.toList());
         ArrayList<AIPCheckDto> aipCheckDtos = new ArrayList<>();
         if (aipsForInstitution.size() == 0) {
@@ -446,7 +446,7 @@ public class LicenseServiceImpl implements LicenseService {
             queryForInstitutionAIP.addCriteria(Criteria.where("institutionId").is(institutionId));
         }
         queryForInstitutionAIP.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID));
-        queryForInstitutionAIP.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
+        queryForInstitutionAIP.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
         List<License> aipsForInstitution = (List<License>) mongoRepositoryReactive.findAll(queryForInstitutionAIP, License.class).toStream().collect(Collectors.toList());
         ArrayList<AIPCheckDto> aipCheckDtos = new ArrayList<>();
         if (aipsForInstitution.size() == 0) {
@@ -630,7 +630,7 @@ public class LicenseServiceImpl implements LicenseService {
             Query queryLicence = new Query();
             queryLicence.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
             queryLicence.addCriteria(Criteria.where("gameTypeId").is(licenseUpdateDto.getGameTypeId()));
-            queryLicence.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION));
+            queryLicence.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
             queryLicence.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID));
             License license = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
             if (license == null) {
@@ -668,7 +668,7 @@ public class LicenseServiceImpl implements LicenseService {
             createLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
             createLicense.setGameTypeId(license.getGameTypeId());
             createLicense.setParentLicenseId(license.getId());
-            createLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION);
+            createLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
             createLicense.setPaymentRecordId(license.getPaymentRecordId());
             mongoRepositoryReactive.saveOrUpdate(license);
             verbiage = "UPDATED : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from AIP DOC UPLOADED to AIP COMPLETED";
@@ -756,7 +756,7 @@ public class LicenseServiceImpl implements LicenseService {
             license.setInstitutionId(paymentRecord.getInstitutionId());
             license.setGameTypeId(paymentRecord.getGameTypeId());
             license.setLicenseStatusId(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
-            license.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION);
+            license.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
             license.setEffectiveDate(effectiveDate);
             license.setExpiryDate(expiryDate);
             license.setPaymentRecordId(paymentRecord.getId());
@@ -789,7 +789,7 @@ public class LicenseServiceImpl implements LicenseService {
             license.setAgentId(paymentRecord.getAgentId());
             license.setGameTypeId(paymentRecord.getGameTypeId());
             license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
-            license.setLicenseTypeId(LicenseTypeReferenceData.AGENT);
+            license.setLicenseTypeId(LicenseTypeReferenceData.AGENT_ID);
             license.setEffectiveDate(effectiveDate);
             license.setExpiryDate(expiryDate);
             license.setPaymentRecordId(paymentRecord.getId());
@@ -817,7 +817,7 @@ public class LicenseServiceImpl implements LicenseService {
             license.setGamingMachineId(paymentRecord.getGamingMachineId());
             license.setGameTypeId(paymentRecord.getGameTypeId());
             license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
-            license.setLicenseTypeId(LicenseTypeReferenceData.GAMING_MACHINE);
+            license.setLicenseTypeId(LicenseTypeReferenceData.GAMING_MACHINE_ID);
             license.setEffectiveDate(effectiveDate);
             license.setExpiryDate(expiryDate);
             license.setPaymentRecordId(paymentRecord.getId());
@@ -839,9 +839,9 @@ public class LicenseServiceImpl implements LicenseService {
             String agentId = paymentRecord.getAgentId();
             String gamingMachineId = paymentRecord.getGamingMachineId();
             String gameTypeId = paymentRecord.getGameTypeId();
-            String licenseTypeId = getLicenseTypeIdFromRevenueNameId(paymentRecord.getRevenueNameId());
+            String licenseTypeId = paymentRecord.getLicenseTypeId();
 
-            License latestLicense = getPreviousConfirmedLicenses(institutionId, agentId, gamingMachineId, gameTypeId, licenseTypeId);
+            License latestLicense = getPreviousConfirmedLicense(institutionId, agentId, gamingMachineId, gameTypeId, licenseTypeId);
             if (latestLicense == null) {
                 logger.info("There is no previous license found for the payment record with id {}", paymentRecord.getId());
                 return;
@@ -864,7 +864,7 @@ public class LicenseServiceImpl implements LicenseService {
             if (latestLicense.isAgentLicense() || latestLicense.isGamingMachineLicense()) {
                 newPendingApprovalRenewedLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
             }
-            newPendingApprovalRenewedLicense.setLicenseTypeId(getLicenseTypeIdFromRevenueNameId(paymentRecord.getRevenueNameId()));
+            newPendingApprovalRenewedLicense.setLicenseTypeId(paymentRecord.getLicenseTypeId());
             newPendingApprovalRenewedLicense.setGameTypeId(paymentRecord.getGameTypeId());
             newPendingApprovalRenewedLicense.setParentLicenseId(latestLicense.getId());
             newPendingApprovalRenewedLicense.setLicenseNumber(latestLicense.getLicenseNumber());
@@ -891,36 +891,23 @@ public class LicenseServiceImpl implements LicenseService {
     private LocalDate getNewLicenseEndDate(License latestLicense, GameType gameType) throws Exception {
         LocalDate newLicenseStartDate = latestLicense.getExpiryDate();
         String licenseTypeId = latestLicense.getLicenseTypeId();
-        if (StringUtils.equals(LicenseTypeReferenceData.AGENT, licenseTypeId)) {
+        if (StringUtils.equals(LicenseTypeReferenceData.AGENT_ID, licenseTypeId)) {
             return newLicenseStartDate.plusMonths(gameType.getAgentLicenseDurationMonths()).minusDays(1);
         }
-        if (StringUtils.equals(LicenseTypeReferenceData.INSTITUTION, licenseTypeId)) {
+        if (StringUtils.equals(LicenseTypeReferenceData.INSTITUTION_ID, licenseTypeId)) {
             return newLicenseStartDate.plusMonths(gameType.getInstitutionLicenseDurationMonths()).minusDays(1);
         }
-        if (StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE, licenseTypeId)) {
+        if (StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, licenseTypeId)) {
             return newLicenseStartDate.plusMonths(gameType.getGamingMachineLicenseDurationMonths()).minusDays(1);
         }
         throw new Exception();
     }
 
-    private String getLicenseTypeIdFromRevenueNameId(String revenueNameId) {
-        if (StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID, revenueNameId)) {
-            return LicenseTypeReferenceData.AGENT;
-        }
-        if (StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_ID, revenueNameId)) {
-            return LicenseTypeReferenceData.GAMING_MACHINE;
-        }
-        if (StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_ID, revenueNameId)) {
-            return LicenseTypeReferenceData.INSTITUTION;
-        }
-        return null;
-    }
-
-    public License getPreviousConfirmedLicenses(String institutionId,
-                                                String agentId,
-                                                String gamingMachineId,
-                                                String gameTypeId,
-                                                String licenseTypeId) {
+    private License getPreviousConfirmedLicense(String institutionId,
+                                               String agentId,
+                                               String gamingMachineId,
+                                               String gameTypeId,
+                                               String licenseTypeId) {
         Query query = new Query();
         if (!StringUtils.isEmpty(institutionId)) {
             query.addCriteria(Criteria.where("institutionId").is(institutionId));
@@ -941,6 +928,7 @@ public class LicenseServiceImpl implements LicenseService {
         List<String> licenseStatusIds = new ArrayList<>();
         licenseStatusIds.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
         licenseStatusIds.add(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
+        licenseStatusIds.add(LicenseStatusReferenceData.RENEWED_ID);
         query.addCriteria(Criteria.where("licenseStatusId").in(licenseStatusIds));
         Sort sort = new Sort(Sort.Direction.DESC, "effectiveDate");
 
@@ -951,15 +939,14 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
     private String generateLicenseNumberForPaymentRecord(PaymentRecord paymentRecord) {
-        String revenueNameId = paymentRecord.getRevenueNameId();
         String prefix = "LSLB-";
-        if (StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID, revenueNameId)) {
+        if (paymentRecord.isAgentPayment()) {
             prefix = prefix + "AG-";
         }
-        if (StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_ID, revenueNameId)) {
+        if (paymentRecord.isGamingMachinePayment()) {
             prefix = prefix + "GM-";
         }
-        if (StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_ID, revenueNameId)) {
+        if (paymentRecord.isInstitutionPayment()) {
             prefix = prefix + "OP-";
         }
         String randomDigit = String.valueOf(NumberUtil.getRandomNumberInRange(100, 1000));

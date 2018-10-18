@@ -7,17 +7,16 @@ import com.software.finatech.lslb.cms.service.model.vigipay.VigiPayMessage;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInBranchNotification;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInvoiceItem;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.ModeOfPaymentReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.*;
+import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
 import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.PaymentEmailNotifierAsync;
-import net.bytebuddy.asm.Advice;
+import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +40,8 @@ import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logA
 public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailService {
 
     private static final Logger logger = LoggerFactory.getLogger(PaymentRecordDetailServiceImpl.class);
+    private static final String paymentAuditActionId = AuditActionReferenceData.PAYMENT_ID;
+
 
     private FeeService feeService;
     private PaymentRecordService paymentRecordService;
@@ -84,7 +85,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     }
 
     @Override
-    public Mono<ResponseEntity> updateWebPaymentRecordDetail(PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto) {
+    public Mono<ResponseEntity> updateWebPaymentRecordDetail(PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto, HttpServletRequest request) {
         try {
             String paymentRecordDetailId = paymentRecordDetailUpdateDto.getId();
             PaymentRecordDetail existingPaymentRecordDetail = findById(paymentRecordDetailId);
@@ -110,6 +111,13 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             existingPaymentRecordDetail.setPaymentStatusId(paymentRecordDetailUpdateDto.getPaymentStatusId());
             existingPaymentRecordDetail.setVigiPayTransactionReference(paymentRecordDetailUpdateDto.getVigipayReference());
             savePaymentRecordDetail(existingPaymentRecordDetail);
+
+            String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
+            String verbiage = String.format("Web Payment record detail callback -> Payment Record Detail id: %s, Invoice Number -> %s, Status Id -> %s", paymentRecordDetailId, existingPaymentRecordDetail.getInvoiceNumber(), existingPaymentRecordDetail.getPaymentStatusId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(paymentAuditActionId,
+                    currentAuditorName, currentAuditorName,
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             paymentEmailNotifierAsync.sendPaymentNotificationForPaymentRecordDetail(existingPaymentRecordDetail, paymentRecord);
             return Mono.just(new ResponseEntity<>(existingPaymentRecordDetail.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -128,7 +136,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     }
 
     @Override
-    public Mono<ResponseEntity> createInBranchPaymentRecordDetail(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto) {
+    public Mono<ResponseEntity> createInBranchPaymentRecordDetail(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, HttpServletRequest request) {
         try {
             String invoiceNumber = null;
             Agent agent = null;
@@ -234,6 +242,15 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             paymentRecordDetailIdList.add(paymentRecordDetail.getId());
             paymentRecord.setPaymentRecordDetailIds(paymentRecordDetailIdList);
             paymentRecordService.savePaymentRecord(paymentRecord);
+
+
+            String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
+            String verbiage = String.format("Created In Branch record detail ->  License Type -> %s, Amount -> %s, Fee Payment Type -> %s, Category -> %s, Invoice Number -> %s",
+                    fee.getLicenseType(), fee.getAmount(), fee.getFeePaymentType(), fee.getGameType(), paymentRecordDetail.getInvoiceNumber());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(paymentAuditActionId,
+                    currentAuditorName, currentAuditorName,
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(paymentRecordDetail.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while creating payment record detail", e);
@@ -241,7 +258,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     }
 
     @Override
-    public Mono<ResponseEntity> createWebPaymentPaymentRecordDetail(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto) {
+    public Mono<ResponseEntity> createWebPaymentPaymentRecordDetail(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, HttpServletRequest request) {
         try {
             String feeId = paymentRecordDetailCreateDto.getFeeId();
             Fee fee = feeService.findFeeById(feeId);
@@ -306,6 +323,14 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             paymentRecordDetailIds.add(paymentRecordDetail.getId());
             paymentRecord.setPaymentRecordDetailIds(paymentRecordDetailIds);
             paymentRecordService.savePaymentRecord(paymentRecord);
+
+            String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
+            String verbiage = String.format("Created web payment record detail ->  License Type -> %s, Amount -> %s, Fee Payment Type -> %s, Category -> %s",
+                     fee.getLicenseType(), fee.getAmount(), fee.getFeePaymentType(), fee.getGameType());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(paymentAuditActionId,
+                    currentAuditorName, currentAuditorName,
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
             return Mono.just(new ResponseEntity<>(paymentRecordDetail.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while creating payment record detail", e);
@@ -414,20 +439,20 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     private void updatePaymentRecord(PaymentRecord paymentRecord) {
         if (paymentRecord.getAmountOutstanding() <= 0) {
             paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
-            String revenueNameId = paymentRecord.getRevenueNameId();
+            String licenseTypeId = paymentRecord.getLicenseTypeId();
             String feePaymentTypeId = paymentRecord.getFeePaymentTypeId();
 
-            if (StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_ID, revenueNameId)
+            if (StringUtils.equals(LicenseTypeReferenceData.INSTITUTION_ID, licenseTypeId)
                     && StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, feePaymentTypeId)) {
                 licenseService.createAIPLicenseForCompletedPayment(paymentRecord);
             }
 
-            if (StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_ID, revenueNameId) &&
+            if (StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, licenseTypeId) &&
                     StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, feePaymentTypeId)) {
                 licenseService.createFirstLicenseForGamingMachinePayment(paymentRecord);
             }
 
-            if (StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID, revenueNameId) &&
+            if (StringUtils.equals(LicenseTypeReferenceData.AGENT_ID, licenseTypeId) &&
                     StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, feePaymentTypeId)) {
                 licenseService.createFirstLicenseForAgentPayment(paymentRecord);
             }
@@ -472,7 +497,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         String agentId = paymentRecordDetailCreateDto.getAgentId();
         String gamingMachineId = paymentRecordDetailCreateDto.getGamingMachineId();
         String gameTypeId = fee.getGameTypeId();
-        String revenueNameId = fee.getRevenueNameId();
+        String revenueNameId = fee.getLicenseTypeId();
         if (paymentRecordDetailCreateDto.isAgentPayment()) {
             gameTypeId = fee.getGameTypeId();
         }
@@ -520,13 +545,13 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
 
     private Mono<ResponseEntity> validateApplicationPayment(String institutionId, String gameTypeId) {
         String applicationFeeTypeId = FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID;
-        String institutionRevenueNameId = RevenueNameReferenceData.INSTITUTION_REVENUE_ID;
+        String institutionLicenseTypeId = LicenseTypeReferenceData.INSTITUTION_ID;
 
         Query query = new Query();
         query.addCriteria(Criteria.where("feePaymentTypeId").is(applicationFeeTypeId));
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-        query.addCriteria(Criteria.where("revenueNameId").is(institutionRevenueNameId));
+        query.addCriteria(Criteria.where("licenseTypeId").is(institutionLicenseTypeId));
 
         PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.find(query, PaymentRecord.class).block();
         if (paymentRecord != null && StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, paymentRecord.getPaymentStatusId())) {
@@ -540,14 +565,12 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
 
     private boolean institutionHasApplicationPaymentInCategory(String institutionId, String gameTypeId) {
         String applicationFeeTypeId = FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID;
-        String institutionRevenueNameId = RevenueNameReferenceData.INSTITUTION_REVENUE_ID;
-
+        String institutionLicenseTypeId = LicenseTypeReferenceData.INSTITUTION_ID;
         Query query = new Query();
         query.addCriteria(Criteria.where("feePaymentTypeId").is(applicationFeeTypeId));
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-        query.addCriteria(Criteria.where("revenueNameId").is(institutionRevenueNameId));
-
+        query.addCriteria(Criteria.where("licenseTypeId").is(institutionLicenseTypeId));
         PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.find(query, PaymentRecord.class).block();
         return paymentRecord != null;
     }
@@ -597,7 +620,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         paymentRecord.setFeeId(fee.getId());
         paymentRecord.setGamingMachineId(gamingMachineId);
         paymentRecord.setGameTypeId(fee.getGameTypeId());
-        paymentRecord.setRevenueNameId(fee.getRevenueNameId());
+        paymentRecord.setLicenseTypeId(fee.getLicenseTypeId());
         paymentRecord.setFeePaymentTypeId(fee.getFeePaymentTypeId());
 
         paymentRecord.setPaymentReference(NumberUtil.generateTransactionReferenceForPaymentRecord());

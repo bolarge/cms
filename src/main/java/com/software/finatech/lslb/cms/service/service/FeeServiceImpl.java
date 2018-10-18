@@ -3,12 +3,12 @@ package com.software.finatech.lslb.cms.service.service;
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.domain.FeePaymentType;
-import com.software.finatech.lslb.cms.service.domain.RevenueName;
+import com.software.finatech.lslb.cms.service.domain.LicenseType;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.MapValues;
@@ -71,7 +71,7 @@ public class FeeServiceImpl implements FeeService {
             Query query = new Query();
             query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
             query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-            query.addCriteria(Criteria.where("revenueNameId").is(feeCreateDto.getRevenueNameId()));
+            query.addCriteria(Criteria.where("licenseTypeId").is(feeCreateDto.getRevenueNameId()));
             query.addCriteria(Criteria.where("active").is(true));
             Fee existingFeeWithGameTypeAndFeePaymentType = (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
             if (existingFeeWithGameTypeAndFeePaymentType != null) {
@@ -83,13 +83,14 @@ public class FeeServiceImpl implements FeeService {
             fee.setAmount(Double.valueOf(feeCreateDto.getAmount()));
             fee.setFeePaymentTypeId(feePaymentTypeId);
             fee.setGameTypeId(gameTypeId);
-            fee.setRevenueNameId(feeCreateDto.getRevenueNameId());
+            fee.setLicenseTypeId(feeCreateDto.getRevenueNameId());
             fee.setActive(true);
             mongoRepositoryReactive.saveOrUpdate(fee);
 
-            String verbiage = String.format("Created Fee -> RevenueName : %s, FeePaymentType -> %s, Category -> %s, Amount -> %s", fee.getRevenueName(), fee.getFeePaymentType(), fee.getGameType(), fee.getAmount());
+            String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
+            String verbiage = String.format("Created Fee -> License Type : %s, FeePaymentType -> %s, Category -> %s, Amount -> %s", fee.getLicenseType(), fee.getFeePaymentType(), fee.getGameType(), fee.getAmount());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
-                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    currentAuditorName, currentAuditorName,
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity<>(fee.convertToDto(), HttpStatus.OK));
@@ -114,9 +115,10 @@ public class FeeServiceImpl implements FeeService {
             feePaymentType.setName(feeTypeUpdateDto.getName());
             mongoRepositoryReactive.saveOrUpdate(feePaymentType);
 
+            String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
             String verbiage = String.format("Updated Fee Payment Type, Name -> %s ", feePaymentTypeName);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
-                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    currentAuditorName, currentAuditorName,
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity<>(feePaymentType.convertToDto(), HttpStatus.OK));
@@ -143,9 +145,10 @@ public class FeeServiceImpl implements FeeService {
             feePaymentTypeMap.put(feePaymentType.getId(), feePaymentType);
             mongoRepositoryReactive.saveOrUpdate(feePaymentType);
 
+            String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
             String verbiage = String.format("Updated Fee Payment Type, Name -> %s ", feePaymentType);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
-                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                  currentAuditorName, currentAuditorName,
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity<>(feePaymentType.convertToDto(), HttpStatus.OK));
@@ -156,28 +159,30 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public Mono<ResponseEntity> createRevenueName(RevenueNameDto revenueNameDto, HttpServletRequest request) {
+    public Mono<ResponseEntity> createLicenseType(RevenueNameDto revenueNameDto, HttpServletRequest request) {
         try {
             Query query = new Query();
             query.addCriteria(Criteria.where("name").is(revenueNameDto.getName()));
-            RevenueName existingRevenueNameWithName = (RevenueName) mongoRepositoryReactive.find(query, RevenueName.class).block();
-            if (existingRevenueNameWithName != null) {
-                return Mono.just(new ResponseEntity<>("This RevenueName setting exist", HttpStatus.BAD_REQUEST));
+            LicenseType existingLicenseTypeWithName = (LicenseType) mongoRepositoryReactive.find(query, LicenseType.class).block();
+            if (existingLicenseTypeWithName != null) {
+                return Mono.just(new ResponseEntity<>("Licence type with name already exist", HttpStatus.BAD_REQUEST));
             }
-            RevenueName revenueName = new RevenueName();
-            revenueName.setId(UUID.randomUUID().toString());
-            revenueName.setDescription(revenueNameDto.getDescription());
-            revenueName.setName(revenueNameDto.getName());
-            mongoRepositoryReactive.saveOrUpdate(revenueName);
-            Map revenueNameMap = Mapstore.STORE.get("RevenueName");
-            revenueNameMap.put(revenueName.getId(), revenueName);
+            LicenseType licenseType = new LicenseType();
+            licenseType.setId(UUID.randomUUID().toString());
+            licenseType.setDescription(revenueNameDto.getDescription());
+            licenseType.setName(revenueNameDto.getName());
+            mongoRepositoryReactive.saveOrUpdate(licenseType);
+            Map licenseTypeMap = Mapstore.STORE.get("LicenseType");
+            if (licenseTypeMap != null) {
+                licenseTypeMap.put(licenseType.getId(), licenseType);
+            }
 
-            String verbiage = String.format("Created Revenue Name, Name -> %s ",revenueName);
+            String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
+            String verbiage = String.format("Created License Type, Name -> %s ", licenseType);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
-                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                currentAuditorName,currentAuditorName,
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-
-            return Mono.just(new ResponseEntity<>(revenueName.convertToDto(), HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(licenseType.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while creating the fee setting";
             return logAndReturnError(logger, errorMsg, e);
@@ -195,7 +200,7 @@ public class FeeServiceImpl implements FeeService {
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             }
             if (!StringUtils.isEmpty(revenueNameId)) {
-                query.addCriteria(Criteria.where("revenueNameId").is(revenueNameId));
+                query.addCriteria(Criteria.where("licenseTypeId").is(revenueNameId));
             }
 
 
@@ -248,13 +253,13 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public List<EnumeratedFactDto> getRevenueNames() {
-        Map revenueNameMap = Mapstore.STORE.get("RevenueName");
-        ArrayList<RevenueName> revenueNames = new ArrayList<RevenueName>(revenueNameMap.values());
+    public List<EnumeratedFactDto> getLicenseTypes() {
+        Map licenseTypeMap = Mapstore.STORE.get("LicenseType");
+        ArrayList<LicenseType> licenseTypes = new ArrayList<LicenseType>(licenseTypeMap.values());
         List<EnumeratedFactDto> revenueNameDtoList = new ArrayList<>();
-        revenueNames.forEach(factObject -> {
-            RevenueName revenueName = factObject;
-            revenueNameDtoList.add(revenueName.convertToDto());
+        licenseTypes.forEach(factObject -> {
+            LicenseType licenseType = factObject;
+            revenueNameDtoList.add(licenseType.convertToDto());
         });
         return revenueNameDtoList;
     }
@@ -276,7 +281,7 @@ public class FeeServiceImpl implements FeeService {
         }
 
         Query query = new Query();
-        query.addCriteria(Criteria.where("revenueNameId").is(revenueNameId));
+        query.addCriteria(Criteria.where("licenseTypeId").is(revenueNameId));
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
         query.addCriteria(Criteria.where("active").is(true));
@@ -296,10 +301,10 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public Mono<ResponseEntity> findAllFeePaymentTypeForRevenueName(String revenueNameId) {
+    public Mono<ResponseEntity> findAllFeePaymentTypeForLicenseType(String licenseTypeId) {
         try {
-            if (StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID, revenueNameId)
-                    || StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_ID, revenueNameId)) {
+            if (StringUtils.equals(LicenseTypeReferenceData.AGENT_ID, licenseTypeId)
+                    || StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, licenseTypeId)) {
                 Query query = new Query();
                 query.addCriteria(Criteria.where("id").ne(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID));
 
@@ -310,7 +315,7 @@ public class FeeServiceImpl implements FeeService {
                 }
                 return Mono.just(new ResponseEntity<>(feePaymentTypeDtos, HttpStatus.OK));
             }
-            if (StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_ID, revenueNameId)) {
+            if (StringUtils.equals(LicenseTypeReferenceData.INSTITUTION_ID, licenseTypeId)) {
                 return getAllFeePaymentType();
             }
             return Mono.just(new ResponseEntity<>("Invalid Revenue Name Supplied", HttpStatus.BAD_REQUEST));
@@ -320,31 +325,31 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public Mono<ResponseEntity> findRevenueNameByParams(String institutionId, String agentId) {
+    public Mono<ResponseEntity> findLicenseTypeByParams(String institutionId, String agentId) {
         try {
             if (!StringUtils.isEmpty(institutionId) && StringUtils.isEmpty(agentId)) {
-                Query query = Query.query(Criteria.where("id").ne(RevenueNameReferenceData.AGENT_REVENUE_ID));
+                Query query = Query.query(Criteria.where("id").ne(LicenseTypeReferenceData.AGENT_ID));
 
-                ArrayList<RevenueName> revenueNames = (ArrayList<RevenueName>) mongoRepositoryReactive.findAll(query, RevenueName.class).toStream().collect(Collectors.toList());
-                if (revenueNames == null || revenueNames.isEmpty()) {
+                ArrayList<LicenseType> licenseTypes = (ArrayList<LicenseType>) mongoRepositoryReactive.findAll(query, LicenseType.class).toStream().collect(Collectors.toList());
+                if (licenseTypes == null || licenseTypes.isEmpty()) {
                     return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
                 }
                 ArrayList<EnumeratedFactDto> enumeratedFactDtos = new ArrayList<>();
-                for (RevenueName revenueName : revenueNames) {
-                    enumeratedFactDtos.add(revenueName.convertToDto());
+                for (LicenseType licenseType : licenseTypes) {
+                    enumeratedFactDtos.add(licenseType.convertToDto());
                 }
                 return Mono.just(new ResponseEntity<>(enumeratedFactDtos, HttpStatus.OK));
             }
 
             if (!StringUtils.isEmpty(agentId) && StringUtils.isEmpty(institutionId)) {
-                Query query = Query.query(Criteria.where("id").is(RevenueNameReferenceData.AGENT_REVENUE_ID));
-                ArrayList<RevenueName> revenueNames = (ArrayList<RevenueName>) mongoRepositoryReactive.findAll(query, RevenueName.class).toStream().collect(Collectors.toList());
-                if (revenueNames == null || revenueNames.isEmpty()) {
+                Query query = Query.query(Criteria.where("id").is(LicenseTypeReferenceData.AGENT_ID));
+                ArrayList<LicenseType> licenseTypes = (ArrayList<LicenseType>) mongoRepositoryReactive.findAll(query, LicenseType.class).toStream().collect(Collectors.toList());
+                if (licenseTypes == null || licenseTypes.isEmpty()) {
                     return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
                 }
                 ArrayList<EnumeratedFactDto> enumeratedFactDtos = new ArrayList<>();
-                for (RevenueName revenueName : revenueNames) {
-                    enumeratedFactDtos.add(revenueName.convertToDto());
+                for (LicenseType licenseType : licenseTypes) {
+                    enumeratedFactDtos.add(licenseType.convertToDto());
                 }
                 return Mono.just(new ResponseEntity<>(enumeratedFactDtos, HttpStatus.OK));
             }
@@ -355,10 +360,10 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public Fee findFeeByRevenueNameGameTypeAndFeePaymentType(String revenueNameId, String gameTypeId, String feePaymentTypeId) {
+    public Fee findFeeByLicenseTypeGameTypeAndFeePaymentType(String licenseTypeId, String gameTypeId, String feePaymentTypeId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-        query.addCriteria(Criteria.where("revenueNameId").is(revenueNameId));
+        query.addCriteria(Criteria.where("licenseTypeId").is(licenseTypeId));
         query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
         return (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
     }

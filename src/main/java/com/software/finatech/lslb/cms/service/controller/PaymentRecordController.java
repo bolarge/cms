@@ -31,7 +31,7 @@ public class PaymentRecordController extends BaseController {
 
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "agentId",
-            "institutionId", "gamingMachineId", "gameTypeId", "feePaymentTypeId", "revenueNameId", "paymentStatusId"})
+            "institutionId", "gamingMachineId", "gameTypeId", "feePaymentTypeId", "licenseTypeId", "paymentStatusId"})
     @ApiOperation(value = "Get all payment records", response = PaymentRecordDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -46,7 +46,7 @@ public class PaymentRecordController extends BaseController {
                                                      @RequestParam("gameTypeId") String gameTypeId,
                                                      @RequestParam("institutionId") String institutionId,
                                                      @RequestParam("feePaymentTypeId") String feePaymentTypeId,
-                                                     @RequestParam("revenueNameId") String revenueNameId,
+                                                     @RequestParam("licenseTypeId") String revenueNameId,
                                                      @RequestParam("agentId") String agentId,
                                                      @RequestParam("paymentStatusId") String paymentStatusId,
                                                      HttpServletResponse httpServletResponse) {

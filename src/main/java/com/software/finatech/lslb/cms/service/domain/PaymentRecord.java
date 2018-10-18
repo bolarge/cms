@@ -4,7 +4,6 @@ import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -18,7 +17,6 @@ import java.util.Map;
 @SuppressWarnings("serial")
 @Document(collection = "PaymentRecords")
 public class PaymentRecord extends AbstractFact {
-
     private String institutionId;
     private String paymentStatusId;
     private String feeId;
@@ -30,9 +28,18 @@ public class PaymentRecord extends AbstractFact {
     private List<String> paymentRecordDetailIds = new ArrayList<>();
     private String gameTypeId;
     private String feePaymentTypeId;
-    private String revenueNameId;
+    private String licenseTypeId;
     private String paymentReference;
     private String batchPaymentId;
+    private String revenueNameId;
+
+    public String getRevenueNameId() {
+        return revenueNameId;
+    }
+
+    public void setRevenueNameId(String revenueNameId) {
+        this.revenueNameId = revenueNameId;
+    }
 
     public String getBatchPaymentId() {
         return batchPaymentId;
@@ -50,12 +57,12 @@ public class PaymentRecord extends AbstractFact {
         this.paymentReference = paymentReference;
     }
 
-    public String getRevenueNameId() {
-        return revenueNameId;
+    public String getLicenseTypeId() {
+        return licenseTypeId;
     }
 
-    public void setRevenueNameId(String revenueNameId) {
-        this.revenueNameId = revenueNameId;
+    public void setLicenseTypeId(String licenseTypeId) {
+        this.licenseTypeId = licenseTypeId;
     }
 
     public String getGameTypeId() {
@@ -228,31 +235,23 @@ public class PaymentRecord extends AbstractFact {
         return (GamingMachine) mongoRepositoryReactive.findById(getGamingMachineId(), GamingMachine.class).block();
     }
 
-    public String getRevenueNameName() {
-        RevenueName revenueName = getRevenueName();
-        if (revenueName != null) {
-            return revenueName.getName();
-        }
-        return "";
-    }
-
-    public RevenueName getRevenueName() {
-        if (revenueNameId == null) {
+    public LicenseType getLicenseType() {
+        if (licenseTypeId == null) {
             return null;
         }
-        Map revenueNameMap = Mapstore.STORE.get("RevenueName");
+        Map licenseTypeMap = Mapstore.STORE.get("LicenseType");
 
-        RevenueName revenueName = null;
-        if (revenueNameMap != null) {
-            revenueName = (RevenueName) revenueNameMap.get(revenueNameId);
+        LicenseType licenseType = null;
+        if (licenseTypeMap != null) {
+            licenseType = (LicenseType) licenseTypeMap.get(licenseTypeId);
         }
-        if (revenueName == null) {
-            revenueName = (RevenueName) mongoRepositoryReactive.findById(revenueNameId, RevenueName.class).block();
-            if (revenueName != null && revenueNameMap != null) {
-                revenueNameMap.put(revenueNameId, revenueName);
+        if (licenseType == null) {
+            licenseType = (LicenseType) mongoRepositoryReactive.findById(licenseTypeId, LicenseType.class).block();
+            if (licenseType != null && licenseTypeMap != null) {
+                licenseTypeMap.put(licenseTypeId, licenseType);
             }
         }
-        return revenueName;
+        return licenseType;
     }
 
     public String getFeePaymentTypeName() {
@@ -286,10 +285,10 @@ public class PaymentRecord extends AbstractFact {
         paymentRecordDto.setId(getId());
         paymentRecordDto.setFeeId(getFeeId());
         String ownerName = "";
-        RevenueName revenueName = getRevenueName();
-        if (revenueName != null) {
-            paymentRecordDto.setRevenueName(revenueName.getName());
-            paymentRecordDto.setRevenueNameId(revenueName.getId());
+        LicenseType licenseType = getLicenseType();
+        if (licenseType != null) {
+            paymentRecordDto.setRevenueName(licenseType.toString());
+            paymentRecordDto.setRevenueNameId(licenseType.getId());
         }
         FeePaymentType feePaymentType = getFeePaymentType();
         if (feePaymentType != null) {
@@ -338,15 +337,15 @@ public class PaymentRecord extends AbstractFact {
 
 
     public boolean isInstitutionPayment() {
-        return StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_ID, this.revenueNameId);
+        return StringUtils.equals(LicenseTypeReferenceData.INSTITUTION_ID, this.licenseTypeId);
     }
 
     public boolean isGamingMachinePayment() {
-        return StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_ID, this.revenueNameId);
+        return StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, this.licenseTypeId);
     }
 
     public boolean isAgentPayment() {
-        return StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID, this.revenueNameId);
+        return StringUtils.equals(LicenseTypeReferenceData.AGENT_ID, this.licenseTypeId);
     }
 
     public License getLicense() {
@@ -379,18 +378,5 @@ public class PaymentRecord extends AbstractFact {
     @Override
     public String getFactName() {
         return "PaymentRecord";
-    }
-
-    private String getLicenseTypeId() {
-        if (StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_ID, this.revenueNameId)) {
-            return LicenseTypeReferenceData.GAMING_MACHINE;
-        }
-        if (StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID, this.revenueNameId)) {
-            return LicenseTypeReferenceData.AGENT;
-        }
-        if (StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_ID, this.revenueNameId)) {
-            return LicenseTypeReferenceData.INSTITUTION;
-        }
-        return null;
     }
 }

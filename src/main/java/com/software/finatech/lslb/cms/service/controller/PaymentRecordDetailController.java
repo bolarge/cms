@@ -10,6 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,8 +39,8 @@ public class PaymentRecordDetailController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> createPaymentRecordDetailInBranch(@RequestBody @Valid PaymentRecordDetailCreateDto paymentRecordDetailCreateDto) {
-        return paymentRecordDetailService.createInBranchPaymentRecordDetail(paymentRecordDetailCreateDto);
+    public Mono<ResponseEntity> createPaymentRecordDetailInBranch(@RequestBody @Valid PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, HttpServletRequest request) {
+        return paymentRecordDetailService.createInBranchPaymentRecordDetail(paymentRecordDetailCreateDto, request);
     }
 
 
@@ -52,8 +53,8 @@ public class PaymentRecordDetailController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> createPaymentRecordDetailWebPayment(@RequestBody @Valid PaymentRecordDetailCreateDto paymentRecordDetailCreateDto) {
-        return paymentRecordDetailService.createWebPaymentPaymentRecordDetail(paymentRecordDetailCreateDto);
+    public Mono<ResponseEntity> createPaymentRecordDetailWebPayment(@RequestBody @Valid PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, HttpServletRequest request) {
+        return paymentRecordDetailService.createWebPaymentPaymentRecordDetail(paymentRecordDetailCreateDto, request);
     }
 
 
@@ -66,8 +67,8 @@ public class PaymentRecordDetailController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> updatePaymentRecord(@RequestBody @Valid PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto) {
-        return paymentRecordDetailService.updateWebPaymentRecordDetail(paymentRecordDetailUpdateDto);
+    public Mono<ResponseEntity> updatePaymentRecord(@RequestBody @Valid PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto, HttpServletRequest request) {
+        return paymentRecordDetailService.updateWebPaymentRecordDetail(paymentRecordDetailUpdateDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/vigipay-in-branch-payment-notification")

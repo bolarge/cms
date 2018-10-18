@@ -182,6 +182,24 @@ public class License extends AbstractFact {
         }
         return (PaymentRecord) mongoRepositoryReactive.findById(this.paymentRecordId, PaymentRecord.class).block();
     }
+    public LicenseType getLicenseType() {
+        if (licenseTypeId == null) {
+            return null;
+        }
+        Map licenseTypeMap = Mapstore.STORE.get("LicenseType");
+
+        LicenseType licenseType = null;
+        if (licenseTypeMap != null) {
+            licenseType = (LicenseType) licenseTypeMap.get(licenseTypeId);
+        }
+        if (licenseType == null) {
+            licenseType = (LicenseType) mongoRepositoryReactive.findById(licenseTypeId, LicenseType.class).block();
+            if (licenseType != null && licenseTypeMap != null) {
+                licenseTypeMap.put(licenseTypeId, licenseType);
+            }
+        }
+        return licenseType;
+    }
 
     public LicenseDto convertToDto() {
         LicenseDto licenseDto = new LicenseDto();
@@ -189,7 +207,7 @@ public class License extends AbstractFact {
         licenseDto.setGamingMachineId(getGamingMachineId());
         licenseDto.setPaymentRecordId(getPaymentRecordId());
         licenseDto.setLicenseTypeId(getLicenseTypeId());
-        licenseDto.setLicenseTypeName(getLicenseTypeId());
+        licenseDto.setLicenseTypeName(String.valueOf(getLicenseType()));
         licenseDto.setId(id);
         licenseDto.setLicenseNumber(getLicenseNumber());
         if (getEffectiveDate() != null && getExpiryDate() != null) {
@@ -224,15 +242,15 @@ public class License extends AbstractFact {
     }
 
     public boolean isInstitutionLicense() {
-        return StringUtils.equals(LicenseTypeReferenceData.INSTITUTION, this.licenseTypeId);
+        return StringUtils.equals(LicenseTypeReferenceData.INSTITUTION_ID, this.licenseTypeId);
     }
 
     public boolean isGamingMachineLicense() {
-        return StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE, this.licenseTypeId);
+        return StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, this.licenseTypeId);
     }
 
     public boolean isAgentLicense() {
-        return StringUtils.equals(LicenseTypeReferenceData.AGENT, this.licenseTypeId);
+        return StringUtils.equals(LicenseTypeReferenceData.AGENT_ID, this.licenseTypeId);
     }
 
     @Override
