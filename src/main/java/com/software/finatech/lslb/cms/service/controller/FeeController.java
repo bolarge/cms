@@ -20,7 +20,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/fees")
 public class FeeController extends BaseController {
-    //private FeeService feeService;
     @Autowired
     public FeeService feeService;
 
@@ -29,11 +28,7 @@ public class FeeController extends BaseController {
         return feeService;
     }
 
-    public void setFeeService(FeeService feeService) {
-        this.feeService = feeService;
-    }
-
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"feePaymentTypeId", "gameTypeId", "revenueNameId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"feePaymentTypeId", "gameTypeId", "licenseTypeId"})
     @ApiOperation(value = "Get all Fees", response = FeeDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -42,7 +37,7 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllFees(@RequestParam("feePaymentTypeId") String feePaymentTypeId,
                                            @RequestParam("gameTypeId") String gameTypeId,
-                                           @RequestParam("revenueNameId") String revenueNameId) {
+                                           @RequestParam("licenseTypeId") String revenueNameId) {
         return feeService.getAllFees(feePaymentTypeId, gameTypeId, revenueNameId);
     }
 
@@ -100,7 +95,7 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllRevenueNames() {
         try {
-            List<EnumeratedFactDto> revenueNames = feeService.getRevenueNames();
+            List<EnumeratedFactDto> revenueNames = feeService.getLicenseTypes();
             if (revenueNames == null) {
                 return Mono.just(new ResponseEntity<>("No Revenue Name Record", HttpStatus.OK));
 
@@ -135,7 +130,7 @@ public class FeeController extends BaseController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/find-fee", params = {"feePaymentTypeId", "gameTypeId", "revenueNameId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/find-fee", params = {"feePaymentTypeId", "gameTypeId", "licenseTypeId"})
     @ApiOperation(value = "Get Fee with revenue name, gameType and Fee Payment Type", response = FeeDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -144,11 +139,11 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> findFeeByParams(@RequestParam("feePaymentTypeId") String feePaymentTypeId,
                                                 @RequestParam("gameTypeId") String gameTypeId,
-                                                @RequestParam("revenueNameId") String revenueNameId) {
+                                                @RequestParam("licenseTypeId") String revenueNameId) {
         return feeService.findActiveFeeByGameTypeAndPaymentTypeAndRevenueName(gameTypeId, feePaymentTypeId, revenueNameId);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/fee-payment-types/for-revenue-name", params = {"revenueNameId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/fee-payment-types/for-revenue-name", params = {"licenseTypeId"})
     @ApiOperation(value = "Get Fee Payment Types for Revenue name", response = EnumeratedFactDto.class, consumes = "application/json",
             notes = "This endpoint find all fee payment types for revenue name \n(Returns only License and License Renewal for agents and gaming machine, \n returns all fee payment types for institutions)")
     @ApiResponses(value = {
@@ -156,8 +151,8 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> findFeeByParams(@RequestParam("revenueNameId") String revenueNameId) {
-        return feeService.findAllFeePaymentTypeForRevenueName(revenueNameId);
+    public Mono<ResponseEntity> findFeeByParams(@RequestParam("licenseTypeId") String revenueNameId) {
+        return feeService.findAllFeePaymentTypeForLicenseType(revenueNameId);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/revenue-names/by-params", params = {"institutionId", "agentId"})
@@ -168,7 +163,7 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> findRevenueNamesByParam(@RequestParam("institutionId") String institutionId, @RequestParam("agentId") String agentId) {
-        return feeService.findRevenueNameByParams(institutionId, agentId);
+        return feeService.findLicenseTypeByParams(institutionId, agentId);
     }
 
 }

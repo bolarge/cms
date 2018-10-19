@@ -166,7 +166,7 @@ public class TestData {
         fee.setFeePaymentTypeId("02");
         fee.setGameTypeId("01");
         fee.setActive(true);
-        fee.setRevenueNameId(RevenueNameReferenceData.INSTITUTION_REVENUE_ID);
+        fee.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
         mongoRepositoryReactive.saveOrUpdate(fee);
         Fee fee2 = (Fee) mongoRepositoryReactive.findById("2", Fee.class).block();
         if (fee2 == null) {
@@ -177,7 +177,7 @@ public class TestData {
         fee2.setFeePaymentTypeId("02");
         fee2.setGameTypeId("02");
         fee2.setActive(true);
-        fee2.setRevenueNameId(RevenueNameReferenceData.INSTITUTION_REVENUE_ID);
+        fee2.setLicenseTypeId(LicenseTypeReferenceData.GAMING_MACHINE_ID);
         mongoRepositoryReactive.saveOrUpdate(fee2);
         Fee fee3 = (Fee) mongoRepositoryReactive.findById("3", Fee.class).block();
         if (fee3 == null) {
@@ -188,7 +188,7 @@ public class TestData {
         fee3.setFeePaymentTypeId("02");
         fee3.setGameTypeId("01");
         fee3.setActive(true);
-        fee3.setRevenueNameId(RevenueNameReferenceData.AGENT_REVENUE_ID);
+        fee3.setLicenseTypeId(LicenseTypeReferenceData.AGENT_ID);
         mongoRepositoryReactive.saveOrUpdate(fee3);
         Fee fee4 = (Fee) mongoRepositoryReactive.findById("4", Fee.class).block();
         if (fee4 == null) {
@@ -199,7 +199,7 @@ public class TestData {
         fee4.setFeePaymentTypeId("02");
         fee4.setGameTypeId("02");
         fee4.setActive(true);
-        fee4.setRevenueNameId(RevenueNameReferenceData.AGENT_REVENUE_ID);
+        fee4.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
         mongoRepositoryReactive.saveOrUpdate(fee4);
         for (int i = 1; i < 6; i++) {
 
@@ -260,6 +260,7 @@ public class TestData {
             paymentRecord.setInstitutionId("" + i);
             paymentRecord.setGameTypeId("01");
             paymentRecord.setFeeId(fee.getId());
+            paymentRecord.setLicenseTypeId(fee.getLicenseTypeId());
             License license = (License) mongoRepositoryReactive.findById(paymentRecord.getId(), License.class).block();
             if (license == null) {
                 license = new License();
@@ -272,7 +273,7 @@ public class TestData {
             license.setEffectiveDate(LocalDate.now());
             LocalDate startDate = new LocalDate();
             license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getInstitutionLicenseDurationMonths()));
-            license.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION);
+            license.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
 
             if (i == 1) {
                 license.setEffectiveDate(LocalDate.now());
@@ -284,14 +285,14 @@ public class TestData {
                 paymentRecord.setGamingMachineId(gamingMachine.getId());
                 license.setGamingMachineId(paymentRecord.getGamingMachineId());
                 license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getGamingMachineLicenseDurationMonths()));
-                license.setLicenseTypeId(LicenseTypeReferenceData.GAMING_MACHINE);
+                license.setLicenseTypeId(LicenseTypeReferenceData.GAMING_MACHINE_ID);
 
             }
             if (i == 4) {
                 paymentRecord.setAgentId(agent.getId());
                 license.setAgentId(paymentRecord.getAgentId());
                 license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getAgentLicenseDurationMonths()));
-                license.setLicenseTypeId(LicenseTypeReferenceData.AGENT);
+                license.setLicenseTypeId(LicenseTypeReferenceData.AGENT_ID);
                 agent.setEmailAddress("samelikzra@gmail.com");
 
             }

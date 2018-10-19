@@ -146,18 +146,6 @@ public class PaymentRecordDetail extends AbstractFact {
         return (PaymentRecord) mongoRepositoryReactive.findById(this.paymentRecordId, PaymentRecord.class).block();
     }
 
-    public String getRevenueName() {
-        PaymentRecord paymentRecord = getPaymentRecord();
-        if (paymentRecord == null) {
-            return null;
-        }
-        RevenueName revenueName = paymentRecord.getRevenueName();
-        if (revenueName == null) {
-            return null;
-        }
-        return revenueName.getName();
-    }
-
     public boolean isSuccessfulPayment() {
         return StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, this.paymentStatusId);
     }

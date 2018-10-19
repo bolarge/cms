@@ -420,7 +420,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 
     private License fromInstitutionUploadAndInstitution(InstitutionUpload institutionUpload, Institution institution) {
         License license = new License();
-        license.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION);
+        license.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
         license.setInstitutionId(institution.getId());
         license.setEffectiveDate(institutionUpload.getLicenseStartDate());
         license.setExpiryDate(institutionUpload.getLicenseEndDate());
