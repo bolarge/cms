@@ -21,23 +21,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class NewUserEmailNotifierAsync {
+public class NewUserEmailNotifierAsync extends AbstractMailSender {
 
     private static final Logger logger = LoggerFactory.getLogger(NewUserEmailNotifierAsync.class);
-
-    private MongoRepositoryReactiveImpl mongoRepositoryReactive;
-    private MailContentBuilderService mailContentBuilderService;
-    private EmailService emailService;
-
-    @Autowired
-    public NewUserEmailNotifierAsync(MongoRepositoryReactiveImpl mongoRepositoryReactive,
-                                     MailContentBuilderService mailContentBuilderService,
-                                     EmailService emailService) {
-        this.mongoRepositoryReactive = mongoRepositoryReactive;
-        this.mailContentBuilderService = mailContentBuilderService;
-        this.emailService = emailService;
-    }
-
 
     @Async
     public void sendNewSSOClientAdminNotificationToVGGAdmins(AuthInfo newSSoClientAdmin) {

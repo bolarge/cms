@@ -18,18 +18,9 @@ import java.util.HashMap;
 import java.util.List;
 
 @Component
-public class LoggedCaseMailSenderAsync {
+public class LoggedCaseMailSenderAsync extends AbstractMailSender {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggedCaseMailSenderAsync.class);
-
-    @Autowired
-    private EmailService emailService;
-    @Autowired
-    private MailContentBuilderService mailContentBuilderService;
-    @Autowired
-    private AuthInfoService authInfoService;
-    @Autowired
-    private FrontEndPropertyHelper frontEndPropertyHelper;
 
     @Async
     public void sendNewCaseNotificationToLslbUsersThatCanReceive(LoggedCase loggedCase) {

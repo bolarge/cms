@@ -17,6 +17,7 @@ import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.NewUserEmailNotifierAsync;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.UserApprovalRequestNotifierAsync;
 import io.advantageous.boon.json.JsonFactory;
 import io.advantageous.boon.json.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -82,6 +83,9 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     @Autowired
     private AuthRoleService authRoleService;
+
+    @Autowired
+    private UserApprovalRequestNotifierAsync userApprovalRequestNotifierAsync;
 
     @Autowired
     private EmailService emailService;
@@ -730,39 +734,24 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
     private Mono<ResponseEntity> validateCreateGamingOperatorAuthInfo(AuthInfoCreateDto authInfoCreateDto) {
         int maxNumberOfGamingOperatorUsers = 3;
-        ArrayList<String> gamingOperatorLimitedRoles = getAllGamingOperatorAdminAndUserRoles();
         String authRoleId = authInfoCreateDto.getAuthRoleId();
-        if (gamingOperatorLimitedRoles.contains(authRoleId)) {
-            ArrayList<AuthInfo> authInfoListWithGamingOperatorLimitedRoles = getAllActiveGamingOperatorAdminsAndUsersForInstitution(authInfoCreateDto.getInstitutionId());
+        if (StringUtils.equals(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID, authRoleId)) {
+            ArrayList<AuthInfo> authInfoListWithGamingOperatorLimitedRoles = getAllActiveGamingOperatorUsersForInstitution(authInfoCreateDto.getInstitutionId());
             if (authInfoListWithGamingOperatorLimitedRoles.size() >= maxNumberOfGamingOperatorUsers) {
                 return Mono.just(new ResponseEntity<>("Number of users for gaming operator exceeded", HttpStatus.BAD_REQUEST));
             }
         } else {
             return Mono.just(new ResponseEntity<>("Role specified cannot be used to create an institution user", HttpStatus.BAD_REQUEST));
         }
-
         return null;
     }
 
     @Override
-    public ArrayList<AuthInfo> getAllActiveGamingOperatorAdminsAndUsersForInstitution(String institutionId) {
-        if (StringUtils.isEmpty(institutionId)) {
-            return new ArrayList<>();
-        }
-        ArrayList<String> gamingOperatorAdminAndUserRoles = getAllGamingOperatorAdminAndUserRoles();
+    public ArrayList<AuthInfo> getAllActiveGamingOperatorUsersForInstitution(String institutionId) {
+        String gamingOperatorRoleId = LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID;
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
-        query.addCriteria(Criteria.where("enabled").is(true));
-        query.addCriteria(Criteria.where("authRoleId").in(gamingOperatorAdminAndUserRoles));
-        return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
-    }
-
-    @Override
-    public ArrayList<AuthInfo> getAllActiveGamingOperatorAdminsForInstitution(String institutionId) {
-        String gamingOperatorAdminRoleId = LSLBAuthRoleReferenceData.GAMING_OPERATOR_ADMIN_ROLE_ID;
-        Query query = new Query();
-        query.addCriteria(Criteria.where("institutionId").is(institutionId));
-        query.addCriteria(Criteria.where("authRoleId").is(gamingOperatorAdminRoleId));
+        query.addCriteria(Criteria.where("authRoleId").is(gamingOperatorRoleId));
         query.addCriteria(Criteria.where("enabled").is(true));
         return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
     }
@@ -832,6 +821,16 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         return validMembers;
     }
 
+    @Override
+    public ArrayList<AuthInfo> findAllOtherActiveUsersForUserApproval(AuthInfo initiator) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("enabled").is(true));
+        query.addCriteria(Criteria.where("authRoleId").is(initiator.getAuthRoleId()));
+        query.addCriteria(Criteria.where("id").ne(initiator.getId()));
+        return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
+
+    }
+
     private ArrayList<AuthInfo> getAllEnabledLSLBMembers() {
         Query query = new Query();
         query.addCriteria(Criteria.where("enabled").is(true));
@@ -882,6 +881,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             userApprovalRequest.setNewPermissionIds(userAuthPermissionDto.getAuthPermissionIds());
             userApprovalRequest.setAuthInfoId(subjectUserId);
             mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
+            userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
 
         } catch (Exception e) {
@@ -932,6 +932,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             userApprovalRequest.setRemovedPermissionIds(userAuthPermissionDto.getAuthPermissionIds());
             userApprovalRequest.setAuthInfoId(subjectUserId);
             mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
+            userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
             return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while removing permission from user", e);
@@ -964,6 +965,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.CHANGE_USER_ROLE_ID);
             userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
             userApprovalRequest.setNewAuthRoleId(newRoleId);
+            userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
             mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -971,15 +973,6 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         }
     }
 
-
-    public ArrayList<String> getAllGamingOperatorAdminAndUserRoles() {
-        String gamingOperatorAdminRoleId = LSLBAuthRoleReferenceData.GAMING_OPERATOR_ADMIN_ROLE_ID;
-        String gamingOperatorUserRoleId = LSLBAuthRoleReferenceData.GAMING_OPERATOR_USER_ROLE_ID;
-        ArrayList<String> gamingOperatorLimitedRoles = new ArrayList<>();
-        gamingOperatorLimitedRoles.add(gamingOperatorAdminRoleId);
-        gamingOperatorLimitedRoles.add(gamingOperatorUserRoleId);
-        return gamingOperatorLimitedRoles;
-    }
 
     private CreateAuthInfoResponse toCreateAuthInfoResponse(AuthInfo authInfo, VerificationToken verificationToken) {
         CreateAuthInfoResponse createAuthInfoResponse = new CreateAuthInfoResponse();

@@ -2,15 +2,10 @@ package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.service.EmailService;
-import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
-import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
-import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -19,30 +14,13 @@ import java.util.HashMap;
 import java.util.List;
 
 @Component
-public class ApplicationFormEmailSenderAsync {
+public class ApplicationFormEmailSenderAsync extends AbstractMailSender{
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationFormEmailSenderAsync.class);
 
-    private AuthInfoService authInfoService;
-    private MailContentBuilderService mailContentBuilderService;
-    private EmailService emailService;
-    private FrontEndPropertyHelper frontEndPropertyHelper;
-
-
-    @Autowired
-    public ApplicationFormEmailSenderAsync(AuthInfoService authInfoService,
-                                           MailContentBuilderService mailContentBuilderService,
-                                           EmailService emailService,
-                                           FrontEndPropertyHelper frontEndPropertyHelper) {
-        this.authInfoService = authInfoService;
-        this.mailContentBuilderService = mailContentBuilderService;
-        this.emailService = emailService;
-        this.frontEndPropertyHelper = frontEndPropertyHelper;
-    }
-
     @Async
     public void sendAdminCommentNotificationToInstitutionAdmins(ApplicationForm applicationForm, String comment) {
-        ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(applicationForm.getInstitutionId());
+        ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(applicationForm.getInstitutionId());
         String mailSubject = String.format("Notification on your application for %s licence", applicationForm.getGameTypeName());
         String emailContent = buildApplicationCommentFromLSLBAdminEmailContent(applicationForm);
         for (AuthInfo institutionAdmin : institutionAdmins) {
@@ -71,7 +49,7 @@ public class ApplicationFormEmailSenderAsync {
 
     @Async
     public void sendRejectionMailToInstitutionAdmins(ApplicationForm applicationForm) {
-        ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(applicationForm.getInstitutionId());
+        ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(applicationForm.getInstitutionId());
         String emailContent = buildRejectionEmailContent(applicationForm);
         for (AuthInfo institutionAdmin : institutionAdmins) {
             sendRejectionMailToInstitutionUser(institutionAdmin.getEmailAddress(), applicationForm, emailContent);
@@ -89,7 +67,7 @@ public class ApplicationFormEmailSenderAsync {
 
     @Async
     public void sendApprovedMailToInstitutionAdmins(ApplicationForm applicationForm) {
-        ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(applicationForm.getInstitutionId());
+        ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(applicationForm.getInstitutionId());
         String mailSubject = String.format("Notification on your application for %s licence", applicationForm.getGameTypeName());
         String emailContent = buildApprovalEmailContent(applicationForm);
         for (AuthInfo institutionAdmin : institutionAdmins) {

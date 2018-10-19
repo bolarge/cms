@@ -2,8 +2,6 @@ package com.software.finatech.lslb.cms.service.dto;
 
 public class FeeDto {
     protected double amount;
- //   protected GameTypeDto gameType;
- //   protected EnumeratedFactDto feePaymentType;
     private String gameTypeName;
     private String gameTypeId;
     protected String id;
@@ -12,9 +10,24 @@ public class FeeDto {
     private String feePaymentTypeId;
     private String revenueName;
     private String revenueId;
+    private String effectiveDate;
+    private String endDate;
 
+    public String getEffectiveDate() {
+        return effectiveDate;
+    }
 
-  //  protected EnumeratedFactDto revenueName;
+    public void setEffectiveDate(String effectiveDate) {
+        this.effectiveDate = effectiveDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
 
     public boolean isActive() {
         return active;

@@ -73,6 +73,7 @@ public class DatabaseLoaderUtils {
         CustomerComplainStatusReferenceData.load(mongoRepositoryReactive);
         LoggedCaseStatusReferenceData.load(mongoRepositoryReactive);
         UserApprovalRequestTypeReferenceData.load(mongoRepositoryReactive);
+        FeeApprovalRequestTypeReferenceData.load(mongoRepositoryReactive);
     }
 
     // @Profile("test")
@@ -107,6 +108,7 @@ public class DatabaseLoaderUtils {
         factEnums.put("AuditAction", AuditAction.class);
         factEnums.put("LoggedCaseStatus", LoggedCaseStatus.class);
         factEnums.put("UserApprovalRequestType", UserApprovalRequestType.class);
+        factEnums.put("FeeApprovalRequestType", FeeApprovalRequestType.class);
 
         for (Map.Entry<String, Class> entry : factEnums.entrySet()) {
             logger.info("Importing ReferenceMasterData for > " + entry.getKey());

@@ -2,15 +2,11 @@ package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
-import com.software.finatech.lslb.cms.service.service.EmailService;
-import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
-import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -19,20 +15,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 @Component
-public class PaymentEmailNotifierAsync {
+public class PaymentEmailNotifierAsync extends AbstractMailSender {
     private static final Logger logger = LoggerFactory.getLogger(PaymentEmailNotifierAsync.class);
-    private AuthInfoService authInfoService;
-    private MailContentBuilderService mailContentBuilderService;
-    private EmailService emailService;
-
-    @Autowired
-    public PaymentEmailNotifierAsync(AuthInfoService authInfoService,
-                                     MailContentBuilderService mailContentBuilderService,
-                                     EmailService emailService) {
-        this.authInfoService = authInfoService;
-        this.mailContentBuilderService = mailContentBuilderService;
-        this.emailService = emailService;
-    }
 
     @Async
     public void sendPaymentNotificationForPaymentRecordDetail(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
@@ -41,7 +25,7 @@ public class PaymentEmailNotifierAsync {
             sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, agent.getEmailAddress(), "PaymentNotificationExternalUser");
         }
         if (paymentRecord.isInstitutionPayment() || paymentRecord.isGamingMachinePayment()) {
-            ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(paymentRecord.getInstitutionId());
+            ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(paymentRecord.getInstitutionId());
             for (AuthInfo institutionAdmin : institutionAdmins) {
                 sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, institutionAdmin.getEmailAddress(), "PaymentNotificationExternalUser");
             }

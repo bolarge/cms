@@ -26,7 +26,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -34,7 +33,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.HandlerMapping;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
@@ -165,7 +163,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             if (applicationForm == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Application form with id %s  does not exist", applicationFormId), badRequestStatus));
             }
-            ArrayList<AuthInfo> gamingOperatorAdminsForInstitution = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institutionId);
+            ArrayList<AuthInfo> gamingOperatorAdminsForInstitution = authInfoService.getAllActiveGamingOperatorUsersForInstitution(institutionId);
             if (gamingOperatorAdminsForInstitution == null || gamingOperatorAdminsForInstitution.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("There is no user with role gaming operator admin for institution", badRequestStatus));
             }
@@ -309,7 +307,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
 
     @Override
     public void sendMeetingNotificationEmailToMeetingAttendees(String mailSubject, String templateName, ScheduledMeeting scheduledMeeting) {
-        ArrayList<AuthInfo> gamingOperatorAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(scheduledMeeting.getInstitutionId());
+        ArrayList<AuthInfo> gamingOperatorAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(scheduledMeeting.getInstitutionId());
         String content = buildMeetingAttendeeEmailContent("ScheduledMeetingReminderNotificationForGamingOperator", scheduledMeeting);
         for (AuthInfo gamingOperatorAdmin : gamingOperatorAdmins) {
             sendMeetingNotificationEmailToAttendee(mailSubject, content, gamingOperatorAdmin);

@@ -264,7 +264,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         Institution newInstitution = fromCreateInstitutionDto(institutionCreateDto);
         try {
             mongoRepositoryReactive.saveOrUpdate(newInstitution);
-            applicantUser.setAuthRoleId(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ADMIN_ROLE_ID);
+            applicantUser.setAuthRoleId(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID);
             applicantUser.setInstitutionId(newInstitution.getId());
             mongoRepositoryReactive.saveOrUpdate(applicantUser);
             customerCodeCreatorAsync.createVigipayCustomerCodeForInstitution(newInstitution);

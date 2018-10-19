@@ -184,7 +184,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             ArrayList<AuthInfo> institutionAdmins;
             if (paymentRecordDetailCreateDto.isInstitutionPayment()) {
                 String institutionId = paymentRecordDetailCreateDto.getInstitutionId();
-                institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institutionId);
+                institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(institutionId);
                 if (institutionAdmins.isEmpty()) {
                     return Mono.just(new ResponseEntity<>("There are no gaming operator admins for institution", HttpStatus.BAD_REQUEST));
                 }
@@ -203,7 +203,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                     return Mono.just(new ResponseEntity<>(String.format("Gaming machine with id %s does not exist", paymentRecordDetailCreateDto.getGamingMachineId()), HttpStatus.BAD_REQUEST));
                 } else {
                     institution = institutionService.findById(gamingMachine.getInstitutionId());
-                    institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institution.getId());
+                    institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(institution.getId());
                     if (institutionAdmins.isEmpty()) {
                         return Mono.just(new ResponseEntity<>("There are no gaming operator admins for institution owning gaming machine", HttpStatus.BAD_REQUEST));
                     }

@@ -20,6 +20,8 @@ public interface AgentApprovalRequestService {
                                                       String rejectorId,
                                                       String requestTypeId,
                                                       String requestStatusId,
+                                                      String startDate,
+                                                      String endDate,
                                                       HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getAllAgentApprovalRequestType();

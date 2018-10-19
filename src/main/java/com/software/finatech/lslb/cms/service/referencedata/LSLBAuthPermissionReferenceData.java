@@ -463,6 +463,27 @@ public class LSLBAuthPermissionReferenceData {
         permission54.setDescription("Can update customer complains");
         permission54.setUsedBySystem(false);
 
+
+        AuthPermission permission55 = (AuthPermission) mongoRepositoryReactive.findById("55", AuthPermission.class).block();
+        if (permission55 == null) {
+            permission55 = new AuthPermission();
+            permission55.setId("55");
+        }
+        permission55.setName("VIEW FEE APPROVAL REQUESTS");
+        permission55.setDescription("Can view fee approval requests");
+        permission55.setUsedBySystem(false);
+
+        AuthPermission permission56 = (AuthPermission) mongoRepositoryReactive.findById("56", AuthPermission.class).block();
+        if (permission56 == null) {
+            permission56 = new AuthPermission();
+            permission56.setId("56");
+        }
+        permission56.setName("APPROVE FEE APPROVAL REQUESTS");
+        permission56.setDescription("Can Approve / Reject fee approval request");
+        permission56.setUsedBySystem(false);
+        permission56.setAuthRoleId(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID);
+
+
         mongoRepositoryReactive.saveOrUpdate(permission1);
         mongoRepositoryReactive.saveOrUpdate(permission2);
         mongoRepositoryReactive.saveOrUpdate(permission3);
@@ -517,6 +538,8 @@ public class LSLBAuthPermissionReferenceData {
         mongoRepositoryReactive.saveOrUpdate(permission52);
         mongoRepositoryReactive.saveOrUpdate(permission53);
         mongoRepositoryReactive.saveOrUpdate(permission54);
+        mongoRepositoryReactive.saveOrUpdate(permission55);
+        mongoRepositoryReactive.saveOrUpdate(permission56);
     }
 
 

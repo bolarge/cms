@@ -33,9 +33,7 @@ public interface AuthInfoService {
 
     Mono<ResponseEntity> completeRegistration(VerificationToken verificationToken, AuthInfoCompleteDto authInfoCompleteDto, AuthInfo authInfo);
 
-    ArrayList<AuthInfo> getAllActiveGamingOperatorAdminsAndUsersForInstitution(String institutionId);
-
-    ArrayList<AuthInfo> getAllActiveGamingOperatorAdminsForInstitution(String institutionId);
+    ArrayList<AuthInfo> getAllActiveGamingOperatorUsersForInstitution(String institutionId);
 
     AuthInfo getUserById(String userId);
 
@@ -54,4 +52,6 @@ public interface AuthInfoService {
     Mono<ResponseEntity> removePermissionFromUser(UserAuthPermissionDto userAuthPermissionDto);
 
     Mono<ResponseEntity> updateUserRole(UserRoleUpdateDto userRoleUpdateDto);
+
+    ArrayList<AuthInfo> findAllOtherActiveUsersForUserApproval(AuthInfo initiator);
 }

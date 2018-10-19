@@ -514,7 +514,7 @@ public class LicenseServiceImpl implements LicenseService {
             }
             license.setLicenseStatusId(LicenseStatusReferenceData.RENEWED_ID);
             mongoRepositoryReactive.saveOrUpdate(license);
-            List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
+            List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(license.getInstitutionId());
             institutionAdmins.stream().forEach(institutionAdmin -> {
                 NotificationDto notificationDto = new NotificationDto();
                 notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
@@ -602,7 +602,7 @@ public class LicenseServiceImpl implements LicenseService {
                     springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
-            List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
+            List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(license.getInstitutionId());
             institutionAdmins.stream().forEach(institutionAdmin -> {
                 NotificationDto notificationDto = new NotificationDto();
                 notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
@@ -688,7 +688,7 @@ public class LicenseServiceImpl implements LicenseService {
             notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ",  License for " +
                     notificationDto.getGameType() + " has been approved.\n License Number is: " + licenseNumber + ". \nDo pick up the original hard copy of this license at LSLB Office.");
 
-            ArrayList<AuthInfo> authInfos = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(license.getInstitutionId());
+            ArrayList<AuthInfo> authInfos = authInfoService.getAllActiveGamingOperatorUsersForInstitution(license.getInstitutionId());
             for (AuthInfo authInfo : authInfos) {
                 notificationDto.setInstitutionEmail(authInfo.getEmailAddress());
                 sendEmail.sendEmailLicenseApplicationNotification(notificationDto);

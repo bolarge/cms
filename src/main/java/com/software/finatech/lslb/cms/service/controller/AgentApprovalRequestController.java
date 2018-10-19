@@ -33,7 +33,7 @@ public class AgentApprovalRequestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty",
-            "institutionId", "approvalStatusId", "gameTypeId", "agentId", "agentApprovalRequestTypeId", "approverId", "rejectorId"})
+            "institutionId", "approvalStatusId", "gameTypeId", "agentId", "agentApprovalRequestTypeId", "approverId", "rejectorId", "startDate", "endDate"})
     @ApiOperation(value = "Get all Application Forms", response = ApplicationFormDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -51,8 +51,10 @@ public class AgentApprovalRequestController {
                                                        @RequestParam("rejectorId") String rejectorId,
                                                        @RequestParam("approvalStatusId") String approvalStatusId,
                                                        @RequestParam("agentApprovalRequestTypeId") String agentApprovalRequestTypeId,
+                                                       @RequestParam("startDate") String startDate,
+                                                       @RequestParam("endDate") String endDate,
                                                        HttpServletResponse httpServletResponse) {
-        return agentApprovalRequestService.findAllAgentApprovalRequests(page, pageSize, sortType, sortParam, institutionId, agentId, approverId, gameTypeId, rejectorId, agentApprovalRequestTypeId, approvalStatusId, httpServletResponse);
+        return agentApprovalRequestService.findAllAgentApprovalRequests(page, pageSize, sortType, sortParam, institutionId, agentId, approverId, gameTypeId, rejectorId, agentApprovalRequestTypeId, approvalStatusId, startDate, endDate, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/approve")
@@ -90,7 +92,7 @@ public class AgentApprovalRequestController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/all-approval-request-status")
-    @ApiOperation(value = "Get all agent approval request statuses", response =EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiOperation(value = "Get all agent approval request statuses", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),

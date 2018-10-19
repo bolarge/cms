@@ -42,7 +42,7 @@ public class CustomerCodeCreator {
         query.addCriteria(Criteria.where("vgPayCustomerCode").is(null));
         ArrayList<Institution> institutionsWithoutVigiPayCustomerCode = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
         for (Institution institution : institutionsWithoutVigiPayCustomerCode) {
-            List<AuthInfo> gamingOperatorAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institution.getId());
+            List<AuthInfo> gamingOperatorAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(institution.getId());
             if (gamingOperatorAdmins.isEmpty()) {
                 continue;
             }

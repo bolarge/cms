@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
 import com.software.finatech.lslb.cms.service.dto.AuthPermissionDto;
 import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -388,5 +389,25 @@ public class AuthInfo extends AbstractFact {
 
     public boolean isSuperAdmin() {
         return StringUtils.equals(AuthRoleReferenceData.SUPER_ADMIN_ID, this.authRoleId);
+    }
+
+    public boolean isVGGAdmin() {
+        return StringUtils.equals(AuthRoleReferenceData.VGG_ADMIN_ID, this.authRoleId);
+    }
+
+    public boolean isVGGUser() {
+        return StringUtils.equals(AuthRoleReferenceData.VGG_USER_ID, this.authRoleId);
+    }
+
+    public boolean isLSLBAdmin() {
+        return StringUtils.equals(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID, this.authRoleId);
+    }
+
+    public boolean isLSLBUser() {
+        return StringUtils.equals(LSLBAuthRoleReferenceData.LSLB_USER_ID, this.authRoleId);
+    }
+
+    public boolean isGamingOperator() {
+        return StringUtils.equals(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID, this.authRoleId);
     }
 }

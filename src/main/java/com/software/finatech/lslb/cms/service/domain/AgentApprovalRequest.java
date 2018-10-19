@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatu
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.adapters.AgentInstitutionAdapter;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
@@ -15,16 +16,12 @@ import java.util.Map;
 
 @SuppressWarnings("serial")
 @Document(collection = "AgentApprovalRequests")
-public class AgentApprovalRequest extends AbstractFact {
+public class AgentApprovalRequest extends AbstractApprovalRequest {
     private String agentId;
     private String institutionId;
     private String agentApprovalRequestTypeId;
     private String gameTypeId;
     private List<String> businessAddressList = new ArrayList<>();
-    private String approverId;
-    private String approvalRequestStatusId;
-    private String rejectorId;
-    private String rejectionReason;
     private String pendingAgentId;
 
     public String getPendingAgentId() {
@@ -39,25 +36,8 @@ public class AgentApprovalRequest extends AbstractFact {
         this.businessAddressList = businessAddressList;
     }
 
-
     public List<String> getBusinessAddressList() {
         return businessAddressList;
-    }
-
-    public String getRejectionReason() {
-        return rejectionReason;
-    }
-
-    public void setRejectionReason(String rejectionReason) {
-        this.rejectionReason = rejectionReason;
-    }
-
-    public String getRejectorId() {
-        return rejectorId;
-    }
-
-    public void setRejectorId(String rejectorId) {
-        this.rejectorId = rejectorId;
     }
 
     public String getAgentId() {
@@ -90,22 +70,6 @@ public class AgentApprovalRequest extends AbstractFact {
 
     public void setGameTypeId(String gameTypeId) {
         this.gameTypeId = gameTypeId;
-    }
-
-    public String getApproverId() {
-        return approverId;
-    }
-
-    public void setApproverId(String approverId) {
-        this.approverId = approverId;
-    }
-
-    public String getApprovalRequestStatusId() {
-        return approvalRequestStatusId;
-    }
-
-    public void setApprovalRequestStatusId(String approvalRequestStatusId) {
-        this.approvalRequestStatusId = approvalRequestStatusId;
     }
 
     public boolean isApprovedRequest() {
@@ -161,24 +125,6 @@ public class AgentApprovalRequest extends AbstractFact {
         return agentApprovalRequestType.getName();
     }
 
-    private ApprovalRequestStatus getApprovalRequestStatus() {
-        if (StringUtils.isEmpty(this.approvalRequestStatusId)) {
-            return null;
-        }
-        Map approvalRequestStatusMap = Mapstore.STORE.get("ApprovalRequestStatus");
-        ApprovalRequestStatus approvalRequestStatus = null;
-        if (approvalRequestStatusMap != null) {
-            approvalRequestStatus = (ApprovalRequestStatus) approvalRequestStatusMap.get(this.approvalRequestStatusId);
-        }
-        if (approvalRequestStatus == null) {
-            approvalRequestStatus = (ApprovalRequestStatus) mongoRepositoryReactive.findById(this.approvalRequestStatusId, ApprovalRequestStatus.class).block();
-            if (approvalRequestStatus != null && approvalRequestStatusMap != null) {
-                approvalRequestStatusMap.put(this.approvalRequestStatusId, approvalRequestStatus);
-            }
-        }
-        return approvalRequestStatus;
-    }
-
     public String getGameTypeName() {
         GameType gameType = getGameType();
         if (gameType == null) {
@@ -215,13 +161,6 @@ public class AgentApprovalRequest extends AbstractFact {
             return null;
         }
         return (PendingAgent) mongoRepositoryReactive.findById(this.pendingAgentId, PendingAgent.class).block();
-    }
-
-    private AuthInfo getUser(String userId) {
-        if (StringUtils.isEmpty(userId)) {
-            return null;
-        }
-        return (AuthInfo) mongoRepositoryReactive.findById(userId, AuthInfo.class).block();
     }
 
     public boolean isAgentCreationRequest() {
@@ -266,7 +205,10 @@ public class AgentApprovalRequest extends AbstractFact {
             agentApprovalRequestDto.setRequestTypeId(getAgentApprovalRequestTypeId());
             agentApprovalRequestDto.setRequestTypeName(agentApprovalRequestType.getName());
         }
-        agentApprovalRequestDto.setCreationDate(getCreated() != null ? getCreated().toString() : "");
+        LocalDateTime dateCreated = getDateCreated();
+        if (dateCreated != null) {
+            agentApprovalRequestDto.setDateCreated(dateCreated.toString("dd-MM-yyyy HH:mm:ss"));
+        }
         return agentApprovalRequestDto;
     }
 
@@ -310,13 +252,13 @@ public class AgentApprovalRequest extends AbstractFact {
         agentApprovalRequestDto.setCreationDate(getCreated() != null ? getCreated().toString() : "");
         agentApprovalRequestDto.setBusinessAddressList(getBusinessAddressList());
 
-        AuthInfo approver = getUser(this.approverId);
+        AuthInfo approver = getAuthInfo(this.approverId);
         if (approver != null) {
             agentApprovalRequestDto.setApproverId(getApproverId());
             agentApprovalRequestDto.setApproverName(approver.getFullName());
         }
 
-        AuthInfo rejector = getUser(this.rejectorId);
+        AuthInfo rejector = getAuthInfo(this.rejectorId);
         if (rejector != null) {
             agentApprovalRequestDto.setRejectorId(getRejectorId());
             agentApprovalRequestDto.setRejectorName(rejector.getFullName());
