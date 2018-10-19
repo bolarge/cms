@@ -37,7 +37,7 @@ public class InstitutionController extends BaseController {
         this.institutionService = institutionService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "gameTypeIds"})
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "gameTypeIds", "institutionId"})
     @ApiOperation(value = "Get all institutions", response = InstitutionDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -51,8 +51,9 @@ public class InstitutionController extends BaseController {
                                                    @RequestParam("sortType") String sortType,
                                                    @RequestParam("sortProperty") String sortParam,
                                                    @RequestParam("gameTypeIds") String gameTypeIds,
+                                                   @RequestParam("institutionId") String institutionId,
                                                    HttpServletResponse httpServletResponse) {
-        return institutionService.findAllInstitutions(page, pageSize, sortType, sortParam, gameTypeIds, httpServletResponse);
+        return institutionService.findAllInstitutions(page, pageSize, sortType, sortParam, gameTypeIds, institutionId, httpServletResponse);
     }
 
 

@@ -16,10 +16,19 @@ public class GamingMachine extends AbstractFact {
     protected String institutionId;
     protected String manufacturer;
     protected String serialNumber;
-    protected Set<GamingMachineGameDetails> gameDetailsList = new HashSet<>();
+    protected Set<String> gameList = new HashSet<>();
     protected String machineNumber;
     private String machineAddress;
     private String gameTypeId;
+
+
+    public Set<String> getGameList() {
+        return gameList;
+    }
+
+    public void setGameList(Set<String> gameList) {
+        this.gameList = gameList;
+    }
 
     public String getGameTypeId() {
         return gameTypeId;
@@ -59,14 +68,6 @@ public class GamingMachine extends AbstractFact {
 
     public void setSerialNumber(String serialNumber) {
         this.serialNumber = serialNumber;
-    }
-
-    public Set<GamingMachineGameDetails> getGameDetailsList() {
-        return gameDetailsList;
-    }
-
-    public void setGameDetailsList(Set<GamingMachineGameDetails> gameDetailsList) {
-        this.gameDetailsList = gameDetailsList;
     }
 
     public String getMachineNumber() {
@@ -113,7 +114,6 @@ public class GamingMachine extends AbstractFact {
 
     public GamingMachineDto convertToDto() {
         GamingMachineDto gamingMachineDto = new GamingMachineDto();
-        gamingMachineDto.setGameDetailsList(getGameDetailsList());
         gamingMachineDto.setInstitutionId(getInstitutionId());
         gamingMachineDto.setMachineNumber(getMachineNumber());
         gamingMachineDto.setManufacturer(getManufacturer());
