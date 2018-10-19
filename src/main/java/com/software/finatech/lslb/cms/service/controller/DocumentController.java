@@ -433,4 +433,86 @@ public class DocumentController extends BaseController {
             return Mono.just(new ResponseEntity(errorMsg, HttpStatus.BAD_REQUEST));
         }
     }
+
+
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/complaint-upload", produces = "application/json")
+    @ApiOperation(value = "Upload Complaint Document", response = DocumentDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+                            @ApiResponse(code = 200, message = "OK"),
+                            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+                            @ApiResponse(code = 400, message = "Bad request"),
+                            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> uploadCompalint(@RequestParam("json") String json,
+                                       @RequestParam("files") @NotEmpty MultipartFile[] files) {
+
+        //@TODO If its a file replace we have to validate that the old id comes with the json
+        if (json == null || json.isEmpty()) {
+            return Mono.just(new ResponseEntity<>("Please specify a json body", HttpStatus.BAD_REQUEST));
+        }
+
+        List<DocumentCreateDto> documentDtos;
+
+        try {
+            documentDtos = mapper.readValue(json, List.class, DocumentCreateDto.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Mono.just(new ResponseEntity<>("Invalid Json", HttpStatus.BAD_REQUEST));
+        }
+        try {
+            //Put the files in a map
+            HashMap<String, MultipartFile> fileMap = new HashMap<>();
+            for (MultipartFile file : files) {
+                fileMap.put(file.getOriginalFilename(), file);
+            }
+             ArrayList<FactObject> documents = new ArrayList<>();
+            ArrayList<FactObject> documentCheck = new ArrayList<>();
+            documentDtos.stream().forEach(documentDto -> {
+                try {
+                    logger.info("Creating file : " + documentDto.getFilename());
+
+                    MultipartFile file = fileMap.get(documentDto.getFilename());
+
+                    if (file != null) {
+                        String originalFilename = file.getOriginalFilename();
+                        Document document = new Document();
+                        document.setId(UUID.randomUUID().toString().replace("-", ""));
+                        document.setEntityId(documentDto.getEntityId());
+                        document.setCurrent(true);
+                        document.setDescription(documentDto.getDescription());
+                        document.setDocumentTypeId(documentDto.getDocumentTypeId());
+                        document.setEntity(documentDto.getEntity());
+                        document.setEntryDate(LocalDateTime.now());
+                        document.setGameTypeId(documentDto.getGameTypeId());
+                        document.setFilename(originalFilename);
+                        document.setOriginalFilename(originalFilename);
+                        document.setMimeType(file.getContentType());
+                        document.setArchive(false);
+                        document.setInstitutionId(documentDto.getInstitutionId());
+                        document.setAgentId(documentDto.getAgentId());
+                        document.setPreviousDocumentId(documentDto.getPreviousDocumentId());
+                        document.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
+                        documents.add(document);
+                        documentCheck.add(document);
+                        //If there is an existing doc we set it to false
+
+                    }
+                } catch (Exception e) {
+                    logger.error("An error occurred while saving document", e);
+                }
+            });
+
+            if (documentCheck.size() != files.length) {
+                return Mono.just(new ResponseEntity<>("Json & file length do not match. Please make sure the each file has a corresponding filename in the json.", HttpStatus.BAD_REQUEST));
+            }
+            documents.stream().forEach(doc -> {
+                mongoRepositoryReactive.saveOrUpdate(doc);
+            });
+
+            return Mono.just(new ResponseEntity<>("FileUpload Successful", HttpStatus.OK));
+        } catch (Exception e) {
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while uploading the documents", e);
+        }
+    }
 }
