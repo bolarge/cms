@@ -11,6 +11,16 @@ public class FeeCreateDto {
     protected String feePaymentTypeId;
     @NotEmpty(message = "Please provide a revenue id")
     protected String revenueNameId;
+    @NotEmpty(message = "Please provide start date")
+    private String startDate;
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
 
     public String getRevenueNameId() {
         return revenueNameId;

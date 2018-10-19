@@ -1,19 +1,24 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.AuthPermission;
 import com.software.finatech.lslb.cms.service.domain.AuthRole;
 import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthRoleService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
+import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
@@ -28,10 +33,7 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Api(value = "AuthRole", description = "", tags = "AuthRole Controller")
@@ -161,7 +163,6 @@ public class AuthRoleController extends BaseController {
 
             mongoRepositoryReactive.saveOrUpdate(authRole);
             Mapstore.STORE.get("AuthRole").put(authRole.getId(), authRole);
-
 
 
             String verbiage = String.format("Updated Role, Role Name: %s ", authRole.getName());
@@ -333,10 +334,8 @@ public class AuthRoleController extends BaseController {
     }
 
     /**
-     * @param userRoleId
-     * @return
      */
-    @RequestMapping(value = "/eligible-roles/{userRoleId}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/eligible-roles", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @ApiOperation(value = "Get all roles a user can create ", response = AuthInfoDto.class, consumes = "application/json")
     @ApiResponses(value = {
@@ -345,31 +344,109 @@ public class AuthRoleController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request")
     }
     )
-    public Mono<ResponseEntity> getEligibleRolesForCreation(@PathVariable(name = "userRoleId") long userRoleId) {
-        Collection<FactObject> authRoles = Mapstore.STORE.get("AuthRole").values();
-        List<AuthRole> eligibleRoles = new ArrayList<>();
-        for (FactObject factObject : authRoles) {
-            AuthRole authRole = (AuthRole) factObject;
-            try {
-                long id = Long.valueOf(authRole.getId());
-                if (id > userRoleId) {
-                    eligibleRoles.add(authRole);
+    public Mono<ResponseEntity> getEligibleRolesForCreation() {
+        try {
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser != null) {
+                List<String> notAllowedIds = new ArrayList<>();
+                Set<String> eligibleRoleIds = new HashSet<>();
+                Map authRoleMap = Mapstore.STORE.get("AuthRole");
+                Set<String> authRoleIds = (Set<String>) authRoleMap.entrySet();
+                if (loggedInUser.isGamingOperator()) {
+                    eligibleRoleIds.add(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID);
                 }
-            } catch (Exception e) {
-                logger.error(String.format("Error parsing Id %s", authRole.getId()));
+
+                if (loggedInUser.isLSLBUser()) {
+                    notAllowedIds.add(AuthRoleReferenceData.VGG_ADMIN_ID);
+                    notAllowedIds.add(AuthRoleReferenceData.VGG_USER_ID);
+                    notAllowedIds.add(AuthRoleReferenceData.SUPER_ADMIN_ID);
+                    notAllowedIds.add(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID);
+                    for (String authRoleId : authRoleIds) {
+                        if (!notAllowedIds.contains(authRoleId)) {
+                            eligibleRoleIds.add(authRoleId);
+                        }
+                    }
+                }
+
+                if (loggedInUser.isLSLBAdmin()) {
+                    notAllowedIds.add(AuthRoleReferenceData.VGG_ADMIN_ID);
+                    notAllowedIds.add(AuthRoleReferenceData.VGG_USER_ID);
+                    notAllowedIds.add(AuthRoleReferenceData.SUPER_ADMIN_ID);
+                    for (String authRoleId : authRoleIds) {
+                        if (!notAllowedIds.contains(authRoleId)) {
+                            eligibleRoleIds.add(authRoleId);
+                        }
+                    }
+                }
+
+                if (loggedInUser.isVGGAdmin()) {
+                    notAllowedIds.add(AuthRoleReferenceData.SUPER_ADMIN_ID);
+                    for (String authRoleId : authRoleIds) {
+                        if (!notAllowedIds.contains(authRoleId)) {
+                            eligibleRoleIds.add(authRoleId);
+                        }
+                    }
+                }
+
+                if (loggedInUser.isVGGUser()) {
+                    notAllowedIds.add(AuthRoleReferenceData.VGG_ADMIN_ID);
+                    notAllowedIds.add(AuthRoleReferenceData.SUPER_ADMIN_ID);
+                    for (String authRoleId : authRoleIds) {
+                        if (!notAllowedIds.contains(authRoleId)) {
+                            eligibleRoleIds.add(authRoleId);
+                        }
+                    }
+                }
+
+                if (eligibleRoleIds.isEmpty()) {
+                    return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
+                }
+
+                ArrayList<AuthRoleDto> roleDtos = new ArrayList<>();
+                for (String eligibleRoleId : eligibleRoleIds) {
+                    AuthRole role = authRoleService.findRoleById(eligibleRoleId);
+                    if (role != null) {
+                        roleDtos.add(role.convertToHalfDto());
+                    }
+                }
+                return Mono.just(new ResponseEntity<>(roleDtos, HttpStatus.OK));
             }
+            return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+        } catch (Exception e) {
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while getting eligible roles", e);
         }
-
-        ArrayList<AuthRoleDto> authRoleDtos = new ArrayList<>();
-        eligibleRoles.forEach(authRole -> {
-            authRoleDtos.add(authRole.convertToDto());
-        });
-        if (authRoleDtos.size() == 0) {
-            return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
-        }
-
-        return Mono.just(new ResponseEntity(authRoleDtos, HttpStatus.OK));
     }
+
+    @RequestMapping(value = "/permissions-to-add-to-role", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get all permissions you can add to role", response = AuthPermissionDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request")})
+    public Mono<ResponseEntity> getAuthPermissionsForRoles() {
+        try {
+            Map authPermissionMap = Mapstore.STORE.get("AuthPermission");
+            Set<AuthPermission> authPermissionSet = (Set<AuthPermission>) authPermissionMap.values();
+            ArrayList<AuthPermission> permissions = new ArrayList<>();
+            for (AuthPermission permission : authPermissionSet) {
+                if (StringUtils.isEmpty(permission.getAuthRoleId()) && !permission.isUsedBySystem()) {
+                    permissions.add(permission);
+                }
+            }
+            if (permissions.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
+            }
+            ArrayList<AuthPermissionDto> dtos = new ArrayList<>();
+            for (AuthPermission permission : permissions) {
+                dtos.add(permission.convertToDto());
+            }
+            return Mono.just(new ResponseEntity<>(dtos, HttpStatus.OK));
+        } catch (Exception e) {
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while getting permissions for roles", e);
+        }
+    }
+
 
     private ArrayList<AuthRoleDto> authRoleDtoListFromAuthRoleList(List<FactObject> authRoles) {
         ArrayList<AuthRoleDto> authRoleDtos = new ArrayList<>();

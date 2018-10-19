@@ -35,7 +35,7 @@ public class AdeTestData {
         gAdmin1.setTitle("Mr");
         gAdmin1.setLastName("Adebolu");
         gAdmin1.setEnabled(true);
-        gAdmin1.setAuthRoleId(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ADMIN_ROLE_ID);
+        gAdmin1.setAuthRoleId(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID);
         gAdmin1.setFullName("Adeyiwunmi Adebolu");
         gAdmin1.setInstitutionId("1234");
       //  mongoRepositoryReactive.saveOrUpdate(gAdmin1);
@@ -49,7 +49,7 @@ public class AdeTestData {
         gAdmin2.setTitle("Miss");
         gAdmin2.setLastName("Akande");
         gAdmin2.setEnabled(true);
-        gAdmin2.setAuthRoleId(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ADMIN_ROLE_ID);
+        gAdmin2.setAuthRoleId(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID);
         gAdmin2.setFullName("Adeyiwunmi Adebolu");
         gAdmin2.setInstitutionId("1234");
      //   mongoRepositoryReactive.saveOrUpdate(gAdmin2);

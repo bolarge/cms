@@ -9,8 +9,6 @@ import com.software.finatech.lslb.cms.service.dto.UserApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.UserApprovalRequestService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
@@ -77,7 +75,8 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
                                                             String approverId,
                                                             String rejectorId,
                                                             String userId,
-                                                            String loggedInUserId,
+                                                            String startDate,
+                                                            String endDate,
                                                             HttpServletResponse httpServletResponse) {
         try {
             Query query = new Query();
@@ -99,19 +98,19 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             if (!StringUtils.isEmpty(userId)) {
                 query.addCriteria(new Criteria().orOperator(Criteria.where("authInfoId").is(userId), Criteria.where("pendingAuthInfoId").is(userId)));
             }
+            if (!StringUtils.isEmpty(startDate) && StringUtils.isEmpty(endDate)) {
+                query.addCriteria(Criteria.where("dateCreated").gte(new LocalDate(startDate)).lte(new LocalDate(endDate)));
+            }
 
-            if (!StringUtils.isEmpty(loggedInUserId)) {
-                /**
-                 *    if logged in user id is sent,
-                 *    find the approval requests that are not logged by him
-                 *    and are logged by people of his role
-                 */
-                AuthInfo loggedInUser = getAuthInfoById(loggedInUserId);
-                if (loggedInUser != null) {
-                    query.addCriteria(Criteria.where("initiatorId").ne(initiatorId));
-                    if (!loggedInUser.isSuperAdmin()) {
-                        query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
-                    }
+
+            /**
+             *   Get the logged in user and use him to filter requests
+             */
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser != null) {
+                query.addCriteria(Criteria.where("initiatorId").ne(initiatorId));
+                if (!loggedInUser.isSuperAdmin()) {
+                    query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
                 }
             }
 
@@ -140,6 +139,8 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
                 userApprovalRequestDtos.add(userApprovalRequest.convertToHalfDto());
             });
             return Mono.just(new ResponseEntity<>(userApprovalRequestDtos, HttpStatus.OK));
+        } catch (IllegalArgumentException e) {
+            return Mono.just(new ResponseEntity<>("Invalid Date format , please use yyyy-MM-dd", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
             String errorMsg = "An error occurred while trying to get user approval requests";
             return logAndReturnError(logger, errorMsg, e);
@@ -183,10 +184,6 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
 
-            if (!canApproveRequest(user)) {
-                return Mono.just(new ResponseEntity<>("User does not have permission to approve request", HttpStatus.BAD_REQUEST));
-            }
-
             if (userApprovalRequest.isCreateUser()) {
                 approveCreateUser(userApprovalRequest);
             }
@@ -209,7 +206,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
             userApprovalRequest.setApproverId(user.getId());
             mongoRepositoryReactive.save(userApprovalRequest);
-            String verbiage = String.format("Approved User approval request ->  Type : %s", userApprovalRequest.getUserApprovalRequestType());
+            String verbiage = String.format("Approved User approval request ->  Type -> %s,Id -> %s ", userApprovalRequest.getUserApprovalRequestType(), userApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), userApprovalRequest.getSubjectUserName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
@@ -240,19 +237,15 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             if (user == null) {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
-            if (!canApproveRequest(user)) {
-                return Mono.just(new ResponseEntity<>("User does not have permission to reject request", HttpStatus.BAD_REQUEST));
-            }
-
             if (userApprovalRequest.isCreateUser()) {
-              rejectCreateUserRequest(userApprovalRequest);
+                rejectCreateUserRequest(userApprovalRequest);
             }
 
             userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
             userApprovalRequest.setRejectorId(user.getId());
             userApprovalRequest.setRejectionReason(requestOperationtDto.getReason());
             mongoRepositoryReactive.save(userApprovalRequest);
-            String verbiage = String.format("Rejected User approval request ->  Type : %s", userApprovalRequest.getUserApprovalRequestType());
+            String verbiage = String.format("Rejected User approval request ->  Type -> %s, Id -> %s", userApprovalRequest.getUserApprovalRequestType(), userApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), userApprovalRequest.getSubjectUserName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
@@ -374,18 +367,6 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             return null;
         }
         return (PendingAuthInfo) mongoRepositoryReactive.findById(pendingAuthInfoId, PendingAuthInfo.class).block();
-    }
-
-    private boolean canApproveRequest(AuthInfo authInfo) {
-        return authInfo.getEnabled() && getAllowedRoleIdsForApprovals().contains(authInfo.getAuthRoleId());
-    }
-
-    private List<String> getAllowedRoleIdsForApprovals() {
-        List<String> allowedRoleIds = new ArrayList<>();
-        allowedRoleIds.add(AuthRoleReferenceData.SUPER_ADMIN_ID);
-        allowedRoleIds.add(AuthRoleReferenceData.VGG_ADMIN_ID);
-        allowedRoleIds.add(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID);
-        return allowedRoleIds;
     }
 
     private AuthInfo getAuthInfoById(String userId) {

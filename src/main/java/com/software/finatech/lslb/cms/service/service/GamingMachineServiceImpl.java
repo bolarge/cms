@@ -446,7 +446,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
         String feePaymentTypeId = FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID;
         String gameTypeName = gameType.getName();
         String gameTypeId = gameType.getId();
-        Fee fee = feeService.findFeeByLicenseTypeGameTypeAndFeePaymentType(licenseTypeId, gameTypeId, feePaymentTypeId);
+        Fee fee = feeService.findActiveFeeByLicenseTypeGameTypeAndFeePaymentType(licenseTypeId, gameTypeId, feePaymentTypeId);
         if (fee == null) {
             invalidGamingMachinePayment = new InvalidGamingMachinePayment(gamingMachineId,
                     machineNumber,
@@ -503,7 +503,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
         String feePaymentTypeId = FeePaymentTypeReferenceData.LICENSE_RENEWAL_FEE_TYPE_ID;
         String gameTypeName = gameType.getName();
         String gameTypeId = gameType.getId();
-        Fee fee = feeService.findFeeByLicenseTypeGameTypeAndFeePaymentType(licenseTypeId, gameTypeId, feePaymentTypeId);
+        Fee fee = feeService.findActiveFeeByLicenseTypeGameTypeAndFeePaymentType(licenseTypeId, gameTypeId, feePaymentTypeId);
         if (fee == null) {
             invalidGamingMachinePayment = new InvalidGamingMachinePayment(gamingMachineId,
                     machineNumber,
@@ -553,7 +553,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
                 if (existingLicensePayment != null) {
                     return Mono.just(new ResponseEntity<>(String.format("Gaming machine with id %s has a license payment already", gamingMachineId), HttpStatus.BAD_REQUEST));
                 }
-                Fee fee = feeService.findFeeByLicenseTypeGameTypeAndFeePaymentType(licenseTypeId, gameTypeId, feePaymentTypeId);
+                Fee fee = feeService.findActiveFeeByLicenseTypeGameTypeAndFeePaymentType(licenseTypeId, gameTypeId, feePaymentTypeId);
                 if (fee == null) {
                     GameType gameType = gamingMachine.getGameType();
                     String gameTypeName = gameType != null ? gameType.getName() : gameTypeId;
@@ -642,7 +642,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
                 if (existingLicensePayment != null) {
                     return Mono.just(new ResponseEntity<>(String.format("Gaming machine with id %s has a license payment already", gamingMachineId), HttpStatus.BAD_REQUEST));
                 }
-                Fee fee = feeService.findFeeByLicenseTypeGameTypeAndFeePaymentType(licenseTypeId, gameTypeId, feePaymentTypeId);
+                Fee fee = feeService.findActiveFeeByLicenseTypeGameTypeAndFeePaymentType(licenseTypeId, gameTypeId, feePaymentTypeId);
                 if (fee == null) {
                     GameType gameType = gamingMachine.getGameType();
                     String gameTypeName = gameType != null ? gameType.getName() : gameTypeId;
@@ -682,7 +682,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
 
 
             List<VigipayInvoiceItem> vigipayInvoiceItems = vigiPayInvoiceItemsFromFeeDescriptions(feeDescriptions);
-            List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institutionId);
+            List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(institutionId);
 
             String invoiceNumber = vigipayService.createInBranchMultipleItemInvoiceForInstitution(institution, institutionAdmins, vigipayInvoiceItems);
 

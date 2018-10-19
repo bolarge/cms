@@ -31,7 +31,7 @@ public class UserApprovalRequestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty",
-            "statusId", "approvalRequestTypeId", "initiatorId", "approverId", "approvalRequestTypeId", "rejectorId", "userId", "loggedInUserId"})
+            "statusId", "approvalRequestTypeId", "initiatorId", "approverId", "approvalRequestTypeId", "rejectorId", "userId", "startDate", "endDate"})
     @ApiOperation(value = "Get all Application Forms", response = UserApprovalRequestDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -48,25 +48,26 @@ public class UserApprovalRequestController {
                                                        @RequestParam("approverId") String approverId,
                                                        @RequestParam("rejectorId") String rejectorId,
                                                        @RequestParam("userId") String userId,
-                                                       @RequestParam("loggedInUserId") String loggedInUserId,
+                                                       @RequestParam("startDate") String startDate,
+                                                       @RequestParam("endDate") String endDate,
                                                        HttpServletResponse httpServletResponse) {
-        return userApprovalRequestService.findAllUserApprovalRequests(page, pageSize, sortType, sortParam, statusId, approvalRequestTypeId, initiatorId, approverId, rejectorId, userId, loggedInUserId, httpServletResponse);
+        return userApprovalRequestService.findAllUserApprovalRequests(page, pageSize, sortType, sortParam, statusId, approvalRequestTypeId, initiatorId, approverId, rejectorId, userId, startDate,endDate, httpServletResponse);
     }
 
 
     @RequestMapping(method = RequestMethod.POST, value = "/approve")
-    @ApiOperation(value = "Approve an user approval request", response = String.class, consumes = "application/json")
+    @ApiOperation(value = "Approve an user approval request", response = UserApprovalRequestDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> approveRequest(@RequestBody @Valid ApprovalRequestOperationtDto agentApprovalRequestOperationtDto, HttpServletRequest request) {
-        return userApprovalRequestService.approveRequest(agentApprovalRequestOperationtDto, request);
+    public Mono<ResponseEntity> approveRequest(@RequestBody @Valid ApprovalRequestOperationtDto approvalRequestOperationtDto, HttpServletRequest request) {
+        return userApprovalRequestService.approveRequest(approvalRequestOperationtDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/reject")
-    @ApiOperation(value = "Reject a user approval request", response = String.class, consumes = "application/json",
+    @ApiOperation(value = "Reject a user approval request", response = UserApprovalRequestDto.class, consumes = "application/json",
             notes = "for this request , you may provide reason for rejecting the request ")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),

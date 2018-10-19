@@ -14,7 +14,6 @@ import com.software.finatech.lslb.cms.service.referencedata.AuditActionReference
 import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.CustomerComplainStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
-import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.CustomerComplainService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
@@ -120,6 +119,8 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             });
 
             return Mono.just(new ResponseEntity<>(customerComplainDtos, HttpStatus.OK));
+        } catch (IllegalArgumentException e) {
+            return Mono.just(new ResponseEntity<>("Invalid Date format , please use yyyy-MM-dd", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
             String errorMsg = "An error occurred while finding customer complains";
             return logAndReturnError(logger, errorMsg, e);

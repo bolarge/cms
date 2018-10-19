@@ -3,8 +3,6 @@ package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 import com.lowagie.text.DocumentException;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
-import com.software.finatech.lslb.cms.service.service.EmailService;
-import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
@@ -23,26 +21,15 @@ import java.util.List;
 
 
 @Component
-public class AIPMailSenderAsync {
+public class AIPMailSenderAsync  extends  AbstractMailSender{
 
     private static Logger logger = LoggerFactory.getLogger(AIPMailSenderAsync.class);
-
-    private AuthInfoService authInfoService;
-    private MailContentBuilderService mailContentBuilderService;
-    private EmailService emailService;
-
     @Autowired
-    public AIPMailSenderAsync(AuthInfoService authInfoService,
-                              MailContentBuilderService mailContentBuilderService,
-                              EmailService emailService) {
-        this.authInfoService = authInfoService;
-        this.mailContentBuilderService = mailContentBuilderService;
-        this.emailService = emailService;
-    }
+    private AuthInfoService authInfoService;
 
     @Async
     public void sendAipNotificationToInstitutionAdmins(PaymentRecord paymentRecord) {
-        List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(paymentRecord.getInstitutionId());
+        List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(paymentRecord.getInstitutionId());
         if (institutionAdmins == null || institutionAdmins.isEmpty()) {
             logger.info("There are no institution admins for {}, skipping AIP notification mail", paymentRecord.getInstitutionName());
             return;

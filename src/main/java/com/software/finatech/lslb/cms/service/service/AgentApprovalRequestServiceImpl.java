@@ -6,7 +6,9 @@ import com.software.finatech.lslb.cms.service.dto.AgentApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.dto.ApprovalRequestOperationtDto;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.*;
+import com.software.finatech.lslb.cms.service.referencedata.AgentApprovalRequestTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentApprovalRequestService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.AgentUserCreator;
@@ -78,6 +80,8 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
                                                              String rejectorId,
                                                              String requestTypeId,
                                                              String requestStatusId,
+                                                             String startDate,
+                                                             String endDate,
                                                              HttpServletResponse httpServletResponse) {
         try {
             Query query = new Query();
@@ -101,6 +105,9 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             }
             if (!StringUtils.isEmpty(requestTypeId)) {
                 query.addCriteria(Criteria.where("agentApprovalRequestTypeId").is(gameTypeId));
+            }
+            if (!StringUtils.isEmpty(startDate) && StringUtils.isEmpty(endDate)) {
+                query.addCriteria(Criteria.where("dateCreated").gte(new LocalDate(startDate)).lte(new LocalDate(endDate)));
             }
             if (page == 0) {
                 Long count = mongoRepositoryReactive.count(query, ApplicationForm.class).block();
@@ -129,6 +136,8 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             });
 
             return Mono.just(new ResponseEntity<>(agentApprovalRequestDtos, HttpStatus.OK));
+        } catch (IllegalArgumentException e) {
+            return Mono.just(new ResponseEntity<>("Invalid Date format , please use yyyy-MM-dd", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
             String errorMsg = "An error occurred while finding agent approval requests";
             return logAndReturnError(logger, errorMsg, e);
@@ -190,10 +199,6 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             if (approvingUser == null) {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
-            if (!canApproveRequest(approvingUser)) {
-                return Mono.just(new ResponseEntity<>("User is not authorized to approve request", HttpStatus.BAD_REQUEST));
-            }
-
 
             if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.CREATE_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
                 approveAgentCreationRequest(agentApprovalRequest, approvingUser.getId());
@@ -230,10 +235,6 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             AuthInfo rejectingUser = springSecurityAuditorAware.getLoggedInUser();
             if (rejectingUser == null) {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
-            }
-
-            if (!canApproveRequest(rejectingUser)) {
-                return Mono.just(new ResponseEntity<>("User is not authorized to reject request", HttpStatus.BAD_REQUEST));
             }
 
             if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.CREATE_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
@@ -364,19 +365,5 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
 
     private Agent findById(String agentId) {
         return (Agent) mongoRepositoryReactive.findById(agentId, Agent.class).block();
-    }
-
-    private boolean canApproveRequest(AuthInfo authInfo) {
-        if (authInfo == null) {
-            return false;
-        }
-        return authInfo.getEnabled() && getAllowedRoleIds().contains(authInfo.getAuthRoleId());
-    }
-
-    public List<String> getAllowedRoleIds() {
-        List<String> allowedIds = new ArrayList<>();
-        allowedIds.add(AuthRoleReferenceData.SUPER_ADMIN_ID);
-        allowedIds.add(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID);
-        return allowedIds;
     }
 }

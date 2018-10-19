@@ -36,7 +36,7 @@ public class CustomerCodeCreatorAsync {
     @Async
     public void createVigipayCustomerCodeForInstitution(Institution institution) {
         logger.info("Trying to get customer code for institution {} -> {}", institution.getInstitutionName(), institution.getInstitutionName());
-        List<AuthInfo> gamingOperatorAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institution.getId());
+        List<AuthInfo> gamingOperatorAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(institution.getId());
         if (gamingOperatorAdmins.isEmpty()) {
             logger.info("Institution does not have gaming operator admins");
         }

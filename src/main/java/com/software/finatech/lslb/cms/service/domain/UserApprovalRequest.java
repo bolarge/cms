@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.dto.UserApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.referencedata.UserApprovalRequestTypeReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.HashSet;
@@ -14,35 +15,13 @@ import java.util.Set;
 
 @SuppressWarnings("serial")
 @Document(collection = "UserApprovalRequests")
-public class UserApprovalRequest extends AbstractFact {
-    private String initiatorId;
-    private String initiatorAuthRoleId;
+public class UserApprovalRequest extends AbstractApprovalRequest {
     private String newAuthRoleId;
     private String pendingAuthInfoId;
     private String authInfoId;
     private String userApprovalRequestTypeId;
     private Set<String> newPermissionIds = new HashSet<>();
     private Set<String> removedPermissionIds = new HashSet<>();
-    private String approvalRequestStatusId ;
-    private String approverId;
-    private String rejectorId;
-    private String rejectionReason;
-
-    public String getRejectionReason() {
-        return rejectionReason;
-    }
-
-    public void setRejectionReason(String rejectionReason) {
-        this.rejectionReason = rejectionReason;
-    }
-
-    public String getInitiatorAuthRoleId() {
-        return initiatorAuthRoleId;
-    }
-
-    public void setInitiatorAuthRoleId(String initiatorAuthRoleId) {
-        this.initiatorAuthRoleId = initiatorAuthRoleId;
-    }
 
     public String getAuthInfoId() {
         return authInfoId;
@@ -50,14 +29,6 @@ public class UserApprovalRequest extends AbstractFact {
 
     public void setAuthInfoId(String authInfoId) {
         this.authInfoId = authInfoId;
-    }
-
-    public String getInitiatorId() {
-        return initiatorId;
-    }
-
-    public void setInitiatorId(String initiatorId) {
-        this.initiatorId = initiatorId;
     }
 
     public String getNewAuthRoleId() {
@@ -98,30 +69,6 @@ public class UserApprovalRequest extends AbstractFact {
 
     public void setRemovedPermissionIds(Set<String> removedPermissionIds) {
         this.removedPermissionIds = removedPermissionIds;
-    }
-
-    public String getApprovalRequestStatusId() {
-        return approvalRequestStatusId;
-    }
-
-    public void setApprovalRequestStatusId(String approvalRequestStatusId) {
-        this.approvalRequestStatusId = approvalRequestStatusId;
-    }
-
-    public String getApproverId() {
-        return approverId;
-    }
-
-    public void setApproverId(String approverId) {
-        this.approverId = approverId;
-    }
-
-    public String getRejectorId() {
-        return rejectorId;
-    }
-
-    public void setRejectorId(String rejectorId) {
-        this.rejectorId = rejectorId;
     }
 
     public UserApprovalRequestType getUserApprovalRequestType() {
@@ -231,6 +178,10 @@ public class UserApprovalRequest extends AbstractFact {
         PendingAuthInfo pendingAuthInfo = getPendingAuthInfo(this.pendingAuthInfoId);
         if (pendingAuthInfo != null) {
             dto.setSubjectUserName(pendingAuthInfo.getFullName());
+        }
+        LocalDateTime dateCreated = getDateCreated();
+        if (dateCreated != null) {
+            dto.setDateCreated(dateCreated.toString("dd-MM-yyyy HH:mm:ss"));
         }
         return dto;
     }

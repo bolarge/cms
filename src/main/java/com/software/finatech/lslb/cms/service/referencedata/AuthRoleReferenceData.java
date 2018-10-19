@@ -8,6 +8,7 @@ import java.util.Set;
 public class AuthRoleReferenceData {
     public static final String VGG_ADMIN_ID = "2";
     public static final String SUPER_ADMIN_ID = "1";
+    public static final String VGG_USER_ID = "3";
 
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
@@ -34,16 +35,16 @@ public class AuthRoleReferenceData {
         role2.setAuthPermissionIds(permissionIds);
 
 
-        AuthRole role3 = (AuthRole) mongoRepositoryReactive.findById("3", AuthRole.class).block();
+        AuthRole role3 = (AuthRole) mongoRepositoryReactive.findById(VGG_USER_ID, AuthRole.class).block();
         if (role3 == null) {
             role3 = new AuthRole();
-            role3.setId("3");
+            role3.setId(VGG_USER_ID);
         }
         role3.setDescription("VGG USER");
         role3.setName("VGG USER");
         role3.setSsoRoleMapping("vgg_user");
         permissionIds = LSLBAuthPermissionReferenceData.getAllVGGUserPermissions();
-     //   role3.setAuthPermissionIds(permissionIds);
+        //   role3.setAuthPermissionIds(permissionIds);
 
         mongoRepositoryReactive.saveOrUpdate(role1);
         mongoRepositoryReactive.saveOrUpdate(role2);

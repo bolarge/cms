@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.AbstractMailSender;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -23,29 +24,13 @@ import java.util.List;
 import java.util.Set;
 
 @Component
-public class AgentCreationNotifierAsync {
+public class AgentCreationNotifierAsync   extends AbstractMailSender {
 
     private static final Logger logger = LoggerFactory.getLogger(AgentCreationNotifierAsync.class);
 
-    private MailContentBuilderService mailContentBuilderService;
-    private EmailService emailService;
-    private AuthInfoService authInfoService;
-    private FrontEndPropertyHelper frontEndPropertyHelper;
-
-    @Autowired
-    public AgentCreationNotifierAsync(MailContentBuilderService mailContentBuilderService,
-                                      EmailService emailService,
-                                      AuthInfoService authInfoService,
-                                      FrontEndPropertyHelper frontEndPropertyHelper) {
-        this.mailContentBuilderService = mailContentBuilderService;
-        this.emailService = emailService;
-        this.authInfoService = authInfoService;
-        this.frontEndPropertyHelper = frontEndPropertyHelper;
-    }
-
     @Async
     public void sendEmailNotificationToInstitutionAdminsAndLslbOnAgentRequestCreation(AgentApprovalRequest agentApprovalRequest) {
-        List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(agentApprovalRequest.getInstitutionId());
+        List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(agentApprovalRequest.getInstitutionId());
         if (institutionAdmins == null || institutionAdmins.isEmpty()) {
             logger.info("Institution with id {} does not have admins, skipping email notification", agentApprovalRequest.getInstitutionId());
             return;
@@ -163,7 +148,7 @@ public class AgentCreationNotifierAsync {
         Set<String> agentInstitutionIds = agent.getInstitutionIds();
         String mailContent = buildAgentAddressChangeNotificationEmailContent(agent, oldPhoneAndAddressPair, newPhoneAndAddressPair);
         for (String institutionId : agentInstitutionIds) {
-            ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(institutionId);
+            ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(institutionId);
             for (AuthInfo institutionAdmin : institutionAdmins) {
                 sendAgentAddressChangeToInstitutionAdmin(mailContent, institutionAdmin.getEmailAddress());
             }

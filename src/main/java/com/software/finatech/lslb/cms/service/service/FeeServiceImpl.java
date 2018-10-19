@@ -1,12 +1,11 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.Fee;
-import com.software.finatech.lslb.cms.service.domain.FeePaymentType;
-import com.software.finatech.lslb.cms.service.domain.LicenseType;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.FeeApprovalRequestTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
@@ -20,6 +19,7 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
@@ -64,39 +64,80 @@ public class FeeServiceImpl implements FeeService {
     @Autowired
     MapValues mapValues;
 
+    @Override
     public Mono<ResponseEntity> createFee(FeeCreateDto feeCreateDto, HttpServletRequest request) {
         try {
+            LocalDate startDate = new LocalDate(feeCreateDto.getStartDate());
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             String gameTypeId = feeCreateDto.getGameTypeId();
             String feePaymentTypeId = feeCreateDto.getFeePaymentTypeId();
-            Query query = new Query();
-            query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
-            query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-            query.addCriteria(Criteria.where("licenseTypeId").is(feeCreateDto.getRevenueNameId()));
-            query.addCriteria(Criteria.where("active").is(true));
-            Fee existingFeeWithGameTypeAndFeePaymentType = (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
-            if (existingFeeWithGameTypeAndFeePaymentType != null) {
-                existingFeeWithGameTypeAndFeePaymentType.setActive(false);
-                mongoRepositoryReactive.saveOrUpdate(existingFeeWithGameTypeAndFeePaymentType);
+            Fee existingFeeWithParams = findMostRecentFeeByLicenseTypeGameTypeAndFeePaymentType(feeCreateDto.getRevenueNameId(),
+                    feeCreateDto.getGameTypeId(), feeCreateDto.getFeePaymentTypeId());
+            if (existingFeeWithParams != null) {
+                LocalDate existingFeeEndDate = existingFeeWithParams.getEndDate();
+                if (existingFeeEndDate == null) {
+                    return Mono.just(new ResponseEntity<>("Please set the end date of the previous fee configuration", HttpStatus.BAD_REQUEST));
+                }
+
+                if (startDate.isBefore(existingFeeEndDate)) {
+                    return Mono.just(new ResponseEntity<>("New Fee start date should not be less than old fee end date", HttpStatus.BAD_REQUEST));
+                }
             }
-            Fee fee = new Fee();
-            fee.setId(UUID.randomUUID().toString());
-            fee.setAmount(Double.valueOf(feeCreateDto.getAmount()));
-            fee.setFeePaymentTypeId(feePaymentTypeId);
-            fee.setGameTypeId(gameTypeId);
-            fee.setLicenseTypeId(feeCreateDto.getRevenueNameId());
-            fee.setActive(true);
-            mongoRepositoryReactive.saveOrUpdate(fee);
+            PendingFee pendingFee = new PendingFee();
+            pendingFee.setId(UUID.randomUUID().toString());
+            pendingFee.setAmount(Double.valueOf(feeCreateDto.getAmount()));
+            pendingFee.setFeePaymentTypeId(feePaymentTypeId);
+            pendingFee.setGameTypeId(gameTypeId);
+            pendingFee.setLicenseTypeId(feeCreateDto.getRevenueNameId());
+            pendingFee.setEffectiveDate(new LocalDate(feeCreateDto.getStartDate()));
+            mongoRepositoryReactive.saveOrUpdate(pendingFee);
+
+            FeeApprovalRequest feeApprovalRequest = new FeeApprovalRequest();
+            feeApprovalRequest.setInitiatorId(loggedInUser.getId());
+            feeApprovalRequest.setPendingFeeId(pendingFee.getId());
+            feeApprovalRequest.setId(UUID.randomUUID().toString());
+            feeApprovalRequest.setFeeApprovalRequestTypeId(FeeApprovalRequestTypeReferenceData.CREATE_FEE_ID);
+            mongoRepositoryReactive.saveOrUpdate(feeApprovalRequest);
 
             String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
-            String verbiage = String.format("Created Fee -> License Type : %s, FeePaymentType -> %s, Category -> %s, Amount -> %s", fee.getLicenseType(), fee.getFeePaymentType(), fee.getGameType(), fee.getAmount());
+            String verbiage = String.format("Created Fee Approval Request -> Request Type -> %s, License Type -> %s, FeePaymentType -> %s, Category -> %s, Amount -> %s",
+                    feeApprovalRequest.getFeeApprovalRequestType(), pendingFee.getLicenseType(), pendingFee.getFeePaymentType(), pendingFee.getGameType(), pendingFee.getAmount());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
                     currentAuditorName, currentAuditorName,
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-
-            return Mono.just(new ResponseEntity<>(fee.convertToDto(), HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(feeApprovalRequest.convertToDto(), HttpStatus.OK));
+        } catch (IllegalArgumentException e) {
+            return Mono.just(new ResponseEntity<>("Invalid Date format , please use yyyy-MM-dd", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
             String errorMsg = "An error occurred while creating the fee setting";
             return logAndReturnError(logger, errorMsg, e);
+        }
+    }
+
+
+    @Override
+    public Mono<ResponseEntity> setFeeEndDate(FeeEndDateUpdateDto feeEndDateUpdateDto, HttpServletRequest request) {
+        try {
+            String feeId = feeEndDateUpdateDto.getFeeId();
+            String endDateString = feeEndDateUpdateDto.getEndDate();
+            Fee fee = findFeeById(feeId);
+            if (fee == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Fee with id %s does not exist", feeId), HttpStatus.BAD_REQUEST));
+            }
+            LocalDate endDate = new LocalDate(endDateString);
+            if (endDate.isBefore(fee.getEffectiveDate())) {
+                return Mono.just(new ResponseEntity<>("New End Date should be greater than fee effective date", HttpStatus.BAD_REQUEST));
+            }
+
+            FeeApprovalRequest feeApprovalRequest = new FeeApprovalRequest();
+            feeApprovalRequest.setId(UUID.randomUUID().toString());
+            feeApprovalRequest.setFeeId(feeId);
+            feeApprovalRequest.setEndDate(endDate);
+            feeApprovalRequest.setFeeApprovalRequestTypeId(FeeApprovalRequestTypeReferenceData.SET_FEE_END_DATE_ID);
+            mongoRepositoryReactive.saveOrUpdate(feeApprovalRequest);
+            return Mono.just(new ResponseEntity<>(feeApprovalRequest.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while updating fee end date", e);
         }
     }
 
@@ -148,7 +189,7 @@ public class FeeServiceImpl implements FeeService {
             String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
             String verbiage = String.format("Updated Fee Payment Type, Name -> %s ", feePaymentType);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
-                  currentAuditorName, currentAuditorName,
+                    currentAuditorName, currentAuditorName,
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity<>(feePaymentType.convertToDto(), HttpStatus.OK));
@@ -180,7 +221,7 @@ public class FeeServiceImpl implements FeeService {
             String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
             String verbiage = String.format("Created License Type, Name -> %s ", licenseType);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
-                currentAuditorName,currentAuditorName,
+                    currentAuditorName, currentAuditorName,
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
             return Mono.just(new ResponseEntity<>(licenseType.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -275,17 +316,11 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public Mono<ResponseEntity> findActiveFeeByGameTypeAndPaymentTypeAndRevenueName(String gameTypeId, String feePaymentTypeId, String revenueNameId) {
-        if (StringUtils.isEmpty(revenueNameId) || StringUtils.isEmpty(gameTypeId) || StringUtils.isEmpty(feePaymentTypeId)) {
+    public Mono<ResponseEntity> findActiveFeeByGameTypeAndPaymentTypeAndRevenueName(String gameTypeId, String feePaymentTypeId, String licenseTypeId) {
+        if (StringUtils.isEmpty(licenseTypeId) || StringUtils.isEmpty(gameTypeId) || StringUtils.isEmpty(feePaymentTypeId)) {
             return Mono.just(new ResponseEntity<>("None of the request params should be empty", HttpStatus.BAD_REQUEST));
         }
-
-        Query query = new Query();
-        query.addCriteria(Criteria.where("licenseTypeId").is(revenueNameId));
-        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-        query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
-        query.addCriteria(Criteria.where("active").is(true));
-        Fee fee = (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
+        Fee fee = findActiveFeeByLicenseTypeGameTypeAndFeePaymentType(licenseTypeId, gameTypeId, feePaymentTypeId);
         if (fee == null) {
             return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
         }
@@ -360,11 +395,22 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public Fee findFeeByLicenseTypeGameTypeAndFeePaymentType(String licenseTypeId, String gameTypeId, String feePaymentTypeId) {
+    public Fee findActiveFeeByLicenseTypeGameTypeAndFeePaymentType(String licenseTypeId, String gameTypeId, String feePaymentTypeId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         query.addCriteria(Criteria.where("licenseTypeId").is(licenseTypeId));
         query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
+        query.addCriteria(Criteria.where("active").is(true));
+        return (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
+    }
+
+    @Override
+    public Fee findMostRecentFeeByLicenseTypeGameTypeAndFeePaymentType(String licenseTypeId, String gameTypeId, String feePaymentTypeId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        query.addCriteria(Criteria.where("licenseTypeId").is(licenseTypeId));
+        query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
+        query.with(new Sort(Sort.Direction.DESC, "endDate"));
         return (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
     }
 

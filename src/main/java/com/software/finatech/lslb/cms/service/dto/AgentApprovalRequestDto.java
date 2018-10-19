@@ -23,7 +23,16 @@ public class AgentApprovalRequestDto {
     private AgentInstitutionDto pendingAgentInstitution;
     private AgentDto agent;
     private List<String> businessAddressList = new ArrayList<>();
+    private String dateCreated;
 
+
+    public String getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(String dateCreated) {
+        this.dateCreated = dateCreated;
+    }
 
     public AgentInstitutionDto getPendingAgentInstitution() {
         return pendingAgentInstitution;

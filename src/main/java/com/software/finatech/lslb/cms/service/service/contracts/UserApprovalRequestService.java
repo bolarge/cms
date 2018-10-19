@@ -20,7 +20,8 @@ public interface UserApprovalRequestService {
                                                      String approverId,
                                                      String rejectorId,
                                                      String userId,
-                                                     String loggedInUserId,
+                                                     String startDate,
+                                                     String endDate,
                                                      HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getAllUserApprovalRequestType();

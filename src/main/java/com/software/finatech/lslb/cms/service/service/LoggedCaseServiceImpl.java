@@ -115,6 +115,8 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
                 loggedCaseDtos.add(loggedCase.convertToDto());
             });
             return Mono.just(new ResponseEntity<>(loggedCaseDtos, HttpStatus.OK));
+        } catch (IllegalArgumentException e) {
+            return Mono.just(new ResponseEntity<>("Invalid Date format , please use yyyy-MM-dd", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while getting logged cases", e);
         }
@@ -123,7 +125,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
     @Override
     public Mono<ResponseEntity> createCase(LoggedCaseCreateDto loggedCaseCreateDto, HttpServletRequest request) {
         try {
-          //  String userId = loggedCaseCreateDto.getUserId();
+            //  String userId = loggedCaseCreateDto.getUserId();
             if (!loggedCaseCreateDto.isValid()) {
                 return Mono.just(new ResponseEntity<>("Please provide either agent id or institution id alone", HttpStatus.BAD_REQUEST));
             }

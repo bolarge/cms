@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.FeeDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Map;
@@ -14,6 +15,24 @@ public class Fee extends AbstractFact {
     protected String gameTypeId;
     protected String feePaymentTypeId;
     protected String licenseTypeId;
+    private LocalDate effectiveDate;
+    private LocalDate endDate;
+
+    public LocalDate getEffectiveDate() {
+        return effectiveDate;
+    }
+
+    public void setEffectiveDate(LocalDate effectiveDate) {
+        this.effectiveDate = effectiveDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
 
     private String revenueNameId;
 
@@ -156,6 +175,15 @@ public class Fee extends AbstractFact {
         if (feePaymentType != null) {
             feeDto.setFeePaymentTypeName(feePaymentType.getName());
             feeDto.setFeePaymentTypeId(getFeePaymentTypeId());
+        }
+
+        LocalDate startDate = getEffectiveDate();
+        if (startDate != null){
+            feeDto.setEffectiveDate(startDate.toString("dd-MM-yyyy"));
+        }
+        LocalDate endDate = getEndDate();
+        if (endDate != null){
+            feeDto.setEndDate(endDate.toString("dd-MM-yyyy"));
         }
         return feeDto;
     }

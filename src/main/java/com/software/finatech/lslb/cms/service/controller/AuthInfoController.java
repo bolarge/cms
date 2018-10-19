@@ -1,10 +1,7 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.domain.PendingAuthInfo;
-import com.software.finatech.lslb.cms.service.domain.UserApprovalRequest;
-import com.software.finatech.lslb.cms.service.domain.VerificationToken;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOChangePasswordModel;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOPasswordResetModel;
@@ -12,12 +9,15 @@ import com.software.finatech.lslb.cms.service.dto.sso.SSOToken;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOUserConfirmResetPasswordRequest;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.UserApprovalRequestTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.AuthInfoServiceImpl;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
+import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.UserApprovalRequestNotifierAsync;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -43,10 +43,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -65,6 +62,8 @@ public class AuthInfoController extends BaseController {
 
     @Autowired
     private SpringSecurityAuditorAware springSecurityAuditorAware;
+    @Autowired
+    private UserApprovalRequestNotifierAsync userApprovalRequestNotifierAsync;
 
     private static final String LOGIN = AuditActionReferenceData.LOGIN_ID;
 
@@ -301,43 +300,46 @@ public class AuthInfoController extends BaseController {
             // Lookup AuthInfo in database by e-mail
             AuthInfo authInfoExists = (AuthInfo) mongoRepositoryReactive.find(new Query(Criteria.where("emailAddress").is(authInfoCreateDto.getEmailAddress())), AuthInfo.class).block();
             if (authInfoExists != null) {
-                return Mono.just(new ResponseEntity("Email already registered", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Email already registered", HttpStatus.BAD_REQUEST));
             }
 
-//            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
-//            if (loggedInUser == null) {
-//                return Mono.just(new ResponseEntity<>("Could not fimf logged in user", HttpStatus.BAD_REQUEST));
-//            }
-//
-//            PendingAuthInfo pendingAuthInfo = new PendingAuthInfo();
-//            pendingAuthInfo.setId(UUID.randomUUID().toString());
-//            pendingAuthInfo.setFirstName(authInfoCreateDto.getFirstName());
-//            pendingAuthInfo.setLastName(authInfoCreateDto.getLastName());
-//            pendingAuthInfo.setInstitutionId(authInfoCreateDto.getInstitutionId());
-//            pendingAuthInfo.setAgentId(authInfoCreateDto.getAgentId());
-//            pendingAuthInfo.setEmailAddress(authInfoCreateDto.getEmailAddress());
-//            pendingAuthInfo.setTitle(authInfoCreateDto.getTitle());
-//            pendingAuthInfo.setPhoneNumber(authInfoCreateDto.getPhoneNumber());
-//            pendingAuthInfo.setAuthRoleId(authInfoCreateDto.getAuthRoleId());
-//            mongoRepositoryReactive.saveOrUpdate(pendingAuthInfo);
-//
-//            UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
-//            userApprovalRequest.setId(UUID.randomUUID().toString());
-//            userApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
-//            userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.CREATE_USER_ID);
-//            userApprovalRequest.setInitiatorId(loggedInUser.getId());
-//            userApprovalRequest.setPendingAuthInfoId(pendingAuthInfo.getId());
-//            userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
-//            mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.BAD_REQUEST));
+            }
 
+            if (!loggedInUser.isGamingOperator()) {
+                String appUrl = appHostPort + request.getContextPath();
+                return authInfoService.createAuthInfo(authInfoCreateDto, appUrl, request);
             /*String appUrl =
                     "http://" + request.getServerName() +
                             ":" + request.getServerPort() +
                             request.getContextPath();*/
-            String appUrl = appHostPort + request.getContextPath();
-            return authInfoService.createAuthInfo(authInfoCreateDto, appUrl, request);
-        //   return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
 
+            } else {
+                PendingAuthInfo pendingAuthInfo = new PendingAuthInfo();
+                pendingAuthInfo.setId(UUID.randomUUID().toString());
+                pendingAuthInfo.setFirstName(authInfoCreateDto.getFirstName());
+                pendingAuthInfo.setLastName(authInfoCreateDto.getLastName());
+                pendingAuthInfo.setInstitutionId(authInfoCreateDto.getInstitutionId());
+                pendingAuthInfo.setAgentId(authInfoCreateDto.getAgentId());
+                pendingAuthInfo.setEmailAddress(authInfoCreateDto.getEmailAddress());
+                pendingAuthInfo.setTitle(authInfoCreateDto.getTitle());
+                pendingAuthInfo.setPhoneNumber(authInfoCreateDto.getPhoneNumber());
+                pendingAuthInfo.setAuthRoleId(authInfoCreateDto.getAuthRoleId());
+                mongoRepositoryReactive.saveOrUpdate(pendingAuthInfo);
+
+                UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
+                userApprovalRequest.setId(UUID.randomUUID().toString());
+                userApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
+                userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.CREATE_USER_ID);
+                userApprovalRequest.setInitiatorId(loggedInUser.getId());
+                userApprovalRequest.setPendingAuthInfoId(pendingAuthInfo.getId());
+                userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+                userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
+                mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
+                return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -474,35 +476,35 @@ public class AuthInfoController extends BaseController {
         try {
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.find(new Query(Criteria.where("emailAddress").is(emailAddress)), AuthInfo.class).block();
             if (authInfo == null) {
-                return Mono.just(new ResponseEntity("Invalid EmailAddress", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Invalid EmailAddress", HttpStatus.BAD_REQUEST));
             }
-//
-//            authInfo.setEnabled(false);
-//            mongoRepositoryReactive.saveOrUpdate(authInfo);
-//
-//            return Mono.just(new ResponseEntity("Success", HttpStatus.OK));
-
             if (!authInfo.getEnabled()) {
                 return Mono.just(new ResponseEntity<>("User already deactivated", HttpStatus.BAD_REQUEST));
             }
-
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
-            UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
-            userApprovalRequest.setId(UUID.randomUUID().toString());
-            userApprovalRequest.setAuthInfoId(authInfo.getId());
-            if (loggedInUser != null) {
+            if (loggedInUser == null) {
+                Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+
+            if (loggedInUser.isGamingOperator()) {
+                authInfo.setEnabled(false);
+                mongoRepositoryReactive.saveOrUpdate(authInfo);
+                return Mono.just(new ResponseEntity("Success", HttpStatus.OK));
+            } else {
+                UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
+                userApprovalRequest.setId(UUID.randomUUID().toString());
+                userApprovalRequest.setAuthInfoId(authInfo.getId());
                 userApprovalRequest.setInitiatorId(loggedInUser.getId());
                 userApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
+                userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.DEACTIVATE_USER_ID);
+                userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+                mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
+                userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
+                return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
             }
-            userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.DEACTIVATE_USER_ID);
-            userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
-            mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
-
-            return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
@@ -525,33 +527,32 @@ public class AuthInfoController extends BaseController {
         try {
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.find(new Query(Criteria.where("emailAddress").is(emailAddress)), AuthInfo.class).block();
             if (authInfo == null) {
-                return Mono.just(new ResponseEntity("Invalid EmailAddress", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Invalid EmailAddress", HttpStatus.BAD_REQUEST));
             }
-//
-//            authInfo.setEnabled(true);
-//            mongoRepositoryReactive.saveOrUpdate(authInfo);
-//
-//
-//
-//            return Mono.just(new ResponseEntity("Success", HttpStatus.OK));
-
             if (authInfo.getEnabled()) {
                 return Mono.just(new ResponseEntity<>("User already activated", HttpStatus.BAD_REQUEST));
             }
-
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
-            UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
-            userApprovalRequest.setId(UUID.randomUUID().toString());
-            userApprovalRequest.setAuthInfoId(authInfo.getId());
-            if (loggedInUser != null) {
+            if (loggedInUser == null) {
+                Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+
+            if (loggedInUser.isGamingOperator()) {
+                authInfo.setEnabled(true);
+                mongoRepositoryReactive.saveOrUpdate(authInfo);
+                return Mono.just(new ResponseEntity<>("Success", HttpStatus.OK));
+            } else {
+                UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
+                userApprovalRequest.setId(UUID.randomUUID().toString());
+                userApprovalRequest.setAuthInfoId(authInfo.getId());
                 userApprovalRequest.setInitiatorId(loggedInUser.getId());
                 userApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
+                userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.ACTIVATE_USER_ID);
+                userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+                userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
+                mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
+                return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
             }
-            userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.ACTIVATE_USER_ID);
-            userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
-            mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
-
-            return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -562,7 +563,7 @@ public class AuthInfoController extends BaseController {
     /**
      * @return All users full information
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"institutionId", "page", "size", "sorting", "sortProperty"})
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"institutionId", "page", "size", "sorting", "sortProperty", "roleId"})
     @ApiOperation(value = "Get Authinfos", response = AuthInfoDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -571,12 +572,30 @@ public class AuthInfoController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> authInfos(@Param("institutionId") String institutionId, @Param("page") @NotNull int page, @Param("size") @NotNull int size, @Param("sortProperty") String sortProperty, @Param("sorting") String sorting) {
+    public Mono<ResponseEntity> authInfos(@Param("institutionId") String institutionId,
+                                          @Param("page") @NotNull int page,
+                                          @Param("size") @NotNull int size,
+                                          @Param("sortProperty") String sortProperty,
+                                          @Param("sorting") String sorting,
+                                          @Param("roleId") String roleId) {
         try {
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             //@TODO validate reqquest params
             Query query = new Query();
             if (institutionId != null && !institutionId.isEmpty()) {
                 query.addCriteria(Criteria.where("institutionId").is(institutionId));
+            }
+
+            if (StringUtils.isEmpty(roleId)) {
+                query.addCriteria(Criteria.where("authRoleId").is(roleId));
+            }
+
+            if (!(loggedInUser.isVGGUser() || loggedInUser.isVGGAdmin() || loggedInUser.isSuperAdmin())) {
+                List<String> notAllowedRoles = new ArrayList<>();
+                notAllowedRoles.add(AuthRoleReferenceData.SUPER_ADMIN_ID);
+                notAllowedRoles.add(AuthRoleReferenceData.VGG_USER_ID);
+                notAllowedRoles.add(AuthRoleReferenceData.VGG_ADMIN_ID);
+                query.addCriteria(Criteria.where("authRoleId").nin(notAllowedRoles));
             }
 
             if (sorting != null && !sorting.isEmpty() && sortProperty != null && !sortProperty.isEmpty()) {
@@ -778,6 +797,42 @@ public class AuthInfoController extends BaseController {
     )
     public Mono<ResponseEntity> removePermissionsFromUser(@RequestBody UserAuthPermissionDto userAuthPermissionDto) {
         return authInfoService.removePermissionFromUser(userAuthPermissionDto);
+    }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/get-new-permissions-for-user")
+    @ApiOperation(value = "Get permissions you can add to user", response = AuthPermissionDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAuthPermissionsToAddForUser(@RequestParam("userId") String userId) {
+        try {
+            AuthInfo loggedInUser = authInfoService.getUserById(userId);
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>(String.format("User with id %s not found", userId), HttpStatus.BAD_REQUEST));
+            }
+            Map authPermissionMap = Mapstore.STORE.get("AuthPermission");
+            Set<AuthPermission> authPermissionSet = (Set<AuthPermission>) authPermissionMap.values();
+            ArrayList<AuthPermission> permissions = new ArrayList<>();
+            for (AuthPermission permission : authPermissionSet) {
+                if (((StringUtils.equals(loggedInUser.getAuthRoleId(), permission.getAuthRoleId()) || permission.isUsedBySystem())) &&
+                        !loggedInUser.getAllUserPermissionIdsForUser().contains(permission.getId())) {
+                    permissions.add(permission);
+                }
+            }
+            if (permissions.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
+            }
+            ArrayList<AuthPermissionDto> dtos = new ArrayList<>();
+            for (AuthPermission permission : permissions) {
+                dtos.add(permission.convertToDto());
+            }
+            return Mono.just(new ResponseEntity<>(dtos, HttpStatus.OK));
+        } catch (Exception e) {
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while getting permissions for roles", e);
+        }
     }
 
     public String getAppHostPort() {

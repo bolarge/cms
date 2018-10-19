@@ -3,14 +3,9 @@ package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.CustomerComplain;
-import com.software.finatech.lslb.cms.service.service.EmailService;
-import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
-import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
-import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -19,25 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 
 @Component
-public class CustomerComplaintEmailSenderAsync {
+public class CustomerComplaintEmailSenderAsync extends AbstractMailSender {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerComplaintEmailSenderAsync.class);
-
-    private MailContentBuilderService mailContentBuilderService;
-    private EmailService emailService;
-    private FrontEndPropertyHelper frontEndPropertyHelper;
-    private AuthInfoService authInfoService;
-
-    @Autowired
-    public CustomerComplaintEmailSenderAsync(MailContentBuilderService mailContentBuilderService,
-                                             EmailService emailService,
-                                             FrontEndPropertyHelper frontEndPropertyHelper,
-                                             AuthInfoService authInfoService) {
-        this.mailContentBuilderService = mailContentBuilderService;
-        this.emailService = emailService;
-        this.frontEndPropertyHelper = frontEndPropertyHelper;
-        this.authInfoService = authInfoService;
-    }
 
     @Async
     public void sendInitialNotificationsForCustomerComplain(CustomerComplain customerComplain) {
@@ -137,7 +116,6 @@ public class CustomerComplaintEmailSenderAsync {
         model.put("ticketId", customerComplain.getTicketId());
         String content = mailContentBuilderService.build(model, "PendingCustomerComplainReminder");
         return content;
-//    /    return mailContentBuilderService.build(model, "PendingCustomerComplainReminder");
     }
 
     private void sendPendingCustomerComplaintToLSLBAdmin(String lslbAdminEmail, String mailContent) {

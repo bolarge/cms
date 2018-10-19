@@ -13,6 +13,9 @@ public interface FeeService {
     Mono<ResponseEntity> createFee(FeeCreateDto feeCreateDto, HttpServletRequest request);
     Mono<ResponseEntity> getAllFees(String feePaymentTypeId, String gameTypeId, String revenueNameId);
     Mono<ResponseEntity> getAllFeePaymentType();
+
+    Mono<ResponseEntity> setFeeEndDate(FeeEndDateUpdateDto feeEndDateUpdateDto, HttpServletRequest request);
+
     Mono<ResponseEntity> updateFeePaymentType(FeePaymentTypeDto feeTypeCreateDto, HttpServletRequest request);
     Mono<ResponseEntity> createFeePaymentType(FeePaymentTypeDto feeTypeCreateDto, HttpServletRequest request);
     Mono<ResponseEntity> createLicenseType(RevenueNameDto revenueNameDto, HttpServletRequest request);
@@ -26,7 +29,9 @@ public interface FeeService {
 
     Mono<ResponseEntity> findLicenseTypeByParams(String institutionId, String agentId);
 
-    Fee findFeeByLicenseTypeGameTypeAndFeePaymentType(String revenueNameId, String gameTypeId, String feePaymentTypeId);
+    Fee findActiveFeeByLicenseTypeGameTypeAndFeePaymentType(String revenueNameId, String gameTypeId, String feePaymentTypeId);
+
+    Fee findMostRecentFeeByLicenseTypeGameTypeAndFeePaymentType(String licenseTypeId, String gameTypeId, String feePaymentTypeId);
 
     FeePaymentType getFeePaymentTypeById(String feePaymentTypeId);
 }

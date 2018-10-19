@@ -12,6 +12,7 @@ public class DocumentTypeReferenceData {
     private static String AIPDocumentPurposeId = DocumentPurposeReferenceData.AIP_LICENSE_ID;
     private static String RENEWALDocumentPurposeId = DocumentPurposeReferenceData.RENEWAL_LICENSE_ID;
     private static String INSPECTION_ID = DocumentPurposeReferenceData.INSPECTION_ID;
+
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
 
         DocumentType documentType1 = (DocumentType) mongoRepositoryReactive.findById("1", DocumentType.class).block();
@@ -154,8 +155,8 @@ public class DocumentTypeReferenceData {
                 "Details of casino staff"
         };
         //documentNames.
-        for(int i=0; i<documentNames.length; i++){
-            int id= i+12;
+        for (int i = 0; i < documentNames.length; i++) {
+            int id = i + 12;
             DocumentType documentType13 = (DocumentType) mongoRepositoryReactive.findById(String.valueOf(id), DocumentType.class).block();
             if (documentType13 == null) {
                 documentType13 = new DocumentType();
@@ -192,6 +193,26 @@ public class DocumentTypeReferenceData {
         documentType23.setActive(true);
         documentType23.setRequired(true);
 
+        DocumentType documentType24 = (DocumentType) mongoRepositoryReactive.findById("24", DocumentType.class).block();
+        if (documentType24 == null) {
+            documentType24 = new DocumentType();
+            documentType24.setId("24");
+        }
+        documentType24.setName("Customer complain document");
+        documentType24.setDocumentPurposeId(DocumentPurposeReferenceData.CUSTOMER_COMPLAIN_ID);
+        documentType24.setActive(true);
+        documentType24.setRequired(true);
+
+        DocumentType documentType25 = (DocumentType) mongoRepositoryReactive.findById("25", DocumentType.class).block();
+        if (documentType25 == null) {
+            documentType25 = new DocumentType();
+            documentType25.setId("25");
+        }
+        documentType25.setName("Logged case document");
+        documentType25.setDocumentPurposeId(DocumentPurposeReferenceData.LOGGED_CASE_ID);
+        documentType25.setActive(true);
+        documentType25.setRequired(true);
+
         mongoRepositoryReactive.saveOrUpdate(documentType1);
         mongoRepositoryReactive.saveOrUpdate(documentType2);
         mongoRepositoryReactive.saveOrUpdate(documentType3);
@@ -205,6 +226,8 @@ public class DocumentTypeReferenceData {
         mongoRepositoryReactive.saveOrUpdate(documentType11);
         mongoRepositoryReactive.saveOrUpdate(documentType22);
         mongoRepositoryReactive.saveOrUpdate(documentType23);
+        mongoRepositoryReactive.saveOrUpdate(documentType24);
+        mongoRepositoryReactive.saveOrUpdate(documentType25);
 
 
     }
