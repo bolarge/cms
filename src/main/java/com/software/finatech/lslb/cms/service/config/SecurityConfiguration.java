@@ -73,7 +73,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 "/configuration/security",
                 "/docApi/**",
                 "/webjars/**",
-                "/api/v1/document/complaint-upload",
+                "/api/v1/document/open-upload",
                 "/test/**");
         SkipPathRequestMatcher matcher = new SkipPathRequestMatcher(pathsToSkip, "/**");
 
