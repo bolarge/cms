@@ -437,14 +437,14 @@ public class DocumentController extends BaseController {
 
 
 
-    @RequestMapping(method = RequestMethod.POST, value = "/complaint-upload", produces = "application/json")
-    @ApiOperation(value = "Upload Complaint Document", response = DocumentDto.class, consumes = "application/json")
+    @RequestMapping(method = RequestMethod.POST, value = "/open-upload", produces = "application/json")
+    @ApiOperation(value = "Upload Document without authentication Document", response = DocumentDto.class, consumes = "application/json")
     @ApiResponses(value = {
                             @ApiResponse(code = 200, message = "OK"),
                             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
                             @ApiResponse(code = 400, message = "Bad request"),
                             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> uploadCompalint(@RequestParam("json") String json,
+    public Mono<ResponseEntity> openUpload(@RequestParam("json") String json,
                                        @RequestParam("files") @NotEmpty MultipartFile[] files) {
 
         //@TODO If its a file replace we have to validate that the old id comes with the json
