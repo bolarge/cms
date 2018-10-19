@@ -693,7 +693,8 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         if (gameType != null && !StringUtils.isEmpty(gameType.getShortCode())) {
             gameTypePref = String.format("-%s", gameType.getShortCode());
         }
-        String applicationFormId = String.format("LSLB-APP%s-%s", gameTypePref, NumberUtil.getRandomNumberInRange(1000, 100000));
+        LocalDateTime presentTime = LocalDateTime.now();
+        String applicationFormId = String.format("LSLB-APP%s-%s%s%s", gameTypePref, NumberUtil.getRandomNumberInRange(10, 100), presentTime.getSecondOfMinute(), presentTime.getMinuteOfHour());
         applicationForm.setApplicationFormId(applicationFormId);
         return applicationForm;
     }

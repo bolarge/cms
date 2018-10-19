@@ -63,10 +63,8 @@ public class DatabaseConfiguration {
         uri.append(mongoHost);
         uri.append(":");
         uri.append(mongoPort);
-        if (getActiveProfiles().contains("staging")) {
-            uri.append("/");
-            uri.append(mongoDatabase);
-        }
+//        uri.append("/");
+//        uri.append(mongoDatabase);
 
         //logger.info(uri.toString());
         ConnectionString connectionString = new ConnectionString(uri.toString());
@@ -125,10 +123,9 @@ public class DatabaseConfiguration {
         uri.append(mongoHost);
         uri.append(":");
         uri.append(mongoPort);
-        if (getActiveProfiles().contains("staging")) {
-            uri.append("/");
-            uri.append(mongoDatabase);
-        }
+//        uri.append("/");
+//        uri.append(mongoDatabase);
+
 
         //logger.info("Mongo template:   "+uri.toString());
         return new com.mongodb.MongoClient(new MongoClientURI(uri.toString()));

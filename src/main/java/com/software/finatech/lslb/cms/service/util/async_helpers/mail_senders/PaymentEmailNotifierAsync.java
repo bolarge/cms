@@ -2,7 +2,6 @@ package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.RevenueNameReferenceData;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Component;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 @Component
 public class PaymentEmailNotifierAsync {
@@ -38,12 +36,11 @@ public class PaymentEmailNotifierAsync {
 
     @Async
     public void sendPaymentNotificationForPaymentRecordDetail(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
-        String revenueNameId = paymentRecord.getRevenueNameId();
-        if (StringUtils.equals(RevenueNameReferenceData.AGENT_REVENUE_ID, revenueNameId)) {
+        if (paymentRecord.isAgentPayment()) {
             Agent agent = paymentRecord.getAgent();
             sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, agent.getEmailAddress(), "PaymentNotificationExternalUser");
         }
-        if (StringUtils.equals(RevenueNameReferenceData.INSTITUTION_REVENUE_ID, revenueNameId) || StringUtils.equals(RevenueNameReferenceData.GAMING_MACHINE_ID, revenueNameId)) {
+        if (paymentRecord.isInstitutionPayment() || paymentRecord.isGamingMachinePayment()) {
             ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorAdminsForInstitution(paymentRecord.getInstitutionId());
             for (AuthInfo institutionAdmin : institutionAdmins) {
                 sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, institutionAdmin.getEmailAddress(), "PaymentNotificationExternalUser");
@@ -98,7 +95,7 @@ public class PaymentEmailNotifierAsync {
             String feePaymentTypeName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getFeePaymentTypeName());
             String amount = NumberFormat.getInstance().format(paymentRecordDetail.getAmount());
             String modeOfPaymentName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecordDetail.getModeOfPaymentName());
-            String revenueName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getRevenueNameName());
+            String revenueName = StringCapitalizer.convertToTitleCaseIteratingChars(String.valueOf(paymentRecord.getLicenseType()));
             String gameTypeName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getGameTypeName());
             String paymentDate = paymentRecordDetail.getPaymentDate().toString("dd-MM-yyyy");
             boolean isPartPayment = paymentRecord.getAmount() > paymentRecordDetail.getAmount();

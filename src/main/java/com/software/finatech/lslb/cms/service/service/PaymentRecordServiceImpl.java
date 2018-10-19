@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.dto.PaymentReceiptResponse;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
@@ -84,7 +85,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             }
             if (!StringUtils.isEmpty(revenueNameId)) {
-                query.addCriteria(Criteria.where("revenueNameId").is(revenueNameId));
+                query.addCriteria(Criteria.where("licenseTypeId").is(revenueNameId));
             }
             if (!StringUtils.isEmpty(paymentStatusId)) {
                 query.addCriteria(Criteria.where("paymentStatusId").is(paymentStatusId));
@@ -215,14 +216,13 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
     public PaymentRecord findPaymentRecordForGamingMachine(String gamingMachineId,
                                                            String gameTypeId,
                                                            String institutionId,
-                                                           String feePaymentTypeId,
-                                                           String revenueNameId) {
+                                                           String feePaymentTypeId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
         query.addCriteria(Criteria.where("feePaymentTypeId").is(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID));
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         query.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
-        query.addCriteria(Criteria.where("revenueNameId").is(revenueNameId));
+        query.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.GAMING_MACHINE_ID));
         return (PaymentRecord) mongoRepositoryReactive.find(query, PaymentRecord.class).block();
     }
 
@@ -256,7 +256,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             paymentReceiptResponse.setOwnerName(convertToTitleCaseIteratingChars(paymentRecord.getOwnerName()));
             paymentReceiptResponse.setPaymentReference(paymentRecord.getPaymentReference());
             paymentReceiptResponse.setAmount(paymentRecord.getAmount());
-            paymentReceiptResponse.setRevenueName(paymentRecord.getRevenueNameName());
+            paymentReceiptResponse.setRevenueName(String.valueOf(paymentRecord.getLicenseType()));
             License paymentLicense = paymentRecord.getLicense();
             if (paymentLicense != null && paymentLicense.getExpiryDate() != null && paymentLicense.getEffectiveDate() != null) {
                 paymentReceiptResponse.setStartDate(paymentLicense.getEffectiveDate().toString("dd-MM-yyyy"));

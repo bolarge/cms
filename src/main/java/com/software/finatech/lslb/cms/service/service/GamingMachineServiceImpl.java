@@ -55,7 +55,6 @@ public class GamingMachineServiceImpl implements GamingMachineService {
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
 
-
     @Autowired
     public GamingMachineServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                                     LicenseValidatorUtil licenseValidatorUtil,
@@ -443,11 +442,11 @@ public class GamingMachineServiceImpl implements GamingMachineService {
                     String.format("No category found for machine with machine number %s", gamingMachine.getMachineNumber()));
             return new ImmutablePair<>(null, invalidGamingMachinePayment);
         }
-        String revenueNameId = RevenueNameReferenceData.GAMING_MACHINE_ID;
+        String licenseTypeId = LicenseTypeReferenceData.GAMING_MACHINE_ID;
         String feePaymentTypeId = FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID;
         String gameTypeName = gameType.getName();
         String gameTypeId = gameType.getId();
-        Fee fee = feeService.findFeeByRevenueNameGameTypeAndFeePaymentType(revenueNameId, gameTypeId, feePaymentTypeId);
+        Fee fee = feeService.findFeeByLicenseTypeGameTypeAndFeePaymentType(licenseTypeId, gameTypeId, feePaymentTypeId);
         if (fee == null) {
             invalidGamingMachinePayment = new InvalidGamingMachinePayment(gamingMachineId,
                     machineNumber,
@@ -455,7 +454,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
             return new ImmutablePair<>(null, invalidGamingMachinePayment);
         }
 
-        PaymentRecord existingLicensePayment = paymentRecordService.findPaymentRecordForGamingMachine(gamingMachineId, gameTypeId, institutionId, feePaymentTypeId, revenueNameId);
+        PaymentRecord existingLicensePayment = paymentRecordService.findPaymentRecordForGamingMachine(gamingMachineId, gameTypeId, institutionId, feePaymentTypeId);
         if (existingLicensePayment != null && StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, existingLicensePayment.getPaymentStatusId())) {
             invalidGamingMachinePayment.setGamingMachineId(gamingMachineId);
             invalidGamingMachinePayment.setGameTypeName(gameTypeName);
@@ -500,18 +499,18 @@ public class GamingMachineServiceImpl implements GamingMachineService {
                     gamingMachine.getMachineNumber()));
             return new ImmutablePair<>(null, invalidGamingMachinePayment);
         }
-        String revenueNameId = RevenueNameReferenceData.GAMING_MACHINE_ID;
+        String licenseTypeId = LicenseTypeReferenceData.GAMING_MACHINE_ID;
         String feePaymentTypeId = FeePaymentTypeReferenceData.LICENSE_RENEWAL_FEE_TYPE_ID;
         String gameTypeName = gameType.getName();
         String gameTypeId = gameType.getId();
-        Fee fee = feeService.findFeeByRevenueNameGameTypeAndFeePaymentType(revenueNameId, gameTypeId, feePaymentTypeId);
+        Fee fee = feeService.findFeeByLicenseTypeGameTypeAndFeePaymentType(licenseTypeId, gameTypeId, feePaymentTypeId);
         if (fee == null) {
             invalidGamingMachinePayment = new InvalidGamingMachinePayment(gamingMachineId,
                     machineNumber,
                     String.format("No licence renewal fee found for gaming machines for category %s", gameTypeName));
             return new ImmutablePair<>(null, invalidGamingMachinePayment);
         }
-        PaymentRecord paymentRecord = paymentRecordService.findPaymentRecordForGamingMachine(gamingMachineId, gameTypeId, institutionId, FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, revenueNameId);
+        PaymentRecord paymentRecord = paymentRecordService.findPaymentRecordForGamingMachine(gamingMachineId, gameTypeId, institutionId, FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID);
         if (paymentRecord == null) {
             invalidGamingMachinePayment.setGamingMachineId(gamingMachineId);
             invalidGamingMachinePayment.setGameTypeName(gameTypeName);
@@ -534,7 +533,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
             double amountTotal = 0;
             Set<String> gamingMachineIdList = gamingMachineMultiplePaymentRequest.getGamingMachineIdList();
             List<PaymentRecordDetailCreateDto> paymentRecordDetailCreateDtoList = new ArrayList<>();
-            String revenueNameId = RevenueNameReferenceData.GAMING_MACHINE_ID;
+            String licenseTypeId = LicenseTypeReferenceData.GAMING_MACHINE_ID;
             String feePaymentTypeId = FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID;
             String institutionId = null;
 
@@ -554,7 +553,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
                 if (existingLicensePayment != null) {
                     return Mono.just(new ResponseEntity<>(String.format("Gaming machine with id %s has a license payment already", gamingMachineId), HttpStatus.BAD_REQUEST));
                 }
-                Fee fee = feeService.findFeeByRevenueNameGameTypeAndFeePaymentType(revenueNameId, gameTypeId, feePaymentTypeId);
+                Fee fee = feeService.findFeeByLicenseTypeGameTypeAndFeePaymentType(licenseTypeId, gameTypeId, feePaymentTypeId);
                 if (fee == null) {
                     GameType gameType = gamingMachine.getGameType();
                     String gameTypeName = gameType != null ? gameType.getName() : gameTypeId;
@@ -596,7 +595,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
                 paymentRecord.setGamingMachineId(paymentRecordDetailCreateDto.getGamingMachineId());
                 paymentRecord.setGameTypeId(fee.getGameTypeId());
                 paymentRecord.setFeePaymentTypeId(fee.getFeePaymentTypeId());
-                paymentRecord.setRevenueNameId(fee.getRevenueNameId());
+                paymentRecord.setLicenseTypeId(fee.getLicenseTypeId());
                 paymentRecord.setPaymentReference(NumberUtil.generateTransactionReferenceForPaymentRecord());
                 paymentRecord.setBatchPaymentId(batchPayment.getId());
 
@@ -622,7 +621,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
             double amountTotal = 0;
             Set<String> gamingMachineIdList = gamingMachineMultiplePaymentRequest.getGamingMachineIdList();
             List<PaymentRecordDetailCreateDto> paymentRecordDetailCreateDtoList = new ArrayList<>();
-            String revenueNameId = RevenueNameReferenceData.GAMING_MACHINE_ID;
+            String licenseTypeId = LicenseTypeReferenceData.GAMING_MACHINE_ID;
             String feePaymentTypeId = FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID;
             String institutionId = null;
 
@@ -643,7 +642,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
                 if (existingLicensePayment != null) {
                     return Mono.just(new ResponseEntity<>(String.format("Gaming machine with id %s has a license payment already", gamingMachineId), HttpStatus.BAD_REQUEST));
                 }
-                Fee fee = feeService.findFeeByRevenueNameGameTypeAndFeePaymentType(revenueNameId, gameTypeId, feePaymentTypeId);
+                Fee fee = feeService.findFeeByLicenseTypeGameTypeAndFeePaymentType(licenseTypeId, gameTypeId, feePaymentTypeId);
                 if (fee == null) {
                     GameType gameType = gamingMachine.getGameType();
                     String gameTypeName = gameType != null ? gameType.getName() : gameTypeId;
@@ -711,7 +710,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
                 paymentRecord.setGamingMachineId(paymentRecordDetailCreateDto.getGamingMachineId());
                 paymentRecord.setGameTypeId(fee.getGameTypeId());
                 paymentRecord.setFeePaymentTypeId(fee.getFeePaymentTypeId());
-                paymentRecord.setRevenueNameId(fee.getRevenueNameId());
+                paymentRecord.setLicenseTypeId(fee.getLicenseTypeId());
                 paymentRecord.setPaymentReference(NumberUtil.generateTransactionReferenceForPaymentRecord());
                 paymentRecord.setBatchPaymentId(batchPayment.getId());
 
@@ -764,7 +763,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
     }
 
     private PaymentRecord findLicensePaymentForGamingMachine(String gamingMachineId, String institutionId, String gameTypeId) {
-        return paymentRecordService.findPaymentRecordForGamingMachine(gamingMachineId, gameTypeId, institutionId, FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, RevenueNameReferenceData.GAMING_MACHINE_ID);
+        return paymentRecordService.findPaymentRecordForGamingMachine(gamingMachineId, gameTypeId, institutionId, FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID);
     }
 
     private List<VigipayInvoiceItem> vigiPayInvoiceItemsFromFeeDescriptions(List<FeeAndDescription> feeDescriptions) {

@@ -64,7 +64,6 @@ public class DatabaseLoaderUtils {
         ScheduledMeetingStatusReferenceData.load(mongoRepositoryReactive);
         DocumentPurposeReferenceData.load(mongoRepositoryReactive);
         DocumentTypeReferenceData.load(mongoRepositoryReactive);
-        RevenueNameReferenceData.load(mongoRepositoryReactive);
         ModeOfPaymentReferenceData.load(mongoRepositoryReactive);
         LicenseTypeReferenceData.load(mongoRepositoryReactive);
         ApprovalRequestStatusReferenceData.load(mongoRepositoryReactive);
@@ -99,7 +98,6 @@ public class DatabaseLoaderUtils {
         factEnums.put("ScheduledMeetingStatus", ScheduledMeetingStatus.class);
         factEnums.put("DocumentPurpose", DocumentPurpose.class);
         factEnums.put("DocumentType", DocumentType.class);
-        factEnums.put("RevenueName", RevenueName.class);
         factEnums.put("ModeOfPayment", ModeOfPayment.class);
         factEnums.put("LicenseTypes", LicenseType.class);
         factEnums.put("ApprovalRequestStatus", ApprovalRequestStatus.class);
@@ -126,5 +124,9 @@ public class DatabaseLoaderUtils {
             Double timeMills = Double.valueOf(endTime) / Double.valueOf(1000000);
             logger.info("Importing took " + " -> " + endTime + "ns" + " >>> " + timeMills + "ms");
         }
+    }
+
+    public MongoRepositoryReactiveImpl getMongoRepositoryReactive() {
+        return mongoRepositoryReactive;
     }
 }

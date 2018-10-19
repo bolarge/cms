@@ -179,14 +179,14 @@ public class DashboardController extends BaseController {
         return licenseStatus;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/payment-summary", params = {"institutionId","revenueNameId","gameTypeId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/payment-summary", params = {"institutionId","licenseTypeId","gameTypeId"})
     @ApiOperation(value = "Get dashboard payment summary ", response = PaymentRecordDashboardSummaryStatusDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getPaymentSummary(@RequestParam("revenueNameId") String revenueNameId,
+    public Mono<ResponseEntity> getPaymentSummary(@RequestParam("licenseTypeId") String revenueNameId,
                                                   @RequestParam("gameTypeId") String gameTypeId,
                                                   @RequestParam("institutionId") String institutionId) {
 
@@ -197,7 +197,7 @@ public class DashboardController extends BaseController {
         }
 
         if (!StringUtils.isEmpty(revenueNameId)) {
-            filterCriteria.add(Criteria.where("revenueNameId").is(revenueNameId));
+            filterCriteria.add(Criteria.where("licenseTypeId").is(revenueNameId));
         }
         if (institutionId != null && !institutionId.isEmpty()) {
             filterCriteria.add(Criteria.where("institutionId").is(institutionId));

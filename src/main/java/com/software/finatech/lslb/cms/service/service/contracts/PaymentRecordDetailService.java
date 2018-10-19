@@ -4,20 +4,21 @@ import com.software.finatech.lslb.cms.service.domain.PaymentRecordDetail;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailUpdateDto;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInBranchNotification;
+import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 public interface PaymentRecordDetailService {
 
-    Mono<ResponseEntity> createInBranchPaymentRecordDetail(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto);
+    Mono<ResponseEntity> createInBranchPaymentRecordDetail(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, HttpServletRequest request);
 
-    Mono<ResponseEntity> createWebPaymentPaymentRecordDetail(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto);
+    Mono<ResponseEntity> createWebPaymentPaymentRecordDetail(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, HttpServletRequest request);
 
     void savePaymentRecordDetail(PaymentRecordDetail paymentRecordDetail);
 
     Mono<ResponseEntity> findAllPaymentRecordDetailForPaymentRecord(String paymentRecordId);
 
-    Mono<ResponseEntity> updateWebPaymentRecordDetail(PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto);
+    Mono<ResponseEntity> updateWebPaymentRecordDetail(PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto, HttpServletRequest request);
 
     PaymentRecordDetail findById(String paymentRecordDetailId);
 
