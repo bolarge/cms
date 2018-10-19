@@ -195,12 +195,16 @@ public class InstitutionServiceImpl implements InstitutionService {
                                                     String sortType,
                                                     String sortProperty,
                                                     String gameTypeIds,
+                                                    String institutionId,
                                                     HttpServletResponse response) {
         try {
             Query query = new Query();
             if (!StringUtils.isEmpty(gameTypeIds)) {
                 List<String> gameTypeIdList = Arrays.asList(gameTypeIds.split("\\s*,\\s*"));
                 query.addCriteria(Criteria.where("gameTypeIds").in(gameTypeIdList));
+            }
+            if (!StringUtils.isEmpty(institutionId)) {
+                query.addCriteria(Criteria.where("id").is(institutionId));
             }
             if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, Institution.class).block();

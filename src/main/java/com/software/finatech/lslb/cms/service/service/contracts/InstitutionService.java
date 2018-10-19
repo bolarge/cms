@@ -26,6 +26,7 @@ public interface InstitutionService {
                                              String sortType,
                                              String sortProperty,
                                              String gameTypeIds,
+                                             String institutionId,
                                              HttpServletResponse httpServletResponse);
 
     Institution findById(String institutionId);
