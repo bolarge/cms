@@ -154,7 +154,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
             if (gamingMachine == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Gaming machine with id %s does not exist", gamingMachineId), HttpStatus.BAD_REQUEST));
             }
-            gamingMachine.setGameDetailsList(gamingMachineUpdateDto.getGameDetailsList());
+        //    gamingMachine.setGameDetailsList(gamingMachineUpdateDto.getGameDetailsList());
             gamingMachine.setMachineNumber(gamingMachineUpdateDto.getGameMachineNumber());
             gamingMachine.setSerialNumber(gamingMachineUpdateDto.getSerialNumber());
             gamingMachine.setManufacturer(gamingMachineUpdateDto.getManufacturer());
@@ -219,13 +219,13 @@ public class GamingMachineServiceImpl implements GamingMachineService {
                                 gamingMachineGameDetails.setGameVersion(columns[5]);
                                 Set<GamingMachineGameDetails> gamingMachineGameDetailsSet = new HashSet<>();
                                 gamingMachineGameDetailsSet.add(gamingMachineGameDetails);
-                                gamingMachine.setGameDetailsList(gamingMachineGameDetailsSet);
+                            //    gamingMachine.setGameDetailsList(gamingMachineGameDetailsSet);
                             } else {
                                 GamingMachineGameDetails gamingMachineGameDetails = new GamingMachineGameDetails();
                                 gamingMachineGameDetails.setGameName(columns[4]);
                                 gamingMachineGameDetails.setGameVersion(columns[5]);
-                                Set<GamingMachineGameDetails> gamingMachineGameDetailsSet = gamingMachine.getGameDetailsList();
-                                gamingMachineGameDetailsSet.add(gamingMachineGameDetails);
+                              //  Set<GamingMachineGameDetails> gamingMachineGameDetailsSet = gamingMachine.getGameDetailsList();
+                           //     gamingMachineGameDetailsSet.add(gamingMachineGameDetails);
                             }
                             gamingMachine.setInstitutionId(institutionId);
                             gamingMachineList.add(gamingMachine);
@@ -302,7 +302,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
         gamingMachine.setManufacturer(gamingMachineCreateDto.getManufacturer());
         gamingMachine.setSerialNumber(gamingMachineCreateDto.getSerialNumber());
         gamingMachine.setMachineNumber(gamingMachineCreateDto.getGameMachineNumber());
-        gamingMachine.setGameDetailsList(gamingMachineCreateDto.getGameDetailsList());
+   //     gamingMachine.setGameDetailsList(gamingMachineCreateDto.getGameDetailsList());
         gamingMachine.setMachineAddress(gamingMachineCreateDto.getMachineAddress());
         gamingMachine.setGameTypeId(gamingMachineCreateDto.getGameTypeId());
         return gamingMachine;
