@@ -87,7 +87,7 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             if (!StringUtils.isEmpty(rejectorId)) {
                 query.addCriteria(Criteria.where("rejectorId").is(rejectorId));
             }
-            if (!StringUtils.isEmpty(startDate) && StringUtils.isEmpty(endDate)) {
+            if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
                 query.addCriteria(Criteria.where("dateCreated").gte(new LocalDate(startDate)).lte(new LocalDate(endDate)));
             }
 
@@ -259,6 +259,11 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             Fee fee = new Fee();
             BeanUtils.copyProperties(pendingFee, fee);
             fee.setId(UUID.randomUUID().toString());
+            fee.setCreated(null);
+            fee.setCreatedAt(null);
+            fee.setLastModified(null);
+            fee.setLastModifiedBy(null);
+            fee.setVersion(null);
             fee.setActive(true);
             mongoRepositoryReactive.saveOrUpdate(fee);
             mongoRepositoryReactive.saveOrUpdate(pendingFee);

@@ -5,6 +5,15 @@ public class Shareholder {
     private String surname;
     private String address;
     private String numberOfShares;
+    private String nationality;
+
+    public String getNationality() {
+        return nationality;
+    }
+
+    public void setNationality(String nationality) {
+        this.nationality = nationality;
+    }
 
     public String getFirstName() {
         return firstName;

@@ -98,7 +98,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             if (!StringUtils.isEmpty(userId)) {
                 query.addCriteria(new Criteria().orOperator(Criteria.where("authInfoId").is(userId), Criteria.where("pendingAuthInfoId").is(userId)));
             }
-            if (!StringUtils.isEmpty(startDate) && StringUtils.isEmpty(endDate)) {
+            if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
                 query.addCriteria(Criteria.where("dateCreated").gte(new LocalDate(startDate)).lte(new LocalDate(endDate)));
             }
 

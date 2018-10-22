@@ -229,7 +229,7 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
         }
         PendingAgent pendingAgent = getPendingAgent();
         if (pendingAgent != null){
-            agentApprovalRequestDto.setAgent(pendingAgent.convertToDto());
+            agentApprovalRequestDto.setAgent(pendingAgent.convertToFullDetailDto());
             agentApprovalRequestDto.setAgentName(pendingAgent.getFullName());
         }
 

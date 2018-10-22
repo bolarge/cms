@@ -5,16 +5,12 @@ import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.domain.AgentApprovalRequest;
 import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.service.EmailService;
-import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
-import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
-import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.AbstractMailSender;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 @Component
-public class AgentCreationNotifierAsync   extends AbstractMailSender {
+public class AgentCreationNotifierAsync extends AbstractMailSender {
 
     private static final Logger logger = LoggerFactory.getLogger(AgentCreationNotifierAsync.class);
 
@@ -49,7 +45,7 @@ public class AgentCreationNotifierAsync   extends AbstractMailSender {
 
     @Async
     public void sendNewAgentApprovalRequestToLSLBAdmin(AgentApprovalRequest agentApprovalRequest) {
-        List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatCanReceiveAgentApprovalsNotification();
+        List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_AGENT_APPROVAL_AGENT_REQUEST_ID);
         if (lslbAdmins == null || lslbAdmins.isEmpty()) {
             logger.info("No LSLB member can receive new agent approval request , skipping emails");
             return;
@@ -85,7 +81,7 @@ public class AgentCreationNotifierAsync   extends AbstractMailSender {
         model.put("institutionName", agentApprovalRequest.getInstitutionName());
         model.put("date", presentDateString);
         model.put("frontEndUrl", frontEndUrl);
-        return mailContentBuilderService.build(model, "Lslb-CreateAgent-Notification");
+        return mailContentBuilderService.build(model, "agent/Lslb-CreateAgent-Notification");
     }
 
     private void sendAgentCreationNotificationToAgent(AgentApprovalRequest agentApprovalRequest) {
@@ -101,7 +97,7 @@ public class AgentCreationNotifierAsync   extends AbstractMailSender {
             model.put("gameType", agentApprovalRequest.getGameTypeName());
             model.put("businessAddressList", businessAddressList);
 
-            String content = mailContentBuilderService.build(model, "Agent-CreateAgent-Notification");
+            String content = mailContentBuilderService.build(model, "agent/Agent-CreateAgent-Notification");
             emailService.sendEmail(content, "LSLB Profile Update", agent.getEmailAddress());
         } catch (Exception e) {
             logger.error("");
@@ -140,7 +136,7 @@ public class AgentCreationNotifierAsync   extends AbstractMailSender {
         model.put("isApproved", isApprovedRequest);
         model.put("businessAddressList", businessAddresses);
         model.put("agentEmail", agentEmail);
-        return mailContentBuilderService.build(model, "agent-creation-notification");
+        return mailContentBuilderService.build(model, "agent/agent-creation-notification-operator");
     }
 
     @Async
@@ -171,7 +167,7 @@ public class AgentCreationNotifierAsync   extends AbstractMailSender {
         model.put("agentId", agentId);
         model.put("agentFullName", agentFullName);
         model.put("frontEndUrl", frontEndUrl);
-        return mailContentBuilderService.build(model, "Agent-Profile-Update-Operator-Admin");
+        return mailContentBuilderService.build(model, "agent/Agent-Profile-Update-Operator-Admin");
     }
 
     private void sendAgentAddressChangeToInstitutionAdmin(String mailContent, String institutionAdminEmail) {

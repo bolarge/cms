@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
 import org.apache.commons.lang3.StringUtils;
@@ -22,30 +23,28 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
     public void sendPaymentNotificationForPaymentRecordDetail(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
         if (paymentRecord.isAgentPayment()) {
             Agent agent = paymentRecord.getAgent();
-            sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, agent.getEmailAddress(), "PaymentNotificationExternalUser");
+            sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, agent.getEmailAddress(), "payment-notifications/PaymentNotificationExternalUser");
         }
         if (paymentRecord.isInstitutionPayment() || paymentRecord.isGamingMachinePayment()) {
             ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(paymentRecord.getInstitutionId());
             for (AuthInfo institutionAdmin : institutionAdmins) {
-                sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, institutionAdmin.getEmailAddress(), "PaymentNotificationExternalUser");
+                sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, institutionAdmin.getEmailAddress(), "payment-notifications/PaymentNotificationExternalUser");
             }
         }
-
         if (paymentRecordDetail.isSuccessfulPayment()) {
             sendPaymentNotificationToLSLBUsers(paymentRecordDetail, paymentRecord);
         }
-
     }
 
 
     private void sendPaymentNotificationToLSLBUsers(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
-        ArrayList<AuthInfo> lslbMembersForPaymentNotification = authInfoService.findAllLSLBMembersThatCanReceivePaymentNotification();
+        ArrayList<AuthInfo> lslbMembersForPaymentNotification = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_PAYMENT_NOTIFICATION_ID);
         if (lslbMembersForPaymentNotification == null || lslbMembersForPaymentNotification.isEmpty()) {
             logger.info("No LSLB finance admin found, skipping email");
             return;
         }
         for (AuthInfo lslbMember : lslbMembersForPaymentNotification) {
-            sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, lslbMember.getEmailAddress(), "PaymentNotificationLSLBFinance");
+            sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, lslbMember.getEmailAddress(), "payment-notifications/PaymentNotificationLSLBFinance");
         }
     }
 
