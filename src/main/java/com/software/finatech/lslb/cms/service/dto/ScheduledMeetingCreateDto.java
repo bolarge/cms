@@ -1,6 +1,8 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ScheduledMeetingCreateDto {
     @NotEmpty(message = "Please provide creator Id")
@@ -14,6 +16,15 @@ public class ScheduledMeetingCreateDto {
     private String meetingDate;
     @NotEmpty(message = "Please provide application form id")
     private String applicationFormId;
+    private Set<String> recipients = new HashSet<>();
+
+    public Set<String> getRecipients() {
+        return recipients;
+    }
+
+    public void setRecipients(Set<String> recipients) {
+        this.recipients = recipients;
+    }
 
     public String getMeetingDate() {
         return meetingDate;

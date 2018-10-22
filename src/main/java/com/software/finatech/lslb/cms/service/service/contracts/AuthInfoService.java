@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 public interface AuthInfoService {
     Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl, HttpServletRequest request);
@@ -37,17 +37,11 @@ public interface AuthInfoService {
 
     AuthInfo getUserById(String userId);
 
-    ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveCustomerComplainNotification();
+    ArrayList<AuthInfo> findAllLSLBMembersThatHasPermission(String authPermissionId);
 
-    ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveApplicationSubmissionNotification();
-
-    ArrayList<AuthInfo> findAllLSLBMembersThatCanReceivePaymentNotification();
-
-    ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveAgentApprovalsNotification();
+    ArrayList<AuthInfo> getUsersFromUserIds(Collection<String> userIds);
 
     Mono<ResponseEntity> addPermissionsToUser(UserAuthPermissionDto userAuthPermissionDto);
-
-    ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveNewCaseNotification();
 
     Mono<ResponseEntity> removePermissionFromUser(UserAuthPermissionDto userAuthPermissionDto);
 

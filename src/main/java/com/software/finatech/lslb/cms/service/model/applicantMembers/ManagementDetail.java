@@ -7,6 +7,33 @@ public class ManagementDetail {
     private String address;
     private String educationalQualification;
     private String position;
+    private Boolean managementHasGamingIndustryExperience;
+    private int numberOfYears;
+    private String detailsOfExperience;
+
+    public Boolean getManagementHasGamingIndustryExperience() {
+        return managementHasGamingIndustryExperience;
+    }
+
+    public void setManagementHasGamingIndustryExperience(Boolean managementHasGamingIndustryExperience) {
+        this.managementHasGamingIndustryExperience = managementHasGamingIndustryExperience;
+    }
+
+    public int getNumberOfYears() {
+        return numberOfYears;
+    }
+
+    public void setNumberOfYears(int numberOfYears) {
+        this.numberOfYears = numberOfYears;
+    }
+
+    public String getDetailsOfExperience() {
+        return detailsOfExperience;
+    }
+
+    public void setDetailsOfExperience(String detailsOfExperience) {
+        this.detailsOfExperience = detailsOfExperience;
+    }
 
     public String getFirstName() {
         return firstName;

@@ -3,7 +3,7 @@ package com.software.finatech.lslb.cms.service.background_jobs;
 import com.software.finatech.lslb.cms.service.domain.ScheduledMeeting;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingStatusReferenceData;
-import com.software.finatech.lslb.cms.service.service.contracts.ScheduledMeetingService;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ScheduledMeetingMailSenderAsync;
 import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
@@ -23,18 +23,18 @@ public class ScheduledMeetingJob {
     private static final Logger logger = LoggerFactory.getLogger(ScheduledMeetingJob.class);
 
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
-    private ScheduledMeetingService scheduledMeetingService;
+    private ScheduledMeetingMailSenderAsync scheduledMeetingMailSenderAsync;
 
     private static final int MAX_NUMBER_OF_METING_REMINDERS = 2;
-    private static  final int POST_MEETING_REMINDER_DAYS = 7;
+    private static final int POST_MEETING_REMINDER_DAYS = 7;
 
     private static final int FIFTEEN_MIN = 15 * 60 * 1000;
 
     @Autowired
     public ScheduledMeetingJob(MongoRepositoryReactiveImpl mongoRepositoryReactive,
-                               ScheduledMeetingService scheduledMeetingService) {
+                               ScheduledMeetingMailSenderAsync scheduledMeetingMailSenderAsync) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
-        this.scheduledMeetingService = scheduledMeetingService;
+        this.scheduledMeetingMailSenderAsync = scheduledMeetingMailSenderAsync;
     }
 
 
@@ -46,7 +46,7 @@ public class ScheduledMeetingJob {
             return;
         }
         for (ScheduledMeeting scheduledMeeting : pendingScheduledMeetings) {
-            scheduledMeetingService.sendMeetingNotificationEmailToMeetingCreator(String.format("Reminder : Meeting with %s", scheduledMeeting.getInstitutionName()), "ScheduledMeetingPostMeetingReminderNotificationForLslbAdmin", scheduledMeeting);
+            scheduledMeetingMailSenderAsync.sendEmailToMeetingCreator("scheduled-meetings/ScheduledMeetingPostMeetingReminderNotificationForLslbAdmin", String.format("Post Meeting Reminder : Meeting with %s", scheduledMeeting.getInstitutionName()), scheduledMeeting);
             scheduledMeeting.setNextPostMeetingReminderDate(scheduledMeeting.getNextPostMeetingReminderDate().plusDays(POST_MEETING_REMINDER_DAYS));
             scheduledMeeting.setReminderNotificationCount(scheduledMeeting.getReminderNotificationCount() + 1);
             mongoRepositoryReactive.saveOrUpdate(scheduledMeeting);
@@ -61,8 +61,9 @@ public class ScheduledMeetingJob {
             return;
         }
         for (ScheduledMeeting scheduledMeeting : pendingScheduledMeetings) {
-            scheduledMeetingService.sendMeetingNotificationEmailToMeetingAttendees("Reminder: Meeting With LSLB", "ScheduledMeetingReminderNotificationForGamingOperator", scheduledMeeting);
-            scheduledMeetingService.sendMeetingNotificationEmailToMeetingCreator(String.format("Reminder: Meeting with %s", scheduledMeeting.getInstitutionName()), "ScheduledMeetingReminderNotificationForLslbAdmin", scheduledMeeting);
+            scheduledMeetingMailSenderAsync.sendEmailToMeetingCreator("scheduled-meetings/ScheduledMeetingReminderNotificationForLslbAdmin", String.format("Reminder: Meeting with %s", scheduledMeeting.getInstitutionName()), scheduledMeeting);
+            scheduledMeetingMailSenderAsync.sendEmailToMeetingInvitedOperators("scheduled-meetings/ScheduledMeetingReminderNotificationForGamingOperator", "Reminder: Meeting With Lagos State Lotteries Board", scheduledMeeting);
+            scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeetingReminderNotificationForLslbAdmin", String.format("Reminder: Meeting with %s", scheduledMeeting.getInstitutionName()), scheduledMeeting, scheduledMeeting.getRecipients());
             scheduledMeeting.setReminderSent(true);
             mongoRepositoryReactive.saveOrUpdate(scheduledMeeting);
         }

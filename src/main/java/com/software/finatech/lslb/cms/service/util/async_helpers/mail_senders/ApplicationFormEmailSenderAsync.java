@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -14,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Component
-public class ApplicationFormEmailSenderAsync extends AbstractMailSender{
+public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
 
     private static final Logger logger = LoggerFactory.getLogger(ApplicationFormEmailSenderAsync.class);
 
@@ -86,7 +87,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender{
 
     @Async
     public void sendApplicationFormSubmissionMailToLSLBAdmins(ApplicationForm applicationForm) {
-        List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatCanReceiveApplicationSubmissionNotification();
+        List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_APPLICATION_ID);
         if (lslbAdmins.isEmpty()) {
             logger.info("No LSLB Admin staff found, Skipping email sending");
             return;

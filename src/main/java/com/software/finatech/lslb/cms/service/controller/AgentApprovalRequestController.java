@@ -40,7 +40,7 @@ public class AgentApprovalRequestController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getAllApplicationForms(@RequestParam("page") int page,
+    public Mono<ResponseEntity> getAllAgentApprovalRequests(@RequestParam("page") int page,
                                                        @RequestParam("pageSize") int pageSize,
                                                        @RequestParam("sortType") String sortType,
                                                        @RequestParam("sortProperty") String sortParam,
@@ -80,7 +80,7 @@ public class AgentApprovalRequestController {
         return agentApprovalRequestService.rejectRequest(agentApprovalRequestOperationtDto, request);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/all-agent-approval-request-types")
+    @RequestMapping(method = RequestMethod.GET, value = "/all-agent-approval-request-types")
     @ApiOperation(value = "Get all agent approval request types", response = String.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -91,7 +91,7 @@ public class AgentApprovalRequestController {
         return agentApprovalRequestService.getAllAgentApprovalRequestType();
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/all-approval-request-status")
+    @RequestMapping(method = RequestMethod.GET, value = "/all-approval-request-status")
     @ApiOperation(value = "Get all agent approval request statuses", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -102,7 +102,7 @@ public class AgentApprovalRequestController {
         return agentApprovalRequestService.getAllApprovalRequestStatus();
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/{id}")
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}")
     @ApiOperation(value = "Get Agent approval request full detail", response = AgentApprovalRequestDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),

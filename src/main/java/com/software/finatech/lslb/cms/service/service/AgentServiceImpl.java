@@ -169,16 +169,16 @@ public class AgentServiceImpl implements AgentService {
             agentCreationNotifierAsync.sendNewAgentApprovalRequestToLSLBAdmin(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
-            return Mono.just(new ResponseEntity<>("Invalid Date format for date of birth , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Invalid Date format for date of birth , please use yyyy-MM-dd", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
             return logAndReturnError(logger, "an error occurred when creating agent", e);
         }
     }
 
-    private AgentApprovalRequest fromAgentCreateDto(AgentCreateDto agentCreateDto, Agent agent) {
+    private AgentApprovalRequest fromAgentCreateDto(AgentCreateDto agentCreateDto, PendingAgent pendingAgent) {
         AgentApprovalRequest agentApprovalRequest = new AgentApprovalRequest();
         agentApprovalRequest.setId(UUID.randomUUID().toString());
-        agentApprovalRequest.setPendingAgentId(agent.getId());
+        agentApprovalRequest.setPendingAgentId(pendingAgent.getId());
         agentApprovalRequest.setGameTypeId(agentCreateDto.getGameTypeId());
         agentApprovalRequest.setInstitutionId(agentCreateDto.getInstitutionId());
         agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
@@ -267,9 +267,8 @@ public class AgentServiceImpl implements AgentService {
             Agent agent = (Agent) mongoRepositoryReactive.find(query, Agent.class).block();
             if (agent == null) {
                 return Mono.just(new ResponseEntity<>("No Record found", HttpStatus.NOT_FOUND));
-            } else {
-                return Mono.just(new ResponseEntity<>(agent.convertToFullDetailDto(), HttpStatus.OK));
             }
+            return Mono.just(new ResponseEntity<>(agent.convertToFullDetailDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while validating agent", e);
         }
@@ -374,6 +373,6 @@ public class AgentServiceImpl implements AgentService {
     }
 
     private String generateAgentId() {
-        return String.format("LAGOS-AG-%s%s", NumberUtil.getRandomNumberInRange(20, 1000), LocalDateTime.now().secondOfMinute());
+        return String.format("LAGOS-AG-%s%s", NumberUtil.getRandomNumberInRange(20, 1000), LocalDateTime.now().getSecondOfMinute());
     }
 }

@@ -7,10 +7,7 @@ import com.software.finatech.lslb.cms.service.dto.sso.SSOChangePasswordModel;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOPasswordResetModel;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOToken;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOUserConfirmResetPasswordRequest;
-import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.UserApprovalRequestTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.AuthInfoServiceImpl;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
@@ -586,16 +583,13 @@ public class AuthInfoController extends BaseController {
                 query.addCriteria(Criteria.where("institutionId").is(institutionId));
             }
 
-            if (StringUtils.isEmpty(roleId)) {
+            if (!StringUtils.isEmpty(roleId)) {
                 query.addCriteria(Criteria.where("authRoleId").is(roleId));
             }
 
-            if (!(loggedInUser.isVGGUser() || loggedInUser.isVGGAdmin() || loggedInUser.isSuperAdmin())) {
-                List<String> notAllowedRoles = new ArrayList<>();
-                notAllowedRoles.add(AuthRoleReferenceData.SUPER_ADMIN_ID);
-                notAllowedRoles.add(AuthRoleReferenceData.VGG_USER_ID);
-                notAllowedRoles.add(AuthRoleReferenceData.VGG_ADMIN_ID);
-                query.addCriteria(Criteria.where("authRoleId").nin(notAllowedRoles));
+            List<String> notAllowedRoleIds = getNotAllowedRoleIds();
+            if (!notAllowedRoleIds.contains(loggedInUser.getAuthRoleId())) {
+                query.addCriteria(Criteria.where("authRoleId").nin(notAllowedRoleIds));
             }
 
             if (sorting != null && !sorting.isEmpty() && sortProperty != null && !sortProperty.isEmpty()) {
@@ -656,7 +650,7 @@ public class AuthInfoController extends BaseController {
                 authInfoDto.add(entry.convertToDto());
             });
 
-            if (authInfoDto.size() == 0) {
+            if (authInfos.size() == 0) {
                 return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
             }
 
@@ -800,7 +794,7 @@ public class AuthInfoController extends BaseController {
     }
 
 
-    @RequestMapping(method = RequestMethod.POST, value = "/get-new-permissions-for-user")
+    @RequestMapping(method = RequestMethod.GET, value = "/new-permissions-for-user")
     @ApiOperation(value = "Get permissions you can add to user", response = AuthPermissionDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -813,10 +807,11 @@ public class AuthInfoController extends BaseController {
             if (loggedInUser == null) {
                 return Mono.just(new ResponseEntity<>(String.format("User with id %s not found", userId), HttpStatus.BAD_REQUEST));
             }
-            Map authPermissionMap = Mapstore.STORE.get("AuthPermission");
-            Set<AuthPermission> authPermissionSet = (Set<AuthPermission>) authPermissionMap.values();
+            Map<String, FactObject> authPermissionMap = Mapstore.STORE.get("AuthPermission");
+            Collection<FactObject> factObjects = authPermissionMap.values();
             ArrayList<AuthPermission> permissions = new ArrayList<>();
-            for (AuthPermission permission : authPermissionSet) {
+            for (FactObject factObject : factObjects) {
+                AuthPermission permission = (AuthPermission) factObject;
                 if (((StringUtils.equals(loggedInUser.getAuthRoleId(), permission.getAuthRoleId()) || permission.isUsedBySystem())) &&
                         !loggedInUser.getAllUserPermissionIdsForUser().contains(permission.getId())) {
                     permissions.add(permission);
@@ -835,7 +830,40 @@ public class AuthInfoController extends BaseController {
         }
     }
 
-    public String getAppHostPort() {
-        return this.appHostPort;
+    @RequestMapping(method = RequestMethod.GET, value = "/all-active-lslb-members")
+    @ApiOperation(value = "Get permissions you can add to user", response = AuthPermissionDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllActiveLSLBMembers() {
+        try {
+            Query query = new Query();
+            query.addCriteria(Criteria.where("authRoleId").in(LSLBAuthRoleReferenceData.getLslbRoles()));
+            query.addCriteria(Criteria.where("enabled").is(true));
+            ArrayList<AuthInfo> authInfos = (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
+            if (authInfos == null || authInfos.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
+            }
+            ArrayList<AuthInfoDto> dtos = new ArrayList<>();
+            for (AuthInfo authInfo : authInfos) {
+                AuthInfoDto dto = new AuthInfoDto();
+                dto.setId(authInfo.getId());
+                dto.setFullName(authInfo.getFullName());
+                dtos.add(dto);
+            }
+            return Mono.just(new ResponseEntity<>(dtos, HttpStatus.OK));
+        } catch (Exception e) {
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while getting permissions for roles", e);
+        }
+    }
+
+    private List<String> getNotAllowedRoleIds() {
+        List<String> notAllowedRoleIds = new ArrayList<>();
+        notAllowedRoleIds.add(AuthRoleReferenceData.VGG_ADMIN_ID);
+        notAllowedRoleIds.add(AuthRoleReferenceData.VGG_USER_ID);
+        notAllowedRoleIds.add(AuthRoleReferenceData.SUPER_ADMIN_ID);
+        return notAllowedRoleIds;
     }
 }

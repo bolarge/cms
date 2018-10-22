@@ -1,13 +1,17 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 
+import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
 import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("serial")
 @Document(collection = "ScheduledMeetings")
@@ -20,6 +24,7 @@ public class ScheduledMeeting extends AbstractFact {
     private String institutionId;
     private String scheduledMeetingStatusId;
     private String venue;
+    private Set<String> recipientIds;
     private String cancelerId;
     private String entityId;
     private String applicationFormId;
@@ -27,6 +32,14 @@ public class ScheduledMeeting extends AbstractFact {
     private LocalDateTime nextPostMeetingReminderDate;
     private int reminderNotificationCount = 0;
     private boolean reminderSent;
+
+    public Set<String> getRecipientIds() {
+        return recipientIds;
+    }
+
+    public void setRecipientIds(Set<String> recipientIds) {
+        this.recipientIds = recipientIds;
+    }
 
     public boolean isReminderSent() {
         return reminderSent;
@@ -192,6 +205,7 @@ public class ScheduledMeeting extends AbstractFact {
         scheduledMeetingDto.setMeetingTitle(getMeetingSubject());
         scheduledMeetingDto.setAdditionalNotes(getMeetingDescription());
         scheduledMeetingDto.setMeetingDate(getMeetingDateString());
+        scheduledMeetingDto.setMeetingTime(getMeetingTimeString());
         ScheduledMeetingStatus scheduledMeetingStatus = getMeetingStatus();
         if (scheduledMeetingStatus != null) {
             scheduledMeetingDto.setMeetingStatusId(getScheduledMeetingStatusId());
@@ -205,6 +219,12 @@ public class ScheduledMeeting extends AbstractFact {
         scheduledMeetingDto.setCreatorFullName(getCreatorFullName());
         scheduledMeetingDto.setVenue(getVenue());
         return scheduledMeetingDto;
+    }
+
+    public ScheduledMeetingDto convertToFullDto() {
+        ScheduledMeetingDto dto = convertToDto();
+        dto.setRecipients(getRecipientDto());
+        return dto;
     }
 
     public String getGameTypeName() {
@@ -222,10 +242,70 @@ public class ScheduledMeeting extends AbstractFact {
         return (ApplicationForm) mongoRepositoryReactive.findById(this.applicationFormId, ApplicationForm.class).block();
     }
 
-    public String getMeetingDateString() {
+    public String getMeetingDateTimeString() {
         LocalDateTime meetingDateTime = getMeetingDate();
         if (meetingDateTime != null) {
             return meetingDateTime.toString("dd-MM-yyyy HH:mm:ss");
+        }
+        return null;
+    }
+
+    public String getMeetingDateString() {
+        LocalDateTime meetingDateTime = getMeetingDate();
+        if (meetingDateTime != null) {
+            return meetingDateTime.toString("dd-MM-yyyy");
+        }
+        return null;
+    }
+
+    public String getMeetingTimeString() {
+        LocalDateTime meetingDateTime = getMeetingDate();
+        if (meetingDateTime != null) {
+            return meetingDateTime.toString("HH:mm:ss a");
+        }
+        return null;
+    }
+
+    public AuthInfo getCreator() {
+        return getUser(this.creatorId);
+    }
+
+    public AuthInfo getUser(String userId) {
+        if (StringUtils.isEmpty(userId)) {
+            return null;
+        }
+        return (AuthInfo) mongoRepositoryReactive.findById(userId, AuthInfo.class).block();
+    }
+
+    public ArrayList<AuthInfo> getRecipients() {
+        ArrayList<AuthInfo> authInfos = new ArrayList<>();
+        for (String authInfoId : this.recipientIds) {
+            AuthInfo recipient = getUser(authInfoId);
+            if (recipient != null) {
+                authInfos.add(recipient);
+            }
+        }
+        return authInfos;
+    }
+
+    public Set<AuthInfoDto> getRecipientDto() {
+        Set<AuthInfoDto> dtos = new HashSet<>();
+        for (String authInfoId : this.recipientIds) {
+            AuthInfo recipient = getUser(authInfoId);
+            if (recipient != null) {
+                AuthInfoDto dto = new AuthInfoDto();
+                dto.setId(recipient.getId());
+                dto.setFullName(recipient.getFullName());
+                dtos.add(dto);
+            }
+        }
+        return dtos;
+    }
+
+    public ArrayList<String> getRecipientNames() {
+        ArrayList<String> recipientNames = new ArrayList<>();
+        for (AuthInfo user : getRecipients()) {
+            recipientNames.add(user.getFullName());
         }
         return null;
     }

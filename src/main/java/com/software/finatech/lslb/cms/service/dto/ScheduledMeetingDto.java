@@ -1,5 +1,8 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class ScheduledMeetingDto {
     private String creatorFullName;
     private String venue;
@@ -11,6 +14,21 @@ public class ScheduledMeetingDto {
     private String institutionId;
     private String meetingStatusName;
     private String meetingStatusId;
+    private String meetingTime;
+    private Set<AuthInfoDto> recipients = new HashSet<>();
+
+    public void setRecipients(Set<AuthInfoDto> recipients) {
+        this.recipients = recipients;
+    }
+
+
+    public String getMeetingTime() {
+        return meetingTime;
+    }
+
+    public void setMeetingTime(String meetingTime) {
+        this.meetingTime = meetingTime;
+    }
 
     public String getInstitutionId() {
         return institutionId;
