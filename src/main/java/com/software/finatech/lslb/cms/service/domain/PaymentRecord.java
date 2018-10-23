@@ -22,6 +22,7 @@ public class PaymentRecord extends AbstractFact {
     private String feeId;
     private String agentId;
     private String gamingMachineId;
+    private String gamingTerminalId;
     private double amount;
     private double amountPaid;
     private double amountOutstanding;
@@ -32,6 +33,15 @@ public class PaymentRecord extends AbstractFact {
     private String paymentReference;
     private String batchPaymentId;
     private String revenueNameId;
+
+
+    public String getGamingTerminalId() {
+        return gamingTerminalId;
+    }
+
+    public void setGamingTerminalId(String gamingTerminalId) {
+        this.gamingTerminalId = gamingTerminalId;
+    }
 
     public String getRevenueNameId() {
         return revenueNameId;

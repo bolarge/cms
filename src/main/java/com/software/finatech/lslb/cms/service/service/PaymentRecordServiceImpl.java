@@ -275,6 +275,11 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         }
     }
 
+    @Override
+    public PaymentRecord findPaymentRecordForGamingTerminal(String gamingTerminalId, String gameTypeId, String institutionId, String licenseFeeTypeId) {
+        return null;
+    }
+
     private PaymentRecordDetail getMostRecentPaymentDetailForPaymentRecord(String paymentRecordId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));

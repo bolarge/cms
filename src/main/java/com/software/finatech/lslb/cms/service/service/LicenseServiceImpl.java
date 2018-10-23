@@ -415,7 +415,7 @@ public class LicenseServiceImpl implements LicenseService {
         if (!StringUtils.isEmpty(institutionId)) {
             queryForInstitutionAIP.addCriteria(Criteria.where("institutionId").is(institutionId));
         }
-        queryForInstitutionAIP.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID));
+        queryForInstitutionAIP.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID).orOperator(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSE_RUNNING)));
         queryForInstitutionAIP.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
         List<License> aipsForInstitution = (List<License>) mongoRepositoryReactive.findAll(queryForInstitutionAIP, License.class).toStream().collect(Collectors.toList());
         ArrayList<AIPCheckDto> aipCheckDtos = new ArrayList<>();
@@ -474,6 +474,11 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public Mono<ResponseEntity> updateToDocumentAIP(String licenseId) {
         try {
+
+            //TODO: get all lslb admins that can recieve notification
+            ArrayList<AuthInfo> lslbAdmins = new ArrayList<>();
+
+
             Query queryLicence = new Query();
             queryLicence.addCriteria(Criteria.where("id").is(licenseId));
             License license = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();

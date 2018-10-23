@@ -13,6 +13,15 @@ public class PaymentRecordDetailCreateDto {
     private String institutionId;
     private String agentId;
     private String gamingMachineId;
+    private String gamingTerminalId;
+
+    public String getGamingTerminalId() {
+        return gamingTerminalId;
+    }
+
+    public void setGamingTerminalId(String gamingTerminalId) {
+        this.gamingTerminalId = gamingTerminalId;
+    }
 
     public String getInstitutionId() {
         return institutionId;

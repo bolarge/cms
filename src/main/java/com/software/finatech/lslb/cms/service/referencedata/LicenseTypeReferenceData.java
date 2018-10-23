@@ -11,7 +11,7 @@ public class LicenseTypeReferenceData {
     public static final String INSTITUTION_ID = "01";
     public static final String AGENT_ID = "02";
     public static final String GAMING_MACHINE_ID = "03";
-
+    public static final String GAMING_TERMINAL_ID = "04";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         LicenseType licenseType = (LicenseType) mongoRepositoryReactive.findById(INSTITUTION_ID, LicenseType.class).block();
@@ -33,8 +33,16 @@ public class LicenseTypeReferenceData {
         }
         licenseType2.setName("GAMING MACHINE");
 
+        LicenseType licenseType3 = (LicenseType) mongoRepositoryReactive.findById(GAMING_TERMINAL_ID, LicenseType.class).block();
+        if (licenseType3 == null) {
+            licenseType3 = new LicenseType();
+            licenseType3.setId(GAMING_TERMINAL_ID);
+        }
+        licenseType3.setName("GAMING TERMINAL");
+
         mongoRepositoryReactive.saveOrUpdate(licenseType);
         mongoRepositoryReactive.saveOrUpdate(licenseType1);
         mongoRepositoryReactive.saveOrUpdate(licenseType2);
+        mongoRepositoryReactive.saveOrUpdate(licenseType3);
     }
 }
