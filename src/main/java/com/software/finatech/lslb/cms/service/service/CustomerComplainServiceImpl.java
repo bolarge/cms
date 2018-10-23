@@ -327,7 +327,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
     private CustomerComplain fromCreateCustomerComplain(CustomerComplainCreateDto customerComplainCreateDto) {
         CustomerComplain customerComplain = new CustomerComplain();
         customerComplain.setId(UUID.randomUUID().toString());
-        customerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.OPEN_ID);
+        customerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.PENDING_ID);
         customerComplain.setComplainDetails(customerComplainCreateDto.getComplainDetail());
         customerComplain.setCustomerEmailAddress(customerComplainCreateDto.getEmailAddress());
         customerComplain.setComplainSubject(customerComplainCreateDto.getComplainSubject());
@@ -336,6 +336,11 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
         customerComplain.setTicketId(generateTicketId());
         customerComplain.setTimeReported(LocalDateTime.now());
         customerComplain.setNextNotificationDateTime(LocalDateTime.now().plusDays(MAX_DAYS_BEFORE_COMPLAIN_REMINDER));
+        customerComplain.setTimeOfIncident(customerComplainCreateDto.getTimeOfIncident());
+        customerComplain.setDateOfIncident(customerComplainCreateDto.getDateOfIncident());
+        customerComplain.setAddress(customerComplainCreateDto.getAddress());
+        customerComplain.setStateOfResidence(customerComplainCreateDto.getStateOfResidence());
+        customerComplain.setNameOfOperator(customerComplainCreateDto.getNameOfOperator());
         return customerComplain;
     }
 

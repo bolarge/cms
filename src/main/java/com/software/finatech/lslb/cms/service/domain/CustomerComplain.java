@@ -25,8 +25,54 @@ public class CustomerComplain extends AbstractFact {
     private String customerComplainStatusId;
     private String ticketId;
     private LocalDateTime timeReported;
+    private String nameOfOperator;
+    private String dateOfIncident;
+    private String address;
+    private String timeOfIncident;
+    private String stateOfResidence;
     private List<CustomerComplainAction> customerComplainActionList = new ArrayList<>();
     private LocalDateTime nextNotificationDateTime;
+
+
+    public String getNameOfOperator() {
+        return nameOfOperator;
+    }
+
+    public void setNameOfOperator(String nameOfOperator) {
+        this.nameOfOperator = nameOfOperator;
+    }
+
+    public String getDateOfIncident() {
+        return dateOfIncident;
+    }
+
+    public void setDateOfIncident(String dateOfIncident) {
+        this.dateOfIncident = dateOfIncident;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getTimeOfIncident() {
+        return timeOfIncident;
+    }
+
+    public void setTimeOfIncident(String timeOfIncident) {
+        this.timeOfIncident = timeOfIncident;
+    }
+
+    public String getStateOfResidence() {
+        return stateOfResidence;
+    }
+
+    public void setStateOfResidence(String stateOfResidence) {
+        this.stateOfResidence = stateOfResidence;
+    }
 
     public LocalDateTime getTimeReported() {
         return timeReported;
@@ -133,6 +179,7 @@ public class CustomerComplain extends AbstractFact {
         dto.setCustomerEmail(getCustomerEmailAddress());
         dto.setCustomerPhone(getCustomerPhoneNumber());
         dto.setComplainSubject(getComplainSubject());
+        dto.setNameOfOperator(getNameOfOperator());
         dto.setTicketId(getTicketId());
         LocalDateTime timeReported= getTimeReported();
         if(timeReported != null){
@@ -150,6 +197,11 @@ public class CustomerComplain extends AbstractFact {
         CustomerComplainDto dto = convertToDto();
         dto.setComplainDetails(getComplainDetails());
         dto.setCustomerComplainActions(getCustomerComplainActions());
+        dto.setStateOfResidence(getStateOfResidence());
+        dto.setTimeOfIncident(getTimeOfIncident());
+        dto.setDateOfIncident(getDateOfIncident());
+        dto.setStateOfResidence(getStateOfResidence());
+        dto.setAddress(getAddress());
         return dto;
     }
 

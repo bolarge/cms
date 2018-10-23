@@ -8,6 +8,7 @@ public class CustomerComplainStatusReferenceData {
     public static final String RESOLVED_ID = "2";
     public static final String CLOSED_ID = "3";
     public static final String UNRESOLVED_ID = "4";
+    public static final String PENDING_ID = "5";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
 
@@ -39,9 +40,16 @@ public class CustomerComplainStatusReferenceData {
         }
         customerComplainStatus4.setName("UNRESOLVED");
 
+        CustomerComplainStatus customerComplainStatus5 = (CustomerComplainStatus) mongoRepositoryReactive.findById(PENDING_ID, CustomerComplainStatus.class).block();
+        if (customerComplainStatus5 == null) {
+            customerComplainStatus5 = new CustomerComplainStatus();
+            customerComplainStatus5.setId(PENDING_ID);
+        }
+        customerComplainStatus5.setName("UNRESOLVED");
         mongoRepositoryReactive.saveOrUpdate(customerComplainStatus1);
         mongoRepositoryReactive.saveOrUpdate(customerComplainStatus2);
         mongoRepositoryReactive.saveOrUpdate(customerComplainStatus3);
         mongoRepositoryReactive.saveOrUpdate(customerComplainStatus4);
+        mongoRepositoryReactive.saveOrUpdate(customerComplainStatus5);
     }
 }
