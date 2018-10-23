@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.CustomerComplain;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.CustomerComplainStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.CustomerComplaintEmailSenderAsync;
 import net.javacrumbs.shedlock.core.SchedulerLock;
@@ -34,7 +35,7 @@ public class CustomerComplainReminder {
     @Scheduled(fixedRate = 5 * 50 * 1000)
     @SchedulerLock(name = "Remind Pending Customer Complains", lockAtMostFor = FIFTEEN_MIN, lockAtLeastFor = FIFTEEN_MIN)
     public void sendReminderEmails() {
-        ArrayList<AuthInfo> validLslbUsersForNotification = authInfoService.findAllLSLBMembersThatCanReceiveCustomerComplainNotification();
+        ArrayList<AuthInfo> validLslbUsersForNotification = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_CUSTOMER_COMPLAIN_ID);
         if (validLslbUsersForNotification == null || validLslbUsersForNotification.isEmpty()) {
             return;
         }

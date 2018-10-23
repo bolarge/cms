@@ -79,8 +79,8 @@ public class ScheduledMeetingController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> updateScheduledMeeting(@RequestBody @Valid ScheduledMeetingUpdateDto scheduledMeetingCreateDto) {
-        return scheduledMeetingService.updateScheduledMeting(scheduledMeetingCreateDto);
+    public Mono<ResponseEntity> updateScheduledMeeting(@RequestBody @Valid ScheduledMeetingUpdateDto scheduledMeetingCreateDto, HttpServletRequest httpServletRequest) {
+        return scheduledMeetingService.updateScheduledMeting(scheduledMeetingCreateDto, httpServletRequest);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/cancel")
@@ -103,5 +103,16 @@ public class ScheduledMeetingController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> completeScheduledMeeting(@RequestParam("meetingId") String meetingId, HttpServletRequest request) {
         return scheduledMeetingService.completeScheduledMeeting(meetingId, request);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}")
+    @ApiOperation(value = "Get a scheduled meeting full details", response = ScheduledMeetingDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getById(@PathVariable("id") String meetingId) {
+       return scheduledMeetingService.getScheduledMeetingById(meetingId);
     }
 }

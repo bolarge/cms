@@ -143,7 +143,7 @@ public class FeeController extends BaseController {
         return feeService.findActiveFeeByGameTypeAndPaymentTypeAndRevenueName(gameTypeId, feePaymentTypeId, revenueNameId);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/fee-payment-types/for-revenue-name", params = {"licenseTypeId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/fee-payment-types/for-license-type", params = {"licenseTypeId"})
     @ApiOperation(value = "Get Fee Payment Types for Revenue name", response = EnumeratedFactDto.class, consumes = "application/json",
             notes = "This endpoint find all fee payment types for revenue name \n(Returns only License and License Renewal for agents and gaming machine, \n returns all fee payment types for institutions)")
     @ApiResponses(value = {

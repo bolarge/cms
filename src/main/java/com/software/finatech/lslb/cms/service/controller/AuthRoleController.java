@@ -351,7 +351,7 @@ public class AuthRoleController extends BaseController {
                 List<String> notAllowedIds = new ArrayList<>();
                 Set<String> eligibleRoleIds = new HashSet<>();
                 Map authRoleMap = Mapstore.STORE.get("AuthRole");
-                Set<String> authRoleIds = (Set<String>) authRoleMap.entrySet();
+                Set<String> authRoleIds = (Set<String>) authRoleMap.keySet();
                 if (loggedInUser.isGamingOperator()) {
                     eligibleRoleIds.add(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID);
                 }
@@ -426,10 +426,12 @@ public class AuthRoleController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request")})
     public Mono<ResponseEntity> getAuthPermissionsForRoles() {
         try {
-            Map authPermissionMap = Mapstore.STORE.get("AuthPermission");
-            Set<AuthPermission> authPermissionSet = (Set<AuthPermission>) authPermissionMap.values();
-            ArrayList<AuthPermission> permissions = new ArrayList<>();
-            for (AuthPermission permission : authPermissionSet) {
+            Map<String, FactObject> factObjectMap = Mapstore.STORE.get("AuthPermission");
+            Collection<FactObject> factObjects = factObjectMap.values();
+            Set<AuthPermission> permissions = new HashSet<>();
+            for (FactObject factObject : factObjects) {
+                AuthPermission permission = (AuthPermission) factObject;
+                //check if permission does not belong to any role and is not used by system
                 if (StringUtils.isEmpty(permission.getAuthRoleId()) && !permission.isUsedBySystem()) {
                     permissions.add(permission);
                 }

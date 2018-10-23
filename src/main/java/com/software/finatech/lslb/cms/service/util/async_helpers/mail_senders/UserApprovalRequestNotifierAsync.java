@@ -46,6 +46,6 @@ public class UserApprovalRequestNotifierAsync extends AbstractMailSender {
         model.put("date", presentDateString);
         model.put("approvalType", approvalRequestType);
         model.put("frontEndUrl", frontEndUrl);
-        return mailContentBuilderService.build(model, "NewUserApprovalRequest");
+        return mailContentBuilderService.build(model, "user-approval/NewUserApprovalRequest");
     }
 }

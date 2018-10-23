@@ -762,59 +762,11 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveCustomerComplainNotification() {
+    public ArrayList<AuthInfo> findAllLSLBMembersThatHasPermission(String authPermissionId) {
         ArrayList<AuthInfo> validMembers = new ArrayList<>();
         for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
             Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();
-            if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECEIVE_CUSTOMER_COMPLAIN_ID)) {
-                validMembers.add(lslbMember);
-            }
-        }
-        return validMembers;
-    }
-
-    @Override
-    public ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveApplicationSubmissionNotification() {
-        ArrayList<AuthInfo> validMembers = new ArrayList<>();
-        for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
-            Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();
-            if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECEIVE_APPLICATION_ID)) {
-                validMembers.add(lslbMember);
-            }
-        }
-        return validMembers;
-    }
-
-    @Override
-    public ArrayList<AuthInfo> findAllLSLBMembersThatCanReceivePaymentNotification() {
-        ArrayList<AuthInfo> validMembers = new ArrayList<>();
-        for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
-            Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();
-            if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECEIVE_PAYMENT_NOTIFICATION_ID)) {
-                validMembers.add(lslbMember);
-            }
-        }
-        return validMembers;
-    }
-
-    @Override
-    public ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveAgentApprovalsNotification() {
-        ArrayList<AuthInfo> validMembers = new ArrayList<>();
-        for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
-            Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();
-            if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECEIVE_AGENT_APPROVAL_AGENT_REQUEST_ID)) {
-                validMembers.add(lslbMember);
-            }
-        }
-        return validMembers;
-    }
-
-    @Override
-    public ArrayList<AuthInfo> findAllLSLBMembersThatCanReceiveNewCaseNotification() {
-        ArrayList<AuthInfo> validMembers = new ArrayList<>();
-        for (AuthInfo lslbMember : getAllEnabledLSLBMembers()) {
-            Set<String> userPermissions = lslbMember.getAllUserPermissionIdsForUser();
-            if (userPermissions.contains(LSLBAuthPermissionReferenceData.RECEIVE_CASE_NOTIFICATION_ID)) {
+            if (userPermissions.contains(authPermissionId)) {
                 validMembers.add(lslbMember);
             }
         }
@@ -830,6 +782,19 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
 
     }
+
+    @Override
+    public ArrayList<AuthInfo> getUsersFromUserIds(Collection<String> userIds) {
+        ArrayList<AuthInfo> users = new ArrayList<>();
+        for (String userId : userIds) {
+            AuthInfo user = getUserById(userId);
+            if (user != null) {
+                users.add(user);
+            }
+        }
+        return users;
+    }
+
 
     private ArrayList<AuthInfo> getAllEnabledLSLBMembers() {
         Query query = new Query();
@@ -972,7 +937,6 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             return logAndReturnError(logger, "An error occurred while updating user role", e);
         }
     }
-
 
     private CreateAuthInfoResponse toCreateAuthInfoResponse(AuthInfo authInfo, VerificationToken verificationToken) {
         CreateAuthInfoResponse createAuthInfoResponse = new CreateAuthInfoResponse();

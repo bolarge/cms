@@ -10,7 +10,6 @@ import com.software.finatech.lslb.cms.service.referencedata.AgentApprovalRequest
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentApprovalRequestService;
-import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.AgentUserCreator;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AgentCreationNotifierAsync;
@@ -36,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -45,7 +45,6 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
 
     private static final Logger logger = LoggerFactory.getLogger(AgentApprovalRequestServiceImpl.class);
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
-    private AuthInfoService authInfoService;
     private AgentUserCreator agentUserCreatorAsync;
     private AgentCreationNotifierAsync agentCreationNotifierAsync;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
@@ -55,13 +54,11 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
 
     @Autowired
     public AgentApprovalRequestServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
-                                           AuthInfoService authInfoService,
                                            AgentUserCreator agentUserCreatorAsync,
                                            AgentCreationNotifierAsync agentCreationNotifierAsync,
                                            SpringSecurityAuditorAware springSecurityAuditorAware,
                                            AuditLogHelper auditLogHelper) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
-        this.authInfoService = authInfoService;
         this.agentUserCreatorAsync = agentUserCreatorAsync;
         this.agentCreationNotifierAsync = agentCreationNotifierAsync;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
@@ -106,7 +103,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             if (!StringUtils.isEmpty(requestTypeId)) {
                 query.addCriteria(Criteria.where("agentApprovalRequestTypeId").is(gameTypeId));
             }
-            if (!StringUtils.isEmpty(startDate) && StringUtils.isEmpty(endDate)) {
+            if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
                 query.addCriteria(Criteria.where("dateCreated").gte(new LocalDate(startDate)).lte(new LocalDate(endDate)));
             }
             if (page == 0) {
@@ -334,17 +331,25 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
 
     private void approveAgentCreationRequest(AgentApprovalRequest agentApprovalRequest, String userId) {
         PendingAgent pendingAgent = findPendingAgentById(agentApprovalRequest.getPendingAgentId());
-        pendingAgent.setEnabled(true);
-        pendingAgent.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
-        mongoRepositoryReactive.saveOrUpdate(pendingAgent);
-        Agent agent = new Agent();
-        BeanUtils.copyProperties(pendingAgent, agent);
-        agent.setEnabled(true);
-        agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
-        agentApprovalRequest.setApproverId(userId);
-        mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
-        mongoRepositoryReactive.saveOrUpdate(agent);
-        agentUserCreatorAsync.createUserAndCustomerCodeForAgent(agent);
+        if (pendingAgent != null) {
+            pendingAgent.setEnabled(true);
+            pendingAgent.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
+            mongoRepositoryReactive.saveOrUpdate(pendingAgent);
+            Agent agent = new Agent();
+            BeanUtils.copyProperties(pendingAgent, agent);
+            agent.setId(UUID.randomUUID().toString());
+            agent.setEnabled(true);
+            agent.setCreated(null);
+            agent.setCreatedAt(null);
+            agent.setLastModified(null);
+            agent.setLastModifiedBy(null);
+            agent.setVersion(null);
+            agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
+            agentApprovalRequest.setApproverId(userId);
+            mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
+            mongoRepositoryReactive.saveOrUpdate(agent);
+            agentUserCreatorAsync.createUserAndCustomerCodeForAgent(agent);
+        }
     }
 
 

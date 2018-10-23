@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.CustomerComplain;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,7 @@ public class CustomerComplaintEmailSenderAsync extends AbstractMailSender {
 
 
     private void sendNewCustomerComplainEmailToLSLBAdmins(CustomerComplain customerComplain) {
-        List<AuthInfo> lslbAdminsForCustomerComplain = authInfoService.findAllLSLBMembersThatCanReceiveCustomerComplainNotification();
+        List<AuthInfo> lslbAdminsForCustomerComplain = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_CUSTOMER_COMPLAIN_ID);
         if (lslbAdminsForCustomerComplain.isEmpty()) {
             logger.info("No LSLB Admin has authority to receive customer complain email, skipping lslb admins emails");
             return;

@@ -2,7 +2,6 @@ package com.software.finatech.lslb.cms.service;
 
 import com.software.finatech.lslb.cms.service.util.DatabaseLoaderUtils;
 import com.software.finatech.lslb.cms.service.util.GlobalApplicationContext;
-import com.software.finatech.lslb.cms.service.util.data_updater.LicenseUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.Banner;
@@ -33,7 +32,6 @@ public class LSLBCMSApplication {
         GlobalApplicationContext.ctx = ctx;
         Environment env = ctx.getBean(Environment.class);
         DatabaseLoaderUtils databaseLoaderUtils = (DatabaseLoaderUtils) ctx.getBean("databaseLoaderUtils");
-        LicenseUpdater.load(databaseLoaderUtils.getMongoRepositoryReactive());
         databaseLoaderUtils.runSeedData(env);
 
         if (Arrays.asList(env.getActiveProfiles()).contains("development") || Arrays.asList(env.getActiveProfiles()).contains("test")) {
@@ -43,8 +41,6 @@ public class LSLBCMSApplication {
         if (Arrays.asList(env.getActiveProfiles()).contains("development") || Arrays.asList(env.getActiveProfiles()).contains("test")) {
             databaseLoaderUtils.generateAuthTestData();
         }
-
         databaseLoaderUtils.runLoadData();
-        LicenseUpdater.load(databaseLoaderUtils.getMongoRepositoryReactive());
     }
 }

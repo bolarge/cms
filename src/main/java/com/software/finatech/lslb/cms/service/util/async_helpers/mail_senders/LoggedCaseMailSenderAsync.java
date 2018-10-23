@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.LoggedCase;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
@@ -24,7 +25,7 @@ public class LoggedCaseMailSenderAsync extends AbstractMailSender {
 
     @Async
     public void sendNewCaseNotificationToLslbUsersThatCanReceive(LoggedCase loggedCase) {
-        List<AuthInfo> lslbMembersThatCanReceiveNewCaseNotification = authInfoService.findAllLSLBMembersThatCanReceiveNewCaseNotification();
+        List<AuthInfo> lslbMembersThatCanReceiveNewCaseNotification = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_CASE_NOTIFICATION_ID);
         if (lslbMembersThatCanReceiveNewCaseNotification == null || lslbMembersThatCanReceiveNewCaseNotification.isEmpty()) {
             logger.info("No LSLB member can receive new case notifications, skipping notification");
             return;

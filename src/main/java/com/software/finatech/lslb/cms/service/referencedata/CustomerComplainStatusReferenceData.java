@@ -39,7 +39,6 @@ public class CustomerComplainStatusReferenceData {
         }
         customerComplainStatus4.setName("UNRESOLVED");
 
-
         mongoRepositoryReactive.saveOrUpdate(customerComplainStatus1);
         mongoRepositoryReactive.saveOrUpdate(customerComplainStatus2);
         mongoRepositoryReactive.saveOrUpdate(customerComplainStatus3);
