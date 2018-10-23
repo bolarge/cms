@@ -302,6 +302,14 @@ public class ScheduledMeeting extends AbstractFact {
         return dtos;
     }
 
+    public ArrayList<String> getRecipientNames() {
+        ArrayList<String> recipientNames = new ArrayList<>();
+        for (AuthInfo user : getRecipients()) {
+            recipientNames.add(user.getFullName());
+        }
+        return recipientNames;
+    }
+
     @Override
     public String getFactName() {
         return "ScheduledMeetings";
