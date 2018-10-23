@@ -17,10 +17,13 @@ public class ScheduledMeetingDto {
     private String meetingTime;
     private Set<AuthInfoDto> recipients = new HashSet<>();
 
+    public Set<AuthInfoDto> getRecipients() {
+        return recipients;
+    }
+
     public void setRecipients(Set<AuthInfoDto> recipients) {
         this.recipients = recipients;
     }
-
 
     public String getMeetingTime() {
         return meetingTime;
