@@ -62,7 +62,6 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
     }
 
     private String buildOperatorMeetingMailContent(ScheduledMeeting scheduledMeeting, String templateName) {
-        AuthInfo inviter = authInfoService.getUserById(scheduledMeeting.getCreatorId());
         Institution institution = institutionService.findById(scheduledMeeting.getInstitutionId());
         String meetingUrl = String.format("%s/schedule-presentation-view/%s", frontEndPropertyHelper.getFrontEndUrl(), scheduledMeeting.getId());
         String institutionName = institution.getInstitutionName();

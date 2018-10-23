@@ -24,7 +24,7 @@ public class ScheduledMeeting extends AbstractFact {
     private String institutionId;
     private String scheduledMeetingStatusId;
     private String venue;
-    private Set<String> recipientIds;
+    private Set<String> recipientIds = new HashSet<>();
     private String cancelerId;
     private String entityId;
     private String applicationFormId;

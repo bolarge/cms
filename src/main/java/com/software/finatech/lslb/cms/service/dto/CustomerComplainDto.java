@@ -16,6 +16,51 @@ public class CustomerComplainDto {
     private List<CustomerComplainActionDto> customerComplainActions;
     private String ticketId;
     private String timeReported;
+    private String dateOfIncident;
+    private String timeOfIncident;
+    private String address;
+    private String stateOfResidence;
+    private String nameOfOperator;
+
+    public String getNameOfOperator() {
+        return nameOfOperator;
+    }
+
+    public void setNameOfOperator(String nameOfOperator) {
+        this.nameOfOperator = nameOfOperator;
+    }
+
+    public String getDateOfIncident() {
+        return dateOfIncident;
+    }
+
+    public void setDateOfIncident(String dateOfIncident) {
+        this.dateOfIncident = dateOfIncident;
+    }
+
+    public String getTimeOfIncident() {
+        return timeOfIncident;
+    }
+
+    public void setTimeOfIncident(String timeOfIncident) {
+        this.timeOfIncident = timeOfIncident;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getStateOfResidence() {
+        return stateOfResidence;
+    }
+
+    public void setStateOfResidence(String stateOfResidence) {
+        this.stateOfResidence = stateOfResidence;
+    }
 
     public String getTimeReported() {
         return timeReported;
