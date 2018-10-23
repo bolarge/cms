@@ -162,51 +162,6 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             return logAndReturnError(logger, String.format("An error occurred while getting customer complain with id %s dull detail", customerComplainId), e);
         }
     }
-
-    @Override
-    public Mono<ResponseEntity> resolveCustomerComplain(String customerComplainId, HttpServletRequest request) {
-        try {
-            if (StringUtils.isEmpty(customerComplainId)) {
-                return Mono.just(new ResponseEntity<>("Customer complain id  should not be empty", HttpStatus.BAD_REQUEST));
-            }
-            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
-            if (user == null) {
-                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
-            }
-            if (!canResolveCustomerComplain(user)) {
-                return Mono.just(new ResponseEntity<>("User does not have permission to update customer complains", HttpStatus.BAD_REQUEST));
-            }
-            CustomerComplain existingCustomerComplain = findCustomerComplainById(customerComplainId);
-            if (existingCustomerComplain == null) {
-                return Mono.just(new ResponseEntity<>(String.format("Customer complain with id %s not found", customerComplainId), HttpStatus.BAD_REQUEST));
-            }
-            String existingCustomerComplainStatusId = existingCustomerComplain.getCustomerComplainStatusId();
-            if (StringUtils.equals(CustomerComplainStatusReferenceData.RESOLVED_ID, existingCustomerComplainStatusId)) {
-                return Mono.just(new ResponseEntity<>("The customer complain is already resolved by another user", HttpStatus.BAD_REQUEST));
-            }
-            if (StringUtils.equals(CustomerComplainStatusReferenceData.CLOSED_ID, existingCustomerComplainStatusId)) {
-                return Mono.just(new ResponseEntity<>("The customer complain is already closed", HttpStatus.BAD_REQUEST));
-            }
-            CustomerComplainAction customerComplainAction = new CustomerComplainAction();
-            customerComplainAction.setActionTime(LocalDateTime.now());
-            customerComplainAction.setComplainStatusId(CustomerComplainStatusReferenceData.RESOLVED_ID);
-            customerComplainAction.setUserId(user.getId());
-            existingCustomerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.RESOLVED_ID);
-            existingCustomerComplain.getCustomerComplainActionList().add(customerComplainAction);
-            mongoRepositoryReactive.saveOrUpdate(existingCustomerComplain);
-            customerComplaintEmailSenderAsync.sendResolvedCustomerComplainToCustomer(existingCustomerComplain);
-
-            String verbiage = String.format("Resolved Customer complain -> Ticket Id: %s ", existingCustomerComplain.getTicketId());
-            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(customerComplainAuditActionId,
-                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-
-            return Mono.just(new ResponseEntity<>(existingCustomerComplain.convertToFullDetailDto(), HttpStatus.OK));
-        } catch (Exception e) {
-            return logAndReturnError(logger, String.format("An error occurred while resolving customer complain %s", customerComplainId), e);
-        }
-    }
-
     @Override
     public CustomerComplain findCustomerComplainById(String customerComplainId) {
         if (StringUtils.isEmpty(customerComplainId)) {
@@ -287,9 +242,6 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             mongoRepositoryReactive.saveOrUpdate(existingCustomerComplain);
             if (customerComplainUpdateDto.isClosedUpdate()) {
                 customerComplaintEmailSenderAsync.sendClosedCustomerComplaintToCustomer(existingCustomerComplain);
-            }
-            if (customerComplainUpdateDto.isResolvedUpdate()) {
-                customerComplaintEmailSenderAsync.sendResolvedCustomerComplainToCustomer(existingCustomerComplain);
             }
 
             String verbiage = String.format("Updated Customer complain status -> Ticket Id: %s ", existingCustomerComplain.getTicketId());
