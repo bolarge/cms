@@ -85,6 +85,11 @@ public class FeeApprovalRequest extends AbstractApprovalRequest {
             dto.setRejectorId(this.rejectorId);
             dto.setRejectorName(rejector.getFullName());
         }
+        AuthInfo approver = getApprover();
+        if (approver != null){
+            dto.setApproverId(this.approverId);
+            dto.setApproverName(approver.getFullName());
+        }
         return dto;
     }
 
@@ -98,13 +103,13 @@ public class FeeApprovalRequest extends AbstractApprovalRequest {
         }
         FeeApprovalRequestType approvalRequestType = getFeeApprovalRequestType();
         if (approvalRequestType != null) {
-            dto.setApprovalRequestType(approvalRequestType.getName());
-            dto.setApprovalRequestTypeId(this.feeApprovalRequestTypeId);
+            dto.setRequestTypeName(approvalRequestType.getName());
+            dto.setRequestTypeId(this.feeApprovalRequestTypeId);
         }
         ApprovalRequestStatus approvalRequestStatus = getApprovalRequestStatus();
         if (approvalRequestStatus != null) {
-            dto.setApprovalRequestStatusId(this.approvalRequestStatusId);
-            dto.setApprovalRequestStatus(approvalRequestStatus.toString());
+            dto.setRequestStatusId(this.approvalRequestStatusId);
+            dto.setRequestStatusName(approvalRequestStatus.toString());
         }
         LocalDateTime dateCreated = getDateCreated();
         if (dateCreated != null) {

@@ -154,14 +154,14 @@ public class UserApprovalRequest extends AbstractApprovalRequest {
         dto.setId(getId());
         ApprovalRequestStatus approvalRequestStatus = getApprovalRequestStatus();
         if (approvalRequestStatus != null) {
-            dto.setApprovalRequestStatusId(approvalRequestStatus.getId());
-            dto.setApprovalRequestStatusName(approvalRequestStatus.getName());
+            dto.setRequestStatusId(approvalRequestStatus.getId());
+            dto.setRequestStatusName(approvalRequestStatus.getName());
         }
 
         UserApprovalRequestType approvalRequestType = getUserApprovalRequestType();
         if (approvalRequestType != null) {
-            dto.setUserApprovalRequestTypeId(approvalRequestType.getId());
-            dto.setUserApprovalRequestTypeName(approvalRequestType.getName());
+            dto.setRequestTypeId(approvalRequestType.getId());
+            dto.setRequestTypeName(approvalRequestType.getName());
         }
 
         AuthInfo initiator = getAuthInfo(this.initiatorId);

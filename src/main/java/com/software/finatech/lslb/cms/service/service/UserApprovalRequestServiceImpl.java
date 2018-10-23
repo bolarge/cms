@@ -244,19 +244,15 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
             userApprovalRequest.setRejectorId(user.getId());
             userApprovalRequest.setRejectionReason(requestOperationtDto.getReason());
-            mongoRepositoryReactive.save(userApprovalRequest);
+            mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
             String verbiage = String.format("Rejected User approval request ->  Type -> %s, Id -> %s", userApprovalRequest.getUserApprovalRequestType(), userApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), userApprovalRequest.getSubjectUserName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
-        } catch (
-                Exception e)
-
-        {
-            return logAndReturnError(logger, "An error occurred while approving user approval request ", e);
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while rejecting approval request ", e);
         }
-
     }
 
     @Override

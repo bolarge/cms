@@ -141,6 +141,11 @@ public class DocumentType extends EnumeratedFact {
         dto.setActive(isActive());
         dto.setRequired(isRequired());
         dto.setGameTypeNames(getGameTypeNames());
+        AuthInfo approver = getApprover();
+        if (approver != null) {
+            dto.setApproverName(approver.getFullName());
+            dto.setApproverId(this.approverId);
+        }
         return dto;
     }
 }

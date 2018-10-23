@@ -97,6 +97,14 @@ public abstract class AbstractApprovalRequest extends AbstractFact {
         return (AuthInfo) mongoRepositoryReactive.findById(userId, AuthInfo.class).block();
     }
 
+    public String getDateCreatedString() {
+        LocalDateTime dateTime = getDateCreated();
+        if (dateTime != null) {
+            return dateTime.toString("dd-MM-yyyy HH:mm:ss");
+        }
+        return null;
+    }
+
     public AuthInfo getApprover() {
         return getAuthInfo(this.approverId);
     }
