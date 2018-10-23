@@ -253,7 +253,7 @@ public class ScheduledMeeting extends AbstractFact {
     public String getMeetingDateString() {
         LocalDateTime meetingDateTime = getMeetingDate();
         if (meetingDateTime != null) {
-            return meetingDateTime.toString("dd-MM-yyyy");
+            return meetingDateTime.toString("yyyy-MM-dd");
         }
         return null;
     }
@@ -300,14 +300,6 @@ public class ScheduledMeeting extends AbstractFact {
             }
         }
         return dtos;
-    }
-
-    public ArrayList<String> getRecipientNames() {
-        ArrayList<String> recipientNames = new ArrayList<>();
-        for (AuthInfo user : getRecipients()) {
-            recipientNames.add(user.getFullName());
-        }
-        return null;
     }
 
     @Override
