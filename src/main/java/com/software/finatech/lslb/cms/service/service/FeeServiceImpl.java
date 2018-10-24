@@ -28,10 +28,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -296,10 +293,10 @@ public class FeeServiceImpl implements FeeService {
     @Override
     public List<EnumeratedFactDto> getLicenseTypes() {
         Map licenseTypeMap = Mapstore.STORE.get("LicenseType");
-        ArrayList<LicenseType> licenseTypes = new ArrayList<LicenseType>(licenseTypeMap.values());
+        Collection<FactObject> licenseTypes = licenseTypeMap.values();
         List<EnumeratedFactDto> revenueNameDtoList = new ArrayList<>();
         licenseTypes.forEach(factObject -> {
-            LicenseType licenseType = factObject;
+            LicenseType licenseType = (LicenseType) factObject;
             revenueNameDtoList.add(licenseType.convertToDto());
         });
         return revenueNameDtoList;
