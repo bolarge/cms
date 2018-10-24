@@ -6,6 +6,15 @@ import java.util.Map;
 public class FormDocumentApproval {
     private int supposedLength;
     private Map<String, Boolean> approvalMap = new HashMap<>();
+    private boolean complete;
+
+    public boolean isComplete() {
+        return complete;
+    }
+
+    public void setComplete(boolean complete) {
+        this.complete = complete;
+    }
 
     public int getSupposedLength() {
         return supposedLength;
