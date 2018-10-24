@@ -8,7 +8,10 @@ import com.software.finatech.lslb.cms.service.domain.VerificationToken;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.dto.sso.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.*;
+import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.UserApprovalRequestTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthPermissionService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthRoleService;
@@ -804,7 +807,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public Mono<ResponseEntity> addPermissionsToUser(UserAuthPermissionDto userAuthPermissionDto) {
+    public Mono<ResponseEntity> addPermissionsToUser(UserAuthPermissionDto userAuthPermissionDto, HttpServletRequest request) {
         try {
 //            String userId = userAuthPermissionDto.getUserId();
 //            Set<String> newPermissionIds = userAuthPermissionDto.getAuthPermissionIds();
@@ -828,9 +831,9 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 //            return Mono.just(new ResponseEntity<>(user.convertToDto(), HttpStatus.OK));
             String loggedInUserId = userAuthPermissionDto.getLoggedInUserId();
             String subjectUserId = userAuthPermissionDto.getUserId();
-            AuthInfo loggedInUser = getUserById(loggedInUserId);
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser == null) {
-                return Mono.just(new ResponseEntity<>(String.format("User with Id %s does not exist", loggedInUserId), HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>(String.format("Could not find loggged in user", loggedInUserId), HttpStatus.BAD_REQUEST));
             }
             AuthInfo subjectUser = getUserById(subjectUserId);
             if (subjectUser == null) {
@@ -847,6 +850,9 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             userApprovalRequest.setAuthInfoId(subjectUserId);
             mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
             userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
+
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Created user approval request to add permissions to user %s",subjectUser.getFullName())));
+
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
 
         } catch (Exception e) {
@@ -855,7 +861,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public Mono<ResponseEntity> removePermissionFromUser(UserAuthPermissionDto userAuthPermissionDto) {
+    public Mono<ResponseEntity> removePermissionFromUser(UserAuthPermissionDto userAuthPermissionDto, HttpServletRequest request) {
         try {
 //            String userId = userAuthPermissionDto.getUserId();
 //            Set<String> removedPermissionIds = userAuthPermissionDto.getAuthPermissionIds();
@@ -879,7 +885,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
             String loggedInUserId = userAuthPermissionDto.getLoggedInUserId();
             String subjectUserId = userAuthPermissionDto.getUserId();
-            AuthInfo loggedInUser = getUserById(loggedInUserId);
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser == null) {
                 return Mono.just(new ResponseEntity<>(String.format("User with Id %s does not exist", loggedInUserId), HttpStatus.BAD_REQUEST));
             }
@@ -898,6 +904,8 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             userApprovalRequest.setAuthInfoId(subjectUserId);
             mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
             userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Created user approval request to remove permissions from user %s",subjectUser.getFullName())));
+
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
             return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while removing permission from user", e);

@@ -39,6 +39,15 @@ public class ApplicationForm extends AbstractFact {
     protected String reasonForRejection;
     protected LocalDate submissionDate;
     protected String applicationFormId;
+    protected FormDocumentApproval documentApproval;
+
+    public FormDocumentApproval getDocumentApproval() {
+        return documentApproval;
+    }
+
+    public void setDocumentApproval(FormDocumentApproval documentApproval) {
+        this.documentApproval = documentApproval;
+    }
 
     public String getApplicationFormId() {
         return applicationFormId;

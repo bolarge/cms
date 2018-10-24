@@ -32,7 +32,7 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
         model.put("meetingDate", meetingDateString);
         model.put("meetingTime", meetingTimeString);
         model.put("meetingTitle", scheduledMeeting.getMeetingSubject());
-        model.put("meetingVenue", scheduledMeeting.getVenue());
+        model.put("venue", scheduledMeeting.getVenue());
         model.put("additionalNotes", scheduledMeeting.getMeetingDescription());
         model.put("date", presentDateString);
         model.put("frontEndUrl", meetingUrl);
@@ -54,7 +54,7 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
         model.put("meetingDate", meetingDateString);
         model.put("meetingTime", meetingTimeString);
         model.put("meetingTitle", scheduledMeeting.getMeetingSubject());
-        model.put("meetingVenue", scheduledMeeting.getVenue());
+        model.put("venue", scheduledMeeting.getVenue());
         model.put("additionalNotes", scheduledMeeting.getMeetingDescription());
         model.put("date", presentDateString);
         model.put("frontEndUrl", meetingUrl);
@@ -73,7 +73,7 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
         model.put("meetingDate", meetingDateString);
         model.put("meetingTime", meetingTimeString);
         model.put("meetingTitle", scheduledMeeting.getMeetingSubject());
-        model.put("meetingVenue", scheduledMeeting.getVenue());
+        model.put("venue", scheduledMeeting.getVenue());
         model.put("additionalNotes", scheduledMeeting.getMeetingDescription());
         model.put("date", presentDateString);
         model.put("frontEndUrl", meetingUrl);

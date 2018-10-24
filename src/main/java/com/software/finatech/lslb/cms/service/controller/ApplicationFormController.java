@@ -79,18 +79,6 @@ public class ApplicationFormController {
         return applicationFormService.getAllApplicationFormStatus();
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/all-approvers")
-    @ApiOperation(value = "Get all application form approvers", response = AuthInfoDto.class, responseContainer = "List", consumes = "application/json")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getAllApplicationFormApprovers() {
-        return applicationFormService.getAllApprovers();
-    }
-
-
     @RequestMapping(method = RequestMethod.GET, value = "/get-applicant-details", params = {"applicationFormId"})
     @ApiOperation(value = "Get applicant details", response = ApplicantDetails.class, consumes = "application/json")
     @ApiResponses(value = {

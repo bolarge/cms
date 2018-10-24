@@ -1,7 +1,5 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.mongodb.reactivestreams.client.DistinctPublisher;
-import com.mongodb.reactivestreams.client.MongoCollection;
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
@@ -36,15 +34,11 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -177,59 +171,6 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String errorMsg = "An error occurred while getting all application form statuses";
             return logAndReturnError(logger, errorMsg, e);
         }
-    }
-
-    //TODO: find way to get all approverID distinct in application form table :DONE
-    //TODO: Remove commented out code once tested
-    @Override
-    public Mono<ResponseEntity> getAllApprovers() {
-        try {
-            MongoCollection mongoCollection = mongoRepositoryReactive.getReactiveMongoTemplate().getCollection("ApplicationForms");
-            DistinctPublisher<String> distinctPublisher = (DistinctPublisher<String>) mongoCollection.distinct("approverId", String.class);
-            List<String> approverIds = Flux.concat(distinctPublisher).toStream().collect(Collectors.toList());
-            if (approverIds == null || approverIds.isEmpty()) {
-                return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
-            }
-            ArrayList<AuthInfoDto> authInfoDtos = new ArrayList<>();
-            for (String approverId : approverIds) {
-                try {
-                    AuthInfo authInfo = authInfoService.getUserById(approverId);
-                    if (authInfo != null) {
-                        AuthInfoDto authInfoDto = new AuthInfoDto();
-                        authInfoDto.setId(approverId);
-                        authInfoDto.setFullName(authInfo.getFullName());
-                        authInfoDtos.add(authInfoDto);
-                    }
-                } catch (Exception e) {
-                    logger.error(String.format("An error occurred while converting user with id %s to DTO", approverId), e);
-                }
-            }
-            return Mono.just(new ResponseEntity<>(authInfoDtos, HttpStatus.OK));
-        } catch (Exception e) {
-            return logAndReturnError(logger, "An error occurred while getting all application form approvers", e);
-        }
-//
-//
-//        String lslbAdminAuthRoleId = LSLBAuthRoleReferenceData.LSLB_GM_ROLE_ID;
-//        Query query = new Query();
-//        query.addCriteria(Criteria.where("authRoleId").is(lslbAdminAuthRoleId));
-//        ArrayList<AuthInfo> authInfos = (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
-//        if (authInfos == null || authInfos.isEmpty()) {
-//            return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
-//        }
-//        List<AuthInfoDto> authInfoDtos = new ArrayList<>();
-//        authInfos.forEach(authInfo -> {
-//            try {
-//                authInfo.setAssociatedProperties();
-//                AuthInfoDto authInfoDto = new AuthInfoDto();
-//                authInfoDto.setId(authInfo.getId());
-//                authInfoDto.setFullName(authInfo.getFullName());
-//                authInfoDtos.add(authInfoDto);
-//            } catch (FactNotFoundException e) {
-//                e.printStackTrace();
-//            }
-//        });
-//        return Mono.just(new ResponseEntity<>(authInfoDtos, HttpStatus.OK));
     }
 
     @Override
@@ -534,6 +475,11 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             if (StringUtils.equals(ApplicationFormStatusReferenceData.REJECTED_STATUS_ID, applicationForm.getApplicationFormStatusId())) {
                 return Mono.just(new ResponseEntity<>("Application already rejected", HttpStatus.BAD_REQUEST));
             }
+            FormDocumentApproval formDocumentApproval = applicationForm.getDocumentApproval();
+            if (formDocumentApproval != null && !formDocumentApproval.isComplete()) {
+                return Mono.just(new ResponseEntity<>("Not all documents on this application are approved", HttpStatus.BAD_REQUEST));
+            }
+
             applicationForm.setApproverId(approverId);
             String approvedApplicationFormStatusId = ApplicationFormStatusReferenceData.APPROVED_STATUS_ID;
             applicationForm.setApplicationFormStatusId(approvedApplicationFormStatusId);
@@ -682,6 +628,63 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             return null;
         }
         return (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
+    }
+
+    @Override
+    public void approveApplicationFormDocument(Document document) {
+        ApplicationForm applicationForm = document.getApplicationForm();
+        String documentId = document.getId();
+        if (applicationForm != null) {
+            FormDocumentApproval formDocumentApproval = applicationForm.getDocumentApproval();
+            if (formDocumentApproval != null) {
+                Map<String, Boolean> documentApprovalMap = formDocumentApproval.getApprovalMap();
+                documentApprovalMap.put(documentId, true);
+                Collection<Boolean> values = documentApprovalMap.values();
+                int count = 0;
+                for (Boolean value : values) {
+                    if (value) {
+                        count = count + 1;
+                    }
+                }
+                if (count == formDocumentApproval.getSupposedLength()) {
+                    applicationFormNotificationHelperAsync.sendApproverMailToFinalApproval(applicationForm);
+                    formDocumentApproval.setComplete(true);
+                }
+                formDocumentApproval.setApprovalMap(documentApprovalMap);
+            }
+            applicationForm.setDocumentApproval(formDocumentApproval);
+            mongoRepositoryReactive.saveOrUpdate(applicationForm);
+        }
+    }
+
+    @Override
+    public void rejectApplicationFormDocument(Document document) {
+        ApplicationForm applicationForm = document.getApplicationForm();
+        String documentId = document.getId();
+        if (applicationForm != null) {
+            FormDocumentApproval formDocumentApproval = applicationForm.getDocumentApproval();
+            if (formDocumentApproval != null) {
+                Map<String, Boolean> documentApprovalMap = formDocumentApproval.getApprovalMap();
+                documentApprovalMap.put(documentId, false);
+                applicationFormNotificationHelperAsync.sendDocumentReturnMailToInstitutionMembers(applicationForm, document);
+                formDocumentApproval.setApprovalMap(documentApprovalMap);
+                applicationForm.setDocumentApproval(formDocumentApproval);
+            }
+            mongoRepositoryReactive.saveOrUpdate(applicationForm);
+        }
+    }
+
+    @Override
+    public void doDocumentReuploadNotification(Document document) {
+        ApplicationForm applicationForm = document.getApplicationForm();
+        String documentId = document.getId();
+        if (applicationForm != null) {
+            FormDocumentApproval formDocumentApproval = applicationForm.getDocumentApproval();
+            formDocumentApproval.getApprovalMap().put(documentId, false);
+            applicationForm.setDocumentApproval(formDocumentApproval);
+            mongoRepositoryReactive.saveOrUpdate(applicationForm);
+            applicationFormNotificationHelperAsync.sendResubmissionNotificationFoApplicationForm(applicationForm, document);
+        }
     }
 
     private ApplicationForm fromCreateDto(ApplicationFormCreateDto applicationFormCreateDto) {
