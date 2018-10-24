@@ -305,7 +305,7 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.BAD_REQUEST));
             }
 
-            if (!loggedInUser.isGamingOperator()) {
+            if (loggedInUser.isGamingOperator()) {
                 String appUrl = appHostPort + request.getContextPath();
                 return authInfoService.createAuthInfo(authInfoCreateDto, appUrl, request);
             /*String appUrl =
