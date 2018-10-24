@@ -13,6 +13,7 @@ import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantO
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
@@ -466,6 +467,10 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(approverId, AuthInfo.class).block();
             if (authInfo == null) {
                 return Mono.just(new ResponseEntity<>("Approver does not exist on the system", HttpStatus.BAD_REQUEST));
+            }
+
+            if (!authInfo.getAllUserPermissionIdsForUser().contains(LSLBAuthPermissionReferenceData.APPROVE_APPICATION_FORM_ID)) {
+                return Mono.just(new ResponseEntity<>("User does not have permission to approve applications", HttpStatus.BAD_REQUEST));
             }
 
             ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
