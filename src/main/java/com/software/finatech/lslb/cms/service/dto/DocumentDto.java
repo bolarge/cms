@@ -22,6 +22,16 @@ public class DocumentDto {
     protected String gameTypeId;
     protected String agentId;
     protected String owner;
+    protected String approverId;
+
+
+    public String getApproverId() {
+        return approverId;
+    }
+
+    public void setApproverId(String approverId) {
+        this.approverId = approverId;
+    }
 
     public String getOwner() {
         return owner;

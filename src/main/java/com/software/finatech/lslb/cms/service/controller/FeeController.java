@@ -166,4 +166,15 @@ public class FeeController extends BaseController {
         return feeService.findLicenseTypeByParams(institutionId, agentId);
     }
 
+
+    @RequestMapping(method = RequestMethod.POST, value = "/set-fee-end-date")
+    @ApiOperation(value = "Set fee end date", response = FeeApprovalRequestDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> findRevenueNamesByParam(@RequestBody FeeEndDateUpdateDto feeEndDateUpdateDto, HttpServletRequest request) {
+        return feeService.setFeeEndDate(feeEndDateUpdateDto, request);
+    }
 }

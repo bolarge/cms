@@ -41,9 +41,9 @@ public interface AuthInfoService {
 
     ArrayList<AuthInfo> getUsersFromUserIds(Collection<String> userIds);
 
-    Mono<ResponseEntity> addPermissionsToUser(UserAuthPermissionDto userAuthPermissionDto);
+    Mono<ResponseEntity> addPermissionsToUser(UserAuthPermissionDto userAuthPermissionDto, HttpServletRequest request);
 
-    Mono<ResponseEntity> removePermissionFromUser(UserAuthPermissionDto userAuthPermissionDto);
+    Mono<ResponseEntity> removePermissionFromUser(UserAuthPermissionDto userAuthPermissionDto, HttpServletRequest request);
 
     Mono<ResponseEntity> updateUserRole(UserRoleUpdateDto userRoleUpdateDto);
 

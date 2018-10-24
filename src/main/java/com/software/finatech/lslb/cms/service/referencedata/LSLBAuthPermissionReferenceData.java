@@ -14,6 +14,7 @@ public class LSLBAuthPermissionReferenceData {
     public static final String RECEIVE_CUSTOMER_COMPLAIN_ID = "33";
     public static final String RECEIVE_AGENT_APPROVAL_AGENT_REQUEST_ID = "48";
     public static final String RECEIVE_CASE_NOTIFICATION_ID = "51";
+    public static final String APPROVE_APPICATION_FORM_ID = "57";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         AuthPermission permission1 = (AuthPermission) mongoRepositoryReactive.findById("1", AuthPermission.class).block();
@@ -483,6 +484,16 @@ public class LSLBAuthPermissionReferenceData {
         permission56.setUsedBySystem(false);
         permission56.setAuthRoleId(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID);
 
+        AuthPermission permission57 = (AuthPermission) mongoRepositoryReactive.findById(APPROVE_APPICATION_FORM_ID, AuthPermission.class).block();
+        if (permission57 == null) {
+            permission57 = new AuthPermission();
+            permission57.setId(APPROVE_APPICATION_FORM_ID);
+        }
+        permission57.setName("APPROVE APPLICATION FORM");
+        permission57.setDescription("Can Approve / Reject application forms");
+        permission57.setUsedBySystem(false);
+        permission57.setAuthRoleId(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID);
+
 
         mongoRepositoryReactive.saveOrUpdate(permission1);
         mongoRepositoryReactive.saveOrUpdate(permission2);
@@ -540,6 +551,7 @@ public class LSLBAuthPermissionReferenceData {
         mongoRepositoryReactive.saveOrUpdate(permission54);
         mongoRepositoryReactive.saveOrUpdate(permission55);
         mongoRepositoryReactive.saveOrUpdate(permission56);
+        mongoRepositoryReactive.saveOrUpdate(permission57);
     }
 
 
