@@ -41,6 +41,7 @@ public class Agent extends AbstractFact {
     private String agentId;
     private boolean enabled;
 
+
     public boolean isEnabled() {
         return enabled;
     }
