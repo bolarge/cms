@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.service.util;
+package com.software.finatech.lslb.cms.service.background_jobs;
 
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.NotificationDto;
@@ -8,6 +8,7 @@ import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferen
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.PaymentRecordServiceImpl;
+import com.software.finatech.lslb.cms.service.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -302,7 +303,7 @@ public class Scheduler {
         }
     }
 
-    //@Scheduled(cron = "46 */12 * * *")
+    @Scheduled(cron = "46 */12 * * * ?")
     public void deactivateAgentWithNoPayment(){
         Query queryAgent= new Query();
         queryAgent.addCriteria(Criteria.where("createdAt").lte(LocalDateTime.now().minusDays(7)));
