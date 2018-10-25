@@ -15,6 +15,16 @@ public abstract class AbstractApprovalRequest extends AbstractFact {
     protected String initiatorAuthRoleId;
     protected LocalDateTime dateCreated = LocalDateTime.now();
     protected String rejectionReason;
+    protected String institutionId;
+
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
+
 
     public String getRejectionReason() {
         return rejectionReason;
@@ -103,6 +113,21 @@ public abstract class AbstractApprovalRequest extends AbstractFact {
             return dateTime.toString("dd-MM-yyyy HH:mm:ss");
         }
         return null;
+    }
+
+    public Institution getInstitution() {
+        if (StringUtils.isEmpty(institutionId)) {
+            return null;
+        }
+        return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+    }
+
+    public String getInstitutionName() {
+        Institution institution = getInstitution();
+        if (institution != null) {
+            return institution.getInstitutionName();
+        }
+        return "";
     }
 
     public AuthInfo getApprover() {

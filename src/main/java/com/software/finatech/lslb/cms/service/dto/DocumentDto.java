@@ -23,7 +23,25 @@ public class DocumentDto {
     protected String agentId;
     protected String owner;
     protected String approverId;
+    protected String comment;
+    protected String commenterName;
 
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public String getCommenterName() {
+        return commenterName;
+    }
+
+    public void setCommenterName(String commenterName) {
+        this.commenterName = commenterName;
+    }
 
     public String getApproverId() {
         return approverId;
@@ -64,6 +82,7 @@ public class DocumentDto {
     public void setInstitutionId(String institutionId) {
         this.institutionId = institutionId;
     }
+
     public boolean isArchive() {
         return archive;
     }

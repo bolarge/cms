@@ -181,7 +181,7 @@ public class UserApprovalRequest extends AbstractApprovalRequest {
         }
         LocalDateTime dateCreated = getDateCreated();
         if (dateCreated != null) {
-            dto.setDateCreated(dateCreated.toString("dd-MM-yyyy HH:mm:ss"));
+            dto.setDateCreated(dateCreated.toString("dd-MM-yyyy HH:mm:ss a"));
         }
         return dto;
     }
@@ -191,12 +191,13 @@ public class UserApprovalRequest extends AbstractApprovalRequest {
         UserApprovalRequestDto dto = convertToHalfDto();
         dto.setNewPermissions(getAuthPermissionDtos(this.getNewPermissionIds()));
         dto.setRemovedPermissions(getAuthPermissionDtos(this.removedPermissionIds));
-        if (isCreateUser()) {
-            dto.setPendingUser(getPendingAuthInfo(this.pendingAuthInfoId));
+        PendingAuthInfo pendingAuthInfo = getPendingAuthInfo(this.pendingAuthInfoId);
+        if (pendingAuthInfo != null) {
+            dto.setPendingUser(pendingAuthInfo.convertToDto());
         }
-        if (isAddPermissionToUser() || isRemovePermissionFromUser() || isUpdateUserRole()
-                || isEnableUser() || isDisableUser()) {
-            dto.setPendingUser(getAuthInfo(this.authInfoId));
+        AuthInfo authInfo = getAuthInfo(this.authInfoId);
+        if (authInfo != null) {
+            dto.setPendingUser(authInfo.convertToDto());
         }
         AuthRole newRole = getAuthRole(this.newAuthRoleId);
         if (newRole != null) {

@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.referencedata.AgentApprovalRequestTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentApprovalRequestService;
 import com.software.finatech.lslb.cms.service.util.AgentUserCreator;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
@@ -38,6 +39,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Service
@@ -92,22 +94,22 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
                 query.addCriteria(Criteria.where("agentId").is(agentId));
             }
             if (!StringUtils.isEmpty(rejectorId)) {
-                query.addCriteria(Criteria.where("rejectorId").is(agentId));
+                query.addCriteria(Criteria.where("rejectorId").is(rejectorId));
             }
             if (!StringUtils.isEmpty(gameTypeId)) {
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             }
             if (!StringUtils.isEmpty(requestStatusId)) {
-                query.addCriteria(Criteria.where("approvalRequestStatusId").is(gameTypeId));
+                query.addCriteria(Criteria.where("approvalRequestStatusId").is(requestStatusId));
             }
             if (!StringUtils.isEmpty(requestTypeId)) {
-                query.addCriteria(Criteria.where("agentApprovalRequestTypeId").is(gameTypeId));
+                query.addCriteria(Criteria.where("agentApprovalRequestTypeId").is(requestTypeId));
             }
             if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
                 query.addCriteria(Criteria.where("dateCreated").gte(new LocalDate(startDate)).lte(new LocalDate(endDate)));
             }
             if (page == 0) {
-                Long count = mongoRepositoryReactive.count(query, ApplicationForm.class).block();
+                Long count = mongoRepositoryReactive.count(query, AgentApprovalRequest.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
                 if (count == 0) {
                     return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
@@ -144,23 +146,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
 
     @Override
     public Mono<ResponseEntity> getAllAgentApprovalRequestType() {
-        try {
-            ArrayList<AgentApprovalRequestType> agentApprovalRequestTypes = (ArrayList<AgentApprovalRequestType>) mongoRepositoryReactive
-                    .findAll(new Query(), AgentApprovalRequestType.class).toStream().collect(Collectors.toList());
-
-            if (agentApprovalRequestTypes == null || agentApprovalRequestTypes.isEmpty()) {
-                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));
-            }
-            List<EnumeratedFactDto> agentApprovalRequestTypeDtos = new ArrayList<>();
-            agentApprovalRequestTypes.forEach(agentApprovalRequestType -> {
-                agentApprovalRequestTypeDtos.add(agentApprovalRequestType.convertToDto());
-            });
-
-            return Mono.just(new ResponseEntity<>(agentApprovalRequestTypeDtos, HttpStatus.OK));
-        } catch (Exception e) {
-            String errorMsg = "An error occurred while getting all agent approval request types";
-            return logAndReturnError(logger, errorMsg, e);
-        }
+        return getAllEnumeratedEntity("AgentApprovalRequestType");
     }
 
     @Override

@@ -18,7 +18,6 @@ import java.util.Map;
 @Document(collection = "AgentApprovalRequests")
 public class AgentApprovalRequest extends AbstractApprovalRequest {
     private String agentId;
-    private String institutionId;
     private String agentApprovalRequestTypeId;
     private String gameTypeId;
     private List<String> businessAddressList = new ArrayList<>();
@@ -46,14 +45,6 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
 
     public void setAgentId(String agentId) {
         this.agentId = agentId;
-    }
-
-    public String getInstitutionId() {
-        return institutionId;
-    }
-
-    public void setInstitutionId(String institutionId) {
-        this.institutionId = institutionId;
     }
 
     public String getAgentApprovalRequestTypeId() {
@@ -133,29 +124,12 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
             return gameType.getName();
         }
     }
-
-    public Institution getInstitution() {
-        if (StringUtils.isEmpty(institutionId)) {
-            return null;
-        }
-        return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
-    }
-
     public Agent getAgent() {
         if (StringUtils.isEmpty(this.agentId)) {
             return null;
         }
         return (Agent) mongoRepositoryReactive.findById(this.agentId, Agent.class).block();
     }
-
-    public String getInstitutionName() {
-        Institution institution = getInstitution();
-        if (institution != null) {
-            return institution.getInstitutionName();
-        }
-        return "";
-    }
-
     private PendingAgent getPendingAgent() {
         if (StringUtils.isEmpty(this.pendingAgentId)) {
             return null;
@@ -207,7 +181,7 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
         }
         LocalDateTime dateCreated = getDateCreated();
         if (dateCreated != null) {
-            agentApprovalRequestDto.setDateCreated(dateCreated.toString("dd-MM-yyyy HH:mm:ss"));
+            agentApprovalRequestDto.setDateCreated(dateCreated.toString("dd-MM-yyyy HH:mm:ss a"));
         }
         return agentApprovalRequestDto;
     }
