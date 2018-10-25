@@ -11,18 +11,25 @@ import java.util.List;
 
 public interface FeeService {
     Mono<ResponseEntity> createFee(FeeCreateDto feeCreateDto, HttpServletRequest request);
+
     Mono<ResponseEntity> getAllFees(String feePaymentTypeId, String gameTypeId, String revenueNameId);
+
     Mono<ResponseEntity> getAllFeePaymentType();
 
     Mono<ResponseEntity> setFeeEndDate(FeeEndDateUpdateDto feeEndDateUpdateDto, HttpServletRequest request);
 
     Mono<ResponseEntity> updateFeePaymentType(FeePaymentTypeDto feeTypeCreateDto, HttpServletRequest request);
+
     Mono<ResponseEntity> createFeePaymentType(FeePaymentTypeDto feeTypeCreateDto, HttpServletRequest request);
+
     Mono<ResponseEntity> createLicenseType(RevenueNameDto revenueNameDto, HttpServletRequest request);
+
     List<EnumeratedFactDto> getLicenseTypes();
-    List<FeesTypeDto>  getAllFeesType();
+
+    List<FeesTypeDto> getAllFeesType();
 
     Mono<ResponseEntity> findActiveFeeByGameTypeAndPaymentTypeAndRevenueName(String gameTypeId, String feePaymentTypeId, String revenueNameId);
+
     Fee findFeeById(String feeId);
 
     Mono<ResponseEntity> findAllFeePaymentTypeForLicenseType(String revenueNameId);

@@ -1,14 +1,15 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import com.software.finatech.lslb.cms.service.model.GamingMachineGameDetails;
+import com.software.finatech.lslb.cms.service.domain.MachineGame;
+import com.software.finatech.lslb.cms.service.model.MachineGameDetails;
 
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 
 public class GamingMachineDto {
     private String institutionId;
     private String institutionName;
-    private Set<GamingMachineGameDetails> gameDetailsList = new HashSet<>();
+    private ArrayList<MachineGameDetails> machineGames = new ArrayList<>();
     private String manufacturer;
     private String serialNumber;
     private String machineNumber;
@@ -65,12 +66,12 @@ public class GamingMachineDto {
         this.institutionName = institutionName;
     }
 
-    public Set<GamingMachineGameDetails> getGameDetailsList() {
-        return gameDetailsList;
+    public ArrayList<MachineGameDetails> getMachineGames() {
+        return machineGames;
     }
 
-    public void setGameDetailsList(Set<GamingMachineGameDetails> gameDetailsList) {
-        this.gameDetailsList = gameDetailsList;
+    public void setMachineGames(ArrayList<MachineGameDetails> machineGames) {
+        this.machineGames = machineGames;
     }
 
     public String getManufacturer() {

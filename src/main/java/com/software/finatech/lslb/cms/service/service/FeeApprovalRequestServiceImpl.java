@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Service
@@ -222,22 +223,7 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
 
     @Override
     public Mono<ResponseEntity> getFeeApprovalRequestTypes() {
-        try {
-            ArrayList<FeeApprovalRequestType> approvalRequestTypes = (ArrayList<FeeApprovalRequestType>) mongoRepositoryReactive
-                    .findAll(new Query(), FeeApprovalRequest.class).toStream().collect(Collectors.toList());
-
-            if (approvalRequestTypes == null || approvalRequestTypes.isEmpty()) {
-                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));
-            }
-            List<EnumeratedFactDto> enumeratedFactDtos = new ArrayList<>();
-            approvalRequestTypes.forEach(approvalRequestType -> {
-                enumeratedFactDtos.add(approvalRequestType.convertToDto());
-            });
-
-            return Mono.just(new ResponseEntity<>(enumeratedFactDtos, HttpStatus.OK));
-        } catch (Exception e) {
-            return logAndReturnError(logger, "An error occurred while getting fee approval request types", e);
-        }
+        return getAllEnumeratedEntity("FeeApprovalRequestType");
     }
 
     private void approveSetFeeEndDateRequest(FeeApprovalRequest feeApprovalRequest) {

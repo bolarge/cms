@@ -1,5 +1,7 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
+
 public abstract class AbstractApprovalRequestDto {
     private String id;
     private String approverId;
@@ -13,6 +15,24 @@ public abstract class AbstractApprovalRequestDto {
     private String requestStatusId;
     private String initiatorId;
     private String initiatorName;
+    private String institutionName;
+    private String institutionId;
+
+    public String getInstitutionName() {
+        return institutionName;
+    }
+
+    public void setInstitutionName(String institutionName) {
+        this.institutionName = institutionName;
+    }
+
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
 
     public String getRequestTypeName() {
         return requestTypeName;

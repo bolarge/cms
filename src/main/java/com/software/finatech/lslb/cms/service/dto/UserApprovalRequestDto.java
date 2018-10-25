@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class UserApprovalRequestDto extends AbstractApprovalRequestDto {
-    private AuthInfo pendingUser;
+    private AuthInfoDto pendingUser;
     private Set<AuthPermissionDto> newPermissions = new HashSet<>();
     private Set<AuthPermissionDto> removedPermissions = new HashSet<>();
     private String subjectUserName;
@@ -29,11 +29,11 @@ public class UserApprovalRequestDto extends AbstractApprovalRequestDto {
         this.newRoleName = newRoleName;
     }
 
-    public AuthInfo getPendingUser() {
+    public AuthInfoDto getPendingUser() {
         return pendingUser;
     }
 
-    public void setPendingUser(AuthInfo pendingUser) {
+    public void setPendingUser(AuthInfoDto pendingUser) {
         this.pendingUser = pendingUser;
     }
 

@@ -4,6 +4,7 @@ import com.software.finatech.lslb.cms.service.domain.GamingMachine;
 import com.software.finatech.lslb.cms.service.dto.GamingMachineCreateDto;
 import com.software.finatech.lslb.cms.service.dto.GamingMachineMultiplePaymentRequest;
 import com.software.finatech.lslb.cms.service.dto.GamingMachineUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.MachineGameUpdateDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
@@ -24,7 +25,11 @@ public interface GamingMachineService {
 
     Mono<ResponseEntity> updateGamingMachine(GamingMachineUpdateDto gamingMachineUpdateDto, HttpServletRequest request);
 
-    Mono<ResponseEntity> uploadMultipleGamingMachinesForInstitution(String institutionId,String gameTypeId, MultipartFile multipartFile, HttpServletRequest request);
+    Mono<ResponseEntity> addGamesToGamingMachine(MachineGameUpdateDto machineGameUpdateDto, HttpServletRequest request);
+
+    Mono<ResponseEntity> removeGamesFromGamingMachine(MachineGameUpdateDto machineGameUpdateDto, HttpServletRequest request);
+
+    Mono<ResponseEntity> uploadMultipleGamingMachinesForInstitution(String institutionId, String gameTypeId, MultipartFile multipartFile, HttpServletRequest request);
 
     GamingMachine findById(String gamingMachineId);
 

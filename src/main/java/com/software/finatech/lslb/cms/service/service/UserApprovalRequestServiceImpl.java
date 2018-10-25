@@ -1,10 +1,12 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.AuthPermission;
+import com.software.finatech.lslb.cms.service.domain.PendingAuthInfo;
+import com.software.finatech.lslb.cms.service.domain.UserApprovalRequest;
 import com.software.finatech.lslb.cms.service.dto.ApprovalRequestOperationtDto;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
-import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.UserApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
@@ -32,10 +34,10 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Service
@@ -109,7 +111,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             //TODO:: make sure initiator is filtered out
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser != null) {
-              //  query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
+                //  query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
                 if (!loggedInUser.isSuperAdmin()) {
                     query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
                 }
@@ -151,23 +153,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
 
     @Override
     public Mono<ResponseEntity> getAllUserApprovalRequestType() {
-        try {
-            ArrayList<UserApprovalRequestType> approvalRequestTypes = (ArrayList<UserApprovalRequestType>) mongoRepositoryReactive
-                    .findAll(new Query(), UserApprovalRequestType.class).toStream().collect(Collectors.toList());
-
-            if (approvalRequestTypes == null || approvalRequestTypes.isEmpty()) {
-                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));
-            }
-            List<EnumeratedFactDto> enumeratedFactDtos = new ArrayList<>();
-            approvalRequestTypes.forEach(approvalRequestType -> {
-                enumeratedFactDtos.add(approvalRequestType.convertToDto());
-            });
-
-            return Mono.just(new ResponseEntity<>(enumeratedFactDtos, HttpStatus.OK));
-        } catch (Exception e) {
-            String errorMsg = "An error occurred while getting all approval request statuses";
-            return logAndReturnError(logger, errorMsg, e);
-        }
+        return getAllEnumeratedEntity("UserApprovalRequestType");
     }
 
     @Override

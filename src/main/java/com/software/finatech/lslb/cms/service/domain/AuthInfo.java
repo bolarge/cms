@@ -422,6 +422,14 @@ public class AuthInfo extends AbstractFact {
         return StringUtils.equals(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID, this.authRoleId);
     }
 
+    public String getInstitutionName() {
+        Institution institution = getInstitution();
+        if (institution != null) {
+            return institution.getInstitutionName();
+        }
+        return null;
+    }
+
     public boolean isLSLBUser() {
         return StringUtils.equals(LSLBAuthRoleReferenceData.LSLB_USER_ID, this.authRoleId);
     }

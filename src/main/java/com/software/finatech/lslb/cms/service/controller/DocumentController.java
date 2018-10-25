@@ -9,7 +9,6 @@ import com.software.finatech.lslb.cms.service.referencedata.AuditActionReference
 import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
-import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import io.swagger.annotations.Api;
@@ -42,6 +41,8 @@ import javax.validation.constraints.NotEmpty;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Api(value = "Document", description = "For everything related to documents", tags = "Document Controller")
 @RestController
@@ -162,7 +163,7 @@ public class DocumentController extends BaseController {
 
             return Mono.just(new ResponseEntity<>("FileUpload Successful", HttpStatus.OK));
         } catch (Exception e) {
-            return ErrorResponseUtil.logAndReturnError(logger, "An error occured while uploading the documents", e);
+            return logAndReturnError(logger, "An error occured while uploading the documents", e);
         }
     }
 
@@ -275,14 +276,14 @@ public class DocumentController extends BaseController {
                 doApplicationFormDocumentReupload(document);
             }
 
-            String verbiage = String.format("Reuploaded document -> Document Type -> %s, File name -> %s, Id -> %s ",document.getDocumentType(),document.getFilename(), document.getId());
+            String verbiage = String.format("Reuploaded document -> Document Type -> %s, File name -> %s, Id -> %s ", document.getDocumentType(), document.getFilename(), document.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), document.getOwner(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity<>(document.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
-            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while re uploading document", e);
+            return logAndReturnError(logger, "An error occurred while re uploading document", e);
         }
     }
 
@@ -608,7 +609,35 @@ public class DocumentController extends BaseController {
 
             return Mono.just(new ResponseEntity<>("FileUpload Successful", HttpStatus.OK));
         } catch (Exception e) {
-            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while uploading the documents", e);
+            return logAndReturnError(logger, "An error occurred while uploading the documents", e);
+        }
+    }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/add-comment", produces = "application/json", params = {"entityName"})
+    @ApiOperation(value = "Add Comment To  Document", response = DocumentDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> addCommentToDocument(@RequestBody @Valid DocumentCommentDto documentCommentDto, HttpServletRequest request) {
+        try {
+            String documentId = documentCommentDto.getDocumentId();
+            Document document = findDocumentById(documentId);
+            if (document == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Document with id %s not found", documentId), HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+            document.setCommenterName(loggedInUser.getFullName());
+            document.setComment(documentCommentDto.getComment());
+            mongoRepositoryReactive.saveOrUpdate(document);
+            return Mono.just(new ResponseEntity<>(document.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding comment to document", e);
         }
     }
 
@@ -641,20 +670,21 @@ public class DocumentController extends BaseController {
             }
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
             document.setComment(documentOperationDto.getComment());
+            document.setCommenterName(loggedInUser.getFullName());
             mongoRepositoryReactive.saveOrUpdate(document);
 
             if (StringUtils.equalsIgnoreCase("applicationForm", entityName)) {
                 approveApplicationFormDocument(document);
             }
 
-            String verbiage = String.format("Approved document -> Document Type -> %s, File name -> %s, Id -> %s ",document.getDocumentType(),document.getFilename(), documentId);
+            String verbiage = String.format("Approved document -> Document Type -> %s, File name -> %s, Id -> %s ", document.getDocumentType(), document.getFilename(), documentId);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), document.getOwner(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity<>(document.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
-            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while approving document", e);
+            return logAndReturnError(logger, "An error occurred while approving document", e);
         }
     }
 
@@ -666,7 +696,7 @@ public class DocumentController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> rejectDocument(@RequestBody @Valid FormDocumentOperationDto documentOperationDto,
-                                                @RequestParam("entityName") String entityName, HttpServletRequest request) {
+                                               @RequestParam("entityName") String entityName, HttpServletRequest request) {
         try {
             String documentId = documentOperationDto.getDocumentId();
             Document document = findDocumentById(documentId);
@@ -686,20 +716,21 @@ public class DocumentController extends BaseController {
             }
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
             document.setComment(documentOperationDto.getComment());
+            document.setCommenterName(loggedInUser.getFullName());
             mongoRepositoryReactive.saveOrUpdate(document);
 
             if (StringUtils.equalsIgnoreCase("applicationForm", entityName)) {
                 rejectApplicationFormDocument(document);
             }
 
-            String verbiage = String.format("Rejected document -> Document Type -> %s, File name -> %s, Id -> %s ",document.getDocumentType(),document.getFilename(), documentId);
+            String verbiage = String.format("Rejected document -> Document Type -> %s, File name -> %s, Id -> %s ", document.getDocumentType(), document.getFilename(), documentId);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), document.getOwner(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity<>(document.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
-            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while approving document", e);
+            return logAndReturnError(logger, "An error occurred while approving document", e);
         }
     }
 
