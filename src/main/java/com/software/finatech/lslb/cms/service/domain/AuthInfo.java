@@ -7,6 +7,8 @@ import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenc
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -34,6 +36,16 @@ public class AuthInfo extends AbstractFact {
     protected String ssoUserId;
     protected String title;
     protected String agentId;
+    protected LocalDate lastInactiveDate;
+
+    public LocalDate getLastInactiveDate() {
+        return lastInactiveDate;
+    }
+
+    public void setLastInactiveDate(LocalDate lastInactiveDate) {
+        this.lastInactiveDate = lastInactiveDate;
+    }
+
     //UI application level field settings
     protected Set<String> authViews = new java.util.HashSet<>();
     protected String gameTypeId;

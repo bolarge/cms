@@ -447,6 +447,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 if(authInfo.isInactive()==true){
                     authInfo.setInactive(false);
                     authInfo.setInactiveReason(null);
+                    authInfo.setLastInactiveDate(LocalDate.now());
                     mongoRepositoryReactive.saveOrUpdate(authInfo);
                 }
                 return Mono.just(new ResponseEntity<>(stringResponse, HttpStatus.valueOf(responseCode)));
