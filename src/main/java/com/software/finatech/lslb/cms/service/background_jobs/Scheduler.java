@@ -3,6 +3,8 @@ package com.software.finatech.lslb.cms.service.background_jobs;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.NotificationDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.EmailService;
@@ -303,27 +305,45 @@ public class Scheduler {
         }
     }
 
-    @Scheduled(cron = "46 */12 * * * ?")
+    @Scheduled(cron = "0 0 20 * * *")
     public void deactivateAgentWithNoPayment(){
         Query queryAgent= new Query();
+
         queryAgent.addCriteria(Criteria.where("createdAt").lte(LocalDateTime.now().minusDays(7)));
-        queryAgent.addCriteria(Criteria.where("enabled").is(true));
-        List<Agent> agents= (List<Agent>)mongoRepositoryReactive.findAll(queryAgent, Agent.class).toStream().collect(Collectors.toList());
+        queryAgent.addCriteria(Criteria.where("inactive").is(false));
+        queryAgent.addCriteria(Criteria.where("authRoleId").is(LSLBAuthRoleReferenceData.AGENT_ROLE_ID));
+        queryAgent.limit(1000);
+        List<AuthInfo> agents= (List<AuthInfo>)mongoRepositoryReactive.findAll(queryAgent, AuthInfo.class).toStream().collect(Collectors.toList());
         agents.parallelStream().forEach(agent -> {
-            Query queryPayment= new Query();
-            queryPayment.addCriteria(Criteria.where("agentId").is(agent.getId()));
-            queryPayment.addCriteria(Criteria.where("paymentStatusId").is(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID));
-            List<PaymentRecord> agentPaymentRecord=(List<PaymentRecord>)mongoRepositoryReactive.findAll(queryPayment,PaymentRecord.class).toStream().collect(Collectors.toList());
-            if(agentPaymentRecord.size()==0){
-                agent.setEnabled(false);
-                mongoRepositoryReactive.saveOrUpdate(agent);
-                NotificationDto notificationDto = new NotificationDto();
-                notificationDto.setDescription("You have been deactivated for lack license payment");
-                notificationDto.setTemplate("Agent_Deactivation");
-                notificationDto.setCallBackUrl(frontEndPropertyHelper.getFrontEndUrl() + "/agent-reactivation-request");
-                notificationDto.setAgentEmailAddress(agent.getEmailAddress());
-                sendEmail.sendEmailDeactivationNotification(notificationDto);
+            int days=0;
+            boolean check = false;
+            if(agent.getLastInactiveDate()!=null){
+                days= Days.daysBetween(agent.getLastInactiveDate(),LocalDateTime.now()).getDays();
+                if(days>=7){
+                    check=true;
+                }
+            }else{
+                check=true;
             }
+            if(check==true){
+                Query queryPayment= new Query();
+                queryPayment.addCriteria(Criteria.where("agentId").is(agent.getId()));
+                queryPayment.addCriteria(Criteria.where("paymentStatusId").is(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID));
+                List<PaymentRecord> agentPaymentRecord=(List<PaymentRecord>)mongoRepositoryReactive.findAll(queryPayment,PaymentRecord.class).toStream().collect(Collectors.toList());
+                if(agentPaymentRecord.size()==0){
+                    agent.setInactive(false);
+                    agent.setInactiveReason("You have been deactivated for lack license payment, please kindly click forget password below to begin re-activation");
+                    mongoRepositoryReactive.saveOrUpdate(agent);
+                    NotificationDto notificationDto = new NotificationDto();
+                    notificationDto.setDescription("You have been deactivated for lack license payment");
+                    notificationDto.setTemplate("Agent_Deactivation");
+                    notificationDto.setCallBackUrl(frontEndPropertyHelper.getFrontEndUrl() + "/forgot-password");
+                    notificationDto.setAgentEmailAddress(agent.getEmailAddress());
+                    sendEmail.sendEmailDeactivationNotification(notificationDto);
+                }
+            }
+
+
 
         });
 

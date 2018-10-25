@@ -21,7 +21,7 @@ public interface AuthInfoService {
 
     String resetPasswordToken(String email, HttpServletRequest request);
 
-    Mono<ResponseEntity> resetPassword(SSOPasswordResetModel ssoPasswordResetModel, HttpServletRequest request);
+    Mono<ResponseEntity> resetPassword(SSOPasswordResetModel ssoPasswordResetModel, HttpServletRequest request ,AuthInfo authInfo);
 
     Mono<ResponseEntity> changePassword(String token, SSOChangePasswordModel model, HttpServletRequest request);
 
