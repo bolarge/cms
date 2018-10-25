@@ -199,7 +199,7 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity<>("Invalid User", HttpStatus.BAD_REQUEST));
             }
             model.setToken(authInfo.getPasswordResetToken());
-            return authInfoService.resetPassword(model, request);
+            return authInfoService.resetPassword(model, request,authInfo);
         } catch (Exception e) {
             String errorMsg = "An error occurred while resetting user password";
             return logAndReturnError(logger, errorMsg, e);
@@ -266,6 +266,11 @@ public class AuthInfoController extends BaseController {
             if (authInfo.getEnabled() != true) {
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User Deactivated"));
                 return Mono.just(new ResponseEntity("User Deactivated", HttpStatus.UNAUTHORIZED));
+            }
+
+            if (authInfo.isInactive() != false) {
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User Inactive"));
+                return Mono.just(new ResponseEntity(authInfo.getInactiveReason(), HttpStatus.UNAUTHORIZED));
             }
 
             return authInfoService.loginToken(loginDto.getUserName(), loginDto.getPassword(), authInfo, request);

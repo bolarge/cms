@@ -401,7 +401,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public Mono<ResponseEntity> resetPassword(SSOPasswordResetModel ssoPasswordResetModel, HttpServletRequest request) {
+    public Mono<ResponseEntity> resetPassword(SSOPasswordResetModel ssoPasswordResetModel, HttpServletRequest request,AuthInfo authInfo) {
         try {
             HttpClient httpclient = HttpClientBuilder.create().build();
             HttpPost httpPost = null;
@@ -444,6 +444,11 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                         userFullName, userFullName, LocalDateTime.now(),
                         LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
+                if(authInfo.isInactive()==true){
+                    authInfo.setInactive(false);
+                    authInfo.setInactiveReason(null);
+                    mongoRepositoryReactive.saveOrUpdate(authInfo);
+                }
                 return Mono.just(new ResponseEntity<>(stringResponse, HttpStatus.valueOf(responseCode)));
             }
         } catch (Throwable e) {

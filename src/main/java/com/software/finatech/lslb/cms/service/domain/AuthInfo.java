@@ -43,6 +43,25 @@ public class AuthInfo extends AbstractFact {
     @Transient
     protected String gameTypeName;
 
+    private boolean inactive;
+    private String inactiveReason;
+
+    public boolean isInactive() {
+        return inactive;
+    }
+
+    public void setInactive(boolean inactive) {
+        this.inactive = inactive;
+    }
+
+    public String getInactiveReason() {
+        return inactiveReason;
+    }
+
+    public void setInactiveReason(String inactiveReason) {
+        this.inactiveReason = inactiveReason;
+    }
+
     public String getGameTypeName() {
         GameType gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
         if (gameType != null) {
