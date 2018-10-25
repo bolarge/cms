@@ -415,7 +415,12 @@ public class LicenseServiceImpl implements LicenseService {
         if (!StringUtils.isEmpty(institutionId)) {
             queryForInstitutionAIP.addCriteria(Criteria.where("institutionId").is(institutionId));
         }
-        queryForInstitutionAIP.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID).orOperator(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSE_RUNNING)));
+//        queryForInstitutionAIP.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID)
+//                .orOperator(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSE_RUNNING)));
+        Criteria criteria = new Criteria();
+        criteria.orOperator(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSE_RUNNING),
+                Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID));
+        queryForInstitutionAIP.addCriteria(criteria);
         queryForInstitutionAIP.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
         List<License> aipsForInstitution = (List<License>) mongoRepositoryReactive.findAll(queryForInstitutionAIP, License.class).toStream().collect(Collectors.toList());
         ArrayList<AIPCheckDto> aipCheckDtos = new ArrayList<>();
@@ -636,9 +641,11 @@ public class LicenseServiceImpl implements LicenseService {
             queryLicence.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
             queryLicence.addCriteria(Criteria.where("gameTypeId").is(licenseUpdateDto.getGameTypeId()));
             queryLicence.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
-            queryLicence.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID).orOperator(
-                    Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSE_RUNNING)
-            ));
+            Criteria criteria = new Criteria();
+            criteria.orOperator(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSE_RUNNING),
+                    Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID));
+            queryLicence.addCriteria(criteria);
+
             License license = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
             if (license == null) {
                 return Mono.just(new ResponseEntity<>("Operator has not uploaded AIP document", HttpStatus.BAD_REQUEST));
