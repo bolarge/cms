@@ -10,6 +10,8 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.springframework.data.annotation.Transient;
 
+import java.util.Map;
+
 
 @SuppressWarnings("serial")
 @org.springframework.data.mongodb.core.mapping.Document(collection = "Documents")
@@ -294,10 +296,14 @@ public class Document extends AbstractFact {
         dto.setGameTypeId(getGameTypeId());
         dto.setComment(getComment());
         dto.setCommenterName(getCommenterName());
+        ApprovalRequestStatus status = getApprovalRequestStatus();
+        if (status != null) {
+            dto.setDocumentStatus(status.toString());
+        }
         return dto;
     }
 
-    private String getCommenterName(){
+    private String getCommenterName() {
 
         return null;
     }
@@ -326,5 +332,23 @@ public class Document extends AbstractFact {
             return documentType.getApprover();
         }
         return null;
+    }
+
+    public ApprovalRequestStatus getApprovalRequestStatus() {
+        if (StringUtils.isEmpty(this.approvalRequestStatusId)) {
+            return null;
+        }
+        Map approvalRequestStatusMap = Mapstore.STORE.get("ApprovalRequestStatus");
+        ApprovalRequestStatus approvalRequestStatus = null;
+        if (approvalRequestStatusMap != null) {
+            approvalRequestStatus = (ApprovalRequestStatus) approvalRequestStatusMap.get(this.approvalRequestStatusId);
+        }
+        if (approvalRequestStatus == null) {
+            approvalRequestStatus = (ApprovalRequestStatus) mongoRepositoryReactive.findById(this.approvalRequestStatusId, ApprovalRequestStatus.class).block();
+            if (approvalRequestStatus != null && approvalRequestStatusMap != null) {
+                approvalRequestStatusMap.put(this.approvalRequestStatusId, approvalRequestStatus);
+            }
+        }
+        return approvalRequestStatus;
     }
 }

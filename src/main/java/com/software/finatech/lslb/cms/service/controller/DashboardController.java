@@ -2,8 +2,6 @@ package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LoggedCaseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
@@ -12,17 +10,12 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
@@ -147,7 +140,7 @@ public class DashboardController extends BaseController {
             queryCasesTotalCount.addCriteria(Criteria.where("institutionId").is(institutionId));
         }
         long institutionTotalCount=mongoRepositoryReactive.count(query, Institution.class).block();
-        long gamingMachineTotalCount=mongoRepositoryReactive.count(query, GamingMachine.class).block();
+        long gamingMachineTotalCount=mongoRepositoryReactive.count(query, Machine.class).block();
         long agentTotalCount=mongoRepositoryReactive.count(queryAgentTotalCount, Agent.class).block();
         long casesTotalCount=mongoRepositoryReactive.count(queryCasesTotalCount, LoggedCase.class).block();
 
@@ -318,7 +311,7 @@ public class DashboardController extends BaseController {
     public long getGamingMachineCountForInstitution(String institutionId){
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").in(institutionId));
-        return mongoRepositoryReactive.count(query, GamingMachine.class).block();
+        return mongoRepositoryReactive.count(query, Machine.class).block();
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/institution-invoice-summary", params = {"institutionId"})

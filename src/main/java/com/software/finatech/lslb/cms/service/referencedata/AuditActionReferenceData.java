@@ -14,13 +14,12 @@ public class AuditActionReferenceData {
     public static final String CASE_ID = "8";
     public static final String PAYMENT_ID = "9";
     public static final String CUSTOMER_COMPLAIN = "10";
-    public static final String GAMING_MACHINE_ID = "11";
+    public static final String MACHINE_ID = "11";
     public static final String AGENT_ID = "12";
     public static final String ROLE_ID = "13";
     public static final String INSTITUTION = "14";
     public static final String AIP_ID = "15";
     public static final String RENEWAL_ID = "16";
-    public static final String GAMING_TERMINAL_ID = "17";
     public static final String DOCUMENT_ID = "18";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
@@ -114,13 +113,13 @@ public class AuditActionReferenceData {
         action.setName("Customer Complain");
         mongoRepositoryReactive.saveOrUpdate(action);
 
-        action = (AuditAction) mongoRepositoryReactive.findById(GAMING_MACHINE_ID, AuditAction.class).block();
+        action = (AuditAction) mongoRepositoryReactive.findById(MACHINE_ID, AuditAction.class).block();
         if (action == null) {
             action = new AuditAction();
-            action.setId(GAMING_MACHINE_ID);
+            action.setId(MACHINE_ID);
         }
-        action.setDescription("Gaming Machine");
-        action.setName("Gaming Machine");
+        action.setDescription("Machine");
+        action.setName("Machine");
         mongoRepositoryReactive.saveOrUpdate(action);
 
         action = (AuditAction) mongoRepositoryReactive.findById(AGENT_ID, AuditAction.class).block();
@@ -166,15 +165,6 @@ public class AuditActionReferenceData {
         }
         action.setDescription("RENEWAL");
         action.setName("RENEWAL");
-        mongoRepositoryReactive.saveOrUpdate(action);
-
-        action = (AuditAction) mongoRepositoryReactive.findById(GAMING_TERMINAL_ID, AuditAction.class).block();
-        if (action == null) {
-            action = new AuditAction();
-            action.setId(GAMING_TERMINAL_ID);
-        }
-        action.setDescription("GAMING TERMINAL");
-        action.setName("GAMING TERMINAL");
         mongoRepositoryReactive.saveOrUpdate(action);
 
         action = (AuditAction) mongoRepositoryReactive.findById(DOCUMENT_ID, AuditAction.class).block();

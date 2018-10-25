@@ -21,11 +21,11 @@ public class LicenseUpdateDto {
 //        this.agentId = agentId;
 //    }
 //
-//    public String getGamingMachineId() {
+//    public String getMachineId() {
 //        return gamingMachineId;
 //    }
 //
-//    public void setGamingMachineId(String gamingMachineId) {
+//    public void setMachineId(String gamingMachineId) {
 //        this.gamingMachineId = gamingMachineId;
 //    }
 

@@ -100,9 +100,9 @@ public class Scheduler {
                     notificationDto.setAgentEmailAddress(agent.getEmailAddress());
 
                 }
-                GamingMachine gamingMachine=(GamingMachine) mongoRepositoryReactive.findById(license.convertToDto().getGamingMachineId(),GamingMachine.class).block();
+                Machine gamingMachine=(Machine) mongoRepositoryReactive.findById(license.convertToDto().getGamingMachineId(),Machine.class).block();
                 if(gamingMachine!=null){
-                    notificationDto.setMachineNumber(gamingMachine.getMachineNumber());
+                    notificationDto.setMachineNumber(gamingMachine.getSerialNumber());
 
                 }
                 notificationDto.setTemplate("LicenseUpdate");
@@ -243,9 +243,9 @@ public class Scheduler {
                     notificationDto.setAgentEmailAddress(agent.getEmailAddress());
 
                 }
-                GamingMachine gamingMachine=(GamingMachine) mongoRepositoryReactive.findById(license.convertToDto().getGamingMachineId(),GamingMachine.class).block();
+                Machine gamingMachine=(Machine) mongoRepositoryReactive.findById(license.convertToDto().getGamingMachineId(),Machine.class).block();
                 if(gamingMachine!=null){
-                    notificationDto.setMachineNumber(gamingMachine.getMachineNumber());
+                    notificationDto.setMachineNumber(gamingMachine.getSerialNumber());
 
                 }
                 notificationDto.setTemplate("LicenseUpdate");

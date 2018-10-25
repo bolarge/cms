@@ -49,7 +49,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     private VigipayService vigipayService;
     private InstitutionService institutionService;
     private AgentService agentService;
-    private GamingMachineService gamingMachineService;
+    private MachineService gamingMachineService;
     private AuthInfoService authInfoService;
     private LicenseService licenseService;
     private ApplicationFormService applicationFormService;
@@ -66,7 +66,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                                           VigipayService vigipayService,
                                           InstitutionService institutionService,
                                           AgentService agentService,
-                                          GamingMachineService gamingMachineService,
+                                          MachineService gamingMachineService,
                                           AuthInfoService authInfoService,
                                           LicenseService licenseService,
                                           ApplicationFormService applicationFormService,
@@ -141,7 +141,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             String invoiceNumber = null;
             Agent agent = null;
             Institution institution = null;
-            GamingMachine gamingMachine = null;
+            Machine gamingMachine = null;
             String feeId = paymentRecordDetailCreateDto.getFeeId();
             Fee fee = feeService.findFeeById(feeId);
             if (fee == null) {
@@ -164,7 +164,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             String revenueName = feeDto.getRevenueName();
             String suffix = "";
             if (paymentRecordDetailCreateDto.isGamingMachinePayment() && gamingMachine != null) {
-                suffix = String.format(" for Machine %s", gamingMachine.getMachineNumber());
+                suffix = String.format(" for Machine %s", gamingMachine.getSerialNumber());
             }
             String feeDescription = String.format("%s for %ss for category : %s %s", feeName, revenueName, gameTypeName, suffix);
             feeDescription = StringCapitalizer.convertToTitleCaseIteratingChars(feeDescription);
@@ -293,7 +293,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             Institution institution = null;
             if (paymentRecordDetailCreateDto.isGamingMachinePayment()) {
                 String gamingMachineId = paymentRecordDetailCreateDto.getGamingMachineId();
-                GamingMachine gamingMachine = gamingMachineService.findById(gamingMachineId);
+                Machine gamingMachine = gamingMachineService.findById(gamingMachineId);
                 if (gamingMachine == null) {
                     return Mono.just(new ResponseEntity<>(String.format("Gaming machine with id %s does not exist", gamingMachineId), HttpStatus.BAD_REQUEST));
                 }

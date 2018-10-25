@@ -15,8 +15,8 @@ import java.util.Set;
 @SuppressWarnings("serial")
 @Document(collection = "MachineApprovalRequests")
 public class MachineApprovalRequest extends AbstractApprovalRequest {
-    private String gamingMachineId;
-    private String pendingGamingMachineId;
+    private String machineId;
+    private String pendingMachineId;
     private Set<MachineGameDetails> newMachineGames = new HashSet<>();
     private Set<MachineGameDetails> removedMachineGames = new HashSet<>();
     private String machineApprovalRequestTypeId;
@@ -29,20 +29,20 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
         this.machineApprovalRequestTypeId = machineApprovalRequestTypeId;
     }
 
-    public String getGamingMachineId() {
-        return gamingMachineId;
+    public String getMachineId() {
+        return machineId;
     }
 
-    public void setGamingMachineId(String gamingMachineId) {
-        this.gamingMachineId = gamingMachineId;
+    public void setMachineId(String machineId) {
+        this.machineId = machineId;
     }
 
-    public String getPendingGamingMachineId() {
-        return pendingGamingMachineId;
+    public String getPendingMachineId() {
+        return pendingMachineId;
     }
 
-    public void setPendingGamingMachineId(String pendingGamingMachineId) {
-        this.pendingGamingMachineId = pendingGamingMachineId;
+    public void setPendingMachineId(String pendingMachineId) {
+        this.pendingMachineId = pendingMachineId;
     }
 
     public Set<MachineGameDetails> getNewMachineGames() {
@@ -103,13 +103,13 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
 
     public MachineApprovalRequestDto convertToFullDto() {
         MachineApprovalRequestDto dto = convertToDto();
-        PendingGamingMachine pendingGamingMachine = getPendingGamingMachine();
+        PendingMachine pendingGamingMachine = getPendingMachine();
         if (pendingGamingMachine != null) {
-            dto.setPendingGamingMachine(pendingGamingMachine.convertToPendingDto());
+            dto.setPendingMachine(pendingGamingMachine.convertToPendingDto());
         }
-        GamingMachine gamingMachine = getGamingMachine();
+        Machine gamingMachine = getMachine();
         if (gamingMachine != null) {
-            dto.setPendingGamingMachine(gamingMachine.convertToFullDto());
+            dto.setPendingMachine(gamingMachine.convertToFullDto());
         }
         dto.setNewGameDetails(getNewMachineGames());
         AuthInfo approver = getAuthInfo(this.approverId);
@@ -126,35 +126,26 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
         return dto;
     }
 
-    public boolean isCreateGamingMachine() {
-        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.CREATE_GAMING_MACHINE_ID, this.machineApprovalRequestTypeId);
+    public boolean isCreateMachine() {
+        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.CREATE_MACHINE_ID, this.machineApprovalRequestTypeId);
     }
 
-
-    public boolean isCreateGamingTerminal() {
-        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.CREATE_GAMING_TERMINAL_ID, this.machineApprovalRequestTypeId);
+    public boolean isAddGamesToMachine() {
+        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.ADD_GAMES_TO_MACHINE_ID, this.machineApprovalRequestTypeId);
     }
 
-    public boolean isAddGamesToGamingMachine() {
-        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.ADD_GAMES_TO_GAMING_MACHINE_ID, this.machineApprovalRequestTypeId);
-    }
-
-    public boolean isAddGamesToGamingTerminal() {
-        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.ADD_GAMES_TO_GAMING_TERMINAL_ID, this.machineApprovalRequestTypeId);
-    }
-
-    public PendingGamingMachine getPendingGamingMachine() {
-        if (StringUtils.isEmpty(this.pendingGamingMachineId)) {
+    public PendingMachine getPendingMachine() {
+        if (StringUtils.isEmpty(this.pendingMachineId)) {
             return null;
         }
-        return (PendingGamingMachine) mongoRepositoryReactive.findById(this.pendingGamingMachineId, PendingGamingMachine.class).block();
+        return (PendingMachine) mongoRepositoryReactive.findById(this.pendingMachineId, PendingMachine.class).block();
     }
 
-    public GamingMachine getGamingMachine() {
-        if (StringUtils.isEmpty(this.gamingMachineId)) {
+    public Machine getMachine() {
+        if (StringUtils.isEmpty(this.machineId)) {
             return null;
         }
-        return (GamingMachine) mongoRepositoryReactive.findById(this.gamingMachineId, GamingMachine.class).block();
+        return (Machine) mongoRepositoryReactive.findById(this.machineId, Machine.class).block();
     }
 
     @Override
