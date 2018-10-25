@@ -6,8 +6,6 @@ import java.util.List;
 public class AgentApprovalRequestDto extends AbstractApprovalRequestDto {
     private String agentName;
     private String agentId;
-    private String institutionName;
-    private String institutionId;
     private String gameTypeId;
     private String gameTypeName;
     private String creationDate;
@@ -61,22 +59,6 @@ public class AgentApprovalRequestDto extends AbstractApprovalRequestDto {
 
     public void setAgentId(String agentId) {
         this.agentId = agentId;
-    }
-
-    public String getInstitutionName() {
-        return institutionName;
-    }
-
-    public void setInstitutionName(String institutionName) {
-        this.institutionName = institutionName;
-    }
-
-    public String getInstitutionId() {
-        return institutionId;
-    }
-
-    public void setInstitutionId(String institutionId) {
-        this.institutionId = institutionId;
     }
 
     public String getGameTypeId() {

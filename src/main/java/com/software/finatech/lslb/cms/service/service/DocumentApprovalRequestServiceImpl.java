@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Service
@@ -132,23 +133,7 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
 
     @Override
     public Mono<ResponseEntity> getAllDocumentApprovalRequestType() {
-        try {
-            ArrayList<DocumentApprovalRequestType> approvalRequestTypes = (ArrayList<DocumentApprovalRequestType>) mongoRepositoryReactive
-                    .findAll(new Query(), UserApprovalRequestType.class).toStream().collect(Collectors.toList());
-
-            if (approvalRequestTypes == null || approvalRequestTypes.isEmpty()) {
-                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));
-            }
-            List<EnumeratedFactDto> enumeratedFactDtos = new ArrayList<>();
-            approvalRequestTypes.forEach(approvalRequestType -> {
-                enumeratedFactDtos.add(approvalRequestType.convertToDto());
-            });
-
-            return Mono.just(new ResponseEntity<>(enumeratedFactDtos, HttpStatus.OK));
-        } catch (Exception e) {
-            String errorMsg = "An error occurred while getting all approval request statuses";
-            return logAndReturnError(logger, errorMsg, e);
-        }
+        return getAllEnumeratedEntity("DocumentApprovalRequestType");
     }
 
     @Override

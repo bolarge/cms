@@ -113,7 +113,7 @@ public class FeeApprovalRequest extends AbstractApprovalRequest {
         }
         LocalDateTime dateCreated = getDateCreated();
         if (dateCreated != null) {
-            dto.setDateCreated(dateCreated.toString("dd-MM-yyyy HH:mm:ss"));
+            dto.setDateCreated(dateCreated.toString("dd-MM-yyyy HH:mm:ss a"));
         }
         return dto;
     }

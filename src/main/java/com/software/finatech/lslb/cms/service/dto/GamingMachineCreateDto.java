@@ -1,6 +1,6 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import com.software.finatech.lslb.cms.service.model.GamingMachineGameDetails;
+import com.software.finatech.lslb.cms.service.model.MachineGameDetails;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -16,7 +16,7 @@ public class GamingMachineCreateDto {
     @NotEmpty(message = "please provide machine serial Number")
     private String serialNumber;
     @NotNull(message = "please provide game details")
-    private Set<GamingMachineGameDetails> gameDetailsList;
+    private Set<MachineGameDetails> gameDetailsList;
     @NotEmpty(message = "please provide institutionId")
     private String institutionId;
     @NotEmpty(message = "please provide game type id")
@@ -54,11 +54,11 @@ public class GamingMachineCreateDto {
         this.serialNumber = serialNumber;
     }
 
-    public Set<GamingMachineGameDetails> getGameDetailsList() {
+    public Set<MachineGameDetails> getGameDetailsList() {
         return gameDetailsList;
     }
 
-    public void setGameDetailsList(Set<GamingMachineGameDetails> gameDetailsList) {
+    public void setGameDetailsList(Set<MachineGameDetails> gameDetailsList) {
         this.gameDetailsList = gameDetailsList;
     }
 

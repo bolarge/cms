@@ -127,7 +127,7 @@ public class DocumentTypeController extends BaseController {
         pendingDocumentType.setId(UUID.randomUUID().toString());
         pendingDocumentType.setDocumentPurposeId(documentTypeCreateDto.getDocumentPurposeId());
         pendingDocumentType.setActive(documentTypeCreateDto.isActive());
-        pendingDocumentType.setRequired(documentTypeCreateDto.isRequired());
+        pendingDocumentType.setRequired(true);
         pendingDocumentType.setName(documentTypeCreateDto.getName());
         pendingDocumentType.setDescription(documentTypeCreateDto.getDescription());
         mongoRepositoryReactive.saveOrUpdate(pendingDocumentType);

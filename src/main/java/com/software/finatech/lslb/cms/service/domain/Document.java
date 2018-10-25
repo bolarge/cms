@@ -37,6 +37,11 @@ public class Document extends AbstractFact {
     protected Boolean notificationSent;
     protected String comment;
     protected String approvalRequestStatusId = ApprovalRequestStatusReferenceData.PENDING_ID;
+    protected String commenterName;
+
+    public void setCommenterName(String commenterName) {
+        this.commenterName = commenterName;
+    }
 
     public String getComment() {
         return comment;
@@ -287,7 +292,14 @@ public class Document extends AbstractFact {
         dto.setValidTo(getValidTo() == null ? null : getValidTo().toString("dd-MM-yyyy"));
         dto.setOwner(getOwner());
         dto.setGameTypeId(getGameTypeId());
+        dto.setComment(getComment());
+        dto.setCommenterName(getCommenterName());
         return dto;
+    }
+
+    private String getCommenterName(){
+
+        return null;
     }
 
     public DocumentType getDocumentType() {

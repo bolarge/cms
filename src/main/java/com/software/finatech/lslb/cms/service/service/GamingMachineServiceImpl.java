@@ -3,7 +3,7 @@ package com.software.finatech.lslb.cms.service.service;
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
-import com.software.finatech.lslb.cms.service.model.GamingMachineGameDetails;
+import com.software.finatech.lslb.cms.service.model.MachineGameDetails;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInvoiceItem;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
@@ -33,10 +33,12 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.software.finatech.lslb.cms.service.model.MachineGameDetails.machineGamesToString;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Service
@@ -124,22 +126,32 @@ public class GamingMachineServiceImpl implements GamingMachineService {
     @Override
     public Mono<ResponseEntity> createGamingMachine(GamingMachineCreateDto gamingMachineCreateDto, HttpServletRequest request) {
         try {
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
             String institutionId = gamingMachineCreateDto.getInstitutionId();
             String gameTypeId = gamingMachineCreateDto.getGameTypeId();
             Mono<ResponseEntity> validateGamingMachineLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
             if (validateGamingMachineLicenseResponse != null) {
                 return validateGamingMachineLicenseResponse;
             }
-            GamingMachine gamingMachine = fromGamingMachineCreateDto(gamingMachineCreateDto);
-            saveGamingMachine(gamingMachine);
+            PendingGamingMachine pendingGamingMachine = fromGamingMachineCreateDto(gamingMachineCreateDto);
+            saveGamingMachine(pendingGamingMachine);
+            MachineApprovalRequest approvalRequest = new MachineApprovalRequest();
+            approvalRequest.setId(UUID.randomUUID().toString());
+            approvalRequest.setPendingGamingMachineId(pendingGamingMachine.getId());
+            approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.CREATE_GAMING_MACHINE_ID);
+            approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
+            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
 
-            String verbiage = String.format("Created Gaming Machine, Serial number -> %s ", gamingMachine.getSerialNumber());
+            String verbiage = String.format("Created Gaming Machine Request, Type  -> %s, Serial Number -> %s", approvalRequest.getMachineApprovalRequestType(), pendingGamingMachine.getSerialNumber());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(gamingMachineAuditActionId,
-                    springSecurityAuditorAware.getCurrentAuditorNotNull(), gamingMachine.getInstitutionName(),
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), pendingGamingMachine.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
 
-            return Mono.just(new ResponseEntity<>(gamingMachine.convertToDto(), HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving gaming machine", e);
         }
@@ -154,10 +166,6 @@ public class GamingMachineServiceImpl implements GamingMachineService {
             if (gamingMachine == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Gaming machine with id %s does not exist", gamingMachineId), HttpStatus.BAD_REQUEST));
             }
-        //    gamingMachine.setGameDetailsList(gamingMachineUpdateDto.getGameDetailsList());
-            gamingMachine.setMachineNumber(gamingMachineUpdateDto.getGameMachineNumber());
-            gamingMachine.setSerialNumber(gamingMachineUpdateDto.getSerialNumber());
-            gamingMachine.setManufacturer(gamingMachineUpdateDto.getManufacturer());
             gamingMachine.setMachineAddress(gamingMachineUpdateDto.getMachineAddress());
             saveGamingMachine(gamingMachine);
 
@@ -169,6 +177,85 @@ public class GamingMachineServiceImpl implements GamingMachineService {
             return Mono.just(new ResponseEntity<>(gamingMachine.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while updating gaming machine", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> addGamesToGamingMachine(MachineGameUpdateDto machineGameUpdateDto, HttpServletRequest request) {
+        try {
+            Set<MachineGameDetails> newGameDetails = machineGameUpdateDto.getMachineGameDetails();
+            if (newGameDetails.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("Empty game details supplied", HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+            String gamingMachineId = machineGameUpdateDto.getMachineId();
+            GamingMachine gamingMachine = findById(machineGameUpdateDto.getMachineId());
+            if (gamingMachine == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Gaming machine with id %s not found", gamingMachineId), HttpStatus.BAD_REQUEST));
+            }
+
+            MachineApprovalRequest approvalRequest = new MachineApprovalRequest();
+            approvalRequest.setId(UUID.randomUUID().toString());
+            approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.ADD_GAMES_TO_GAMING_MACHINE_ID);
+            approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
+            approvalRequest.setNewMachineGames(newGameDetails);
+            approvalRequest.setGamingMachineId(gamingMachineId);
+            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+
+
+            String verbiage = String.format("Created Gaming Machine Request, Type  -> %s, Serial Number -> %s, New Games -> %s", approvalRequest.getMachineApprovalRequestType(), machineGamesToString(newGameDetails));
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(gamingMachineAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), gamingMachine.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding games to machine", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> removeGamesFromGamingMachine(MachineGameUpdateDto machineGameUpdateDto, HttpServletRequest request) {
+        try {
+            Set<String> removedGameDetailIds = machineGameUpdateDto.getRemovedGameIds();
+            if (removedGameDetailIds.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("Empty game details supplied", HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+            String gamingMachineId = machineGameUpdateDto.getMachineId();
+            GamingMachine gamingMachine = findById(machineGameUpdateDto.getMachineId());
+            if (gamingMachine == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Gaming machine with id %s not found", gamingMachineId), HttpStatus.BAD_REQUEST));
+            }
+            List<MachineGameDetails> gameDetails = new ArrayList<>();
+            for (String gameId : removedGameDetailIds) {
+                MachineGame machineGame = findMachineGameById(gameId);
+                if (machineGame == null) {
+                    return Mono.just(new ResponseEntity<>(String.format("Game with Id %s not found", gameId), HttpStatus.BAD_REQUEST));
+                }
+                if (!StringUtils.equals(gamingMachineId, machineGame.getGamingMachineId())) {
+                    return Mono.just(new ResponseEntity<>(String.format("Game with id %s is not for machine with id %s", gameId, gamingMachineId), HttpStatus.BAD_REQUEST));
+                }
+                machineGame.setActive(false);
+                gameDetails.add(MachineGameDetails.fromGameNameAndVersion(machineGame.getGameName(), machineGame.getGameVersion()));
+                mongoRepositoryReactive.saveOrUpdate(machineGame);
+            }
+
+            String verbiage = String.format("Disabled games from machines, Serial Number -> %s, Disabled Games -> %s",
+                    gamingMachine.getSerialNumber(), machineGamesToString(gameDetails));
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(gamingMachineAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), gamingMachine.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            return Mono.just(new ResponseEntity<>("Game successfully disabled", HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while disabling games from machines", e);
         }
     }
 
@@ -214,18 +301,18 @@ public class GamingMachineServiceImpl implements GamingMachineService {
                                 gamingMachine.setMachineNumber(columns[2]);
                                 gamingMachine.setMachineAddress(columns[3]);
                                 gamingMachine.setGameTypeId(gameTypeId);
-                                GamingMachineGameDetails gamingMachineGameDetails = new GamingMachineGameDetails();
+                                MachineGameDetails gamingMachineGameDetails = new MachineGameDetails();
                                 gamingMachineGameDetails.setGameName(columns[4]);
                                 gamingMachineGameDetails.setGameVersion(columns[5]);
-                                Set<GamingMachineGameDetails> gamingMachineGameDetailsSet = new HashSet<>();
+                                Set<MachineGameDetails> gamingMachineGameDetailsSet = new HashSet<>();
                                 gamingMachineGameDetailsSet.add(gamingMachineGameDetails);
-                            //    gamingMachine.setGameDetailsList(gamingMachineGameDetailsSet);
+                                //    gamingMachine.setGameDetailsList(gamingMachineGameDetailsSet);
                             } else {
-                                GamingMachineGameDetails gamingMachineGameDetails = new GamingMachineGameDetails();
+                                MachineGameDetails gamingMachineGameDetails = new MachineGameDetails();
                                 gamingMachineGameDetails.setGameName(columns[4]);
                                 gamingMachineGameDetails.setGameVersion(columns[5]);
-                              //  Set<GamingMachineGameDetails> gamingMachineGameDetailsSet = gamingMachine.getGameDetailsList();
-                           //     gamingMachineGameDetailsSet.add(gamingMachineGameDetails);
+                                //  Set<MachineGameDetails> gamingMachineGameDetailsSet = gamingMachine.getGameDetailsList();
+                                //     gamingMachineGameDetailsSet.add(gamingMachineGameDetails);
                             }
                             gamingMachine.setInstitutionId(institutionId);
                             gamingMachineList.add(gamingMachine);
@@ -283,7 +370,7 @@ public class GamingMachineServiceImpl implements GamingMachineService {
         return (GamingMachine) mongoRepositoryReactive.find(query, GamingMachine.class).block();
     }
 
-    private GamingMachine getGamingMachineBySerialNumber(String serialNumber, Map<String, GamingMachine> gamingMachineMap) {
+    private GamingMachine getGamingMachineBySerialNumber(String serialNumber, @NotNull Map<String, GamingMachine> gamingMachineMap) {
         GamingMachine gamingMachine = gamingMachineMap.get(serialNumber);
         if (gamingMachine != null) {
             return gamingMachine;
@@ -296,16 +383,16 @@ public class GamingMachineServiceImpl implements GamingMachineService {
     }
 
 
-    private GamingMachine fromGamingMachineCreateDto(GamingMachineCreateDto gamingMachineCreateDto) {
-        GamingMachine gamingMachine = new GamingMachine();
-        gamingMachine.setInstitutionId(gamingMachineCreateDto.getInstitutionId());
-        gamingMachine.setManufacturer(gamingMachineCreateDto.getManufacturer());
-        gamingMachine.setSerialNumber(gamingMachineCreateDto.getSerialNumber());
-        gamingMachine.setMachineNumber(gamingMachineCreateDto.getGameMachineNumber());
-   //     gamingMachine.setGameDetailsList(gamingMachineCreateDto.getGameDetailsList());
-        gamingMachine.setMachineAddress(gamingMachineCreateDto.getMachineAddress());
-        gamingMachine.setGameTypeId(gamingMachineCreateDto.getGameTypeId());
-        return gamingMachine;
+    private PendingGamingMachine fromGamingMachineCreateDto(GamingMachineCreateDto gamingMachineCreateDto) {
+        PendingGamingMachine pendingGamingMachine = new PendingGamingMachine();
+        pendingGamingMachine.setInstitutionId(gamingMachineCreateDto.getInstitutionId());
+        pendingGamingMachine.setManufacturer(gamingMachineCreateDto.getManufacturer());
+        pendingGamingMachine.setSerialNumber(gamingMachineCreateDto.getSerialNumber());
+        pendingGamingMachine.setMachineNumber(gamingMachineCreateDto.getGameMachineNumber());
+        pendingGamingMachine.setGameDetailsList(gamingMachineCreateDto.getGameDetailsList());
+        pendingGamingMachine.setMachineAddress(gamingMachineCreateDto.getMachineAddress());
+        pendingGamingMachine.setGameTypeId(gamingMachineCreateDto.getGameTypeId());
+        return pendingGamingMachine;
     }
 
     private void saveGamingMachine(GamingMachine gamingMachine) {
@@ -784,5 +871,12 @@ public class GamingMachineServiceImpl implements GamingMachineService {
             return null;
         }
         return (BatchPayment) mongoRepositoryReactive.findById(batchPaymentId, BatchPayment.class).block();
+    }
+
+    private MachineGame findMachineGameById(String id) {
+        if (StringUtils.isEmpty(id)) {
+            return null;
+        }
+        return (MachineGame) mongoRepositoryReactive.findById(id, MachineGame.class).block();
     }
 }
