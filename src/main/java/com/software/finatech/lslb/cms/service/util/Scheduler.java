@@ -302,7 +302,7 @@ public class Scheduler {
         }
     }
 
-    @Scheduled(cron = "46 */12 * * *")
+    //@Scheduled(cron = "46 */12 * * *")
     public void deactivateAgentWithNoPayment(){
         Query queryAgent= new Query();
         queryAgent.addCriteria(Criteria.where("createdAt").lte(LocalDateTime.now().minusDays(7)));
