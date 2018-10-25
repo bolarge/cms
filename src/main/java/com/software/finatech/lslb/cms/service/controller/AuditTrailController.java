@@ -56,7 +56,7 @@ public class AuditTrailController extends BaseController {
         });
 
         if (dto.size() == 0) {
-            return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
+            return Mono.just(new ResponseEntity("No record found", HttpStatus.BAD_REQUEST));
         }
 
         return Mono.just(new ResponseEntity(dto, HttpStatus.OK));
@@ -78,7 +78,7 @@ public class AuditTrailController extends BaseController {
     public Mono<ResponseEntity> getById(@PathVariable String id) {
         AuditTrail auditTrail = (AuditTrail) mongoRepositoryReactive.findById(id, AuditTrail.class).block();
         if (auditTrail == null) {
-            return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
+            return Mono.just(new ResponseEntity("No record found", HttpStatus.BAD_REQUEST));
         }
 
         return Mono.just(new ResponseEntity(auditTrail.convertToDto(), HttpStatus.OK));
@@ -150,7 +150,7 @@ public class AuditTrailController extends BaseController {
             ArrayList<AuditTrail> auditTrails = (ArrayList<AuditTrail>) mongoRepositoryReactive.findAll(query, AuditTrail.class).toStream().collect(Collectors.toList());
 
             if (auditTrails == null || auditTrails.isEmpty()) {
-                return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
+                return Mono.just(new ResponseEntity("No record found", HttpStatus.BAD_REQUEST));
             }
 
             ArrayList<AuditTrailDto> auditTrailsDTO = new ArrayList<>();
