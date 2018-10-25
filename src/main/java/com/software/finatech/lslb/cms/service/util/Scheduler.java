@@ -4,6 +4,7 @@ import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.NotificationDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.PaymentRecordServiceImpl;
@@ -15,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class Scheduler {
@@ -34,9 +38,13 @@ public class Scheduler {
     MailContentBuilderService mailContentBuilderService;
     @Autowired
     ExpirationList expirationList;
+    @Autowired
+    SendEmail sendEmail;
 
     @Value("${email-username}")
     String adminEmail;
+    @Autowired
+    private FrontEndPropertyHelper frontEndPropertyHelper;
     private static final Logger logger = LoggerFactory.getLogger(PaymentRecordServiceImpl.class);
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     @Autowired
@@ -292,5 +300,31 @@ public class Scheduler {
             }
             sendEmailNotification(notificationDtos,"AIPExpired");
         }
+    }
+
+    @Scheduled(cron = "46 */12 * * *")
+    public void deactivateAgentWithNoPayment(){
+        Query queryAgent= new Query();
+        queryAgent.addCriteria(Criteria.where("createdAt").lte(LocalDateTime.now().minusDays(7)));
+        queryAgent.addCriteria(Criteria.where("enabled").is(true));
+        List<Agent> agents= (List<Agent>)mongoRepositoryReactive.findAll(queryAgent, Agent.class).toStream().collect(Collectors.toList());
+        agents.parallelStream().forEach(agent -> {
+            Query queryPayment= new Query();
+            queryPayment.addCriteria(Criteria.where("agentId").is(agent.getId()));
+            queryPayment.addCriteria(Criteria.where("paymentStatusId").is(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID));
+            List<PaymentRecord> agentPaymentRecord=(List<PaymentRecord>)mongoRepositoryReactive.findAll(queryPayment,PaymentRecord.class).toStream().collect(Collectors.toList());
+            if(agentPaymentRecord.size()==0){
+                agent.setEnabled(false);
+                mongoRepositoryReactive.saveOrUpdate(agent);
+                NotificationDto notificationDto = new NotificationDto();
+                notificationDto.setDescription("You have been deactivated for lack license payment");
+                notificationDto.setTemplate("Agent_Deactivation");
+                notificationDto.setCallBackUrl(frontEndPropertyHelper.getFrontEndUrl() + "/agent-reactivation-request");
+                notificationDto.setAgentEmailAddress(agent.getEmailAddress());
+                sendEmail.sendEmailDeactivationNotification(notificationDto);
+            }
+
+        });
+
     }
 }
