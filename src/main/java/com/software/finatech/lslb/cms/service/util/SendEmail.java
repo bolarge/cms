@@ -31,5 +31,15 @@ public class SendEmail {
         emailService.sendEmail(content, "Licence Update Notification", notificationDto.getInstitutionEmail());
         return "success";
     }
+    public String sendEmailDeactivationNotification(NotificationDto notificationDto) {
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("description", notificationDto.getDescription());
+        model.put("date", LocalDate.now().toString("dd-MM-YYYY"));
+        model.put("CallbackUrl", notificationDto.getCallBackUrl());
+        String content = mailContentBuilderService.build(model, notificationDto.getTemplate());
+        content = content.replaceAll("CallbackUrl", notificationDto.getCallBackUrl());
+        emailService.sendEmail(content, "AGENT DEACTIVATION NOTIFICATION", notificationDto.getAgentEmailAddress());
+        return "success";
+    }
 
 }
