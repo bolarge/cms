@@ -106,9 +106,10 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             /**
              *   Get the logged in user and use him to filter requests
              */
+            //TODO:: make sure initiator is filtered out
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser != null) {
-                query.addCriteria(Criteria.where("initiatorId").ne(initiatorId));
+              //  query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
                 if (!loggedInUser.isSuperAdmin()) {
                     query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
                 }
@@ -181,7 +182,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
 
             AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
             if (user == null) {
-                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
             }
 
             if (userApprovalRequest.isCreateUser()) {
@@ -205,7 +206,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
 
             userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
             userApprovalRequest.setApproverId(user.getId());
-            mongoRepositoryReactive.save(userApprovalRequest);
+            mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
             String verbiage = String.format("Approved User approval request ->  Type -> %s,Id -> %s ", userApprovalRequest.getUserApprovalRequestType(), userApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), userApprovalRequest.getSubjectUserName(),
@@ -235,7 +236,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             }
             AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
             if (user == null) {
-                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
             }
             if (userApprovalRequest.isCreateUser()) {
                 rejectCreateUserRequest(userApprovalRequest);
@@ -244,19 +245,15 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
             userApprovalRequest.setRejectorId(user.getId());
             userApprovalRequest.setRejectionReason(requestOperationtDto.getReason());
-            mongoRepositoryReactive.save(userApprovalRequest);
+            mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
             String verbiage = String.format("Rejected User approval request ->  Type -> %s, Id -> %s", userApprovalRequest.getUserApprovalRequestType(), userApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), userApprovalRequest.getSubjectUserName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
-        } catch (
-                Exception e)
-
-        {
-            return logAndReturnError(logger, "An error occurred while approving user approval request ", e);
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while rejecting approval request ", e);
         }
-
     }
 
     @Override

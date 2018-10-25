@@ -32,7 +32,7 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
         model.put("meetingDate", meetingDateString);
         model.put("meetingTime", meetingTimeString);
         model.put("meetingTitle", scheduledMeeting.getMeetingSubject());
-        model.put("meetingVenue", scheduledMeeting.getVenue());
+        model.put("venue", scheduledMeeting.getVenue());
         model.put("additionalNotes", scheduledMeeting.getMeetingDescription());
         model.put("date", presentDateString);
         model.put("frontEndUrl", meetingUrl);
@@ -54,7 +54,7 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
         model.put("meetingDate", meetingDateString);
         model.put("meetingTime", meetingTimeString);
         model.put("meetingTitle", scheduledMeeting.getMeetingSubject());
-        model.put("meetingVenue", scheduledMeeting.getVenue());
+        model.put("venue", scheduledMeeting.getVenue());
         model.put("additionalNotes", scheduledMeeting.getMeetingDescription());
         model.put("date", presentDateString);
         model.put("frontEndUrl", meetingUrl);
@@ -62,7 +62,6 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
     }
 
     private String buildOperatorMeetingMailContent(ScheduledMeeting scheduledMeeting, String templateName) {
-        AuthInfo inviter = authInfoService.getUserById(scheduledMeeting.getCreatorId());
         Institution institution = institutionService.findById(scheduledMeeting.getInstitutionId());
         String meetingUrl = String.format("%s/schedule-presentation-view/%s", frontEndPropertyHelper.getFrontEndUrl(), scheduledMeeting.getId());
         String institutionName = institution.getInstitutionName();
@@ -74,7 +73,7 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
         model.put("meetingDate", meetingDateString);
         model.put("meetingTime", meetingTimeString);
         model.put("meetingTitle", scheduledMeeting.getMeetingSubject());
-        model.put("meetingVenue", scheduledMeeting.getVenue());
+        model.put("venue", scheduledMeeting.getVenue());
         model.put("additionalNotes", scheduledMeeting.getMeetingDescription());
         model.put("date", presentDateString);
         model.put("frontEndUrl", meetingUrl);

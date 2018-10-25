@@ -62,18 +62,6 @@ public class CustomerComplainController {
         return customerComplainService.createCustomerComplain(customerComplainCreateDto, request);
     }
 
-
-    @RequestMapping(method = RequestMethod.POST, value = "/resolve", produces = "application/json")
-    @ApiOperation(value = "Resolve customer complain", response = CustomerComplainDto.class, consumes = "application/json")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> resolveCustomerComplain(@RequestParam("complaintId") String complaintId, HttpServletRequest request) {
-        return customerComplainService.resolveCustomerComplain(complaintId, request);
-    }
-
     @RequestMapping(method = RequestMethod.POST, value = "/close", produces = "application/json")
     @ApiOperation(value = "Close customer complain", response = CustomerComplainDto.class, consumes = "application/json")
     @ApiResponses(value = {

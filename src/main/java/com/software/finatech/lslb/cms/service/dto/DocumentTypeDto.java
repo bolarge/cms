@@ -10,6 +10,24 @@ public class DocumentTypeDto extends EnumeratedFactDto{
     protected boolean active;
     protected boolean required;
     protected Set<String> gameTypeNames;
+    private String approverName;
+    private String approverId;
+
+    public String getApproverName() {
+        return approverName;
+    }
+
+    public void setApproverName(String approverName) {
+        this.approverName = approverName;
+    }
+
+    public String getApproverId() {
+        return approverId;
+    }
+
+    public void setApproverId(String approverId) {
+        this.approverId = approverId;
+    }
 
     public Set<String> getGameTypeNames() {
         return gameTypeNames;

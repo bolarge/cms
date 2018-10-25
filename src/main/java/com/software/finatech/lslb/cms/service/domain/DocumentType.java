@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.DocumentTypeDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -12,7 +13,7 @@ import java.util.Set;
 
 
 @Document(collection = "DocumentTypes")
-public class DocumentType extends EnumeratedFact{
+public class DocumentType extends EnumeratedFact {
 
     protected Set<String> gameTypeIds = new HashSet<>();
     protected String documentPurposeId;
@@ -20,6 +21,7 @@ public class DocumentType extends EnumeratedFact{
     protected DocumentPurpose documentPurpose;
     protected boolean active;
     protected boolean required;
+    protected String approverId;
 
     public Set<String> getGameTypeIds() {
         return gameTypeIds;
@@ -61,6 +63,14 @@ public class DocumentType extends EnumeratedFact{
         this.documentPurpose = documentPurpose;
     }
 
+    public String getApproverId() {
+        return approverId;
+    }
+
+    public void setApproverId(String approverId) {
+        this.approverId = approverId;
+    }
+
     @Override
     public String getFactName() {
         return "DocumentType";
@@ -72,7 +82,7 @@ public class DocumentType extends EnumeratedFact{
         return super.clone();
     }
 
-    private GameType getGameType(String gameTypeId){
+    private GameType getGameType(String gameTypeId) {
         Map gameTypeMap = Mapstore.STORE.get("GameType");
         GameType gameType = null;
         if (gameTypeMap != null) {
@@ -87,11 +97,11 @@ public class DocumentType extends EnumeratedFact{
         return gameType;
     }
 
-    private Set<String> getGameTypeNames(){
-       Set<String> gameTypeNames = new HashSet<>();
+    private Set<String> getGameTypeNames() {
+        Set<String> gameTypeNames = new HashSet<>();
         for (String gameTypeId : gameTypeIds) {
             GameType gameType = getGameType(gameTypeId);
-            if (gameType != null){
+            if (gameType != null) {
                 gameTypeNames.add(gameType.getName());
             }
         }
@@ -114,16 +124,28 @@ public class DocumentType extends EnumeratedFact{
         }
     }
 
+    public AuthInfo getApprover() {
+        if (StringUtils.isEmpty(this.approverId)) {
+            return null;
+        }
+        return (AuthInfo) mongoRepositoryReactive.findById(this.approverId, AuthInfo.class).block();
+    }
+
     public DocumentTypeDto convertToDto() {
         DocumentTypeDto dto = new DocumentTypeDto();
         dto.setName(getName());
         dto.setId(getId());
         dto.setDocumentPurposeId(getDocumentPurposeId());
         dto.setDescription(getDescription());
-        dto.setDocumentPurpose(getDocumentPurpose()==null?null:getDocumentPurpose().convertToDto());
+        dto.setDocumentPurpose(getDocumentPurpose() == null ? null : getDocumentPurpose().convertToDto());
         dto.setActive(isActive());
         dto.setRequired(isRequired());
         dto.setGameTypeNames(getGameTypeNames());
+        AuthInfo approver = getApprover();
+        if (approver != null) {
+            dto.setApproverName(approver.getFullName());
+            dto.setApproverId(this.approverId);
+        }
         return dto;
     }
 }

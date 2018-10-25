@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.domain.AuditTrail;
 import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.dto.AuditActionDto;
 import com.software.finatech.lslb.cms.service.dto.AuditTrailDto;
+import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -17,13 +18,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
@@ -100,15 +97,18 @@ public class AuditTrailController extends BaseController {
     }
     )
     //For multi-search invoice we use json to receive the fields and param
-    public Mono<ResponseEntity> getAuditTrails(@Param("keyword") String keyword,
-                                               @Param("fromDate") String fromDate,
-                                               @Param("toDate") String toDate,
-                                               @Param("auditActionId") String auditActionId,
-                                               @Param("page") @NotNull int page, @Param("size") @NotNull int size, @Param("sortProperty") String sortProperty, @Param("sorting") String sorting, HttpServletResponse response) {
+    public Mono<ResponseEntity> getAuditTrails(@RequestParam("keyword") String keyword,
+                                               @RequestParam("fromDate") String fromDate,
+                                               @RequestParam("toDate") String toDate,
+                                               @RequestParam("auditActionId") String auditActionId,
+                                               @RequestParam("page") @NotNull int page,
+                                               @RequestParam("size") @NotNull int size,
+                                               @RequestParam("sortProperty") String sortProperty,
+                                               @RequestParam("sorting") String sorting,
+                                               HttpServletResponse response) {
         try {
             //@TODO validate request params
             Query query = new Query();
-            Criteria criteria = new Criteria();
 
             /*if(healthInstitutionId != null && !healthInstitutionId.isEmpty()) {
                 query.addCriteria(Criteria.where("healthInstitutionId").is(healthInstitutionId));
@@ -117,22 +117,20 @@ public class AuditTrailController extends BaseController {
                 //"*.ab.*"
                 //keyword = "*."+keyword+".*";
                 //keyword = "/.*"+keyword+".*/";
-                criteria.orOperator(Criteria.where("actionPerformed").regex(keyword, "i"),
+              query.addCriteria(new Criteria().orOperator(Criteria.where("actionPerformed").regex(keyword, "i"),
                         Criteria.where("performedBy").regex(keyword, "i"),
                         Criteria.where("remoteAddress").regex(keyword, "i"),
-                        Criteria.where("owner").regex(keyword, "i"));
+                        Criteria.where("owner").regex(keyword, "i")));
             }
             if (auditActionId != null && !auditActionId.isEmpty()) {
-                criteria.andOperator(Criteria.where("auditActionId").is(auditActionId));
+                query.addCriteria(Criteria.where("auditActionId").is(auditActionId));
             }
             if ((toDate != null && !toDate.isEmpty()) && (fromDate != null && !fromDate.isEmpty())) {
                 //Parse to Date first
                 LocalDate from = new LocalDate(fromDate);
                 LocalDate to = new LocalDate(toDate);
-                criteria.andOperator(Criteria.where("auditDate").gte(from).lte(to));
+                query.addCriteria(Criteria.where("auditDate").gte(from).lte(to));
             }
-
-            query.addCriteria(criteria);
 
             //For the very firstPage we send the totalCount
             if (page == 0) {
@@ -144,7 +142,7 @@ public class AuditTrailController extends BaseController {
             if (sorting != null && !sorting.isEmpty() && sortProperty != null && !sortProperty.isEmpty()) {
                 sort = new Sort((sorting.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC), sortProperty);
             } else {
-                sort = new Sort(Sort.Direction.ASC, "id");
+                sort = new Sort(Sort.Direction.DESC, "createdAt");
             }
             query.with(PageRequest.of(page, size, sort));
             query.with(sort);
@@ -161,9 +159,10 @@ public class AuditTrailController extends BaseController {
             }
             return Mono.just(new ResponseEntity(auditTrailsDTO, HttpStatus.OK));
 
+        } catch (IllegalArgumentException e) {
+            return Mono.just(new ResponseEntity<>("Invalid Date format , please use yyyy-MM-dd", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
-            e.printStackTrace();
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while getting audit trails", e);
         }
-        return null;
     }
 }

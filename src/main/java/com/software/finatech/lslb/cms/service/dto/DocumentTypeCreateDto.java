@@ -8,6 +8,15 @@ public class DocumentTypeCreateDto extends EnumeratedFactDto{
     protected String documentPurposeId;
     protected boolean active;
     protected boolean required;
+    private String approverId;
+
+    public String getApproverId() {
+        return approverId;
+    }
+
+    public void setApproverId(String approverId) {
+        this.approverId = approverId;
+    }
 
     public boolean isActive() {
         return active;

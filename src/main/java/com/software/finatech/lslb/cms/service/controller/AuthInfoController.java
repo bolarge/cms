@@ -305,7 +305,7 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.BAD_REQUEST));
             }
 
-            if (!loggedInUser.isGamingOperator()) {
+            if (loggedInUser.isGamingOperator()) {
                 String appUrl = appHostPort + request.getContextPath();
                 return authInfoService.createAuthInfo(authInfoCreateDto, appUrl, request);
             /*String appUrl =
@@ -486,6 +486,7 @@ public class AuthInfoController extends BaseController {
             if (loggedInUser.isGamingOperator()) {
                 authInfo.setEnabled(false);
                 mongoRepositoryReactive.saveOrUpdate(authInfo);
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), authInfo.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Deactivated user  %s",authInfo.getFullName())));
                 return Mono.just(new ResponseEntity("Success", HttpStatus.OK));
             } else {
                 UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
@@ -497,6 +498,7 @@ public class AuthInfoController extends BaseController {
                 userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
                 mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
                 userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), authInfo.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Created user approval request to disable user %s",authInfo.getFullName())));
                 return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
             }
         } catch (Exception e) {
@@ -537,6 +539,7 @@ public class AuthInfoController extends BaseController {
             if (loggedInUser.isGamingOperator()) {
                 authInfo.setEnabled(true);
                 mongoRepositoryReactive.saveOrUpdate(authInfo);
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), authInfo.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Activated user %s",authInfo.getFullName())));
                 return Mono.just(new ResponseEntity<>("Success", HttpStatus.OK));
             } else {
                 UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
@@ -548,6 +551,7 @@ public class AuthInfoController extends BaseController {
                 userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
                 userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
                 mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), authInfo.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Created user approval request to activate user %s",authInfo.getFullName())));
                 return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
             }
         } catch (Exception e) {
@@ -776,8 +780,8 @@ public class AuthInfoController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> addPermissionsToUser(@RequestBody UserAuthPermissionDto userAuthPermissionDto) {
-        return authInfoService.addPermissionsToUser(userAuthPermissionDto);
+    public Mono<ResponseEntity> addPermissionsToUser(@RequestBody UserAuthPermissionDto userAuthPermissionDto, HttpServletRequest request) {
+        return authInfoService.addPermissionsToUser(userAuthPermissionDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/remove-permission-from-user")
@@ -789,8 +793,8 @@ public class AuthInfoController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> removePermissionsFromUser(@RequestBody UserAuthPermissionDto userAuthPermissionDto) {
-        return authInfoService.removePermissionFromUser(userAuthPermissionDto);
+    public Mono<ResponseEntity> removePermissionsFromUser(@RequestBody UserAuthPermissionDto userAuthPermissionDto, HttpServletRequest request) {
+        return authInfoService.removePermissionFromUser(userAuthPermissionDto, request);
     }
 
 

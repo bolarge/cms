@@ -21,6 +21,7 @@ public class AuditActionReferenceData {
     public static final String AIP_ID = "15";
     public static final String RENEWAL_ID = "16";
     public static final String GAMING_TERMINAL_ID = "17";
+    public static final String DOCUMENT_ID = "18";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         AuditAction action = (AuditAction) mongoRepositoryReactive.findById(LOGIN_ID, AuditAction.class).block();
@@ -175,5 +176,15 @@ public class AuditActionReferenceData {
         action.setDescription("GAMING TERMINAL");
         action.setName("GAMING TERMINAL");
         mongoRepositoryReactive.saveOrUpdate(action);
+
+        action = (AuditAction) mongoRepositoryReactive.findById(DOCUMENT_ID, AuditAction.class).block();
+        if (action == null) {
+            action = new AuditAction();
+            action.setId(DOCUMENT_ID);
+        }
+        action.setDescription("DOCUMENTS");
+        action.setName("DOCUMENTS");
+        mongoRepositoryReactive.saveOrUpdate(action);
+
     }
 }

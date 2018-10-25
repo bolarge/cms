@@ -1,14 +1,17 @@
 package com.software.finatech.lslb.cms.service.controller;
 
-import com.software.finatech.lslb.cms.service.domain.Document;
-import com.software.finatech.lslb.cms.service.domain.DocumentPurpose;
-import com.software.finatech.lslb.cms.service.domain.DocumentType;
-import com.software.finatech.lslb.cms.service.domain.FactObject;
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
+import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeReferenceData;
+import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
+import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -16,9 +19,11 @@ import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.BsonBinarySubType;
 import org.bson.types.Binary;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -30,8 +35,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,6 +49,14 @@ import java.util.stream.Collectors;
 public class DocumentController extends BaseController {
 
     private static Logger logger = LoggerFactory.getLogger(DocumentController.class);
+
+    @Autowired
+    private SpringSecurityAuditorAware springSecurityAuditorAware;
+    @Autowired
+    private AuditLogHelper auditLogHelper;
+    @Autowired
+    private ApplicationFormService applicationFormService;
+
 
     @RequestMapping(method = RequestMethod.POST, value = "/upload", produces = "application/json")
     @ApiOperation(value = "Upload Document", response = DocumentDto.class, consumes = "application/json")
@@ -89,19 +105,19 @@ public class DocumentController extends BaseController {
                         document.setCurrent(true);
                         DocumentType documentType = (DocumentType) mongoRepositoryReactive.findById((documentDto.getDocumentTypeId()), DocumentType.class).block();
 
-                        if(documentType!=null && documentType.getDocumentPurposeId().equals(DocumentPurposeReferenceData.RENEWAL_LICENSE_ID)){
-                           // document.set
+                        if (documentType != null && documentType.getDocumentPurposeId().equals(DocumentPurposeReferenceData.RENEWAL_LICENSE_ID)) {
+                            // document.set
                             Query queryPreviousDocuments = new Query();
                             queryPreviousDocuments.addCriteria(Criteria.where("institutionId").is(documentDto.getInstitutionId()));
                             queryPreviousDocuments.addCriteria(Criteria.where("gameTypeId").is(documentDto.getGameTypeId()));
                             queryPreviousDocuments.addCriteria(Criteria.where("documentTypeId").is(documentDto.getDocumentTypeId()));
                             Document previousDocument = (Document) mongoRepositoryReactive.find(queryPreviousDocuments, Document.class).block();
-                           if(previousDocument!=null){
-                               previousDocument.setArchive(true);
-                               previousDocument.setCurrent(false);
-                               //mongoRepositoryReactive.saveOrUpdate(previousDocument);
-                               mongoRepositoryReactive.saveOrUpdate(previousDocument);
-                           }
+                            if (previousDocument != null) {
+                                previousDocument.setArchive(true);
+                                previousDocument.setCurrent(false);
+                                //mongoRepositoryReactive.saveOrUpdate(previousDocument);
+                                mongoRepositoryReactive.saveOrUpdate(previousDocument);
+                            }
 
                         }
                         document.setDescription(documentDto.getDescription());
@@ -188,15 +204,96 @@ public class DocumentController extends BaseController {
         return Mono.just(new ResponseEntity(documentsDto, HttpStatus.OK));
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/find-by-id", params = {"id"})
+    @ApiOperation(value = "Get Document by Id", response = DocumentDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getDocumentById(@RequestParam("id") @NotEmpty String id, HttpServletResponse httpServletResponse) {
 
-    @RequestMapping(method = RequestMethod.GET, value = "/get-institution-document-aip", params = {"gameTypeId", "documentPurposeId","institutionId"})
+        Query query = new Query();
+        query.addCriteria(Criteria.where("id").is(id));
+        Document document = (Document) mongoRepositoryReactive.find(query, Document.class).block();
+        if (document == null) {
+            return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
+        }
+        return Mono.just(new ResponseEntity<>(document.convertToDto(), HttpStatus.OK));
+    }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/reupload", params = {"file", "entityName"})
+    @ApiOperation(value = "Get Document by Id", response = DocumentDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> reUploadDocument(@RequestBody DocumentCreateDto documentCreateDto,
+                                                 @RequestParam("entityName") String entityName,
+                                                 @RequestParam("file") MultipartFile multipartFile, HttpServletRequest request) {
+
+        try {
+            String previousDocumentId = documentCreateDto.getPreviousDocumentId();
+            if (multipartFile.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("Empty file supplied ", HttpStatus.BAD_REQUEST));
+            }
+            String originalFilename = multipartFile.getOriginalFilename();
+            Document document = new Document();
+            document.setId(UUID.randomUUID().toString().replace("-", ""));
+            document.setEntityId(documentCreateDto.getEntityId());
+            document.setCurrent(true);
+            document.setDescription(documentCreateDto.getDescription());
+            document.setDocumentTypeId(documentCreateDto.getDocumentTypeId());
+            document.setEntity(documentCreateDto.getEntity());
+            document.setEntryDate(LocalDateTime.now());
+            document.setGameTypeId(documentCreateDto.getGameTypeId());
+            document.setFilename(originalFilename);
+            document.setOriginalFilename(originalFilename);
+            document.setMimeType(multipartFile.getContentType());
+            document.setArchive(false);
+            document.setInstitutionId(documentCreateDto.getInstitutionId());
+            document.setAgentId(documentCreateDto.getAgentId());
+            document.setPreviousDocumentId(documentCreateDto.getPreviousDocumentId());
+            try {
+                document.setFile(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
+            } catch (IOException e) {
+                logger.error("An error occurred while setting bytes of document");
+            }
+            if (StringUtils.isEmpty(previousDocumentId)) {
+                return Mono.just(new ResponseEntity<>("Please provide previous document id", HttpStatus.BAD_REQUEST));
+            }
+            Document oldDocument = (Document) mongoRepositoryReactive.findById(previousDocumentId, Document.class).block();
+            if (oldDocument == null) {
+                return Mono.just(new ResponseEntity<>("No record found for previous document", HttpStatus.BAD_REQUEST));
+            }
+            oldDocument.setCurrent(false);
+            mongoRepositoryReactive.saveOrUpdate(oldDocument);
+            mongoRepositoryReactive.saveOrUpdate(document);
+            if (StringUtils.equalsIgnoreCase("applicationForm", entityName)) {
+                doApplicationFormDocumentReupload(document);
+            }
+
+            String verbiage = String.format("Reuploaded document -> Document Type -> %s, File name -> %s, Id -> %s ",document.getDocumentType(),document.getFilename(), document.getId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), document.getOwner(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            return Mono.just(new ResponseEntity<>(document.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while re uploading document", e);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/get-institution-document-aip", params = {"gameTypeId", "documentPurposeId", "institutionId"})
     @ApiOperation(value = "Get AIP Documents", response = ApplicationFormDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getByInstitution(@RequestParam("gameTypeId") String gameTypeId, @RequestParam("documentPurposeId") String documentPurposeId,@RequestParam("institutionId") String institutionId ) {
+    public Mono<ResponseEntity> getByInstitution(@RequestParam("gameTypeId") String gameTypeId, @RequestParam("documentPurposeId") String documentPurposeId, @RequestParam("institutionId") String institutionId) {
 
 
         if (StringUtils.isEmpty(documentPurposeId)) {
@@ -206,25 +303,26 @@ public class DocumentController extends BaseController {
         if (StringUtils.isEmpty(gameTypeId)) {
             return Mono.just(new ResponseEntity("Provide GameTypeId is required", HttpStatus.NOT_FOUND));
 
-        }if (StringUtils.isEmpty(institutionId)) {
+        }
+        if (StringUtils.isEmpty(institutionId)) {
             return Mono.just(new ResponseEntity("Provide InstitutionId is required", HttpStatus.NOT_FOUND));
 
         }
 
-        Query queryDocumentType= new Query();
+        Query queryDocumentType = new Query();
         queryDocumentType.addCriteria(Criteria.where("documentPurposeId").is(documentPurposeId));
-        List<DocumentType>documentTypes =(List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
-         List<String>documentTypeIds= new ArrayList<>();
-         documentTypes.stream().forEach(documentType -> {
-             documentTypeIds.add(documentType.getId());
-         });
+        List<DocumentType> documentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
+        List<String> documentTypeIds = new ArrayList<>();
+        documentTypes.stream().forEach(documentType -> {
+            documentTypeIds.add(documentType.getId());
+        });
 
-         Query queryDocument = new Query();
-         queryDocument.addCriteria(Criteria.where("documentTypeId").in(documentTypeIds));
-         queryDocument.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-         queryDocument.addCriteria(Criteria.where("institutionId").is(institutionId));
+        Query queryDocument = new Query();
+        queryDocument.addCriteria(Criteria.where("documentTypeId").in(documentTypeIds));
+        queryDocument.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        queryDocument.addCriteria(Criteria.where("institutionId").is(institutionId));
 
-         List<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(queryDocument, Document.class).toStream().collect(Collectors.toList());
+        List<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(queryDocument, Document.class).toStream().collect(Collectors.toList());
         ArrayList<DocumentDto> documentsDto = new ArrayList<>();
         documents.forEach(entry -> {
             try {
@@ -294,7 +392,7 @@ public class DocumentController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page","pageSize","sortType","sortProperty","id", "documentTypeId","institutionId","archive","isCurrent"}, produces = "application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "id", "documentTypeId", "institutionId", "archive", "isCurrent"}, produces = "application/json")
     public Mono<ResponseEntity> getById(@RequestParam("page") int page,
                                         @RequestParam("pageSize") int pageSize,
                                         @RequestParam("sortType") String sortType,
@@ -307,22 +405,22 @@ public class DocumentController extends BaseController {
                                         HttpServletResponse httpServletResponse) {
 
         Query query = new Query();
-        if(!StringUtils.isEmpty(institutionId)){
+        if (!StringUtils.isEmpty(institutionId)) {
             query.addCriteria(Criteria.where("institutionId").is(institutionId));
 
         }
-        if(!StringUtils.isEmpty(documentTypeId)){
+        if (!StringUtils.isEmpty(documentTypeId)) {
             query.addCriteria(Criteria.where("documentTypeId").is(documentTypeId));
 
         }
-        if(!StringUtils.isEmpty(id)){
+        if (!StringUtils.isEmpty(id)) {
             query.addCriteria(Criteria.where("id").is(id));
         }
-            query.addCriteria(Criteria.where("isCurrent").is(isCurrent));
-            query.addCriteria(Criteria.where("archive").is(archive));
+        query.addCriteria(Criteria.where("isCurrent").is(isCurrent));
+        query.addCriteria(Criteria.where("archive").is(archive));
 
 
-         if (page == 0) {
+        if (page == 0) {
             long count = mongoRepositoryReactive.count(query, Document.class).block();
             httpServletResponse.setHeader("TotalCount", String.valueOf(count));
         }
@@ -337,11 +435,11 @@ public class DocumentController extends BaseController {
         query.with(PageRequest.of(page, pageSize, sort));
         query.with(sort);
 
-        List<Document> documents = (List<Document>)mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
+        List<Document> documents = (List<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
         if (documents.size() == 0) {
             return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
         }
-        List<DocumentDto> documentDtos= new ArrayList<>();
+        List<DocumentDto> documentDtos = new ArrayList<>();
         documents.stream().forEach(document -> {
             try {
                 document.setAssociatedProperties();
@@ -365,7 +463,7 @@ public class DocumentController extends BaseController {
         ArrayList<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(new Query(Criteria.where("entityId").is(entityId).and("isCurrent").is(true)), Document.class).toStream().collect(Collectors.toList());
 
         //We use this to temporarily store so that we can merge
-        HashMap<String,EntityDocumentDto> entityDocuments = new HashMap<>();
+        HashMap<String, EntityDocumentDto> entityDocuments = new HashMap<>();
 
         ArrayList<EntityDocumentDto> documentsDto = new ArrayList<>();
         documents.forEach(entry -> {
@@ -381,26 +479,26 @@ public class DocumentController extends BaseController {
             dto.setFilename(entry.getFilename());
             dto.setMimeType(entry.getMimeType());
             dto.setId(entry.getId());
-            if(entry.getDocumentType()!=null) {
+            if (entry.getDocumentType() != null) {
                 dto.setDocumentType(entry.getDocumentType().getName());
                 dto.setActive(entry.getDocumentType().isActive());
                 dto.setRequired(entry.getDocumentType().isRequired());
             }
-            entityDocuments.put(entry.getDocumentTypeId(),dto);
+            entityDocuments.put(entry.getDocumentTypeId(), dto);
 
             documentsDto.add(dto);
         });
 
         ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(new Query(Criteria.where("documentPurposeId").is(purposeId)), DocumentType.class).toStream().collect(Collectors.toList());
         documentTypes.forEach(entry -> {
-            if(entityDocuments.get(entry.getId()) == null){
+            if (entityDocuments.get(entry.getId()) == null) {
                 EntityDocumentDto dto = new EntityDocumentDto();
                 dto.setDescription(entry.getDescription());
                 dto.setDocumentType(entry.getName());
                 dto.setDocumentTypeId(entry.getId());
                 dto.setActive(entry.isActive());
                 dto.setRequired(entry.isRequired());
-                entityDocuments.put(entry.getId(),dto);
+                entityDocuments.put(entry.getId(), dto);
                 documentsDto.add(dto);
             }
         });
@@ -435,17 +533,15 @@ public class DocumentController extends BaseController {
     }
 
 
-
-
     @RequestMapping(method = RequestMethod.POST, value = "/open-upload", produces = "application/json")
     @ApiOperation(value = "Upload Document without authentication Document", response = DocumentDto.class, consumes = "application/json")
     @ApiResponses(value = {
-                            @ApiResponse(code = 200, message = "OK"),
-                            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
-                            @ApiResponse(code = 400, message = "Bad request"),
-                            @ApiResponse(code = 404, message = "Not Found")})
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> openUpload(@RequestParam("json") String json,
-                                       @RequestParam("files") @NotEmpty MultipartFile[] files) {
+                                           @RequestParam("files") @NotEmpty MultipartFile[] files) {
 
         //@TODO If its a file replace we have to validate that the old id comes with the json
         if (json == null || json.isEmpty()) {
@@ -466,7 +562,7 @@ public class DocumentController extends BaseController {
             for (MultipartFile file : files) {
                 fileMap.put(file.getOriginalFilename(), file);
             }
-             ArrayList<FactObject> documents = new ArrayList<>();
+            ArrayList<FactObject> documents = new ArrayList<>();
             ArrayList<FactObject> documentCheck = new ArrayList<>();
             documentDtos.stream().forEach(documentDto -> {
                 try {
@@ -514,5 +610,117 @@ public class DocumentController extends BaseController {
         } catch (Exception e) {
             return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while uploading the documents", e);
         }
+    }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/approve", produces = "application/json", params = {"entityName"})
+    @ApiOperation(value = "Approve Document", response = DocumentDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> approveDocument(@RequestBody @Valid FormDocumentOperationDto documentOperationDto,
+                                                @RequestParam("entityName") String entityName, HttpServletRequest request) {
+        try {
+            String documentId = documentOperationDto.getDocumentId();
+            Document document = findDocumentById(documentId);
+            if (document == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Document with Id %s does not exist", documentId), HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+            DocumentType documentType = document.getDocumentType();
+            if (!StringUtils.equals(loggedInUser.getId(), documentType.getApproverId())) {
+                return Mono.just(new ResponseEntity<>("Approving user should be document type approver", HttpStatus.BAD_REQUEST));
+            }
+            if (!StringUtils.equals(documentOperationDto.getFormId(), document.getEntityId())) {
+                return Mono.just(new ResponseEntity<>("The form specified is not attached to the document", HttpStatus.BAD_REQUEST));
+            }
+            document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
+            document.setComment(documentOperationDto.getComment());
+            mongoRepositoryReactive.saveOrUpdate(document);
+
+            if (StringUtils.equalsIgnoreCase("applicationForm", entityName)) {
+                approveApplicationFormDocument(document);
+            }
+
+            String verbiage = String.format("Approved document -> Document Type -> %s, File name -> %s, Id -> %s ",document.getDocumentType(),document.getFilename(), documentId);
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), document.getOwner(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            return Mono.just(new ResponseEntity<>(document.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while approving document", e);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/reject", produces = "application/json", params = {"entityName"})
+    @ApiOperation(value = "Reject Document", response = DocumentDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> rejectDocument(@RequestBody @Valid FormDocumentOperationDto documentOperationDto,
+                                                @RequestParam("entityName") String entityName, HttpServletRequest request) {
+        try {
+            String documentId = documentOperationDto.getDocumentId();
+            Document document = findDocumentById(documentId);
+            if (document == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Document with Id %s does not exist", documentId), HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+            DocumentType documentType = document.getDocumentType();
+            if (!StringUtils.equals(loggedInUser.getId(), documentType.getApproverId())) {
+                return Mono.just(new ResponseEntity<>("Rejecting user should be document type approver", HttpStatus.BAD_REQUEST));
+            }
+            if (!StringUtils.equals(documentOperationDto.getFormId(), document.getEntityId())) {
+                return Mono.just(new ResponseEntity<>("The form specified is not attached to the document", HttpStatus.BAD_REQUEST));
+            }
+            document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
+            document.setComment(documentOperationDto.getComment());
+            mongoRepositoryReactive.saveOrUpdate(document);
+
+            if (StringUtils.equalsIgnoreCase("applicationForm", entityName)) {
+                rejectApplicationFormDocument(document);
+            }
+
+            String verbiage = String.format("Rejected document -> Document Type -> %s, File name -> %s, Id -> %s ",document.getDocumentType(),document.getFilename(), documentId);
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), document.getOwner(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            return Mono.just(new ResponseEntity<>(document.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while approving document", e);
+        }
+    }
+
+    private void rejectApplicationFormDocument(Document document) {
+        applicationFormService.rejectApplicationFormDocument(document);
+    }
+
+
+    private void approveApplicationFormDocument(Document document) {
+        applicationFormService.approveApplicationFormDocument(document);
+    }
+
+    private void doApplicationFormDocumentReupload(Document document) {
+        applicationFormService.doDocumentReuploadNotification(document);
+    }
+
+
+    private Document findDocumentById(String documentId) {
+        if (StringUtils.isEmpty(documentId)) {
+            return null;
+        }
+        return (Document) mongoRepositoryReactive.findById(documentId, Document.class).block();
     }
 }

@@ -30,8 +30,4 @@ public class CustomerComplainUpdateDto {
     public boolean isClosedUpdate() {
         return StringUtils.equals(CustomerComplainStatusReferenceData.CLOSED_ID, this.customerComplainStatusId);
     }
-
-    public boolean isResolvedUpdate() {
-        return StringUtils.equals(CustomerComplainStatusReferenceData.RESOLVED_ID, this.customerComplainStatusId);
     }
-}

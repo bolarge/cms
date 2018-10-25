@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.DocumentDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
+import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.Binary;
@@ -33,6 +34,33 @@ public class Document extends AbstractFact {
     protected String institutionId;
     protected String gameTypeId;
     protected String agentId;
+    protected Boolean notificationSent;
+    protected String comment;
+    protected String approvalRequestStatusId = ApprovalRequestStatusReferenceData.PENDING_ID;
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public String getApprovalRequestStatusId() {
+        return approvalRequestStatusId;
+    }
+
+    public void setApprovalRequestStatusId(String approvalRequestStatusId) {
+        this.approvalRequestStatusId = approvalRequestStatusId;
+    }
+
+    public Boolean getNotificationSent() {
+        return notificationSent;
+    }
+
+    public void setNotificationSent(Boolean notificationSent) {
+        this.notificationSent = notificationSent;
+    }
 
     public String getAgentId() {
         return agentId;
@@ -166,10 +194,6 @@ public class Document extends AbstractFact {
         this.documentTypeId = documentTypeId;
     }
 
-    public DocumentType getDocumentType() {
-        return documentType;
-    }
-
     public void setDocumentType(DocumentType documentType) {
         this.documentType = documentType;
     }
@@ -197,28 +221,31 @@ public class Document extends AbstractFact {
     public void setOriginalFilename(String originalFilename) {
         this.originalFilename = originalFilename;
     }
+
     public Institution getInstitution() {
-        if(!StringUtils.isEmpty(institutionId)) {
+        if (!StringUtils.isEmpty(institutionId)) {
             return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
         }
-        return  null;
+        return null;
     }
+
     public Agent getAgent() {
-        if(!StringUtils.isEmpty(agentId)){
+        if (!StringUtils.isEmpty(agentId)) {
             return (Agent) mongoRepositoryReactive.findById(agentId, Agent.class).block();
         }
         return null;
     }
 
-    public String getOwner(){
-        if(!StringUtils.isEmpty(agentId)){
-            return (getAgent()==null?null:getAgent().getFullName());
-        }else if(!StringUtils.isEmpty(institutionId)){
-           return  (getInstitution()==null?null:getInstitution().getInstitutionName());
-        }else{
+    public String getOwner() {
+        if (!StringUtils.isEmpty(agentId)) {
+            return (getAgent() == null ? null : getAgent().getFullName());
+        } else if (!StringUtils.isEmpty(institutionId)) {
+            return (getInstitution() == null ? null : getInstitution().getInstitutionName());
+        } else {
             return null;
         }
     }
+
     public void setAssociatedProperties() throws FactNotFoundException {
         if (documentTypeId != null) {
             DocumentType DocumentType = (DocumentType) Mapstore.STORE.get("DocumentType").get(documentTypeId);
@@ -243,7 +270,11 @@ public class Document extends AbstractFact {
         dto.setCurrent(getCurrent());
         dto.setDescription(getDescription());
         dto.setDocumentTypeId(getDocumentTypeId());
-        dto.setDocumentType(getDocumentType() == null ? null : getDocumentType().convertToDto());
+        DocumentType documentType = getDocumentType();
+        if (documentType != null) {
+            dto.setDocumentType(documentType.convertToDto());
+            dto.setApproverId(documentType.getApproverId());
+        }
         dto.setEntity(getEntity());
         dto.setEntryDate(getEntryDate() == null ? null : getEntryDate().toString("dd-MM-yyyy HH:mm:ss"));
         dto.setFilename(getFilename());
@@ -257,5 +288,31 @@ public class Document extends AbstractFact {
         dto.setOwner(getOwner());
         dto.setGameTypeId(getGameTypeId());
         return dto;
+    }
+
+    public DocumentType getDocumentType() {
+        DocumentType DocumentType = (DocumentType) Mapstore.STORE.get("DocumentType").get(documentTypeId);
+        if (DocumentType == null) {
+            DocumentType = (DocumentType) mongoRepositoryReactive.findById(documentTypeId, DocumentType.class).block();
+            if (DocumentType != null) {
+                Mapstore.STORE.get("DocumentType").put(DocumentType.getId(), DocumentType);
+            }
+        }
+        return documentType;
+    }
+
+    public ApplicationForm getApplicationForm() {
+        if (StringUtils.isEmpty(this.entityId)) {
+            return null;
+        }
+        return (ApplicationForm) mongoRepositoryReactive.findById(this.entityId, ApplicationForm.class).block();
+    }
+
+    public AuthInfo getApprover() {
+        DocumentType documentType = getDocumentType();
+        if (documentType != null) {
+            return documentType.getApprover();
+        }
+        return null;
     }
 }
