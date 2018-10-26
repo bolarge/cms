@@ -2,6 +2,8 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.MachineDto;
 import com.software.finatech.lslb.cms.service.model.MachineGameDetails;
+import com.software.finatech.lslb.cms.service.referencedata.MachineStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.MachineTypeReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -13,7 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
-@Document(collection = "GamingMachines")
+@Document(collection = "Machines")
 public class Machine extends AbstractFact {
     private String institutionId;
     private String manufacturer;
@@ -206,6 +208,13 @@ public class Machine extends AbstractFact {
     public MachineDto convertToFullDto() {
         MachineDto dto = convertToDto();
         dto.setMachineGames(getMachineGames());
+        License license = getLicense();
+        if (license != null) {
+            dto.setLicenseEndDate(license.getEndDateString());
+            dto.setLicenseStartDate(license.getStartDateString());
+            dto.setLicenseNumber(license.getLicenseNumber());
+            dto.setLicenseStatus(license.getLicenseStatusName() );
+        }
         return dto;
     }
 
@@ -233,6 +242,19 @@ public class Machine extends AbstractFact {
         }
         return (License) mongoRepositoryReactive.findById(this.licenseId, License.class).block();
     }
+
+    public boolean isGamingMachine() {
+        return StringUtils.equals(MachineTypeReferenceData.GAMING_MACHINE_ID, this.machineTypeId);
+    }
+
+    public boolean isGamingTerminal() {
+        return StringUtils.equals(MachineTypeReferenceData.GAMING_TERMINAL_ID, this.machineTypeId);
+    }
+
+    public boolean isActive() {
+        return StringUtils.equals(MachineStatusReferenceData.ACTIVE_ID, this.machineStatusId);
+    }
+
 
     @Override
     public String getFactName() {

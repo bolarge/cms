@@ -11,11 +11,11 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.SendEmail;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -125,20 +125,9 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         }
     }
 
-    public List<EnumeratedFactDto> getPaymentStatus() {
-        Map paymentStatusMap = Mapstore.STORE.get("PaymentStatus");
-        ArrayList<PaymentStatus> paymentStatus = new ArrayList<PaymentStatus>(paymentStatusMap.values());
-        List<EnumeratedFactDto> paymentStatusDtoList = new ArrayList<>();
-        paymentStatus.forEach(factObject -> {
-            PaymentStatus paymentStat = factObject;
-            paymentStatusDtoList.add(paymentStat.convertToDto());
-        });
-        return paymentStatusDtoList;
-    }
-
     @Override
     public Mono<ResponseEntity> getAllPaymentStatus() {
-        return Mono.just(new ResponseEntity<>(getPaymentStatus(), HttpStatus.OK));
+        return ReferenceDataUtil.getAllEnumeratedEntity("PaymentStatus");
     }
 
     @Override
@@ -231,9 +220,9 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         try {
             PaymentRecord paymentRecord = findById(paymentRecordId);
             if (paymentRecord == null) {
-                return Mono.just(new ResponseEntity(String.format("Payment record with id %s not found", paymentRecordId), HttpStatus.NOT_FOUND));
+                return Mono.just(new ResponseEntity<>(String.format("Payment record with id %s not found", paymentRecordId), HttpStatus.NOT_FOUND));
             }
-            return Mono.just(new ResponseEntity(paymentRecord.convertToDto(), HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(paymentRecord.convertToFullDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while getting payment record by id", e);
         }
@@ -259,25 +248,27 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             paymentReceiptResponse.setRevenueName(String.valueOf(paymentRecord.getLicenseType()));
             License paymentLicense = paymentRecord.getLicense();
             if (paymentLicense != null && paymentLicense.getExpiryDate() != null && paymentLicense.getEffectiveDate() != null) {
-                paymentReceiptResponse.setStartDate(paymentLicense.getEffectiveDate().toString("dd-MM-yyyy"));
-                paymentReceiptResponse.setEndDate(paymentLicense.getExpiryDate().toString("dd-MM-yyyy"));
+                paymentReceiptResponse.setStartDate(paymentLicense.getStartDateString());
+                paymentReceiptResponse.setEndDate(paymentLicense.getEndDateString());
+                paymentReceiptResponse.setLicenseStatus(paymentLicense.getLicenseStatusName());
+                paymentReceiptResponse.setLicenseNumber(paymentLicense.getLicenseNumber());
             }
             PaymentRecordDetail latestPaymentDetail = getMostRecentPaymentDetailForPaymentRecord(paymentRecordId);
-            if (latestPaymentDetail != null && latestPaymentDetail.getPaymentDate() != null) {
-                LocalDateTime paymentDateTime = latestPaymentDetail.getPaymentDate();
-                paymentReceiptResponse.setPaymentDate(paymentDateTime.toString("dd-MM-yyyy"));
-                paymentReceiptResponse.setPaymentTime(paymentDateTime.toString("HH:mm:ss"));
+            if (latestPaymentDetail != null) {
+                paymentReceiptResponse.setPaymentDate(latestPaymentDetail.getPaymentDateString());
+                paymentReceiptResponse.setPaymentTime(latestPaymentDetail.getPaymentTimeString());
                 paymentReceiptResponse.setLastModeOfPayment(convertToTitleCaseIteratingChars(latestPaymentDetail.getModeOfPaymentName()));
+            }
+            if (paymentRecord.isGamingTerminalPayment()) {
+                paymentReceiptResponse.setGamingTerminals(paymentRecord.getGamingTerminalDtos());
+            }
+            if (paymentRecord.isGamingMachinePayment()) {
+                paymentReceiptResponse.setGamingMachines(paymentRecord.getGamingMachineDtos());
             }
             return Mono.just(new ResponseEntity<>(paymentReceiptResponse, HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while fetching payment receipt details", e);
         }
-    }
-
-    @Override
-    public PaymentRecord findPaymentRecordForGamingTerminal(String gamingTerminalId, String gameTypeId, String institutionId, String licenseFeeTypeId) {
-        return null;
     }
 
     private PaymentRecordDetail getMostRecentPaymentDetailForPaymentRecord(String paymentRecordId) {

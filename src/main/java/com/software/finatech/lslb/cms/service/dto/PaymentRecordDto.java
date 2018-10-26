@@ -1,5 +1,8 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PaymentRecordDto {
     private String institutionId;
     private String approverName;
@@ -16,30 +19,38 @@ public class PaymentRecordDto {
     private String parentLicenseId;
     private String agentId;
     private String ownerName;
-    private String gamingMachineId;
     private String startYear;
     private String endYear;
     private String feePaymentTypeName;
     private String feePaymentTypeId;
     private String revenueName;
     private String revenueNameId;
-    private String machineNumber;
+    private List<MachineDto> gamingMachines = new ArrayList<>();
+    private List<MachineDto> gamingTerminals = new ArrayList<>();
     private String paymentReference;
 
     public String getPaymentReference() {
         return paymentReference;
     }
 
+    public List<MachineDto> getGamingMachines() {
+        return gamingMachines;
+    }
+
+    public void setGamingMachines(List<MachineDto> gamingMachines) {
+        this.gamingMachines = gamingMachines;
+    }
+
+    public List<MachineDto> getGamingTerminals() {
+        return gamingTerminals;
+    }
+
+    public void setGamingTerminals(List<MachineDto> gamingTerminals) {
+        this.gamingTerminals = gamingTerminals;
+    }
+
     public void setPaymentReference(String paymentReference) {
         this.paymentReference = paymentReference;
-    }
-
-    public String getMachineNumber() {
-        return machineNumber;
-    }
-
-    public void setMachineNumber(String machineNumber) {
-        this.machineNumber = machineNumber;
     }
 
     public String getOwnerName() {
@@ -204,14 +215,6 @@ public class PaymentRecordDto {
 
     public void setAgentId(String agentId) {
         this.agentId = agentId;
-    }
-
-    public String getGamingMachineId() {
-        return gamingMachineId;
-    }
-
-    public void setGamingMachineId(String gamingMachineId) {
-        this.gamingMachineId = gamingMachineId;
     }
 
     public String getEndYear() {

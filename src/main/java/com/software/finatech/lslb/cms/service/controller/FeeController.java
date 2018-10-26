@@ -94,18 +94,7 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllRevenueNames() {
-        try {
-            List<EnumeratedFactDto> revenueNames = feeService.getLicenseTypes();
-            if (revenueNames == null) {
-                return Mono.just(new ResponseEntity<>("No Revenue Name Record", HttpStatus.OK));
-
-            }
-            return Mono.just(new ResponseEntity<>(revenueNames, HttpStatus.OK));
-        } catch (Exception ex) {
-            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
-
-        }
-
+        return feeService.getLicenseTypes();
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-processing-fees")
@@ -174,7 +163,7 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> findRevenueNamesByParam(@RequestBody FeeEndDateUpdateDto feeEndDateUpdateDto, HttpServletRequest request) {
+    public Mono<ResponseEntity> setFeeEndDate(@RequestBody FeeEndDateUpdateDto feeEndDateUpdateDto, HttpServletRequest request) {
         return feeService.setFeeEndDate(feeEndDateUpdateDto, request);
     }
 }

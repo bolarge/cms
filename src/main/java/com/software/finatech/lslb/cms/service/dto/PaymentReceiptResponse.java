@@ -1,5 +1,8 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PaymentReceiptResponse {
     private String paymentReference;
     private String ownerName;
@@ -12,6 +15,43 @@ public class PaymentReceiptResponse {
     private String gameTypeName;
     private String lastModeOfPayment;
     private String revenueName;
+    private String licenseStatus;
+    private List<MachineDto> gamingMachines = new ArrayList<>();
+    private List<MachineDto> gamingTerminals = new ArrayList<>();
+    private String licenseNumber;
+
+
+    public String getLicenseNumber() {
+        return licenseNumber;
+    }
+
+    public void setLicenseNumber(String licenseNumber) {
+        this.licenseNumber = licenseNumber;
+    }
+
+    public String getLicenseStatus() {
+        return licenseStatus;
+    }
+
+    public void setLicenseStatus(String licenseStatus) {
+        this.licenseStatus = licenseStatus;
+    }
+
+    public List<MachineDto> getGamingMachines() {
+        return gamingMachines;
+    }
+
+    public void setGamingMachines(List<MachineDto> gamingMachines) {
+        this.gamingMachines = gamingMachines;
+    }
+
+    public List<MachineDto> getGamingTerminals() {
+        return gamingTerminals;
+    }
+
+    public void setGamingTerminals(List<MachineDto> gamingTerminals) {
+        this.gamingTerminals = gamingTerminals;
+    }
 
     public String getPaymentReference() {
         return paymentReference;

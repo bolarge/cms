@@ -104,7 +104,7 @@ public class DatabaseLoaderUtils {
         factEnums.put("DocumentPurpose", DocumentPurpose.class);
         factEnums.put("DocumentType", DocumentType.class);
         factEnums.put("ModeOfPayment", ModeOfPayment.class);
-        factEnums.put("LicenseTypes", LicenseType.class);
+        factEnums.put("LicenseType", LicenseType.class);
         factEnums.put("ApprovalRequestStatus", ApprovalRequestStatus.class);
         factEnums.put("AgentApprovalRequestType", AgentApprovalRequestType.class);
         factEnums.put("RenewalFormStatus", RenewalFormStatus.class);

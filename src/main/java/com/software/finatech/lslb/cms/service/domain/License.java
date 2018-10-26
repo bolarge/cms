@@ -182,6 +182,7 @@ public class License extends AbstractFact {
         }
         return (PaymentRecord) mongoRepositoryReactive.findById(this.paymentRecordId, PaymentRecord.class).block();
     }
+
     public LicenseType getLicenseType() {
         if (licenseTypeId == null) {
             return null;
@@ -249,8 +250,36 @@ public class License extends AbstractFact {
         return StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, this.licenseTypeId);
     }
 
+    public boolean isGamingTerminalLicense() {
+        return StringUtils.equals(LicenseTypeReferenceData.GAMING_TERMINAL_ID, this.licenseTypeId);
+    }
+
     public boolean isAgentLicense() {
         return StringUtils.equals(LicenseTypeReferenceData.AGENT_ID, this.licenseTypeId);
+    }
+
+    public String getEndDateString() {
+        LocalDate date = getExpiryDate();
+        if (date != null) {
+            return date.toString("dd-MM-yyyy");
+        }
+        return null;
+    }
+
+    public String getStartDateString() {
+        LocalDate date = getEffectiveDate();
+        if (date != null) {
+            return date.toString("dd-MM-yyyy");
+        }
+        return null;
+    }
+
+    public String getLicenseStatusName() {
+        LicenseStatus status = getLicenseStatus();
+        if (status != null) {
+            return status.getName();
+        }
+        return null;
     }
 
     @Override

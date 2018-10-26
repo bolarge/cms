@@ -14,9 +14,9 @@ public interface VigipayService {
 
     String createCustomerCodeForInstitution(Institution institution);
 
-    String createInBranchInvoiceForAgent(Agent agent, VigipayInvoiceItem vigipayInvoiceItem);
+    String createInBranchInvoiceForAgent(Agent agent, List<VigipayInvoiceItem> vigipayInvoiceItems);
 
-    String createInBranchInvoiceForInstitution(Institution institution, List<AuthInfo> adminsForInstitution, VigipayInvoiceItem vigipayInvoiceItem);
+    String createInBranchInvoiceForInstitution(Institution institution, List<AuthInfo> adminsForInstitution, List<VigipayInvoiceItem> vigipayInvoiceItems);
 
     String createInBranchMultipleItemInvoiceForInstitution(Institution institution,
                                                            List<AuthInfo> adminsForInstitution,

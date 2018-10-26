@@ -85,19 +85,19 @@ public class Fee extends AbstractFact {
     }
 
     public LicenseType getLicenseType() {
-        if (licenseTypeId == null) {
+        if (this.licenseTypeId == null) {
             return null;
         }
         Map licenseTypeMap = Mapstore.STORE.get("LicenseType");
 
         LicenseType licenseType = null;
         if (licenseTypeMap != null) {
-            licenseType = (LicenseType) licenseTypeMap.get(licenseTypeId);
+            licenseType = (LicenseType) licenseTypeMap.get(this.licenseTypeId);
         }
         if (licenseType == null) {
-            licenseType = (LicenseType) mongoRepositoryReactive.findById(licenseTypeId, LicenseType.class).block();
+            licenseType = (LicenseType) mongoRepositoryReactive.findById(this.licenseTypeId, LicenseType.class).block();
             if (licenseType != null && licenseTypeMap != null) {
-                licenseTypeMap.put(licenseTypeId, licenseType);
+                licenseTypeMap.put(this.licenseTypeId, licenseType);
             }
         }
         return licenseType;

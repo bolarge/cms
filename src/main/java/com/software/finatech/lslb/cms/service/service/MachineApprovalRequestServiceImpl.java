@@ -152,7 +152,6 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
 
-            boolean isGamingTerminal = false;
             if (approvalRequest.isCreateMachine()) {
                 approveCreateMachine(approvalRequest);
             }
@@ -168,7 +167,7 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             //    agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsAndLslbOnAgentRequestCreation(agentApprovalRequest);
-            return Mono.just(new ResponseEntity<>("Request successfully approved", HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving request", e);
         }

@@ -21,7 +21,42 @@ public class MachineDto {
     private String machineTypeId;
     private String machineStatus;
     private String machineStatusId;
+    private String licenseNumber;
+    private String licenseStartDate;
+    private String licenseEndDate;
+    private String licenseStatus;
 
+    public String getLicenseNumber() {
+        return licenseNumber;
+    }
+
+    public void setLicenseNumber(String licenseNumber) {
+        this.licenseNumber = licenseNumber;
+    }
+
+    public String getLicenseStartDate() {
+        return licenseStartDate;
+    }
+
+    public void setLicenseStartDate(String licenseStartDate) {
+        this.licenseStartDate = licenseStartDate;
+    }
+
+    public String getLicenseEndDate() {
+        return licenseEndDate;
+    }
+
+    public void setLicenseEndDate(String licenseEndDate) {
+        this.licenseEndDate = licenseEndDate;
+    }
+
+    public String getLicenseStatus() {
+        return licenseStatus;
+    }
+
+    public void setLicenseStatus(String licenseStatus) {
+        this.licenseStatus = licenseStatus;
+    }
 
     public String getMachineStatus() {
         return machineStatus;
