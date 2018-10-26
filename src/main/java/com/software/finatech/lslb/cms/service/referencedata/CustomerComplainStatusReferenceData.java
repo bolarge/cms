@@ -14,13 +14,6 @@ public class CustomerComplainStatusReferenceData {
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
 
-        ArrayList<CustomerComplainStatus> customerComplainStatuses = (ArrayList<CustomerComplainStatus>) mongoRepositoryReactive.findAll(new Query(), CustomerComplainStatus.class).toStream().collect(Collectors.toList());
-        if (customerComplainStatuses != null && !customerComplainStatuses.isEmpty()) {
-            for (CustomerComplainStatus status : customerComplainStatuses) {
-                mongoRepositoryReactive.delete(status);
-            }
-        }
-
         CustomerComplainStatus customerComplainStatus1 = (CustomerComplainStatus) mongoRepositoryReactive.findById(OPEN_ID, CustomerComplainStatus.class).block();
         if (customerComplainStatus1 == null) {
             customerComplainStatus1 = new CustomerComplainStatus();
