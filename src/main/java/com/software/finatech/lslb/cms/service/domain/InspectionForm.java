@@ -123,7 +123,7 @@ public class InspectionForm extends AbstractFact {
         if(institution!=null){
             inspectionFormDto.setInstitution(institution.convertToDto());
         }
-        GamingMachine gamingMachine =(GamingMachine) mongoRepositoryReactive.findById(getGamingMachineId(), GamingMachine.class).block();
+        Machine gamingMachine =(Machine) mongoRepositoryReactive.findById(getGamingMachineId(), Machine.class).block();
         if(gamingMachine!=null){
 
             inspectionFormDto.setGamingMachine(gamingMachine.convertToDto());

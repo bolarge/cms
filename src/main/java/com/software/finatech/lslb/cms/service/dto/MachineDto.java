@@ -1,12 +1,10 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import com.software.finatech.lslb.cms.service.domain.MachineGame;
 import com.software.finatech.lslb.cms.service.model.MachineGameDetails;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
-public class GamingMachineDto {
+public class MachineDto {
     private String institutionId;
     private String institutionName;
     private ArrayList<MachineGameDetails> machineGames = new ArrayList<>();
@@ -17,6 +15,61 @@ public class GamingMachineDto {
     private String gameTypeId;
     private String gameTypeName;
     private String id;
+    private String agentId;
+    private String agentFullName;
+    private String machineType;
+    private String machineTypeId;
+    private String machineStatus;
+    private String machineStatusId;
+
+
+    public String getMachineStatus() {
+        return machineStatus;
+    }
+
+    public void setMachineStatus(String machineStatus) {
+        this.machineStatus = machineStatus;
+    }
+
+    public String getMachineStatusId() {
+        return machineStatusId;
+    }
+
+    public void setMachineStatusId(String machineStatusId) {
+        this.machineStatusId = machineStatusId;
+    }
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
+
+    public String getAgentFullName() {
+        return agentFullName;
+    }
+
+    public void setAgentFullName(String agentFullName) {
+        this.agentFullName = agentFullName;
+    }
+
+    public String getMachineType() {
+        return machineType;
+    }
+
+    public void setMachineType(String machineType) {
+        this.machineType = machineType;
+    }
+
+    public String getMachineTypeId() {
+        return machineTypeId;
+    }
+
+    public void setMachineTypeId(String machineTypeId) {
+        this.machineTypeId = machineTypeId;
+    }
 
     public String getId() {
         return id;

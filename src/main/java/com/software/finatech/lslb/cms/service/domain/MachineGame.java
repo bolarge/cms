@@ -6,26 +6,17 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @SuppressWarnings("serial")
 @Document(collection = "MachineGames")
 public class MachineGame extends AbstractFact {
-   private String gamingMachineId;
-   private String gamingTerminalId;
-   private String gameName;
-   private String gameVersion;
-   private Boolean active;
+    private String machineId;
+    private String gameName;
+    private String gameVersion;
+    private Boolean active;
 
-    public String getGamingMachineId() {
-        return gamingMachineId;
+    public String getMachineId() {
+        return machineId;
     }
 
-    public void setGamingMachineId(String gamingMachineId) {
-        this.gamingMachineId = gamingMachineId;
-    }
-
-    public String getGamingTerminalId() {
-        return gamingTerminalId;
-    }
-
-    public void setGamingTerminalId(String gamingTerminalId) {
-        this.gamingTerminalId = gamingTerminalId;
+    public void setMachineId(String machineId) {
+        this.machineId = machineId;
     }
 
     public String getGameName() {

@@ -480,8 +480,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             if (StringUtils.equals(ApplicationFormStatusReferenceData.REJECTED_STATUS_ID, applicationForm.getApplicationFormStatusId())) {
                 return Mono.just(new ResponseEntity<>("Application already rejected", HttpStatus.BAD_REQUEST));
             }
-            FormDocumentApproval formDocumentApproval = applicationForm.getDocumentApproval();
-            if (formDocumentApproval != null && !formDocumentApproval.isComplete()) {
+            if (!applicationForm.getReadyForApproval()) {
                 return Mono.just(new ResponseEntity<>("Not all documents on this application are approved", HttpStatus.BAD_REQUEST));
             }
 

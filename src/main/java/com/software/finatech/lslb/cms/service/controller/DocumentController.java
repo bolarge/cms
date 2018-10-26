@@ -224,7 +224,7 @@ public class DocumentController extends BaseController {
     }
 
 
-    @RequestMapping(method = RequestMethod.POST, value = "/reupload", params = {"file", "entityName"})
+    @RequestMapping(method = RequestMethod.POST, value = "/reupload", params = {"entityName"})
     @ApiOperation(value = "Get Document by Id", response = DocumentDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -614,7 +614,7 @@ public class DocumentController extends BaseController {
     }
 
 
-    @RequestMapping(method = RequestMethod.POST, value = "/add-comment", produces = "application/json", params = {"entityName"})
+    @RequestMapping(method = RequestMethod.POST, value = "/add-comment", produces = "application/json")
     @ApiOperation(value = "Add Comment To  Document", response = DocumentDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),

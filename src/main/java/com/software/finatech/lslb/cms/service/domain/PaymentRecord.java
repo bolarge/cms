@@ -238,11 +238,11 @@ public class PaymentRecord extends AbstractFact {
         return (Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
     }
 
-    public GamingMachine getGamingMachine() {
+    public Machine getGamingMachine() {
         if (StringUtils.isEmpty(this.gamingMachineId)) {
             return null;
         }
-        return (GamingMachine) mongoRepositoryReactive.findById(getGamingMachineId(), GamingMachine.class).block();
+        return (Machine) mongoRepositoryReactive.findById(getGamingMachineId(), Machine.class).block();
     }
 
     public LicenseType getLicenseType() {
@@ -316,10 +316,10 @@ public class PaymentRecord extends AbstractFact {
             paymentRecordDto.setAgentId(getAgentId());
             ownerName = agent.getFullName();
         }
-        GamingMachine gamingMachine = getGamingMachine();
+        Machine gamingMachine = getGamingMachine();
         if (gamingMachine != null) {
             paymentRecordDto.setGamingMachineId(getGamingMachineId());
-            paymentRecordDto.setMachineNumber(gamingMachine.getMachineNumber());
+        //    paymentRecordDto.setMachineNumber(gamingMachine.getMachineNumber());
             paymentRecordDto.setInstitutionId(gamingMachine.getInstitutionId());
             Institution institution = gamingMachine.getInstitution();
             if (institution != null) {

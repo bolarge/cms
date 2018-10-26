@@ -1,7 +1,7 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.dto.*;
-import com.software.finatech.lslb.cms.service.service.contracts.GamingMachineService;
+import com.software.finatech.lslb.cms.service.service.contracts.MachineService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -16,20 +16,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-@Api(value = "Gaming machines", description = "For everything related to gaming machines", tags = "Gaming Machine Controller")
+@Api(value = "Machines", description = "For everything related to Machines (Gaming terminals and Gaming Machines)", tags = "Machine Controller(Gaming Machines and Terminals)")
 @RestController
-@RequestMapping("/api/v1/gaming-machines")
-public class GamingMachineController {
+@RequestMapping("/api/v1/machines")
+public class MachineController {
 
-    private GamingMachineService gamingMachineService;
+    private MachineService machineService;
 
     @Autowired
-    public void setGamingMachineService(GamingMachineService gamingMachineService) {
-        this.gamingMachineService = gamingMachineService;
+    public void setMachineService(MachineService machineService) {
+        this.machineService = machineService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "institutionId"})
-    @ApiOperation(value = "Get all gaming machines", response = GamingMachineDto.class, responseContainer = "List", consumes = "application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "institutionId", "agentId", "machineTypeId"})
+    @ApiOperation(value = "Get all gaming machines", response = MachineDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -40,30 +40,44 @@ public class GamingMachineController {
                                                      @RequestParam("sortType") String sortType,
                                                      @RequestParam("sortProperty") String sortParam,
                                                      @RequestParam("institutionId") String institutionId,
+                                                     @RequestParam("agentId") String agentId,
+                                                     @RequestParam("machineTypeId") String machineTypeId,
+                                                     @RequestParam("machineStatusId") String machineStatusId,
                                                      HttpServletResponse httpServletResponse) {
-        return gamingMachineService.findAllGamingMachines(page, pageSize, sortType, sortParam, institutionId, httpServletResponse);
+        return machineService.findAllMachines(page, pageSize, sortType, sortParam, institutionId, agentId, machineTypeId,machineStatusId, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create")
-    @ApiOperation(value = "Create an Gaming Machine", response = GamingMachineDto.class, consumes = "application/json")
+    @ApiOperation(value = "Create a Machine", response = MachineDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createGamingMachine(@RequestBody @Valid GamingMachineCreateDto gamingMachineCreateDto, HttpServletRequest request) {
-        return gamingMachineService.createGamingMachine(gamingMachineCreateDto, request);
+    public Mono<ResponseEntity> createMachine(@RequestBody @Valid MachineCreateDto machineCreateDto, HttpServletRequest request) {
+        return machineService.createMachine(machineCreateDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/update")
-    @ApiOperation(value = "Update a Gaming Machine", response = GamingMachineDto.class, consumes = "application/json")
+    @ApiOperation(value = "Update a Machine", response = MachineDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> updateGamingMachine(@RequestBody @Valid GamingMachineUpdateDto gamingMachineUpdateDto, HttpServletRequest request) {
-        return gamingMachineService.updateGamingMachine(gamingMachineUpdateDto, request);
+    public Mono<ResponseEntity> updateMachine(@RequestBody @Valid MachineUpdateDto machineUpdateDto, HttpServletRequest request) {
+        return machineService.updateMachine(machineUpdateDto, request);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/update-status")
+    @ApiOperation(value = "Update a Machine Status", response = MachineDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> updateMachineStatus(@RequestBody @Valid MachineStatusUpdateDto statusUpdateDto, HttpServletRequest request) {
+        return machineService.updateMachineStatus(statusUpdateDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/upload-multiple", params = {"institutionId", "gameTypeId"})
@@ -77,7 +91,7 @@ public class GamingMachineController {
     public Mono<ResponseEntity> uploadMachinesFromCsv(@RequestParam("institutionId") String institutionId,
                                                       @RequestParam("gameTypeId") String gameTypeId,
                                                       @RequestParam("file") MultipartFile multipartFile, HttpServletRequest request) {
-        return gamingMachineService.uploadMultipleGamingMachinesForInstitution(institutionId, gameTypeId, multipartFile, request);
+        return machineService.uploadMultipleMachinesForInstitution(institutionId, gameTypeId, multipartFile, request);
     }
 
 
@@ -90,7 +104,7 @@ public class GamingMachineController {
             @ApiResponse(code = 400, message = "Bad request"), @ApiResponse(code = 404, message = "Not Found"),
             @ApiResponse(code = 500, message = "Internal Server error")})
     public Mono<ResponseEntity> validateMultipleGamingMachineLicensePayment(@RequestBody GamingMachineMultiplePaymentRequest gamingMachineMultiplePaymentRequest) {
-        return gamingMachineService.validateMultipleGamingMachineLicensePayment(gamingMachineMultiplePaymentRequest);
+        return machineService.validateMultipleGamingMachineLicensePayment(gamingMachineMultiplePaymentRequest);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/validate-multiple-license-renewal-payment")
@@ -102,11 +116,11 @@ public class GamingMachineController {
             @ApiResponse(code = 400, message = "Bad request"), @ApiResponse(code = 404, message = "Not Found"),
             @ApiResponse(code = 500, message = "Internal Server error")})
     public Mono<ResponseEntity> validateMultipleGamingMachineLicenseRenewalPayment(@RequestBody GamingMachineMultiplePaymentRequest gamingMachineMultiplePaymentRequest) {
-        return gamingMachineService.validateMultipleGamingMachineLicenseRenewalPayment(gamingMachineMultiplePaymentRequest);
+        return machineService.validateMultipleGamingMachineLicenseRenewalPayment(gamingMachineMultiplePaymentRequest);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/search", params = {"searchKey"})
-    @ApiOperation(value = "Search for gaming machines on system", response = GamingMachineDto.class, responseContainer = "List", consumes = "application/json",
+    @ApiOperation(value = "Search for gaming machines on system", response = MachineDto.class, responseContainer = "List", consumes = "application/json",
             notes = "Search for agent on system using a search key that matches machine serial number")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -114,6 +128,30 @@ public class GamingMachineController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> searchGamingMachines(@RequestParam("searchKey") String searchKey) {
-        return gamingMachineService.findGamingMachineBySearchKey(searchKey);
+        return machineService.findMachineBySearchKey(searchKey);
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/all-machine-types")
+    @ApiOperation(value = "Get All Machine Types", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllMachineTypes() {
+        return machineService.getAllMachineTypes();
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/all-machine-status")
+    @ApiOperation(value = "Get All Machine Status", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllMachineStatus() {
+        return machineService.getAllMachineStatus();
     }
 }

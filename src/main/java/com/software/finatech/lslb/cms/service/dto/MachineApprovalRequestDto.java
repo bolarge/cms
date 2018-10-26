@@ -6,15 +6,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class MachineApprovalRequestDto extends AbstractApprovalRequestDto {
-    private GamingMachineDto pendingGamingMachine;
+    private MachineDto pendingMachine;
     private Set<MachineGameDetails> newGameDetails = new HashSet<>();
 
-    public GamingMachineDto getPendingGamingMachine() {
-        return pendingGamingMachine;
+    public MachineDto getPendingMachine() {
+        return pendingMachine;
     }
 
-    public void setPendingGamingMachine(GamingMachineDto pendingGamingMachine) {
-        this.pendingGamingMachine = pendingGamingMachine;
+    public void setPendingMachine(MachineDto pendingMachine) {
+        this.pendingMachine = pendingMachine;
     }
 
     public Set<MachineGameDetails> getNewGameDetails() {
