@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 
 public class CustomerComplainStatusReferenceData {
     public static final String OPEN_ID = "1";
-    public static final String CLOSED_ID = "3";
-    public static final String PENDING_ID = "5";
+    public static final String CLOSED_ID = "2";
+    public static final String PENDING_ID = "3";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
 
@@ -33,7 +33,7 @@ public class CustomerComplainStatusReferenceData {
             customerComplainStatus3 = new CustomerComplainStatus();
             customerComplainStatus3.setId(PENDING_ID);
         }
-        customerComplainStatus3.setName("UNRESOLVED");
+        customerComplainStatus3.setName("PENDING");
 
         mongoRepositoryReactive.saveOrUpdate(customerComplainStatus1);
         mongoRepositoryReactive.saveOrUpdate(customerComplainStatus2);

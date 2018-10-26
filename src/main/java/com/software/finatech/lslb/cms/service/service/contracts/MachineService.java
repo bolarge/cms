@@ -33,10 +33,6 @@ public interface MachineService {
 
     Machine findById(String machineId);
 
-    Mono<ResponseEntity> validateMultipleGamingMachineLicensePayment(GamingMachineMultiplePaymentRequest gamingMachineMultiplePaymentRequest);
-
-    Mono<ResponseEntity> validateMultipleGamingMachineLicenseRenewalPayment(GamingMachineMultiplePaymentRequest gamingMachineMultiplePaymentRequest);
-
     Mono<ResponseEntity> findMachineBySearchKey(String searchKey);
 
     Mono<ResponseEntity> updateMachineStatus(MachineStatusUpdateDto statusUpdateDto, HttpServletRequest request);
@@ -44,4 +40,6 @@ public interface MachineService {
     Mono<ResponseEntity> getAllMachineTypes();
 
     Mono<ResponseEntity> getAllMachineStatus();
+
+    Mono<ResponseEntity> getMachineFullDetail(String machineId);
 }

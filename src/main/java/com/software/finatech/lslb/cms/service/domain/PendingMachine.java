@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @SuppressWarnings("serial")
-@Document(collection = "GamingMachines")
+@Document(collection = "PendingMachines")
 public class PendingMachine extends Machine {
     private String approvalRequestStatusId = ApprovalRequestStatusReferenceData.PENDING_ID;
     private Set<MachineGameDetails> gameDetailsList = new HashSet<>();

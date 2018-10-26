@@ -1,9 +1,8 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 public class MachinePaymentDetail {
-
     private String feePaymentTypeName;
-    private String machineNumber;
+    private String machineSerialNumber;
     private double amount;
     private String gameTypeName;
 
@@ -15,12 +14,12 @@ public class MachinePaymentDetail {
         this.feePaymentTypeName = feePaymentTypeName;
     }
 
-    public String getMachineNumber() {
-        return machineNumber;
+    public String getMachineSerialNumber() {
+        return machineSerialNumber;
     }
 
-    public void setMachineNumber(String machineNumber) {
-        this.machineNumber = machineNumber;
+    public void setMachineSerialNumber(String machineSerialNumber) {
+        this.machineSerialNumber = machineSerialNumber;
     }
 
     public double getAmount() {

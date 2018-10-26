@@ -3,6 +3,8 @@ package com.software.finatech.lslb.cms.service.dto;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.HashSet;
+import java.util.Set;
 
 public class PaymentRecordDetailCreateDto {
     private String modeOfPaymentId;
@@ -12,15 +14,23 @@ public class PaymentRecordDetailCreateDto {
     private String feeId;
     private String institutionId;
     private String agentId;
-    private String gamingMachineId;
-    private String gamingTerminalId;
+    private Set<String> gamingMachineIds = new HashSet<>();
+    private Set<String> gamingTerminalIds = new HashSet<>();
 
-    public String getGamingTerminalId() {
-        return gamingTerminalId;
+    public Set<String> getGamingMachineIds() {
+        return gamingMachineIds;
     }
 
-    public void setGamingTerminalId(String gamingTerminalId) {
-        this.gamingTerminalId = gamingTerminalId;
+    public void setGamingMachineIds(Set<String> gamingMachineIds) {
+        this.gamingMachineIds = gamingMachineIds;
+    }
+
+    public Set<String> getGamingTerminalIds() {
+        return gamingTerminalIds;
+    }
+
+    public void setGamingTerminalIds(Set<String> gamingTerminalIds) {
+        this.gamingTerminalIds = gamingTerminalIds;
     }
 
     public String getInstitutionId() {
@@ -37,14 +47,6 @@ public class PaymentRecordDetailCreateDto {
 
     public void setAgentId(String agentId) {
         this.agentId = agentId;
-    }
-
-    public String getGamingMachineId() {
-        return gamingMachineId;
-    }
-
-    public void setGamingMachineId(String gamingMachineId) {
-        this.gamingMachineId = gamingMachineId;
     }
 
     public String getFeeId() {
@@ -81,23 +83,31 @@ public class PaymentRecordDetailCreateDto {
 
     public boolean isInstitutionPayment() {
         return StringUtils.isEmpty(this.getAgentId())
-                && StringUtils.isEmpty(this.getGamingMachineId())
+                && this.gamingMachineIds.isEmpty()
+                && this.gamingTerminalIds.isEmpty()
                 && !StringUtils.isEmpty(this.getInstitutionId());
 
     }
 
     public boolean isAgentPayment() {
         return !StringUtils.isEmpty(this.getAgentId())
-                && StringUtils.isEmpty(this.getGamingMachineId())
+                && this.gamingTerminalIds.isEmpty()
+                && this.gamingMachineIds.isEmpty()
                 && StringUtils.isEmpty(this.getInstitutionId());
 
     }
-
     public boolean isGamingMachinePayment() {
         return StringUtils.isEmpty(this.getAgentId())
-                && !StringUtils.isEmpty(this.getGamingMachineId())
+                && !this.gamingMachineIds.isEmpty()
+                && this.gamingTerminalIds.isEmpty()
                 && !StringUtils.isEmpty(this.getInstitutionId());
+    }
 
+    public boolean isGamingTerminalPayment(){
+        return StringUtils.isEmpty(this.institutionId)
+                && !StringUtils.isEmpty(this.agentId)
+                && this.gamingMachineIds.isEmpty()
+                && !this.gamingTerminalIds.isEmpty();
     }
 
     public boolean isFirstPayment() {

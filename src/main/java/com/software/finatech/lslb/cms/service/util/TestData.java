@@ -281,8 +281,6 @@ public class TestData {
 
             }
             if (i == 3) {
-                paymentRecord.setGamingMachineId(machine.getId());
-                license.setGamingMachineId(paymentRecord.getGamingMachineId());
                 license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getGamingMachineLicenseDurationMonths()));
                 license.setLicenseTypeId(LicenseTypeReferenceData.GAMING_MACHINE_ID);
 
