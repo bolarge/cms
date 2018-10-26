@@ -18,7 +18,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -237,12 +236,11 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
         if (pendingDocumentType != null) {
             DocumentType documentType = new DocumentType();
             documentType.setId(UUID.randomUUID().toString());
-            BeanUtils.copyProperties(pendingDocumentType, documentType);
-            documentType.setCreated(null);
-            documentType.setCreatedAt(null);
-            documentType.setCreatedBy(null);
-            documentType.setLastModified(null);
-            documentType.setLastModifiedBy(null);
+            documentType.setApproverId(pendingDocumentType.getApproverId());
+            documentType.setGameTypeIds(pendingDocumentType.getGameTypeIds());
+            documentType.setDocumentPurposeId(pendingDocumentType.getDocumentPurposeId());
+            documentType.setActive(pendingDocumentType.isActive());
+            documentType.setRequired(pendingDocumentType.isRequired());
             mongoRepositoryReactive.saveOrUpdate(documentType);
             pendingDocumentType.setApprovalRequestStatusIds(ApprovalRequestStatusReferenceData.APPROVED_ID);
             mongoRepositoryReactive.saveOrUpdate(pendingDocumentType);
