@@ -1,10 +1,12 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.DocumentApprovalRequest;
+import com.software.finatech.lslb.cms.service.domain.DocumentType;
+import com.software.finatech.lslb.cms.service.domain.PendingDocumentType;
 import com.software.finatech.lslb.cms.service.dto.ApprovalRequestOperationtDto;
 import com.software.finatech.lslb.cms.service.dto.DocumentApprovalRequestDto;
-import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
@@ -29,7 +31,6 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -93,7 +94,7 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
             //TODO:: make sure initiator is filtered out
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser != null) {
-              //  query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
+                //  query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
                 if (!loggedInUser.isSuperAdmin()) {
                     query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
                 }
@@ -171,6 +172,7 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
             return logAndReturnError(logger, "An error occurred while approving user approval request ", e);
         }
     }
+
     @Override
     public Mono<ResponseEntity> rejectRequest(ApprovalRequestOperationtDto requestOperationtDto, HttpServletRequest request) {
         try {
@@ -234,13 +236,13 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
         PendingDocumentType pendingDocumentType = documentApprovalRequest.getPendingDocumentType();
         if (pendingDocumentType != null) {
             DocumentType documentType = new DocumentType();
+            documentType.setId(UUID.randomUUID().toString());
             BeanUtils.copyProperties(pendingDocumentType, documentType);
             documentType.setCreated(null);
             documentType.setCreatedAt(null);
             documentType.setCreatedBy(null);
             documentType.setLastModified(null);
             documentType.setLastModifiedBy(null);
-            documentType.setId(UUID.randomUUID().toString());
             mongoRepositoryReactive.saveOrUpdate(documentType);
             pendingDocumentType.setApprovalRequestStatusIds(ApprovalRequestStatusReferenceData.APPROVED_ID);
             mongoRepositoryReactive.saveOrUpdate(pendingDocumentType);
