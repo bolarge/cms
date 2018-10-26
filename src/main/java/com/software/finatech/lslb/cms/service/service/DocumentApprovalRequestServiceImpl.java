@@ -113,7 +113,7 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
             query.with(PageRequest.of(page, pageSize, sort));
             query.with(sort);
 
-            ArrayList<DocumentApprovalRequest> documentApprovalRequests = (ArrayList<DocumentApprovalRequest>) mongoRepositoryReactive.findAll(query, UserApprovalRequest.class).toStream().collect(Collectors.toList());
+            ArrayList<DocumentApprovalRequest> documentApprovalRequests = (ArrayList<DocumentApprovalRequest>) mongoRepositoryReactive.findAll(query, DocumentApprovalRequest.class).toStream().collect(Collectors.toList());
             if (documentApprovalRequests == null || documentApprovalRequests.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
             }
