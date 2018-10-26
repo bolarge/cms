@@ -19,6 +19,25 @@ public class MachineDto {
     private String agentFullName;
     private String machineType;
     private String machineTypeId;
+    private String machineStatus;
+    private String machineStatusId;
+
+
+    public String getMachineStatus() {
+        return machineStatus;
+    }
+
+    public void setMachineStatus(String machineStatus) {
+        this.machineStatus = machineStatus;
+    }
+
+    public String getMachineStatusId() {
+        return machineStatusId;
+    }
+
+    public void setMachineStatusId(String machineStatusId) {
+        this.machineStatusId = machineStatusId;
+    }
 
     public String getAgentId() {
         return agentId;

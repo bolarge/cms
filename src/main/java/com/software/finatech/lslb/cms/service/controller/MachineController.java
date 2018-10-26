@@ -130,4 +130,28 @@ public class MachineController {
     public Mono<ResponseEntity> searchGamingMachines(@RequestParam("searchKey") String searchKey) {
         return machineService.findMachineBySearchKey(searchKey);
     }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/all-machine-types")
+    @ApiOperation(value = "Get All Machine Types", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllMachineTypes() {
+        return machineService.getAllMachineTypes();
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/all-machine-status")
+    @ApiOperation(value = "Get All Machine Status", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllMachineStatus() {
+        return machineService.getAllMachineStatus();
+    }
 }

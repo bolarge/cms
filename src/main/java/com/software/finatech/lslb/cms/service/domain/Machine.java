@@ -23,6 +23,15 @@ public class Machine extends AbstractFact {
     private String agentId;
     private String machineTypeId;
     private String machineStatusId;
+    private String licenseId;
+
+    public String getLicenseId() {
+        return licenseId;
+    }
+
+    public void setLicenseId(String licenseId) {
+        this.licenseId = licenseId;
+    }
 
     public String getMachineStatusId() {
         return machineStatusId;
@@ -181,6 +190,11 @@ public class Machine extends AbstractFact {
             dto.setMachineType(machineType.toString());
             dto.setMachineTypeId(this.machineTypeId);
         }
+        MachineStatus machineStatus = getMachineStatus();
+        if (machineStatus != null) {
+            dto.setMachineStatusId(this.machineStatusId);
+            dto.setMachineStatus(machineStatus.toString());
+        }
         GameType gameType = getGameType();
         if (gameType != null) {
             dto.setGameTypeId(getGameTypeId());
@@ -211,6 +225,13 @@ public class Machine extends AbstractFact {
             machineGameDetails.add(MachineGameDetails.fromGameNameAndVersionAndState(machineGame.getGameName(), machineGame.getGameVersion(), machineGame.getActive()));
         }
         return machineGameDetails;
+    }
+
+    private License getLicense() {
+        if (StringUtils.isEmpty(this.licenseId)) {
+            return null;
+        }
+        return (License) mongoRepositoryReactive.findById(this.licenseId, License.class).block();
     }
 
     @Override

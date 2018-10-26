@@ -40,4 +40,8 @@ public interface MachineService {
     Mono<ResponseEntity> findMachineBySearchKey(String searchKey);
 
     Mono<ResponseEntity> updateMachineStatus(MachineStatusUpdateDto statusUpdateDto, HttpServletRequest request);
+
+    Mono<ResponseEntity> getAllMachineTypes();
+
+    Mono<ResponseEntity> getAllMachineStatus();
 }

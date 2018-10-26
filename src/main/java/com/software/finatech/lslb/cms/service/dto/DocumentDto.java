@@ -25,7 +25,7 @@ public class DocumentDto {
     protected String approverId;
     protected String comment;
     protected String commenterName;
-    private String documentStatus;
+    protected String documentStatus;
 
     public String getDocumentStatus() {
         return documentStatus;

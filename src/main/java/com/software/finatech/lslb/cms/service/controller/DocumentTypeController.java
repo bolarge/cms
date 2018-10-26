@@ -102,7 +102,7 @@ public class DocumentTypeController extends BaseController {
         query.addCriteria(Criteria.where("name").is(documentTypeCreateDto.getName()));
         DocumentType checkForDocumentType = (DocumentType) mongoRepositoryReactive.find(query, DocumentType.class).block();
         if (checkForDocumentType != null) {
-            return Mono.just(new ResponseEntity("Document Type exist, try make an update", HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>("Document Type exist, try make an update", HttpStatus.BAD_REQUEST));
 
         }
         String loggedInUserName = springSecurityAuditorAware.getCurrentAuditorNotNull();

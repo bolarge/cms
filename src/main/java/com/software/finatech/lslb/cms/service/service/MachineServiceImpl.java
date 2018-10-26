@@ -40,6 +40,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.model.MachineGameDetails.machineGamesToString;
+import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Service
@@ -282,11 +283,20 @@ public class MachineServiceImpl implements MachineService {
     @Override
     public Mono<ResponseEntity> updateMachineStatus(MachineStatusUpdateDto statusUpdateDto, HttpServletRequest request) {
         try {
-
             return null;
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while updating machine status", e);
         }
+    }
+
+    @Override
+    public Mono<ResponseEntity> getAllMachineTypes() {
+        return getAllEnumeratedEntity("MachineType");
+    }
+
+    @Override
+    public Mono<ResponseEntity> getAllMachineStatus() {
+        return getAllEnumeratedEntity("MachineStatus");
     }
 
     //TODO: validate if its multiple or not

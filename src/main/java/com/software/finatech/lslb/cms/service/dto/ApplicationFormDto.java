@@ -27,7 +27,16 @@ public class ApplicationFormDto {
     private String lslbAdminName;
     private String lslbAdminComment;
     private String applicationFormId;
+    private Boolean readyForApproval;
 
+
+    public Boolean getReadyForApproval() {
+        return readyForApproval;
+    }
+
+    public void setReadyForApproval(Boolean readyForApproval) {
+        this.readyForApproval = readyForApproval;
+    }
 
     public String getApplicationFormId() {
         return applicationFormId;
