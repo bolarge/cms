@@ -241,6 +241,8 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
             documentType.setDocumentPurposeId(pendingDocumentType.getDocumentPurposeId());
             documentType.setActive(pendingDocumentType.isActive());
             documentType.setRequired(pendingDocumentType.isRequired());
+            documentType.setName(pendingDocumentType.getName());
+            documentType.setDescription(pendingDocumentType.getDescription());
             mongoRepositoryReactive.saveOrUpdate(documentType);
             pendingDocumentType.setApprovalRequestStatusIds(ApprovalRequestStatusReferenceData.APPROVED_ID);
             mongoRepositoryReactive.saveOrUpdate(pendingDocumentType);
