@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -650,7 +651,7 @@ public class DocumentController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> approveDocument(@RequestBody @Valid FormDocumentOperationDto documentOperationDto,
-                                                @RequestParam("entityName") String entityName, HttpServletRequest request) {
+                                                @RequestParam("entityName") @NotNull String entityName, HttpServletRequest request) {
         try {
             String documentId = documentOperationDto.getDocumentId();
             Document document = findDocumentById(documentId);
@@ -664,9 +665,6 @@ public class DocumentController extends BaseController {
             DocumentType documentType = document.getDocumentType();
             if (!StringUtils.equals(loggedInUser.getId(), documentType.getApproverId())) {
                 return Mono.just(new ResponseEntity<>("Approving user should be document type approver", HttpStatus.BAD_REQUEST));
-            }
-            if (!StringUtils.equals(documentOperationDto.getFormId(), document.getEntityId())) {
-                return Mono.just(new ResponseEntity<>("The form specified is not attached to the document", HttpStatus.BAD_REQUEST));
             }
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
             document.setComment(documentOperationDto.getComment());

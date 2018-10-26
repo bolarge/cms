@@ -244,14 +244,13 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
                 return;
             }
             Fee fee = new Fee();
-            BeanUtils.copyProperties(pendingFee, fee);
             fee.setId(UUID.randomUUID().toString());
-            fee.setCreated(null);
-            fee.setCreatedAt(null);
-            fee.setLastModified(null);
-            fee.setLastModifiedBy(null);
-            fee.setVersion(null);
-            fee.setActive(true);
+            fee.setActive(pendingFee.isActive());
+            fee.setGameTypeId(pendingFee.getGameTypeId());
+            fee.setFeePaymentTypeId(pendingFee.getFeePaymentTypeId());
+            fee.setLicenseTypeId(pendingFee.getLicenseTypeId());
+            fee.setEffectiveDate(pendingFee.getEffectiveDate());
+            fee.setAmount(pendingFee.getAmount());
             mongoRepositoryReactive.saveOrUpdate(fee);
             mongoRepositoryReactive.saveOrUpdate(pendingFee);
         }
