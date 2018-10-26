@@ -304,16 +304,22 @@ public class Document extends AbstractFact {
     }
 
     private String getCommenterName() {
-
-        return null;
+        return this.commenterName;
     }
 
     public DocumentType getDocumentType() {
-        DocumentType DocumentType = (DocumentType) Mapstore.STORE.get("DocumentType").get(documentTypeId);
-        if (DocumentType == null) {
-            DocumentType = (DocumentType) mongoRepositoryReactive.findById(documentTypeId, DocumentType.class).block();
-            if (DocumentType != null) {
-                Mapstore.STORE.get("DocumentType").put(DocumentType.getId(), DocumentType);
+        if (StringUtils.isEmpty(this.documentTypeId)) {
+            return null;
+        }
+        DocumentType documentType = null;
+        Map documentTypeMap = Mapstore.STORE.get("DocumentType");
+        if (documentTypeMap != null) {
+            documentType = (DocumentType) documentTypeMap.get(this.documentTypeId);
+        }
+        if (documentType == null) {
+            documentType = (DocumentType) mongoRepositoryReactive.findById(this.documentTypeId, DocumentType.class).block();
+            if (documentType != null && documentTypeMap != null) {
+                documentTypeMap.put(documentType.getId(), documentType);
             }
         }
         return documentType;
