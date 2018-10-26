@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
@@ -239,6 +240,7 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
             documentType.setCreatedBy(null);
             documentType.setLastModified(null);
             documentType.setLastModifiedBy(null);
+            documentType.setId(UUID.randomUUID().toString());
             mongoRepositoryReactive.saveOrUpdate(documentType);
             pendingDocumentType.setApprovalRequestStatusIds(ApprovalRequestStatusReferenceData.APPROVED_ID);
             mongoRepositoryReactive.saveOrUpdate(pendingDocumentType);
