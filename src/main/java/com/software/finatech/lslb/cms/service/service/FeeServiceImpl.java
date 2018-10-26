@@ -102,7 +102,7 @@ public class FeeServiceImpl implements FeeService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
                     currentAuditorName, currentAuditorName,
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-            return Mono.just(new ResponseEntity<>(feeApprovalRequest.convertToDto(), HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(feeApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format , please use yyyy-MM-dd", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {

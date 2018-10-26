@@ -160,13 +160,13 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
 
             documentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
             documentApprovalRequest.setApproverId(user.getId());
-            mongoRepositoryReactive.save(documentApprovalRequest);
+            mongoRepositoryReactive.saveOrUpdate(documentApprovalRequest);
             String verbiage = String.format("Approved Document approval request ->  Type -> %s,Id -> %s ", documentApprovalRequest.getDocumentApprovalRequestType(), documentApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(configAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), String.valueOf(documentApprovalRequest.getSubjectDocumentType()),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
-            return Mono.just(new ResponseEntity<>(documentApprovalRequest, HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(documentApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving user approval request ", e);
         }
