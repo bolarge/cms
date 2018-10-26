@@ -75,6 +75,7 @@ public class DocumentApprovalRequest extends AbstractApprovalRequest {
 
     public DocumentApprovalRequestDto convertToHalfDto() {
         DocumentApprovalRequestDto dto = new DocumentApprovalRequestDto();
+        dto.setId(getId());
         dto.setDateCreated(getDateCreatedString());
         dto.setRequestTypeId(this.documentApprovalRequestTypeId);
         DocumentApprovalRequestType approvalRequestType = getDocumentApprovalRequestType();
