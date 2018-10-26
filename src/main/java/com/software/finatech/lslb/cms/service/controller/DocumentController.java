@@ -709,9 +709,6 @@ public class DocumentController extends BaseController {
             if (!StringUtils.equals(loggedInUser.getId(), documentType.getApproverId())) {
                 return Mono.just(new ResponseEntity<>("Rejecting user should be document type approver", HttpStatus.BAD_REQUEST));
             }
-            if (!StringUtils.equals(documentOperationDto.getFormId(), document.getEntityId())) {
-                return Mono.just(new ResponseEntity<>("The form specified is not attached to the document", HttpStatus.BAD_REQUEST));
-            }
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
             document.setComment(documentOperationDto.getComment());
             document.setCommenterName(loggedInUser.getFullName());
