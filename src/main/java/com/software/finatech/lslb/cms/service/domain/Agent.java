@@ -10,6 +10,8 @@ import com.software.finatech.lslb.cms.service.util.adapters.AgentInstitutionAdap
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -306,9 +308,6 @@ public class Agent extends AbstractFact {
     }
 
     public AuthInfo getAuthInfo() {
-        if (StringUtils.isEmpty(this.authInfoId)) {
-            return null;
-        }
-        return (AuthInfo) mongoRepositoryReactive.findById(this.authInfoId, AuthInfo.class).block();
+        return (AuthInfo) mongoRepositoryReactive.find(Query.query(Criteria.where("agentId").is(this.getId())), AuthInfo.class).block();
     }
 }

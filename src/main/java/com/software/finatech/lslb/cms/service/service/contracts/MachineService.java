@@ -12,14 +12,14 @@ import javax.servlet.http.HttpServletResponse;
 public interface MachineService {
 
     Mono<ResponseEntity> findAllMachines(int page,
-                                               int pageSize,
-                                               String sortDirection,
-                                               String sortProperty,
-                                               String institutionId,
-                                               String agentId,
-                                               String machineTypeId,
-                                               String machineStatusId,
-                                               HttpServletResponse httpServletResponse);
+                                         int pageSize,
+                                         String sortDirection,
+                                         String sortProperty,
+                                         String institutionId,
+                                         String agentId,
+                                         String machineTypeId,
+                                         String machineStatusId,
+                                         HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> createMachine(MachineCreateDto gamingMachineCreateDto, HttpServletRequest request);
 
@@ -31,7 +31,7 @@ public interface MachineService {
 
     Mono<ResponseEntity> uploadMultipleMachinesForInstitution(String institutionId, String gameTypeId, MultipartFile multipartFile, HttpServletRequest request);
 
-    Machine findById(String machineId);
+    Machine findMachineById(String machineId);
 
     Mono<ResponseEntity> findMachineBySearchKey(String searchKey);
 
@@ -42,4 +42,6 @@ public interface MachineService {
     Mono<ResponseEntity> getAllMachineStatus();
 
     Mono<ResponseEntity> getMachineFullDetail(String machineId);
+
+    Mono<ResponseEntity> assignMachineToAgent(MachineAgentAddDto machineAgentAddDto, HttpServletRequest request);
 }

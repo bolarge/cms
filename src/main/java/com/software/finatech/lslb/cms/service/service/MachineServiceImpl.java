@@ -4,13 +4,13 @@ import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.model.MachineGameDetails;
-import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInvoiceItem;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.MachineApprovalRequestTypeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
-import com.software.finatech.lslb.cms.service.service.contracts.*;
+import com.software.finatech.lslb.cms.service.referencedata.MachineTypeReferenceData;
+import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
+import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
+import com.software.finatech.lslb.cms.service.service.contracts.MachineService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.LicenseValidatorUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
@@ -51,10 +51,7 @@ public class MachineServiceImpl implements MachineService {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private LicenseValidatorUtil licenseValidatorUtil;
     private InstitutionService institutionService;
-    private FeeService feeService;
-    private PaymentRecordService paymentRecordService;
-    private AuthInfoService authInfoService;
-    private VigipayService vigipayService;
+    private AgentService agentService;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
 
@@ -62,19 +59,13 @@ public class MachineServiceImpl implements MachineService {
     public MachineServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                               LicenseValidatorUtil licenseValidatorUtil,
                               InstitutionService institutionService,
-                              FeeService feeService,
-                              PaymentRecordService paymentRecordService,
-                              AuthInfoService authInfoService,
-                              VigipayService vigipayService,
+                              AgentService agentService,
                               SpringSecurityAuditorAware springSecurityAuditorAware,
                               AuditLogHelper auditLogHelper) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.licenseValidatorUtil = licenseValidatorUtil;
         this.institutionService = institutionService;
-        this.feeService = feeService;
-        this.paymentRecordService = paymentRecordService;
-        this.authInfoService = authInfoService;
-        this.vigipayService = vigipayService;
+        this.agentService = agentService;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.auditLogHelper = auditLogHelper;
     }
@@ -137,24 +128,35 @@ public class MachineServiceImpl implements MachineService {
     }
 
     @Override
-    public Mono<ResponseEntity> createMachine(MachineCreateDto gamingMachineCreateDto, HttpServletRequest request) {
+    public Mono<ResponseEntity> createMachine(MachineCreateDto machineCreateDto, HttpServletRequest request) {
         try {
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser == null) {
                 return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
             }
-            String institutionId = gamingMachineCreateDto.getInstitutionId();
-            String gameTypeId = gamingMachineCreateDto.getGameTypeId();
+            String institutionId = machineCreateDto.getInstitutionId();
+            String gameTypeId = machineCreateDto.getGameTypeId();
             Mono<ResponseEntity> validateGamingMachineLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
             if (validateGamingMachineLicenseResponse != null) {
                 return validateGamingMachineLicenseResponse;
             }
-            PendingMachine pendingGamingMachine = fromGamingMachineCreateDto(gamingMachineCreateDto);
+            if (!(machineCreateDto.isCreateGamingMachine() || machineCreateDto.isCreateGamingTerminal())) {
+                return Mono.just(new ResponseEntity<>(String.format("Machinet type with id %s does not exist on the system", machineCreateDto.getMachineTypeId()), HttpStatus.BAD_REQUEST));
+            }
+            PendingMachine pendingGamingMachine = fromGamingMachineCreateDto(machineCreateDto);
             mongoRepositoryReactive.saveOrUpdate(pendingGamingMachine);
             MachineApprovalRequest approvalRequest = new MachineApprovalRequest();
             approvalRequest.setId(UUID.randomUUID().toString());
+            approvalRequest.setInitiatedByInstitution(true);
             approvalRequest.setPendingMachineId(pendingGamingMachine.getId());
-            approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.CREATE_MACHINE_ID);
+            if (machineCreateDto.isCreateGamingTerminal()) {
+                approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.CREATE_GAMING_TERMINAL_ID);
+                approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_TERMINAL_ID);
+            }
+            if (machineCreateDto.isCreateGamingMachine()) {
+                approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_MACHINE_ID);
+                approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.CREATE_GAMING_MACHINE_ID);
+            }
             approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
             mongoRepositoryReactive.saveOrUpdate(approvalRequest);
 
@@ -162,7 +164,6 @@ public class MachineServiceImpl implements MachineService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), pendingGamingMachine.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-
 
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -175,7 +176,7 @@ public class MachineServiceImpl implements MachineService {
     public Mono<ResponseEntity> updateMachine(MachineUpdateDto gamingMachineUpdateDto, HttpServletRequest request) {
         try {
             String gamingMachineId = gamingMachineUpdateDto.getId();
-            Machine gamingMachine = findById(gamingMachineId);
+            Machine gamingMachine = findMachineById(gamingMachineId);
             if (gamingMachine == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Gaming machine with id %s does not exist", gamingMachineId), HttpStatus.BAD_REQUEST));
             }
@@ -206,24 +207,32 @@ public class MachineServiceImpl implements MachineService {
                 return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
             }
             String gamingMachineId = machineGameUpdateDto.getMachineId();
-            Machine gamingMachine = findById(machineGameUpdateDto.getMachineId());
-            if (gamingMachine == null) {
+            Machine machine = findMachineById(machineGameUpdateDto.getMachineId());
+            if (machine == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Gaming machine with id %s not found", gamingMachineId), HttpStatus.BAD_REQUEST));
             }
 
             MachineApprovalRequest approvalRequest = new MachineApprovalRequest();
             approvalRequest.setId(UUID.randomUUID().toString());
-            approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.ADD_GAMES_TO_MACHINE_ID);
+            if (machine.isGamingMachine()) {
+                approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_MACHINE_ID);
+                approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.ADD_GAMES_TO_GAMING_MACHINE_ID);
+            }
+            if (machine.isGamingTerminal()) {
+                approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_TERMINAL_ID);
+                approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.ADD_GAMES_TO_GAMING_TERMINAL_ID);
+            }
             approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
             approvalRequest.setNewMachineGames(newGameDetails);
+            approvalRequest.setInitiatedByInstitution(true);
             approvalRequest.setMachineId(gamingMachineId);
             mongoRepositoryReactive.saveOrUpdate(approvalRequest);
 
 
             String verbiage = String.format("Created Gaming Machine Request, Type  -> %s, Serial Number -> %s, New Games -> %s",
-                    approvalRequest.getMachineApprovalRequestType(), gamingMachine.getSerialNumber(), machineGamesToString(newGameDetails));
+                    approvalRequest.getMachineApprovalRequestType(), machine.getSerialNumber(), machineGamesToString(newGameDetails));
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
-                    springSecurityAuditorAware.getCurrentAuditorNotNull(), gamingMachine.getInstitutionName(),
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), machine.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
@@ -244,7 +253,7 @@ public class MachineServiceImpl implements MachineService {
                 return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
             }
             String machineId = machineGameUpdateDto.getMachineId();
-            Machine machine = findById(machineGameUpdateDto.getMachineId());
+            Machine machine = findMachineById(machineGameUpdateDto.getMachineId());
             if (machine == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Machine with id %s not found", machineId), HttpStatus.BAD_REQUEST));
             }
@@ -262,8 +271,8 @@ public class MachineServiceImpl implements MachineService {
                 mongoRepositoryReactive.saveOrUpdate(machineGame);
             }
 
-            String verbiage = String.format("Disabled games from machines, Serial Number -> %s, Disabled Games -> %s",
-                    machine.getSerialNumber(), machineGamesToString(gameDetails));
+            String verbiage = String.format("Disabled games from machines, Serial Number -> %s,Machine Type -> %s, Disabled Games -> %s",
+                    machine.getSerialNumber(), machine.getMachineType(), machineGamesToString(gameDetails));
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), machine.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
@@ -275,7 +284,7 @@ public class MachineServiceImpl implements MachineService {
     }
 
     @Override
-    public Machine findById(String machineId) {
+    public Machine findMachineById(String machineId) {
         return (Machine) mongoRepositoryReactive.findById(machineId, Machine.class).block();
     }
 
@@ -283,6 +292,35 @@ public class MachineServiceImpl implements MachineService {
     @Override
     public Mono<ResponseEntity> updateMachineStatus(MachineStatusUpdateDto statusUpdateDto, HttpServletRequest request) {
         try {
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+            String machineId = statusUpdateDto.getMachineId();
+            Machine machine = findMachineById(machineId);
+            if (machine == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Machine with id %s does not exist", machineId), HttpStatus.BAD_REQUEST));
+            }
+            MachineApprovalRequest approvalRequest = new MachineApprovalRequest();
+            approvalRequest.setId(UUID.randomUUID().toString());
+            approvalRequest.setMachineId(machineId);
+            approvalRequest.setNewMachineStatusId(statusUpdateDto.getMachineStatusId());
+            if (machine.isGamingMachine()) {
+                approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.CHANGE_GAMING_MACHINE_STATUS);
+                approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_MACHINE_ID);
+                approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
+                approvalRequest.setInitiatedByInstitution(true);
+            }
+            if (machine.isGamingTerminal()) {
+                approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.CHANGE_GAMING_MACHINE_STATUS);
+                approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_MACHINE_ID);
+                //TODO:: validate what we did here
+                if (!loggedInUser.isAgent()) {
+                    return Mono.just(new ResponseEntity<>("Only Agents are allowed to update machine status", HttpStatus.BAD_REQUEST));
+                }
+                approvalRequest.setInitiatorId(loggedInUser.getId());
+
+            }
             return null;
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while updating machine status", e);
@@ -302,20 +340,20 @@ public class MachineServiceImpl implements MachineService {
     @Override
     public Mono<ResponseEntity> getMachineFullDetail(String id) {
         try {
-            Machine machine = findById(id);
+            Machine machine = findMachineById(id);
             if (machine == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Machine with id %s not found", id), HttpStatus.BAD_REQUEST));
             }
             return Mono.just(new ResponseEntity<>(machine.convertToFullDto(), HttpStatus.OK));
-            } catch (Exception e) {
-          return   logAndReturnError(logger,String.format("An error occurred while getting machine by id %s", id), e);
+        } catch (Exception e) {
+            return logAndReturnError(logger, String.format("An error occurred while getting machine by id %s", id), e);
         }
     }
 
     //TODO: validate if its multiple or not
     @Override
     public Mono<ResponseEntity> uploadMultipleMachinesForInstitution(String institutionId, String gameTypeId, MultipartFile multipartFile, HttpServletRequest request) {
-        Institution institution = institutionService.findById(institutionId);
+        Institution institution = institutionService.findByInstitutionId(institutionId);
         if (institution == null) {
             return Mono.just(new ResponseEntity<>(String.format("Institution with id %s does not exist", institutionId), HttpStatus.BAD_REQUEST));
         }
@@ -373,9 +411,7 @@ public class MachineServiceImpl implements MachineService {
                 if (!failedLines.isEmpty()) {
                     uploadTransactionResponse.setFailedLines(failedLines);
                     uploadTransactionResponse.setFailedTransactionCount(failedLines.size());
-                    uploadTransactionResponse.setMessage(String.format(
-                            "Please review with sample file and re upload",
-                            failedLines.size()));
+                    uploadTransactionResponse.setMessage("Please review with sample file and re upload");
                     return Mono.just(new ResponseEntity<>(uploadTransactionResponse, HttpStatus.BAD_REQUEST));
                 } else {
                     for (Machine gamingMachine : gamingMachineList) {
@@ -468,38 +504,51 @@ public class MachineServiceImpl implements MachineService {
         }
     }
 
+    @Override
+    public Mono<ResponseEntity> assignMachineToAgent(MachineAgentAddDto machineAgentAddDto, HttpServletRequest request) {
+        try {
+            String agentId = machineAgentAddDto.getAgentId();
+            String machineId = machineAgentAddDto.getMachineId();
+            Machine machine = findMachineById(machineId);
+            if (machine == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Gaming Terminal with id %s does not exist", machineId), HttpStatus.BAD_REQUEST));
+            }
+            if (!machine.isGamingTerminal()) {
+                return Mono.just(new ResponseEntity<>(String.format("Machine with id %s is not a gaming terminal", machineId), HttpStatus.BAD_REQUEST));
+            }
+            Agent agent = agentService.findAgentById(agentId);
+            if (agent == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Agent with Id %s not found", agentId), HttpStatus.BAD_REQUEST));
+            }
+            if (!agent.isEnabled() || agent.getAuthInfo().isInactive() || !agent.getAuthInfo().getEnabled()) {
+                return Mono.just(new ResponseEntity<>(String.format("Agent with Id %s is disbaled on our platform", agentId), HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
 
-    private void updateLicensePaymentsInBatchToSuccessful(BatchPayment existingBatchPayment) {
-        String completedPaymentStatusId = PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID;
-        for (PaymentRecord paymentRecord : existingBatchPayment.getPaymentRecords()) {
-            paymentRecord.setPaymentStatusId(completedPaymentStatusId);
-            paymentRecord.setAmountPaid(paymentRecord.getAmount());
-            paymentRecord.setAmountOutstanding(0);
+            MachineApprovalRequest approvalRequest = new MachineApprovalRequest();
+            approvalRequest.setId(UUID.randomUUID().toString());
+            approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_TERMINAL_ID);
+            approvalRequest.setAgentId(agentId);
+            approvalRequest.setMachineId(machineId);
+            approvalRequest.setInitiatedByInstitution(true);
+            approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
+            approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.ASSIGN_TERMINAL_TO_AGENT);
+            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+
+
+            String verbiage = String.format("Created Machine Request, Type  -> %s, Serial Number -> %s, Agent Name -> %s",
+                    approvalRequest.getMachineApprovalRequestType(), machine.getSerialNumber(), agent.getFullName());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), machine.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding machine to agent", e);
         }
-    }
-
-    private PaymentRecord findLicensePaymentForGamingMachine(String gamingMachineId, String institutionId, String gameTypeId) {
-        return paymentRecordService.findPaymentRecordForGamingMachine(gamingMachineId, gameTypeId, institutionId, FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID);
-    }
-
-    private List<VigipayInvoiceItem> vigiPayInvoiceItemsFromFeeDescriptions(List<FeeAndDescription> feeDescriptions) {
-        List<VigipayInvoiceItem> vigipayInvoiceItems = new ArrayList<>();
-        for (FeeAndDescription feeDescription : feeDescriptions) {
-            VigipayInvoiceItem vigipayInvoiceItem = new VigipayInvoiceItem();
-            vigipayInvoiceItem.setAmount(feeDescription.getAmount());
-            vigipayInvoiceItem.setDetail(feeDescription.getFeeDescription());
-            vigipayInvoiceItem.setQuantity(1);
-            vigipayInvoiceItem.setProductCode("");
-            vigipayInvoiceItems.add(vigipayInvoiceItem);
-        }
-        return vigipayInvoiceItems;
-    }
-
-    private BatchPayment findBatchPaymentById(String batchPaymentId) {
-        if (StringUtils.isEmpty(batchPaymentId)) {
-            return null;
-        }
-        return (BatchPayment) mongoRepositoryReactive.findById(batchPaymentId, BatchPayment.class).block();
     }
 
     private MachineGame findMachineGameById(String id) {

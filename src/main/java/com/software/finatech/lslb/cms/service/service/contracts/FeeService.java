@@ -26,8 +26,6 @@ public interface FeeService {
 
     Mono<ResponseEntity> getLicenseTypes();
 
-    List<FeesTypeDto> getAllFeesType();
-
     Mono<ResponseEntity> findActiveFeeByGameTypeAndPaymentTypeAndRevenueName(String gameTypeId, String feePaymentTypeId, String revenueNameId);
 
     Fee findFeeById(String feeId);

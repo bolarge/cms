@@ -20,9 +20,45 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
     private Set<MachineGameDetails> newMachineGames = new HashSet<>();
     private Set<MachineGameDetails> removedMachineGames = new HashSet<>();
     private String machineApprovalRequestTypeId;
+    private String agentId;
+    private String machineTypeId;
+    private boolean initiatedByInstitution;
+    private String newMachineStatusId;
+
+    public String getNewMachineStatusId() {
+        return newMachineStatusId;
+    }
+
+    public void setNewMachineStatusId(String newMachineStatusId) {
+        this.newMachineStatusId = newMachineStatusId;
+    }
+
+    public boolean isInitiatedByInstitution() {
+        return initiatedByInstitution;
+    }
+
+    public void setInitiatedByInstitution(boolean initiatedByInstitution) {
+        this.initiatedByInstitution = initiatedByInstitution;
+    }
 
     public String getMachineApprovalRequestTypeId() {
         return machineApprovalRequestTypeId;
+    }
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
+
+    public String getMachineTypeId() {
+        return machineTypeId;
+    }
+
+    public void setMachineTypeId(String machineTypeId) {
+        this.machineTypeId = machineTypeId;
     }
 
     public void setMachineApprovalRequestTypeId(String machineApprovalRequestTypeId) {
@@ -79,10 +115,17 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
     public MachineApprovalRequestDto convertToDto() {
         MachineApprovalRequestDto dto = new MachineApprovalRequestDto();
         dto.setId(getId());
-        Institution institution = getInstitution();
-        if (institution != null) {
-            dto.setInstitutionId(this.institutionId);
-            dto.setInstitutionName(institution.getInstitutionName());
+        if (isInitiatedByInstitution()) {
+            Institution institution = getInstitution();
+            if (institution != null) {
+                dto.setInstitutionId(this.institutionId);
+                dto.setInitiatorName(institution.getInstitutionName());
+            }
+        } else {
+            AuthInfo initiator = getInitiator();
+            if (initiator != null) {
+                dto.setInitiatorName(initiator.getFullName());
+            }
         }
         MachineApprovalRequestType approvalRequestType = getMachineApprovalRequestType();
         if (approvalRequestType != null) {
@@ -123,16 +166,38 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
             dto.setRejectorId(this.rejectorId);
             dto.setRejectorName(rejector.getFullName());
         }
+        dto.setNewMachineStatusName(getNewMachineStatusName());
         return dto;
     }
 
-    public boolean isCreateMachine() {
-        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.CREATE_MACHINE_ID, this.machineApprovalRequestTypeId);
+    public boolean isCreateGamingMachine() {
+        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.CREATE_GAMING_MACHINE_ID, this.machineApprovalRequestTypeId);
     }
 
-    public boolean isAddGamesToMachine() {
-        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.ADD_GAMES_TO_MACHINE_ID, this.machineApprovalRequestTypeId);
+    public boolean isCreateGamingTerminal() {
+        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.CREATE_GAMING_TERMINAL_ID, this.machineApprovalRequestTypeId);
     }
+
+    public boolean isAddGamesToGamingMachine() {
+        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.ADD_GAMES_TO_GAMING_MACHINE_ID, this.machineApprovalRequestTypeId);
+    }
+
+    public boolean isAddGamesToGamingTerminal() {
+        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.ADD_GAMES_TO_GAMING_TERMINAL_ID, this.machineApprovalRequestTypeId);
+    }
+
+    public boolean isChangeGamingMachineStatus() {
+        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.CHANGE_GAMING_MACHINE_STATUS, this.machineApprovalRequestTypeId);
+    }
+
+    public boolean isChangeGamingTerminalStatus() {
+        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.CHANGE_GAMING_TERMINAL_STATUS, this.machineApprovalRequestTypeId);
+    }
+
+    public boolean isAssignTerminalToAgent() {
+        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.ASSIGN_TERMINAL_TO_AGENT, this.machineApprovalRequestTypeId);
+    }
+
 
     public PendingMachine getPendingMachine() {
         if (StringUtils.isEmpty(this.pendingMachineId)) {
@@ -152,4 +217,31 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
     public String getFactName() {
         return "MachineApprovalRequests";
     }
+
+    public MachineStatus getNewMachineStatus() {
+        if (StringUtils.isEmpty(this.newMachineStatusId)) {
+            return null;
+        }
+        Map machineStatusMap = Mapstore.STORE.get("MachineStatus");
+        MachineStatus machineStatus = null;
+        if (machineStatus != null) {
+            machineStatus = (MachineStatus) machineStatusMap.get(this.newMachineStatusId);
+        }
+        if (machineStatus == null) {
+            machineStatus = (MachineStatus) mongoRepositoryReactive.findById(this.newMachineStatusId, MachineStatus.class).block();
+            if (machineStatus != null && machineStatusMap != null) {
+                machineStatusMap.put(this.machineTypeId, machineStatus);
+            }
+        }
+        return machineStatus;
+    }
+
+    private String getNewMachineStatusName() {
+        MachineStatus newStatus = getNewMachineStatus();
+        if (newStatus != null) {
+            return newStatus.toString();
+        }
+        return null;
+    }
+
 }

@@ -29,7 +29,7 @@ public interface InstitutionService {
                                              String institutionId,
                                              HttpServletResponse httpServletResponse);
 
-    Institution findById(String institutionId);
+    Institution findByInstitutionId(String institutionId);
 
     void saveInstitution(Institution institution);
 
