@@ -326,7 +326,10 @@ public class FeeServiceImpl implements FeeService {
                     dtos.add(licenseType.convertToDto());
                 }
             }
-            return Mono.just(new ResponseEntity<>(dtos, HttpStatus.BAD_REQUEST));
+            if (dtos.isEmpty()){
+                return Mono.just(new ResponseEntity<>(dtos, HttpStatus.NOT_FOUND));
+            }
+            return Mono.just(new ResponseEntity<>(dtos, HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while finding revenue names by param", e);
         }

@@ -44,7 +44,7 @@ public class MachineController {
                                                      @RequestParam("machineTypeId") String machineTypeId,
                                                      @RequestParam("machineStatusId") String machineStatusId,
                                                      HttpServletResponse httpServletResponse) {
-        return machineService.findAllMachines(page, pageSize, sortType, sortParam, institutionId, agentId, machineTypeId,machineStatusId, httpServletResponse);
+        return machineService.findAllMachines(page, pageSize, sortType, sortParam, institutionId, agentId, machineTypeId, machineStatusId, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create")
@@ -95,7 +95,6 @@ public class MachineController {
     }
 
 
-
     @RequestMapping(method = RequestMethod.GET, value = "/search", params = {"searchKey"})
     @ApiOperation(value = "Search for gaming machines on system", response = MachineDto.class, responseContainer = "List", consumes = "application/json",
             notes = "Search for agent on system using a search key that matches machine serial number")
@@ -139,9 +138,21 @@ public class MachineController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getAddGamesToMachine( @RequestBody MachineGameUpdateDto machineGameUpdateDto, HttpServletRequest request) {
+    public Mono<ResponseEntity> getAddGamesToMachine(@RequestBody MachineGameUpdateDto machineGameUpdateDto, HttpServletRequest request) {
         return machineService.addGamesToMachine(machineGameUpdateDto, request);
     }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/assign-machine-to-agent")
+    @ApiOperation(value = "Assign machine to agent", response = MachineApprovalRequestDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> assignMachineToAgent(@RequestBody MachineAgentAddDto dto, HttpServletRequest request) {
+        return machineService.assignMachineToAgent(dto, request);
+    }
+
 
     @RequestMapping(method = RequestMethod.POST, value = "/remove-games-from-machine")
     @ApiOperation(value = "Remove Games From Machine", response = MachineDto.class, consumes = "application/json")
@@ -150,7 +161,7 @@ public class MachineController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> removeGamesFromMachine( @RequestBody MachineGameUpdateDto gameUpdateDto, HttpServletRequest request) {
+    public Mono<ResponseEntity> removeGamesFromMachine(@RequestBody MachineGameUpdateDto gameUpdateDto, HttpServletRequest request) {
         return machineService.removeGamesFromMachine(gameUpdateDto, request);
     }
 

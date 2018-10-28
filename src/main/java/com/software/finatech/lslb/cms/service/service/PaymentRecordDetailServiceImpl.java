@@ -218,7 +218,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             }
 
             if (paymentRecordDetailCreateDto.isGamingTerminalPayment()) {
-                agent = agentService.findById(paymentRecordDetailCreateDto.getAgentId());
+                agent = agentService.findAgentById(paymentRecordDetailCreateDto.getAgentId());
                 if (agent == null) {
                     return Mono.just(new ResponseEntity<>(String.format("Agent with Id %s does not exist", paymentRecordDetailCreateDto.getAgentId()), HttpStatus.BAD_REQUEST));
                 }
@@ -231,7 +231,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             }
 
             if (paymentRecordDetailCreateDto.isAgentPayment()) {
-                agent = agentService.findById(paymentRecordDetailCreateDto.getAgentId());
+                agent = agentService.findAgentById(paymentRecordDetailCreateDto.getAgentId());
                 if (agent != null) {
                     invoiceNumber = createInBranchRecordDetailForAgent(agent, feeDescription, paymentRecordDetailCreateDto);
                 }
@@ -316,7 +316,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             Agent agent;
             if (paymentRecordDetailCreateDto.isAgentPayment()) {
                 String agentId = paymentRecordDetailCreateDto.getAgentId();
-                agent = agentService.findById(agentId);
+                agent = agentService.findAgentById(agentId);
                 if (agent == null) {
                     return Mono.just(new ResponseEntity<>(String.format("Agent with id %s does not exist", agentId), HttpStatus.BAD_REQUEST));
                 }

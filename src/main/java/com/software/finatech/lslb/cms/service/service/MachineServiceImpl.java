@@ -8,7 +8,9 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.MachineApprovalRequestTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.MachineTypeReferenceData;
-import com.software.finatech.lslb.cms.service.service.contracts.*;
+import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
+import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
+import com.software.finatech.lslb.cms.service.service.contracts.MachineService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.LicenseValidatorUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
@@ -49,10 +51,7 @@ public class MachineServiceImpl implements MachineService {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private LicenseValidatorUtil licenseValidatorUtil;
     private InstitutionService institutionService;
-    private FeeService feeService;
-    private PaymentRecordService paymentRecordService;
-    private AuthInfoService authInfoService;
-    private VigipayService vigipayService;
+    private AgentService agentService;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
 
@@ -60,19 +59,13 @@ public class MachineServiceImpl implements MachineService {
     public MachineServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                               LicenseValidatorUtil licenseValidatorUtil,
                               InstitutionService institutionService,
-                              FeeService feeService,
-                              PaymentRecordService paymentRecordService,
-                              AuthInfoService authInfoService,
-                              VigipayService vigipayService,
+                              AgentService agentService,
                               SpringSecurityAuditorAware springSecurityAuditorAware,
                               AuditLogHelper auditLogHelper) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.licenseValidatorUtil = licenseValidatorUtil;
         this.institutionService = institutionService;
-        this.feeService = feeService;
-        this.paymentRecordService = paymentRecordService;
-        this.authInfoService = authInfoService;
-        this.vigipayService = vigipayService;
+        this.agentService = agentService;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.auditLogHelper = auditLogHelper;
     }
@@ -508,6 +501,53 @@ public class MachineServiceImpl implements MachineService {
             return Mono.just(new ResponseEntity<>(gamingMachineDtos, HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while searching gaming machines by key", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> assignMachineToAgent(MachineAgentAddDto machineAgentAddDto, HttpServletRequest request) {
+        try {
+            String agentId = machineAgentAddDto.getAgentId();
+            String machineId = machineAgentAddDto.getMachineId();
+            Machine machine = findMachineById(machineId);
+            if (machine == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Gaming Terminal with id %s does not exist", machineId), HttpStatus.BAD_REQUEST));
+            }
+            if (!machine.isGamingTerminal()) {
+                return Mono.just(new ResponseEntity<>(String.format("Machine with id %s is not a gaming terminal", machineId), HttpStatus.BAD_REQUEST));
+            }
+            Agent agent = agentService.findAgentById(agentId);
+            if (agent == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Agent with Id %s not found", agentId), HttpStatus.BAD_REQUEST));
+            }
+            if (!agent.isEnabled() || agent.getAuthInfo().isInactive() || !agent.getAuthInfo().getEnabled()) {
+                return Mono.just(new ResponseEntity<>(String.format("Agent with Id %s is disbaled on our platform", agentId), HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+
+            MachineApprovalRequest approvalRequest = new MachineApprovalRequest();
+            approvalRequest.setId(UUID.randomUUID().toString());
+            approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_TERMINAL_ID);
+            approvalRequest.setAgentId(agentId);
+            approvalRequest.setMachineId(machineId);
+            approvalRequest.setInitiatedByInstitution(true);
+            approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
+            approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.ASSIGN_TERMINAL_TO_AGENT);
+            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+
+
+            String verbiage = String.format("Created Machine Request, Type  -> %s, Serial Number -> %s, Agent Name -> %s",
+                    approvalRequest.getMachineApprovalRequestType(), machine.getSerialNumber(), agent.getFullName());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), machine.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding machine to agent", e);
         }
     }
 

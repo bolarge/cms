@@ -157,6 +157,10 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             if (approvalRequest.isAddGamesToGamingMachine() || approvalRequest.isAddGamesToGamingTerminal()) {
                 approveAddGamesToMachine(approvalRequest);
             }
+
+            if (approvalRequest.isAssignTerminalToAgent()) {
+                approveAssignTerminalToAgent(approvalRequest);
+            }
             approvalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
             approvalRequest.setApproverId(approvingUser.getId());
             mongoRepositoryReactive.saveOrUpdate(approvalRequest);
@@ -169,6 +173,14 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving request", e);
+        }
+    }
+
+    private void approveAssignTerminalToAgent(MachineApprovalRequest approvalRequest) {
+        Machine machine = approvalRequest.getMachine();
+        if (machine != null && machine.isGamingTerminal()) {
+            machine.setAgentId(approvalRequest.getAgentId());
+            mongoRepositoryReactive.saveOrUpdate(machine);
         }
     }
 

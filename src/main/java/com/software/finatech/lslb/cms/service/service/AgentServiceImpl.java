@@ -188,7 +188,7 @@ public class AgentServiceImpl implements AgentService {
 
 
     @Override
-    public Agent findById(String agentId) {
+    public Agent findAgentById(String agentId) {
         return (Agent) mongoRepositoryReactive.findById(agentId, Agent.class).block();
     }
 
@@ -196,7 +196,7 @@ public class AgentServiceImpl implements AgentService {
     public Mono<ResponseEntity> updateAgent(AgentUpdateDto agentUpdateDto, HttpServletRequest request) {
         try {
             String agentId = agentUpdateDto.getId();
-            Agent agent = findById(agentId);
+            Agent agent = findAgentById(agentId);
             if (agent == null) {
                 return Mono.just(new ResponseEntity<>(String.format("No agent found with id %s", agentId), HttpStatus.BAD_REQUEST));
             }
@@ -362,7 +362,7 @@ public class AgentServiceImpl implements AgentService {
     @Override
     public Mono<ResponseEntity> getAgentFullDetailById(String agentId) {
         try {
-            Agent agent = findById(agentId);
+            Agent agent = findAgentById(agentId);
             if (agent == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Agent with id %s does not exist", agentId), HttpStatus.BAD_REQUEST));
             }
