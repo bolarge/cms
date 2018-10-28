@@ -1,6 +1,8 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 import com.software.finatech.lslb.cms.service.model.MachineGameDetails;
+import com.software.finatech.lslb.cms.service.referencedata.MachineTypeReferenceData;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -86,5 +88,13 @@ public class MachineCreateDto {
 
     public void setInstitutionId(String institutionId) {
         this.institutionId = institutionId;
+    }
+
+    public boolean isCreateGamingMachine() {
+        return StringUtils.equals(MachineTypeReferenceData.GAMING_MACHINE_ID, this.machineTypeId);
+    }
+
+    public boolean isCreateGamingTerminal() {
+        return StringUtils.equals(MachineTypeReferenceData.GAMING_TERMINAL_ID, this.machineTypeId);
     }
 }

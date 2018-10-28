@@ -31,7 +31,7 @@ public interface MachineService {
 
     Mono<ResponseEntity> uploadMultipleMachinesForInstitution(String institutionId, String gameTypeId, MultipartFile multipartFile, HttpServletRequest request);
 
-    Machine findById(String machineId);
+    Machine findMachineById(String machineId);
 
     Mono<ResponseEntity> findMachineBySearchKey(String searchKey);
 

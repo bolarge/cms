@@ -105,18 +105,7 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllProcessingFees() {
-        try {
-            List<FeesTypeDto> feesTypeDtos = feeService.getAllFeesType();
-            if (feesTypeDtos.size() == 0) {
-                return Mono.just(new ResponseEntity<>("No Processing FeeType ", HttpStatus.OK));
-
-            }
-            return Mono.just(new ResponseEntity<>(feesTypeDtos, HttpStatus.OK));
-
-        } catch (Exception ex) {
-            return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
-
-        }
+        return null;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/find-fee", params = {"feePaymentTypeId", "gameTypeId", "licenseTypeId"})

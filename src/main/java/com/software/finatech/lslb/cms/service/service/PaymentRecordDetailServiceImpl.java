@@ -190,7 +190,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 if (institutionAdmins.isEmpty()) {
                     return Mono.just(new ResponseEntity<>("There are no gaming operator users for institution", HttpStatus.BAD_REQUEST));
                 }
-                institution = institutionService.findById(institutionId);
+                institution = institutionService.findByInstitutionId(institutionId);
                 if (institution == null) {
                     return Mono.just(new ResponseEntity<>(String.format("Institution with id %s does not exist", institutionId), HttpStatus.BAD_REQUEST));
                 }
@@ -201,7 +201,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             }
 
             if (paymentRecordDetailCreateDto.isGamingMachinePayment()) {
-                institution = institutionService.findById(paymentRecordDetailCreateDto.getInstitutionId());
+                institution = institutionService.findByInstitutionId(paymentRecordDetailCreateDto.getInstitutionId());
                 institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(paymentRecordDetailCreateDto.getInstitutionId());
                 if (institutionAdmins.isEmpty()) {
                     return Mono.just(new ResponseEntity<>("There are no gaming operator admins for institution owning gaming machine", HttpStatus.BAD_REQUEST));
@@ -341,7 +341,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
 
             if (paymentRecordDetailCreateDto.isInstitutionPayment()) {
                 String institutionId = paymentRecordDetailCreateDto.getInstitutionId();
-                institution = institutionService.findById(institutionId);
+                institution = institutionService.findByInstitutionId(institutionId);
                 if (institution == null) {
                     return Mono.just(new ResponseEntity<>(String.format("Institution with id %s does not exist", institutionId), HttpStatus.BAD_REQUEST));
                 }
@@ -749,7 +749,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         String gameTypeId = null;
         double totalAmount = 0;
         for (String gamingMachineId : machineIds) {
-            Machine gamingMachine = gamingMachineService.findById(gamingMachineId);
+            Machine gamingMachine = gamingMachineService.findMachineById(gamingMachineId);
             if (gamingMachine == null) {
                 responseEntityMono = Mono.just(new ResponseEntity<>(String.format("Gaming machine with Id %s not found", gamingMachineId), HttpStatus.BAD_REQUEST));
                 return new ImmutablePair<>(responseEntityMono, null);
@@ -802,7 +802,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         Mono<ResponseEntity> responseEntityMono;
         String gameTypeId = null;
         for (String gamingMachineId : machineIds) {
-            Machine gamingMachine = gamingMachineService.findById(gamingMachineId);
+            Machine gamingMachine = gamingMachineService.findMachineById(gamingMachineId);
             if (gamingMachine == null) {
                 responseEntityMono = Mono.just(new ResponseEntity<>(String.format("Gaming terminal with Id %s not found", gamingMachineId), HttpStatus.BAD_REQUEST));
                 return new ImmutablePair<>(responseEntityMono, null);

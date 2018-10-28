@@ -237,7 +237,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public Institution findById(String institutionId) {
+    public Institution findByInstitutionId(String institutionId) {
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
 

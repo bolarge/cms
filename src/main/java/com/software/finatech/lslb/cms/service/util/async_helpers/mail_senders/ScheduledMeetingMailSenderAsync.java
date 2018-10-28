@@ -21,7 +21,7 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
     private InstitutionService institutionService;
 
     private String buildMeetingCreatorMailContent(ScheduledMeeting scheduledMeeting, String templateName) {
-        Institution institution = institutionService.findById(scheduledMeeting.getInstitutionId());
+        Institution institution = institutionService.findByInstitutionId(scheduledMeeting.getInstitutionId());
         String meetingUrl = String.format("%s/schedule-presentation-view/%s", frontEndPropertyHelper.getFrontEndUrl(), scheduledMeeting.getId());
         String institutionName = institution.getInstitutionName();
         HashMap<String, Object> model = new HashMap<>();
@@ -42,7 +42,7 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
 
     private String buildMeetingRecipientMailContent(ScheduledMeeting scheduledMeeting, String templateName) {
         AuthInfo inviter = authInfoService.getUserById(scheduledMeeting.getCreatorId());
-        Institution institution = institutionService.findById(scheduledMeeting.getInstitutionId());
+        Institution institution = institutionService.findByInstitutionId(scheduledMeeting.getInstitutionId());
         String meetingUrl = String.format("%s/schedule-presentation-view/%s", frontEndPropertyHelper.getFrontEndUrl(), scheduledMeeting.getId());
         String institutionName = institution.getInstitutionName();
         HashMap<String, Object> model = new HashMap<>();
@@ -62,7 +62,7 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
     }
 
     private String buildOperatorMeetingMailContent(ScheduledMeeting scheduledMeeting, String templateName) {
-        Institution institution = institutionService.findById(scheduledMeeting.getInstitutionId());
+        Institution institution = institutionService.findByInstitutionId(scheduledMeeting.getInstitutionId());
         String meetingUrl = String.format("%s/schedule-presentation-view/%s", frontEndPropertyHelper.getFrontEndUrl(), scheduledMeeting.getId());
         String institutionName = institution.getInstitutionName();
         HashMap<String, Object> model = new HashMap<>();

@@ -8,7 +8,6 @@ import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -448,5 +447,9 @@ public class AuthInfo extends AbstractFact {
 
     public boolean isGamingOperator() {
         return StringUtils.equals(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID, this.authRoleId);
+    }
+
+    public boolean isAgent() {
+        return StringUtils.equals(LSLBAuthRoleReferenceData.AGENT_ROLE_ID, this.authRoleId);
     }
 }

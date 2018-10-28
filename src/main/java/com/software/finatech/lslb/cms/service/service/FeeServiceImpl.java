@@ -257,28 +257,6 @@ public class FeeServiceImpl implements FeeService {
 
 
     @Override
-    public List<FeesTypeDto> getAllFeesType() {
-        try {
-            Query query = new Query();
-            query.addCriteria(Criteria.where("active").is(true));
-            List<Fee> fees = (ArrayList<Fee>) mongoRepositoryReactive.findAll(query, Fee.class).toStream().collect(Collectors.toList());
-            ArrayList<FeesTypeDto> feeDtos = new ArrayList<>();
-            fees.forEach(fee -> {
-                FeesTypeDto feesTypeDto = new FeesTypeDto();
-                feesTypeDto.setFeeId(fee.getId());
-                feesTypeDto.setFee(fee.convertToDto().getRevenueName() + " " + fee.convertToDto().getGameTypeName() + " " + fee.convertToDto().getFeePaymentTypeName());
-                feeDtos.add(feesTypeDto);
-            });
-            return feeDtos;
-        } catch (Exception e) {
-            String errorMsg = "An error occurred while getting all fees";
-            logger.error(errorMsg, e);
-            return null;
-        }
-    }
-
-
-    @Override
     public Mono<ResponseEntity> getLicenseTypes() {
         return getAllEnumeratedEntity("LicenseType");
     }
@@ -339,15 +317,15 @@ public class FeeServiceImpl implements FeeService {
         try {
             Collection<FactObject> factObjects = ReferenceDataUtil.getAllEnumeratedFacts("LicenseType");
             List<EnumeratedFactDto> dtos = new ArrayList<>();
-                for (FactObject factObject : factObjects) {
-                    LicenseType licenseType = (LicenseType) factObject;
-                    if (search.isAgentSearch() && licenseType.appliesToAgent()) {
-                        dtos.add(licenseType.convertToDto());
-                    }
-                    if (search.isInstitutionSearch() && licenseType.appliesToInstitution()) {
-                        dtos.add(licenseType.convertToDto());
-                    }
+            for (FactObject factObject : factObjects) {
+                LicenseType licenseType = (LicenseType) factObject;
+                if (search.isAgentSearch() && licenseType.appliesToAgent()) {
+                    dtos.add(licenseType.convertToDto());
                 }
+                if (search.isInstitutionSearch() && licenseType.appliesToInstitution()) {
+                    dtos.add(licenseType.convertToDto());
+                }
+            }
             return Mono.just(new ResponseEntity<>(dtos, HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while finding revenue names by param", e);
@@ -369,6 +347,7 @@ public class FeeServiceImpl implements FeeService {
         Query query = new Query();
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         query.addCriteria(Criteria.where("licenseTypeId").is(licenseTypeId));
+        query.addCriteria(Criteria.where("active").is(true));
         query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
         query.with(new Sort(Sort.Direction.DESC, "endDate"));
         return (Fee) mongoRepositoryReactive.find(query, Fee.class).block();

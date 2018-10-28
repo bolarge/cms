@@ -28,7 +28,7 @@ public class LicenseValidatorUtil {
     }
 //
 //    public Mono<ResponseEntity> validateInstitutionGameTypeLicenseConfirmed(String institutionId, String gameTypeId) {
-//        GameType gameType = gameTypeService.findById(gameTypeId);
+//        GameType gameType = gameTypeService.findMachineById(gameTypeId);
 //        String gameTypeName = gameTypeId;
 //        if (gameType != null) {
 //            gameTypeName = gameType.getDescription();
@@ -39,7 +39,7 @@ public class LicenseValidatorUtil {
 //            List<LicenseDto> licenseDtosList = (List<LicenseDto>) licenseDtoEntity;
 //            //check if he has existing license record
 //            if (licenseDtosList.isEmpty()) {
-//                Institution institution = institutionService.findById(institutionId);
+//                Institution institution = institutionService.findMachineById(institutionId);
 //                String institutionName = institutionId;
 //                if (institution != null) {
 //                    institutionName = institution.getInstitutionName();
@@ -49,7 +49,7 @@ public class LicenseValidatorUtil {
 //
 //            //check if he has  more than one license record (which is never meant to happen)
 //            if (licenseDtosList.size() > 1) {
-//                Institution institution = institutionService.findById(institutionId);
+//                Institution institution = institutionService.findMachineById(institutionId);
 //                String institutionName = institutionId;
 //                if (institution != null) {
 //                    institutionName = institution.getInstitutionName();
@@ -63,7 +63,7 @@ public class LicenseValidatorUtil {
 //            if (licenseStatusDto != null) {
 //                String licensedStatusId = LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID;
 //                if (!StringUtils.equals(licensedStatusId, licenseStatusDto.getId())) {
-//                    Institution institution = institutionService.findById(institutionId);
+//                    Institution institution = institutionService.findMachineById(institutionId);
 //                    String institutionName = institutionId;
 //                    if (institution != null) {
 //                        institutionName = institution.getInstitutionName();
@@ -76,7 +76,7 @@ public class LicenseValidatorUtil {
 //                return Mono.just(new ResponseEntity<>("Invalid license status found for institution license", HttpStatus.BAD_REQUEST));
 //            }
 //        } else {
-//            Institution institution = institutionService.findById(institutionId);
+//            Institution institution = institutionService.findMachineById(institutionId);
 //            String institutionName = institutionId;
 //            if (institution != null) {
 //                institutionName = institution.getInstitutionName();
@@ -95,7 +95,7 @@ public class LicenseValidatorUtil {
             if (gameType != null) {
                 gameTypeName = gameType.getDescription();
             }
-            Institution institution = institutionService.findById(institutionId);
+            Institution institution = institutionService.findByInstitutionId(institutionId);
             String institutionName = institutionId;
             if (institution != null) {
                 institutionName = institution.getInstitutionName();

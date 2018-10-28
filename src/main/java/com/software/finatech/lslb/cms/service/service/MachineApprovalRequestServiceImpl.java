@@ -17,7 +17,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -152,10 +151,10 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
 
-            if (approvalRequest.isCreateMachine()) {
+            if (approvalRequest.isCreateGamingTerminal() || approvalRequest.isCreateGamingMachine()) {
                 approveCreateMachine(approvalRequest);
             }
-            if (approvalRequest.isAddGamesToMachine()) {
+            if (approvalRequest.isAddGamesToGamingMachine() || approvalRequest.isAddGamesToGamingTerminal()) {
                 approveAddGamesToMachine(approvalRequest);
             }
             approvalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
@@ -184,13 +183,14 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
         PendingMachine pendingMachine = approvalRequest.getPendingMachine();
         if (pendingMachine != null) {
             Machine machine = new Machine();
-            BeanUtils.copyProperties(pendingMachine, machine);
-            machine.setCreated(null);
-            machine.setCreatedAt(null);
-            machine.setCreatedBy(null);
-            machine.setLastModified(null);
-            machine.setLastModifiedBy(null);
             machine.setId(UUID.randomUUID().toString());
+            machine.setManufacturer(pendingMachine.getManufacturer());
+            machine.setGameTypeId(pendingMachine.getGameTypeId());
+            machine.setMachineAddress(pendingMachine.getMachineAddress());
+            machine.setSerialNumber(pendingMachine.getSerialNumber());
+            machine.setMachineTypeId(pendingMachine.getMachineTypeId());
+            machine.setMachineStatusId(pendingMachine.getMachineStatusId());
+            machine.setInstitutionId(pendingMachine.getInstitutionId());
             mongoRepositoryReactive.saveOrUpdate(machine);
             Set<MachineGameDetails> machineGameDetails = pendingMachine.getGameDetailsList();
             if (!machineGameDetails.isEmpty()) {
@@ -231,7 +231,7 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
 
-            if (approvalRequest.isCreateMachine()) {
+            if (approvalRequest.isCreateGamingMachine() || approvalRequest.isCreateGamingTerminal()) {
                 rejectCreateMachine(approvalRequest);
             }
             approvalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
