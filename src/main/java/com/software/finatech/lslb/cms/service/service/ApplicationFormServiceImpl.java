@@ -586,7 +586,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String applicationFormId, ApplicationFormCreateCommentDto applicationFormCreateCommentDto, HttpServletRequest request) {
+    public Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String applicationFormId, FormCreateCommentDto formCreateCommentDto, HttpServletRequest request) {
         try {
             ApplicationForm applicationForm = getApplicationFormById(applicationFormId);
             if (applicationForm == null) {
@@ -595,11 +595,11 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             if (!StringUtils.equals(ApplicationFormStatusReferenceData.IN_REVIEW_STATUS_ID, applicationForm.getApplicationFormStatusId())) {
                 return Mono.just(new ResponseEntity<>("Application form status has to be IN REVIEW for you to add a comment", HttpStatus.BAD_REQUEST));
             }
-            AuthInfo lslbAdmin = authInfoService.getUserById(applicationFormCreateCommentDto.getUserId());
+            AuthInfo lslbAdmin = authInfoService.getUserById(formCreateCommentDto.getUserId());
             if (lslbAdmin == null) {
                 return Mono.just(new ResponseEntity<>("Commenting user does not exist", HttpStatus.BAD_REQUEST));
             }
-            LslbAdminComment lslbAdminComment = new LslbAdminComment(applicationFormCreateCommentDto.getUserId(), applicationFormCreateCommentDto.getComment());
+            LslbAdminComment lslbAdminComment = new LslbAdminComment(formCreateCommentDto.getUserId(), formCreateCommentDto.getComment());
             applicationForm.setLslbAdminComment(lslbAdminComment);
             applicationForm.setApplicationFormStatusId(ApplicationFormStatusReferenceData.PENDING_RESUBMISSON_ID);
             saveApplicationForm(applicationForm);
@@ -688,7 +688,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             formDocumentApproval.getApprovalMap().put(documentId, false);
             applicationForm.setDocumentApproval(formDocumentApproval);
             mongoRepositoryReactive.saveOrUpdate(applicationForm);
-            applicationFormNotificationHelperAsync.sendResubmissionNotificationFoApplicationForm(applicationForm, document);
+            applicationFormNotificationHelperAsync.sendResubmissionNotificationForApplicationForm(applicationForm, document);
         }
     }
 

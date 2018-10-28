@@ -319,7 +319,12 @@ public class Document extends AbstractFact {
         }
         return (ApplicationForm) mongoRepositoryReactive.findById(this.entityId, ApplicationForm.class).block();
     }
-
+    public RenewalForm getRenewalForm() {
+        if (StringUtils.isEmpty(this.entityId)) {
+            return null;
+        }
+        return (RenewalForm) mongoRepositoryReactive.findById(this.entityId, RenewalForm.class).block();
+    }
     public AuthInfo getApprover() {
         DocumentType documentType = getDocumentType();
         if (documentType != null) {

@@ -2,7 +2,7 @@ package com.software.finatech.lslb.cms.service.dto;
 
 import javax.validation.constraints.NotEmpty;
 
-public class ApplicationFormCreateCommentDto {
+public class FormCreateCommentDto {
     @NotEmpty(message = "please provider user id")
     private String userId;
     @NotEmpty(message = "please provider user comment")

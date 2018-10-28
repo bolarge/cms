@@ -26,7 +26,6 @@ public class ApplicationForm extends AbstractFact {
     protected Set<String> paymentRecordIds;
     protected String applicationFormTypeId;
     protected String formName;
-    protected String approverId;
     protected String rejectorId;
     protected ApplicantDetails applicantDetails;
     protected ApplicantMemberDetails applicantMemberDetails;
@@ -39,6 +38,7 @@ public class ApplicationForm extends AbstractFact {
     protected String reasonForRejection;
     protected LocalDate submissionDate;
     protected String applicationFormId;
+    protected String approverId;
     protected FormDocumentApproval documentApproval;
 
     public FormDocumentApproval getDocumentApproval() {

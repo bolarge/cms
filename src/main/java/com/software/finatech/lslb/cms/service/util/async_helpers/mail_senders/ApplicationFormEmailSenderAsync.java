@@ -33,6 +33,16 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         }
     }
 
+    @Async
+    public void sendAdminCommentNotificationToInstitutionAdmins(RenewalForm renewalForm, String comment) {
+        ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(renewalForm.getInstitutionId());
+        String mailSubject = String.format("Notification on your renewal application for %s licence", renewalForm.getGameTypeName());
+        String emailContent = buildApplicationCommentFromLSLBAdminEmailContent(renewalForm);
+        for (AuthInfo institutionAdmin : institutionAdmins) {
+            sendCommentNotificationToInstitutionUser(institutionAdmin.getEmailAddress(), mailSubject, emailContent);
+        }
+    }
+
     private void sendCommentNotificationToInstitutionUser(String institutionAdminEmail, String mailSubject, String emailContent) {
         try {
             emailService.sendEmail(emailContent, mailSubject, institutionAdminEmail);
@@ -52,12 +62,31 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         return mailContentBuilderService.build(model, "application-form/ApplicationFormPendingUploadGAadmin");
     }
 
+    private String buildApplicationCommentFromLSLBAdminEmailContent(RenewalForm renewalForm) {
+        String presentDate = DateTime.now().toString("dd-MM-yyyy ");
+        String gameTypeName = renewalForm.getGameTypeName();
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("comment", renewalForm.getLslbAdminComment());
+        model.put("date", presentDate);
+        model.put("gameType", gameTypeName);
+        return mailContentBuilderService.build(model, "renewal-form/RenewalFormPendingUploadGAadmin");
+    }
+
     @Async
     public void sendRejectionMailToInstitutionAdmins(ApplicationForm applicationForm) {
         ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(applicationForm.getInstitutionId());
         String emailContent = buildRejectionEmailContent(applicationForm);
         for (AuthInfo institutionAdmin : institutionAdmins) {
             sendRejectionMailToInstitutionUser(institutionAdmin.getEmailAddress(), applicationForm, emailContent);
+        }
+    }
+
+    @Async
+    public void sendRejectionMailToInstitutionAdmins(RenewalForm renewalForm) {
+        ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(renewalForm.getInstitutionId());
+        String emailContent = buildRejectionEmailContent(renewalForm);
+        for (AuthInfo institutionAdmin : institutionAdmins) {
+            sendRejectionMailToInstitutionUser(institutionAdmin.getEmailAddress(), renewalForm, emailContent);
         }
     }
 
@@ -70,11 +99,29 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         }
     }
 
+    private void sendRejectionMailToInstitutionUser(String institutionAdminEmail, RenewalForm renewalForm, String emailContent) {
+        try {
+            String mailSubject = String.format("Notification on your application for %s licence", renewalForm.getGameTypeName());
+            emailService.sendEmail(emailContent, mailSubject, emailContent);
+        } catch (Exception e) {
+            logger.error("An error occurred while sending rejection mail to -> {}", institutionAdminEmail, e);
+        }
+    }
+
     @Async
     public void sendApprovedMailToInstitutionAdmins(ApplicationForm applicationForm) {
         ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(applicationForm.getInstitutionId());
         String mailSubject = String.format("Notification on your application for %s licence", applicationForm.getGameTypeName());
         String emailContent = buildApprovalEmailContent(applicationForm);
+        for (AuthInfo institutionAdmin : institutionAdmins) {
+            sendApprovedMailToInstitutionUser(institutionAdmin.getEmailAddress(), mailSubject, emailContent);
+        }
+    }
+    @Async
+    public void sendApprovedMailToInstitutionAdmins(RenewalForm renewalForm) {
+        ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(renewalForm.getInstitutionId());
+        String mailSubject = String.format("Notification on your renewal application for %s licence", renewalForm.getGameTypeName());
+        String emailContent = buildApprovalEmailContent(renewalForm);
         for (AuthInfo institutionAdmin : institutionAdmins) {
             sendApprovedMailToInstitutionUser(institutionAdmin.getEmailAddress(), mailSubject, emailContent);
         }
@@ -143,6 +190,22 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("rejectionReason", applicationForm.getReasonForRejection());
         return mailContentBuilderService.build(model, "application-form/application-form-rejection-GA-new");
     }
+    private String buildRejectionEmailContent(RenewalForm renewalForm) {
+        String gameTypeName = renewalForm.getGameTypeName();
+        String presentDate = DateTime.now().toString("dd-MM-yyyy ");
+        LocalDate submissionDate = renewalForm.getSubmissionDate();
+        String submissionDateString = "";
+        if (submissionDate != null) {
+            submissionDateString = submissionDate.toString("dd-MM-yyyy");
+        }
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("date", presentDate);
+        model.put("gameType", gameTypeName);
+        model.put("institutionName", renewalForm.getInstitutionName());
+        model.put("submissionDate", submissionDateString);
+        model.put("rejectionReason", renewalForm.getReasonForRejection());
+        return mailContentBuilderService.build(model, "application-form/application-form-rejection-GA-new");
+    }
 
     private String buildApprovalEmailContent(ApplicationForm applicationForm) {
         String gameTypeName = applicationForm.getGameTypeName();
@@ -153,6 +216,17 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("gameType", gameTypeName);
         model.put("frontEndUrl", callBackUrl);
         return mailContentBuilderService.build(model, "application-form/application-form-approval-GA-new");
+    }
+
+    private String buildApprovalEmailContent(RenewalForm renewalForm) {
+        String gameTypeName = renewalForm.getGameTypeName();
+        String presentDate = DateTime.now().toString("dd-MM-yyyy ");
+        String callBackUrl = String.format("%s/payment-page", frontEndPropertyHelper.getFrontEndUrl());
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("date", presentDate);
+        model.put("gameType", gameTypeName);
+        model.put("frontEndUrl", callBackUrl);
+        return mailContentBuilderService.build(model, "renewal-form/renewal-form-approval-GA-new");
     }
 
     private ArrayList<Document> getAllDocumentsForApplicationForm(ApplicationForm applicationForm) {
@@ -237,6 +311,20 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         }
     }
 
+    public void sendApproverMailToFinalApproval(RenewalForm renewalForm) {
+        ArrayList<AuthInfo> finalApprovers = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.APPROVE_APPICATION_FORM_ID);
+        if (finalApprovers.isEmpty()) {
+            logger.info("No final approvers for application form");
+            return;
+        }
+        String mailContent = buildRenewalFormFormSubmissionApprovalEmailContent(renewalForm);
+        for (AuthInfo authInfo : finalApprovers) {
+            String emailAddress = authInfo.getEmailAddress();
+            logger.info("Sending final approver email to {}", emailAddress);
+            emailService.sendEmail(mailContent, "New Application Submission on LSLB Customer Management System", emailAddress);
+        }
+    }
+
     private String buildApplicationFormSubmissionApprovalEmailContent(ApplicationForm applicationForm) {
         String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId());
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
@@ -248,6 +336,17 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         return mailContentBuilderService.build(model, "application-form/ApplicationFormSubmissionApprovalLSLB");
     }
 
+    private String buildRenewalFormFormSubmissionApprovalEmailContent(RenewalForm renewalForm) {
+        String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), renewalForm.getId());
+        String presentDate = DateTime.now().toString("dd-MM-yyyy ");
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("date", presentDate);
+        model.put("gameType", renewalForm.getGameTypeName());
+        model.put("applicantName", renewalForm.getInstitutionName());
+        model.put("frontEndUrl", callbackUrl);
+        return mailContentBuilderService.build(model, "renewal-form/RenewalFormSubmissionApprovalLSLB");
+    }
+
     public void sendDocumentReturnMailToInstitutionMembers(ApplicationForm applicationForm, Document document) {
         ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(applicationForm.getInstitutionId());
         String mailContent = buildDocumentReturnMailContent(applicationForm, document);
@@ -256,6 +355,20 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
                 String email = institutionAdmin.getEmailAddress();
                 logger.info("Sending document return email to {}", email);
                 emailService.sendEmail(mailContent, String.format("Notification on your application for %s licence", applicationForm.getGameTypeName()), email);
+            } catch (Exception e) {
+                logger.error("An error occurred while sending email", e);
+            }
+        }
+    }
+
+    public void sendDocumentReturnMailToInstitutionMembers(RenewalForm renewalForm, Document document) {
+        ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(renewalForm.getInstitutionId());
+        String mailContent = buildDocumentReturnMailContent(renewalForm, document);
+        for (AuthInfo institutionAdmin : institutionAdmins) {
+            try {
+                String email = institutionAdmin.getEmailAddress();
+                logger.info("Sending document return email to {}", email);
+                emailService.sendEmail(mailContent, String.format("Notification on your renewal application for %s licence", renewalForm.getGameTypeName()), email);
             } catch (Exception e) {
                 logger.error("An error occurred while sending email", e);
             }
@@ -274,8 +387,20 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("documentType", String.valueOf(document.getDocumentType()));
         return mailContentBuilderService.build(model, "application-form/ApplicationFormDocumentReturnGAAdmin");
     }
+    private String buildDocumentReturnMailContent(RenewalForm renewalForm, Document document) {
+        String callbackUrl = String.format("%s/%s/reupload/%s", frontEndPropertyHelper.getFrontEndUrl(), renewalForm.getId(), document.getId());
+        String presentDate = DateTime.now().toString("dd-MM-yyyy ");
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("date", presentDate);
+        model.put("gameType", renewalForm.getGameTypeName());
+        model.put("applicantName", renewalForm.getInstitutionName());
+        model.put("frontEndUrl", callbackUrl);
+        model.put("fileName", document.getFilename());
+        model.put("documentType", String.valueOf(document.getDocumentType()));
+        return mailContentBuilderService.build(model, "application-form/ApplicationFormDocumentReturnGAAdmin");
+    }
 
-    private String buildResubmissionNotificationFoApplicationForm(ApplicationForm applicationForm, Document document) {
+    private String buildResubmissionNotificationForApplicationForm(ApplicationForm applicationForm, Document document) {
         String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId());
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
         HashMap<String, Object> model = new HashMap<>();
@@ -287,12 +412,33 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         return mailContentBuilderService.build(model, "application-form/ApplicationFormDocumentResubmissionLSLB");
     }
 
+    private String buildResubmissionNotificationForRenewalForm(RenewalForm renewalForm, Document document) {
+        String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), renewalForm.getId());
+        String presentDate = DateTime.now().toString("dd-MM-yyyy ");
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("date", presentDate);
+        model.put("gameType", renewalForm.getGameTypeName());
+        model.put("applicantName", renewalForm.getInstitutionName());
+        model.put("frontEndUrl", callbackUrl);
+        model.put("documentType", String.valueOf(document.getDocumentType()));
+        return mailContentBuilderService.build(model, "renewal-form/RenewalFormDocumentResubmissionLSLB");
+    }
+
     @Async
-    public void sendResubmissionNotificationFoApplicationForm(ApplicationForm applicationForm, Document document) {
+    public void sendResubmissionNotificationForApplicationForm(ApplicationForm applicationForm, Document document) {
         AuthInfo approver = document.getApprover();
         if (approver != null) {
-            String mailContent = buildResubmissionNotificationFoApplicationForm(applicationForm, document);
+            String mailContent = buildResubmissionNotificationForApplicationForm(applicationForm, document);
             emailService.sendEmail(mailContent, String.format("%s has resubmitted %s", applicationForm.getInstitutionName(), document.getDocumentType()), approver.getEmailAddress());
+        }
+    }
+
+    @Async
+    public void sendResubmissionNotificationForRenewalForm(RenewalForm renewalForm, Document document) {
+        AuthInfo approver = document.getApprover();
+        if (approver != null) {
+            String mailContent = buildResubmissionNotificationForRenewalForm(renewalForm, document);
+            emailService.sendEmail(mailContent, String.format("%s has resubmitted %s", renewalForm.getInstitutionName(), document.getDocumentType()), approver.getEmailAddress());
         }
     }
 }
