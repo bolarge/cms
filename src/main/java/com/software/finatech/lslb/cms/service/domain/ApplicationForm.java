@@ -40,6 +40,15 @@ public class ApplicationForm extends AbstractFact {
     protected String applicationFormId;
     protected String approverId;
     protected FormDocumentApproval documentApproval;
+    protected Boolean readyForApproval;
+
+    public Boolean getReadyForApproval() {
+        return readyForApproval;
+    }
+
+    public void setReadyForApproval(Boolean readyForApproval) {
+        this.readyForApproval = readyForApproval;
+    }
 
     public FormDocumentApproval getDocumentApproval() {
         return documentApproval;
@@ -328,6 +337,7 @@ public class ApplicationForm extends AbstractFact {
         applicationFormDto.setFilledApplicantOutletInformation(getApplicantOutletInformation() != null);
         applicationFormDto.setFilledApplicantDetails(getApplicantDetails() != null);
         applicationFormDto.setApplicationFormId(getApplicationFormId());
+        applicationFormDto.setReadyForApproval(getReadyForApproval());
         return applicationFormDto;
     }
 

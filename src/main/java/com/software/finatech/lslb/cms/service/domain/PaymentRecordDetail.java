@@ -94,7 +94,7 @@ public class PaymentRecordDetail extends AbstractFact {
         }
 
         paymentRecordDetailDto.setCreationDate(getCreatedAt() != null ? getCreatedAt().toString("dd-MM-yyyy") : null);
-        paymentRecordDetailDto.setPaymentDate(getPaymentDate() != null ? getPaymentDate().toString("dd-MM-yyyy HH:mm:ss") : null);
+        paymentRecordDetailDto.setPaymentDate(getPaymentDate() != null ? getPaymentDate().toString("dd-MM-yyyy HH:mm:ss a") : null);
         paymentRecordDetailDto.setInvoiceNumber(getInvoiceNumber());
         paymentRecordDetailDto.setVigiPayReference(getVigiPayTransactionReference());
         return paymentRecordDetailDto;
@@ -152,6 +152,20 @@ public class PaymentRecordDetail extends AbstractFact {
 
     public boolean isFailedPayment() {
         return StringUtils.equals(PaymentStatusReferenceData.FAILED_PAYMENT_STATUS_ID, this.paymentStatusId);
+    }
+
+    public String getPaymentDateString(){
+        if (this.paymentDate != null){
+            return this.paymentDate.toString("dd-MM-yyyy");
+        }
+        return null;
+    }
+
+    public String getPaymentTimeString(){
+        if (this.paymentDate != null){
+            return this.paymentDate.toString("HH:mm:ss a");
+        }
+        return null;
     }
 
     @Override

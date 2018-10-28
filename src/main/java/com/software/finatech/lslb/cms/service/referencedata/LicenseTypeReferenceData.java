@@ -6,7 +6,7 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 public class LicenseTypeReferenceData {
 //    public static final String INSTITUTION_ID = "INSTITUTION";
 //    public static final String AGENT_ID = "AGENT_ID";
-//    public static final String GAMING_MACHINE_ID = "GAMING_MACHINE_ID";
+//    public static final String MACHINE_ID = "MACHINE_ID";
 
     public static final String INSTITUTION_ID = "01";
     public static final String AGENT_ID = "02";

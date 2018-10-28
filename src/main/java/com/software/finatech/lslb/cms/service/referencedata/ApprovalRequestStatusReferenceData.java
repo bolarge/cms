@@ -7,33 +7,23 @@ public class ApprovalRequestStatusReferenceData {
     public static final String APPROVED_ID = "1";
     public static final String PENDING_ID = "2";
     public static final String REJECTED_ID = "3";
+    public static final String PENDING_OPERATOR_APPROVAL_ID = "4";
 
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
+        loadForId(APPROVED_ID, mongoRepositoryReactive, "APPROVED");
+        loadForId(PENDING_ID, mongoRepositoryReactive, "PENDING APPROVAL");
+        loadForId(REJECTED_ID, mongoRepositoryReactive, "REJECTED");
+        loadForId(PENDING_OPERATOR_APPROVAL_ID, mongoRepositoryReactive, "PENDING OPERATOR APPROVAL");
+    }
 
-        ApprovalRequestStatus approvalRequestStatus1 = (ApprovalRequestStatus) mongoRepositoryReactive.findById(APPROVED_ID, ApprovalRequestStatus.class).block();
-        if (approvalRequestStatus1 == null) {
-            approvalRequestStatus1 = new ApprovalRequestStatus();
-            approvalRequestStatus1.setId(APPROVED_ID);
+    private static void loadForId(String id, MongoRepositoryReactiveImpl mongoRepositoryReactive, String name) {
+        ApprovalRequestStatus status = (ApprovalRequestStatus) mongoRepositoryReactive.findById(id, ApprovalRequestStatus.class).block();
+        if (status == null) {
+            status = new ApprovalRequestStatus();
+            status.setId(id);
         }
-        approvalRequestStatus1.setName("APPROVED");
-
-        ApprovalRequestStatus approvalRequestStatus2 = (ApprovalRequestStatus) mongoRepositoryReactive.findById(PENDING_ID, ApprovalRequestStatus.class).block();
-        if (approvalRequestStatus2 == null) {
-            approvalRequestStatus2 = new ApprovalRequestStatus();
-            approvalRequestStatus2.setId(PENDING_ID);
-        }
-        approvalRequestStatus2.setName("PENDING APPROVAL");
-
-        ApprovalRequestStatus approvalRequestStatus3 = (ApprovalRequestStatus) mongoRepositoryReactive.findById(REJECTED_ID, ApprovalRequestStatus.class).block();
-        if (approvalRequestStatus3 == null) {
-            approvalRequestStatus3 = new ApprovalRequestStatus();
-            approvalRequestStatus3.setId(REJECTED_ID);
-        }
-        approvalRequestStatus3.setName("REJECTED");
-
-        mongoRepositoryReactive.saveOrUpdate(approvalRequestStatus1);
-        mongoRepositoryReactive.saveOrUpdate(approvalRequestStatus2);
-        mongoRepositoryReactive.saveOrUpdate(approvalRequestStatus3);
+        status.setName(name);
+        mongoRepositoryReactive.saveOrUpdate(status);
     }
 }

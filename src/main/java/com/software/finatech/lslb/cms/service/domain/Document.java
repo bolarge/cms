@@ -10,6 +10,8 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.springframework.data.annotation.Transient;
 
+import java.util.Map;
+
 
 @SuppressWarnings("serial")
 @org.springframework.data.mongodb.core.mapping.Document(collection = "Documents")
@@ -294,20 +296,30 @@ public class Document extends AbstractFact {
         dto.setGameTypeId(getGameTypeId());
         dto.setComment(getComment());
         dto.setCommenterName(getCommenterName());
+        ApprovalRequestStatus status = getApprovalRequestStatus();
+        if (status != null) {
+            dto.setDocumentStatus(status.toString());
+        }
         return dto;
     }
 
-    private String getCommenterName(){
-
-        return null;
+    private String getCommenterName() {
+        return this.commenterName;
     }
 
     public DocumentType getDocumentType() {
-        DocumentType DocumentType = (DocumentType) Mapstore.STORE.get("DocumentType").get(documentTypeId);
-        if (DocumentType == null) {
-            DocumentType = (DocumentType) mongoRepositoryReactive.findById(documentTypeId, DocumentType.class).block();
-            if (DocumentType != null) {
-                Mapstore.STORE.get("DocumentType").put(DocumentType.getId(), DocumentType);
+        if (StringUtils.isEmpty(this.documentTypeId)) {
+            return null;
+        }
+        DocumentType documentType = null;
+        Map documentTypeMap = Mapstore.STORE.get("DocumentType");
+        if (documentTypeMap != null) {
+            documentType = (DocumentType) documentTypeMap.get(this.documentTypeId);
+        }
+        if (documentType == null) {
+            documentType = (DocumentType) mongoRepositoryReactive.findById(this.documentTypeId, DocumentType.class).block();
+            if (documentType != null && documentTypeMap != null) {
+                documentTypeMap.put(documentType.getId(), documentType);
             }
         }
         return documentType;
@@ -331,5 +343,23 @@ public class Document extends AbstractFact {
             return documentType.getApprover();
         }
         return null;
+    }
+
+    public ApprovalRequestStatus getApprovalRequestStatus() {
+        if (StringUtils.isEmpty(this.approvalRequestStatusId)) {
+            return null;
+        }
+        Map approvalRequestStatusMap = Mapstore.STORE.get("ApprovalRequestStatus");
+        ApprovalRequestStatus approvalRequestStatus = null;
+        if (approvalRequestStatusMap != null) {
+            approvalRequestStatus = (ApprovalRequestStatus) approvalRequestStatusMap.get(this.approvalRequestStatusId);
+        }
+        if (approvalRequestStatus == null) {
+            approvalRequestStatus = (ApprovalRequestStatus) mongoRepositoryReactive.findById(this.approvalRequestStatusId, ApprovalRequestStatus.class).block();
+            if (approvalRequestStatus != null && approvalRequestStatusMap != null) {
+                approvalRequestStatusMap.put(this.approvalRequestStatusId, approvalRequestStatus);
+            }
+        }
+        return approvalRequestStatus;
     }
 }

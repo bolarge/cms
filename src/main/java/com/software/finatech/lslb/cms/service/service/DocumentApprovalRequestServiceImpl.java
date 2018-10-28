@@ -1,10 +1,12 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.DocumentApprovalRequest;
+import com.software.finatech.lslb.cms.service.domain.DocumentType;
+import com.software.finatech.lslb.cms.service.domain.PendingDocumentType;
 import com.software.finatech.lslb.cms.service.dto.ApprovalRequestOperationtDto;
 import com.software.finatech.lslb.cms.service.dto.DocumentApprovalRequestDto;
-import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
@@ -16,7 +18,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -29,7 +30,7 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
@@ -92,7 +93,7 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
             //TODO:: make sure initiator is filtered out
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser != null) {
-              //  query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
+                //  query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
                 if (!loggedInUser.isSuperAdmin()) {
                     query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
                 }
@@ -113,7 +114,7 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
             query.with(PageRequest.of(page, pageSize, sort));
             query.with(sort);
 
-            ArrayList<DocumentApprovalRequest> documentApprovalRequests = (ArrayList<DocumentApprovalRequest>) mongoRepositoryReactive.findAll(query, UserApprovalRequest.class).toStream().collect(Collectors.toList());
+            ArrayList<DocumentApprovalRequest> documentApprovalRequests = (ArrayList<DocumentApprovalRequest>) mongoRepositoryReactive.findAll(query, DocumentApprovalRequest.class).toStream().collect(Collectors.toList());
             if (documentApprovalRequests == null || documentApprovalRequests.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
             }
@@ -159,17 +160,18 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
 
             documentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
             documentApprovalRequest.setApproverId(user.getId());
-            mongoRepositoryReactive.save(documentApprovalRequest);
+            mongoRepositoryReactive.saveOrUpdate(documentApprovalRequest);
             String verbiage = String.format("Approved Document approval request ->  Type -> %s,Id -> %s ", documentApprovalRequest.getDocumentApprovalRequestType(), documentApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(configAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), String.valueOf(documentApprovalRequest.getSubjectDocumentType()),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
-            return Mono.just(new ResponseEntity<>(documentApprovalRequest, HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(documentApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving user approval request ", e);
         }
     }
+
     @Override
     public Mono<ResponseEntity> rejectRequest(ApprovalRequestOperationtDto requestOperationtDto, HttpServletRequest request) {
         try {
@@ -233,12 +235,14 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
         PendingDocumentType pendingDocumentType = documentApprovalRequest.getPendingDocumentType();
         if (pendingDocumentType != null) {
             DocumentType documentType = new DocumentType();
-            BeanUtils.copyProperties(pendingDocumentType, documentType);
-            documentType.setCreated(null);
-            documentType.setCreatedAt(null);
-            documentType.setCreatedBy(null);
-            documentType.setLastModified(null);
-            documentType.setLastModifiedBy(null);
+            documentType.setId(UUID.randomUUID().toString());
+            documentType.setApproverId(pendingDocumentType.getApproverId());
+            documentType.setGameTypeIds(pendingDocumentType.getGameTypeIds());
+            documentType.setDocumentPurposeId(pendingDocumentType.getDocumentPurposeId());
+            documentType.setActive(pendingDocumentType.isActive());
+            documentType.setRequired(pendingDocumentType.isRequired());
+            documentType.setName(pendingDocumentType.getName());
+            documentType.setDescription(pendingDocumentType.getDescription());
             mongoRepositoryReactive.saveOrUpdate(documentType);
             pendingDocumentType.setApprovalRequestStatusIds(ApprovalRequestStatusReferenceData.APPROVED_ID);
             mongoRepositoryReactive.saveOrUpdate(pendingDocumentType);

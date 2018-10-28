@@ -1,7 +1,8 @@
 package com.software.finatech.lslb.cms.service.domain;
 
+import com.software.finatech.lslb.cms.service.dto.MachineDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
@@ -10,9 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @SuppressWarnings("serial")
 @Document(collection = "PaymentRecords")
@@ -21,8 +20,6 @@ public class PaymentRecord extends AbstractFact {
     private String paymentStatusId;
     private String feeId;
     private String agentId;
-    private String gamingMachineId;
-    private String gamingTerminalId;
     private double amount;
     private double amountPaid;
     private double amountOutstanding;
@@ -31,32 +28,24 @@ public class PaymentRecord extends AbstractFact {
     private String feePaymentTypeId;
     private String licenseTypeId;
     private String paymentReference;
-    private String batchPaymentId;
-    private String revenueNameId;
+    private Set<String> gamingMachineIds = new HashSet<>();
+    private Set<String> gamingTerminalIds = new HashSet<>();
 
 
-    public String getGamingTerminalId() {
-        return gamingTerminalId;
+    public Set<String> getGamingMachineIds() {
+        return gamingMachineIds;
     }
 
-    public void setGamingTerminalId(String gamingTerminalId) {
-        this.gamingTerminalId = gamingTerminalId;
+    public void setGamingMachineIds(Set<String> gamingMachineIds) {
+        this.gamingMachineIds = gamingMachineIds;
     }
 
-    public String getRevenueNameId() {
-        return revenueNameId;
+    public Set<String> getGamingTerminalIds() {
+        return gamingTerminalIds;
     }
 
-    public void setRevenueNameId(String revenueNameId) {
-        this.revenueNameId = revenueNameId;
-    }
-
-    public String getBatchPaymentId() {
-        return batchPaymentId;
-    }
-
-    public void setBatchPaymentId(String batchPaymentId) {
-        this.batchPaymentId = batchPaymentId;
+    public void setGamingTerminalIds(Set<String> gamingTerminalIds) {
+        this.gamingTerminalIds = gamingTerminalIds;
     }
 
     public String getPaymentReference() {
@@ -97,14 +86,6 @@ public class PaymentRecord extends AbstractFact {
 
     public void setAgentId(String agentId) {
         this.agentId = agentId;
-    }
-
-    public String getGamingMachineId() {
-        return gamingMachineId;
-    }
-
-    public void setGamingMachineId(String gamingMachineId) {
-        this.gamingMachineId = gamingMachineId;
     }
 
     public String getFeeId() {
@@ -191,7 +172,7 @@ public class PaymentRecord extends AbstractFact {
         if (gameType != null) {
             return gameType.getName();
         }
-        return "";
+        return null;
     }
 
     public GameType getGameType() {
@@ -236,13 +217,6 @@ public class PaymentRecord extends AbstractFact {
             return null;
         }
         return (Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
-    }
-
-    public GamingMachine getGamingMachine() {
-        if (StringUtils.isEmpty(this.gamingMachineId)) {
-            return null;
-        }
-        return (GamingMachine) mongoRepositoryReactive.findById(getGamingMachineId(), GamingMachine.class).block();
     }
 
     public LicenseType getLicenseType() {
@@ -316,16 +290,6 @@ public class PaymentRecord extends AbstractFact {
             paymentRecordDto.setAgentId(getAgentId());
             ownerName = agent.getFullName();
         }
-        GamingMachine gamingMachine = getGamingMachine();
-        if (gamingMachine != null) {
-            paymentRecordDto.setGamingMachineId(getGamingMachineId());
-            paymentRecordDto.setMachineNumber(gamingMachine.getMachineNumber());
-            paymentRecordDto.setInstitutionId(gamingMachine.getInstitutionId());
-            Institution institution = gamingMachine.getInstitution();
-            if (institution != null) {
-                ownerName = institution.getInstitutionName();
-            }
-        }
 
         paymentRecordDto.setAmount(getAmount());
         paymentRecordDto.setAmountPaid(getAmountPaid());
@@ -345,23 +309,16 @@ public class PaymentRecord extends AbstractFact {
         return paymentRecordDto;
     }
 
-
-    public boolean isInstitutionPayment() {
-        return StringUtils.equals(LicenseTypeReferenceData.INSTITUTION_ID, this.licenseTypeId);
-    }
-
-    public boolean isGamingMachinePayment() {
-        return StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, this.licenseTypeId);
-    }
-
-    public boolean isAgentPayment() {
-        return StringUtils.equals(LicenseTypeReferenceData.AGENT_ID, this.licenseTypeId);
+    public PaymentRecordDto convertToFullDto() {
+        PaymentRecordDto dto = convertToDto();
+        dto.setGamingMachines(getGamingMachineDtos());
+        dto.setGamingTerminals(getGamingTerminalDtos());
+        return dto;
     }
 
     public License getLicense() {
         Query query = new Query();
         query.addCriteria(Criteria.where("paymentRecordId").is(this.id));
-        query.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID));
         return (License) mongoRepositoryReactive.find(query, License.class).block();
     }
 
@@ -372,7 +329,7 @@ public class PaymentRecord extends AbstractFact {
                 return institution.getInstitutionName();
             }
         }
-        if (isAgentPayment()) {
+        if (isAgentPayment() || isGamingTerminalPayment()) {
             Agent agent = getAgent();
             if (agent != null) {
                 return agent.getFullName();
@@ -383,6 +340,82 @@ public class PaymentRecord extends AbstractFact {
 
     public boolean isCompletedPayment() {
         return StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, this.paymentStatusId);
+    }
+
+    public boolean isLicensePayment() {
+        return StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, this.feePaymentTypeId);
+    }
+
+    public boolean isLicenseRenewalPayment() {
+        return StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_RENEWAL_FEE_TYPE_ID, this.feePaymentTypeId);
+    }
+
+    public boolean isInstitutionPayment() {
+        return StringUtils.equals(LicenseTypeReferenceData.INSTITUTION_ID, this.licenseTypeId);
+    }
+
+    public boolean isGamingMachinePayment() {
+        return StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, this.licenseTypeId);
+    }
+
+    public boolean isGamingTerminalPayment() {
+        return StringUtils.equals(LicenseTypeReferenceData.GAMING_TERMINAL_ID, this.licenseTypeId);
+    }
+
+    public boolean isAgentPayment() {
+        return StringUtils.equals(LicenseTypeReferenceData.AGENT_ID, this.licenseTypeId);
+    }
+
+    public boolean isTaxPayment() {
+        return StringUtils.equals(FeePaymentTypeReferenceData.TAX_FEE_TYPE_ID, this.feePaymentTypeId);
+    }
+
+    public Set<Machine> getGamingMachines() {
+        Set<Machine> machines = new HashSet<>();
+        for (String machineId : this.gamingMachineIds) {
+            Machine machine = findMachineById(machineId);
+            if (machine != null && machine.isGamingMachine()) {
+                machines.add(machine);
+            }
+        }
+        return machines;
+    }
+
+    public Set<Machine> getGamingTerminals() {
+        Set<Machine> machines = new HashSet<>();
+        for (String machineId : this.gamingTerminalIds) {
+            Machine machine = findMachineById(machineId);
+            if (machine != null && machine.isGamingTerminal()) {
+                machines.add(machine);
+            }
+        }
+        return machines;
+    }
+
+    public List<MachineDto> getGamingMachineDtos() {
+        List<MachineDto> dtos = new ArrayList<>();
+        for (Machine machine : getGamingMachines()) {
+            MachineDto dto = new MachineDto();
+            dto.setId(machine.getId());
+            dto.setSerialNumber(machine.getSerialNumber());
+            dtos.add(dto);
+        }
+        return dtos;
+    }
+
+    public List<MachineDto> getGamingTerminalDtos() {
+        List<MachineDto> dtos = new ArrayList<>();
+        for (Machine machine : getGamingTerminals()) {
+            MachineDto dto = new MachineDto();
+            dto.setId(machine.getId());
+            dto.setSerialNumber(machine.getSerialNumber());
+            dtos.add(dto);
+        }
+        return dtos;
+    }
+
+    private Machine findMachineById(String id) {
+        return (Machine) mongoRepositoryReactive.findById(id, Machine.class).block();
     }
 
     @Override

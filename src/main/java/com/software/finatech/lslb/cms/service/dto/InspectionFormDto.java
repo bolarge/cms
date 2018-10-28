@@ -8,7 +8,7 @@ public class InspectionFormDto {
     //protected AuthRoleDto userRole;
     protected String inspectionDate;
     protected AgentDto agent;
-    protected GamingMachineDto gamingMachine;
+    protected MachineDto gamingMachine;
     protected String id;
     protected String subject;
     protected String ownerName;
@@ -54,11 +54,11 @@ public class InspectionFormDto {
     }
 
 
-    public GamingMachineDto getGamingMachine() {
+    public MachineDto getGamingMachine() {
         return gamingMachine;
     }
 
-    public void setGamingMachine(GamingMachineDto gamingMachine) {
+    public void setGamingMachine(MachineDto gamingMachine) {
         this.gamingMachine = gamingMachine;
     }
 

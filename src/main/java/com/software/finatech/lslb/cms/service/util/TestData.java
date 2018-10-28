@@ -242,14 +242,13 @@ public class TestData {
             agent.setInstitutionIds(institutionIds);
             agent.setGameTypeIds(gameTypes);
 
-            GamingMachine gamingMachine = (GamingMachine) mongoRepositoryReactive.findById(String.valueOf(i), GamingMachine.class).block();
-            if (gamingMachine == null) {
-                gamingMachine = new GamingMachine();
-                gamingMachine.setId(String.valueOf(i));
+            Machine machine = (Machine) mongoRepositoryReactive.findById(String.valueOf(i), Machine.class).block();
+            if (machine == null) {
+                machine = new Machine();
+                machine.setId(String.valueOf(i));
             }
-            gamingMachine.setSerialNumber(String.format("%s%s%s%s", String.valueOf(i), String.valueOf(i + 1), String.valueOf(i + 2), String.valueOf(i + 3)));
-            gamingMachine.setMachineNumber(String.valueOf(i));
-            gamingMachine.setInstitutionId(String.valueOf(i));
+            machine.setSerialNumber(String.format("%s%s%s%s", String.valueOf(i), String.valueOf(i + 1), String.valueOf(i + 2), String.valueOf(i + 3)));
+            machine.setInstitutionId(String.valueOf(i));
 
             PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById(String.valueOf(i), PaymentRecord.class).block();
             if (paymentRecord == null) {
@@ -282,8 +281,6 @@ public class TestData {
 
             }
             if (i == 3) {
-                paymentRecord.setGamingMachineId(gamingMachine.getId());
-                license.setGamingMachineId(paymentRecord.getGamingMachineId());
                 license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getGamingMachineLicenseDurationMonths()));
                 license.setLicenseTypeId(LicenseTypeReferenceData.GAMING_MACHINE_ID);
 
@@ -301,7 +298,7 @@ public class TestData {
 
             }
             license.setRenewalStatus("false");
-            mongoRepositoryReactive.saveOrUpdate(gamingMachine);
+            mongoRepositoryReactive.saveOrUpdate(machine);
             mongoRepositoryReactive.saveOrUpdate(agent);
             mongoRepositoryReactive.saveOrUpdate(paymentRecord);
             mongoRepositoryReactive.saveOrUpdate(license);

@@ -24,9 +24,7 @@ public interface FeeService {
 
     Mono<ResponseEntity> createLicenseType(RevenueNameDto revenueNameDto, HttpServletRequest request);
 
-    List<EnumeratedFactDto> getLicenseTypes();
-
-    List<FeesTypeDto> getAllFeesType();
+    Mono<ResponseEntity> getLicenseTypes();
 
     Mono<ResponseEntity> findActiveFeeByGameTypeAndPaymentTypeAndRevenueName(String gameTypeId, String feePaymentTypeId, String revenueNameId);
 
@@ -36,7 +34,7 @@ public interface FeeService {
 
     Mono<ResponseEntity> findLicenseTypeByParams(String institutionId, String agentId);
 
-    Fee findActiveFeeByLicenseTypeGameTypeAndFeePaymentType(String revenueNameId, String gameTypeId, String feePaymentTypeId);
+    Fee findActiveFeeByLicenseTypeGameTypeAndFeePaymentType(String licenseTypeId, String gameTypeId, String feePaymentTypeId);
 
     Fee findMostRecentFeeByLicenseTypeGameTypeAndFeePaymentType(String licenseTypeId, String gameTypeId, String feePaymentTypeId);
 

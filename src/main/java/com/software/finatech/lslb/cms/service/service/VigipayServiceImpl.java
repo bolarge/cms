@@ -57,16 +57,16 @@ public class VigipayServiceImpl implements VigipayService {
     }
 
     @Override
-    public String createInBranchInvoiceForAgent(Agent agent, VigipayInvoiceItem vigipayInvoiceItem) {
-        VigipayCreateInvoice vigipayCreateInvoice = createInvoiceForAgent(agent, vigipayInvoiceItem);
+    public String createInBranchInvoiceForAgent(Agent agent, List<VigipayInvoiceItem> vigipayInvoiceItems) {
+        VigipayCreateInvoice vigipayCreateInvoice = createInvoiceForAgent(agent, vigipayInvoiceItems);
         return vigipayHttpClient.createInvoice(vigipayCreateInvoice);
     }
 
     @Override
     public String createInBranchInvoiceForInstitution(Institution institution,
                                                       List<AuthInfo> adminsForInstitution,
-                                                      VigipayInvoiceItem vigipayInvoiceItem) {
-        VigipayCreateInvoice vigipayCreateInvoice = createInvoiceFromInstitution(institution, adminsForInstitution, vigipayInvoiceItem);
+                                                      List<VigipayInvoiceItem> vigipayInvoiceItems) {
+        VigipayCreateInvoice vigipayCreateInvoice = createInvoiceFromInstitution(institution, adminsForInstitution, vigipayInvoiceItems);
         return vigipayHttpClient.createInvoice(vigipayCreateInvoice);
     }
 
@@ -118,17 +118,14 @@ public class VigipayServiceImpl implements VigipayService {
 
 
     private VigipayCreateInvoice createInvoiceFromInstitution(Institution institution, List<AuthInfo> authInfos,
-                                                              VigipayInvoiceItem vigipayInvoiceItem) {
+                                                              List<VigipayInvoiceItem> vigipayInvoiceItems) {
         VigipayCreateInvoice vigipayCreateInvoice = new VigipayCreateInvoice();
         vigipayCreateInvoice.setCustomerCode(institution.getVgPayCustomerCode());
         vigipayCreateInvoice.setRecipients(vigipayRecipientListFromAdmins(authInfos));
         vigipayCreateInvoice.setLocationCode(locationCode);
         vigipayCreateInvoice.setCurrencyCode(currencyCode);
         vigipayCreateInvoice.setNote("From Lagos State Lotteries Board");
-
-        List<VigipayInvoiceItem> invoiceItems = new ArrayList<>();
-        invoiceItems.add(vigipayInvoiceItem);
-        vigipayCreateInvoice.setInvoiceItems(invoiceItems);
+        vigipayCreateInvoice.setInvoiceItems(vigipayInvoiceItems);
         vigipayCreateInvoice.setCorporateRevenueCode(corporateRevenueCode);
         DateTime today = DateTime.now();
         DateTime next7days = today.plusDays(7);
@@ -163,17 +160,14 @@ public class VigipayServiceImpl implements VigipayService {
         return vigipayCreateInvoice;
     }
 
-    private VigipayCreateInvoice createInvoiceForAgent(Agent agent, VigipayInvoiceItem vigipayInvoiceItem) {
+    private VigipayCreateInvoice createInvoiceForAgent(Agent agent, List<VigipayInvoiceItem> vigipayInvoiceItems) {
         VigipayCreateInvoice vigipayCreateInvoice = new VigipayCreateInvoice();
         vigipayCreateInvoice.setCustomerCode(agent.getVgPayCustomerCode());
         vigipayCreateInvoice.setRecipients(vigipayRecipientListFromAgent(agent));
         vigipayCreateInvoice.setLocationCode(locationCode);
         vigipayCreateInvoice.setCurrencyCode(currencyCode);
         vigipayCreateInvoice.setNote("From Lagos State Lotteries Board");
-
-        List<VigipayInvoiceItem> invoiceItems = new ArrayList<>();
-        invoiceItems.add(vigipayInvoiceItem);
-        vigipayCreateInvoice.setInvoiceItems(invoiceItems);
+        vigipayCreateInvoice.setInvoiceItems(vigipayInvoiceItems);
         vigipayCreateInvoice.setCorporateRevenueCode(corporateRevenueCode);
         DateTime today = DateTime.now();
         DateTime next7days = today.plusDays(7);

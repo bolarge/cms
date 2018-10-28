@@ -27,7 +27,6 @@ public class LSLBCMSApplication {
 
         ApplicationContext ctx = app.run(args);
 
-
         // Our global app context
         GlobalApplicationContext.ctx = ctx;
         Environment env = ctx.getBean(Environment.class);

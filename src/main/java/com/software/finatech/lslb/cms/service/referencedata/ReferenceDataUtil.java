@@ -3,7 +3,6 @@ package com.software.finatech.lslb.cms.service.referencedata;
 import com.software.finatech.lslb.cms.service.domain.EnumeratedFact;
 import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
-import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +38,20 @@ public class ReferenceDataUtil {
             }
             return Mono.just(new ResponseEntity<>(enumeratedFactDtoList, HttpStatus.OK));
         } catch (Exception e) {
-          return   logAndReturnError(logger,String.format("An error occurred while getting all values of %s from map store", entityMapName), e);
+            return logAndReturnError(logger, String.format("An error occurred while getting all values of %s from map store", entityMapName), e);
+        }
+    }
+
+    public static Collection<FactObject> getAllEnumeratedFacts(String entityMapName) {
+        try {
+            Map<String, FactObject> entityMap = Mapstore.STORE.get(entityMapName);
+            if (entityMap == null) {
+                return new ArrayList<>();
+            }
+            return entityMap.values();
+        } catch (Exception e) {
+            logger.error(String.format("An error occurred while getting all values of %s from map store", entityMapName));
+            return new ArrayList<>();
         }
     }
 }

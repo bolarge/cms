@@ -49,6 +49,7 @@ public class AgentUserCreator {
         authInfoCreateDto.setPhoneNumber(agent.getPhoneNumber());
         authInfoCreateDto.setFirstName(agent.getFirstName());
         authInfoCreateDto.setLastName(agent.getLastName());
+        authInfoCreateDto.setTitle(agent.getTitle());
         authInfoCreateDto.setAgentId(agent.getId());
         return authInfoCreateDto;
     }

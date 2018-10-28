@@ -38,7 +38,7 @@ public class DocumentApprovalRequestController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getAllApplicationForms(@RequestParam("page") int page,
+    public Mono<ResponseEntity> getAllDocumentApprovalRequests(@RequestParam("page") int page,
                                                        @RequestParam("pageSize") int pageSize,
                                                        @RequestParam("sortType") String sortType,
                                                        @RequestParam("sortProperty") String sortParam,

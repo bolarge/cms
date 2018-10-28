@@ -15,34 +15,70 @@ import java.util.Set;
 @SuppressWarnings("serial")
 @Document(collection = "MachineApprovalRequests")
 public class MachineApprovalRequest extends AbstractApprovalRequest {
-    private String gamingMachineId;
-    private String pendingGamingMachineId;
+    private String machineId;
+    private String pendingMachineId;
     private Set<MachineGameDetails> newMachineGames = new HashSet<>();
     private Set<MachineGameDetails> removedMachineGames = new HashSet<>();
     private String machineApprovalRequestTypeId;
+    private String agentId;
+    private String machineTypeId;
+    private boolean initiatedByInstitution;
+    private String newMachineStatusId;
+
+    public String getNewMachineStatusId() {
+        return newMachineStatusId;
+    }
+
+    public void setNewMachineStatusId(String newMachineStatusId) {
+        this.newMachineStatusId = newMachineStatusId;
+    }
+
+    public boolean isInitiatedByInstitution() {
+        return initiatedByInstitution;
+    }
+
+    public void setInitiatedByInstitution(boolean initiatedByInstitution) {
+        this.initiatedByInstitution = initiatedByInstitution;
+    }
 
     public String getMachineApprovalRequestTypeId() {
         return machineApprovalRequestTypeId;
+    }
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
+
+    public String getMachineTypeId() {
+        return machineTypeId;
+    }
+
+    public void setMachineTypeId(String machineTypeId) {
+        this.machineTypeId = machineTypeId;
     }
 
     public void setMachineApprovalRequestTypeId(String machineApprovalRequestTypeId) {
         this.machineApprovalRequestTypeId = machineApprovalRequestTypeId;
     }
 
-    public String getGamingMachineId() {
-        return gamingMachineId;
+    public String getMachineId() {
+        return machineId;
     }
 
-    public void setGamingMachineId(String gamingMachineId) {
-        this.gamingMachineId = gamingMachineId;
+    public void setMachineId(String machineId) {
+        this.machineId = machineId;
     }
 
-    public String getPendingGamingMachineId() {
-        return pendingGamingMachineId;
+    public String getPendingMachineId() {
+        return pendingMachineId;
     }
 
-    public void setPendingGamingMachineId(String pendingGamingMachineId) {
-        this.pendingGamingMachineId = pendingGamingMachineId;
+    public void setPendingMachineId(String pendingMachineId) {
+        this.pendingMachineId = pendingMachineId;
     }
 
     public Set<MachineGameDetails> getNewMachineGames() {
@@ -79,10 +115,17 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
     public MachineApprovalRequestDto convertToDto() {
         MachineApprovalRequestDto dto = new MachineApprovalRequestDto();
         dto.setId(getId());
-        Institution institution = getInstitution();
-        if (institution != null) {
-            dto.setInstitutionId(this.institutionId);
-            dto.setInstitutionName(institution.getInstitutionName());
+        if (isInitiatedByInstitution()) {
+            Institution institution = getInstitution();
+            if (institution != null) {
+                dto.setInstitutionId(this.institutionId);
+                dto.setInitiatorName(institution.getInstitutionName());
+            }
+        } else {
+            AuthInfo initiator = getInitiator();
+            if (initiator != null) {
+                dto.setInitiatorName(initiator.getFullName());
+            }
         }
         MachineApprovalRequestType approvalRequestType = getMachineApprovalRequestType();
         if (approvalRequestType != null) {
@@ -103,13 +146,13 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
 
     public MachineApprovalRequestDto convertToFullDto() {
         MachineApprovalRequestDto dto = convertToDto();
-        PendingGamingMachine pendingGamingMachine = getPendingGamingMachine();
+        PendingMachine pendingGamingMachine = getPendingMachine();
         if (pendingGamingMachine != null) {
-            dto.setPendingGamingMachine(pendingGamingMachine.convertToPendingDto());
+            dto.setPendingMachine(pendingGamingMachine.convertToPendingDto());
         }
-        GamingMachine gamingMachine = getGamingMachine();
+        Machine gamingMachine = getMachine();
         if (gamingMachine != null) {
-            dto.setPendingGamingMachine(gamingMachine.convertToFullDto());
+            dto.setPendingMachine(gamingMachine.convertToFullDto());
         }
         dto.setNewGameDetails(getNewMachineGames());
         AuthInfo approver = getAuthInfo(this.approverId);
@@ -123,13 +166,13 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
             dto.setRejectorId(this.rejectorId);
             dto.setRejectorName(rejector.getFullName());
         }
+        dto.setNewMachineStatusName(getNewMachineStatusName());
         return dto;
     }
 
     public boolean isCreateGamingMachine() {
         return StringUtils.equals(MachineApprovalRequestTypeReferenceData.CREATE_GAMING_MACHINE_ID, this.machineApprovalRequestTypeId);
     }
-
 
     public boolean isCreateGamingTerminal() {
         return StringUtils.equals(MachineApprovalRequestTypeReferenceData.CREATE_GAMING_TERMINAL_ID, this.machineApprovalRequestTypeId);
@@ -143,22 +186,62 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
         return StringUtils.equals(MachineApprovalRequestTypeReferenceData.ADD_GAMES_TO_GAMING_TERMINAL_ID, this.machineApprovalRequestTypeId);
     }
 
-    public PendingGamingMachine getPendingGamingMachine() {
-        if (StringUtils.isEmpty(this.pendingGamingMachineId)) {
-            return null;
-        }
-        return (PendingGamingMachine) mongoRepositoryReactive.findById(this.pendingGamingMachineId, PendingGamingMachine.class).block();
+    public boolean isChangeGamingMachineStatus() {
+        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.CHANGE_GAMING_MACHINE_STATUS, this.machineApprovalRequestTypeId);
     }
 
-    public GamingMachine getGamingMachine() {
-        if (StringUtils.isEmpty(this.gamingMachineId)) {
+    public boolean isChangeGamingTerminalStatus() {
+        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.CHANGE_GAMING_TERMINAL_STATUS, this.machineApprovalRequestTypeId);
+    }
+
+    public boolean isAssignTerminalToAgent() {
+        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.ASSIGN_TERMINAL_TO_AGENT, this.machineApprovalRequestTypeId);
+    }
+
+
+    public PendingMachine getPendingMachine() {
+        if (StringUtils.isEmpty(this.pendingMachineId)) {
             return null;
         }
-        return (GamingMachine) mongoRepositoryReactive.findById(this.gamingMachineId, GamingMachine.class).block();
+        return (PendingMachine) mongoRepositoryReactive.findById(this.pendingMachineId, PendingMachine.class).block();
+    }
+
+    public Machine getMachine() {
+        if (StringUtils.isEmpty(this.machineId)) {
+            return null;
+        }
+        return (Machine) mongoRepositoryReactive.findById(this.machineId, Machine.class).block();
     }
 
     @Override
     public String getFactName() {
         return "MachineApprovalRequests";
     }
+
+    public MachineStatus getNewMachineStatus() {
+        if (StringUtils.isEmpty(this.newMachineStatusId)) {
+            return null;
+        }
+        Map machineStatusMap = Mapstore.STORE.get("MachineStatus");
+        MachineStatus machineStatus = null;
+        if (machineStatus != null) {
+            machineStatus = (MachineStatus) machineStatusMap.get(this.newMachineStatusId);
+        }
+        if (machineStatus == null) {
+            machineStatus = (MachineStatus) mongoRepositoryReactive.findById(this.newMachineStatusId, MachineStatus.class).block();
+            if (machineStatus != null && machineStatusMap != null) {
+                machineStatusMap.put(this.machineTypeId, machineStatus);
+            }
+        }
+        return machineStatus;
+    }
+
+    private String getNewMachineStatusName() {
+        MachineStatus newStatus = getNewMachineStatus();
+        if (newStatus != null) {
+            return newStatus.toString();
+        }
+        return null;
+    }
+
 }

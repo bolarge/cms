@@ -76,6 +76,8 @@ public class DatabaseLoaderUtils {
         FeeApprovalRequestTypeReferenceData.load(mongoRepositoryReactive);
         DocumentApprovalRequestTypeReferenceData.load(mongoRepositoryReactive);
         MachineApprovalRequestTypeReferenceData.load(mongoRepositoryReactive);
+        MachineTypeReferenceData.load(mongoRepositoryReactive);
+        MachineStatusReferenceData.load(mongoRepositoryReactive);
     }
 
     // @Profile("test")
@@ -102,7 +104,7 @@ public class DatabaseLoaderUtils {
         factEnums.put("DocumentPurpose", DocumentPurpose.class);
         factEnums.put("DocumentType", DocumentType.class);
         factEnums.put("ModeOfPayment", ModeOfPayment.class);
-        factEnums.put("LicenseTypes", LicenseType.class);
+        factEnums.put("LicenseType", LicenseType.class);
         factEnums.put("ApprovalRequestStatus", ApprovalRequestStatus.class);
         factEnums.put("AgentApprovalRequestType", AgentApprovalRequestType.class);
         factEnums.put("RenewalFormStatus", RenewalFormStatus.class);
@@ -113,6 +115,8 @@ public class DatabaseLoaderUtils {
         factEnums.put("FeeApprovalRequestType", FeeApprovalRequestType.class);
         factEnums.put("DocumentApprovalRequestType", DocumentApprovalRequestType.class);
         factEnums.put("MachineApprovalRequestType", MachineApprovalRequestType.class);
+        factEnums.put("MachineType", MachineType.class);
+        factEnums.put("MachineStatus", MachineStatus.class);
 
         for (Map.Entry<String, Class> entry : factEnums.entrySet()) {
             logger.info("Importing ReferenceMasterData for > " + entry.getKey());

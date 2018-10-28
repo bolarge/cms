@@ -29,10 +29,7 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -815,32 +812,82 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
     @Override
-    public void createFirstLicenseForGamingMachinePayment(PaymentRecord paymentRecord) {
+    public void createLicenseForGamingMachinePayment(PaymentRecord paymentRecord) {
         try {
             if (!StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, paymentRecord.getPaymentStatusId())) {
                 logger.info("payment record with id {} is not completed, skipping creation of License for gaming machine", paymentRecord.getId());
                 return;
             }
 
-            GameType gameType = paymentRecord.getGameType();
-            LocalDate effectiveDate = LocalDate.now();
-            LocalDate expiryDate = effectiveDate.plusMonths(gameType.getGamingMachineLicenseDurationMonths()).minusDays(1);
-            License license = new License();
+            Set<Machine> gamingMachines = paymentRecord.getGamingMachines();
+            License license = findExistingGamingMachineLicenseInPresentYear(paymentRecord);
+            if (license != null) {
+                addLicenseToMachines(license, gamingMachines);
+                return;
+            }
+
+            LocalDate effectiveDate = LocalDate.now().dayOfYear().withMinimumValue();
+            LocalDate expiryDate = LocalDate.now().dayOfYear().withMaximumValue();
+            license = new License();
             license.setId(UUID.randomUUID().toString());
+            License mostRecentLicense = findMostRecentGamingMachinelLicense(paymentRecord);
+            if (mostRecentLicense == null) {
+                license.setLicenseNumber(generateLicenseNumberForPaymentRecord(paymentRecord));
+            } else {
+                license.setLicenseNumber(mostRecentLicense.getLicenseNumber());
+            }
             license.setInstitutionId(paymentRecord.getInstitutionId());
-            license.setGamingMachineId(paymentRecord.getGamingMachineId());
-            license.setGameTypeId(paymentRecord.getGameTypeId());
             license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
             license.setLicenseTypeId(LicenseTypeReferenceData.GAMING_MACHINE_ID);
             license.setEffectiveDate(effectiveDate);
             license.setExpiryDate(expiryDate);
+            license.setGameTypeId(paymentRecord.getGameTypeId());
             license.setPaymentRecordId(paymentRecord.getId());
-            license.setLicenseNumber(generateLicenseNumberForPaymentRecord(paymentRecord));
             mongoRepositoryReactive.saveOrUpdate(license);
+            addLicenseToMachines(license, gamingMachines);
         } catch (Exception e) {
-            logger.error("An error occurred while creating initial license for gaming machine {}", paymentRecord.getGamingMachineId(), e);
+            logger.error("An error occurred while creating license for gaming machines", e);
         }
     }
+
+    @Override
+    public void createLicenseForGamingTerminalPayment(PaymentRecord paymentRecord) {
+        try {
+            if (!StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, paymentRecord.getPaymentStatusId())) {
+                logger.info("payment record with id {} is not completed, skipping creation of License for gaming machine", paymentRecord.getId());
+                return;
+            }
+            Set<Machine> gamingTerminals = paymentRecord.getGamingTerminals();
+            License license = findExistingGamingTerminalLicenseInPresentYear(paymentRecord);
+            if (license != null) {
+                addLicenseToMachines(license, gamingTerminals);
+                return;
+            }
+
+            LocalDate effectiveDate = LocalDate.now().dayOfYear().withMinimumValue();
+            LocalDate expiryDate = LocalDate.now().dayOfYear().withMaximumValue();
+            license = new License();
+            license.setId(UUID.randomUUID().toString());
+            License mostRecentLicense = findMostRecentGamingTerminalLicense(paymentRecord);
+            if (mostRecentLicense == null) {
+                license.setLicenseNumber(generateLicenseNumberForPaymentRecord(paymentRecord));
+            } else {
+                license.setLicenseNumber(mostRecentLicense.getLicenseNumber());
+            }
+            license.setAgentId(paymentRecord.getAgentId());
+            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+            license.setLicenseTypeId(LicenseTypeReferenceData.GAMING_TERMINAL_ID);
+            license.setEffectiveDate(effectiveDate);
+            license.setExpiryDate(expiryDate);
+            paymentRecord.setGameTypeId(paymentRecord.getGameTypeId());
+            license.setPaymentRecordId(paymentRecord.getId());
+            mongoRepositoryReactive.saveOrUpdate(license);
+            addLicenseToMachines(license, gamingTerminals);
+        } catch (Exception e) {
+            logger.error("An error occurred while creating license for gaming machines", e);
+        }
+    }
+
 
     @Override
     public void createRenewedLicenseForPayment(PaymentRecord paymentRecord) {
@@ -851,11 +898,10 @@ public class LicenseServiceImpl implements LicenseService {
             GameType gameType = paymentRecord.getGameType();
             String institutionId = paymentRecord.getInstitutionId();
             String agentId = paymentRecord.getAgentId();
-            String gamingMachineId = paymentRecord.getGamingMachineId();
             String gameTypeId = paymentRecord.getGameTypeId();
             String licenseTypeId = paymentRecord.getLicenseTypeId();
 
-            License latestLicense = getPreviousConfirmedLicense(institutionId, agentId, gamingMachineId, gameTypeId, licenseTypeId);
+            License latestLicense = getPreviousConfirmedLicense(institutionId, agentId, gameTypeId, licenseTypeId);
             if (latestLicense == null) {
                 logger.info("There is no previous license found for the payment record with id {}", paymentRecord.getId());
                 return;
@@ -866,7 +912,6 @@ public class LicenseServiceImpl implements LicenseService {
 
             License newPendingApprovalRenewedLicense = new License();
             newPendingApprovalRenewedLicense.setId(UUID.randomUUID().toString());
-            newPendingApprovalRenewedLicense.setGamingMachineId(gamingMachineId);
             newPendingApprovalRenewedLicense.setInstitutionId(institutionId);
             newPendingApprovalRenewedLicense.setAgentId(agentId);
             newPendingApprovalRenewedLicense.setEffectiveDate(newLicenseStartDate.plusDays(1));
@@ -875,7 +920,7 @@ public class LicenseServiceImpl implements LicenseService {
             if (latestLicense.isInstitutionLicense()) {
                 newPendingApprovalRenewedLicense.setLicenseStatusId(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
             }
-            if (latestLicense.isAgentLicense() || latestLicense.isGamingMachineLicense()) {
+            if (latestLicense.isAgentLicense()) {
                 newPendingApprovalRenewedLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
             }
             newPendingApprovalRenewedLicense.setLicenseTypeId(paymentRecord.getLicenseTypeId());
@@ -918,19 +963,15 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
     private License getPreviousConfirmedLicense(String institutionId,
-                                               String agentId,
-                                               String gamingMachineId,
-                                               String gameTypeId,
-                                               String licenseTypeId) {
+                                                String agentId,
+                                                String gameTypeId,
+                                                String licenseTypeId) {
         Query query = new Query();
         if (!StringUtils.isEmpty(institutionId)) {
             query.addCriteria(Criteria.where("institutionId").is(institutionId));
         }
         if (!StringUtils.isEmpty(agentId)) {
             query.addCriteria(Criteria.where("agentId").is(agentId));
-        }
-        if (!StringUtils.isEmpty(gamingMachineId)) {
-            query.addCriteria(Criteria.where("gamingMachineId").is(gamingMachineId));
         }
         if (!StringUtils.isEmpty(gameTypeId)) {
             query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
@@ -960,6 +1001,9 @@ public class LicenseServiceImpl implements LicenseService {
         if (paymentRecord.isGamingMachinePayment()) {
             prefix = prefix + "GM-";
         }
+        if (paymentRecord.isGamingTerminalPayment()) {
+            prefix = prefix + "GT-";
+        }
         if (paymentRecord.isInstitutionPayment()) {
             prefix = prefix + "OP-";
         }
@@ -969,5 +1013,56 @@ public class LicenseServiceImpl implements LicenseService {
             prefix = prefix + gameType.getShortCode() + "-";
         }
         return String.format("%s%s%s", prefix, randomDigit, LocalDateTime.now().getSecondOfMinute());
+    }
+
+    private License findExistingGamingMachineLicenseInPresentYear(PaymentRecord paymentRecord) {
+        LocalDate firstDayOfYear = LocalDate.now().dayOfYear().withMinimumValue();
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(paymentRecord.getInstitutionId()));
+        query.addCriteria(Criteria.where("gameTypeId").is(paymentRecord.getGameTypeId()));
+        query.addCriteria(Criteria.where("effectiveDate").gte(firstDayOfYear));
+        query.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.GAMING_MACHINE_ID));
+        return (License) mongoRepositoryReactive.find(query, License.class).block();
+    }
+
+    private License findExistingGamingTerminalLicenseInPresentYear(PaymentRecord paymentRecord) {
+        LocalDate firstDayOfYear = LocalDate.now().dayOfYear().withMinimumValue();
+        Query query = new Query();
+        query.addCriteria(Criteria.where("agentId").is(paymentRecord.getAgentId()));
+        query.addCriteria(Criteria.where("gameTypeId").is(paymentRecord.getGameTypeId()));
+        query.addCriteria(Criteria.where("effectiveDate").gte(firstDayOfYear));
+        query.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.GAMING_TERMINAL_ID));
+        return (License) mongoRepositoryReactive.find(query, License.class).block();
+    }
+
+    private void addLicenseToMachines(License license, Collection<Machine> machines) {
+        for (Machine machine : machines) {
+            try {
+                machine.setLicenseId(license.getId());
+                mongoRepositoryReactive.saveOrUpdate(machine);
+            } catch (Exception e) {
+                logger.error("An error occurred while adding license {} to machine {}", license.getLicenseNumber(), machine.getSerialNumber(), e);
+            }
+        }
+    }
+
+    private License findMostRecentGamingTerminalLicense(PaymentRecord paymentRecord) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("agentId").is(paymentRecord.getAgentId()));
+        query.addCriteria(Criteria.where("gameTypeId").is(paymentRecord.getGameTypeId()));
+        query.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.GAMING_TERMINAL_ID));
+        Sort sort = new Sort(Sort.Direction.DESC, "expiryDate");
+        query.with(sort);
+        return (License) mongoRepositoryReactive.find(query, License.class).block();
+    }
+
+    private License findMostRecentGamingMachinelLicense(PaymentRecord paymentRecord) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(paymentRecord.getInstitutionId()));
+        query.addCriteria(Criteria.where("gameTypeId").is(paymentRecord.getGameTypeId()));
+        query.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.GAMING_MACHINE_ID));
+        Sort sort = new Sort(Sort.Direction.DESC, "expiryDate");
+        query.with(sort);
+        return (License) mongoRepositoryReactive.find(query, License.class).block();
     }
 }

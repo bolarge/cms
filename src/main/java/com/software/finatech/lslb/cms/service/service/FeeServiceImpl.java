@@ -4,10 +4,7 @@ import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.FeeApprovalRequestTypeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.MapValues;
@@ -31,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Service
@@ -102,7 +100,7 @@ public class FeeServiceImpl implements FeeService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
                     currentAuditorName, currentAuditorName,
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-            return Mono.just(new ResponseEntity<>(feeApprovalRequest.convertToDto(), HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(feeApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format , please use yyyy-MM-dd", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
@@ -259,57 +257,13 @@ public class FeeServiceImpl implements FeeService {
 
 
     @Override
-    public List<FeesTypeDto> getAllFeesType() {
-        try {
-            Query query = new Query();
-            query.addCriteria(Criteria.where("active").is(true));
-            List<Fee> fees = (ArrayList<Fee>) mongoRepositoryReactive.findAll(query, Fee.class).toStream().collect(Collectors.toList());
-            ArrayList<FeesTypeDto> feeDtos = new ArrayList<>();
-            fees.forEach(fee -> {
-                FeesTypeDto feesTypeDto = new FeesTypeDto();
-                feesTypeDto.setFeeId(fee.getId());
-                feesTypeDto.setFee(fee.convertToDto().getRevenueName() + " " + fee.convertToDto().getGameTypeName() + " " + fee.convertToDto().getFeePaymentTypeName());
-                feeDtos.add(feesTypeDto);
-            });
-            return feeDtos;
-        } catch (Exception e) {
-            String errorMsg = "An error occurred while getting all fees";
-            logger.error(errorMsg, e);
-            return null;
-        }
-    }
-
-    public List<EnumeratedFactDto> getFeePaymentType() {
-        Map feePaymentTypeMap = Mapstore.STORE.get("FeePaymentType");
-        ArrayList<FeePaymentType> feePaymentTypes = new ArrayList<FeePaymentType>(feePaymentTypeMap.values());
-        List<EnumeratedFactDto> feePaymentTypeDtoList = new ArrayList<>();
-        feePaymentTypes.forEach(factObject -> {
-            FeePaymentType feePaymentType = factObject;
-            feePaymentTypeDtoList.add(feePaymentType.convertToDto());
-        });
-        return feePaymentTypeDtoList;
-    }
-
-    @Override
-    public List<EnumeratedFactDto> getLicenseTypes() {
-        Map licenseTypeMap = Mapstore.STORE.get("LicenseType");
-        Collection<FactObject> licenseTypes = licenseTypeMap.values();
-        List<EnumeratedFactDto> revenueNameDtoList = new ArrayList<>();
-        licenseTypes.forEach(factObject -> {
-            LicenseType licenseType = (LicenseType) factObject;
-            revenueNameDtoList.add(licenseType.convertToDto());
-        });
-        return revenueNameDtoList;
+    public Mono<ResponseEntity> getLicenseTypes() {
+        return getAllEnumeratedEntity("LicenseType");
     }
 
     @Override
     public Mono<ResponseEntity> getAllFeePaymentType() {
-        try {
-            return Mono.just(new ResponseEntity<>(getFeePaymentType(), HttpStatus.OK));
-        } catch (Exception e) {
-            String errorMsg = "An error occurred while trying to get all payment types";
-            return logAndReturnError(logger, errorMsg, e);
-        }
+        return getAllEnumeratedEntity("FeePaymentType");
     }
 
     @Override
@@ -336,7 +290,8 @@ public class FeeServiceImpl implements FeeService {
     public Mono<ResponseEntity> findAllFeePaymentTypeForLicenseType(String licenseTypeId) {
         try {
             if (StringUtils.equals(LicenseTypeReferenceData.AGENT_ID, licenseTypeId)
-                    || StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, licenseTypeId)) {
+                    || StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, licenseTypeId)
+                    || StringUtils.equals(LicenseTypeReferenceData.GAMING_TERMINAL_ID, licenseTypeId)) {
                 Query query = new Query();
                 query.addCriteria(Criteria.where("id").ne(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID));
 
@@ -358,34 +313,20 @@ public class FeeServiceImpl implements FeeService {
 
     @Override
     public Mono<ResponseEntity> findLicenseTypeByParams(String institutionId, String agentId) {
+        LicenseTypeSearch search = new LicenseTypeSearch(institutionId, agentId);
         try {
-            if (!StringUtils.isEmpty(institutionId) && StringUtils.isEmpty(agentId)) {
-                Query query = Query.query(Criteria.where("id").ne(LicenseTypeReferenceData.AGENT_ID));
-
-                ArrayList<LicenseType> licenseTypes = (ArrayList<LicenseType>) mongoRepositoryReactive.findAll(query, LicenseType.class).toStream().collect(Collectors.toList());
-                if (licenseTypes == null || licenseTypes.isEmpty()) {
-                    return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
+            Collection<FactObject> factObjects = ReferenceDataUtil.getAllEnumeratedFacts("LicenseType");
+            List<EnumeratedFactDto> dtos = new ArrayList<>();
+            for (FactObject factObject : factObjects) {
+                LicenseType licenseType = (LicenseType) factObject;
+                if (search.isAgentSearch() && licenseType.appliesToAgent()) {
+                    dtos.add(licenseType.convertToDto());
                 }
-                ArrayList<EnumeratedFactDto> enumeratedFactDtos = new ArrayList<>();
-                for (LicenseType licenseType : licenseTypes) {
-                    enumeratedFactDtos.add(licenseType.convertToDto());
+                if (search.isInstitutionSearch() && licenseType.appliesToInstitution()) {
+                    dtos.add(licenseType.convertToDto());
                 }
-                return Mono.just(new ResponseEntity<>(enumeratedFactDtos, HttpStatus.OK));
             }
-
-            if (!StringUtils.isEmpty(agentId) && StringUtils.isEmpty(institutionId)) {
-                Query query = Query.query(Criteria.where("id").is(LicenseTypeReferenceData.AGENT_ID));
-                ArrayList<LicenseType> licenseTypes = (ArrayList<LicenseType>) mongoRepositoryReactive.findAll(query, LicenseType.class).toStream().collect(Collectors.toList());
-                if (licenseTypes == null || licenseTypes.isEmpty()) {
-                    return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
-                }
-                ArrayList<EnumeratedFactDto> enumeratedFactDtos = new ArrayList<>();
-                for (LicenseType licenseType : licenseTypes) {
-                    enumeratedFactDtos.add(licenseType.convertToDto());
-                }
-                return Mono.just(new ResponseEntity<>(enumeratedFactDtos, HttpStatus.OK));
-            }
-            return Mono.just(new ResponseEntity<>("Please make either institution or agent id null", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>(dtos, HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while finding revenue names by param", e);
         }
@@ -406,6 +347,7 @@ public class FeeServiceImpl implements FeeService {
         Query query = new Query();
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         query.addCriteria(Criteria.where("licenseTypeId").is(licenseTypeId));
+        query.addCriteria(Criteria.where("active").is(true));
         query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
         query.with(new Sort(Sort.Direction.DESC, "endDate"));
         return (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
@@ -429,5 +371,41 @@ public class FeeServiceImpl implements FeeService {
             }
         }
         return feePaymentType;
+    }
+
+    private class LicenseTypeSearch {
+        private String institutionId;
+        private String agentId;
+
+        public String getInstitutionId() {
+            return institutionId;
+        }
+
+        public void setInstitutionId(String institutionId) {
+            this.institutionId = institutionId;
+        }
+
+        public String getAgentId() {
+            return agentId;
+        }
+
+        public void setAgentId(String agentId) {
+            this.agentId = agentId;
+        }
+
+        public boolean isAgentSearch() {
+            return !StringUtils.isEmpty(this.agentId)
+                    && StringUtils.isEmpty(this.institutionId);
+        }
+
+        public boolean isInstitutionSearch() {
+            return StringUtils.isEmpty(this.agentId)
+                    && !StringUtils.isEmpty(this.institutionId);
+        }
+
+        public LicenseTypeSearch(String institutionId, String agentId) {
+            this.institutionId = institutionId;
+            this.agentId = agentId;
+        }
     }
 }

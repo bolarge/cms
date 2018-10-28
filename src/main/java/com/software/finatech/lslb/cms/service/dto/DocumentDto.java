@@ -25,7 +25,15 @@ public class DocumentDto {
     protected String approverId;
     protected String comment;
     protected String commenterName;
+    protected String documentStatus;
 
+    public String getDocumentStatus() {
+        return documentStatus;
+    }
+
+    public void setDocumentStatus(String documentStatus) {
+        this.documentStatus = documentStatus;
+    }
 
     public String getComment() {
         return comment;
