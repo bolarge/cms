@@ -231,7 +231,12 @@ public class Machine extends AbstractFact {
         query.addCriteria(Criteria.where("machineId").is(this.id));
         ArrayList<MachineGame> machineGames = (ArrayList<MachineGame>) mongoRepositoryReactive.findAll(query, MachineGame.class).toStream().collect(Collectors.toList());
         for (MachineGame machineGame : machineGames) {
-            machineGameDetails.add(MachineGameDetails.fromGameNameAndVersionAndState(machineGame.getGameName(), machineGame.getGameVersion(), machineGame.getActive()));
+         MachineGameDetails gameDetails = new MachineGameDetails();
+         gameDetails.setId(machineGame.getId());
+         gameDetails.setActive(machineGame.getActive());
+         gameDetails.setGameVersion(machineGame.getGameVersion());
+         gameDetails.setGameName(machineGame.getGameName());
+            machineGameDetails.add(gameDetails);
         }
         return machineGameDetails;
     }
