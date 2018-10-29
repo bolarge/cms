@@ -1,4 +1,4 @@
-package com.software.finatech.lslb.cms.service.domain;
+package com.software.finatech.lslb.cms.service.dto;
 
 public class CommentDto {
     private String commentTime;

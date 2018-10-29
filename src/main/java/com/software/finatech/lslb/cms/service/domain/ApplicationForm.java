@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
+import com.software.finatech.lslb.cms.service.dto.CommentDto;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
 import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
 import com.software.finatech.lslb.cms.service.model.contactDetails.ApplicantContactDetails;

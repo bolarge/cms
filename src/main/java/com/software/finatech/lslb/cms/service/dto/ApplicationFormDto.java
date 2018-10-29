@@ -1,7 +1,5 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import com.software.finatech.lslb.cms.service.domain.CommentDto;
-
 import java.util.ArrayList;
 import java.util.List;
 
