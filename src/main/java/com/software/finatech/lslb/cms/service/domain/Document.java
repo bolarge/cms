@@ -33,6 +33,8 @@ public class Document extends AbstractFact {
     protected String previousDocumentId;
     protected String originalFilename;
     private String applicationFormId;
+    private String renewalFormId;
+    private String aipFormId;
     protected String institutionId;
     protected String gameTypeId;
     protected String agentId;
@@ -40,6 +42,22 @@ public class Document extends AbstractFact {
     protected String comment;
     protected String approvalRequestStatusId = ApprovalRequestStatusReferenceData.PENDING_ID;
     protected String commenterName;
+
+    public String getRenewalFormId() {
+        return renewalFormId;
+    }
+
+    public void setRenewalFormId(String renewalFormId) {
+        this.renewalFormId = renewalFormId;
+    }
+
+    public String getAipFormId() {
+        return aipFormId;
+    }
+
+    public void setAipFormId(String aipFormId) {
+        this.aipFormId = aipFormId;
+    }
 
     public void setCommenterName(String commenterName) {
         this.commenterName = commenterName;
@@ -336,6 +354,13 @@ public class Document extends AbstractFact {
             return null;
         }
         return (RenewalForm) mongoRepositoryReactive.findById(this.entityId, RenewalForm.class).block();
+    }
+    public AIPDocumentApproval getAIPForm() {
+        if (StringUtils.isEmpty(this.entityId)) {
+            return null;
+        }
+        return (AIPDocumentApproval) mongoRepositoryReactive.findById(this.entityId, AIPDocumentApproval.class).block();
+
     }
     public AuthInfo getApprover() {
         DocumentType documentType = getDocumentType();

@@ -3,10 +3,7 @@ package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
-import com.software.finatech.lslb.cms.service.dto.RenewalFormCreateDto;
-import com.software.finatech.lslb.cms.service.dto.RenewalFormDto;
-import com.software.finatech.lslb.cms.service.dto.RenewalFormStatusDto;
-import com.software.finatech.lslb.cms.service.dto.RenewalFormUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.RenewalFormStatusReferenceData;
@@ -101,8 +98,51 @@ public class RenewalFormController extends BaseController {
         return renewalFormService.updateRenewalForm(renewalFormUpdateDto);
 
     }
+    @RequestMapping(method = RequestMethod.POST, value = "/approve-renewal-form", params = {"renewalId","userId"})
+    @ApiOperation(value = "Approve Renewal form", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> approveAIPForm(@RequestParam("renewalId") String renewalId,
+                                               @RequestParam("userId") String approverId,HttpServletRequest request) {
+        return renewalFormService.approveRenewalForm(renewalId,approverId, request);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/create-comment", params = {"renewalId"})
+    @ApiOperation(value = "Create comment for AIP form from LSLB Admin", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> createAIPFormComment(@RequestParam("renewalId") String renewalId,
+                                                     @RequestBody @Valid FormCreateCommentDto formCreateCommentDto, HttpServletRequest request) {
+        return renewalFormService.addCommentsToFormFromLslbAdmin(renewalId, formCreateCommentDto, request);
+    }
+    @RequestMapping(method = RequestMethod.POST, value = "/complete-renewal-form", params = {"renewalId"})
+    @ApiOperation(value = "complete filling renewal form", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> completeApplicationForm(@RequestParam("renewalId") String renewalId, @RequestParam("isResubmit") boolean isResubmit, HttpServletRequest request) {
+        return renewalFormService.completeRenewalForm(renewalId, isResubmit, request);
+    }
 
 
+    @RequestMapping(method = RequestMethod.POST, value = "/reject-renewal-form", params = {"renewalFormId"})
+    @ApiOperation(value = "Reject renewal application form", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> rejectApplicationForm(@RequestParam("renewalFormId") String renewalFormId, @RequestBody @Valid RenewalFormRejectDto renewalFormRejectDto, HttpServletRequest request) {
+        return renewalFormService.rejectRenewalForm(renewalFormId, renewalFormRejectDto, request);
+    }
 
     @RequestMapping(method = RequestMethod.GET, value = "/get-renewal-form-statuses")
     @ApiOperation(value = "Get all renewal form statuses", response = RenewalForm.class, responseContainer = "List", consumes = "application/json")

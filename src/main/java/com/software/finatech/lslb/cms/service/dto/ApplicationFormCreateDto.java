@@ -2,7 +2,7 @@ package com.software.finatech.lslb.cms.service.dto;
 
 import javax.validation.constraints.NotEmpty;
 
-public class ApplicationFormCreateDto {
+public class ApplicationFormCreateDto{
 
     @NotEmpty(message = "please supply game type Id")
     protected String gameTypeId;

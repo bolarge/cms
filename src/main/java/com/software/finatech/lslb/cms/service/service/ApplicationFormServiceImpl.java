@@ -96,6 +96,8 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         }
     }
 
+
+
     @Override
     public Mono<ResponseEntity> findAllApplicationForm(int page,
                                                        int pageSize,
@@ -507,6 +509,50 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         }
     }
 
+
+    @Override
+    public Mono<ResponseEntity> approveAIPForm(String aipFormId, String approverId, HttpServletRequest request) {
+        try {
+            AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(approverId, AuthInfo.class).block();
+            if (authInfo == null) {
+                return Mono.just(new ResponseEntity<>("Approver does not exist on the system", HttpStatus.BAD_REQUEST));
+            }
+
+            if (!authInfo.getAllUserPermissionIdsForUser().contains(LSLBAuthPermissionReferenceData.APPROVE_APPICATION_FORM_ID)) {
+                return Mono.just(new ResponseEntity<>("User does not have permission to approve applications", HttpStatus.BAD_REQUEST));
+            }
+            AIPDocumentApproval aipDocumentApproval = getAIPFormById(aipFormId);
+            if (aipDocumentApproval == null) {
+                return Mono.just(new ResponseEntity<>("AIP form does not exist", HttpStatus.BAD_REQUEST));
+            }
+
+            if (!StringUtils.equals(ApplicationFormStatusReferenceData.IN_REVIEW_STATUS_ID, aipDocumentApproval.getFormStatusId())){
+                return Mono.just(new ResponseEntity<>("AIP form not yet submitted", HttpStatus.BAD_REQUEST));
+            }
+            if (StringUtils.equals(ApplicationFormStatusReferenceData.REJECTED_STATUS_ID, aipDocumentApproval.getFormStatusId())) {
+                return Mono.just(new ResponseEntity<>("AIP already rejected", HttpStatus.BAD_REQUEST));
+            }
+            if (!aipDocumentApproval.getReadyForApproval()) {
+                return Mono.just(new ResponseEntity<>("Not all documents on this application are approved", HttpStatus.BAD_REQUEST));
+            }
+
+            aipDocumentApproval.setApproverId(approverId);
+            String approvedAIPFormStatusId = ApplicationFormStatusReferenceData.APPROVED_STATUS_ID;
+            aipDocumentApproval.setFormStatusId(approvedAIPFormStatusId);
+            saveAIPForm(aipDocumentApproval);
+
+            String verbiage = String.format("Approved AIP form : %s ->  ", aipDocumentApproval.getFormStatusId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), aipDocumentApproval.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            applicationFormNotificationHelperAsync.sendApprovedMailToInstitutionAdmins(aipDocumentApproval);
+            return Mono.just(new ResponseEntity<>("Application form approved successfully", HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while approving application form", e);
+        }
+    }
+
     @Override
     public Mono<ResponseEntity> completeApplicationForm(String applicationFormId, boolean isResubmit, HttpServletRequest request) {
         try {
@@ -531,6 +577,34 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         }
     }
 
+
+    @Override
+    public Mono<ResponseEntity> completeAIPForm(String institutionId,String gameTypeId, boolean isResubmit, HttpServletRequest request) {
+        try {
+            Query queryDocument= new Query();
+            queryDocument.addCriteria(Criteria.where("institutionId").is(institutionId));
+            queryDocument.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+
+            AIPDocumentApproval aipDocumentApproval = (AIPDocumentApproval) mongoRepositoryReactive.find(queryDocument, AIPDocumentApproval.class).block();
+            if (aipDocumentApproval == null) {
+                return Mono.just(new ResponseEntity<>("AIP form does not exist", HttpStatus.BAD_REQUEST));
+            }
+            String inReviewApplicationFormStatusId = ApplicationFormStatusReferenceData.IN_REVIEW_STATUS_ID;
+            aipDocumentApproval.setFormStatusId(inReviewApplicationFormStatusId);
+            aipDocumentApproval.setSubmissionDate(LocalDate.now());
+            saveAIPForm(aipDocumentApproval);
+
+            String verbiage = String.format("Submitted AIP form : %s ->  ", aipDocumentApproval.getFormStatusId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), aipDocumentApproval.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            applicationFormNotificationHelperAsync.sendAIPFormSubmissionMailToLSLBAdmins(aipDocumentApproval);
+            return Mono.just(new ResponseEntity<>("AIP completed successfully and now in review", HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while completing application form", e);
+        }
+    }
     @Override
     public Mono<ResponseEntity> getPaymentRecordsForApplicationForm(String applicationFormId) {
         try {
@@ -621,6 +695,41 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         }
     }
 
+
+    @Override
+    public Mono<ResponseEntity> addCommentsToAIPFormFromLslbAdmin(String aipFormId, FormCreateCommentDto formCreateCommentDto, HttpServletRequest request) {
+        try {
+
+
+            AIPDocumentApproval aipDocumentApproval = getAIPFormById(aipFormId);
+
+            if (aipDocumentApproval == null) {
+                return Mono.just(new ResponseEntity<>("AIP form does not exist", HttpStatus.BAD_REQUEST));
+            }
+            if (!StringUtils.equals(ApplicationFormStatusReferenceData.IN_REVIEW_STATUS_ID, aipDocumentApproval.getFormStatusId())) {
+                return Mono.just(new ResponseEntity<>("Aip form status has to be IN REVIEW for you to add a comment", HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo lslbAdmin = authInfoService.getUserById(formCreateCommentDto.getUserId());
+            if (lslbAdmin == null) {
+                return Mono.just(new ResponseEntity<>("Commenting user does not exist", HttpStatus.BAD_REQUEST));
+            }
+            LslbAdminComment lslbAdminComment = new LslbAdminComment(formCreateCommentDto.getUserId(), formCreateCommentDto.getComment());
+            aipDocumentApproval.setLslbAdminComment(lslbAdminComment);
+            aipDocumentApproval.setFormStatusId(ApplicationFormStatusReferenceData.PENDING_RESUBMISSON_ID);
+            saveAIPForm(aipDocumentApproval);
+
+            String verbiage = String.format("Added comment to AIP form : %s ->  ", aipDocumentApproval.getFormStatusId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), aipDocumentApproval.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            applicationFormNotificationHelperAsync.sendAdminCommentNotificationToInstitutionAdmins(aipDocumentApproval, lslbAdminComment.getComment());
+            return Mono.just(new ResponseEntity<>("Comment added successfully", HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding comment to application form", e);
+        }
+    }
+
     @Override
     public boolean institutionHasCompletedApplicationForGameType(String institutionId, String gameTypeId) {
         Query query = new Query();
@@ -683,6 +792,22 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             mongoRepositoryReactive.saveOrUpdate(applicationForm);
         }
     }
+    @Override
+    public void rejectAIPFormDocument(Document document) {
+        AIPDocumentApproval aipDocumentApproval = document.getAIPForm();
+        String documentId = document.getId();
+        if (aipDocumentApproval != null) {
+            FormDocumentApproval formDocumentApproval = aipDocumentApproval.getDocumentApproval();
+            if (formDocumentApproval != null) {
+                Map<String, Boolean> documentApprovalMap = formDocumentApproval.getApprovalMap();
+                documentApprovalMap.put(documentId, false);
+                applicationFormNotificationHelperAsync.sendDocumentReturnMailToInstitutionMembers(aipDocumentApproval, document);
+                formDocumentApproval.setApprovalMap(documentApprovalMap);
+                aipDocumentApproval.setDocumentApproval(formDocumentApproval);
+            }
+            mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
+        }
+    }
 
     @Override
     public void doDocumentReuploadNotification(Document document) {
@@ -694,6 +819,46 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationForm.setDocumentApproval(formDocumentApproval);
             mongoRepositoryReactive.saveOrUpdate(applicationForm);
             applicationFormNotificationHelperAsync.sendResubmissionNotificationForApplicationForm(applicationForm, document);
+        }
+    }
+
+    @Override
+    public void doAIPDocumentReuploadNotification(Document document) {
+        AIPDocumentApproval aipDocumentApproval = document.getAIPForm();
+        String documentId = document.getId();
+        if (aipDocumentApproval != null) {
+            FormDocumentApproval formDocumentApproval = aipDocumentApproval.getDocumentApproval();
+            formDocumentApproval.getApprovalMap().put(documentId, false);
+            aipDocumentApproval.setDocumentApproval(formDocumentApproval);
+            mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
+            applicationFormNotificationHelperAsync.sendResubmissionNotificationForApplicationForm(aipDocumentApproval, document);
+        }
+    }
+
+    @Override
+    public void approveAIPFormDocument(Document document) {
+        AIPDocumentApproval aipDocumentApproval = document.getAIPForm();
+        String documentId = document.getId();
+        if (aipDocumentApproval != null) {
+            FormDocumentApproval formDocumentApproval = aipDocumentApproval.getDocumentApproval();
+            if (formDocumentApproval != null) {
+                Map<String, Boolean> documentApprovalMap = formDocumentApproval.getApprovalMap();
+                documentApprovalMap.put(documentId, true);
+                Collection<Boolean> values = documentApprovalMap.values();
+                int count = 0;
+                for (Boolean value : values) {
+                    if (value) {
+                        count = count + 1;
+                    }
+                }
+                if (count == formDocumentApproval.getSupposedLength()) {
+                    applicationFormNotificationHelperAsync.sendApproverMailToFinalApproval(aipDocumentApproval);
+                    formDocumentApproval.setComplete(true);
+                }
+                formDocumentApproval.setApprovalMap(documentApprovalMap);
+            }
+            aipDocumentApproval.setDocumentApproval(formDocumentApproval);
+            mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
         }
     }
 
@@ -716,8 +881,16 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         return (ApplicationForm) mongoRepositoryReactive.findById(applicationFormId, ApplicationForm.class).block();
     }
 
+    public AIPDocumentApproval getAIPFormById(String aipFormId) {
+        return (AIPDocumentApproval) mongoRepositoryReactive.findById(aipFormId, AIPDocumentApproval.class).block();
+    }
+
     public void saveApplicationForm(ApplicationForm applicationForm) {
         mongoRepositoryReactive.saveOrUpdate(applicationForm);
+    }
+
+    public void saveAIPForm(AIPDocumentApproval aipDocumentApproval) {
+        mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
     }
 
     private Mono<ResponseEntity> validateCreateApplicationForm(ApplicationFormCreateDto applicationFormCreateDto) {

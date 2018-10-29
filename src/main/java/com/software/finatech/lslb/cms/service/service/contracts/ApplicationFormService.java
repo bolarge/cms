@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.service.contracts;
 
 import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
 import com.software.finatech.lslb.cms.service.domain.Document;
+import com.software.finatech.lslb.cms.service.dto.AIPFormCreateDto;
 import com.software.finatech.lslb.cms.service.dto.FormCreateCommentDto;
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormCreateDto;
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormRejectDto;
@@ -75,10 +76,14 @@ public interface ApplicationFormService {
     ApplicationForm findApplicationFormById(String applicationFormId);
 
     Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String applicationFormId, FormCreateCommentDto formCreateCommentDto, HttpServletRequest request);
-
+    Mono<ResponseEntity> approveAIPForm(String aipFormId,String approverId, HttpServletRequest request);
+    Mono<ResponseEntity> addCommentsToAIPFormFromLslbAdmin(String aipFormId, FormCreateCommentDto formCreateCommentDto, HttpServletRequest request);
+    Mono<ResponseEntity> completeAIPForm(String institutionId,String gameTypeId, boolean isResubmit, HttpServletRequest request);
     void approveApplicationFormDocument(Document document);
-
     void rejectApplicationFormDocument(Document document);
-
     void doDocumentReuploadNotification(Document document);
+    void approveAIPFormDocument(Document document);
+    void rejectAIPFormDocument(Document document);
+    void doAIPDocumentReuploadNotification(Document document);
+
 }

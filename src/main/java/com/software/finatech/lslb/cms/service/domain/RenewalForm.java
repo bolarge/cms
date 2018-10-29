@@ -40,6 +40,15 @@ public class RenewalForm extends AbstractFact {
     protected String reasonForRejection;
     protected FormDocumentApproval documentApproval;
     protected LocalDate submissionDate;
+    protected Boolean readyForApproval;
+
+    public Boolean getReadyForApproval() {
+        return readyForApproval;
+    }
+
+    public void setReadyForApproval(Boolean readyForApproval) {
+        this.readyForApproval = readyForApproval;
+    }
 
     public LslbAdminComment getLslbAdminComment() {
         return lslbAdminComment;

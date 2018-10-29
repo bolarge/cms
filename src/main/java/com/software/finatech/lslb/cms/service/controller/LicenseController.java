@@ -278,21 +278,21 @@ public class LicenseController {
     }
 
 
-    @RequestMapping(method = RequestMethod.POST, value = "/update-renewal-in-review-to-in-progress")
-    @ApiOperation(value = "Update Renewal In Review to Renewal In Progress", response = String.class, consumes = "application/json")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> updateInReviewToInProgress(@RequestBody @Valid RenewalFormCommentDto renewalFormCommentDto) {
-        try {
-            return licenseService.updateRenewalReviewToInProgress(renewalFormCommentDto);
-        } catch (Exception ex) {
-            return Mono.just(new ResponseEntity<>("Error! Please contact Admin", HttpStatus.BAD_REQUEST));
-
-        }
-    }
+//    @RequestMapping(method = RequestMethod.POST, value = "/update-renewal-in-review-to-in-progress")
+//    @ApiOperation(value = "Update Renewal In Review to Renewal In Progress", response = String.class, consumes = "application/json")
+//    @ApiResponses(value = {
+//            @ApiResponse(code = 200, message = "OK"),
+//            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+//            @ApiResponse(code = 400, message = "Bad request"),
+//            @ApiResponse(code = 404, message = "Not Found")})
+//    public Mono<ResponseEntity> updateInReviewToInProgress(@RequestBody @Valid RenewalFormCommentDto renewalFormCommentDto) {
+//        try {
+//            return licenseService.updateRenewalReviewToInProgress(renewalFormCommentDto);
+//        } catch (Exception ex) {
+//            return Mono.just(new ResponseEntity<>("Error! Please contact Admin", HttpStatus.BAD_REQUEST));
+//
+//        }
+//    }
     @RequestMapping(method = RequestMethod.GET, value = "/update-to-renewal-in-review-from-in-license", params = {"licenseId"})
     @ApiOperation(value = "Update Renewal In review to Renewal License", response = String.class, consumes = "application/json")
     @ApiResponses(value = {

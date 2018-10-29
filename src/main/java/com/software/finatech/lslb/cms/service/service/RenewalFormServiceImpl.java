@@ -4,10 +4,7 @@ import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.RenewalFormStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import com.software.finatech.lslb.cms.service.service.contracts.RenewalFormService;
@@ -48,6 +45,8 @@ public class RenewalFormServiceImpl implements RenewalFormService {
     private AuditLogHelper auditLogHelper;
     @Autowired
     private HttpServletRequest request;
+    @Autowired
+    private LicenseServiceImpl licenseService;
     private static final String applicationAuditActionId = AuditActionReferenceData.APPLICATION_ID;
 
     @Autowired
@@ -91,14 +90,13 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             if (formDocumentApproval != null && !formDocumentApproval.isComplete()) {
                 return Mono.just(new ResponseEntity<>("Not all documents on this application are approved", HttpStatus.BAD_REQUEST));
             }
-
             renewalForm.setApproverId(approverId);
             String approvedRenewalFormStatusId = RenewalFormStatusReferenceData.APPROVED;
             renewalForm.setFormStatusId(approvedRenewalFormStatusId);
             saveRenewalForm(renewalForm);
 
             String verbiage = String.format("Approved application form : %s ->  ", renewalForm.getId());
-            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), renewalForm.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
@@ -123,15 +121,15 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             }
 
             if (StringUtils.equals(RenewalFormStatusReferenceData.APPROVED, renewalForm.getFormStatusId())) {
-                return Mono.just(new ResponseEntity<>("Application already approved", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Renewal Application already approved", HttpStatus.BAD_REQUEST));
             }
             renewalForm.setRejectorId(rejectorId);
             renewalForm.setReasonForRejection(renewalFormRejectDto.getReason());
-            renewalForm.setFormStatusId(RenewalFormStatusReferenceData.REJECT);
+            renewalForm.setFormStatusId(RenewalFormStatusReferenceData.PENDING);
+            licenseService.updateRenewalReviewToInProgress(renewalForm);
             saveRenewalForm(renewalForm);
-
             String verbiage = String.format("Rejected application form : %s ->  ", renewalForm.getId());
-            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), renewalForm.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
@@ -285,9 +283,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
         try {
             RenewalForm renewalForm = (RenewalForm) mongoRepositoryReactive.findById(renewalFormUpdateDto.getId(), RenewalForm.class).block();
             if (renewalForm == null) {
-
                 return Mono.just(new ResponseEntity<>("Invalid Renewal Form Selected", HttpStatus.BAD_REQUEST));
-
             }
             renewalForm.setCheckChangeInGamingMachines(renewalFormUpdateDto.getCheckChangeInGamingMachines());
             renewalForm.setCheckConvictedCrime(renewalFormUpdateDto.getCheckConvictedCrime());
@@ -380,7 +376,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             renewalForm.setFormStatusId(RenewalFormStatusReferenceData.PENDING_RESUBMISION);
             saveRenewalForm(renewalForm);
 
-            String verbiage = String.format("Added comment to application form : %s ->  ", renewalForm.getId());
+            String verbiage = String.format("Added comment to renewal form : %s ->  ", renewalForm.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), renewalForm.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
@@ -449,6 +445,30 @@ public class RenewalFormServiceImpl implements RenewalFormService {
         }
     }
 
+    @Override
+    public Mono<ResponseEntity> completeRenewalForm(String renewalFormId, boolean isResubmit, HttpServletRequest request) {
+        try {
+            RenewalForm renewalForm = (RenewalForm) mongoRepositoryReactive.findById(renewalFormId, RenewalForm.class).block();
+            if (renewalForm == null) {
+                return Mono.just(new ResponseEntity<>("Renewal form does not exist", HttpStatus.BAD_REQUEST));
+            }
+            String inReviewFormStatusId = RenewalFormStatusReferenceData.IN_REVIEW;
+            renewalForm.setFormStatusId(inReviewFormStatusId);
+            renewalForm.setSubmissionDate(LocalDate.now());
+            saveRenewalForm(renewalForm);
+
+            String verbiage = String.format("Submitted renewal application form : %s ->  ", renewalForm.getFormStatusId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), renewalForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            renewalFormNotificationHelperAsync.sendRenewalFormSubmissionMailToLSLBAdmins(renewalForm);
+            return Mono.just(new ResponseEntity<>("Renewal Application completed successfully and now in review", HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while completing application form", e);
+        }
+    }
+
     public void saveRenewalForm(RenewalForm renewalForm) {
         mongoRepositoryReactive.saveOrUpdate(renewalForm);
     }
@@ -456,4 +476,5 @@ public class RenewalFormServiceImpl implements RenewalFormService {
     public Institution getInstitution(String institutionId) {
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
+
 }

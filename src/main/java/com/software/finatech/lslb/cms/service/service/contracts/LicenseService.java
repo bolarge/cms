@@ -4,7 +4,6 @@ import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseUpdateAIPToLicenseDto;
-import com.software.finatech.lslb.cms.service.dto.RenewalFormCommentDto;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
@@ -45,7 +44,7 @@ public interface LicenseService {
     Mono<ResponseEntity>updateRenewalLicenseToReview(String paymentRecordId);
     Mono<ResponseEntity> getInstitutionAIPUploaded(String institutionId);
     Mono<ResponseEntity> getLicensesInRenewalInReview(String institutionId);
-    Mono<ResponseEntity> updateRenewalReviewToInProgress(RenewalFormCommentDto renewalFormCommentDto);
+    //Mono<ResponseEntity> updateRenewalReviewToInProgress(RenewalFormCommentDto renewalFormCommentDto);
     License findRenewalLicense(String institutionId, String agentId, String gamingMachineId, String gameTypeId, String licenseTypeId);
     boolean institutionIsLicensedForGameType(String institutionId, String gameTypeId);
 
