@@ -30,7 +30,7 @@ public interface FeeService {
 
     Fee findFeeById(String feeId);
 
-    Mono<ResponseEntity> findAllFeePaymentTypeForLicenseType(String revenueNameId);
+    Mono<ResponseEntity> findAllFeePaymentTypeForLicenseType(String licenseTypeId);
 
     Mono<ResponseEntity> findLicenseTypeByParams(String institutionId, String agentId);
 

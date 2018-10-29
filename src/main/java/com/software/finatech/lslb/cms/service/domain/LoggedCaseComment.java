@@ -30,5 +30,4 @@ public class LoggedCaseComment {
     public void setCommentTime(LocalDateTime commentTime) {
         this.commentTime = commentTime;
     }
-
 }

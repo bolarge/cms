@@ -207,7 +207,7 @@ public class LoggedCase extends AbstractFact {
         caseCommentDto.setComment(caseComment.getComment());
         LocalDateTime commentTime = caseComment.getCommentTime();
         if (commentTime != null) {
-            caseCommentDto.setCommentTime(commentTime.toString("dd-MM-yyyy HH:mm:ss"));
+            caseCommentDto.setCommentTime(commentTime.toString("dd-MM-yyyy HH:mm:ss a"));
         }
         return caseCommentDto;
     }

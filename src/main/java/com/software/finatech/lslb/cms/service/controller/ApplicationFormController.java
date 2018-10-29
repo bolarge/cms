@@ -54,7 +54,7 @@ public class ApplicationFormController {
                                                        @RequestParam("approverId") String approverId,
                                                        @RequestParam("gameTypeId") String gameTypeId,
                                                        HttpServletResponse httpServletResponse) {
-        return applicationFormService.findAllApplicationForm(page, pageSize, sortType, sortParam, institutionId, applicationFormStatusId, approverId, gameTypeId,httpServletResponse);
+        return applicationFormService.findAllApplicationForm(page, pageSize, sortType, sortParam, institutionId, applicationFormStatusId, approverId, gameTypeId, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create")
@@ -323,14 +323,14 @@ public class ApplicationFormController {
         return applicationFormService.addCommentsToAIPFormFromLslbAdmin(aipFormId, formCreateCommentDto, request);
     }
 
-    /*@RequestMapping(method = RequestMethod.GET, value = "/{applicationFormId}/get-document-types", params = {"applicationFormId"})
-    @ApiOperation(value = "Get document types for application form (Shows the files that are uploaded)",response = ApplicationFormDocumentDto.class,responseContainer = "List",consumes = "application/json")
+    @RequestMapping(method = RequestMethod.POST, value = "/{applicationFormId}/add-comment")
+    @ApiOperation(value = "Add Comment to application form", response = ApplicationFormDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getDocumentTypesForApplicationForm(@PathVariable("applicationFormId") String applicationFormId) {
-        return applicationFormService.getDocumentTypesForApplicationForm(applicationFormId);
-    }*/
+    public Mono<ResponseEntity> addCommentToApplicationForm(@PathVariable("applicationFormId") String applicationFormId, @RequestBody AddCommentDto addCommentDto, HttpServletRequest request) {
+        return applicationFormService.addCommentsToForm(applicationFormId, addCommentDto, request);
+    }
 }

@@ -77,7 +77,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         try {
             Mono<ResponseEntity> validateCreateApplicationFormResponse = validateCreateApplicationForm(applicationFormCreateDto);
             if (validateCreateApplicationFormResponse != null) {
-                return validateCreateApplicationFormResponse;
+                //    return validateCreateApplicationFormResponse;
             }
 
             ApplicationForm applicationForm = fromCreateDto(applicationFormCreateDto);
@@ -480,7 +480,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>("Application form does not exist", HttpStatus.BAD_REQUEST));
             }
 
-            if (!StringUtils.equals(ApplicationFormStatusReferenceData.IN_REVIEW_STATUS_ID, applicationForm.getApplicationFormStatusId())){
+            if (!StringUtils.equals(ApplicationFormStatusReferenceData.IN_REVIEW_STATUS_ID, applicationForm.getApplicationFormStatusId())) {
                 return Mono.just(new ResponseEntity<>("Application form not yet submitted", HttpStatus.BAD_REQUEST));
             }
             if (StringUtils.equals(ApplicationFormStatusReferenceData.REJECTED_STATUS_ID, applicationForm.getApplicationFormStatusId())) {
@@ -489,8 +489,6 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             if (!applicationForm.getReadyForApproval()) {
                 return Mono.just(new ResponseEntity<>("Not all documents on this application are approved", HttpStatus.BAD_REQUEST));
             }
-
-
 
             applicationForm.setApproverId(approverId);
             String approvedApplicationFormStatusId = ApplicationFormStatusReferenceData.APPROVED_STATUS_ID;
@@ -859,6 +857,37 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             }
             aipDocumentApproval.setDocumentApproval(formDocumentApproval);
             mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> addCommentsToForm(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request) {
+        try {
+            ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
+            if (applicationForm == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+
+            FormComment comment = new FormComment();
+            comment.setTimeCreated(LocalDateTime.now());
+            comment.setUserFullName(loggedInUser.getFullName());
+            comment.setComment(addCommentDto.getComment());
+            applicationForm.getFormComments().add(comment);
+            mongoRepositoryReactive.saveOrUpdate(applicationForm);
+
+            String verbiage = String.format("Added comment to application form  :Form Id -> %s ->  ,Category : -> %s , Comment -> %s",
+                    applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
+
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding comment", e);
         }
     }
 

@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
+import com.software.finatech.lslb.cms.service.dto.CommentDto;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
 import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
 import com.software.finatech.lslb.cms.service.model.contactDetails.ApplicantContactDetails;
@@ -13,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,6 +44,16 @@ public class ApplicationForm extends AbstractFact {
     protected String approverId;
     protected FormDocumentApproval documentApproval;
     protected Boolean readyForApproval;
+    protected List<FormComment> formComments = new ArrayList<>();
+
+
+    public List<FormComment> getFormComments() {
+        return formComments;
+    }
+
+    public void setFormComments(List<FormComment> formComments) {
+        this.formComments = formComments;
+    }
 
     public Boolean getReadyForApproval() {
         return readyForApproval;
@@ -338,7 +351,21 @@ public class ApplicationForm extends AbstractFact {
         applicationFormDto.setFilledApplicantDetails(getApplicantDetails() != null);
         applicationFormDto.setApplicationFormId(getApplicationFormId());
         applicationFormDto.setReadyForApproval(getReadyForApproval());
+        applicationFormDto.setComments(getComments());
         return applicationFormDto;
+    }
+
+    private List<CommentDto> getComments() {
+        List<CommentDto> comments = new ArrayList<>();
+        for (FormComment comment : this.formComments) {
+            CommentDto dto = new CommentDto();
+            dto.setComment(comment.getComment());
+            dto.setUserFullName(comment.getUserFullName());
+            dto.setCommentDate(comment.getTimeCreated().toString("dd-MM-yyyy"));
+            dto.setCommentTime(comment.getTimeCreated().toString("HH:mm:ss a"));
+            comments.add(dto);
+        }
+        return comments;
     }
 
     @Override

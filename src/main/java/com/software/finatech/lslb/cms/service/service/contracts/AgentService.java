@@ -28,7 +28,7 @@ public interface AgentService {
 
     Mono<ResponseEntity> updateAgent(AgentUpdateDto agentUpdateDto, HttpServletRequest request);
 
-    Agent findById(String agentId);
+    Agent findAgentById(String agentId);
 
     void saveAgent(Agent agent);
 

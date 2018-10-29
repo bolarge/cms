@@ -185,6 +185,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
 
     @Async
     public void sendApplicationFormSubmissionMailToLSLBAdmins(ApplicationForm applicationForm) {
+        sendEmailToDocumentApprovers(applicationForm);
         List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_APPLICATION_ID);
         if (lslbAdmins.isEmpty()) {
             logger.info("No LSLB Admin staff found, Skipping email sending");
@@ -197,7 +198,6 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
             logger.info("Sending email to LSLB admin with email -> {}", adminEmail);
             sendApplicationFormSubmissionNotificationToLSLSBAdmin(adminEmail, mailSubject, emailContent);
         }
-        sendEmailToDocumentApprovers(applicationForm);
         logger.info("Finished sending emails to LSLB Admins");
     }
 
