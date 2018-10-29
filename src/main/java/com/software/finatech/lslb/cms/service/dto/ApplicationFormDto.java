@@ -1,5 +1,10 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import com.software.finatech.lslb.cms.service.domain.CommentDto;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class ApplicationFormDto {
 
     private String gameTypeName;
@@ -28,7 +33,16 @@ public class ApplicationFormDto {
     private String lslbAdminComment;
     private String applicationFormId;
     private Boolean readyForApproval;
+    private List<CommentDto> comments = new ArrayList<>();
 
+
+    public List<CommentDto> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<CommentDto> comments) {
+        this.comments = comments;
+    }
 
     public Boolean getReadyForApproval() {
         return readyForApproval;
