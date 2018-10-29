@@ -318,7 +318,7 @@ public class FeeServiceImpl implements FeeService {
             if (feePaymentTypes.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
             }
-            return Mono.just(new ResponseEntity<>(getFeePaymentTypeDtoFromIds(feePaymentTypes), HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>(getFeePaymentTypeDtoFromIds(feePaymentTypes), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while finding fee payment types for revenue", e);
         }
