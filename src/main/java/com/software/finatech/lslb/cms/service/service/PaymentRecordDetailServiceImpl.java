@@ -796,7 +796,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     }
 
     private Pair<Mono<ResponseEntity>, MachineMultiplePayment> validateGamingTerminalPayment(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto) {
-        Set<String> machineIds = paymentRecordDetailCreateDto.getGamingMachineIds();
+        Set<String> machineIds = paymentRecordDetailCreateDto.getGamingTerminalIds();
         List<MachinePaymentDetail> machinePaymentDetails = new ArrayList<>();
         double totalAmount = 0;
         Mono<ResponseEntity> responseEntityMono;
