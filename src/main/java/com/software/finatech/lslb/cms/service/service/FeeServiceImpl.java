@@ -64,6 +64,9 @@ public class FeeServiceImpl implements FeeService {
         try {
             LocalDate startDate = new LocalDate(feeCreateDto.getStartDate());
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not get logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
             String gameTypeId = feeCreateDto.getGameTypeId();
             String feePaymentTypeId = feeCreateDto.getFeePaymentTypeId();
             Fee existingFeeWithParams = findMostRecentFeeByLicenseTypeGameTypeAndFeePaymentType(feeCreateDto.getRevenueNameId(),
@@ -90,6 +93,7 @@ public class FeeServiceImpl implements FeeService {
 
             FeeApprovalRequest feeApprovalRequest = new FeeApprovalRequest();
             feeApprovalRequest.setInitiatorId(loggedInUser.getId());
+            feeApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
             feeApprovalRequest.setPendingFeeId(pendingFee.getId());
             feeApprovalRequest.setId(UUID.randomUUID().toString());
             feeApprovalRequest.setFeeApprovalRequestTypeId(FeeApprovalRequestTypeReferenceData.CREATE_FEE_ID);
@@ -116,6 +120,10 @@ public class FeeServiceImpl implements FeeService {
         try {
             String feeId = feeEndDateUpdateDto.getFeeId();
             String endDateString = feeEndDateUpdateDto.getEndDate();
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not get logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
             Fee fee = findFeeById(feeId);
             if (fee == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Fee with id %s does not exist", feeId), HttpStatus.BAD_REQUEST));
@@ -129,6 +137,8 @@ public class FeeServiceImpl implements FeeService {
             feeApprovalRequest.setId(UUID.randomUUID().toString());
             feeApprovalRequest.setFeeId(feeId);
             feeApprovalRequest.setEndDate(endDate);
+            feeApprovalRequest.setInitiatorId(loggedInUser.getId());
+            feeApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
             feeApprovalRequest.setFeeApprovalRequestTypeId(FeeApprovalRequestTypeReferenceData.SET_FEE_END_DATE_ID);
             mongoRepositoryReactive.saveOrUpdate(feeApprovalRequest);
             return Mono.just(new ResponseEntity<>(feeApprovalRequest.convertToDto(), HttpStatus.OK));
@@ -290,23 +300,25 @@ public class FeeServiceImpl implements FeeService {
     @Override
     public Mono<ResponseEntity> findAllFeePaymentTypeForLicenseType(String licenseTypeId) {
         try {
-            if (StringUtils.equals(LicenseTypeReferenceData.AGENT_ID, licenseTypeId)
-                    || StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, licenseTypeId)
-                    || StringUtils.equals(LicenseTypeReferenceData.GAMING_TERMINAL_ID, licenseTypeId)) {
-                Query query = new Query();
-                query.addCriteria(Criteria.where("id").ne(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID));
+            List<String> feePaymentTypes = new ArrayList<>();
+            if (StringUtils.equals(LicenseTypeReferenceData.GAMING_TERMINAL_ID, licenseTypeId)
+                    || StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, licenseTypeId)) {
+                feePaymentTypes.add(FeePaymentTypeReferenceData.TAX_FEE_TYPE_ID);
+            }
+            if (StringUtils.equals(LicenseTypeReferenceData.AGENT_ID, licenseTypeId)) {
+                feePaymentTypes.add(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID);
+                feePaymentTypes.add(FeePaymentTypeReferenceData.LICENSE_RENEWAL_FEE_TYPE_ID);
+            }
 
-                ArrayList<FeePaymentType> feePaymentTypes = (ArrayList<FeePaymentType>) mongoRepositoryReactive.findAll(query, FeePaymentType.class).toStream().collect(Collectors.toList());
-                ArrayList<EnumeratedFactDto> feePaymentTypeDtos = new ArrayList<>();
-                for (FeePaymentType feePaymentType : feePaymentTypes) {
-                    feePaymentTypeDtos.add(feePaymentType.convertToDto());
-                }
-                return Mono.just(new ResponseEntity<>(feePaymentTypeDtos, HttpStatus.OK));
-            }
             if (StringUtils.equals(LicenseTypeReferenceData.INSTITUTION_ID, licenseTypeId)) {
-                return getAllFeePaymentType();
+                feePaymentTypes.add(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID);
+                feePaymentTypes.add(FeePaymentTypeReferenceData.LICENSE_RENEWAL_FEE_TYPE_ID);
+                feePaymentTypes.add(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID);
             }
-            return Mono.just(new ResponseEntity<>("Invalid Revenue Name Supplied", HttpStatus.BAD_REQUEST));
+            if (feePaymentTypes.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
+            }
+            return Mono.just(new ResponseEntity<>(getFeePaymentTypeDtoFromIds(feePaymentTypes), HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while finding fee payment types for revenue", e);
         }
@@ -327,7 +339,7 @@ public class FeeServiceImpl implements FeeService {
                     dtos.add(licenseType.convertToDto());
                 }
             }
-            if (dtos.isEmpty()){
+            if (dtos.isEmpty()) {
                 return Mono.just(new ResponseEntity<>(dtos, HttpStatus.NOT_FOUND));
             }
             return Mono.just(new ResponseEntity<>(dtos, HttpStatus.OK));
@@ -375,6 +387,18 @@ public class FeeServiceImpl implements FeeService {
             }
         }
         return feePaymentType;
+    }
+
+
+    private List<EnumeratedFactDto> getFeePaymentTypeDtoFromIds(Collection<String> ids) {
+        List<EnumeratedFactDto> dtos = new ArrayList<>();
+        for (String id : ids) {
+            FeePaymentType feePaymentType = getFeePaymentTypeById(id);
+            if (feePaymentType != null) {
+                dtos.add(feePaymentType.convertToDto());
+            }
+        }
+        return dtos;
     }
 
     private class LicenseTypeSearch {
