@@ -245,7 +245,7 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             }
             Fee fee = new Fee();
             fee.setId(UUID.randomUUID().toString());
-            fee.setActive(pendingFee.isActive());
+            fee.setActive(true);
             fee.setGameTypeId(pendingFee.getGameTypeId());
             fee.setFeePaymentTypeId(pendingFee.getFeePaymentTypeId());
             fee.setLicenseTypeId(pendingFee.getLicenseTypeId());
