@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.service.contracts;
 
 import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
 import com.software.finatech.lslb.cms.service.domain.Document;
+import com.software.finatech.lslb.cms.service.dto.AddCommentDto;
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormCreateCommentDto;
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormCreateDto;
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormRejectDto;
@@ -81,4 +82,6 @@ public interface ApplicationFormService {
     void rejectApplicationFormDocument(Document document);
 
     void doDocumentReuploadNotification(Document document);
+
+    Mono<ResponseEntity> addCommentsToForm(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request);
 }
