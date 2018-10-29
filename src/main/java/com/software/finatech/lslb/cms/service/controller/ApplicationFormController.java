@@ -299,16 +299,4 @@ public class ApplicationFormController {
     public Mono<ResponseEntity> addCommentToApplicationForm(@PathVariable("applicationFormId") String applicationFormId, @RequestBody AddCommentDto addCommentDto, HttpServletRequest request) {
         return applicationFormService.addCommentsToForm(applicationFormId, addCommentDto, request);
     }
-
-
-    /*@RequestMapping(method = RequestMethod.GET, value = "/{applicationFormId}/get-document-types", params = {"applicationFormId"})
-    @ApiOperation(value = "Get document types for application form (Shows the files that are uploaded)",response = ApplicationFormDocumentDto.class,responseContainer = "List",consumes = "application/json")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getDocumentTypesForApplicationForm(@PathVariable("applicationFormId") String applicationFormId) {
-        return applicationFormService.getDocumentTypesForApplicationForm(applicationFormId);
-    }*/
 }
