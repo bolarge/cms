@@ -65,7 +65,7 @@ public class Scheduler {
 
         List<License> licenses=
                 expirationList.getExpiringLicences(90,licenseStatuses);
-       List<NotificationDto> notificationDtos= new ArrayList<>();
+        List<NotificationDto> notificationDtos= new ArrayList<>();
         LocalDate endDate;
         dateTime=dateTime.plusMonths(3);
         if(licenses!=null){
@@ -120,7 +120,7 @@ public class Scheduler {
                     notificationDtos.add(notificationDto);
                 }
                 sendEmailNotification(notificationDtos,"expiring");
-                }
+            }
 
         }
 
@@ -197,7 +197,7 @@ public class Scheduler {
                     model.put("description", notificationDto.getInstitutionName()+" with Game Type: "+notificationDto.getGameType()+" License has expired. License Expiration Date is "+notificationDto.getEndDate());
 
                 }
-                }else if(type=="AIPExpired"){
+            }else if(type=="AIPExpired"){
                 model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType()+" AIP period has ended");
             }else if(type=="AIPExpiring"){
                 model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType()+" AIP period is due to end on "+notificationDto.getEndDate());
@@ -207,19 +207,19 @@ public class Scheduler {
             model.put("date", LocalDate.now().toString("dd-MM-YYYY"));
             String content = mailContentBuilderService.build(model, notificationDto.getTemplate());
 
-           if((type=="AIPExpired")||(type=="AIPExpiring")){
-               emailService.sendEmail(content,"AIP Expiration Notification", adminEmail);
-               emailService.sendEmail(content,"AIP Expiration Notification", notificationDto.getInstitutionEmail());
+            if((type=="AIPExpired")||(type=="AIPExpiring")){
+                emailService.sendEmail(content,"AIP Expiration Notification", adminEmail);
+                emailService.sendEmail(content,"AIP Expiration Notification", notificationDto.getInstitutionEmail());
 
-           }else{
-               if(!StringUtils.isEmpty(notificationDto.getAgentId())){
-                   emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getAgentEmailAddress());
+            }else{
+                if(!StringUtils.isEmpty(notificationDto.getAgentId())){
+                    emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getAgentEmailAddress());
 
-               }
-                   emailService.sendEmail(content, "Licence Expiration Notification", adminEmail);
-                   emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getInstitutionEmail());
+                }
+                emailService.sendEmail(content, "Licence Expiration Notification", adminEmail);
+                emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getInstitutionEmail());
 
-           }
+            }
 
         }
     }
@@ -297,7 +297,7 @@ public class Scheduler {
         ArrayList<String> licenseStatuses= new ArrayList<>();
         licenseStatuses.add(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
         licenseStatuses.add(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID);
-         List<License> licenses= expirationList.getExpiredLicences(licenseStatuses);
+        List<License> licenses= expirationList.getExpiredLicences(licenseStatuses);
         List<NotificationDto> notificationDtos= new ArrayList<>();
         if(licenses!=null){
             for(License license: licenses){
