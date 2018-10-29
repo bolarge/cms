@@ -130,6 +130,7 @@ public class DocumentTypeController extends BaseController {
         pendingDocumentType.setRequired(true);
         pendingDocumentType.setName(documentTypeCreateDto.getName());
         pendingDocumentType.setDescription(documentTypeCreateDto.getDescription());
+        pendingDocumentType.setApproverId(documentTypeCreateDto.getApproverId());
         mongoRepositoryReactive.saveOrUpdate(pendingDocumentType);
 
         AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();

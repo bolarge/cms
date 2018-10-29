@@ -31,7 +31,7 @@ public class MachineApprovalRequestController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty",
-            "statusId", "approvalRequestTypeId", "initiatorId", "approverId", "approvalRequestTypeId", "rejectorId", "institutionId","gamingMachineId","gamingTerminalId", "startDate", "endDate"})
+            "statusId", "approvalRequestTypeId", "initiatorId", "approverId", "approvalRequestTypeId", "rejectorId", "institutionId", "gamingMachineId", "gamingTerminalId", "startDate", "endDate"})
     @ApiOperation(value = "Get all Application Forms", response = MachineApprovalRequestDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -52,10 +52,11 @@ public class MachineApprovalRequestController {
                                                               @RequestParam("gamineTerminalId") String gamingTerminalId,
                                                               @RequestParam("startDate") String startDate,
                                                               @RequestParam("endDate") String endDate,
+                                                              @RequestParam("machineTypeId") String machineTypeId,
                                                               HttpServletResponse httpServletResponse) {
         return machineApprovalRequestService.findAllMachineApprovalRequests(page, pageSize, sortType,
                 sortParam, statusId, approvalRequestTypeId, initiatorId,
-                approverId, rejectorId, institutitonId, gamingMachineId, gamingTerminalId, startDate, endDate, httpServletResponse);
+                approverId, rejectorId, institutitonId, gamingMachineId, gamingTerminalId, startDate, endDate, machineTypeId, httpServletResponse);
     }
 
 

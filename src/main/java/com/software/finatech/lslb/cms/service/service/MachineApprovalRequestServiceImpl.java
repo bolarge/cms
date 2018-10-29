@@ -72,6 +72,7 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
                                                                String gamingTerminalId,
                                                                String startDate,
                                                                String endDate,
+                                                               String machineTypeId,
                                                                HttpServletResponse httpServletResponse) {
 
         try {
@@ -93,6 +94,9 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             }
             if (!StringUtils.isEmpty(requestTypeId)) {
                 query.addCriteria(Criteria.where("machineApprovalRequestTypeId").is(requestTypeId));
+            }
+            if (!StringUtils.isEmpty(machineTypeId)) {
+                query.addCriteria(Criteria.where("machineTypeId").is(machineTypeId));
             }
             if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
                 query.addCriteria(Criteria.where("dateCreated").gte(new LocalDate(startDate)).lte(new LocalDate(endDate)));
