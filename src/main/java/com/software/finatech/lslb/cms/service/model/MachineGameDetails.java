@@ -3,9 +3,19 @@ package com.software.finatech.lslb.cms.service.model;
 import java.util.Collection;
 
 public class MachineGameDetails {
+    private String id;
     private String gameName;
     private String gameVersion;
     private boolean active;
+
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public boolean isActive() {
         return active;
