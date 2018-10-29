@@ -163,7 +163,7 @@ public class Machine extends AbstractFact {
         if (machineStatus == null) {
             machineStatus = (MachineStatus) mongoRepositoryReactive.findById(this.machineStatusId, MachineStatus.class).block();
             if (machineStatus != null && machineStatusMap != null) {
-                machineStatusMap.put(this.machineTypeId, machineStatus);
+                machineStatusMap.put(this.machineStatusId, machineStatus);
             }
         }
         return machineStatus;

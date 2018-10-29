@@ -83,6 +83,7 @@ public class FeeServiceImpl implements FeeService {
             pendingFee.setAmount(Double.valueOf(feeCreateDto.getAmount()));
             pendingFee.setFeePaymentTypeId(feePaymentTypeId);
             pendingFee.setGameTypeId(gameTypeId);
+            pendingFee.setActive(true);
             pendingFee.setLicenseTypeId(feeCreateDto.getRevenueNameId());
             pendingFee.setEffectiveDate(new LocalDate(feeCreateDto.getStartDate()));
             mongoRepositoryReactive.saveOrUpdate(pendingFee);

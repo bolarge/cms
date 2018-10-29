@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.model.MachineGameDetails;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.MachineApprovalRequestTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.MachineTypeReferenceData;
@@ -13,7 +14,9 @@ import com.software.finatech.lslb.cms.service.service.contracts.InstitutionServi
 import com.software.finatech.lslb.cms.service.service.contracts.MachineService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.LicenseValidatorUtil;
+import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.MachineApprovalRequestMailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -54,6 +57,7 @@ public class MachineServiceImpl implements MachineService {
     private AgentService agentService;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
+    private MachineApprovalRequestMailSenderAsync machineApprovalRequestMailSenderAsync;
 
     @Autowired
     public MachineServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
@@ -61,13 +65,15 @@ public class MachineServiceImpl implements MachineService {
                               InstitutionService institutionService,
                               AgentService agentService,
                               SpringSecurityAuditorAware springSecurityAuditorAware,
-                              AuditLogHelper auditLogHelper) {
+                              AuditLogHelper auditLogHelper,
+                              MachineApprovalRequestMailSenderAsync machineApprovalRequestMailSenderAsync) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.licenseValidatorUtil = licenseValidatorUtil;
         this.institutionService = institutionService;
         this.agentService = agentService;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.auditLogHelper = auditLogHelper;
+        this.machineApprovalRequestMailSenderAsync = machineApprovalRequestMailSenderAsync;
     }
 
     @Override
@@ -297,10 +303,17 @@ public class MachineServiceImpl implements MachineService {
                 return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
             }
             String machineId = statusUpdateDto.getMachineId();
+            String machineStatusId = statusUpdateDto.getMachineStatusId();
             Machine machine = findMachineById(machineId);
             if (machine == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Machine with id %s does not exist", machineId), HttpStatus.BAD_REQUEST));
             }
+
+            MachineStatus newStatus = getMachineStatus(machineStatusId);
+            if (newStatus == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Machine status with id %s not found", machineStatusId), HttpStatus.BAD_REQUEST));
+            }
+
             MachineApprovalRequest approvalRequest = new MachineApprovalRequest();
             approvalRequest.setId(UUID.randomUUID().toString());
             approvalRequest.setMachineId(machineId);
@@ -314,14 +327,19 @@ public class MachineServiceImpl implements MachineService {
             if (machine.isGamingTerminal()) {
                 approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.CHANGE_GAMING_MACHINE_STATUS);
                 approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_MACHINE_ID);
-                //TODO:: validate what we did here
-                if (!loggedInUser.isAgent()) {
-                    return Mono.just(new ResponseEntity<>("Only Agents are allowed to update machine status", HttpStatus.BAD_REQUEST));
+                if (loggedInUser.isAgent()) {
+                    approvalRequest.setInitiatedByInstitution(false);
+                    approvalRequest.setInitiatorId(loggedInUser.getId());
+                    approvalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_OPERATOR_APPROVAL_ID);
+                    machineApprovalRequestMailSenderAsync.sendInitialMachineStateUpdateToAgentOperators(approvalRequest, newStatus.getName());
                 }
-                approvalRequest.setInitiatorId(loggedInUser.getId());
-
+                if (loggedInUser.isGamingOperator()) {
+                    approvalRequest.setInitiatedByInstitution(true);
+                    approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
+                }
             }
-            return null;
+            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+            return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while updating machine status", e);
         }
@@ -377,19 +395,21 @@ public class MachineServiceImpl implements MachineService {
                         failedLines.add(FailedLine.fromLineAndReason(rows[i], "Line has less than 6 fields"));
                     } else {
                         try {
-                            Machine gamingMachine = getGamingMachineBySerialNumber(columns[0], gamingMachineMap);
-                            if (gamingMachine == null) {
-                                gamingMachine = new Machine();
-                                gamingMachine.setId(UUID.randomUUID().toString());
-                                gamingMachine.setSerialNumber(columns[0]);
-                                gamingMachine.setManufacturer(columns[1]);
-                                gamingMachine.setMachineAddress(columns[3]);
-                                gamingMachine.setGameTypeId(gameTypeId);
-                                MachineGameDetails gamingMachineGameDetails = new MachineGameDetails();
-                                gamingMachineGameDetails.setGameName(columns[4]);
-                                gamingMachineGameDetails.setGameVersion(columns[5]);
+                            Machine machine = getGamingMachineBySerialNumber(columns[0], gamingMachineMap);
+                            if (machine == null) {
+                                machine = new Machine();
+                                machine.setId(UUID.randomUUID().toString());
+                                machine.setSerialNumber(columns[0]);
+                                machine.setManufacturer(columns[1]);
+                                machine.setMachineAddress(columns[3]);
+                                machine.setGameTypeId(gameTypeId);
+                                MachineGameDetails machineGameDetails = new MachineGameDetails();
+                                machineGameDetails.setGameName(columns[4]);
+                                machineGameDetails.setGameVersion(columns[5]);
+
+
                                 Set<MachineGameDetails> gamingMachineGameDetailsSet = new HashSet<>();
-                                gamingMachineGameDetailsSet.add(gamingMachineGameDetails);
+                                gamingMachineGameDetailsSet.add(machineGameDetails);
                                 //    gamingMachine.setGameDetailsList(gamingMachineGameDetailsSet);
                             } else {
                                 MachineGameDetails gamingMachineGameDetails = new MachineGameDetails();
@@ -398,9 +418,9 @@ public class MachineServiceImpl implements MachineService {
                                 //  Set<MachineGameDetails> gamingMachineGameDetailsSet = gamingMachine.getGameDetailsList();
                                 //     gamingMachineGameDetailsSet.add(gamingMachineGameDetails);
                             }
-                            gamingMachine.setInstitutionId(institutionId);
-                            gamingMachineList.add(gamingMachine);
-                            gamingMachineMap.put(gamingMachine.getSerialNumber(), gamingMachine);
+                            machine.setInstitutionId(institutionId);
+                            gamingMachineList.add(machine);
+                            gamingMachineMap.put(machine.getSerialNumber(), machine);
                         } catch (Exception e) {
                             logger.error(String.format("Error parsing line %s", rows[i]), e);
                             failedLines.add(FailedLine.fromLineAndReason(rows[i], "An error occurred while parsing line"));
@@ -416,7 +436,7 @@ public class MachineServiceImpl implements MachineService {
                 } else {
                     for (Machine gamingMachine : gamingMachineList) {
                         try {
-                            //          saveGamingMachine(gamingMachine);
+                            mongoRepositoryReactive.saveOrUpdate(gamingMachine);
                         } catch (Exception e) {
                             logger.error("An error occurred while saving gaming machine with serial number {}", gamingMachine.getSerialNumber());
                             String line = String.format("%s,%s,%s", gamingMachine.getSerialNumber(), gamingMachine.getManufacturer(), gamingMachine.getMachineAddress());
@@ -556,5 +576,23 @@ public class MachineServiceImpl implements MachineService {
             return null;
         }
         return (MachineGame) mongoRepositoryReactive.findById(id, MachineGame.class).block();
+    }
+
+    public MachineStatus getMachineStatus(String machineStatusId) {
+        if (StringUtils.isEmpty(machineStatusId)) {
+            return null;
+        }
+        Map machineStatusMap = Mapstore.STORE.get("MachineStatus");
+        MachineStatus machineStatus = null;
+        if (machineStatus != null) {
+            machineStatus = (MachineStatus) machineStatusMap.get(machineStatusId);
+        }
+        if (machineStatus == null) {
+            machineStatus = (MachineStatus) mongoRepositoryReactive.findById(machineStatusId, MachineStatus.class).block();
+            if (machineStatus != null && machineStatusMap != null) {
+                machineStatusMap.put(machineStatusId, machineStatus);
+            }
+        }
+        return machineStatus;
     }
 }

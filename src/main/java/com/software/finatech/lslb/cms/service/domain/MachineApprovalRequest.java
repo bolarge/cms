@@ -118,7 +118,7 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
         if (isInitiatedByInstitution()) {
             Institution institution = getInstitution();
             if (institution != null) {
-                dto.setInstitutionId(this.institutionId);
+                dto.setInitiatorId(this.institutionId);
                 dto.setInitiatorName(institution.getInstitutionName());
             }
         } else {

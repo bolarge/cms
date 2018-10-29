@@ -24,6 +24,7 @@ public interface MachineApprovalRequestService {
                                                         String gamingTerminalId,
                                                         String startDate,
                                                         String endDate,
+                                                        String machineTypeId,
                                                         HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getAllMachineApprovalRequestType();

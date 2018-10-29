@@ -488,8 +488,6 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>("Not all documents on this application are approved", HttpStatus.BAD_REQUEST));
             }
 
-
-
             applicationForm.setApproverId(approverId);
             String approvedApplicationFormStatusId = ApplicationFormStatusReferenceData.APPROVED_STATUS_ID;
             applicationForm.setApplicationFormStatusId(approvedApplicationFormStatusId);

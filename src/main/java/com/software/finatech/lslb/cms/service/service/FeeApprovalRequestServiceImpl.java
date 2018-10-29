@@ -101,7 +101,7 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             if (loggedInUser != null) {
               //  query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
                 if (!loggedInUser.isSuperAdmin()) {
-                    query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
+               //     query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
                 }
             }
 
@@ -133,7 +133,7 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format , please use yyyy-MM-dd", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
-            String errorMsg = "An error occurred while trying to get user approval requests";
+            String errorMsg = "An error occurred while trying to get fee approval requests";
             return logAndReturnError(logger, errorMsg, e);
         }
     }
