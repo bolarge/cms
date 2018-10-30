@@ -8,17 +8,26 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class GameType extends EnumeratedFact {
 
     protected int aipDurationMonths;
-    protected boolean allowsGamingMachine;
     protected int institutionLicenseDurationMonths;
     protected int agentLicenseDurationMonths;
     protected int gamingMachineLicenseDurationMonths;
     protected String shortCode;
+    protected Boolean allowsGamingTerminal;
+    protected Boolean allowsGamingMachine;
 
-    public boolean isAllowsGamingMachine() {
+    public Boolean getAllowsGamingTerminal() {
+        return allowsGamingTerminal;
+    }
+
+    public void setAllowsGamingTerminal(Boolean allowsGamingTerminal) {
+        this.allowsGamingTerminal = allowsGamingTerminal;
+    }
+
+    public Boolean getAllowsGamingMachine() {
         return allowsGamingMachine;
     }
 
-    public void setAllowsGamingMachine(boolean allowsGamingMachine) {
+    public void setAllowsGamingMachine(Boolean allowsGamingMachine) {
         this.allowsGamingMachine = allowsGamingMachine;
     }
 
@@ -72,7 +81,8 @@ public class GameType extends EnumeratedFact {
         gameType.setAgentLicenseDuration(String.valueOf(getAgentLicenseDurationMonths()));
         gameType.setGamingMachineLicenseDuration(String.valueOf(getGamingMachineLicenseDurationMonths()));
         gameType.setShortCode(getShortCode());
-        gameType.setAllowsGamingMachine(isAllowsGamingMachine());
+        gameType.setAllowsGamingMachine(getAllowsGamingMachine());
+        gameType.setAllowsGamingTerminal(getAllowsGamingTerminal());
         return gameType;
     }
 

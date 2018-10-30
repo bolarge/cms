@@ -5,10 +5,7 @@ import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.model.MachineGameDetails;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.MachineApprovalRequestTypeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.MachineTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
 import com.software.finatech.lslb.cms.service.service.contracts.MachineService;
@@ -147,7 +144,7 @@ public class MachineServiceImpl implements MachineService {
                 return validateGamingMachineLicenseResponse;
             }
             if (!(machineCreateDto.isCreateGamingMachine() || machineCreateDto.isCreateGamingTerminal())) {
-                return Mono.just(new ResponseEntity<>(String.format("Machinet type with id %s does not exist on the system", machineCreateDto.getMachineTypeId()), HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>(String.format("Machine type with id %s does not exist on the system", machineCreateDto.getMachineTypeId()), HttpStatus.BAD_REQUEST));
             }
             PendingMachine pendingGamingMachine = fromGamingMachineCreateDto(machineCreateDto);
             mongoRepositoryReactive.saveOrUpdate(pendingGamingMachine);
@@ -377,7 +374,7 @@ public class MachineServiceImpl implements MachineService {
         }
         Mono<ResponseEntity> validateGamingMachineLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
         if (validateGamingMachineLicenseResponse != null) {
-           return validateGamingMachineLicenseResponse;
+            return validateGamingMachineLicenseResponse;
         }
 
         List<Machine> machineList = new ArrayList<>();
@@ -573,6 +570,40 @@ public class MachineServiceImpl implements MachineService {
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding machine to agent", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> getMachineByParam(String agentId, String institutionId) {
+        try {
+            Query query = new Query();
+            query.addCriteria(Criteria.where("machineStatusId").is(MachineStatusReferenceData.ACTIVE_ID));
+            String machineTypeId = "";
+            if (StringUtils.isEmpty(agentId) && !StringUtils.isEmpty(institutionId)) {
+                query.addCriteria(Criteria.where("institutionId").is(institutionId));
+                machineTypeId = MachineTypeReferenceData.GAMING_MACHINE_ID;
+            }
+            if (!StringUtils.isEmpty(agentId) && StringUtils.isEmpty(institutionId)) {
+                query.addCriteria(Criteria.where("agentId").is(agentId));
+                machineTypeId = MachineTypeReferenceData.GAMING_TERMINAL_ID;
+            }
+            query.addCriteria(Criteria.where("machineTypeId").is(machineTypeId));
+
+            ArrayList<Machine> machines = (ArrayList<Machine>) mongoRepositoryReactive.findAll(query, Machine.class).toStream().collect(Collectors.toList());
+            if (machines.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
+            }
+
+            List<MachineDto> dtos = new ArrayList<>();
+            for (Machine machine : machines) {
+                MachineDto dto = new MachineDto();
+                dto.setId(machine.getId());
+                dto.setSerialNumber(machine.getSerialNumber());
+                dtos.add(dto);
+            }
+            return Mono.just(new ResponseEntity<>(dtos, HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while getting machines by params", e);
         }
     }
 
