@@ -1,10 +1,8 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 
-import com.software.finatech.lslb.cms.service.dto.AgentDto;
-import com.software.finatech.lslb.cms.service.dto.AgentInstitutionDto;
-import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
-import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
+import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.referencedata.MachineTypeReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.adapters.AgentInstitutionAdapter;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 @Document(collection = "Agents")
@@ -235,9 +234,9 @@ public class Agent extends AbstractFact {
         agentDto.setGameTypes(getGameTypes());
         agentDto.setBusinessAddresses(getBusinessAddresses());
         agentDto.setAgentInstitutions(convertAgentInstitutions());
+        agentDto.setGamingTerminals(getAllGamingTerminals());
         return agentDto;
     }
-
 
     private List<AgentInstitutionDto> convertAgentInstitutions() {
         List<AgentInstitutionDto> agentInstitutionDtos = new ArrayList<>();
@@ -309,5 +308,17 @@ public class Agent extends AbstractFact {
 
     public AuthInfo getAuthInfo() {
         return (AuthInfo) mongoRepositoryReactive.find(Query.query(Criteria.where("agentId").is(this.getId())), AuthInfo.class).block();
+    }
+
+    private List<MachineDto> getAllGamingTerminals() {
+        List<MachineDto> dtos = new ArrayList<>();
+        Query query = new Query();
+        query.addCriteria(Criteria.where("agentId").is(this.id));
+        query.addCriteria(Criteria.where("machineTypeId").is(MachineTypeReferenceData.GAMING_TERMINAL_ID));
+        ArrayList<Machine> machines = (ArrayList<Machine>) mongoRepositoryReactive.findAll(query, Machine.class).toStream().collect(Collectors.toList());
+        for (Machine machine : machines) {
+            dtos.add(machine.convertToFullDto());
+        }
+        return dtos;
     }
 }
