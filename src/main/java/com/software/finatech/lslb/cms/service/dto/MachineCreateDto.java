@@ -22,16 +22,6 @@ public class MachineCreateDto {
     private String gameTypeId;
     @NotEmpty(message = "please provide machine type id")
     private String machineTypeId;
-    @NotEmpty(message = "please provide machine status id")
-    private String machineStatusId;
-
-    public String getMachineStatusId() {
-        return machineStatusId;
-    }
-
-    public void setMachineStatusId(String machineStatusId) {
-        this.machineStatusId = machineStatusId;
-    }
 
     public String getMachineTypeId() {
         return machineTypeId;

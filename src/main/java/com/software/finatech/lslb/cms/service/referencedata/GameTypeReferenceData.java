@@ -20,6 +20,8 @@ public class GameTypeReferenceData {
         gameType1.setName("Public Online Lottery");
         gameType1.setShortCode("POL");
         gameType1.setAipDurationMonths(3);
+        gameType1.setAllowsGamingTerminal(true);
+        gameType1.setAllowsGamingMachine(false);
         gameType1.setInstitutionLicenseDurationMonths(12);
         gameType1.setGamingMachineLicenseDurationMonths(12);
         gameType1.setAgentLicenseDurationMonths(12);
@@ -34,6 +36,8 @@ public class GameTypeReferenceData {
         gameType2.setDescription("Online Sport Betting");
         gameType2.setName("Online Sport Betting");
         gameType2.setShortCode("OSB");
+        gameType2.setAllowsGamingTerminal(false);
+        gameType2.setAllowsGamingMachine(false);
         gameType2.setAipDurationMonths(3);
         gameType2.setInstitutionLicenseDurationMonths(12);
         gameType2.setGamingMachineLicenseDurationMonths(12);
@@ -44,10 +48,12 @@ public class GameTypeReferenceData {
             gameType3 = new GameType();
             gameType3.setId(GAMING_MACHINE_OPERATOR_ID);
         }
-        gameType3.setDescription("A gaming machine operator (operator that has gaming machines)");
-        gameType3.setName("Gaming Machine");
-        gameType3.setShortCode("GM");
+        gameType3.setDescription("Casino (Category with gaming Machines)");
+        gameType3.setName("Casino");
+        gameType3.setShortCode("CS");
         gameType3.setAipDurationMonths(3);
+        gameType3.setAllowsGamingMachine(true);
+        gameType3.setAllowsGamingTerminal(false);
         gameType3.setInstitutionLicenseDurationMonths(12);
         gameType3.setGamingMachineLicenseDurationMonths(12);
         gameType3.setAgentLicenseDurationMonths(12);

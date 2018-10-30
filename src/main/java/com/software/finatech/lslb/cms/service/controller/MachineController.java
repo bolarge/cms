@@ -176,4 +176,16 @@ public class MachineController {
         return machineService.getMachineFullDetail(id);
     }
 
+
+    @RequestMapping(method = RequestMethod.GET, value = "/find-machines-by-params")
+    @ApiOperation(value = "Get Machines By Params ", response = MachineDto.class, consumes = "application/json",
+            notes = "Used from the payment page to get machines for institution or agent")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> findMachineByAgentOrInstitution(@RequestParam("agentId") String agentId, @RequestParam("institutionId") String institutionId) {
+        return machineService.getMachineByParam(agentId, institutionId);
+    }
 }

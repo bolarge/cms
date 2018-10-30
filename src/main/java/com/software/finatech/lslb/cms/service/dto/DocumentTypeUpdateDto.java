@@ -1,13 +1,21 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 
-import javax.validation.constraints.NotEmpty;
-
-public class DocumentTypeUpdateDto extends EnumeratedFactDto{
-    @NotEmpty(message = "Enter a valid document purpose ID")
-    protected String documentPurposeId;
+public class DocumentTypeUpdateDto extends EnumeratedFactDto {
     protected boolean active;
     protected boolean required;
+    protected String id;
+
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public boolean isActive() {
         return active;
@@ -24,12 +32,4 @@ public class DocumentTypeUpdateDto extends EnumeratedFactDto{
     public void setRequired(boolean required) {
         this.required = required;
     }
-    public String getDocumentPurposeId() {
-        return documentPurposeId;
-    }
-
-    public void setDocumentPurposeId(String documentPurposeId) {
-        this.documentPurposeId = documentPurposeId;
-    }
-
 }
