@@ -377,10 +377,12 @@ public class MachineServiceImpl implements MachineService {
         }
         Mono<ResponseEntity> validateGamingMachineLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
         if (validateGamingMachineLicenseResponse != null) {
-            return validateGamingMachineLicenseResponse;
+           return validateGamingMachineLicenseResponse;
         }
 
-        List<Machine> gamingMachineList = new ArrayList<>();
+        List<Machine> machineList = new ArrayList<>();
+        List<MachineGame> machineGames = new ArrayList<>();
+
         List<FailedLine> failedLines = new ArrayList<>();
         UploadTransactionResponse uploadTransactionResponse = new UploadTransactionResponse();
         if (!multipartFile.isEmpty()) {
@@ -391,35 +393,43 @@ public class MachineServiceImpl implements MachineService {
                 Map<String, Machine> gamingMachineMap = new HashMap<>();
                 for (int i = 1; i < rows.length; i++) {
                     String[] columns = rows[i].split(",");
-                    if (columns.length < 6) {
+                    if (columns.length < 8) {
                         failedLines.add(FailedLine.fromLineAndReason(rows[i], "Line has less than 6 fields"));
                     } else {
                         try {
-                            Machine machine = getGamingMachineBySerialNumber(columns[0], gamingMachineMap);
+                            Machine machine = getGamingMachineBySerialNumberFromMap(columns[0], gamingMachineMap);
+                            MachineGame machineGame = new MachineGame();
                             if (machine == null) {
                                 machine = new Machine();
                                 machine.setId(UUID.randomUUID().toString());
                                 machine.setSerialNumber(columns[0]);
                                 machine.setManufacturer(columns[1]);
                                 machine.setMachineAddress(columns[3]);
-                                machine.setGameTypeId(gameTypeId);
-                                MachineGameDetails machineGameDetails = new MachineGameDetails();
-                                machineGameDetails.setGameName(columns[4]);
-                                machineGameDetails.setGameVersion(columns[5]);
+                                String machineTypeId = columns[4];
+                                MachineType machineType = getMachineType(machineTypeId);
+                                if (machineType == null) {
+                                    failedLines.add(FailedLine.fromLineAndReason(rows[i], String.format("Machine type with id %s not found", machineTypeId)));
+                                    continue;
+                                }
+                                machine.setMachineTypeId(machineTypeId);
+                                String machineStatusId = columns[5];
+                                MachineStatus machineStatus = getMachineStatus(machineStatusId);
+                                if (machineStatus == null) {
+                                    failedLines.add(FailedLine.fromLineAndReason(rows[i], String.format("Machine status with id %s not found", machineStatusId)));
+                                    continue;
+                                }
+                                machine.setMachineStatusId(machineStatusId);
 
-
-                                Set<MachineGameDetails> gamingMachineGameDetailsSet = new HashSet<>();
-                                gamingMachineGameDetailsSet.add(machineGameDetails);
-                                //    gamingMachine.setGameDetailsList(gamingMachineGameDetailsSet);
-                            } else {
-                                MachineGameDetails gamingMachineGameDetails = new MachineGameDetails();
-                                gamingMachineGameDetails.setGameName(columns[4]);
-                                gamingMachineGameDetails.setGameVersion(columns[5]);
-                                //  Set<MachineGameDetails> gamingMachineGameDetailsSet = gamingMachine.getGameDetailsList();
-                                //     gamingMachineGameDetailsSet.add(gamingMachineGameDetails);
                             }
+                            machine.setGameTypeId(gameTypeId);
+                            machineGame.setId(UUID.randomUUID().toString());
+                            machineGame.setMachineId(machine.getId());
+                            machineGame.setGameName(columns[6]);
+                            machineGame.setGameVersion(columns[7]);
+                            machineGame.setActive(true);
                             machine.setInstitutionId(institutionId);
-                            gamingMachineList.add(machine);
+                            machineList.add(machine);
+                            machineGames.add(machineGame);
                             gamingMachineMap.put(machine.getSerialNumber(), machine);
                         } catch (Exception e) {
                             logger.error(String.format("Error parsing line %s", rows[i]), e);
@@ -434,13 +444,16 @@ public class MachineServiceImpl implements MachineService {
                     uploadTransactionResponse.setMessage("Please review with sample file and re upload");
                     return Mono.just(new ResponseEntity<>(uploadTransactionResponse, HttpStatus.BAD_REQUEST));
                 } else {
-                    for (Machine gamingMachine : gamingMachineList) {
+                    for (Machine gamingMachine : machineList) {
                         try {
                             mongoRepositoryReactive.saveOrUpdate(gamingMachine);
                         } catch (Exception e) {
                             logger.error("An error occurred while saving gaming machine with serial number {}", gamingMachine.getSerialNumber());
                             String line = String.format("%s,%s,%s", gamingMachine.getSerialNumber(), gamingMachine.getManufacturer(), gamingMachine.getMachineAddress());
                             failedLines.add(FailedLine.fromLineAndReason(line, "An error occurred while saving line"));
+                        }
+                        for (MachineGame machineGame : machineGames) {
+                            mongoRepositoryReactive.saveOrUpdate(machineGame);
                         }
                     }
                     if (!failedLines.isEmpty()) {
@@ -472,16 +485,8 @@ public class MachineServiceImpl implements MachineService {
         return (Machine) mongoRepositoryReactive.find(query, Machine.class).block();
     }
 
-    private Machine getGamingMachineBySerialNumber(String serialNumber, @NotNull Map<String, Machine> gamingMachineMap) {
-        Machine gamingMachine = gamingMachineMap.get(serialNumber);
-        if (gamingMachine != null) {
-            return gamingMachine;
-        }
-        gamingMachine = findBySerialNumber(serialNumber);
-        if (gamingMachine != null) {
-            gamingMachineMap.put(serialNumber, gamingMachine);
-        }
-        return gamingMachine;
+    private Machine getGamingMachineBySerialNumberFromMap(String serialNumber, @NotNull Map<String, Machine> gamingMachineMap) {
+        return gamingMachineMap.get(serialNumber);
     }
 
 
@@ -578,7 +583,7 @@ public class MachineServiceImpl implements MachineService {
         return (MachineGame) mongoRepositoryReactive.findById(id, MachineGame.class).block();
     }
 
-    public MachineStatus getMachineStatus(String machineStatusId) {
+    private MachineStatus getMachineStatus(String machineStatusId) {
         if (StringUtils.isEmpty(machineStatusId)) {
             return null;
         }
@@ -595,4 +600,23 @@ public class MachineServiceImpl implements MachineService {
         }
         return machineStatus;
     }
+
+    private MachineType getMachineType(String machineTypeId) {
+        if (StringUtils.isEmpty(machineTypeId)) {
+            return null;
+        }
+        Map machineTypeMap = Mapstore.STORE.get("MachineType");
+        MachineType machineType = null;
+        if (machineType != null) {
+            machineType = (MachineType) machineTypeMap.get(machineTypeId);
+        }
+        if (machineType == null) {
+            machineType = (MachineType) mongoRepositoryReactive.findById(machineTypeId, MachineType.class).block();
+            if (machineType != null && machineTypeMap != null) {
+                machineTypeMap.put(machineTypeId, machineType);
+            }
+        }
+        return machineType;
+    }
+
 }

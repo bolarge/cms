@@ -1,5 +1,8 @@
 package com.software.finatech.lslb.cms.service.model.criminalityDetails;
 
+import com.software.finatech.lslb.cms.service.dto.CommentDto;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class ApplicantCriminalityDetails {
@@ -7,6 +10,15 @@ public class ApplicantCriminalityDetails {
     private ApplicantPendingInvestigation applicantPendingInvestigation;
     private Boolean applicantHasPendingInvestigation;
     private Boolean applicantMemberHasCriminalOffence;
+    private List<CommentDto> comments = new ArrayList<>();
+
+    public List<CommentDto> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<CommentDto> comments) {
+        this.comments = comments;
+    }
 
     public Boolean getApplicantHasPendingInvestigation() {
         return applicantHasPendingInvestigation;

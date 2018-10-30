@@ -1,5 +1,10 @@
 package com.software.finatech.lslb.cms.service.model.applicantDetails;
 
+import com.software.finatech.lslb.cms.service.dto.CommentDto;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class ApplicantDetails {
 
     private String applicantName;
@@ -27,6 +32,15 @@ public class ApplicantDetails {
     private String applicantMemberGamingExperienceDetails;
     private Boolean applicantIndigenous;
     private String applicantIndigenousDetails;
+    private List<CommentDto> comments = new ArrayList<>();
+
+    public List<CommentDto> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<CommentDto> comments) {
+        this.comments = comments;
+    }
 
     public String getApplicantName() {
         return applicantName;

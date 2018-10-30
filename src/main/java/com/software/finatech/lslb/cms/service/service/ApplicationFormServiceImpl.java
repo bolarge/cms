@@ -77,7 +77,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         try {
             Mono<ResponseEntity> validateCreateApplicationFormResponse = validateCreateApplicationForm(applicationFormCreateDto);
             if (validateCreateApplicationFormResponse != null) {
-                //    return validateCreateApplicationFormResponse;
+                return validateCreateApplicationFormResponse;
             }
 
             ApplicationForm applicationForm = fromCreateDto(applicationFormCreateDto);
@@ -880,6 +880,260 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             mongoRepositoryReactive.saveOrUpdate(applicationForm);
 
             String verbiage = String.format("Added comment to application form  :Form Id -> %s ->  ,Category : -> %s , Comment -> %s",
+                    applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
+
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding comment", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> saveApplicantDetailsComment(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request) {
+        try {
+            ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
+            if (applicationForm == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+
+            ApplicantDetails applicantDetails = applicationForm.getApplicantDetails();
+            if (applicantDetails == null) {
+                return Mono.just(new ResponseEntity<>("Applicant has not filled applicant details", HttpStatus.BAD_REQUEST));
+            }
+
+            CommentDto comment = new CommentDto();
+            comment.setCommentDate(LocalDate.now().toString("dd-MM-yyyy"));
+            comment.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
+            comment.setUserFullName(loggedInUser.getFullName());
+            comment.setComment(addCommentDto.getComment());
+            applicationForm.getApplicantDetails().getComments().add(comment);
+            mongoRepositoryReactive.saveOrUpdate(applicationForm);
+
+            String verbiage = String.format("Added comment to application form  , Applicant Details :Form Id -> %s ->  ,Category : -> %s , Comment -> %s",
+                    applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
+
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding comment", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> saveApplicantMembersDetailsComment(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request) {
+        try {
+            ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
+            if (applicationForm == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+
+            ApplicantMemberDetails memberDetails = applicationForm.getApplicantMemberDetails();
+            if (memberDetails == null) {
+                return Mono.just(new ResponseEntity<>("Applicant has not filled members details", HttpStatus.BAD_REQUEST));
+            }
+
+            CommentDto comment = new CommentDto();
+            comment.setCommentDate(LocalDate.now().toString("dd-MM-yyyy"));
+            comment.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
+            comment.setUserFullName(loggedInUser.getFullName());
+            comment.setComment(addCommentDto.getComment());
+            applicationForm.getApplicantMemberDetails().getComments().add(comment);
+            mongoRepositoryReactive.saveOrUpdate(applicationForm);
+
+            String verbiage = String.format("Added comment to application form  , Applicant Member Details :Form Id -> %s ->  ,Category : -> %s , Comment -> %s",
+                    applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
+
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding comment", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> saveApplicantContactDetailsComment(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request) {
+        try {
+            ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
+            if (applicationForm == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+            ApplicantContactDetails contactDetails = applicationForm.getApplicantContactDetails();
+            if (contactDetails == null) {
+                return Mono.just(new ResponseEntity<>("Applicant has not filled contact details", HttpStatus.BAD_REQUEST));
+            }
+
+            CommentDto comment = new CommentDto();
+            comment.setCommentDate(LocalDate.now().toString("dd-MM-yyyy"));
+            comment.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
+            comment.setUserFullName(loggedInUser.getFullName());
+            comment.setComment(addCommentDto.getComment());
+            applicationForm.getApplicantContactDetails().getComments().add(comment);
+            mongoRepositoryReactive.saveOrUpdate(applicationForm);
+
+            String verbiage = String.format("Added comment to application form  , Applicant Contact Details :Form Id -> %s ->  ,Category : -> %s , Comment -> %s",
+                    applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding comment", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> saveApplicantCriminalityDetailsComment(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request) {
+        try {
+            ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
+            if (applicationForm == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+
+            ApplicantCriminalityDetails criminalityDetails = applicationForm.getApplicantCriminalityDetails();
+            if (criminalityDetails == null) {
+                return Mono.just(new ResponseEntity<>("Applicant has not filled criminality details", HttpStatus.BAD_REQUEST));
+            }
+
+            CommentDto comment = new CommentDto();
+            comment.setCommentDate(LocalDate.now().toString("dd-MM-yyyy"));
+            comment.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
+            comment.setUserFullName(loggedInUser.getFullName());
+            comment.setComment(addCommentDto.getComment());
+            applicationForm.getApplicantCriminalityDetails().getComments().add(comment);
+            mongoRepositoryReactive.saveOrUpdate(applicationForm);
+
+            String verbiage = String.format("Added comment to application form  , Applicant Criminality Details :Form Id -> %s ->  ,Category : -> %s , Comment -> %s",
+                    applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
+
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding comment", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> saveApplicantDeclarationDetailsComment(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request) {
+        try {
+            ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
+            if (applicationForm == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+
+            CommentDto comment = new CommentDto();
+            comment.setCommentDate(LocalDate.now().toString("dd-MM-yyyy"));
+            comment.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
+            comment.setUserFullName(loggedInUser.getFullName());
+            comment.setComment(addCommentDto.getComment());
+            ApplicantDeclarationDetails declarationDetails = applicationForm.getApplicantDeclarationDetails();
+            if (declarationDetails == null) {
+                return Mono.just(new ResponseEntity<>("Applicant has not filled declaration details", HttpStatus.BAD_REQUEST));
+            }
+            applicationForm.getApplicantDeclarationDetails().getComments().add(comment);
+            mongoRepositoryReactive.saveOrUpdate(applicationForm);
+
+            String verbiage = String.format("Added comment to application form  , Applicant Declaration Details :Form Id -> %s ->  ,Category : -> %s , Comment -> %s",
+                    applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding comment", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> saveApplicantOtherInformationComment(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request) {
+        try {
+            ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
+            if (applicationForm == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+
+            ApplicantOtherInformation otherInformation = applicationForm.getApplicantOtherInformation();
+            if (otherInformation == null) {
+                return Mono.just(new ResponseEntity<>("Applicant has not filled other information", HttpStatus.BAD_REQUEST));
+            }
+
+            CommentDto comment = new CommentDto();
+            comment.setCommentDate(LocalDate.now().toString("dd-MM-yyyy"));
+            comment.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
+            comment.setUserFullName(loggedInUser.getFullName());
+            comment.setComment(addCommentDto.getComment());
+            applicationForm.getApplicantOtherInformation().getComments().add(comment);
+            mongoRepositoryReactive.saveOrUpdate(applicationForm);
+
+            String verbiage = String.format("Added comment to application form  , Applicant Details :Form Id -> %s ->  ,Category : -> %s , Comment -> %s",
+                    applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
+
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding comment", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> saveApplicantOutletInformationComment(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request) {
+        try {
+            ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
+            if (applicationForm == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+            ApplicantOutletInformation outletInformation = applicationForm.getApplicantOutletInformation();
+            if (outletInformation == null) {
+                return Mono.just(new ResponseEntity<>("Applicant has not filled outlet information", HttpStatus.BAD_REQUEST));
+            }
+
+            CommentDto comment = new CommentDto();
+            comment.setCommentDate(LocalDate.now().toString("dd-MM-yyyy"));
+            comment.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
+            comment.setUserFullName(loggedInUser.getFullName());
+            comment.setComment(addCommentDto.getComment());
+            applicationForm.getApplicantOutletInformation().getComments().add(comment);
+            mongoRepositoryReactive.saveOrUpdate(applicationForm);
+
+            String verbiage = String.format("Added comment to application form  , Applicant Outlet information :Form Id -> %s ->  ,Category : -> %s , Comment -> %s",
                     applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
