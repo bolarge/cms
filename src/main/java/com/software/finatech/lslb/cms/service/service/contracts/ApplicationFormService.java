@@ -84,4 +84,18 @@ public interface ApplicationFormService {
     void doDocumentReuploadNotification(Document document);
 
     Mono<ResponseEntity> addCommentsToForm(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request);
+
+    Mono<ResponseEntity> saveApplicantDetailsComment(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request);
+
+    Mono<ResponseEntity> saveApplicantMembersDetailsComment(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request);
+
+    Mono<ResponseEntity> saveApplicantContactDetailsComment(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request);
+
+    Mono<ResponseEntity> saveApplicantCriminalityDetailsComment(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request);
+
+    Mono<ResponseEntity> saveApplicantDeclarationDetailsComment(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request);
+
+    Mono<ResponseEntity> saveApplicantOtherInformationComment(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request);
+
+    Mono<ResponseEntity> saveApplicantOutletInformationComment(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request);
 }
