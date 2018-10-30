@@ -57,7 +57,7 @@ public class Scheduler {
     LocalDateTime dateTime = new LocalDateTime();
 
 
-    @Scheduled(cron = "0 0 4 * * ?")
+    @Scheduled(cron = "0 0 6 * * *")
     protected void checkForLicensesCloseToExpirations(){
         logger.info(" checkForLicensesCloseToExpirations");
         ArrayList<String> licenseStatuses= new ArrayList<>();
@@ -65,56 +65,67 @@ public class Scheduler {
 
         List<License> licenses=
                 expirationList.getExpiringLicences(90,licenseStatuses);
-       List<NotificationDto> notificationDtos= new ArrayList<>();
+        List<NotificationDto> notificationDtos= new ArrayList<>();
         LocalDate endDate;
         dateTime=dateTime.plusMonths(3);
         if(licenses!=null){
             for(License license: licenses){
-                int days=0;
-                NotificationDto notificationDto= new NotificationDto();
-                endDate=license.getExpiryDate();
-                days= Days.daysBetween(dateTime,endDate).getDays();
-                notificationDto.setDaysToExpiration(days);
-                Map gameTypeMap = Mapstore.STORE.get("GameType");
-                GameType gameType = null;
-                if (gameTypeMap != null) {
-                    gameType = (GameType) gameTypeMap.get(license.getGameTypeId());
-                }
-                if (gameType == null) {
-                    gameType = (GameType) mongoRepositoryReactive.findById(license.getGameTypeId(), GameType.class).block();
-                    if (gameType != null && gameTypeMap != null) {
-                        gameTypeMap.put(license.getGameTypeId(), gameType);
+                boolean check=false;
+                int days_diff=0;
+                if(license.getLastSentExpiryEmailDate()==null){
+                    check=true;
+                    license.setLastSentExpiryEmailDate(LocalDate.now());
+                }else{
+                    days_diff= Days.daysBetween(license.getLastSentExpiryEmailDate(),LocalDate.now().plusDays(7)).getDays();
+                    if(days_diff>0){
+                        check=true;
                     }
                 }
+                if(check==true){
+                    int days=0;
+                    NotificationDto notificationDto= new NotificationDto();
+                    endDate=license.getExpiryDate();
+                    days= Days.daysBetween(dateTime,endDate).getDays();
+                    notificationDto.setDaysToExpiration(days);
+                    Map gameTypeMap = Mapstore.STORE.get("GameType");
+                    GameType gameType = null;
+                    if (gameTypeMap != null) {
+                        gameType = (GameType) gameTypeMap.get(license.getGameTypeId());
+                    }
+                    if (gameType == null) {
+                        gameType = (GameType) mongoRepositoryReactive.findById(license.getGameTypeId(), GameType.class).block();
+                        if (gameType != null && gameTypeMap != null) {
+                            gameTypeMap.put(license.getGameTypeId(), gameType);
+                        }
+                    }
 
-                notificationDto.setGameType(gameType.getDescription());
-                notificationDto.setInstitutionId(license.getInstitutionId());
-                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
-                Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),Institution.class).block();
-                if(institution!=null){
-                    notificationDto.setInstitutionName(institution.getInstitutionName());
-                    notificationDto.setInstitutionEmail(institution.getEmailAddress());
-
+                    notificationDto.setGameType(gameType.getDescription());
+                    notificationDto.setInstitutionId(license.getInstitutionId());
+                    notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
+                    Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),Institution.class).block();
+                    if(institution!=null){
+                        notificationDto.setInstitutionName(institution.getInstitutionName());
+                        notificationDto.setInstitutionEmail(institution.getEmailAddress());
+                    }
+                    Agent agent=(Agent) mongoRepositoryReactive.findById(license.getAgentId(),Agent.class).block();
+                    if(agent!=null){
+                        notificationDto.setAgentFullName(agent.getFullName());
+                        notificationDto.setAgentEmailAddress(agent.getEmailAddress());
+                    }
+                    Machine gamingMachine=(Machine) mongoRepositoryReactive.findById(license.convertToDto().getGamingMachineId(),Machine.class).block();
+                    if(gamingMachine!=null){
+                        notificationDto.setMachineNumber(gamingMachine.getSerialNumber());
+                    }
+                    notificationDto.setTemplate("LicenseUpdate");
+                    notificationDtos.add(notificationDto);
                 }
-                Agent agent=(Agent) mongoRepositoryReactive.findById(license.getAgentId(),Agent.class).block();
-                if(agent!=null){
-                    notificationDto.setAgentFullName(agent.getFullName());
-                    notificationDto.setAgentEmailAddress(agent.getEmailAddress());
-
-                }
-                Machine gamingMachine=(Machine) mongoRepositoryReactive.findById(license.convertToDto().getGamingMachineId(),Machine.class).block();
-                if(gamingMachine!=null){
-                    notificationDto.setMachineNumber(gamingMachine.getSerialNumber());
-
-                }
-                notificationDto.setTemplate("LicenseUpdate");
-                notificationDtos.add(notificationDto);
+                sendEmailNotification(notificationDtos,"expiring");
             }
-            sendEmailNotification(notificationDtos,"expiring");
+
         }
 
     }
-    @Scheduled(cron = "0 0 4 * * ?")
+    @Scheduled(cron = "0 0 6 * * *")
     protected void checkForAIPCloseToExpirations(){
 
         logger.info("checkForAIPCloseToExpirations");
@@ -186,7 +197,7 @@ public class Scheduler {
                     model.put("description", notificationDto.getInstitutionName()+" with Game Type: "+notificationDto.getGameType()+" License has expired. License Expiration Date is "+notificationDto.getEndDate());
 
                 }
-                }else if(type=="AIPExpired"){
+            }else if(type=="AIPExpired"){
                 model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType()+" AIP period has ended");
             }else if(type=="AIPExpiring"){
                 model.put("description", notificationDto.getInstitutionName()+" "+notificationDto.getGameType()+" AIP period is due to end on "+notificationDto.getEndDate());
@@ -196,83 +207,97 @@ public class Scheduler {
             model.put("date", LocalDate.now().toString("dd-MM-YYYY"));
             String content = mailContentBuilderService.build(model, notificationDto.getTemplate());
 
-           if((type=="AIPExpired")||(type=="AIPExpiring")){
-               emailService.sendEmail(content,"AIP Expiration Notification", adminEmail);
-               emailService.sendEmail(content,"AIP Expiration Notification", notificationDto.getInstitutionEmail());
+            if((type=="AIPExpired")||(type=="AIPExpiring")){
+                emailService.sendEmail(content,"AIP Expiration Notification", adminEmail);
+                emailService.sendEmail(content,"AIP Expiration Notification", notificationDto.getInstitutionEmail());
 
-           }else{
-               if(!StringUtils.isEmpty(notificationDto.getAgentId())){
-                   emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getAgentEmailAddress());
+            }else{
+                if(!StringUtils.isEmpty(notificationDto.getAgentId())){
+                    emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getAgentEmailAddress());
 
-               }
-                   emailService.sendEmail(content, "Licence Expiration Notification", adminEmail);
-                   emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getInstitutionEmail());
+                }
+                emailService.sendEmail(content, "Licence Expiration Notification", adminEmail);
+                emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getInstitutionEmail());
 
-           }
+            }
 
         }
     }
-    //@Scheduled(cron = "5 8 * * 1")
+    @Scheduled(cron = "0 0 6 * * *")
     protected void InstitutionsWithExpiredLicense(){
         ArrayList<String> licenseStatuses= new ArrayList<>();
         licenseStatuses.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
         List<License> licenses= expirationList.getExpiredLicences(licenseStatuses);
         List<NotificationDto> notificationDtos= new ArrayList<>();
         if(licenses!=null){
-            for(License license: licenses){
-                NotificationDto notificationDto= new NotificationDto();
-                LocalDate endDate=license.getExpiryDate();
-                GameType gameType = null;
-                Map gameTypeMap = Mapstore.STORE.get("GameType");
-                if (gameTypeMap != null) {
-                    gameType = (GameType) gameTypeMap.get(license.getGameTypeId());
-                }
-                if (gameType == null) {
-                    gameType = (GameType) mongoRepositoryReactive.findById(license.getGameTypeId(), GameType.class).block();
-                    if (gameType != null && gameTypeMap != null) {
-                        gameTypeMap.put(license.getGameTypeId(), gameType);
+            for(License license: licenses) {
+                boolean check = false;
+                int days_diff = 0;
+                if (license.getLastSentExpiryEmailDate() == null) {
+                    check = true;
+                    license.setLastSentExpiryEmailDate(LocalDate.now());
+                } else {
+                    days_diff = Days.daysBetween(license.getLastSentExpiryEmailDate(), LocalDate.now().plusDays(7)).getDays();
+                    if (days_diff > 0) {
+                        check = true;
                     }
-                } notificationDto.setGameType(gameType.getDescription());
-                notificationDto.setInstitutionId(license.getInstitutionId());
-                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
-                Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),
-                        Institution.class).block();
-                notificationDto.setInstitutionName(institution.getInstitutionName());
-                notificationDto.setInstitutionEmail(institution.getEmailAddress());
-                Agent agent=(Agent) mongoRepositoryReactive.findById(license.getAgentId(),Agent.class).block();
-                if(agent!=null){
-                    notificationDto.setAgentFullName(agent.getFullName());
-                    notificationDto.setAgentEmailAddress(agent.getEmailAddress());
-
                 }
-                Machine gamingMachine=(Machine) mongoRepositoryReactive.findById(license.convertToDto().getGamingMachineId(),Machine.class).block();
-                if(gamingMachine!=null){
-                    notificationDto.setMachineNumber(gamingMachine.getSerialNumber());
+                if (check == true) {
+                    NotificationDto notificationDto = new NotificationDto();
+                    LocalDate endDate = license.getExpiryDate();
+                    GameType gameType = null;
+                    Map gameTypeMap = Mapstore.STORE.get("GameType");
+                    if (gameTypeMap != null) {
+                        gameType = (GameType) gameTypeMap.get(license.getGameTypeId());
+                    }
+                    if (gameType == null) {
+                        gameType = (GameType) mongoRepositoryReactive.findById(license.getGameTypeId(), GameType.class).block();
+                        if (gameType != null && gameTypeMap != null) {
+                            gameTypeMap.put(license.getGameTypeId(), gameType);
+                        }
+                    }
+                    notificationDto.setGameType(gameType.getDescription());
+                    notificationDto.setInstitutionId(license.getInstitutionId());
+                    notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
+                    Institution institution = (Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),
+                            Institution.class).block();
+                    notificationDto.setInstitutionName(institution.getInstitutionName());
+                    notificationDto.setInstitutionEmail(institution.getEmailAddress());
+                    Agent agent = (Agent) mongoRepositoryReactive.findById(license.getAgentId(), Agent.class).block();
+                    if (agent != null) {
+                        notificationDto.setAgentFullName(agent.getFullName());
+                        notificationDto.setAgentEmailAddress(agent.getEmailAddress());
 
+                    }
+                    Machine gamingMachine = (Machine) mongoRepositoryReactive.findById(license.convertToDto().getGamingMachineId(), Machine.class).block();
+                    if (gamingMachine != null) {
+                        notificationDto.setMachineNumber(gamingMachine.getSerialNumber());
+
+                    }
+                    notificationDto.setTemplate("LicenseUpdate");
+                    notificationDtos.add(notificationDto);
+
+                    license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
+
+                    mongoRepositoryReactive.saveOrUpdate(license);
                 }
-                notificationDto.setTemplate("LicenseUpdate");
-                notificationDtos.add(notificationDto);
-
-                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
-
-                mongoRepositoryReactive.saveOrUpdate(license);
+                sendEmailNotification(notificationDtos, "expired");
             }
-            sendEmailNotification(notificationDtos,"expired");
         }
     }
-    @Scheduled(cron = "0 0 4 * * ?")
+    @Scheduled(cron = "0 0 6 * * *")
     protected void deactivateInstitutionsWithExpiredLicense() {
         ArrayList<String> licenseStatuses = new ArrayList<>();
         licenseStatuses.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
         expirationList.getExpiredLicences(licenseStatuses);
 
     }
-    @Scheduled(cron = "0 0 4 * * ?")
+    @Scheduled(cron = "0 0 6 * * *")
     protected void WithExpiredAIP(){
         ArrayList<String> licenseStatuses= new ArrayList<>();
         licenseStatuses.add(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
         licenseStatuses.add(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID);
-         List<License> licenses= expirationList.getExpiredLicences(licenseStatuses);
+        List<License> licenses= expirationList.getExpiredLicences(licenseStatuses);
         List<NotificationDto> notificationDtos= new ArrayList<>();
         if(licenses!=null){
             for(License license: licenses){

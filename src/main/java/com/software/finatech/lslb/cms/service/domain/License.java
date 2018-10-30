@@ -27,6 +27,15 @@ public class License extends AbstractFact {
     protected String gamingMachineId;
     protected String parentLicenseId;
     protected String licenseNumber;
+    protected LocalDate lastSentExpiryEmailDate;
+
+    public LocalDate getLastSentExpiryEmailDate() {
+        return lastSentExpiryEmailDate;
+    }
+
+    public void setLastSentExpiryEmailDate(LocalDate lastSentExpiryEmailDate) {
+        this.lastSentExpiryEmailDate = lastSentExpiryEmailDate;
+    }
 
     public String getLicenseNumber() {
         return licenseNumber;

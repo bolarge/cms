@@ -569,6 +569,7 @@ public class LicenseServiceImpl implements LicenseService {
             notificationDto.setTemplate("LicenseUpdate");
             notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ",  has submitted renewal application and uploaded the requested documents for " +
                     notificationDto.getGameType());
+            //@TODO: Send email to lslb admin with permission
             notificationDto.setInstitutionEmail(adminEmail);
             sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
 
@@ -579,48 +580,34 @@ public class LicenseServiceImpl implements LicenseService {
         }
     }
 
-    @Override
-    public Mono<ResponseEntity> updateRenewalReviewToInProgress(RenewalFormCommentDto renewalFormCommentDto) {
+//
+    public Mono<ResponseEntity> updateRenewalReviewToInProgress(RenewalForm renewalForm) {
         try {
             String verbiage;
             Query queryLicenceStatus = new Query();
-            queryLicenceStatus.addCriteria(Criteria.where("paymentRecordId").is(renewalFormCommentDto.getPaymentRecordId()));
+            queryLicenceStatus.addCriteria(Criteria.where("paymentRecordId").is(renewalForm.getPaymentRecordId()));
             queryLicenceStatus.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.RENEWAL_LICENSE_IN_REVIEW));
             License license = (License) mongoRepositoryReactive.find(queryLicenceStatus, License.class).block();
             if (license == null) {
                 return Mono.just(new ResponseEntity<>("Invalid payment record", HttpStatus.BAD_REQUEST));
             }
-            Query queryRenewalStatus = new Query();
-            queryRenewalStatus.addCriteria(Criteria.where("paymentRecordId").is(renewalFormCommentDto.getPaymentRecordId()));
-            RenewalForm renewalForm = (RenewalForm) mongoRepositoryReactive.find(queryRenewalStatus, RenewalForm.class).block();
-            renewalForm.setFormStatusId(RenewalFormStatusReferenceData.PENDING);
-            renewalForm.setComment(renewalFormCommentDto.getComment());
-            mongoRepositoryReactive.saveOrUpdate(renewalForm);
-            verbiage = "Moved : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " renewal form  status from submitted to pending";
-            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
-                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-
-
             license.setLicenseStatusId(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
             mongoRepositoryReactive.saveOrUpdate(license);
             verbiage = "Moved : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from Renewal In Review back to Renewal In Progress";
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
                     springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-
-            List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(license.getInstitutionId());
-            institutionAdmins.stream().forEach(institutionAdmin -> {
-                NotificationDto notificationDto = new NotificationDto();
-                notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
-                notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
-                notificationDto.setTemplate("LicenseUpdate");
-                notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ", " + renewalFormCommentDto.getComment()
-                );
-                notificationDto.setInstitutionEmail(institutionAdmin.getEmailAddress());
-                sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
-            });
-
+//            List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(license.getInstitutionId());
+//            institutionAdmins.stream().forEach(institutionAdmin -> {
+//                NotificationDto notificationDto = new NotificationDto();
+//                notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
+//                notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
+//                notificationDto.setTemplate("LicenseUpdate");
+//                notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ", " + renewalForm.getComment()
+//                );
+//                notificationDto.setInstitutionEmail(institutionAdmin.getEmailAddress());
+//                sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
+//            });
 
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
         } catch (Exception ex) {
@@ -633,6 +620,14 @@ public class LicenseServiceImpl implements LicenseService {
     @Override
     public Mono<ResponseEntity> updateAIPDocToLicense(LicenseUpdateAIPToLicenseDto licenseUpdateDto) {
         try {
+            Query queryAIPFormApproval = new Query();
+            queryAIPFormApproval.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
+            queryAIPFormApproval.addCriteria(Criteria.where("gameTypeId").is(licenseUpdateDto.getGameTypeId()));
+            queryAIPFormApproval.addCriteria(Criteria.where("formStatusId").is(ApplicationFormStatusReferenceData.APPROVED_STATUS_ID));
+            AIPDocumentApproval aipDocumentApproval= (AIPDocumentApproval)mongoRepositoryReactive.find(queryAIPFormApproval,AIPDocumentApproval.class).block();
+            if(aipDocumentApproval==null){
+                return Mono.just(new ResponseEntity<>("AIP FORM NOT APPROVED", HttpStatus.BAD_REQUEST));
+            }
             String verbiage;
             Query queryLicence = new Query();
             queryLicence.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
@@ -777,8 +772,20 @@ public class LicenseServiceImpl implements LicenseService {
 //            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.AIP_ID,
 //                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
 //                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            AIPDocumentApproval aipDocumentApproval = new AIPDocumentApproval();
+                aipDocumentApproval.setFormStatusId(ApplicationFormStatusReferenceData.CREATED_STATUS_ID);
+                aipDocumentApproval.setGameTypeId(license.getGameTypeId());
+                aipDocumentApproval.setInstitutionId(license.getInstitutionId());
+                aipDocumentApproval.setId(UUID.randomUUID().toString());
+                mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
 
+                String verbiage = String.format("Created application form : %s ->  Category :%s",
+                        aipDocumentApproval.getFormStatusId(), aipDocumentApproval.getGameTypeName());
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.AIP_ID,
+                        springSecurityAuditorAware.getCurrentAuditorNotNull(), aipDocumentApproval.getInstitutionName(),
+                        LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
             aipMailSenderAsync.sendAipNotificationToInstitutionAdmins(paymentRecord);
+
         } catch (Exception e) {
             logger.error("An error occurred while creating AIP license for institution {}", paymentRecord.getInstitutionId(), e);
         }

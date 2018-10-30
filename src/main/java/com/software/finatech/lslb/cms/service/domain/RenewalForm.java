@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.RenewalFormDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -33,14 +34,83 @@ public class RenewalForm extends AbstractFact {
     protected String checkNewInvestors;
     protected String newInvestors;
     protected String formStatusId;
-    protected String comment;
+    protected LslbAdminComment lslbAdminComment;
+    protected String approverId;
+    protected String rejectorId;
+    protected String reasonForRejection;
+    protected FormDocumentApproval documentApproval;
+    protected LocalDate submissionDate;
+    protected Boolean readyForApproval;
 
-    public String getComment() {
-        return comment;
+    public Boolean getReadyForApproval() {
+        return readyForApproval;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setReadyForApproval(Boolean readyForApproval) {
+        this.readyForApproval = readyForApproval;
+    }
+
+    public LslbAdminComment getLslbAdminComment() {
+        return lslbAdminComment;
+    }
+
+    public void setLslbAdminComment(LslbAdminComment lslbAdminComment) {
+        this.lslbAdminComment = lslbAdminComment;
+    }
+
+    public LocalDate getSubmissionDate() {
+        return submissionDate;
+    }
+
+    public void setSubmissionDate(LocalDate submissionDate) {
+        this.submissionDate = submissionDate;
+    }
+
+    public String getReasonForRejection() {
+        return reasonForRejection;
+    }
+
+    public void setReasonForRejection(String reasonForRejection) {
+        this.reasonForRejection = reasonForRejection;
+    }
+
+    public String getRejectorId() {
+        return rejectorId;
+    }
+
+    public void setRejectorId(String rejectorId) {
+        this.rejectorId = rejectorId;
+    }
+
+
+    public String getApproverId() {
+        return approverId;
+    }
+
+    public void setApproverId(String approverId) {
+        this.approverId = approverId;
+    }
+
+    public FormDocumentApproval getDocumentApproval() {
+        return documentApproval;
+    }
+
+    public void setDocumentApproval(FormDocumentApproval documentApproval) {
+        this.documentApproval = documentApproval;
+    }
+
+    public Institution getInstitution() {
+        if (StringUtils.isEmpty(institutionId)) {
+            return null;
+        }
+        return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+    }
+    public String getInstitutionName() {
+        Institution institution = getInstitution();
+        if (institution != null) {
+            return institution.getInstitutionName();
+        }
+        return "";
     }
 
     public String getLicensedId() {
@@ -210,8 +280,38 @@ public class RenewalForm extends AbstractFact {
     public void setNewInvestors(String newInvestors) {
         this.newInvestors = newInvestors;
     }
+    public AuthInfo getAuthInfo(String authInfoId) {
+        if (StringUtils.isEmpty(authInfoId)) {
+            return null;
+        }
+        return (AuthInfo) mongoRepositoryReactive.findById(authInfoId, AuthInfo.class).block();
+    }
 
-
+    public GameType getGameType() {
+        if (StringUtils.isEmpty(this.gameTypeId)) {
+            return null;
+        }
+        Map gameTypeMap = Mapstore.STORE.get("GameType");
+        GameType gameType = null;
+        if (gameTypeMap != null) {
+            gameType = (GameType) gameTypeMap.get(gameTypeId);
+        }
+        if (gameType == null) {
+            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
+            if (gameType != null && gameTypeMap != null) {
+                gameTypeMap.put(gameTypeId, gameType);
+            }
+        }
+        return gameType;
+    }
+    public String getGameTypeName() {
+        GameType gameType = getGameType();
+        if (gameType == null) {
+            return null;
+        } else {
+            return gameType.getName();
+        }
+    }
     public RenewalFormDto convertToDto(){
         RenewalFormDto renewalFormDto = new RenewalFormDto();
         renewalFormDto.setRenewalFormId(getId());
@@ -232,12 +332,32 @@ public class RenewalForm extends AbstractFact {
         renewalFormDto.setStakeHoldersChange(getStakeHoldersChange());
         renewalFormDto.setTechnicalPartner(getTechnicalPartner());
         renewalFormDto.setLicenseId(getLicensedId());
+        renewalFormDto.setRejectionReason(getReasonForRejection());
+        LslbAdminComment lslbAdminComment = getLslbAdminComment();
+        if (lslbAdminComment != null) {
+            renewalFormDto.setLslbAdminComment(lslbAdminComment.getComment());
+            renewalFormDto.setLslbAdminCommented(true);
+            AuthInfo admin = getAuthInfo(lslbAdminComment.getUserId());
+            if (admin != null) {
+                renewalFormDto.setLslbAdminName(admin.getFullName());
+            }
+        }
         Query query=new Query();
         query.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));
         License license= (License) mongoRepositoryReactive.find(query,License.class).block();
         if(license!=null){
             renewalFormDto.setLicenseStatus(license.getLicenseStatus().convertToDto());
 
+        }
+        AuthInfo approver = getAuthInfo(approverId);
+        if (approver != null) {
+            renewalFormDto.setApproverId(approverId);
+            renewalFormDto.setApproverName(approver.getFullName());
+        }
+        AuthInfo rejector = getAuthInfo(rejectorId);
+        if (rejector != null) {
+            renewalFormDto.setRejectorId(rejectorId);
+            renewalFormDto.setRejectorName(rejector.getFullName());
         }
         PaymentRecord paymentRecord= (PaymentRecord) mongoRepositoryReactive.findById(getPaymentRecordId(),PaymentRecord.class).block();
         renewalFormDto.setPaymentRecord(paymentRecord.convertToDto());
