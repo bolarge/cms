@@ -322,6 +322,17 @@ public class ApplicationFormController {
         return applicationFormService.approveApplicationForm(applicationFormId, approverId, request);
     }
 
+    @RequestMapping(method = RequestMethod.POST, value = "/approve-aip-form", params = {"aipFormId", "userId"})
+    @ApiOperation(value = "Approve aip form", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> approveAIPForm(@RequestParam("aipFormId") String aipFormId, @RequestParam("userId") String approverId, HttpServletRequest request) {
+        return applicationFormService.approveAIPForm(aipFormId, approverId, request);
+    }
+
     @RequestMapping(method = RequestMethod.POST, value = "/reject-application-form", params = {"applicationFormId"})
     @ApiOperation(value = "Reject application form", response = String.class, consumes = "application/json")
     @ApiResponses(value = {
@@ -333,6 +344,7 @@ public class ApplicationFormController {
         return applicationFormService.rejectApplicationForm(applicationFormId, applicationFormRejectDto, request);
     }
 
+
     @RequestMapping(method = RequestMethod.POST, value = "/complete-application-form", params = {"applicationFormId"})
     @ApiOperation(value = "complete filling application form", response = String.class, consumes = "application/json")
     @ApiResponses(value = {
@@ -342,6 +354,17 @@ public class ApplicationFormController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> completeApplicationForm(@RequestParam("applicationFormId") String applicationFormId, @RequestParam("isResubmit") boolean isResubmit, HttpServletRequest request) {
         return applicationFormService.completeApplicationForm(applicationFormId, isResubmit, request);
+    }
+    @RequestMapping(method = RequestMethod.POST, value = "/complete-aip-form", params = {"institutionId","gameTypeId"})
+    @ApiOperation(value = "complete filling AIP form", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> completeAIPForm(@RequestParam("institutionId") String institutionId,
+                                                @RequestParam("gameTypeId") String gameTypeId, @RequestParam("isResubmit") boolean isResubmit, HttpServletRequest request) {
+        return applicationFormService.completeAIPForm(institutionId,gameTypeId, isResubmit, request);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/payment-records", params = {"applicationFormId"})
@@ -355,7 +378,7 @@ public class ApplicationFormController {
         return applicationFormService.getPaymentRecordsForApplicationForm(applicationFormId);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/create-comment")
+    @RequestMapping(method = RequestMethod.POST, value = "/create-comment", params = {"applicationFormId"})
     @ApiOperation(value = "Create comment for application form from LSLB Admin", response = String.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -363,8 +386,19 @@ public class ApplicationFormController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> createApplicationFormComment(@RequestParam("applicationFormId") String applicationFormId,
-                                                             @RequestBody @Valid ApplicationFormCreateCommentDto applicationFormCreateCommentDto, HttpServletRequest request) {
-        return applicationFormService.addCommentsToFormFromLslbAdmin(applicationFormId, applicationFormCreateCommentDto, request);
+                                                             @RequestBody @Valid ApplicationFormCreateCommentDto formCreateCommentDto, HttpServletRequest request) {
+        return applicationFormService.addCommentsToFormFromLslbAdmin(applicationFormId, formCreateCommentDto, request);
+    }
+    @RequestMapping(method = RequestMethod.POST, value = "/create-aip-comment", params = {"aipFormId"})
+    @ApiOperation(value = "Create comment for AIP form from LSLB Admin", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> createAIPFormComment(@RequestParam("aipFormId") String aipFormId,
+                                                     @RequestBody @Valid FormCreateCommentDto formCreateCommentDto, HttpServletRequest request) {
+        return applicationFormService.addCommentsToAIPFormFromLslbAdmin(aipFormId, formCreateCommentDto, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{applicationFormId}/add-comment")

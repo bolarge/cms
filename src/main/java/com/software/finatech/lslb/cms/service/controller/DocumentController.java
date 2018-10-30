@@ -7,6 +7,7 @@ import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeReferenceData;
+import com.software.finatech.lslb.cms.service.service.RenewalFormServiceImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
@@ -58,6 +59,8 @@ public class DocumentController extends BaseController {
     private AuditLogHelper auditLogHelper;
     @Autowired
     private ApplicationFormService applicationFormService;
+    @Autowired
+    private RenewalFormServiceImpl renewalFormService;
 
 
     @RequestMapping(method = RequestMethod.POST, value = "/upload", produces = "application/json")
@@ -275,6 +278,12 @@ public class DocumentController extends BaseController {
             mongoRepositoryReactive.saveOrUpdate(document);
             if (StringUtils.equalsIgnoreCase("applicationForm", entityName)) {
                 doApplicationFormDocumentReupload(document);
+            }
+            if (StringUtils.equalsIgnoreCase("aipForm", entityName)) {
+                doAIPFormDocumentReupload(document);
+            }
+            if (StringUtils.equalsIgnoreCase("renewalForm", entityName)) {
+                doRenewalFormDocumentReupload(document);
             }
 
             String verbiage = String.format("Reuploaded document -> Document Type -> %s, File name -> %s, Id -> %s ", document.getDocumentType(), document.getFilename(), document.getId());
@@ -674,6 +683,11 @@ public class DocumentController extends BaseController {
             if (StringUtils.equalsIgnoreCase("applicationForm", entityName)) {
                 approveApplicationFormDocument(document);
             }
+            if (StringUtils.equalsIgnoreCase("renewalForm", entityName)) {
+                approveRenewalFormDocument(document);
+            } if (StringUtils.equalsIgnoreCase("aipForm", entityName)) {
+                approveAIPFormDocument(document);
+            }
 
             String verbiage = String.format("Approved document -> Document Type -> %s, File name -> %s, Id -> %s ", document.getDocumentType(), document.getFilename(), documentId);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
@@ -717,6 +731,12 @@ public class DocumentController extends BaseController {
             if (StringUtils.equalsIgnoreCase("applicationForm", entityName)) {
                 rejectApplicationFormDocument(document);
             }
+            if (StringUtils.equalsIgnoreCase("renewalForm", entityName)) {
+                rejectRenewalFormDocument(document);
+            }
+            if (StringUtils.equalsIgnoreCase("aipForm", entityName)) {
+                rejectAIPFormDocument(document);
+            }
 
             String verbiage = String.format("Rejected document -> Document Type -> %s, File name -> %s, Id -> %s ", document.getDocumentType(), document.getFilename(), documentId);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
@@ -732,16 +752,33 @@ public class DocumentController extends BaseController {
     private void rejectApplicationFormDocument(Document document) {
         applicationFormService.rejectApplicationFormDocument(document);
     }
+    private void rejectAIPFormDocument(Document document) {
+        applicationFormService.rejectAIPFormDocument(document);
+    }
 
-
+    private void rejectRenewalFormDocument(Document document) {
+        renewalFormService.rejectRenewalFormDocument(document);
+    }
     private void approveApplicationFormDocument(Document document) {
         applicationFormService.approveApplicationFormDocument(document);
     }
 
+    private void approveRenewalFormDocument(Document document) {
+        renewalFormService.approveRenewalFormDocument(document);
+    }
+    private void approveAIPFormDocument(Document document) {
+        applicationFormService.approveAIPFormDocument(document);
+    }
+
+    private void doRenewalFormDocumentReupload(Document document) {
+        renewalFormService.doDocumentReuploadNotification(document);
+    }
     private void doApplicationFormDocumentReupload(Document document) {
         applicationFormService.doDocumentReuploadNotification(document);
     }
-
+    private void doAIPFormDocumentReupload(Document document) {
+        applicationFormService.doAIPDocumentReuploadNotification(document);
+    }
 
     private Document findDocumentById(String documentId) {
         if (StringUtils.isEmpty(documentId)) {
@@ -749,4 +786,6 @@ public class DocumentController extends BaseController {
         }
         return (Document) mongoRepositoryReactive.findById(documentId, Document.class).block();
     }
+
+
 }

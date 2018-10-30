@@ -2,10 +2,7 @@ package com.software.finatech.lslb.cms.service.service.contracts;
 
 import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
 import com.software.finatech.lslb.cms.service.domain.Document;
-import com.software.finatech.lslb.cms.service.dto.AddCommentDto;
-import com.software.finatech.lslb.cms.service.dto.ApplicationFormCreateCommentDto;
-import com.software.finatech.lslb.cms.service.dto.ApplicationFormCreateDto;
-import com.software.finatech.lslb.cms.service.dto.ApplicationFormRejectDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
 import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
 import com.software.finatech.lslb.cms.service.model.contactDetails.ApplicantContactDetails;
@@ -34,7 +31,7 @@ public interface ApplicationFormService {
                                                 HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getAllApplicationFormStatus();
-    
+
     Mono<ResponseEntity> getApplicantDetails(String applicationFormId);
 
     Mono<ResponseEntity> saveApplicantDetails(String applicationFormId, ApplicantDetails applicantDetails, HttpServletRequest request);
@@ -67,23 +64,35 @@ public interface ApplicationFormService {
 
     Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, ApplicationFormRejectDto applicationFormRejectDto, HttpServletRequest request);
 
+    Mono<ResponseEntity> approveAIPForm(String aipFormId, String approverId, HttpServletRequest request);
+
     Mono<ResponseEntity> completeApplicationForm(String applicationFormId, boolean isResubmit, HttpServletRequest request);
+
+    Mono<ResponseEntity> completeAIPForm(String institutionId, String gameTypeId, boolean isResubmit, HttpServletRequest request);
 
     Mono<ResponseEntity> getPaymentRecordsForApplicationForm(String applicationFormId);
 
     boolean institutionHasCompletedApplicationForGameType(String institutionId, String gameTypeId);
 
+    void doAIPDocumentReuploadNotification(Document document);
+
     ApplicationForm findApplicationFormById(String applicationFormId);
+
+    Mono<ResponseEntity> addCommentsToForm(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request);
 
     Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String applicationFormId, ApplicationFormCreateCommentDto applicationFormCreateCommentDto, HttpServletRequest request);
 
+    Mono<ResponseEntity> addCommentsToAIPFormFromLslbAdmin(String aipFormId, FormCreateCommentDto applicationFormCreateCommentDto, HttpServletRequest request);
+
     void approveApplicationFormDocument(Document document);
+
+    void approveAIPFormDocument(Document document);
 
     void rejectApplicationFormDocument(Document document);
 
-    void doDocumentReuploadNotification(Document document);
+    void rejectAIPFormDocument(Document document);
 
-    Mono<ResponseEntity> addCommentsToForm(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request);
+    void doDocumentReuploadNotification(Document document);
 
     Mono<ResponseEntity> saveApplicantDetailsComment(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request);
 
