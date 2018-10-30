@@ -176,7 +176,6 @@ public class Machine extends AbstractFact {
         dto.setManufacturer(getManufacturer());
         dto.setSerialNumber(getSerialNumber());
         dto.setMachineAddress(getMachineAddress());
-        dto.setInstitutionId(getInstitutionId());
         dto.setId(getId());
         Institution institution = getInstitution();
         if (institution != null) {

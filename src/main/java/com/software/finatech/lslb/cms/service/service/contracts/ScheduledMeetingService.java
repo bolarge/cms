@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
+import com.software.finatech.lslb.cms.service.dto.AddCommentDto;
 import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingCreateDto;
 import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingUpdateDto;
 import org.springframework.http.ResponseEntity;
@@ -31,5 +32,7 @@ public interface ScheduledMeetingService {
                                                   HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getScheduledMeetingById(String meetingId);
+
+    Mono<ResponseEntity> addCommentsToMeeting(String meetingId, AddCommentDto addCommentDto, HttpServletRequest request);
 }
 

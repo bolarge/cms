@@ -1,6 +1,8 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class ScheduledMeetingDto {
@@ -16,6 +18,16 @@ public class ScheduledMeetingDto {
     private String meetingStatusId;
     private String meetingTime;
     private Set<AuthInfoDto> recipients = new HashSet<>();
+    private List<CommentDto> comment = new ArrayList<>();
+
+
+    public List<CommentDto> getComment() {
+        return comment;
+    }
+
+    public void setComment(List<CommentDto> comment) {
+        this.comment = comment;
+    }
 
     public Set<AuthInfoDto> getRecipients() {
         return recipients;
