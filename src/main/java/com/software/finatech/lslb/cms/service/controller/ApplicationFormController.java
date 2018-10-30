@@ -308,7 +308,7 @@ public class ApplicationFormController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> createApplicationFormComment(@RequestParam("applicationFormId") String applicationFormId,
-                                                             @RequestBody @Valid FormCreateCommentDto formCreateCommentDto, HttpServletRequest request) {
+                                                             @RequestBody @Valid ApplicationFormCreateCommentDto formCreateCommentDto, HttpServletRequest request) {
         return applicationFormService.addCommentsToFormFromLslbAdmin(applicationFormId, formCreateCommentDto, request);
     }
     @RequestMapping(method = RequestMethod.POST, value = "/create-aip-comment", params = {"aipFormId"})

@@ -140,7 +140,7 @@ public class RenewalFormController extends BaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> rejectApplicationForm(@RequestParam("renewalFormId") String renewalFormId, @RequestBody @Valid RenewalFormRejectDto renewalFormRejectDto, HttpServletRequest request) {
+    public Mono<ResponseEntity> rejectRenewalForm(@RequestParam("renewalFormId") String renewalFormId, @RequestBody @Valid RenewalFormRejectDto renewalFormRejectDto, HttpServletRequest request) {
         return renewalFormService.rejectRenewalForm(renewalFormId, renewalFormRejectDto, request);
     }
 

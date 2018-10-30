@@ -79,7 +79,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("comment", aipDocumentApproval.getLslbAdminComment());
         model.put("date", presentDate);
         model.put("gameType", gameTypeName);
-        return mailContentBuilderService.build(model, "application-form/AIPFormPendingUploadGAadmin");
+        return mailContentBuilderService.build(model, "aip-form/AIPFormPendingUploadGAadmin");
     }
 
     private String buildRenewalCommentFromLSLBAdminEmailContent(RenewalForm renewalForm) {
@@ -616,7 +616,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("gameType", aipDocumentApproval.getGameTypeName());
         model.put("applicantName", aipDocumentApproval.getInstitutionName());
         model.put("frontEndUrl", callbackUrl);
-        return mailContentBuilderService.build(model, "application-form/ApplicationFormSubmissionApprovalLSLB");
+        return mailContentBuilderService.build(model, "aip-form/AIPFormSubmissionApprovalLSLB");
     }
 
     private String buildApplicationFormSubmissionApprovalEmailContent(ApplicationForm applicationForm) {

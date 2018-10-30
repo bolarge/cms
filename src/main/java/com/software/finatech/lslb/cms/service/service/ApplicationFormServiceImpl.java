@@ -663,7 +663,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String applicationFormId, FormCreateCommentDto formCreateCommentDto, HttpServletRequest request) {
+    public Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String applicationFormId, ApplicationFormCreateCommentDto formCreateCommentDto, HttpServletRequest request) {
         try {
             ApplicationForm applicationForm = getApplicationFormById(applicationFormId);
             if (applicationForm == null) {
