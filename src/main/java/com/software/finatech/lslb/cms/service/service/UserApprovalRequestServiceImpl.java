@@ -295,14 +295,12 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
         AuthInfo user = userApprovalRequest.getAuthInfo(userApprovalRequest.getAuthInfoId());
         if (user != null) {
             Set<String> allUserPermissionIdsForUser = user.getAllUserPermissionIdsForUser();
-            Set<String> userSpecificPermissionIdsForUser = user.getAuthPermissionIds();
             for (String newPermissionId : newPermissionIds) {
                 AuthPermission authPermission = userApprovalRequest.getAuthPermission(newPermissionId);
                 if (authPermission != null && !allUserPermissionIdsForUser.contains(newPermissionId)) {
-                    userSpecificPermissionIdsForUser.add(newPermissionId);
+                    user.getAuthPermissionIds().add(newPermissionId);
                 }
             }
-            user.setAuthPermissionIds(userSpecificPermissionIdsForUser);
             mongoRepositoryReactive.saveOrUpdate(user);
         }
     }
@@ -312,14 +310,12 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
         Set<String> removedPermissionIds = userApprovalRequest.getRemovedPermissionIds();
         AuthInfo user = userApprovalRequest.getAuthInfo(userId);
         if (user != null) {
-            Set<String> userMappedPermissions = user.getAuthPermissionIds();
             for (String removedPermissionId : removedPermissionIds) {
                 AuthPermission authPermission = userApprovalRequest.getAuthPermission(removedPermissionId);
                 if (authPermission != null) {
-                    userMappedPermissions.remove(removedPermissionId);
+                    user.getAuthPermissionIds().remove(removedPermissionId);
                 }
             }
-            user.setAuthPermissionIds(userMappedPermissions);
             mongoRepositoryReactive.saveOrUpdate(user);
         }
     }
@@ -350,12 +346,4 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             return null;
         }
         return (PendingAuthInfo) mongoRepositoryReactive.findById(pendingAuthInfoId, PendingAuthInfo.class).block();
-    }
-
-    private AuthInfo getAuthInfoById(String userId) {
-        if (StringUtils.isEmpty(userId)) {
-            return null;
-        }
-        return (AuthInfo) mongoRepositoryReactive.findById(userId, AuthInfo.class).block();
-    }
-}
+    }}
