@@ -346,7 +346,7 @@ public class AuthInfo extends AbstractFact {
 
     private Set<AuthPermissionDto> getAllPermissionDtosForUser() {
         Set<AuthPermissionDto> authPermissionDtos = new HashSet<>();
-        for (String userPermissionId : getAuthPermissionIds()) {
+        for (String userPermissionId : this.authPermissionIds) {
             AuthPermission authPermission = getAuthPermission(userPermissionId);
             AuthPermissionDto dto = new AuthPermissionDto();
             if (authPermission != null) {
@@ -389,7 +389,7 @@ public class AuthInfo extends AbstractFact {
     }
 
     public Set<String> getAllUserPermissionIdsForUser() {
-        Set<String> authPermissions = getAuthPermissionIds();
+        Set<String> authPermissions = this.authPermissionIds;
         AuthRole userRole = getAuthRole();
         if (userRole != null) {
             authPermissions.addAll(userRole.getAuthPermissionIds());
