@@ -21,15 +21,23 @@ public class AuthInfoDto {
     protected String gameTypeName;
     protected String institutionName;
     protected String agentId;
-    private Set<AuthPermissionDto> authPermissions = new HashSet<>();
+    private Set<AuthPermissionDto> rolePermissions = new HashSet<>();
+    private Set<AuthPermissionDto>  userPermissions = new HashSet<>();
 
-
-    public Set<AuthPermissionDto> getAuthPermissions() {
-        return authPermissions;
+    public Set<AuthPermissionDto> getRolePermissions() {
+        return rolePermissions;
     }
 
-    public void setAuthPermissions(Set<AuthPermissionDto> authPermissions) {
-        this.authPermissions = authPermissions;
+    public void setRolePermissions(Set<AuthPermissionDto> rolePermissions) {
+        this.rolePermissions = rolePermissions;
+    }
+
+    public Set<AuthPermissionDto> getUserPermissions() {
+        return userPermissions;
+    }
+
+    public void setUserPermissions(Set<AuthPermissionDto> userPermissions) {
+        this.userPermissions = userPermissions;
     }
 
     public String getAgentId() {

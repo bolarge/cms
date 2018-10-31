@@ -886,6 +886,7 @@ public class LicenseServiceImpl implements LicenseService {
             license.setLicenseTypeId(LicenseTypeReferenceData.GAMING_TERMINAL_ID);
             license.setEffectiveDate(effectiveDate);
             license.setExpiryDate(expiryDate);
+            license.setGameTypeId(paymentRecord.getGameTypeId());
             paymentRecord.setGameTypeId(paymentRecord.getGameTypeId());
             license.setPaymentRecordId(paymentRecord.getId());
             mongoRepositoryReactive.saveOrUpdate(license);

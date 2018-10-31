@@ -45,7 +45,9 @@ public interface AuthInfoService {
 
     Mono<ResponseEntity> removePermissionFromUser(UserAuthPermissionDto userAuthPermissionDto, HttpServletRequest request);
 
-    Mono<ResponseEntity> updateUserRole(UserRoleUpdateDto userRoleUpdateDto);
+    Mono<ResponseEntity> updateUserRole(UserRoleUpdateDto userRoleUpdateDto, HttpServletRequest request);
 
     ArrayList<AuthInfo> findAllOtherActiveUsersForUserApproval(AuthInfo initiator);
+
+    Mono<ResponseEntity> getUserFullDetail(String userId);
 }
