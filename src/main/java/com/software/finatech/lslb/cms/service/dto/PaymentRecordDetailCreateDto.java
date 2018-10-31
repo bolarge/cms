@@ -3,14 +3,14 @@ package com.software.finatech.lslb.cms.service.dto;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.Set;
 
 public class PaymentRecordDetailCreateDto {
-    private String modeOfPaymentId;
+    @NotNull(message = "please provide amount")
     private double amount;
     private String paymentRecordId;
-    @NotEmpty(message = "please provide feeId")
     private String feeId;
     private String institutionId;
     private String agentId;
@@ -55,14 +55,6 @@ public class PaymentRecordDetailCreateDto {
 
     public void setFeeId(String feeId) {
         this.feeId = feeId;
-    }
-
-    public String getModeOfPaymentId() {
-        return modeOfPaymentId;
-    }
-
-    public void setModeOfPaymentId(String modeOfPaymentId) {
-        this.modeOfPaymentId = modeOfPaymentId;
     }
 
     public double getAmount() {
