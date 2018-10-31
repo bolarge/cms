@@ -103,12 +103,13 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             }
 
             if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
-                DateTime startDateTime = FORMATTER.parseDateTime(startDate);
-                DateTime endDateTime = FORMATTER.parseDateTime(endDate);
+                LocalDate endD8 = new LocalDate(endDate);
+                LocalDate startD8 = new LocalDate(startDate);
+
                 if (StringUtils.isEmpty(dateProperty)) {
                     dateProperty = "meetingDate";
                 }
-                query.addCriteria(Criteria.where(dateProperty).gte(startDateTime).lte(endDateTime));
+                query.addCriteria(Criteria.where(dateProperty).gte(startD8).lte(endD8));
             }
 
             Sort sort;
@@ -131,7 +132,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             });
             return Mono.just(new ResponseEntity<>(scheduledMeetingDtos, HttpStatus.OK));
         } catch (IllegalArgumentException e) {
-            return Mono.just(new ResponseEntity<>("Invalid Date format for meeting date , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Invalid Date format for meeting date , please use yyyy-MM-dd", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while finding scheduled meetings", e);
         }

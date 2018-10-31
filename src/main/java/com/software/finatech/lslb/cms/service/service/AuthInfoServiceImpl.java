@@ -401,7 +401,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public Mono<ResponseEntity> resetPassword(SSOPasswordResetModel ssoPasswordResetModel, HttpServletRequest request,AuthInfo authInfo) {
+    public Mono<ResponseEntity> resetPassword(SSOPasswordResetModel ssoPasswordResetModel, HttpServletRequest request, AuthInfo authInfo) {
         try {
             HttpClient httpclient = HttpClientBuilder.create().build();
             HttpPost httpPost = null;
@@ -444,7 +444,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                         userFullName, userFullName, LocalDateTime.now(),
                         LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
-                if(authInfo.isInactive()==true){
+                if (authInfo.isInactive() == true) {
                     authInfo.setInactive(false);
                     authInfo.setInactiveReason(null);
                     authInfo.setLastInactiveDate(LocalDate.now());
@@ -686,7 +686,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             if (responseCode == 200) {
                 // everything is fine, handle the response
                 SSOToken token = mapper.readValue(stringResponse, SSOToken.class);
-                token.setAuthInfo(authInfo.convertToDto());
+                token.setAuthInfo(authInfo.convertToFullDto());
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Successful Login Attempt"));
 
                 return Mono.just(new ResponseEntity<>((token), HttpStatus.OK));
@@ -835,13 +835,13 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 //            user.setAuthPermissionIds(userSpecificPermissionIdsForUser);
 //            mongoRepositoryReactive.saveOrUpdate(user);
 //            return Mono.just(new ResponseEntity<>(user.convertToDto(), HttpStatus.OK));
-            String loggedInUserId = userAuthPermissionDto.getLoggedInUserId();
             String subjectUserId = userAuthPermissionDto.getUserId();
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser == null) {
-                return Mono.just(new ResponseEntity<>(String.format("Could not find loggged in user", loggedInUserId), HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.BAD_REQUEST));
             }
             AuthInfo subjectUser = getUserById(subjectUserId);
+            String loggedInUserId = loggedInUser.getId();
             if (subjectUser == null) {
                 return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", subjectUserId), HttpStatus.BAD_REQUEST));
             }
@@ -857,8 +857,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
             userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
 
-            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Created user approval request to add permissions to user %s",subjectUser.getFullName())));
-
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Created user approval request to add permissions to user %s", subjectUser.getFullName())));
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
 
         } catch (Exception e) {
@@ -910,7 +909,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             userApprovalRequest.setAuthInfoId(subjectUserId);
             mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
             userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
-            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Created user approval request to remove permissions from user %s",subjectUser.getFullName())));
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Created user approval request to remove permissions from user %s", subjectUser.getFullName())));
 
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -919,7 +918,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public Mono<ResponseEntity> updateUserRole(UserRoleUpdateDto userRoleUpdateDto) {
+    public Mono<ResponseEntity> updateUserRole(UserRoleUpdateDto userRoleUpdateDto, HttpServletRequest request) {
         try {
             String subjectUserId = userRoleUpdateDto.getUserId();
             String newRoleId = userRoleUpdateDto.getNewRoleId();
@@ -931,6 +930,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             if (subjectUser == null) {
                 return Mono.just(new ResponseEntity<>(String.format("User with id %s does not exist", subjectUserId), HttpStatus.BAD_REQUEST));
             }
+            AuthRole oldRole = subjectUser.getAuthRole();
             AuthRole newRole = authRoleService.findRoleById(newRoleId);
             if (newRole == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Role with id %s not found", newRoleId), HttpStatus.BAD_REQUEST));
@@ -946,9 +946,25 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             userApprovalRequest.setNewAuthRoleId(newRoleId);
             userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
             mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
+
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(),
+                    String.format("Created user approval request to change role, old role -> %s, New Role -> %s", oldRole, newRole)));
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while updating user role", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> getUserFullDetail(String userId) {
+        try {
+            AuthInfo user = getUserById(userId);
+            if (user == null) {
+                return Mono.just(new ResponseEntity<>(String.format("User with id %s not found ", userId), HttpStatus.BAD_REQUEST));
+            }
+            return Mono.just(new ResponseEntity<>(user.convertToFullDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while getting user full detail", e);
         }
     }
 
