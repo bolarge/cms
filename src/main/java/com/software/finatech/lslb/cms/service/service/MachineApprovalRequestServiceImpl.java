@@ -13,6 +13,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.MachineApprovalR
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.MachineApprovalRequestMailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -48,14 +49,17 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
+    private MachineApprovalRequestMailSenderAsync machineApprovalRequestMailSenderAsync;
 
     @Autowired
     public MachineApprovalRequestServiceImpl(SpringSecurityAuditorAware springSecurityAuditorAware,
                                              AuditLogHelper auditLogHelper,
-                                             MongoRepositoryReactiveImpl mongoRepositoryReactive) {
+                                             MongoRepositoryReactiveImpl mongoRepositoryReactive,
+                                             MachineApprovalRequestMailSenderAsync machineApprovalRequestMailSenderAsync) {
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.auditLogHelper = auditLogHelper;
         this.mongoRepositoryReactive = mongoRepositoryReactive;
+        this.machineApprovalRequestMailSenderAsync = machineApprovalRequestMailSenderAsync;
     }
 
     @Override
@@ -174,6 +178,7 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), approvalRequest.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
+            machineApprovalRequestMailSenderAsync.sendMachineApprovalNotificationToOperatorAdmins(approvalRequest);
             //    agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsAndLslbOnAgentRequestCreation(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -259,6 +264,7 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), approvalRequest.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            machineApprovalRequestMailSenderAsync.sendMachineApprovalNotificationToOperatorAdmins(approvalRequest);
             return Mono.just(new ResponseEntity<>("Request successfully rejected", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving request", e);

@@ -167,6 +167,7 @@ public class MachineServiceImpl implements MachineService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), pendingGamingMachine.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
 
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -238,6 +239,7 @@ public class MachineServiceImpl implements MachineService {
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), machine.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
+            machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding games to machine", e);
@@ -322,8 +324,8 @@ public class MachineServiceImpl implements MachineService {
                 approvalRequest.setInitiatedByInstitution(true);
             }
             if (machine.isGamingTerminal()) {
-                approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.CHANGE_GAMING_MACHINE_STATUS);
-                approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_MACHINE_ID);
+                approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.CHANGE_GAMING_TERMINAL_STATUS);
+                approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_TERMINAL_ID);
                 if (loggedInUser.isAgent()) {
                     approvalRequest.setInitiatedByInstitution(false);
                     approvalRequest.setInitiatorId(loggedInUser.getId());
@@ -336,6 +338,14 @@ public class MachineServiceImpl implements MachineService {
                 }
             }
             mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+
+            String verbiage = String.format("Created machine approval request,Type -> %s, Serial Number -> %s, Old Status -> %s, New Status -> %s",
+                    approvalRequest.getMachineApprovalRequestType(), machine.getSerialNumber(),machine.getMachineStatus(), newStatus);
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), machine.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while updating machine status", e);
