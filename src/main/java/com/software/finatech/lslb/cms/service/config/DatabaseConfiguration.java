@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.config;
 
 
 import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
 import com.mongodb.async.client.MongoClientSettings;
 import com.mongodb.connection.*;
@@ -30,27 +31,41 @@ import java.util.List;
 @Configuration
 @EnableMongoAuditing
 public class DatabaseConfiguration {
-    @Value("${mongodb.host}")
-    private String mongoHost;
+
     private static Logger logger = LoggerFactory.getLogger(DatabaseConfiguration.class);
+
+    @Value("${mongodb.hosts}")
+    private String mongoHosts;
+    @Value("${mongodb.replicaSet}")
+    private String replicaSet;
     @Autowired
     private Environment environment;
 
-    @Value("${mongodb.port}")
-    private String mongoPort;
+    //@Value("${mongodb.port}")
+    //private String mongoPort;
 
     @Value("${mongodb.database}")
     private String mongoDatabase;
+    @Value("${mongodb.authDb}")
+    private String authDatabase;
     @Value("${mongodb.username}")
     private String username;
 
     @Value("${mongodb.password}")
     private String password;
 
+    @Bean
+    public MongoClientOptions mongoOptions()
+    {
+        return MongoClientOptions.builder()
+            .threadsAllowedToBlockForConnectionMultiplier(2)
+            .maxConnectionIdleTime(1).connectionsPerHost(1)
+            .minConnectionsPerHost(1).socketTimeout(2000).build();
+    }
+
     @Bean("mongoClient")
     @Primary
     public MongoClient mongoClient() {
-        //mongodb://cloud:Jdk19Version@54.191.139.8:27017
         StringBuffer uri = new StringBuffer();
         uri.append("mongodb://");
         if ((password != null && !password.isEmpty()) && (username != null && !username.isEmpty())) {
@@ -60,16 +75,24 @@ public class DatabaseConfiguration {
             uri.append("@");
         }
 
-        uri.append(mongoHost);
-        uri.append(":");
-        uri.append(mongoPort);
-//        uri.append("/");
-//        uri.append(mongoDatabase);
+        uri.append(mongoHosts);
+        uri.append("/");
+        //uri.append(mongoDatabase);
+        if(replicaSet != null && !replicaSet.isEmpty()){
+         uri.append("?replicaSet=");
+         uri.append(replicaSet);
+        }
+        uri.append("&connectTimeoutMS=300000");
+        uri.append("&maxPoolSize=10000");
+        uri.append("&socketTimeoutMS=300000");
 
         //logger.info(uri.toString());
         ConnectionString connectionString = new ConnectionString(uri.toString());
 
+        //MongoCredential.createCredential();
+
         MongoClientSettings.Builder builder = MongoClientSettings.builder()
+                //.readPreference(ReadPreference.primary())
                 .clusterSettings(ClusterSettings.builder().applyConnectionString(connectionString).build())
                 .connectionPoolSettings(ConnectionPoolSettings.builder().applyConnectionString(connectionString).build())
                 .serverSettings(ServerSettings.builder().applyConnectionString(connectionString).build())
@@ -77,30 +100,12 @@ public class DatabaseConfiguration {
                 .sslSettings(SslSettings.builder().applyConnectionString(connectionString).build())
                 .socketSettings(SocketSettings.builder().applyConnectionString(connectionString).build());
 
-        MongoClientSettings settings = builder.codecRegistry(com.mongodb.MongoClient.getDefaultCodecRegistry()).build();
+        MongoClientSettings settings = builder.codecRegistry(com.mongodb.MongoClient.getDefaultCodecRegistry())
+                .build();
 
         return MongoClients.create(settings);
         // return MongoClients.create("mongodb://localhost");
     }
-
-   /* @Bean("reactiveMongoClient")
-    public MongoClient reactiveMongoClient() {
-        StringBuffer uri = new StringBuffer();
-        uri.append("mongodb://");
-        if((password!=null && !password.isEmpty()) && (username!=null && !username.isEmpty())) {
-            uri.append(username);
-            uri.append(":");
-            uri.append(password);
-            uri.append("@");
-        }
-
-        uri.append(mongoHost);
-        uri.append(":");
-        uri.append(mongoPort);
-
-        return MongoClients.create(uri.toString());
-    }*/
-
 
     @Bean("reactiveMongoTemplate")
     ReactiveMongoTemplate reactiveMongoTemplate(MongoClient mongoClient, MappingMongoConverter mappingMongoConverter) {
@@ -120,15 +125,25 @@ public class DatabaseConfiguration {
             uri.append("@");
         }
 
-        uri.append(mongoHost);
-        uri.append(":");
-        uri.append(mongoPort);
-//        uri.append("/");
-//        uri.append(mongoDatabase);
+        uri.append(mongoHosts);
+        uri.append("/");
+        //uri.append(mongoDatabase);
+        if(replicaSet != null && !replicaSet.isEmpty()){
+            uri.append("?replicaSet=");
+            uri.append(replicaSet);
+        }
+        uri.append("&connectTimeoutMS=300000");
+        uri.append("&maxPoolSize=10000");
+        uri.append("&socketTimeoutMS=300000");
+        String connectionString = uri.toString();
 
-
+        /*com.mongodb.MongoClient client = new com.mongodb.MongoClient(Arrays.asList(
+                new ServerAddress("34.255.164.20", 27017),
+                new ServerAddress("52.215.123.210", 27017)),
+                MongoClientOptions.builder().serverSelectionTimeout(30000).connectTimeout(30000).build());*/
         //logger.info("Mongo template:   "+uri.toString());
-        return new com.mongodb.MongoClient(new MongoClientURI(uri.toString()));
+        return new com.mongodb.MongoClient(new MongoClientURI(connectionString));
+        //return client;
     }
 
     @Bean
