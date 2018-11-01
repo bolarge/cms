@@ -11,9 +11,7 @@ import com.software.finatech.lslb.cms.service.model.declaration.ApplicantDeclara
 import com.software.finatech.lslb.cms.service.model.otherInformation.ApplicantOtherInformation;
 import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantOutletInformation;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
@@ -54,6 +52,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     private ApplicationFormEmailSenderAsync applicationFormNotificationHelperAsync;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
+
+    @Autowired
+    private LicenseServiceImpl licenseService;
 
     private static final String applicationAuditActionId = AuditActionReferenceData.APPLICATION_ID;
 
@@ -538,6 +539,8 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String approvedAIPFormStatusId = ApplicationFormStatusReferenceData.APPROVED_STATUS_ID;
             aipDocumentApproval.setFormStatusId(approvedAIPFormStatusId);
             saveAIPForm(aipDocumentApproval);
+            licenseService.updateAIPDocToLicense(aipDocumentApproval.getInstitutionId(),aipDocumentApproval.getGameTypeId());
+
 
             String verbiage = String.format("Approved AIP form : %s ->  ", aipDocumentApproval.getFormStatusId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
@@ -577,7 +580,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
 
     @Override
-    public Mono<ResponseEntity> completeAIPForm(String institutionId,String gameTypeId, boolean isResubmit, HttpServletRequest request) {
+    public Mono<ResponseEntity> completeAIPForm(String institutionId,String gameTypeId,  HttpServletRequest request) {
         try {
             Query queryDocument= new Query();
             queryDocument.addCriteria(Criteria.where("institutionId").is(institutionId));
@@ -591,6 +594,13 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             aipDocumentApproval.setFormStatusId(inReviewApplicationFormStatusId);
             aipDocumentApproval.setSubmissionDate(LocalDate.now());
             saveAIPForm(aipDocumentApproval);
+            Query queryAIP= new Query();
+            queryAIP.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID));
+            queryAIP.addCriteria(Criteria.where("institutionId").is(institutionId));
+            queryAIP.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+
+            License license=(License)mongoRepositoryReactive.find(queryAIP, License.class).block();
+            licenseService.updateToDocumentAIP(license.getId());
 
             String verbiage = String.format("Submitted AIP form : %s ->  ", aipDocumentApproval.getFormStatusId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,

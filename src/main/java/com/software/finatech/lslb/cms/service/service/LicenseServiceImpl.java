@@ -473,7 +473,6 @@ public class LicenseServiceImpl implements LicenseService {
 
     }
 
-    @Override
     public Mono<ResponseEntity> updateToDocumentAIP(String licenseId) {
         try {
 
@@ -616,13 +615,11 @@ public class LicenseServiceImpl implements LicenseService {
         }
     }
 
-
-    @Override
-    public Mono<ResponseEntity> updateAIPDocToLicense(LicenseUpdateAIPToLicenseDto licenseUpdateDto) {
+    public Mono<ResponseEntity> updateAIPDocToLicense(String institutionId, String gameTypeId) {
         try {
             Query queryAIPFormApproval = new Query();
-            queryAIPFormApproval.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
-            queryAIPFormApproval.addCriteria(Criteria.where("gameTypeId").is(licenseUpdateDto.getGameTypeId()));
+            queryAIPFormApproval.addCriteria(Criteria.where("institutionId").is(institutionId));
+            queryAIPFormApproval.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             queryAIPFormApproval.addCriteria(Criteria.where("formStatusId").is(ApplicationFormStatusReferenceData.APPROVED_STATUS_ID));
             AIPDocumentApproval aipDocumentApproval= (AIPDocumentApproval)mongoRepositoryReactive.find(queryAIPFormApproval,AIPDocumentApproval.class).block();
             if(aipDocumentApproval==null){
@@ -630,8 +627,8 @@ public class LicenseServiceImpl implements LicenseService {
             }
             String verbiage;
             Query queryLicence = new Query();
-            queryLicence.addCriteria(Criteria.where("institutionId").is(licenseUpdateDto.getInstitutionId()));
-            queryLicence.addCriteria(Criteria.where("gameTypeId").is(licenseUpdateDto.getGameTypeId()));
+            queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
+            queryLicence.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             queryLicence.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
             Criteria criteria = new Criteria();
             criteria.orOperator(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSE_RUNNING),
