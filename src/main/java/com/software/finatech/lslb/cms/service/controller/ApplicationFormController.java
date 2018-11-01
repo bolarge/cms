@@ -363,8 +363,8 @@ public class ApplicationFormController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> completeAIPForm(@RequestParam("institutionId") String institutionId,
-                                                @RequestParam("gameTypeId") String gameTypeId, @RequestParam("isResubmit") boolean isResubmit, HttpServletRequest request) {
-        return applicationFormService.completeAIPForm(institutionId,gameTypeId, isResubmit, request);
+                                                @RequestParam("gameTypeId") String gameTypeId, HttpServletRequest request) {
+        return applicationFormService.completeAIPForm(institutionId,gameTypeId, request);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/payment-records", params = {"applicationFormId"})
