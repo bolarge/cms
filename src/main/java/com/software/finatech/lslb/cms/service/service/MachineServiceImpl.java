@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.software.finatech.lslb.cms.service.model.MachineGameDetails.machineGameUpgradeToString;
 import static com.software.finatech.lslb.cms.service.model.MachineGameDetails.machineGamesToString;
 import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -219,16 +220,26 @@ public class MachineServiceImpl implements MachineService {
             MachineApprovalRequest approvalRequest = new MachineApprovalRequest();
             approvalRequest.setId(UUID.randomUUID().toString());
             if (machine.isGamingMachine()) {
+                approvalRequest.setInitiatedByInstitution(true);
+                approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
+
                 approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_MACHINE_ID);
                 approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.ADD_GAMES_TO_GAMING_MACHINE_ID);
+                machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
             }
             if (machine.isGamingTerminal()) {
                 approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_TERMINAL_ID);
                 approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.ADD_GAMES_TO_GAMING_TERMINAL_ID);
+                if (loggedInUser.isGamingOperator()) {
+                    approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
+                    approvalRequest.setInitiatedByInstitution(true);
+                    machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
+                }
+                if (loggedInUser.isAgent()) {
+                    makeRequestFromAgent(approvalRequest, loggedInUser);
+                }
             }
-            approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
             approvalRequest.setNewMachineGames(newGameDetails);
-            approvalRequest.setInitiatedByInstitution(true);
             approvalRequest.setMachineId(gamingMachineId);
             mongoRepositoryReactive.saveOrUpdate(approvalRequest);
 
@@ -239,7 +250,6 @@ public class MachineServiceImpl implements MachineService {
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), machine.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
-            machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding games to machine", e);
@@ -322,25 +332,83 @@ public class MachineServiceImpl implements MachineService {
                 approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_MACHINE_ID);
                 approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
                 approvalRequest.setInitiatedByInstitution(true);
+                machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
             }
             if (machine.isGamingTerminal()) {
                 approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.CHANGE_GAMING_TERMINAL_STATUS);
                 approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_TERMINAL_ID);
                 if (loggedInUser.isAgent()) {
-                    approvalRequest.setInitiatedByInstitution(false);
-                    approvalRequest.setInitiatorId(loggedInUser.getId());
-                    approvalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_OPERATOR_APPROVAL_ID);
-                    machineApprovalRequestMailSenderAsync.sendInitialMachineStateUpdateToAgentOperators(approvalRequest, newStatus.getName());
+                    makeRequestFromAgent(approvalRequest, loggedInUser);
                 }
                 if (loggedInUser.isGamingOperator()) {
                     approvalRequest.setInitiatedByInstitution(true);
                     approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
+                    machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
                 }
             }
             mongoRepositoryReactive.saveOrUpdate(approvalRequest);
 
             String verbiage = String.format("Created machine approval request,Type -> %s, Serial Number -> %s, Old Status -> %s, New Status -> %s",
-                    approvalRequest.getMachineApprovalRequestType(), machine.getSerialNumber(),machine.getMachineStatus(), newStatus);
+                    approvalRequest.getMachineApprovalRequestType(), machine.getSerialNumber(), machine.getMachineStatus(), newStatus);
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), machine.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while updating machine status", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> upgradeMachineGames(MachineGameUpgradeRequest machineGameUpgradeRequest, HttpServletRequest request) {
+        try {
+
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+            String machineId = machineGameUpgradeRequest.getMachineId();
+            Machine machine = findMachineById(machineId);
+            if (machine == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Machine with id %s not found", machineId), HttpStatus.BAD_REQUEST));
+            }
+            MachineApprovalRequest approvalRequest = new MachineApprovalRequest();
+            approvalRequest.setId(UUID.randomUUID().toString());
+            approvalRequest.setMachineId(machineId);
+            List<GameUpgrade> gameUpgrades = machineGameUpgradeRequest.getGameUpgradeList();
+            for (GameUpgrade gameUpgrade : gameUpgrades) {
+                String gameId = gameUpgrade.getGameId();
+                MachineGame machineGame = findMachineGameById(gameId);
+                if (machineGame == null) {
+                    return Mono.just(new ResponseEntity<>(String.format("Machine game with id %s not found", gameId), HttpStatus.BAD_REQUEST));
+                }
+                gameUpgrade.setGameName(machineGame.getGameName());
+                gameUpgrade.setOldGameVersion(machineGame.getGameVersion());
+            }
+            approvalRequest.setMachineGameUpgrades(new HashSet<>(gameUpgrades));
+            if (machine.isGamingMachine()) {
+                approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.UPGRADE_GAMING_MACHINE_GAMES);
+                approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
+                approvalRequest.setInitiatedByInstitution(true);
+                approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_MACHINE_ID);
+                machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
+            }
+            if (machine.isGamingTerminal()) {
+                approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.UPGRADE_GAMING_TERMINAL_GAMES);
+                approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_TERMINAL_ID);
+                if (loggedInUser.isAgent()) {
+                    makeRequestFromAgent(approvalRequest, loggedInUser);
+                }
+                if (loggedInUser.isGamingOperator()) {
+                    approvalRequest.setInitiatedByInstitution(true);
+                    approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
+                    machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
+                }
+            }
+
+            String verbiage = String.format("Created machine approval request,Type -> %s, Serial Number -> %s, Upgrade Games Versions -> %s",
+                    approvalRequest.getMachineApprovalRequestType(), machine.getSerialNumber(), machineGameUpgradeToString(gameUpgrades));
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), machine.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
@@ -348,9 +416,10 @@ public class MachineServiceImpl implements MachineService {
             machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
-            return logAndReturnError(logger, "An error occurred while updating machine status", e);
+            return logAndReturnError(logger, "An error occurred while upgrading machine games", e);
         }
     }
+
 
     @Override
     public Mono<ResponseEntity> getAllMachineTypes() {
@@ -660,4 +729,10 @@ public class MachineServiceImpl implements MachineService {
         return machineType;
     }
 
+    private void makeRequestFromAgent(MachineApprovalRequest approvalRequest, AuthInfo loggedInUser) {
+        approvalRequest.setInitiatedByInstitution(false);
+        approvalRequest.setInitiatorId(loggedInUser.getId());
+        approvalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_OPERATOR_APPROVAL_ID);
+        machineApprovalRequestMailSenderAsync.sendInitialMachineStateUpdateToAgentOperators(approvalRequest);
+    }
 }

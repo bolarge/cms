@@ -46,4 +46,6 @@ public interface MachineService {
     Mono<ResponseEntity> assignMachineToAgent(MachineAgentAddDto machineAgentAddDto, HttpServletRequest request);
 
     Mono<ResponseEntity> getMachineByParam(String agentId, String institutionId);
+
+    Mono<ResponseEntity> upgradeMachineGames(MachineGameUpgradeRequest machineGameUpgradeDto, HttpServletRequest request);
 }

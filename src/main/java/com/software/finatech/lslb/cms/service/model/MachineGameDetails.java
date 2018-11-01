@@ -1,5 +1,7 @@
 package com.software.finatech.lslb.cms.service.model;
 
+import com.software.finatech.lslb.cms.service.dto.GameUpgrade;
+
 import java.util.Collection;
 
 public class MachineGameDetails {
@@ -62,6 +64,17 @@ public class MachineGameDetails {
         for (MachineGameDetails gameDetails : machineGameDetails) {
             builder.append(String.format("Game Name -> %s ,", gameDetails.getGameName()));
             builder.append(String.format("Game Version -> %s ", gameDetails.getGameVersion()));
+            builder.append("\n");
+        }
+        return builder.toString();
+    }
+
+    public static  String machineGameUpgradeToString(Collection<GameUpgrade> gameUpgrades){
+        StringBuilder builder = new StringBuilder();
+        for (GameUpgrade gameUpgrade: gameUpgrades) {
+            builder.append(String.format("Game Name -> %s ,", gameUpgrade.getGameName()));
+            builder.append(String.format("Old Game Version -> %s ,", gameUpgrade.getOldGameVersion()));
+            builder.append(String.format("New Game Version -> %s ", gameUpgrade.getNewGameVersion()));
             builder.append("\n");
         }
         return builder.toString();
