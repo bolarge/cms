@@ -35,8 +35,6 @@ public interface LicenseService {
     List<EnumeratedFactDto> getLicenseStatus();
     List<EnumeratedFactDto> getAllLicenseTypes();
     Mono<ResponseEntity> getInstitutionAIPs(String institutionId);
-    Mono<ResponseEntity> updateToDocumentAIP(String licenseId);
-    Mono<ResponseEntity> updateAIPDocToLicense(LicenseUpdateAIPToLicenseDto licenseUpdateDto);
     Mono<ResponseEntity> updateInReviewToLicense(String licenseId);
     Mono<ResponseEntity> getInstitutionCloseToExpirationLicenses(String institutionId);
     Mono<ResponseEntity> getAgentLicensesCloseToExpiration(String agentId);
