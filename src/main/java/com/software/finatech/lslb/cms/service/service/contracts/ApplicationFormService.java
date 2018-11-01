@@ -65,7 +65,7 @@ public interface ApplicationFormService {
     Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, ApplicationFormRejectDto applicationFormRejectDto, HttpServletRequest request);
     Mono<ResponseEntity> approveAIPForm(String aipFormId, String approverId, HttpServletRequest request);
     Mono<ResponseEntity> completeApplicationForm(String applicationFormId, boolean isResubmit, HttpServletRequest request);
-    Mono<ResponseEntity> completeAIPForm(String institutionId,String gameTypeId, boolean isResubmit, HttpServletRequest request);
+    Mono<ResponseEntity> completeAIPForm(String institutionId,String gameTypeId, HttpServletRequest request);
     Mono<ResponseEntity> getPaymentRecordsForApplicationForm(String applicationFormId);
 
     boolean institutionHasCompletedApplicationForGameType(String institutionId, String gameTypeId);

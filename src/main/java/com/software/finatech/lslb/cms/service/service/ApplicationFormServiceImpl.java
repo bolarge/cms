@@ -577,7 +577,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
 
     @Override
-    public Mono<ResponseEntity> completeAIPForm(String institutionId,String gameTypeId, boolean isResubmit, HttpServletRequest request) {
+    public Mono<ResponseEntity> completeAIPForm(String institutionId,String gameTypeId,  HttpServletRequest request) {
         try {
             Query queryDocument= new Query();
             queryDocument.addCriteria(Criteria.where("institutionId").is(institutionId));
