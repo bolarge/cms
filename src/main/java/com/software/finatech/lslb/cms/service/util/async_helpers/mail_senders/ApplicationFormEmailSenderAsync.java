@@ -568,7 +568,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     }
 
     public void sendApproverMailToFinalApproval(ApplicationForm applicationForm) {
-        ArrayList<AuthInfo> finalApprovers = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.APPROVE_APPICATION_FORM_ID);
+        ArrayList<AuthInfo> finalApprovers = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.APPROVE_APPLICATION_FORM_ID);
         if (finalApprovers.isEmpty()) {
             logger.info("No final approvers for application form");
             return;
@@ -581,7 +581,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         }
     }
     public void sendApproverMailToFinalApproval(AIPDocumentApproval aipDocumentApproval) {
-        ArrayList<AuthInfo> finalApprovers = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.APPROVE_APPICATION_FORM_ID);
+        ArrayList<AuthInfo> finalApprovers = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.APPROVE_APPLICATION_FORM_ID);
         if (finalApprovers.isEmpty()) {
             logger.info("No final approvers for application form");
             return;
@@ -595,7 +595,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     }
 
     public void sendApproverMailToFinalApproval(RenewalForm renewalForm) {
-        ArrayList<AuthInfo> finalApprovers = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.APPROVE_APPICATION_FORM_ID);
+        ArrayList<AuthInfo> finalApprovers = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.APPROVE_APPLICATION_FORM_ID);
         if (finalApprovers.isEmpty()) {
             logger.info("No final approvers for application form");
             return;
@@ -641,6 +641,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         return mailContentBuilderService.build(model, "renewal-form/RenewalFormSubmissionApprovalLSLB");
     }
 
+    @Async
     public void sendDocumentReturnMailToInstitutionMembers(ApplicationForm applicationForm, Document document) {
         ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(applicationForm.getInstitutionId());
         String mailContent = buildDocumentReturnMailContent(applicationForm, document);
@@ -654,6 +655,8 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
             }
         }
     }
+
+    @Async
     public void sendDocumentReturnMailToInstitutionMembers(AIPDocumentApproval aipDocumentApproval, Document document) {
         ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(aipDocumentApproval.getInstitutionId());
         String mailContent = buildDocumentReturnMailContent(aipDocumentApproval, document);
@@ -731,6 +734,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("documentType", String.valueOf(document.getDocumentType()));
         return mailContentBuilderService.build(model, "application-form/ApplicationFormDocumentResubmissionLSLB");
     }
+
     private String buildResubmissionNotificationForAIPForm(AIPDocumentApproval aipDocumentApproval, Document document) {
         String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId());
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");

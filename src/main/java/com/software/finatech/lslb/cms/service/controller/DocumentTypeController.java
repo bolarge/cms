@@ -110,7 +110,7 @@ public class DocumentTypeController extends BaseController {
             DocumentType documentType = new DocumentType();
             documentType.setId(UUID.randomUUID().toString());
             documentType.setDocumentPurposeId(documentTypeCreateDto.getDocumentPurposeId());
-            documentType.setActive(documentTypeCreateDto.isActive());
+            documentType.setActive(true);
             documentType.setRequired(documentTypeCreateDto.isRequired());
             documentType.setName(documentTypeCreateDto.getName());
             documentType.setDescription(documentTypeCreateDto.getDescription());
@@ -155,16 +155,12 @@ public class DocumentTypeController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> updateDocumentType(@RequestBody @Valid DocumentTypeUpdateDto documentTypeUpdateDto) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("documentPurposeId").is(documentTypeUpdateDto.getDocumentPurposeId()));
-        DocumentType documentType = (DocumentType) mongoRepositoryReactive.findById(documentTypeUpdateDto.getDocumentPurposeId(), DocumentType.class).block();
+        DocumentType documentType = (DocumentType) mongoRepositoryReactive.findById(documentTypeUpdateDto.getId(), DocumentType.class).block();
         if (documentType == null) {
             return Mono.just(new ResponseEntity("Document Type does not exist", HttpStatus.BAD_REQUEST));
         }
-        documentType.setDocumentPurposeId(documentTypeUpdateDto.getDocumentPurposeId());
         documentType.setActive(documentTypeUpdateDto.isActive());
         documentType.setRequired(documentTypeUpdateDto.isRequired());
-        documentType.setName(documentTypeUpdateDto.getName());
         documentType.setDescription(documentTypeUpdateDto.getDescription());
         mongoRepositoryReactive.saveOrUpdate(documentType);
         return Mono.just(new ResponseEntity(documentType.convertToDto(), HttpStatus.OK));

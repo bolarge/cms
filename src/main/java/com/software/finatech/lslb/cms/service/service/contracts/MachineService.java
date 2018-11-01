@@ -44,4 +44,6 @@ public interface MachineService {
     Mono<ResponseEntity> getMachineFullDetail(String machineId);
 
     Mono<ResponseEntity> assignMachineToAgent(MachineAgentAddDto machineAgentAddDto, HttpServletRequest request);
+
+    Mono<ResponseEntity> getMachineByParam(String agentId, String institutionId);
 }

@@ -5,9 +5,7 @@ import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.domain.ScheduledMeeting;
-import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingCreateDto;
-import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingDto;
-import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingStatusReferenceData;
@@ -105,12 +103,13 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             }
 
             if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
-                DateTime startDateTime = FORMATTER.parseDateTime(startDate);
-                DateTime endDateTime = FORMATTER.parseDateTime(endDate);
+                LocalDate endD8 = new LocalDate(endDate);
+                LocalDate startD8 = new LocalDate(startDate);
+
                 if (StringUtils.isEmpty(dateProperty)) {
                     dateProperty = "meetingDate";
                 }
-                query.addCriteria(Criteria.where(dateProperty).gte(startDateTime).lte(endDateTime));
+                query.addCriteria(Criteria.where(dateProperty).gte(startD8).lte(endD8));
             }
 
             Sort sort;
@@ -133,7 +132,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             });
             return Mono.just(new ResponseEntity<>(scheduledMeetingDtos, HttpStatus.OK));
         } catch (IllegalArgumentException e) {
-            return Mono.just(new ResponseEntity<>("Invalid Date format for meeting date , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>("Invalid Date format for meeting date , please use yyyy-MM-dd", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while finding scheduled meetings", e);
         }
@@ -326,6 +325,38 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             return Mono.just(new ResponseEntity<>(existingScheduledMeeting.convertToFullDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while  getting meeting by id", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> addCommentsToMeeting(String meetingId, AddCommentDto addCommentDto, HttpServletRequest request) {
+        try {
+            ScheduledMeeting existingScheduledMeeting = findScheduledMeetingById(meetingId);
+            if (existingScheduledMeeting == null) {
+                return Mono.just(new ResponseEntity<>("Scheduled meeting does not exist", HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+            CommentDto commentDto = new CommentDto();
+            commentDto.setComment(addCommentDto.getComment());
+            commentDto.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
+            commentDto.setCommentDate(LocalDateTime.now().toString("dd-MM-yyyy"));
+            commentDto.setUserFullName(loggedInUser.getFullName());
+            existingScheduledMeeting.getComments().add(commentDto);
+            saveScheduledMeeting(existingScheduledMeeting);
+
+            String institutionName = existingScheduledMeeting.getInstitutionName();
+            String verbiage = String.format("Added comment to Scheduled Meeting, Institution Name-> %s ,Comment -> %s,  Id -> %s ",
+                    institutionName, addCommentDto.getComment(), existingScheduledMeeting.getId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            return Mono.just(new ResponseEntity<>("Comment added successfully", HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding comments", e);
         }
     }
 

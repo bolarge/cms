@@ -2,16 +2,14 @@ package com.software.finatech.lslb.cms.service.domain;
 
 
 import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
+import com.software.finatech.lslb.cms.service.dto.CommentDto;
 import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("serial")
 @Document(collection = "ScheduledMeetings")
@@ -32,9 +30,18 @@ public class ScheduledMeeting extends AbstractFact {
     private LocalDateTime nextPostMeetingReminderDate;
     private int reminderNotificationCount = 0;
     private boolean reminderSent;
+    private List<CommentDto> comments = new ArrayList<>();
 
     public Set<String> getRecipientIds() {
         return recipientIds;
+    }
+
+    public List<CommentDto> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<CommentDto> comments) {
+        this.comments = comments;
     }
 
     public void setRecipientIds(Set<String> recipientIds) {
@@ -224,6 +231,7 @@ public class ScheduledMeeting extends AbstractFact {
     public ScheduledMeetingDto convertToFullDto() {
         ScheduledMeetingDto dto = convertToDto();
         dto.setRecipients(getRecipientDto());
+        dto.setComment(getComments());
         return dto;
     }
 

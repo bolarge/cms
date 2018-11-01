@@ -281,8 +281,15 @@ public class AuthInfo extends AbstractFact {
             authInfoDto.setInstitutionName(userInstitution.getInstitutionName());
         }
         authInfoDto.setAgentId(getAgentId());
-        authInfoDto.setAuthPermissions(getTotalPermissionDtosForUser());
         return authInfoDto;
+    }
+
+    public AuthInfoDto convertToFullDto(){
+        AuthInfoDto dto = convertToDto();
+        AuthRole authRole = getAuthRole();
+        dto.setUserPermissions(getPermissionDtos(this.authPermissionIds));
+        dto.setRolePermissions(getPermissionDtos(authRole.authPermissionIds));
+        return dto;
     }
 
     public AuthRole getAuthRole() {
@@ -316,9 +323,7 @@ public class AuthInfo extends AbstractFact {
         if (this == obj) {
             return true;
         }
-
         AuthInfo that = (AuthInfo) obj;
-
         Object thisObject = this.getId();
         Object thatObject = that.getId();
 
@@ -329,67 +334,8 @@ public class AuthInfo extends AbstractFact {
         }
     }
 
-    private Set<AuthPermissionDto> getAllPermissionsForUser() {
-        Set<String> authPermissionIds = getAllUserPermissionIdsForUser();
-        if (authPermissionIds.isEmpty()) {
-            return new HashSet<>();
-        }
-        Set<AuthPermissionDto> authPermissionDtos = new HashSet<>();
-        for (String authPermissionId : authPermissionIds) {
-            AuthPermission authPermission = getAuthPermission(authPermissionId);
-            if (authPermission != null) {
-                authPermissionDtos.add(authPermission.convertToDto());
-            }
-        }
-        return authPermissionDtos;
-    }
-
-    private Set<AuthPermissionDto> getAllPermissionDtosForUser() {
-        Set<AuthPermissionDto> authPermissionDtos = new HashSet<>();
-        for (String userPermissionId : getAuthPermissionIds()) {
-            AuthPermission authPermission = getAuthPermission(userPermissionId);
-            AuthPermissionDto dto = new AuthPermissionDto();
-            if (authPermission != null) {
-                dto.setId(authPermission.getId());
-                dto.setName(authPermission.getName());
-                dto.setDescription(authPermission.getDescription());
-                dto.setUsedBySystem(authPermission.isUsedBySystem());
-                dto.setBelongsToUser(true);
-                authPermissionDtos.add(dto);
-            }
-        }
-        return authPermissionDtos;
-    }
-
-    private Set<AuthPermissionDto> getAllPermissionDtosFromUserRole() {
-        Set<AuthPermissionDto> authPermissionDtos = new HashSet<>();
-        AuthRole authRole = getAuthRole();
-        if (authRole == null) {
-            return new HashSet<>();
-        }
-        for (String userPermissionId : authRole.getAuthPermissionIds()) {
-            AuthPermission authPermission = getAuthPermission(userPermissionId);
-            AuthPermissionDto dto = new AuthPermissionDto();
-            if (authPermission != null) {
-                dto.setId(authPermission.getId());
-                dto.setName(authPermission.getName());
-                dto.setDescription(authPermission.getDescription());
-                dto.setUsedBySystem(authPermission.isUsedBySystem());
-                dto.setBelongsToUser(false);
-                authPermissionDtos.add(dto);
-            }
-        }
-        return authPermissionDtos;
-    }
-
-    private Set<AuthPermissionDto> getTotalPermissionDtosForUser() {
-        Set<AuthPermissionDto> authPermissionDtos = getAllPermissionDtosForUser();
-        authPermissionDtos.addAll(getAllPermissionDtosFromUserRole());
-        return authPermissionDtos;
-    }
-
     public Set<String> getAllUserPermissionIdsForUser() {
-        Set<String> authPermissions = getAuthPermissionIds();
+        Set<String> authPermissions = this.authPermissionIds;
         AuthRole userRole = getAuthRole();
         if (userRole != null) {
             authPermissions.addAll(userRole.getAuthPermissionIds());
@@ -447,6 +393,17 @@ public class AuthInfo extends AbstractFact {
 
     public boolean isGamingOperator() {
         return StringUtils.equals(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID, this.authRoleId);
+    }
+
+    private Set<AuthPermissionDto> getPermissionDtos(Set<String> permissionsIds) {
+        Set<AuthPermissionDto> dtos = new HashSet<>();
+        for (String id : permissionsIds) {
+            AuthPermission permission = getAuthPermission(id);
+            if (permission != null) {
+                dtos.add(permission.convertToDto());
+            }
+        }
+        return dtos;
     }
 
     public boolean isAgent() {

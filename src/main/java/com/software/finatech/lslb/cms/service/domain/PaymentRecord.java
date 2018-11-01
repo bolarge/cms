@@ -394,22 +394,28 @@ public class PaymentRecord extends AbstractFact {
 
     public List<MachineDto> getGamingMachineDtos() {
         List<MachineDto> dtos = new ArrayList<>();
-        for (Machine machine : getGamingMachines()) {
-            MachineDto dto = new MachineDto();
-            dto.setId(machine.getId());
-            dto.setSerialNumber(machine.getSerialNumber());
-            dtos.add(dto);
+        for (String machineId : this.gamingMachineIds) {
+            Machine machine = findMachineById(machineId);
+            if (machine != null) {
+                MachineDto dto = new MachineDto();
+                dto.setId(machine.getId());
+                dto.setSerialNumber(machine.getSerialNumber());
+                dtos.add(dto);
+            }
         }
         return dtos;
     }
 
     public List<MachineDto> getGamingTerminalDtos() {
         List<MachineDto> dtos = new ArrayList<>();
-        for (Machine machine : getGamingTerminals()) {
-            MachineDto dto = new MachineDto();
-            dto.setId(machine.getId());
-            dto.setSerialNumber(machine.getSerialNumber());
-            dtos.add(dto);
+        for (String machineId : this.gamingTerminalIds) {
+            Machine machine = findMachineById(machineId);
+            if (machine != null) {
+                MachineDto dto = new MachineDto();
+                dto.setId(machine.getId());
+                dto.setSerialNumber(machine.getSerialNumber());
+                dtos.add(dto);
+            }
         }
         return dtos;
     }

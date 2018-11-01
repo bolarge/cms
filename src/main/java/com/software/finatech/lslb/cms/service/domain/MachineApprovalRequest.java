@@ -244,4 +244,31 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
         return null;
     }
 
+    public String getRequestInitiatorName() {
+        if (isInitiatedByInstitution()) {
+            Institution institution = getInstitution();
+            if (institution != null) {
+                return institution.getInstitutionName();
+            }
+        } else {
+            AuthInfo initiator = getInitiator();
+            if (initiator != null) {
+                return initiator.getFullName();
+            }
+        }
+        return null;
+    }
+
+    public String getMachineRequestSerialNumber() {
+        PendingMachine pendingMachine = getPendingMachine();
+        if (pendingMachine != null) {
+            return pendingMachine.getSerialNumber();
+        }
+        Machine machine = getMachine();
+        if (machine != null) {
+            return machine.getSerialNumber();
+        }
+        return null;
+    }
+
 }
