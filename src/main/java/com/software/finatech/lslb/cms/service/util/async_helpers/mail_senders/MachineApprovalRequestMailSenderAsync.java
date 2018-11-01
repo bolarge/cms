@@ -4,6 +4,7 @@ import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.Machine;
 import com.software.finatech.lslb.cms.service.domain.MachineApprovalRequest;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static com.software.finatech.lslb.cms.service.util.StringCapitalizer.convertToTitleCaseIteratingChars;
 
@@ -27,9 +29,47 @@ public class MachineApprovalRequestMailSenderAsync extends AbstractMailSender {
         for (AuthInfo admin : institutionAdmins) {
             String email = admin.getEmailAddress();
             try {
-                emailService.sendEmail(content, "Gaming Terminal Updated ", email);
+                logger.info("Sending machine state update to operator admin with email {}", email);
+                emailService.sendEmail(content, "Gaming Terminal Update Request on LSLB", email);
             } catch (Exception e) {
                 logger.error("An error occurred while sending mail to institution admin {}", email, e);
+            }
+        }
+    }
+
+    @Async
+    public void sendMachineApprovalInitialNotificationToLSLBAdmins(MachineApprovalRequest approvalRequest) {
+        List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_MACHINE_APPLICATION_NOTIFICATION_ID);
+        if (lslbAdmins.isEmpty()) {
+            logger.info("There are no lslb admins that can receive new machine requests");
+            return;
+        }
+        String content = buildNewMachineApprovalRequestNotificationMailContent(approvalRequest);
+
+        for (AuthInfo authInfo : lslbAdmins) {
+            String email = authInfo.getEmailAddress();
+            try {
+                logger.info("Sending initial machine request email to {}", email);
+                emailService.sendEmail(content, "New Machine Approval Request on LSLB Customer Management System", email);
+            } catch (Exception e) {
+                logger.error("An error occurred while sending initial machine approval notification to {}", email, e);
+            }
+        }
+    }
+
+    @Async
+    public void sendMachineApprovalNotificationToOperatorAdmins(MachineApprovalRequest approvalRequest) {
+        List<AuthInfo> operatorAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(approvalRequest.getInstitutionId());
+        String content = buildMachineApprovalNotificationOperator(approvalRequest);
+        String machineSerialNumber = approvalRequest.getMachineRequestSerialNumber();
+        String mailSubject = String.format("Update on your machine approval for machine with serial number %s", machineSerialNumber);
+        for (AuthInfo operatorAdmin : operatorAdmins) {
+            String adminEmail = operatorAdmin.getEmailAddress();
+            try {
+                logger.info("Sending machine approval notification to {}", adminEmail);
+                emailService.sendEmail(content, mailSubject, adminEmail);
+            } catch (Exception e) {
+                logger.error("An error occurred while sending  machine approval notification to {}", adminEmail, e);
             }
         }
     }
@@ -46,5 +86,30 @@ public class MachineApprovalRequestMailSenderAsync extends AbstractMailSender {
         model.put("serialNumber", gamingTerminal.getSerialNumber());
         model.put("frontEndUrl", frontEndUrl);
         return mailContentBuilderService.build(model, "machine-approvals/Agent-ChangeMachine-Operator-Notification");
+    }
+
+    private String buildNewMachineApprovalRequestNotificationMailContent(MachineApprovalRequest machineApprovalRequest) {
+        String frontEndUrl = String.format("%s/machine-approvals-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), machineApprovalRequest.getId());
+        String initiatorName = machineApprovalRequest.getRequestInitiatorName();
+        String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("date", presentDateString);
+        model.put("approvalType", convertToTitleCaseIteratingChars(String.valueOf(machineApprovalRequest.getMachineApprovalRequestType())));
+        model.put("serialNumber", machineApprovalRequest.getMachineRequestSerialNumber());
+        model.put("frontEndUrl", frontEndUrl);
+        model.put("initiatorName", initiatorName);
+        return mailContentBuilderService.build(model, "machine-approvals/NewMachineApprovalRequest");
+    }
+
+    private String buildMachineApprovalNotificationOperator(MachineApprovalRequest approvalRequest) {
+        String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("date", presentDateString);
+        model.put("approvalType", convertToTitleCaseIteratingChars(String.valueOf(approvalRequest.getMachineApprovalRequestType())));
+        model.put("serialNumber", approvalRequest.getMachineRequestSerialNumber());
+        model.put("isApproved", approvalRequest.isApproved());
+        model.put("rejectionReason", approvalRequest.getRejectionReason());
+        model.put("institutionName", approvalRequest.getInstitutionName());
+        return mailContentBuilderService.build(model, "machine-approvals/NewMachineApprovalRequest");
     }
 }
