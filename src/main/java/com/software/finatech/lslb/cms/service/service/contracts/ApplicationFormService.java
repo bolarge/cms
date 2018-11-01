@@ -68,7 +68,7 @@ public interface ApplicationFormService {
 
     Mono<ResponseEntity> completeApplicationForm(String applicationFormId, boolean isResubmit, HttpServletRequest request);
 
-    Mono<ResponseEntity> completeAIPForm(String institutionId, String gameTypeId, boolean isResubmit, HttpServletRequest request);
+    Mono<ResponseEntity> completeAIPForm(String institutionId,String gameTypeId, HttpServletRequest request);
 
     Mono<ResponseEntity> getPaymentRecordsForApplicationForm(String applicationFormId);
 
