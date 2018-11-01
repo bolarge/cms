@@ -21,8 +21,6 @@ public class InstitutionUpdateDto  {
     @NotEmpty
     protected String phoneNumber;
     protected Set<String> gameTypeIds = new java.util.HashSet<>();
-    @Transient
-    protected Set<GameTypeDto> gameTypes = new java.util.HashSet<>();
 
     public Set<String> getGameTypeIds() {
         return gameTypeIds;
@@ -30,14 +28,6 @@ public class InstitutionUpdateDto  {
 
     public void setGameTypeIds(Set<String> gameTypeIds) {
         this.gameTypeIds = gameTypeIds;
-    }
-
-    public Set<GameTypeDto> getGameTypes() {
-        return gameTypes;
-    }
-
-    public void setGameTypes(Set<GameTypeDto> gameTypes) {
-        this.gameTypes = gameTypes;
     }
 
     public String getId() {

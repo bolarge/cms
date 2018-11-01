@@ -17,12 +17,21 @@ public class AuthInfoDto {
     protected String institutionId;
     protected String ssoUserId;
     protected AuthRoleDto authRole;
-    protected  String gameTypeId;
+    protected String gameTypeId;
     protected String gameTypeName;
     protected String institutionName;
     protected String agentId;
     private Set<AuthPermissionDto> rolePermissions = new HashSet<>();
-    private Set<AuthPermissionDto>  userPermissions = new HashSet<>();
+    private Set<AuthPermissionDto> userPermissions = new HashSet<>();
+    private Set<AuthPermissionDto> authPermissions = new HashSet<>();
+
+    public Set<AuthPermissionDto> getAuthPermissions() {
+        return authPermissions;
+    }
+
+    public void setAuthPermissions(Set<AuthPermissionDto> authPermissions) {
+        this.authPermissions = authPermissions;
+    }
 
     public Set<AuthPermissionDto> getRolePermissions() {
         return rolePermissions;

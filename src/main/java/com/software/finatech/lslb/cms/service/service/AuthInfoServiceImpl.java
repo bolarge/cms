@@ -686,7 +686,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             if (responseCode == 200) {
                 // everything is fine, handle the response
                 SSOToken token = mapper.readValue(stringResponse, SSOToken.class);
-                token.setAuthInfo(authInfo.convertToFullDto());
+                token.setAuthInfo(authInfo.convertToLoginDto());
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Successful Login Attempt"));
 
                 return Mono.just(new ResponseEntity<>((token), HttpStatus.OK));
