@@ -700,7 +700,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
-            applicationFormNotificationHelperAsync.sendAdminCommentNotificationToInstitutionAdmins(applicationForm, lslbAdminComment.getComment());
+            applicationFormNotificationHelperAsync.sendAdminCommentNotificationToInstitutionAdmins(applicationForm);
             return Mono.just(new ResponseEntity<>("Comment added successfully", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding comment to application form", e);

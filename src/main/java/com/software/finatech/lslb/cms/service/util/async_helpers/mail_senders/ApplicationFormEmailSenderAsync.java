@@ -24,7 +24,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     private static final Logger logger = LoggerFactory.getLogger(ApplicationFormEmailSenderAsync.class);
 
     @Async
-    public void sendAdminCommentNotificationToInstitutionAdmins(ApplicationForm applicationForm, String comment) {
+    public void sendAdminCommentNotificationToInstitutionAdmins(ApplicationForm applicationForm) {
         ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(applicationForm.getInstitutionId());
         String mailSubject = String.format("Notification on your application for %s licence", applicationForm.getGameTypeName());
         String emailContent = buildApplicationCommentFromLSLBAdminEmailContent(applicationForm);
@@ -363,7 +363,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     private ArrayList<Document> getAllDocumentsForApplicationForm(ApplicationForm applicationForm) {
         Query query = new Query();
         query.addCriteria(Criteria.where("entityId").is(applicationForm.getId()));
-        query.addCriteria(Criteria.where("isActive").is(true));
+        query.addCriteria(Criteria.where("isCurrent").is(true));
         query.addCriteria(Criteria.where("notificationSent").is(false));
         return (ArrayList<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
     }
