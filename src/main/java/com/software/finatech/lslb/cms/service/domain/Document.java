@@ -38,7 +38,7 @@ public class Document extends AbstractFact {
     protected String institutionId;
     protected String gameTypeId;
     protected String agentId;
-    protected Boolean notificationSent;
+    protected Boolean notificationSent = false;
     protected String comment;
     protected String approvalRequestStatusId = ApprovalRequestStatusReferenceData.PENDING_ID;
     protected String commenterName;
