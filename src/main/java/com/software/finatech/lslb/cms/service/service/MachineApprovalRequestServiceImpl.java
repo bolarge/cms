@@ -186,10 +186,10 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             if (approvalRequest.isAssignTerminalToAgent()) {
                 approveAssignTerminalToAgent(approvalRequest);
             }
-            if(approvalRequest.isUpgradeGamingMachineGames()){
+            if (approvalRequest.isUpgradeGamingMachineGames()) {
                 approveUpgradeGamingMachineGames(approvalRequest);
             }
-            if (approvalRequest.isUpgradeGamingMachineGames()){
+            if (approvalRequest.isUpgradeGamingMachineGames()) {
                 approveUpgradeGamingTerminalGames(approvalRequest, approvingUser);
             }
 
@@ -389,6 +389,7 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             newMachineGame.setGameVersion(gameUpgrade.getNewGameVersion());
             newMachineGame.setGameName(machineGame.getGameName());
             newMachineGame.setMachineId(machineGame.getMachineId());
+            mongoRepositoryReactive.saveOrUpdate(machineGame);
             mongoRepositoryReactive.saveOrUpdate(newMachineGame);
         }
     }
