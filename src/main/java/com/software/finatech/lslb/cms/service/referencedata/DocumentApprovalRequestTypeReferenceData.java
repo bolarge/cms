@@ -9,23 +9,18 @@ public class DocumentApprovalRequestTypeReferenceData {
     public static final String SET_APPROVER_ID = "2";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
+        loadForIdNameAndDesc(CREATE_DOCUMENT_TYPE_ID, mongoRepositoryReactive, "CREATE DOCUMENT TYPE", "Create a new document type , with an approver set");
+        loadForIdNameAndDesc(SET_APPROVER_ID, mongoRepositoryReactive, "SET APPROVER", null);
+    }
 
-        DocumentApprovalRequestType requestType = (DocumentApprovalRequestType) mongoRepositoryReactive.findById(CREATE_DOCUMENT_TYPE_ID, DocumentApprovalRequestType.class).block();
+    private static void loadForIdNameAndDesc(String id, MongoRepositoryReactiveImpl mongoRepositoryReactive, String name, String description) {
+        DocumentApprovalRequestType requestType = (DocumentApprovalRequestType) mongoRepositoryReactive.findById(id, DocumentApprovalRequestType.class).block();
         if (requestType == null) {
             requestType = new DocumentApprovalRequestType();
-            requestType.setId(CREATE_DOCUMENT_TYPE_ID);
+            requestType.setId(id);
         }
-        requestType.setName("CREATE DOCUMENT TYPE");
-        requestType.setDescription("Create a new document type , with an approver set");
-        mongoRepositoryReactive.saveOrUpdate(requestType);
-
-
-        requestType = (DocumentApprovalRequestType) mongoRepositoryReactive.findById(SET_APPROVER_ID, DocumentApprovalRequestType.class).block();
-        if (requestType == null) {
-            requestType = new DocumentApprovalRequestType();
-            requestType.setId(SET_APPROVER_ID);
-        }
-        requestType.setName("SET APPROVER");
+        requestType.setName(name);
+        requestType.setDescription(description);
         mongoRepositoryReactive.saveOrUpdate(requestType);
     }
 }
