@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.domain;
 
+import com.software.finatech.lslb.cms.service.dto.GameUpgrade;
 import com.software.finatech.lslb.cms.service.dto.MachineApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.model.MachineGameDetails;
 import com.software.finatech.lslb.cms.service.referencedata.MachineApprovalRequestTypeReferenceData;
@@ -24,6 +25,15 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
     private String machineTypeId;
     private boolean initiatedByInstitution;
     private String newMachineStatusId;
+    private Set<GameUpgrade> machineGameUpgrades = new HashSet<>();
+
+    public Set<GameUpgrade> getMachineGameUpgrades() {
+        return machineGameUpgrades;
+    }
+
+    public void setMachineGameUpgrades(Set<GameUpgrade> machineGameUpgrades) {
+        this.machineGameUpgrades = machineGameUpgrades;
+    }
 
     public String getNewMachineStatusId() {
         return newMachineStatusId;
@@ -167,6 +177,7 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
             dto.setRejectorName(rejector.getFullName());
         }
         dto.setNewMachineStatusName(getNewMachineStatusName());
+        dto.setGameUpgrades(getMachineGameUpgrades());
         return dto;
     }
 
@@ -198,6 +209,13 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
         return StringUtils.equals(MachineApprovalRequestTypeReferenceData.ASSIGN_TERMINAL_TO_AGENT, this.machineApprovalRequestTypeId);
     }
 
+    public boolean isUpgradeGamingTerminalGames() {
+        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.UPGRADE_GAMING_TERMINAL_GAMES, this.machineApprovalRequestTypeId);
+    }
+
+    public boolean isUpgradeGamingMachineGames() {
+        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.UPGRADE_GAMING_MACHINE_GAMES, this.machineApprovalRequestTypeId);
+    }
 
     public PendingMachine getPendingMachine() {
         if (StringUtils.isEmpty(this.pendingMachineId)) {

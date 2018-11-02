@@ -284,11 +284,21 @@ public class AuthInfo extends AbstractFact {
         return authInfoDto;
     }
 
-    public AuthInfoDto convertToFullDto(){
+    public AuthInfoDto convertToFullDto() {
         AuthInfoDto dto = convertToDto();
         AuthRole authRole = getAuthRole();
         dto.setUserPermissions(getPermissionDtos(this.authPermissionIds));
         dto.setRolePermissions(getPermissionDtos(authRole.authPermissionIds));
+        return dto;
+    }
+
+    public AuthInfoDto convertToLoginDto() {
+        AuthInfoDto dto = convertToDto();
+        AuthRole authRole = getAuthRole();
+        Set<AuthPermissionDto> authPermissionDtos = new HashSet<>();
+        authPermissionDtos.addAll(getPermissionDtos(this.authPermissionIds));
+        authPermissionDtos.addAll(getPermissionDtos(authRole.authPermissionIds));
+        dto.setAuthPermissions(authPermissionDtos);
         return dto;
     }
 
@@ -389,6 +399,10 @@ public class AuthInfo extends AbstractFact {
 
     public boolean isLSLBUser() {
         return StringUtils.equals(LSLBAuthRoleReferenceData.LSLB_USER_ID, this.authRoleId);
+    }
+
+    public boolean isLSLBMember() {
+        return isLSLBAdmin() || isLSLBUser();
     }
 
     public boolean isGamingOperator() {

@@ -3,11 +3,13 @@ package com.software.finatech.lslb.cms.service.service;
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.ApprovalRequestOperationtDto;
+import com.software.finatech.lslb.cms.service.dto.GameUpgrade;
 import com.software.finatech.lslb.cms.service.dto.MachineApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.model.MachineGameDetails;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.MachineApprovalRequestTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.MachineStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.MachineApprovalRequestService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
@@ -31,10 +33,7 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
@@ -106,6 +105,15 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
                 query.addCriteria(Criteria.where("dateCreated").gte(new LocalDate(startDate)).lte(new LocalDate(endDate)));
             }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser != null) {
+                if (loggedInUser.isGamingOperator()) {
+                    List<String> allowedRequestTypeIdsForOperators = Arrays.asList(MachineApprovalRequestTypeReferenceData.ADD_GAMES_TO_GAMING_TERMINAL_ID,
+                            MachineApprovalRequestTypeReferenceData.UPGRADE_GAMING_TERMINAL_GAMES,
+                            MachineApprovalRequestTypeReferenceData.CHANGE_GAMING_TERMINAL_STATUS);
+                    query.addCriteria(Criteria.where("machineApprovalRequestTypeId").in(allowedRequestTypeIdsForOperators));
+                }
+            }
             if (page == 0) {
                 Long count = mongoRepositoryReactive.count(query, MachineApprovalRequest.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
@@ -163,75 +171,45 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             if (approvalRequest.isCreateGamingTerminal() || approvalRequest.isCreateGamingMachine()) {
                 approveCreateMachine(approvalRequest);
             }
-            if (approvalRequest.isAddGamesToGamingMachine() || approvalRequest.isAddGamesToGamingTerminal()) {
-                approveAddGamesToMachine(approvalRequest);
+            if (approvalRequest.isAddGamesToGamingMachine()) {
+                approveAddGamesToGamingMachine(approvalRequest);
             }
-
+            if (approvalRequest.isAddGamesToGamingTerminal()) {
+                approveAddGamesToGamingTerminal(approvalRequest, approvingUser);
+            }
+            if (approvalRequest.isChangeGamingMachineStatus()) {
+                approveChangeGamingMachineStatus(approvalRequest);
+            }
+            if (approvalRequest.isChangeGamingTerminalStatus()) {
+                approveChangeGamingTerminalStatus(approvalRequest, approvingUser);
+            }
             if (approvalRequest.isAssignTerminalToAgent()) {
                 approveAssignTerminalToAgent(approvalRequest);
             }
-            approvalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
-            approvalRequest.setApproverId(approvingUser.getId());
+            if(approvalRequest.isUpgradeGamingMachineGames()){
+                approveUpgradeGamingMachineGames(approvalRequest);
+            }
+            if (approvalRequest.isUpgradeGamingMachineGames()){
+                approveUpgradeGamingTerminalGames(approvalRequest, approvingUser);
+            }
+
+
+            if (approvingUser.isLSLBMember()) {
+                approvalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
+                approvalRequest.setApproverId(approvingUser.getId());
+                machineApprovalRequestMailSenderAsync.sendMachineApprovalNotificationToRequestInitiator(approvalRequest);
+            }
+
             mongoRepositoryReactive.saveOrUpdate(approvalRequest);
-            String verbiage = String.format("Approved Machine approval request -> Type: %s ,  Id -> %s", approvalRequest.getMachineApprovalRequestType(), approvalRequest.getId());
+            String verbiage = String.format("Approved Machine approval request -> Type: %s ,Machine Serial Number -> %s,  Id -> %s",
+                    approvalRequest.getMachineApprovalRequestType(), approvalRequest.getMachineRequestSerialNumber(), approvalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), approvalRequest.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
-            machineApprovalRequestMailSenderAsync.sendMachineApprovalNotificationToOperatorAdmins(approvalRequest);
-            //    agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsAndLslbOnAgentRequestCreation(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving request", e);
-        }
-    }
-
-    private void approveAssignTerminalToAgent(MachineApprovalRequest approvalRequest) {
-        Machine machine = approvalRequest.getMachine();
-        if (machine != null && machine.isGamingTerminal()) {
-            machine.setAgentId(approvalRequest.getAgentId());
-            mongoRepositoryReactive.saveOrUpdate(machine);
-        }
-    }
-
-    private void approveAddGamesToMachine(MachineApprovalRequest approvalRequest) {
-        Machine machine = approvalRequest.getMachine();
-        if (machine != null) {
-            addGamesToMachine(approvalRequest.getNewMachineGames(), machine);
-        }
-    }
-
-    private void approveCreateMachine(MachineApprovalRequest approvalRequest) {
-        PendingMachine pendingMachine = approvalRequest.getPendingMachine();
-        if (pendingMachine != null) {
-            Machine machine = new Machine();
-            machine.setId(UUID.randomUUID().toString());
-            machine.setManufacturer(pendingMachine.getManufacturer());
-            machine.setGameTypeId(pendingMachine.getGameTypeId());
-            machine.setMachineAddress(pendingMachine.getMachineAddress());
-            machine.setSerialNumber(pendingMachine.getSerialNumber());
-            machine.setMachineTypeId(pendingMachine.getMachineTypeId());
-            machine.setMachineStatusId(MachineStatusReferenceData.ACTIVE_ID);
-            machine.setInstitutionId(pendingMachine.getInstitutionId());
-            mongoRepositoryReactive.saveOrUpdate(machine);
-            Set<MachineGameDetails> machineGameDetails = pendingMachine.getGameDetailsList();
-            if (!machineGameDetails.isEmpty()) {
-                addGamesToMachine(machineGameDetails, machine);
-            }
-            pendingMachine.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
-            mongoRepositoryReactive.saveOrUpdate(pendingMachine);
-        }
-    }
-
-    private void addGamesToMachine(Collection<MachineGameDetails> machineGameDetails, Machine machine) {
-        for (MachineGameDetails gameDetails : machineGameDetails) {
-            MachineGame machineGame = new MachineGame();
-            machineGame.setGameName(gameDetails.getGameName());
-            machineGame.setGameVersion(gameDetails.getGameVersion());
-            machineGame.setMachineId(machine.getId());
-            machineGame.setActive(true);
-            machineGame.setId(UUID.randomUUID().toString());
-            mongoRepositoryReactive.saveOrUpdate(machineGame);
         }
     }
 
@@ -264,17 +242,11 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), approvalRequest.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-            machineApprovalRequestMailSenderAsync.sendMachineApprovalNotificationToOperatorAdmins(approvalRequest);
+            machineApprovalRequestMailSenderAsync.sendMachineApprovalNotificationToRequestInitiator(approvalRequest);
+
             return Mono.just(new ResponseEntity<>("Request successfully rejected", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving request", e);
-        }
-    }
-
-    private void rejectCreateMachine(MachineApprovalRequest approvalRequest) {
-        PendingMachine pendingMachine = approvalRequest.getPendingMachine();
-        if (pendingMachine != null) {
-            pendingMachine.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
         }
     }
 
@@ -298,5 +270,144 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             return logAndReturnError(logger,
                     String.format("An error occurred while getting full detail of machine approval request with id %s", approvalRequestId), e);
         }
+    }
+
+    private void approveChangeGamingMachineStatus(MachineApprovalRequest approvalRequest) {
+        approveChangeMachineStatus(approvalRequest);
+    }
+
+    private void approveChangeGamingTerminalStatus(MachineApprovalRequest approvalRequest, AuthInfo loggedInUser) {
+        if (loggedInUser.isLSLBMember()) {
+            approveChangeMachineStatus(approvalRequest);
+        }
+        if (loggedInUser.isGamingOperator()) {
+            approvalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+            machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
+        }
+    }
+
+    private void approveChangeMachineStatus(MachineApprovalRequest approvalRequest) {
+        Machine machine = approvalRequest.getMachine();
+        if (machine != null) {
+            machine.setMachineStatusId(approvalRequest.getNewMachineStatusId());
+            mongoRepositoryReactive.saveOrUpdate(machine);
+        }
+    }
+
+    private void approveAssignTerminalToAgent(MachineApprovalRequest approvalRequest) {
+        Machine machine = approvalRequest.getMachine();
+        if (machine != null && machine.isGamingTerminal()) {
+            machine.setAgentId(approvalRequest.getAgentId());
+            mongoRepositoryReactive.saveOrUpdate(machine);
+        }
+    }
+
+    private void approveAddGamesToGamingMachine(MachineApprovalRequest approvalRequest) {
+        Machine machine = approvalRequest.getMachine();
+        if (machine != null) {
+            addGamesToMachine(approvalRequest.getNewMachineGames(), machine);
+        }
+    }
+
+    private void approveAddGamesToGamingTerminal(MachineApprovalRequest approvalRequest, AuthInfo loggedInUser) {
+        if (loggedInUser.isGamingOperator()) {
+            approvalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+            machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
+        }
+        if (loggedInUser.isLSLBMember()) {
+            Machine machine = approvalRequest.getMachine();
+            if (machine != null) {
+                addGamesToMachine(approvalRequest.getNewMachineGames(), machine);
+            }
+        }
+    }
+
+    private void approveUpgradeGamingMachineGames(MachineApprovalRequest approvalRequest) {
+        approveUpgradeMachineGames(approvalRequest);
+    }
+
+    private void approveUpgradeGamingTerminalGames(MachineApprovalRequest approvalRequest, AuthInfo loggedInUser) {
+        if (loggedInUser.isGamingOperator()) {
+            approvalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+            machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
+        }
+        if (loggedInUser.isLSLBMember()) {
+            approveUpgradeMachineGames(approvalRequest);
+        }
+    }
+
+
+    private void approveCreateMachine(MachineApprovalRequest approvalRequest) {
+        PendingMachine pendingMachine = approvalRequest.getPendingMachine();
+        if (pendingMachine != null) {
+            Machine machine = new Machine();
+            machine.setId(UUID.randomUUID().toString());
+            machine.setManufacturer(pendingMachine.getManufacturer());
+            machine.setGameTypeId(pendingMachine.getGameTypeId());
+            machine.setMachineAddress(pendingMachine.getMachineAddress());
+            machine.setSerialNumber(pendingMachine.getSerialNumber());
+            machine.setMachineTypeId(pendingMachine.getMachineTypeId());
+            machine.setMachineStatusId(MachineStatusReferenceData.ACTIVE_ID);
+            machine.setInstitutionId(pendingMachine.getInstitutionId());
+            mongoRepositoryReactive.saveOrUpdate(machine);
+            Set<MachineGameDetails> machineGameDetails = pendingMachine.getGameDetailsList();
+            if (!machineGameDetails.isEmpty()) {
+                addGamesToMachine(machineGameDetails, machine);
+            }
+            pendingMachine.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
+            mongoRepositoryReactive.saveOrUpdate(pendingMachine);
+        }
+    }
+
+    private void addGamesToMachine(Collection<MachineGameDetails> machineGameDetails, Machine machine) {
+        for (MachineGameDetails gameDetails : machineGameDetails) {
+            MachineGame machineGame = new MachineGame();
+            machineGame.setId(UUID.randomUUID().toString());
+            machineGame.setGameName(gameDetails.getGameName());
+            machineGame.setGameVersion(gameDetails.getGameVersion());
+            machineGame.setMachineId(machine.getId());
+            machineGame.setActive(true);
+            machineGame.setId(UUID.randomUUID().toString());
+            mongoRepositoryReactive.saveOrUpdate(machineGame);
+        }
+    }
+
+    private void rejectCreateMachine(MachineApprovalRequest approvalRequest) {
+        PendingMachine pendingMachine = approvalRequest.getPendingMachine();
+        if (pendingMachine != null) {
+            pendingMachine.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
+        }
+    }
+
+    private void upgradeMachineGame(GameUpgrade gameUpgrade) {
+        MachineGame machineGame = findMachineGameById(gameUpgrade.getGameId());
+        if (machineGame != null) {
+            machineGame.setActive(false);
+            MachineGame newMachineGame = new MachineGame();
+            machineGame.setId(UUID.randomUUID().toString());
+            newMachineGame.setActive(true);
+            newMachineGame.setGameVersion(gameUpgrade.getNewGameVersion());
+            newMachineGame.setGameName(machineGame.getGameName());
+            newMachineGame.setMachineId(machineGame.getMachineId());
+            mongoRepositoryReactive.saveOrUpdate(newMachineGame);
+        }
+    }
+
+
+    private void approveUpgradeMachineGames(MachineApprovalRequest approvalRequest) {
+        Machine machine = approvalRequest.getMachine();
+        Set<GameUpgrade> gameUpgrades = approvalRequest.getMachineGameUpgrades();
+        if (machine != null && !gameUpgrades.isEmpty()) {
+            for (GameUpgrade gameUpgrade : gameUpgrades) {
+                upgradeMachineGame(gameUpgrade);
+            }
+        }
+    }
+
+    private MachineGame findMachineGameById(String id) {
+        if (StringUtils.isEmpty(id)) {
+            return null;
+        }
+        return (MachineGame) mongoRepositoryReactive.findById(id, MachineGame.class).block();
     }
 }
