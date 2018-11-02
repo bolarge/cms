@@ -707,6 +707,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("applicantName", aipDocumentApproval.getInstitutionName());
         model.put("frontEndUrl", callbackUrl);
         model.put("fileName", document.getFilename());
+        model.put("comment", document.getComment());
         model.put("documentType", String.valueOf(document.getDocumentType()));
         return mailContentBuilderService.build(model, "aip-form/AIPFormDocumentReturnGAAdmin");
     }

@@ -560,18 +560,14 @@
                                                                             </h3>
                                                                             <div mc:edit="body"
                                                                                  style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
-                                                                                This is to inform you that your agent
-                                                                                <span th:text="${agentName}"></span>
-                                                                                has requested to update his gaming
-                                                                                terminal with serial number <span
-                                                                                    th:text="${serialNumber}"></span>
-                                                                                status from old status of <span
-                                                                                    th:text="${oldState}"></span>
-                                                                                to new status of <span
-                                                                                    th:text="${newState}"></span>
-                                                                                and it requires your approval to be
-                                                                                approved by us.
-
+                                                                                Your agent <span
+                                                                                    th:text="${agentName}"></span> has
+                                                                                submitted an approval request to <span
+                                                                                    th:text="${approvalType}"></span>
+                                                                                with serial number <span
+                                                                                    th:text="${serialNumber}"></span> .
+                                                                                Kindly click the link below to view and
+                                                                                approve/reject the request.
                                                                                 <br/>
                                                                             </div>
                                                                         </td>

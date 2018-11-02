@@ -401,6 +401,10 @@ public class AuthInfo extends AbstractFact {
         return StringUtils.equals(LSLBAuthRoleReferenceData.LSLB_USER_ID, this.authRoleId);
     }
 
+    public boolean isLSLBMember() {
+        return isLSLBAdmin() || isLSLBUser();
+    }
+
     public boolean isGamingOperator() {
         return StringUtils.equals(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID, this.authRoleId);
     }

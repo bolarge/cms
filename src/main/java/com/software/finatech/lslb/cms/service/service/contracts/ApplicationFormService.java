@@ -64,7 +64,7 @@ public interface ApplicationFormService {
 
     Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, ApplicationFormRejectDto applicationFormRejectDto, HttpServletRequest request);
 
-    Mono<ResponseEntity> approveAIPForm(String aipFormId, String approverId, HttpServletRequest request);
+    Mono<ResponseEntity> approveAIPForm(String institutionId,String gameTypeId, String approverId, HttpServletRequest request);
 
     Mono<ResponseEntity> completeApplicationForm(String applicationFormId, boolean isResubmit, HttpServletRequest request);
 

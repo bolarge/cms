@@ -9,6 +9,15 @@ public class MachineApprovalRequestDto extends AbstractApprovalRequestDto {
     private MachineDto pendingMachine;
     private Set<MachineGameDetails> newGameDetails = new HashSet<>();
     private String newMachineStatusName;
+    private Set<GameUpgrade> gameUpgrades = new HashSet<>();
+
+    public Set<GameUpgrade> getGameUpgrades() {
+        return gameUpgrades;
+    }
+
+    public void setGameUpgrades(Set<GameUpgrade> gameUpgrades) {
+        this.gameUpgrades = gameUpgrades;
+    }
 
     public String getNewMachineStatusName() {
         return newMachineStatusName;

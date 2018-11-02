@@ -834,7 +834,7 @@ public class LicenseServiceImpl implements LicenseService {
             LocalDate expiryDate = LocalDate.now().dayOfYear().withMaximumValue();
             license = new License();
             license.setId(UUID.randomUUID().toString());
-            License mostRecentLicense = findMostRecentGamingMachinelLicense(paymentRecord);
+            License mostRecentLicense = findMostRecentGamingMachineLicense(paymentRecord);
             if (mostRecentLicense == null) {
                 license.setLicenseNumber(generateLicenseNumberForPaymentRecord(paymentRecord));
             } else {
@@ -1060,7 +1060,7 @@ public class LicenseServiceImpl implements LicenseService {
         return (License) mongoRepositoryReactive.find(query, License.class).block();
     }
 
-    private License findMostRecentGamingMachinelLicense(PaymentRecord paymentRecord) {
+    private License findMostRecentGamingMachineLicense(PaymentRecord paymentRecord) {
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").is(paymentRecord.getInstitutionId()));
         query.addCriteria(Criteria.where("gameTypeId").is(paymentRecord.getGameTypeId()));

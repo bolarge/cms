@@ -22,15 +22,15 @@ public class MachineApprovalRequestMailSenderAsync extends AbstractMailSender {
     private static final Logger logger = LoggerFactory.getLogger(MachineApprovalRequestMailSenderAsync.class);
 
     @Async
-    public void sendInitialMachineStateUpdateToAgentOperators(MachineApprovalRequest machineApprovalRequest, String newStatusName) {
+    public void sendInitialMachineStateUpdateToAgentOperators(MachineApprovalRequest machineApprovalRequest) {
         Machine gamingTerminal = machineApprovalRequest.getMachine();
         ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(gamingTerminal.getInstitutionId());
-        String content = buildInitialMachineStateChangeOperatorNotification(machineApprovalRequest, gamingTerminal, newStatusName);
+        String content = buildInitialMachineApprovalRequestOperatorNotificationContent(machineApprovalRequest);
         for (AuthInfo admin : institutionAdmins) {
             String email = admin.getEmailAddress();
             try {
                 logger.info("Sending machine state update to operator admin with email {}", email);
-                emailService.sendEmail(content, "Gaming Terminal Update Request on LSLB", email);
+                emailService.sendEmail(content, "Gaming Terminal Approval Request on LSLB", email);
             } catch (Exception e) {
                 logger.error("An error occurred while sending mail to institution admin {}", email, e);
             }
@@ -45,7 +45,6 @@ public class MachineApprovalRequestMailSenderAsync extends AbstractMailSender {
             return;
         }
         String content = buildNewMachineApprovalRequestNotificationMailContent(approvalRequest);
-
         for (AuthInfo authInfo : lslbAdmins) {
             String email = authInfo.getEmailAddress();
             try {
@@ -58,31 +57,38 @@ public class MachineApprovalRequestMailSenderAsync extends AbstractMailSender {
     }
 
     @Async
-    public void sendMachineApprovalNotificationToOperatorAdmins(MachineApprovalRequest approvalRequest) {
-        List<AuthInfo> operatorAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(approvalRequest.getInstitutionId());
+    public void sendMachineApprovalNotificationToRequestInitiator(MachineApprovalRequest approvalRequest) {
         String content = buildMachineApprovalNotificationOperator(approvalRequest);
         String machineSerialNumber = approvalRequest.getMachineRequestSerialNumber();
-        String mailSubject = String.format("Update on your machine approval for machine with serial number %s", machineSerialNumber);
-        for (AuthInfo operatorAdmin : operatorAdmins) {
-            String adminEmail = operatorAdmin.getEmailAddress();
-            try {
-                logger.info("Sending machine approval notification to {}", adminEmail);
-                emailService.sendEmail(content, mailSubject, adminEmail);
-            } catch (Exception e) {
-                logger.error("An error occurred while sending  machine approval notification to {}", adminEmail, e);
+        if (approvalRequest.isInitiatedByInstitution()) {
+            List<AuthInfo> operatorAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(approvalRequest.getInstitutionId());
+            String mailSubject = String.format("Update on your machine approval for machine with serial number %s", machineSerialNumber);
+            for (AuthInfo operatorAdmin : operatorAdmins) {
+                String adminEmail = operatorAdmin.getEmailAddress();
+                try {
+                    logger.info("Sending machine approval notification to {}", adminEmail);
+                    emailService.sendEmail(content, mailSubject, adminEmail);
+                } catch (Exception e) {
+                    logger.error("An error occurred while sending  machine approval notification to {}", adminEmail, e);
+                }
             }
+        } else {
+            AuthInfo initiator = approvalRequest.getInitiator();
+            String mailSubject = String.format("Update on your approval request for terminal with serial number %s", machineSerialNumber);
+            logger.info("Sending machine approval notification to {}", initiator.getEmailAddress());
+            emailService.sendEmail(content, mailSubject, initiator.getEmailAddress());
         }
     }
 
-    private String buildInitialMachineStateChangeOperatorNotification(MachineApprovalRequest machineApprovalRequest, Machine gamingTerminal, String newStatusName) {
+    private String buildInitialMachineApprovalRequestOperatorNotificationContent(MachineApprovalRequest machineApprovalRequest) {
         String frontEndUrl = String.format("%s/machine-approvals-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), machineApprovalRequest.getId());
+        Machine gamingTerminal = machineApprovalRequest.getMachine();
         String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
         Agent agent = gamingTerminal.getAgent();
         HashMap<String, Object> model = new HashMap<>();
         model.put("agentName", agent.getFullName());
         model.put("date", presentDateString);
-        model.put("newState", convertToTitleCaseIteratingChars(newStatusName));
-        model.put("oldState", convertToTitleCaseIteratingChars(gamingTerminal.getMachineStatus().toString()));
+        model.put("approvalType", convertToTitleCaseIteratingChars(String.valueOf(machineApprovalRequest.getMachineApprovalRequestType())));
         model.put("serialNumber", gamingTerminal.getSerialNumber());
         model.put("frontEndUrl", frontEndUrl);
         return mailContentBuilderService.build(model, "machine-approvals/Agent-ChangeMachine-Operator-Notification");
