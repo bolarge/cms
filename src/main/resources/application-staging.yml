@@ -33,7 +33,7 @@ mongodb:
   username: useradmin
   password: f1nat3ch
   database: LslbCMSDb
-  authDb:
+  authDb: admin
   replicaSet:
 
 
