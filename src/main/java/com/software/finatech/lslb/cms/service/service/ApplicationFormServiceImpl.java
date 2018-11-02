@@ -158,23 +158,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
     @Override
     public Mono<ResponseEntity> getAllApplicationFormStatus() {
-        try {
-            ArrayList<ApplicationFormStatus> applicationFormStatuses = (ArrayList<ApplicationFormStatus>) mongoRepositoryReactive
-                    .findAll(new Query(), ApplicationFormStatus.class).toStream().collect(Collectors.toList());
-
-            if (applicationFormStatuses == null || applicationFormStatuses.isEmpty()) {
-                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));
-            }
-            List<EnumeratedFactDto> applicationFormStatusDto = new ArrayList<>();
-            applicationFormStatuses.forEach(applicationFormStatus -> {
-                applicationFormStatusDto.add(applicationFormStatus.convertToDto());
-            });
-
-            return Mono.just(new ResponseEntity<>(applicationFormStatusDto, HttpStatus.OK));
-        } catch (Exception e) {
-            String errorMsg = "An error occurred while getting all application form statuses";
-            return logAndReturnError(logger, errorMsg, e);
-        }
+       return ReferenceDataUtil.getAllEnumeratedEntity("ApplicationFormStatus");
     }
 
     @Override
