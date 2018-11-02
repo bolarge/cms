@@ -510,7 +510,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
 
     @Override
-    public Mono<ResponseEntity> approveAIPForm(String aipFormId, String approverId, HttpServletRequest request) {
+    public Mono<ResponseEntity> approveAIPForm(String institutionId, String gameTypeId, String approverId, HttpServletRequest request) {
         try {
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(approverId, AuthInfo.class).block();
             if (authInfo == null) {
@@ -520,7 +520,11 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             if (!authInfo.getAllUserPermissionIdsForUser().contains(LSLBAuthPermissionReferenceData.APPROVE_APPLICATION_FORM_ID)) {
                 return Mono.just(new ResponseEntity<>("User does not have permission to approve applications", HttpStatus.BAD_REQUEST));
             }
-            AIPDocumentApproval aipDocumentApproval = getAIPFormById(aipFormId);
+            Query queryAIPDocumentApproval= new Query();
+            queryAIPDocumentApproval.addCriteria(Criteria.where("institutionId").is(institutionId));
+            queryAIPDocumentApproval.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+
+            AIPDocumentApproval aipDocumentApproval = (AIPDocumentApproval)mongoRepositoryReactive.find(queryAIPDocumentApproval, AIPDocumentApproval.class).block();
             if (aipDocumentApproval == null) {
                 return Mono.just(new ResponseEntity<>("AIP form does not exist", HttpStatus.BAD_REQUEST));
             }
@@ -539,7 +543,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String approvedAIPFormStatusId = ApplicationFormStatusReferenceData.APPROVED_STATUS_ID;
             aipDocumentApproval.setFormStatusId(approvedAIPFormStatusId);
             saveAIPForm(aipDocumentApproval);
-            licenseService.updateAIPDocToLicense(aipDocumentApproval.getInstitutionId(),aipDocumentApproval.getGameTypeId());
+            licenseService.updateAIPDocToLicense(institutionId,gameTypeId);
 
 
             String verbiage = String.format("Approved AIP form : %s ->  ", aipDocumentApproval.getFormStatusId());

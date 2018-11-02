@@ -322,15 +322,15 @@ public class ApplicationFormController {
         return applicationFormService.approveApplicationForm(applicationFormId, approverId, request);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/approve-aip-form", params = {"aipFormId", "userId"})
+    @RequestMapping(method = RequestMethod.POST, value = "/approve-aip-form", params = {"institutionId","gameTypeId","userId"})
     @ApiOperation(value = "Approve aip form", response = String.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> approveAIPForm(@RequestParam("aipFormId") String aipFormId, @RequestParam("userId") String approverId, HttpServletRequest request) {
-        return applicationFormService.approveAIPForm(aipFormId, approverId, request);
+    public Mono<ResponseEntity> approveAIPForm(@RequestParam("institutionId") String institutionId,@RequestParam("gameTypeId") String gameTypeId, @RequestParam("userId") String approverId, HttpServletRequest request) {
+        return applicationFormService.approveAIPForm(institutionId,gameTypeId, approverId, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/reject-application-form", params = {"applicationFormId"})
