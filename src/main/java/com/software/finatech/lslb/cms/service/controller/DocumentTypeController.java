@@ -5,12 +5,12 @@ import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.DocumentApprovalRequest;
 import com.software.finatech.lslb.cms.service.domain.DocumentType;
 import com.software.finatech.lslb.cms.service.domain.PendingDocumentType;
-import com.software.finatech.lslb.cms.service.dto.DocumentTypeCreateDto;
-import com.software.finatech.lslb.cms.service.dto.DocumentTypeDto;
-import com.software.finatech.lslb.cms.service.dto.DocumentTypeUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.DocumentApprovalRequestTypeReferenceData;
+import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
+import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -47,6 +47,8 @@ public class DocumentTypeController extends BaseController {
 
     @Autowired
     private SpringSecurityAuditorAware springSecurityAuditorAware;
+    @Autowired
+    private AuthInfoService authInfoService;
     @Autowired
     private AuditLogHelper auditLogHelper;
 
@@ -164,5 +166,40 @@ public class DocumentTypeController extends BaseController {
         documentType.setDescription(documentTypeUpdateDto.getDescription());
         mongoRepositoryReactive.saveOrUpdate(documentType);
         return Mono.just(new ResponseEntity(documentType.convertToDto(), HttpStatus.OK));
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/set-approver")
+    @ApiOperation(value = "Set Approver For Document Type", response = DocumentApprovalRequestDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> setApprover(@RequestBody @Valid SetApproverRequest setApproverRequest) {
+        try {
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+            DocumentType documentType = (DocumentType) mongoRepositoryReactive.findById(setApproverRequest.getDocumentTypeId(), DocumentType.class).block();
+            if (documentType == null) {
+                return Mono.just(new ResponseEntity<>("Document Type does not exist", HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo newApprover = authInfoService.getUserById(setApproverRequest.getApproverId());
+            if (newApprover == null) {
+                return Mono.just(new ResponseEntity<>(String.format("user with id %s does not exist", setApproverRequest.getApproverId()), HttpStatus.BAD_REQUEST));
+            }
+            DocumentApprovalRequest approvalRequest = new DocumentApprovalRequest();
+            approvalRequest.setDocumentApprovalRequestTypeId(DocumentApprovalRequestTypeReferenceData.SET_APPROVER_ID);
+            approvalRequest.setDocumentTypeId(documentType.getId());
+            approvalRequest.setInitiatorId(loggedInUser.getId());
+            approvalRequest.setNewApproverId(newApprover.getId());
+            approvalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
+            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+            return Mono.just(new ResponseEntity<>(approvalRequest.convertToHalfDto(), HttpStatus.OK));
+
+        } catch (Exception e) {
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while setting document approver id", e);
+        }
     }
 }
