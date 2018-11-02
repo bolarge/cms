@@ -774,6 +774,7 @@ public class LicenseServiceImpl implements LicenseService {
                 aipDocumentApproval.setGameTypeId(license.getGameTypeId());
                 aipDocumentApproval.setInstitutionId(license.getInstitutionId());
                 aipDocumentApproval.setId(UUID.randomUUID().toString());
+                aipDocumentApproval.setReadyForApproval(false);
                 mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
 
                 String verbiage = String.format("Created application form : %s ->  Category :%s",
