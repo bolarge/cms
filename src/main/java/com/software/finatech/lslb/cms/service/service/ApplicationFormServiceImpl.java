@@ -188,6 +188,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantDetails == null) {
                     return Mono.just(new ResponseEntity<>("No applicant details found for application form", HttpStatus.NOT_FOUND));
                 } else {
+                    List<CommentDto> comments = applicantDetails.getComments();
+                    Collections.reverse(comments);
+                    applicantDetails.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantDetails, HttpStatus.OK));
                 }
             }
@@ -228,6 +231,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantMemberDetails == null) {
                     return Mono.just(new ResponseEntity<>("No applicant member details found for application form", HttpStatus.NOT_FOUND));
                 } else {
+                    List<CommentDto> comments = applicantMemberDetails.getComments();
+                    Collections.reverse(comments);
+                    applicantMemberDetails.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantMemberDetails, HttpStatus.OK));
                 }
             }
@@ -269,6 +275,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantContactDetails == null) {
                     return Mono.just(new ResponseEntity<>("No applicant contact details found for application form", HttpStatus.NOT_FOUND));
                 } else {
+                    List<CommentDto> comments = applicantContactDetails.getComments();
+                    Collections.reverse(comments);
+                    applicantContactDetails.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantContactDetails, HttpStatus.OK));
                 }
             }
@@ -311,6 +320,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantCriminalityDetails == null) {
                     return Mono.just(new ResponseEntity<>("No criminality details found for application form", HttpStatus.NOT_FOUND));
                 } else {
+                    List<CommentDto> comments = applicantCriminalityDetails.getComments();
+                    Collections.reverse(comments);
+                    applicantCriminalityDetails.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantCriminalityDetails, HttpStatus.OK));
                 }
             }
@@ -352,6 +364,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantDeclarationDetails == null) {
                     return Mono.just(new ResponseEntity<>("No applicant declarations details found for application form", HttpStatus.NOT_FOUND));
                 } else {
+                    List<CommentDto> comments = applicantDeclarationDetails.getComments();
+                    Collections.reverse(comments);
+                    applicantDeclarationDetails.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantDeclarationDetails, HttpStatus.OK));
                 }
             }
@@ -393,6 +408,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantOtherInformation == null) {
                     return Mono.just(new ResponseEntity<>("No applicant other information found for application form", HttpStatus.NOT_FOUND));
                 } else {
+                    List<CommentDto> comments = applicantOtherInformation.getComments();
+                    Collections.reverse(comments);
+                    applicantOtherInformation.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantOtherInformation, HttpStatus.OK));
                 }
             }
@@ -434,6 +452,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantOutletInformation == null) {
                     return Mono.just(new ResponseEntity<>("No applicant outlet details found for application form", HttpStatus.NOT_FOUND));
                 } else {
+                    List<CommentDto> comments = applicantOutletInformation.getComments();
+                    Collections.reverse(comments);
+                    applicantOutletInformation.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantOutletInformation, HttpStatus.OK));
                 }
             }
