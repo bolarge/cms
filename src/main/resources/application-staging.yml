@@ -29,11 +29,14 @@ security:
   basic:
     enabled: false
 mongodb:
-  host: db2.mlnx.staging.vggdev.com
+  hosts: db2.mlnx.staging.vggdev.com:27017 #172.31.31.29:27017,172.31.22.131:27017
   username: useradmin
-  password: f1nat3ch-user
+  password: f1nat3ch
   database: LslbCMSDb
-  port: 27017
+  authDb:
+  replicaSet:
+
+
 logging:
   level:
     ROOT: INFO
