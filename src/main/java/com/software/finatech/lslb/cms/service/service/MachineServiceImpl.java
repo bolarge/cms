@@ -407,6 +407,7 @@ public class MachineServiceImpl implements MachineService {
                 }
             }
 
+            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
             String verbiage = String.format("Created machine approval request,Type -> %s, Serial Number -> %s, Upgrade Games Versions -> %s",
                     approvalRequest.getMachineApprovalRequestType(), machine.getSerialNumber(), machineGameUpgradeToString(gameUpgrades));
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
