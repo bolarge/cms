@@ -79,10 +79,12 @@ public class DatabaseConfiguration {
         uri.append("/");
         //uri.append(mongoDatabase);
         if(replicaSet != null && !replicaSet.isEmpty()){
-         uri.append("?replicaSet=");
-         uri.append(replicaSet);
+            uri.append("?replicaSet=");
+            uri.append(replicaSet);
+            uri.append("&connectTimeoutMS=300000");
+        }else {
+            uri.append("?connectTimeoutMS=300000");
         }
-        uri.append("&connectTimeoutMS=300000");
         uri.append("&maxPoolSize=10000");
         uri.append("&socketTimeoutMS=300000");
 
@@ -131,8 +133,10 @@ public class DatabaseConfiguration {
         if(replicaSet != null && !replicaSet.isEmpty()){
             uri.append("?replicaSet=");
             uri.append(replicaSet);
+            uri.append("&connectTimeoutMS=300000");
+        }else {
+            uri.append("?connectTimeoutMS=300000");
         }
-        uri.append("&connectTimeoutMS=300000");
         uri.append("&maxPoolSize=10000");
         uri.append("&socketTimeoutMS=300000");
         String connectionString = uri.toString();
