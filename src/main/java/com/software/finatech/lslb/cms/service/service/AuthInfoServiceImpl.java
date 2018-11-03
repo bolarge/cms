@@ -20,7 +20,7 @@ import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.NewUserEmailNotifierAsync;
-import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.UserApprovalRequestNotifierAsync;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApprovalRequestNotifierAsync;
 import io.advantageous.boon.json.JsonFactory;
 import io.advantageous.boon.json.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -88,7 +88,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     private AuthRoleService authRoleService;
 
     @Autowired
-    private UserApprovalRequestNotifierAsync userApprovalRequestNotifierAsync;
+    private ApprovalRequestNotifierAsync approvalRequestNotifierAsync;
 
     @Autowired
     private EmailService emailService;
@@ -783,7 +783,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public ArrayList<AuthInfo> findAllOtherActiveUsersForUserApproval(AuthInfo initiator) {
+    public ArrayList<AuthInfo> findAllOtherActiveUsersForApproval(AuthInfo initiator) {
         Query query = new Query();
         query.addCriteria(Criteria.where("enabled").is(true));
         query.addCriteria(Criteria.where("authRoleId").is(initiator.getAuthRoleId()));
@@ -855,7 +855,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             userApprovalRequest.setNewPermissionIds(userAuthPermissionDto.getAuthPermissionIds());
             userApprovalRequest.setAuthInfoId(subjectUserId);
             mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
-            userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
+            approvalRequestNotifierAsync.sendNewUserApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
 
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Created user approval request to add permissions to user %s", subjectUser.getFullName())));
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
@@ -908,7 +908,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             userApprovalRequest.setRemovedPermissionIds(userAuthPermissionDto.getAuthPermissionIds());
             userApprovalRequest.setAuthInfoId(subjectUserId);
             mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
-            userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
+            approvalRequestNotifierAsync.sendNewUserApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Created user approval request to remove permissions from user %s", subjectUser.getFullName())));
 
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
@@ -944,7 +944,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.CHANGE_USER_ROLE_ID);
             userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
             userApprovalRequest.setNewAuthRoleId(newRoleId);
-            userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
+            approvalRequestNotifierAsync.sendNewUserApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
             mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
 
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(),

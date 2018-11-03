@@ -14,7 +14,7 @@ import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
-import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.UserApprovalRequestNotifierAsync;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApprovalRequestNotifierAsync;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -60,7 +60,7 @@ public class AuthInfoController extends BaseController {
     @Autowired
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     @Autowired
-    private UserApprovalRequestNotifierAsync userApprovalRequestNotifierAsync;
+    private ApprovalRequestNotifierAsync approvalRequestNotifierAsync;
 
     private static final String LOGIN = AuditActionReferenceData.LOGIN_ID;
 
@@ -338,7 +338,7 @@ public class AuthInfoController extends BaseController {
                 userApprovalRequest.setInitiatorId(loggedInUser.getId());
                 userApprovalRequest.setPendingAuthInfoId(pendingAuthInfo.getId());
                 userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
-                userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
+                approvalRequestNotifierAsync.sendNewUserApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
                 mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
                 return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
             }
@@ -502,7 +502,7 @@ public class AuthInfoController extends BaseController {
                 userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.DEACTIVATE_USER_ID);
                 userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
                 mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
-                userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
+                approvalRequestNotifierAsync.sendNewUserApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), authInfo.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Created user approval request to disable user %s", authInfo.getFullName())));
                 return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
             }
@@ -554,7 +554,7 @@ public class AuthInfoController extends BaseController {
                 userApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
                 userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.ACTIVATE_USER_ID);
                 userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
-                userApprovalRequestNotifierAsync.sendNewApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
+                approvalRequestNotifierAsync.sendNewUserApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
                 mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), authInfo.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Created user approval request to activate user %s", authInfo.getFullName())));
                 return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));

@@ -29,13 +29,13 @@ public class LoggedCaseController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize",
             "sortType", "sortProperty", "institutionId", "agentId", "statusId", "reporterId", "startDate", "endDate"})
-    @ApiOperation(value = "Get all logged cases", response = CustomerComplainDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiOperation(value = "Get all logged cases", response = LoggedCaseDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getAllApplicationForms(@RequestParam("page") int page,
+    public Mono<ResponseEntity> getAllLoggedCases(@RequestParam("page") int page,
                                                        @RequestParam("pageSize") int pageSize,
                                                        @RequestParam("sortType") String sortType,
                                                        @RequestParam("sortProperty") String sortParam,

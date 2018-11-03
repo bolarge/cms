@@ -1,6 +1,9 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DocumentDto {
     protected String id;
     protected String description;
@@ -23,32 +26,23 @@ public class DocumentDto {
     protected String agentId;
     protected String owner;
     protected String approverId;
-    protected String comment;
-    protected String commenterName;
     protected String documentStatus;
+    protected List<CommentDto> comments = new ArrayList<>();
 
     public String getDocumentStatus() {
         return documentStatus;
     }
 
+    public List<CommentDto> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<CommentDto> comments) {
+        this.comments = comments;
+    }
+
     public void setDocumentStatus(String documentStatus) {
         this.documentStatus = documentStatus;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public String getCommenterName() {
-        return commenterName;
-    }
-
-    public void setCommenterName(String commenterName) {
-        this.commenterName = commenterName;
     }
 
     public String getApproverId() {

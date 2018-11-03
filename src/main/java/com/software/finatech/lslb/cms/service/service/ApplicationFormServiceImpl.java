@@ -158,23 +158,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
     @Override
     public Mono<ResponseEntity> getAllApplicationFormStatus() {
-        try {
-            ArrayList<ApplicationFormStatus> applicationFormStatuses = (ArrayList<ApplicationFormStatus>) mongoRepositoryReactive
-                    .findAll(new Query(), ApplicationFormStatus.class).toStream().collect(Collectors.toList());
-
-            if (applicationFormStatuses == null || applicationFormStatuses.isEmpty()) {
-                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));
-            }
-            List<EnumeratedFactDto> applicationFormStatusDto = new ArrayList<>();
-            applicationFormStatuses.forEach(applicationFormStatus -> {
-                applicationFormStatusDto.add(applicationFormStatus.convertToDto());
-            });
-
-            return Mono.just(new ResponseEntity<>(applicationFormStatusDto, HttpStatus.OK));
-        } catch (Exception e) {
-            String errorMsg = "An error occurred while getting all application form statuses";
-            return logAndReturnError(logger, errorMsg, e);
-        }
+       return ReferenceDataUtil.getAllEnumeratedEntity("ApplicationFormStatus");
     }
 
     @Override
@@ -188,6 +172,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantDetails == null) {
                     return Mono.just(new ResponseEntity<>("No applicant details found for application form", HttpStatus.NOT_FOUND));
                 } else {
+                    List<CommentDto> comments = applicantDetails.getComments();
+                    Collections.reverse(comments);
+                    applicantDetails.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantDetails, HttpStatus.OK));
                 }
             }
@@ -228,6 +215,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantMemberDetails == null) {
                     return Mono.just(new ResponseEntity<>("No applicant member details found for application form", HttpStatus.NOT_FOUND));
                 } else {
+                    List<CommentDto> comments = applicantMemberDetails.getComments();
+                    Collections.reverse(comments);
+                    applicantMemberDetails.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantMemberDetails, HttpStatus.OK));
                 }
             }
@@ -269,6 +259,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantContactDetails == null) {
                     return Mono.just(new ResponseEntity<>("No applicant contact details found for application form", HttpStatus.NOT_FOUND));
                 } else {
+                    List<CommentDto> comments = applicantContactDetails.getComments();
+                    Collections.reverse(comments);
+                    applicantContactDetails.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantContactDetails, HttpStatus.OK));
                 }
             }
@@ -311,6 +304,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantCriminalityDetails == null) {
                     return Mono.just(new ResponseEntity<>("No criminality details found for application form", HttpStatus.NOT_FOUND));
                 } else {
+                    List<CommentDto> comments = applicantCriminalityDetails.getComments();
+                    Collections.reverse(comments);
+                    applicantCriminalityDetails.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantCriminalityDetails, HttpStatus.OK));
                 }
             }
@@ -352,6 +348,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantDeclarationDetails == null) {
                     return Mono.just(new ResponseEntity<>("No applicant declarations details found for application form", HttpStatus.NOT_FOUND));
                 } else {
+                    List<CommentDto> comments = applicantDeclarationDetails.getComments();
+                    Collections.reverse(comments);
+                    applicantDeclarationDetails.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantDeclarationDetails, HttpStatus.OK));
                 }
             }
@@ -393,6 +392,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantOtherInformation == null) {
                     return Mono.just(new ResponseEntity<>("No applicant other information found for application form", HttpStatus.NOT_FOUND));
                 } else {
+                    List<CommentDto> comments = applicantOtherInformation.getComments();
+                    Collections.reverse(comments);
+                    applicantOtherInformation.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantOtherInformation, HttpStatus.OK));
                 }
             }
@@ -434,6 +436,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantOutletInformation == null) {
                     return Mono.just(new ResponseEntity<>("No applicant outlet details found for application form", HttpStatus.NOT_FOUND));
                 } else {
+                    List<CommentDto> comments = applicantOutletInformation.getComments();
+                    Collections.reverse(comments);
+                    applicantOutletInformation.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantOutletInformation, HttpStatus.OK));
                 }
             }
@@ -789,7 +794,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public void rejectApplicationFormDocument(Document document) {
+    public void rejectApplicationFormDocument(Document document, String latestComment) {
         ApplicationForm applicationForm = document.getApplicationForm();
         String documentId = document.getId();
         if (applicationForm != null) {
@@ -797,7 +802,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             if (formDocumentApproval != null) {
                 Map<String, Boolean> documentApprovalMap = formDocumentApproval.getApprovalMap();
                 documentApprovalMap.put(documentId, false);
-                applicationFormNotificationHelperAsync.sendDocumentReturnMailToInstitutionMembers(applicationForm, document);
+                applicationFormNotificationHelperAsync.sendDocumentReturnMailToInstitutionMembers(applicationForm, document, latestComment);
                 formDocumentApproval.setApprovalMap(documentApprovalMap);
                 applicationForm.setDocumentApproval(formDocumentApproval);
             }

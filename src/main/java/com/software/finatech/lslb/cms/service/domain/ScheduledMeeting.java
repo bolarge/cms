@@ -231,7 +231,9 @@ public class ScheduledMeeting extends AbstractFact {
     public ScheduledMeetingDto convertToFullDto() {
         ScheduledMeetingDto dto = convertToDto();
         dto.setRecipients(getRecipientDto());
-        dto.setComment(getComments());
+        List<CommentDto> comments = getComments();
+        Collections.reverse(comments);
+        dto.setComment(comments);
         return dto;
     }
 
