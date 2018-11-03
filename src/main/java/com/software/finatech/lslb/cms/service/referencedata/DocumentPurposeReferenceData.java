@@ -105,7 +105,7 @@ public class DocumentPurposeReferenceData {
         DocumentPurpose purpose10 = (DocumentPurpose) mongoRepositoryReactive.findById(LICENSE_TRANSFER_ID, DocumentPurpose.class).block();
         if (purpose10 == null) {
             purpose10 = new DocumentPurpose();
-            purpose10.setId(ADD_GAMES_TO_MACHINES_ID);
+            purpose10.setId(LICENSE_TRANSFER_ID);
 
         }
         purpose10.setDescription("License Transfer");
