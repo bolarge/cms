@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.domain;
 
+import com.software.finatech.lslb.cms.service.dto.CommentDto;
 import com.software.finatech.lslb.cms.service.dto.DocumentDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
@@ -10,6 +11,10 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.springframework.data.annotation.Transient;
 
+import javax.xml.stream.events.Comment;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 
@@ -39,9 +44,17 @@ public class Document extends AbstractFact {
     protected String gameTypeId;
     protected String agentId;
     protected Boolean notificationSent = false;
-    protected String comment;
     protected String approvalRequestStatusId = ApprovalRequestStatusReferenceData.PENDING_ID;
-    protected String commenterName;
+    protected List<CommentDto> comments = new ArrayList<>();
+
+
+    public List<CommentDto> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<CommentDto> comments) {
+        this.comments = comments;
+    }
 
     public String getRenewalFormId() {
         return renewalFormId;
@@ -57,18 +70,6 @@ public class Document extends AbstractFact {
 
     public void setAipFormId(String aipFormId) {
         this.aipFormId = aipFormId;
-    }
-
-    public void setCommenterName(String commenterName) {
-        this.commenterName = commenterName;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
     }
 
     public String getApprovalRequestStatusId() {
@@ -312,18 +313,17 @@ public class Document extends AbstractFact {
         dto.setValidTo(getValidTo() == null ? null : getValidTo().toString("dd-MM-yyyy"));
         dto.setOwner(getOwner());
         dto.setGameTypeId(getGameTypeId());
-        dto.setComment(getComment());
-        dto.setCommenterName(getCommenterName());
+        List<CommentDto> commentDtos = getComments();
+        Collections.reverse(commentDtos);
+        dto.setComments(commentDtos);
         ApprovalRequestStatus status = getApprovalRequestStatus();
         if (status != null) {
             dto.setDocumentStatus(status.toString());
         }
+
         return dto;
     }
 
-    private String getCommenterName() {
-        return this.commenterName;
-    }
 
     public DocumentType getDocumentType() {
         if (StringUtils.isEmpty(this.documentTypeId)) {
@@ -349,12 +349,14 @@ public class Document extends AbstractFact {
         }
         return (ApplicationForm) mongoRepositoryReactive.findById(this.entityId, ApplicationForm.class).block();
     }
+
     public RenewalForm getRenewalForm() {
         if (StringUtils.isEmpty(this.entityId)) {
             return null;
         }
         return (RenewalForm) mongoRepositoryReactive.findById(this.entityId, RenewalForm.class).block();
     }
+
     public AIPDocumentApproval getAIPForm() {
         if (StringUtils.isEmpty(this.entityId)) {
             return null;
@@ -362,6 +364,7 @@ public class Document extends AbstractFact {
         return (AIPDocumentApproval) mongoRepositoryReactive.findById(this.entityId, AIPDocumentApproval.class).block();
 
     }
+
     public AuthInfo getApprover() {
         DocumentType documentType = getDocumentType();
         if (documentType != null) {

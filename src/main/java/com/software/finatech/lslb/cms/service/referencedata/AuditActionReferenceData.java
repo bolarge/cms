@@ -175,6 +175,5 @@ public class AuditActionReferenceData {
         action.setDescription("DOCUMENTS");
         action.setName("DOCUMENTS");
         mongoRepositoryReactive.saveOrUpdate(action);
-
-    }
+        }
 }

@@ -12,6 +12,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApprovalRequestNotifierAsync;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -45,6 +46,8 @@ public class DocumentTypeController extends BaseController {
     private static Logger logger = LoggerFactory.getLogger(DocumentTypeController.class);
     private static final String configAuditActionId = AuditActionReferenceData.CONFIGURATIONS_ID;
 
+    @Autowired
+    private ApprovalRequestNotifierAsync approvalRequestNotifierAsync;
     @Autowired
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     @Autowired
@@ -125,6 +128,10 @@ public class DocumentTypeController extends BaseController {
 
             return Mono.just(new ResponseEntity(documentType.convertToDto(), HttpStatus.OK));
         }
+        AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+        if (loggedInUser == null) {
+            return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+        }
         PendingDocumentType pendingDocumentType = new PendingDocumentType();
         pendingDocumentType.setId(UUID.randomUUID().toString());
         pendingDocumentType.setDocumentPurposeId(documentTypeCreateDto.getDocumentPurposeId());
@@ -134,11 +141,6 @@ public class DocumentTypeController extends BaseController {
         pendingDocumentType.setDescription(documentTypeCreateDto.getDescription());
         pendingDocumentType.setApproverId(documentTypeCreateDto.getApproverId());
         mongoRepositoryReactive.saveOrUpdate(pendingDocumentType);
-
-        AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
-        if (loggedInUser == null) {
-            return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
-        }
         DocumentApprovalRequest documentApprovalRequest = new DocumentApprovalRequest();
         documentApprovalRequest.setId(UUID.randomUUID().toString());
         documentApprovalRequest.setPendingDocumentTypeId(pendingDocumentType.getId());
@@ -146,6 +148,7 @@ public class DocumentTypeController extends BaseController {
         documentApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
         documentApprovalRequest.setDocumentApprovalRequestTypeId(DocumentApprovalRequestTypeReferenceData.CREATE_DOCUMENT_TYPE_ID);
         mongoRepositoryReactive.saveOrUpdate(documentApprovalRequest);
+        approvalRequestNotifierAsync.sendNewDocumentApprovalRequestEmailToAllOtherUsersInRole(loggedInUser,documentApprovalRequest);
         return Mono.just(new ResponseEntity<>(documentApprovalRequest.convertToHalfDto(), HttpStatus.OK));
     }
 
@@ -196,6 +199,7 @@ public class DocumentTypeController extends BaseController {
             approvalRequest.setNewApproverId(newApprover.getId());
             approvalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
             mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+            approvalRequestNotifierAsync.sendNewDocumentApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, approvalRequest);
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToHalfDto(), HttpStatus.OK));
 
         } catch (Exception e) {

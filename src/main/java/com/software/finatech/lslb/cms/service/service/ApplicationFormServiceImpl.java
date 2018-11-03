@@ -794,7 +794,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public void rejectApplicationFormDocument(Document document) {
+    public void rejectApplicationFormDocument(Document document, String latestComment) {
         ApplicationForm applicationForm = document.getApplicationForm();
         String documentId = document.getId();
         if (applicationForm != null) {
@@ -802,7 +802,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             if (formDocumentApproval != null) {
                 Map<String, Boolean> documentApprovalMap = formDocumentApproval.getApprovalMap();
                 documentApprovalMap.put(documentId, false);
-                applicationFormNotificationHelperAsync.sendDocumentReturnMailToInstitutionMembers(applicationForm, document);
+                applicationFormNotificationHelperAsync.sendDocumentReturnMailToInstitutionMembers(applicationForm, document, latestComment);
                 formDocumentApproval.setApprovalMap(documentApprovalMap);
                 applicationForm.setDocumentApproval(formDocumentApproval);
             }

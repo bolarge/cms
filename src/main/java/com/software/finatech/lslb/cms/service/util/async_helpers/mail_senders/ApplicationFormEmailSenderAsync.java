@@ -66,7 +66,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
         String gameTypeName = applicationForm.getGameTypeName();
         HashMap<String, Object> model = new HashMap<>();
-        model.put("comment", applicationForm.getLslbAdminComment());
+        model.put("comment", applicationForm.getLslbAdminComment().getComment());
         model.put("date", presentDate);
         model.put("gameType", gameTypeName);
         return mailContentBuilderService.build(model, "application-form/ApplicationFormPendingUploadGAadmin");
@@ -247,7 +247,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     }
 
     private String buildApplicationFormSubmissionEmailContent(ApplicationForm applicationForm) {
-        String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId());
+        String callbackUrl = String.format("%s/application-view/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId());
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
         HashMap<String, Object> model = new HashMap<>();
         model.put("date", presentDate);
@@ -441,7 +441,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     }
 
     private String buildDocumentSubmissionMailContentLSLB(ApplicationForm applicationForm, Document document) {
-        String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId());
+        String callbackUrl = String.format("%s/application-view/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId());
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
         HashMap<String, Object> model = new HashMap<>();
         model.put("date", presentDate);
@@ -642,9 +642,9 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     }
 
     @Async
-    public void sendDocumentReturnMailToInstitutionMembers(ApplicationForm applicationForm, Document document) {
+    public void sendDocumentReturnMailToInstitutionMembers(ApplicationForm applicationForm, Document document, String latestComment) {
         ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(applicationForm.getInstitutionId());
-        String mailContent = buildDocumentReturnMailContent(applicationForm, document);
+        String mailContent = buildDocumentReturnMailContent(applicationForm, document,latestComment);
         for (AuthInfo institutionAdmin : institutionAdmins) {
             try {
                 String email = institutionAdmin.getEmailAddress();
@@ -685,7 +685,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         }
     }
 
-    private String buildDocumentReturnMailContent(ApplicationForm applicationForm, Document document) {
+    private String buildDocumentReturnMailContent(ApplicationForm applicationForm, Document document,String latestComment) {
         String callbackUrl = String.format("%s/%s/reupload/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId(), document.getId());
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
         HashMap<String, Object> model = new HashMap<>();
@@ -695,6 +695,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("frontEndUrl", callbackUrl);
         model.put("fileName", document.getFilename());
         model.put("documentType", String.valueOf(document.getDocumentType()));
+        model.put("comment",latestComment);
         return mailContentBuilderService.build(model, "application-form/ApplicationFormDocumentReturnGAAdmin");
     }
 
@@ -707,7 +708,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("applicantName", aipDocumentApproval.getInstitutionName());
         model.put("frontEndUrl", callbackUrl);
         model.put("fileName", document.getFilename());
-        model.put("comment", document.getComment());
+    //    model.put("comment", document.getComment());
         model.put("documentType", String.valueOf(document.getDocumentType()));
         return mailContentBuilderService.build(model, "aip-form/AIPFormDocumentReturnGAAdmin");
     }
@@ -725,7 +726,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     }
 
     private String buildResubmissionNotificationForApplicationForm(ApplicationForm applicationForm, Document document) {
-        String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId());
+        String callbackUrl = String.format("%s/application-view/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId());
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
         HashMap<String, Object> model = new HashMap<>();
         model.put("date", presentDate);

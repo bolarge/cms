@@ -88,7 +88,7 @@ public interface ApplicationFormService {
 
     void approveAIPFormDocument(Document document);
 
-    void rejectApplicationFormDocument(Document document);
+    void rejectApplicationFormDocument(Document document, String latestComment);
 
     void rejectAIPFormDocument(Document document);
 

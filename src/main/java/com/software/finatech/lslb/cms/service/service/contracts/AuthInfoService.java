@@ -47,7 +47,7 @@ public interface AuthInfoService {
 
     Mono<ResponseEntity> updateUserRole(UserRoleUpdateDto userRoleUpdateDto, HttpServletRequest request);
 
-    ArrayList<AuthInfo> findAllOtherActiveUsersForUserApproval(AuthInfo initiator);
+    ArrayList<AuthInfo> findAllOtherActiveUsersForApproval(AuthInfo initiator);
 
     Mono<ResponseEntity> getUserFullDetail(String userId);
 }
