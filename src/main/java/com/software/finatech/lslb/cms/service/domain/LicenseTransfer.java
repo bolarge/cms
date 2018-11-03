@@ -91,6 +91,7 @@ public class LicenseTransfer extends AbstractFact {
 
     public LicenseTransferDto convertToDto() {
         LicenseTransferDto dto = new LicenseTransferDto();
+        dto.setId(getId());
         Institution fromInstitution = getFromInstitution();
         if (fromInstitution != null) {
             dto.setFromInstitutionId(this.fromInstitutionId);
