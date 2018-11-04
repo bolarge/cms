@@ -823,6 +823,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 aipDocumentApproval.setDocumentApproval(formDocumentApproval);
             }
             mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
+            licenseService.updateFromAIPDocToAIP(aipDocumentApproval.getInstitutionId(),aipDocumentApproval.getGameTypeId());
         }
     }
 

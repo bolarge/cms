@@ -50,7 +50,7 @@ public class FeePaymentTypeReferenceData {
             feePaymentType6 = new FeePaymentType();
             feePaymentType6.setId(TRANSFER_FEE_TYPE_ID);
         }
-        feePaymentType6.setName("TRANSFER FEE TYPE ID");
+        feePaymentType6.setName("TRANSFER FEE");
 
         mongoRepositoryReactive.saveOrUpdate(feePaymentType1);
         mongoRepositoryReactive.saveOrUpdate(feePaymentType2);
