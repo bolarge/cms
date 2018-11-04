@@ -2,7 +2,10 @@ package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
-import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.dto.AIPCheckDto;
+import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
+import com.software.finatech.lslb.cms.service.dto.LicenseDto;
+import com.software.finatech.lslb.cms.service.dto.NotificationDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
@@ -607,7 +610,7 @@ public class LicenseServiceImpl implements LicenseService {
         }
     }
 
-//
+    //
     public Mono<ResponseEntity> updateRenewalReviewToInProgress(RenewalForm renewalForm) {
         try {
             String verbiage;
@@ -649,8 +652,8 @@ public class LicenseServiceImpl implements LicenseService {
             queryAIPFormApproval.addCriteria(Criteria.where("institutionId").is(institutionId));
             queryAIPFormApproval.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             queryAIPFormApproval.addCriteria(Criteria.where("formStatusId").is(ApplicationFormStatusReferenceData.APPROVED_STATUS_ID));
-            AIPDocumentApproval aipDocumentApproval= (AIPDocumentApproval)mongoRepositoryReactive.find(queryAIPFormApproval,AIPDocumentApproval.class).block();
-            if(aipDocumentApproval==null){
+            AIPDocumentApproval aipDocumentApproval = (AIPDocumentApproval) mongoRepositoryReactive.find(queryAIPFormApproval, AIPDocumentApproval.class).block();
+            if (aipDocumentApproval == null) {
                 return Mono.just(new ResponseEntity<>("AIP FORM NOT APPROVED", HttpStatus.BAD_REQUEST));
             }
             String verbiage;
@@ -798,18 +801,18 @@ public class LicenseServiceImpl implements LicenseService {
 //                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
 //                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
             AIPDocumentApproval aipDocumentApproval = new AIPDocumentApproval();
-                aipDocumentApproval.setFormStatusId(ApplicationFormStatusReferenceData.CREATED_STATUS_ID);
-                aipDocumentApproval.setGameTypeId(license.getGameTypeId());
-                aipDocumentApproval.setInstitutionId(license.getInstitutionId());
-                aipDocumentApproval.setId(UUID.randomUUID().toString());
-                aipDocumentApproval.setReadyForApproval(false);
-                mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
+            aipDocumentApproval.setFormStatusId(ApplicationFormStatusReferenceData.CREATED_STATUS_ID);
+            aipDocumentApproval.setGameTypeId(license.getGameTypeId());
+            aipDocumentApproval.setInstitutionId(license.getInstitutionId());
+            aipDocumentApproval.setId(UUID.randomUUID().toString());
+            aipDocumentApproval.setReadyForApproval(false);
+            mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
 
-                String verbiage = String.format("Created application form : %s ->  Category :%s",
-                        aipDocumentApproval.getFormStatusId(), aipDocumentApproval.getGameTypeName());
-                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.AIP_ID,
-                        springSecurityAuditorAware.getCurrentAuditorNotNull(), aipDocumentApproval.getInstitutionName(),
-                        LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            String verbiage = String.format("Created application form : %s ->  Category :%s",
+                    aipDocumentApproval.getFormStatusId(), aipDocumentApproval.getGameTypeName());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.AIP_ID,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), aipDocumentApproval.getInstitutionName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
             aipMailSenderAsync.sendAipNotificationToInstitutionAdmins(paymentRecord);
 
         } catch (Exception e) {
@@ -970,6 +973,14 @@ public class LicenseServiceImpl implements LicenseService {
         } catch (Exception e) {
             logger.error("An error occurred while creating renewed license for payment record {}", paymentRecord.getId(), e);
         }
+    }
+
+    @Override
+    public License findLicenseById(String id) {
+        if (StringUtils.isEmpty(id)) {
+            return null;
+        }
+        return (License) mongoRepositoryReactive.findById(id, License.class).block();
     }
 
     private List<String> getAllowedLicensedStatusIds() {

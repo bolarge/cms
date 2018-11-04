@@ -185,6 +185,10 @@ public class Institution extends AbstractFact {
         }
     }
 
+    @Override
+    public String toString() {
+        return this.getInstitutionName();
+    }
 
     @Override
     public boolean equals(Object obj) {

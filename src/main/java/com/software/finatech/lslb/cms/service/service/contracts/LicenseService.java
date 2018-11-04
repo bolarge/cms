@@ -55,4 +55,6 @@ public interface LicenseService {
     void createLicenseForGamingTerminalPayment(PaymentRecord paymentRecord);
 
     void createRenewedLicenseForPayment(PaymentRecord paymentRecord);
+
+    License findLicenseById(String id);
 }

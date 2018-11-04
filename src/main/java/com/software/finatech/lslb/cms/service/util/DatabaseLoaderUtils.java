@@ -78,6 +78,7 @@ public class DatabaseLoaderUtils {
         MachineApprovalRequestTypeReferenceData.load(mongoRepositoryReactive);
         MachineTypeReferenceData.load(mongoRepositoryReactive);
         MachineStatusReferenceData.load(mongoRepositoryReactive);
+        LicenseTransferStatusReferenceData.load(mongoRepositoryReactive);
     }
 
     // @Profile("test")
@@ -117,6 +118,7 @@ public class DatabaseLoaderUtils {
         factEnums.put("MachineApprovalRequestType", MachineApprovalRequestType.class);
         factEnums.put("MachineType", MachineType.class);
         factEnums.put("MachineStatus", MachineStatus.class);
+        factEnums.put("LicenseTransferStatus", LicenseTransferStatus.class);
 
         for (Map.Entry<String, Class> entry : factEnums.entrySet()) {
             logger.info("Importing ReferenceMasterData for > " + entry.getKey());

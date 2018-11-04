@@ -10,6 +10,7 @@ import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.MapValues;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApprovalRequestNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -40,20 +41,17 @@ public class FeeServiceImpl implements FeeService {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
+    private ApprovalRequestNotifierAsync approvalRequestNotifierAsync;
 
     @Autowired
-    public void setSpringSecurityAuditorAware(SpringSecurityAuditorAware springSecurityAuditorAware) {
-        this.springSecurityAuditorAware = springSecurityAuditorAware;
-    }
-
-    @Autowired
-    public void setAuditLogHelper(AuditLogHelper auditLogHelper) {
-        this.auditLogHelper = auditLogHelper;
-    }
-
-    @Autowired
-    public void setMongoRepositoryReactive(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
+    public FeeServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
+                          SpringSecurityAuditorAware springSecurityAuditorAware,
+                          AuditLogHelper auditLogHelper,
+                          ApprovalRequestNotifierAsync approvalRequestNotifierAsync) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
+        this.springSecurityAuditorAware = springSecurityAuditorAware;
+        this.auditLogHelper = auditLogHelper;
+        this.approvalRequestNotifierAsync = approvalRequestNotifierAsync;
     }
 
     @Autowired
@@ -98,6 +96,7 @@ public class FeeServiceImpl implements FeeService {
             feeApprovalRequest.setId(UUID.randomUUID().toString());
             feeApprovalRequest.setFeeApprovalRequestTypeId(FeeApprovalRequestTypeReferenceData.CREATE_FEE_ID);
             mongoRepositoryReactive.saveOrUpdate(feeApprovalRequest);
+            approvalRequestNotifierAsync.sendNewFeeApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, feeApprovalRequest);
 
             String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
             String verbiage = String.format("Created Fee Approval Request -> Request Type -> %s, License Type -> %s, FeePaymentType -> %s, Category -> %s, Amount -> %s",
@@ -141,6 +140,7 @@ public class FeeServiceImpl implements FeeService {
             feeApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
             feeApprovalRequest.setFeeApprovalRequestTypeId(FeeApprovalRequestTypeReferenceData.SET_FEE_END_DATE_ID);
             mongoRepositoryReactive.saveOrUpdate(feeApprovalRequest);
+            approvalRequestNotifierAsync.sendNewFeeApprovalRequestEmailToAllOtherUsersInRole(loggedInUser,feeApprovalRequest);
             return Mono.just(new ResponseEntity<>(feeApprovalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while updating fee end date", e);

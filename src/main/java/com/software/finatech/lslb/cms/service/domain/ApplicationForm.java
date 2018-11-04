@@ -14,10 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("serial")
 @Document(collection = "ApplicationForms")
@@ -351,7 +348,9 @@ public class ApplicationForm extends AbstractFact {
         applicationFormDto.setFilledApplicantDetails(getApplicantDetails() != null);
         applicationFormDto.setApplicationFormId(getApplicationFormId());
         applicationFormDto.setReadyForApproval(getReadyForApproval());
-        applicationFormDto.setComments(getComments());
+        List<CommentDto> comments = getComments();
+        Collections.reverse(comments);
+        applicationFormDto.setComments(comments);
         return applicationFormDto;
     }
 

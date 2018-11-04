@@ -81,9 +81,6 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             if (!StringUtils.isEmpty(agentId)) {
                 query.addCriteria(Criteria.where("agentId").is(agentId));
             }
-            if (!StringUtils.isEmpty(agentId)) {
-                query.addCriteria(Criteria.where("agentId").is(agentId));
-            }
             if (!StringUtils.isEmpty(loggedCaseStatusId)) {
                 query.addCriteria(Criteria.where("loggedCaseStatusId").is(loggedCaseStatusId));
             }

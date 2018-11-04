@@ -228,18 +228,27 @@ public class DocumentController extends BaseController {
     }
 
 
-    @RequestMapping(method = RequestMethod.POST, value = "/reupload", params = {"entityName"})
+    @RequestMapping(method = RequestMethod.POST, value = "/reupload", produces = "application/json")
     @ApiOperation(value = "Get Document by Id", response = DocumentDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> reUploadDocument(@RequestBody DocumentCreateDto documentCreateDto,
+    public Mono<ResponseEntity> reUploadDocument(@RequestParam("json") String json,
                                                  @RequestParam("entityName") String entityName,
                                                  @RequestParam("file") MultipartFile multipartFile, HttpServletRequest request) {
 
         try {
+            DocumentCreateDto documentCreateDto;
+            try {
+                documentCreateDto = mapper.readValue(json, DocumentCreateDto.class);
+                if (documentCreateDto == null) {
+                    return Mono.just(new ResponseEntity<>("Invalid Json supplied", HttpStatus.BAD_REQUEST));
+                }
+            } catch (Exception e) {
+                return logAndReturnError(logger, "An error occurred while parsing json", e);
+            }
             String previousDocumentId = documentCreateDto.getPreviousDocumentId();
             if (multipartFile.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("Empty file supplied ", HttpStatus.BAD_REQUEST));
@@ -286,7 +295,8 @@ public class DocumentController extends BaseController {
                 doRenewalFormDocumentReupload(document);
             }
 
-            String verbiage = String.format("Reuploaded document -> Document Type -> %s, File name -> %s, Id -> %s ", document.getDocumentType(), document.getFilename(), document.getId());
+            String verbiage = String.format("Re uploaded document -> Document Type -> %s, File name -> %s,Entity name -> %s, Id -> %s ",
+                    document.getDocumentType(), document.getFilename(), entityName, document.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), document.getOwner(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
@@ -642,8 +652,7 @@ public class DocumentController extends BaseController {
             if (loggedInUser == null) {
                 return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
             }
-            document.setCommenterName(loggedInUser.getFullName());
-            document.setComment(documentCommentDto.getComment());
+            document.getComments().add(CommentDto.fromCommentAndUser(documentCommentDto.getComment(), loggedInUser.getFullName()));
             mongoRepositoryReactive.saveOrUpdate(document);
             return Mono.just(new ResponseEntity<>(document.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -676,16 +685,16 @@ public class DocumentController extends BaseController {
                 return Mono.just(new ResponseEntity<>("Approving user should be document type approver", HttpStatus.BAD_REQUEST));
             }
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
-            document.setComment(documentOperationDto.getComment());
-            document.setCommenterName(loggedInUser.getFullName());
+            document.getComments().add(CommentDto.fromCommentAndUser(documentOperationDto.getComment(), loggedInUser.getFullName()));
             mongoRepositoryReactive.saveOrUpdate(document);
 
             if (StringUtils.equalsIgnoreCase("applicationForm", entityName)) {
-                approveApplicationFormDocument(document);
+                approveApplicationFormDocument(document, documentOperationDto.getComment());
             }
             if (StringUtils.equalsIgnoreCase("renewalForm", entityName)) {
                 approveRenewalFormDocument(document);
-            } if (StringUtils.equalsIgnoreCase("aipForm", entityName)) {
+            }
+            if (StringUtils.equalsIgnoreCase("aipForm", entityName)) {
                 approveAIPFormDocument(document);
             }
 
@@ -724,12 +733,11 @@ public class DocumentController extends BaseController {
                 return Mono.just(new ResponseEntity<>("Rejecting user should be document type approver", HttpStatus.BAD_REQUEST));
             }
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
-            document.setComment(documentOperationDto.getComment());
-            document.setCommenterName(loggedInUser.getFullName());
+            document.getComments().add(CommentDto.fromCommentAndUser(documentOperationDto.getComment(), loggedInUser.getFullName()));
             mongoRepositoryReactive.saveOrUpdate(document);
 
             if (StringUtils.equalsIgnoreCase("applicationForm", entityName)) {
-                rejectApplicationFormDocument(document);
+                rejectApplicationFormDocument(document, documentOperationDto.getComment());
             }
             if (StringUtils.equalsIgnoreCase("renewalForm", entityName)) {
                 rejectRenewalFormDocument(document);
@@ -749,9 +757,10 @@ public class DocumentController extends BaseController {
         }
     }
 
-    private void rejectApplicationFormDocument(Document document) {
-        applicationFormService.rejectApplicationFormDocument(document);
+    private void rejectApplicationFormDocument(Document document, String latestComment) {
+        applicationFormService.rejectApplicationFormDocument(document, latestComment);
     }
+
     private void rejectAIPFormDocument(Document document) {
         applicationFormService.rejectAIPFormDocument(document);
     }
@@ -759,13 +768,15 @@ public class DocumentController extends BaseController {
     private void rejectRenewalFormDocument(Document document) {
         renewalFormService.rejectRenewalFormDocument(document);
     }
-    private void approveApplicationFormDocument(Document document) {
+
+    private void approveApplicationFormDocument(Document document, String latestComment) {
         applicationFormService.approveApplicationFormDocument(document);
     }
 
     private void approveRenewalFormDocument(Document document) {
         renewalFormService.approveRenewalFormDocument(document);
     }
+
     private void approveAIPFormDocument(Document document) {
         applicationFormService.approveAIPFormDocument(document);
     }
@@ -773,9 +784,11 @@ public class DocumentController extends BaseController {
     private void doRenewalFormDocumentReupload(Document document) {
         renewalFormService.doDocumentReuploadNotification(document);
     }
+
     private void doApplicationFormDocumentReupload(Document document) {
         applicationFormService.doDocumentReuploadNotification(document);
     }
+
     private void doAIPFormDocumentReupload(Document document) {
         applicationFormService.doAIPDocumentReuploadNotification(document);
     }
@@ -786,6 +799,4 @@ public class DocumentController extends BaseController {
         }
         return (Document) mongoRepositoryReactive.findById(documentId, Document.class).block();
     }
-
-
 }

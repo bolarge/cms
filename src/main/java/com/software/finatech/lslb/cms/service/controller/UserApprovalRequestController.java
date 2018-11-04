@@ -32,7 +32,7 @@ public class UserApprovalRequestController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty",
             "statusId", "approvalRequestTypeId", "initiatorId", "approverId", "approvalRequestTypeId", "rejectorId", "userId", "startDate", "endDate"})
-    @ApiOperation(value = "Get all Application Forms", response = UserApprovalRequestDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiOperation(value = "Get all user approval requests", response = UserApprovalRequestDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),

@@ -14,6 +14,7 @@ public class DocumentPurposeReferenceData {
     public static final String LOGGED_CASE_ID = "7";
     public static final String INSPECTION_ID = "8";
     public static final String ADD_GAMES_TO_MACHINES_ID = "9";
+    public static final String LICENSE_TRANSFER_ID = "10";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         DocumentPurpose purpose1 = (DocumentPurpose) mongoRepositoryReactive.findById(APPLICATION_FORM_DOCUMENT_PURPOSE_ID, DocumentPurpose.class).block();
@@ -101,6 +102,15 @@ public class DocumentPurposeReferenceData {
         purpose9.setDescription("Add Games to Machines");
         purpose9.setName("Add Games to machines");
 
+        DocumentPurpose purpose10 = (DocumentPurpose) mongoRepositoryReactive.findById(LICENSE_TRANSFER_ID, DocumentPurpose.class).block();
+        if (purpose10 == null) {
+            purpose10 = new DocumentPurpose();
+            purpose10.setId(LICENSE_TRANSFER_ID);
+
+        }
+        purpose10.setDescription("License Transfer");
+        purpose10.setName("License Transfer");
+
 
         mongoRepositoryReactive.saveOrUpdate(purpose1);
         mongoRepositoryReactive.saveOrUpdate(purpose2);
@@ -111,5 +121,6 @@ public class DocumentPurposeReferenceData {
         mongoRepositoryReactive.saveOrUpdate(purpose7);
         mongoRepositoryReactive.saveOrUpdate(purpose8);
         mongoRepositoryReactive.saveOrUpdate(purpose9);
+        mongoRepositoryReactive.saveOrUpdate(purpose10);
     }
 }

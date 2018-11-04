@@ -5,13 +5,14 @@ import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.DocumentApprovalRequest;
 import com.software.finatech.lslb.cms.service.domain.DocumentType;
 import com.software.finatech.lslb.cms.service.domain.PendingDocumentType;
-import com.software.finatech.lslb.cms.service.dto.DocumentTypeCreateDto;
-import com.software.finatech.lslb.cms.service.dto.DocumentTypeDto;
-import com.software.finatech.lslb.cms.service.dto.DocumentTypeUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.DocumentApprovalRequestTypeReferenceData;
+import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
+import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApprovalRequestNotifierAsync;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -46,7 +47,11 @@ public class DocumentTypeController extends BaseController {
     private static final String configAuditActionId = AuditActionReferenceData.CONFIGURATIONS_ID;
 
     @Autowired
+    private ApprovalRequestNotifierAsync approvalRequestNotifierAsync;
+    @Autowired
     private SpringSecurityAuditorAware springSecurityAuditorAware;
+    @Autowired
+    private AuthInfoService authInfoService;
     @Autowired
     private AuditLogHelper auditLogHelper;
 
@@ -123,6 +128,10 @@ public class DocumentTypeController extends BaseController {
 
             return Mono.just(new ResponseEntity(documentType.convertToDto(), HttpStatus.OK));
         }
+        AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+        if (loggedInUser == null) {
+            return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+        }
         PendingDocumentType pendingDocumentType = new PendingDocumentType();
         pendingDocumentType.setId(UUID.randomUUID().toString());
         pendingDocumentType.setDocumentPurposeId(documentTypeCreateDto.getDocumentPurposeId());
@@ -132,11 +141,6 @@ public class DocumentTypeController extends BaseController {
         pendingDocumentType.setDescription(documentTypeCreateDto.getDescription());
         pendingDocumentType.setApproverId(documentTypeCreateDto.getApproverId());
         mongoRepositoryReactive.saveOrUpdate(pendingDocumentType);
-
-        AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
-        if (loggedInUser == null) {
-            return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
-        }
         DocumentApprovalRequest documentApprovalRequest = new DocumentApprovalRequest();
         documentApprovalRequest.setId(UUID.randomUUID().toString());
         documentApprovalRequest.setPendingDocumentTypeId(pendingDocumentType.getId());
@@ -144,6 +148,7 @@ public class DocumentTypeController extends BaseController {
         documentApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
         documentApprovalRequest.setDocumentApprovalRequestTypeId(DocumentApprovalRequestTypeReferenceData.CREATE_DOCUMENT_TYPE_ID);
         mongoRepositoryReactive.saveOrUpdate(documentApprovalRequest);
+        approvalRequestNotifierAsync.sendNewDocumentApprovalRequestEmailToAllOtherUsersInRole(loggedInUser,documentApprovalRequest);
         return Mono.just(new ResponseEntity<>(documentApprovalRequest.convertToHalfDto(), HttpStatus.OK));
     }
 
@@ -164,5 +169,41 @@ public class DocumentTypeController extends BaseController {
         documentType.setDescription(documentTypeUpdateDto.getDescription());
         mongoRepositoryReactive.saveOrUpdate(documentType);
         return Mono.just(new ResponseEntity(documentType.convertToDto(), HttpStatus.OK));
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/set-approver")
+    @ApiOperation(value = "Set Approver For Document Type", response = DocumentApprovalRequestDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> setApprover(@RequestBody @Valid SetApproverRequest setApproverRequest) {
+        try {
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+            DocumentType documentType = (DocumentType) mongoRepositoryReactive.findById(setApproverRequest.getDocumentTypeId(), DocumentType.class).block();
+            if (documentType == null) {
+                return Mono.just(new ResponseEntity<>("Document Type does not exist", HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo newApprover = authInfoService.getUserById(setApproverRequest.getApproverId());
+            if (newApprover == null) {
+                return Mono.just(new ResponseEntity<>(String.format("user with id %s does not exist", setApproverRequest.getApproverId()), HttpStatus.BAD_REQUEST));
+            }
+            DocumentApprovalRequest approvalRequest = new DocumentApprovalRequest();
+            approvalRequest.setDocumentApprovalRequestTypeId(DocumentApprovalRequestTypeReferenceData.SET_APPROVER_ID);
+            approvalRequest.setDocumentTypeId(documentType.getId());
+            approvalRequest.setInitiatorId(loggedInUser.getId());
+            approvalRequest.setNewApproverId(newApprover.getId());
+            approvalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
+            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+            approvalRequestNotifierAsync.sendNewDocumentApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, approvalRequest);
+            return Mono.just(new ResponseEntity<>(approvalRequest.convertToHalfDto(), HttpStatus.OK));
+
+        } catch (Exception e) {
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while setting document approver id", e);
+        }
     }
 }
