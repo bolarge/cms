@@ -92,7 +92,7 @@ public class DocumentApprovalRequest extends AbstractApprovalRequest {
             dto.setDocumentTypeName(pendingDoc.toString());
         }
         AuthInfo initiator = getInitiator();
-        if (initiator != null){
+        if (initiator != null) {
             dto.setInitiatorId(this.initiatorId);
             dto.setInitiatorName(initiator.getFullName());
         }
@@ -103,16 +103,21 @@ public class DocumentApprovalRequest extends AbstractApprovalRequest {
         DocumentApprovalRequestDto dto = convertToHalfDto();
         dto.setPendingDocumentType(getDocumentTypeDto());
         AuthInfo rejector = getRejector();
-        if (rejector != null){
+        if (rejector != null) {
             dto.setRejectorId(this.rejectorId);
             dto.setRejectorName(rejector.getFullName());
         }
         AuthInfo approver = getApprover();
-        if (approver != null){
+        if (approver != null) {
             dto.setApproverId(this.approverId);
             dto.setApproverName(approver.getFullName());
         }
 
+        AuthInfo newApprover = getAuthInfo(this.newApproverId);
+        if (newApprover != null) {
+            dto.setNewApproverId(this.newApproverId);
+            dto.setNewApproverName(newApprover.getFullName());
+        }
         return dto;
     }
 

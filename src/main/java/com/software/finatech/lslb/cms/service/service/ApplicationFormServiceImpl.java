@@ -786,6 +786,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (count == formDocumentApproval.getSupposedLength()) {
                     applicationFormNotificationHelperAsync.sendApproverMailToFinalApproval(applicationForm);
                     formDocumentApproval.setComplete(true);
+                    applicationForm.setReadyForApproval(true);
                 }
                 formDocumentApproval.setApprovalMap(documentApprovalMap);
             }
