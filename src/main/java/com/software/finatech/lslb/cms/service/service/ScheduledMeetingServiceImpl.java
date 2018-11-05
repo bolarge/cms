@@ -1,7 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.domain.ScheduledMeeting;
@@ -16,7 +15,6 @@ import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ScheduledMeetingMailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -152,11 +150,6 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             if (invitedInstitution == null) {
                 return Mono.just(new ResponseEntity<>("Invited institution does not exist", badRequestStatus));
             }
-            String applicationFormId = scheduledMeetingCreateDto.getApplicationFormId();
-            ApplicationForm applicationForm = applicationFormService.findApplicationFormById(applicationFormId);
-            if (applicationForm == null) {
-                return Mono.just(new ResponseEntity<>(String.format("Application form with id %s  does not exist", applicationFormId), badRequestStatus));
-            }
             ArrayList<AuthInfo> gamingOperatorAdminsForInstitution = authInfoService.getAllActiveGamingOperatorUsersForInstitution(institutionId);
             if (gamingOperatorAdminsForInstitution == null || gamingOperatorAdminsForInstitution.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("There is no user for institution", badRequestStatus));
@@ -173,7 +166,11 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
 
             ScheduledMeeting scheduledMeeting = fromCreateDto(scheduledMeetingCreateDto);
             saveScheduledMeeting(scheduledMeeting);
+            String creatorTemplateName = "";
+            String recipientTemplateName = "";
+            String operatorTemplateName;
             String creatorMailSubject = String.format("Scheduled meeting with %s", invitedInstitution.getInstitutionName());
+
             scheduledMeetingMailSenderAsync.sendEmailToMeetingCreator("scheduled-meetings/ScheduledMeeting-InitialNotification-Creator", creatorMailSubject, scheduledMeeting);
             scheduledMeetingMailSenderAsync.sendEmailToMeetingInvitedOperators("scheduled-meetings/ScheduledMeeting-InitialNotification-Operator", "Meeting Invite With Lagos State Lotteries Board", scheduledMeeting);
             scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-InitialNotification-Recipient", creatorMailSubject, scheduledMeeting, recipientList);
@@ -368,7 +365,8 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
         scheduledMeeting.setMeetingSubject(scheduledMeetingCreateDto.getMeetingTitle());
         scheduledMeeting.setCreatorId(scheduledMeetingCreateDto.getCreatorId());
         scheduledMeeting.setRecipientIds(scheduledMeetingCreateDto.getRecipients());
-        scheduledMeeting.setApplicationFormId(scheduledMeetingCreateDto.getApplicationFormId());
+        scheduledMeeting.setEntityId(scheduledMeetingCreateDto.getEntityId());
+        scheduledMeeting.setMeetingPurposeId(scheduledMeetingCreateDto.getMeetingPurposeId());
         String pendingScheduledMeetingStatusId = ScheduledMeetingStatusReferenceData.PENDING_STATUS_ID;
         scheduledMeeting.setScheduledMeetingStatusId(pendingScheduledMeetingStatusId);
         LocalDateTime meetingDate = FORMATTER.parseLocalDateTime(scheduledMeetingCreateDto.getMeetingDate());
@@ -392,5 +390,20 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
 
     private Institution getInstitution(String institutionId) {
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+    }
+
+    private void sendInitialMeetingNotifications(ScheduledMeeting scheduledMeeting, ArrayList<AuthInfo> recipients, Institution invitedInstitution) {
+        String creatorTemplateName = "";
+        String recipientTemplateName = "";
+        String operatorTemplateName;
+        String creatorMailSubject = String.format("Scheduled meeting with %s",invitedInstitution);
+
+        if (scheduledMeeting.isForLicenseApplicant()) {
+            operatorTemplateName = "scheduled-meetings/ScheduledMeeting-InitialNotification-ApplicantOperator";
+        }
+        scheduledMeetingMailSenderAsync.sendEmailToMeetingCreator("scheduled-meetings/ScheduledMeeting-InitialNotification-Creator", creatorMailSubject, scheduledMeeting);
+        scheduledMeetingMailSenderAsync.sendEmailToMeetingInvitedOperators("scheduled-meetings/ScheduledMeeting-InitialNotification-Operator", "Meeting Invite With Lagos State Lotteries Board", scheduledMeeting);
+        scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-InitialNotification-Recipient", creatorMailSubject, scheduledMeeting, recipients);
+
     }
 }

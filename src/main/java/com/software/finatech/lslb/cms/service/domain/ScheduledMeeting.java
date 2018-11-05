@@ -4,6 +4,7 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
 import com.software.finatech.lslb.cms.service.dto.CommentDto;
 import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingDto;
+import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingPurposeReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
@@ -25,12 +26,20 @@ public class ScheduledMeeting extends AbstractFact {
     private Set<String> recipientIds = new HashSet<>();
     private String cancelerId;
     private String entityId;
-    private String applicationFormId;
     private LocalDateTime meetingReminderDate;
     private LocalDateTime nextPostMeetingReminderDate;
     private int reminderNotificationCount = 0;
     private boolean reminderSent;
+    private String meetingPurposeId;
     private List<CommentDto> comments = new ArrayList<>();
+
+    public String getMeetingPurposeId() {
+        return meetingPurposeId;
+    }
+
+    public void setMeetingPurposeId(String meetingPurposeId) {
+        this.meetingPurposeId = meetingPurposeId;
+    }
 
     public Set<String> getRecipientIds() {
         return recipientIds;
@@ -71,15 +80,6 @@ public class ScheduledMeeting extends AbstractFact {
     public void setReminderNotificationCount(int reminderNotificationCount) {
         this.reminderNotificationCount = reminderNotificationCount;
     }
-
-    public String getApplicationFormId() {
-        return applicationFormId;
-    }
-
-    public void setApplicationFormId(String applicationFormId) {
-        this.applicationFormId = applicationFormId;
-    }
-
 
     public String getEntityId() {
         return entityId;
@@ -206,6 +206,26 @@ public class ScheduledMeeting extends AbstractFact {
         return scheduledMeetingStatus;
     }
 
+
+    private ScheduledMeetingPurpose getMeetingPurpose() {
+        if (StringUtils.isEmpty(this.meetingPurposeId)) {
+            return null;
+        }
+        Map scheduledMeetingPurposeMap = Mapstore.STORE.get("ScheduledMeetingPurpose");
+        ScheduledMeetingPurpose scheduledMeetingPurpose = null;
+        if (scheduledMeetingPurposeMap != null) {
+            scheduledMeetingPurpose = (ScheduledMeetingPurpose) scheduledMeetingPurposeMap.get(this.meetingPurposeId);
+        }
+        if (scheduledMeetingPurpose == null) {
+            scheduledMeetingPurpose = (ScheduledMeetingPurpose) mongoRepositoryReactive.findById(this.meetingPurposeId, ScheduledMeetingStatus.class).block();
+            if (scheduledMeetingPurpose != null && scheduledMeetingPurposeMap != null) {
+                scheduledMeetingPurposeMap.put(this.meetingPurposeId, scheduledMeetingPurpose);
+            }
+        }
+        return scheduledMeetingPurpose;
+    }
+
+
     public ScheduledMeetingDto convertToDto() {
         ScheduledMeetingDto scheduledMeetingDto = new ScheduledMeetingDto();
         scheduledMeetingDto.setId(getId());
@@ -225,6 +245,11 @@ public class ScheduledMeeting extends AbstractFact {
         }
         scheduledMeetingDto.setCreatorFullName(getCreatorFullName());
         scheduledMeetingDto.setVenue(getVenue());
+        ScheduledMeetingPurpose meetingPurpose = getMeetingPurpose();
+        if (meetingPurpose != null) {
+            scheduledMeetingDto.setMeetingPurposeId(this.meetingPurposeId);
+            scheduledMeetingDto.setMeetingPurposeName(meetingPurpose.getName());
+        }
         return scheduledMeetingDto;
     }
 
@@ -246,10 +271,10 @@ public class ScheduledMeeting extends AbstractFact {
     }
 
     public ApplicationForm getApplicationForm() {
-        if (StringUtils.isEmpty(this.applicationFormId)) {
+        if (StringUtils.isEmpty(this.entityId)) {
             return null;
         }
-        return (ApplicationForm) mongoRepositoryReactive.findById(this.applicationFormId, ApplicationForm.class).block();
+        return (ApplicationForm) mongoRepositoryReactive.findById(this.entityId, ApplicationForm.class).block();
     }
 
     public String getMeetingDateTimeString() {
@@ -318,6 +343,18 @@ public class ScheduledMeeting extends AbstractFact {
             recipientNames.add(user.getFullName());
         }
         return recipientNames;
+    }
+
+    public boolean isForLicenseApplicant() {
+        return StringUtils.equals(ScheduledMeetingPurposeReferenceData.APPLICANT_ID, this.meetingPurposeId);
+    }
+
+    public boolean isForLicenseTransferror() {
+        return StringUtils.equals(ScheduledMeetingPurposeReferenceData.TRANSFEROR_ID, this.meetingPurposeId);
+    }
+
+    public boolean isForLicenseTransferee() {
+        return StringUtils.equals(ScheduledMeetingPurposeReferenceData.TRANSFEREE_ID, this.meetingPurposeId);
     }
 
     @Override

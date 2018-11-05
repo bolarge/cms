@@ -19,7 +19,24 @@ public class ScheduledMeetingDto {
     private String meetingTime;
     private Set<AuthInfoDto> recipients = new HashSet<>();
     private List<CommentDto> comment = new ArrayList<>();
+    private String meetingPurposeName;
+    private String meetingPurposeId;
 
+    public String getMeetingPurposeName() {
+        return meetingPurposeName;
+    }
+
+    public void setMeetingPurposeName(String meetingPurposeName) {
+        this.meetingPurposeName = meetingPurposeName;
+    }
+
+    public String getMeetingPurposeId() {
+        return meetingPurposeId;
+    }
+
+    public void setMeetingPurposeId(String meetingPurposeId) {
+        this.meetingPurposeId = meetingPurposeId;
+    }
 
     public List<CommentDto> getComment() {
         return comment;

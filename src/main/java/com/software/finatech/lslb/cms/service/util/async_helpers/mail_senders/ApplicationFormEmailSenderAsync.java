@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.DocumentNotification;
+import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -128,6 +129,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
             logger.error("An error occurred while sending rejection mail to -> {}", institutionAdminEmail, e);
         }
     }
+
     private void sendRejectionMailToInstitutionUser(String institutionAdminEmail, AIPDocumentApproval aipDocumentApproval, String emailContent) {
         try {
             String mailSubject = String.format("Notification on your AIP for %s licence", aipDocumentApproval.getGameTypeName());
@@ -155,6 +157,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
             sendApprovedMailToInstitutionUser(institutionAdmin.getEmailAddress(), mailSubject, emailContent);
         }
     }
+
     @Async
     public void sendApprovedMailToInstitutionAdmins(AIPDocumentApproval aipDocumentApproval) {
         ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(aipDocumentApproval.getInstitutionId());
@@ -164,6 +167,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
             sendApprovedMailToInstitutionUser(institutionAdmin.getEmailAddress(), mailSubject, emailContent);
         }
     }
+
     @Async
     public void sendApprovedMailToInstitutionAdmins(RenewalForm renewalForm) {
         ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(renewalForm.getInstitutionId());
@@ -200,6 +204,20 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         }
         logger.info("Finished sending emails to LSLB Admins");
     }
+
+    private List<DocumentNotification> getDocumentNotificationsForApplicationForm(ApplicationForm applicationForm) {
+        List<DocumentNotification> documentNotifications = new ArrayList<>();
+        ArrayList<Document> documentsForForm = getAllDocumentsForApplicationForm(applicationForm);
+        for (Document document : documentsForForm) {
+            AuthInfo approver = document.getApprover();
+            if (approver != null) {
+                documentNotifications.add(DocumentNotification.fromApproverEmailAndDocument(approver.getEmailAddress(),
+                        document));
+            }
+        }
+        return documentNotifications;
+    }
+
 
     @Async
     public void sendRenewalFormSubmissionMailToLSLBAdmins(RenewalForm renewalForm) {
@@ -256,6 +274,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("frontEndUrl", callbackUrl);
         return mailContentBuilderService.build(model, "application-form/ApplicationFormSubmissionLSLB");
     }
+
     private String buildApplicationFormSubmissionEmailContent(RenewalForm renewalForm) {
         String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), renewalForm.getId());
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
@@ -311,6 +330,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("rejectionReason", aipDocumentApproval.getReasonForRejection());
         return mailContentBuilderService.build(model, "aip-form/aip-form-rejection-GA-new");
     }
+
     private String buildRejectionEmailContent(RenewalForm renewalForm) {
         String gameTypeName = renewalForm.getGameTypeName();
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
@@ -338,6 +358,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("frontEndUrl", callBackUrl);
         return mailContentBuilderService.build(model, "application-form/application-form-approval-GA-new");
     }
+
     private String buildApprovalEmailContent(AIPDocumentApproval aipDocumentApproval) {
         String gameTypeName = aipDocumentApproval.getGameTypeName();
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
@@ -364,9 +385,10 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         Query query = new Query();
         query.addCriteria(Criteria.where("entityId").is(applicationForm.getId()));
         query.addCriteria(Criteria.where("isCurrent").is(true));
-        query.addCriteria(Criteria.where("notificationSent").is(false));
+        query.addCriteria(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID));
         return (ArrayList<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
     }
+
     private ArrayList<Document> getAllDocumentsForRenewalForm(RenewalForm renewalForm) {
         Query query = new Query();
         query.addCriteria(Criteria.where("entityId").is(renewalForm.getId()));
@@ -383,24 +405,6 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         return (ArrayList<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
     }
 
-    private List<DocumentNotification> getDocumentNotificationsForApplicationForm(ApplicationForm applicationForm) {
-        List<DocumentNotification> documentNotifications = new ArrayList<>();
-        ArrayList<Document> documentsForForm = getAllDocumentsForApplicationForm(applicationForm);
-        if (documentsForForm.isEmpty()) {
-            sendApproverMailToFinalApproval(applicationForm);
-        } else {
-            for (Document document : documentsForForm) {
-                DocumentType documentType = document.getDocumentType();
-                if (documentType != null) {
-                    AuthInfo approver = documentType.getApprover();
-                    if (approver != null) {
-                        documentNotifications.add(DocumentNotification.fromApproverEmailAndDocument(approver.getEmailAddress(), document));
-                    }
-                }
-            }
-        }
-        return documentNotifications;
-    }
 
     private List<DocumentNotification> getDocumentNotificationsForRenewalForm(RenewalForm renewalForm) {
         List<DocumentNotification> documentNotifications = new ArrayList<>();
@@ -451,6 +455,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("documentType", String.valueOf(document.getDocumentType()));
         return mailContentBuilderService.build(model, "application-form/ApplicationFormDocumentSubmissionLSLB");
     }
+
     private String buildDocumentSubmissionMailContentLSLB(RenewalForm renewalForm, Document document) {
         String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), renewalForm.getId());
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
@@ -462,6 +467,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("documentType", String.valueOf(document.getDocumentType()));
         return mailContentBuilderService.build(model, "renewal-form/RenewalFormDocumentSubmissionLSLB");
     }
+
     private String buildDocumentSubmissionMailContentLSLB(AIPDocumentApproval aipDocumentApproval, Document document) {
         String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId());
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
@@ -498,6 +504,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
                 mongoRepositoryReactive.saveOrUpdate(document);
             }
             documentApproval.setApprovalMap(approvalMap);
+            applicationForm.setReadyForApproval(false);
             applicationForm.setDocumentApproval(documentApproval);
             mongoRepositoryReactive.saveOrUpdate(applicationForm);
         } catch (Exception e) {
@@ -580,6 +587,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
             emailService.sendEmail(mailContent, "New Application Submission on LSLB Customer Management System", emailAddress);
         }
     }
+
     public void sendApproverMailToFinalApproval(AIPDocumentApproval aipDocumentApproval) {
         ArrayList<AuthInfo> finalApprovers = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.APPROVE_APPLICATION_FORM_ID);
         if (finalApprovers.isEmpty()) {
@@ -644,7 +652,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     @Async
     public void sendDocumentReturnMailToInstitutionMembers(ApplicationForm applicationForm, Document document, String latestComment) {
         ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(applicationForm.getInstitutionId());
-        String mailContent = buildDocumentReturnMailContent(applicationForm, document,latestComment);
+        String mailContent = buildDocumentReturnMailContent(applicationForm, document, latestComment);
         for (AuthInfo institutionAdmin : institutionAdmins) {
             try {
                 String email = institutionAdmin.getEmailAddress();
@@ -685,7 +693,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         }
     }
 
-    private String buildDocumentReturnMailContent(ApplicationForm applicationForm, Document document,String latestComment) {
+    private String buildDocumentReturnMailContent(ApplicationForm applicationForm, Document document, String latestComment) {
         String callbackUrl = String.format("%s/%s/reupload/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId(), document.getId());
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
         HashMap<String, Object> model = new HashMap<>();
@@ -695,7 +703,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("frontEndUrl", callbackUrl);
         model.put("fileName", document.getFilename());
         model.put("documentType", String.valueOf(document.getDocumentType()));
-        model.put("comment",latestComment);
+        model.put("comment", latestComment);
         return mailContentBuilderService.build(model, "application-form/ApplicationFormDocumentReturnGAAdmin");
     }
 
@@ -708,10 +716,11 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("applicantName", aipDocumentApproval.getInstitutionName());
         model.put("frontEndUrl", callbackUrl);
         model.put("fileName", document.getFilename());
-    //    model.put("comment", document.getComment());
+        //    model.put("comment", document.getComment());
         model.put("documentType", String.valueOf(document.getDocumentType()));
         return mailContentBuilderService.build(model, "aip-form/AIPFormDocumentReturnGAAdmin");
     }
+
     private String buildDocumentReturnMailContent(RenewalForm renewalForm, Document document) {
         String callbackUrl = String.format("%s/%s/reupload/%s", frontEndPropertyHelper.getFrontEndUrl(), renewalForm.getId(), document.getId());
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
