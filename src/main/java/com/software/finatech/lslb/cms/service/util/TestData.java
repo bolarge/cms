@@ -157,151 +157,151 @@ public class TestData {
     }
 
     public static void generateTestData(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
-        Fee fee = (Fee) mongoRepositoryReactive.findById("1", Fee.class).block();
-        if (fee == null) {
-            fee = new Fee();
-            fee.setId("1");
-        }
-        fee.setAmount(200000);
-        fee.setFeePaymentTypeId("02");
-        fee.setGameTypeId("01");
-        fee.setActive(true);
-        fee.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
-        mongoRepositoryReactive.saveOrUpdate(fee);
-        Fee fee2 = (Fee) mongoRepositoryReactive.findById("2", Fee.class).block();
-        if (fee2 == null) {
-            fee2 = new Fee();
-            fee2.setId("2");
-        }
-        fee2.setAmount(100000);
-        fee2.setFeePaymentTypeId("02");
-        fee2.setGameTypeId("02");
-        fee2.setActive(true);
-        fee2.setLicenseTypeId(LicenseTypeReferenceData.GAMING_MACHINE_ID);
-        mongoRepositoryReactive.saveOrUpdate(fee2);
-        Fee fee3 = (Fee) mongoRepositoryReactive.findById("3", Fee.class).block();
-        if (fee3 == null) {
-            fee3 = new Fee();
-            fee3.setId("3");
-        }
-        fee3.setAmount(100000);
-        fee3.setFeePaymentTypeId("02");
-        fee3.setGameTypeId("01");
-        fee3.setActive(true);
-        fee3.setLicenseTypeId(LicenseTypeReferenceData.AGENT_ID);
-        mongoRepositoryReactive.saveOrUpdate(fee3);
-        Fee fee4 = (Fee) mongoRepositoryReactive.findById("4", Fee.class).block();
-        if (fee4 == null) {
-            fee4 = new Fee();
-            fee4.setId("4");
-        }
-        fee4.setAmount(200000);
-        fee4.setFeePaymentTypeId("02");
-        fee4.setGameTypeId("02");
-        fee4.setActive(true);
-        fee4.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
-        mongoRepositoryReactive.saveOrUpdate(fee4);
-        for (int i = 1; i < 6; i++) {
-
-            Institution institution = (Institution) mongoRepositoryReactive.findById(String.valueOf(i), Institution.class).block();
-            if (institution == null) {
-                institution = new Institution();
-                institution.setId(String.valueOf(i));
-            }
-            institution.setEmailAddress("ldapcmstest_" + i + "@gmail.com");
-
-            if (i == 1) {
-                institution.setEmailAddress("samelikzra@gmail.com");
-
-            }
-            if (i == 5) {
-                institution.setEmailAddress("azy@qa.team");
-
-            }
-            institution.setActive(true);
-            institution.getGameTypeIds().addAll(Arrays.asList("01"));
-            institution.setInstitutionName("Test Institution " + i);
-            institution.setPhoneNumber("12345" + i);
-            institution.setStatus(true);
-
-            mongoRepositoryReactive.saveOrUpdate(institution);
-
-            Agent agent = (Agent) mongoRepositoryReactive.findById(String.valueOf(i), Agent.class).block();
-            if (agent == null) {
-                agent = new Agent();
-                agent.setId(String.valueOf(i));
-            }
-            agent.setFirstName("Agent");
-            agent.setLastName(String.valueOf(i));
-            agent.setFullName(agent.getFirstName() + " " + agent.getLastName());
-            agent.setEmailAddress("testcms " + i + "@gmail.com");
-            Set<String> institutionIds = new HashSet<>();
-            institutionIds.add(String.valueOf(i));
-            Set<String> gameTypes = new HashSet<>();
-            gameTypes.add(GameTypeReferenceData.POL_GAME_TYPE_ID);
-            agent.setInstitutionIds(institutionIds);
-            agent.setGameTypeIds(gameTypes);
-
-            Machine machine = (Machine) mongoRepositoryReactive.findById(String.valueOf(i), Machine.class).block();
-            if (machine == null) {
-                machine = new Machine();
-                machine.setId(String.valueOf(i));
-            }
-            machine.setSerialNumber(String.format("%s%s%s%s", String.valueOf(i), String.valueOf(i + 1), String.valueOf(i + 2), String.valueOf(i + 3)));
-            machine.setInstitutionId(String.valueOf(i));
-
-            PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById(String.valueOf(i), PaymentRecord.class).block();
-            if (paymentRecord == null) {
-                paymentRecord = new PaymentRecord();
-                paymentRecord.setId(String.valueOf(i));
-            }
-            paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
-            paymentRecord.setInstitutionId("" + i);
-            paymentRecord.setGameTypeId("01");
-            paymentRecord.setFeeId(fee.getId());
-            paymentRecord.setLicenseTypeId(fee.getLicenseTypeId());
-            License license = (License) mongoRepositoryReactive.findById(paymentRecord.getId(), License.class).block();
-            if (license == null) {
-                license = new License();
-                license.setId("" + i);
-            }
-            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
-            license.setInstitutionId(paymentRecord.getInstitutionId());
-            license.setGameTypeId("01");
-            license.setPaymentRecordId(paymentRecord.getId());
-            license.setEffectiveDate(LocalDate.now());
-            LocalDate startDate = new LocalDate();
-            license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getInstitutionLicenseDurationMonths()));
-            license.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
-
-            if (i == 1) {
-                license.setEffectiveDate(LocalDate.now());
-                license.setLicenseStatusId(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
-                license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getAipDurationMonths()));
-
-            }
-            if (i == 3) {
-                license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getGamingMachineLicenseDurationMonths()));
-                license.setLicenseTypeId(LicenseTypeReferenceData.GAMING_MACHINE_ID);
-
-            }
-            if (i == 4) {
-                paymentRecord.setAgentId(agent.getId());
-                license.setAgentId(paymentRecord.getAgentId());
-                license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getAgentLicenseDurationMonths()));
-                license.setLicenseTypeId(LicenseTypeReferenceData.AGENT_ID);
-                agent.setEmailAddress("samelikzra@gmail.com");
-
-            }
-            if (i == 5) {
-                license.setLicenseStatusId(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
-
-            }
-            license.setRenewalStatus("false");
-            mongoRepositoryReactive.saveOrUpdate(machine);
-            mongoRepositoryReactive.saveOrUpdate(agent);
-            mongoRepositoryReactive.saveOrUpdate(paymentRecord);
-            mongoRepositoryReactive.saveOrUpdate(license);
-        }
+//        Fee fee = (Fee) mongoRepositoryReactive.findById("1", Fee.class).block();
+//        if (fee == null) {
+//            fee = new Fee();
+//            fee.setId("1");
+//        }
+//        fee.setAmount(200000);
+//        fee.setFeePaymentTypeId("02");
+//        fee.setGameTypeId("01");
+//        fee.setActive(true);
+//        fee.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
+//        mongoRepositoryReactive.saveOrUpdate(fee);
+//        Fee fee2 = (Fee) mongoRepositoryReactive.findById("2", Fee.class).block();
+//        if (fee2 == null) {
+//            fee2 = new Fee();
+//            fee2.setId("2");
+//        }
+//        fee2.setAmount(100000);
+//        fee2.setFeePaymentTypeId("02");
+//        fee2.setGameTypeId("02");
+//        fee2.setActive(true);
+//        fee2.setLicenseTypeId(LicenseTypeReferenceData.GAMING_MACHINE_ID);
+//        mongoRepositoryReactive.saveOrUpdate(fee2);
+//        Fee fee3 = (Fee) mongoRepositoryReactive.findById("3", Fee.class).block();
+//        if (fee3 == null) {
+//            fee3 = new Fee();
+//            fee3.setId("3");
+//        }
+//        fee3.setAmount(100000);
+//        fee3.setFeePaymentTypeId("02");
+//        fee3.setGameTypeId("01");
+//        fee3.setActive(true);
+//        fee3.setLicenseTypeId(LicenseTypeReferenceData.AGENT_ID);
+//        mongoRepositoryReactive.saveOrUpdate(fee3);
+//        Fee fee4 = (Fee) mongoRepositoryReactive.findById("4", Fee.class).block();
+//        if (fee4 == null) {
+//            fee4 = new Fee();
+//            fee4.setId("4");
+//        }
+//        fee4.setAmount(200000);
+//        fee4.setFeePaymentTypeId("02");
+//        fee4.setGameTypeId("02");
+//        fee4.setActive(true);
+//        fee4.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
+//        mongoRepositoryReactive.saveOrUpdate(fee4);
+//        for (int i = 1; i < 6; i++) {
+//
+//            Institution institution = (Institution) mongoRepositoryReactive.findById(String.valueOf(i), Institution.class).block();
+//            if (institution == null) {
+//                institution = new Institution();
+//                institution.setId(String.valueOf(i));
+//            }
+//            institution.setEmailAddress("ldapcmstest_" + i + "@gmail.com");
+//
+//            if (i == 1) {
+//                institution.setEmailAddress("samelikzra@gmail.com");
+//
+//            }
+//            if (i == 5) {
+//                institution.setEmailAddress("azy@qa.team");
+//
+//            }
+//            institution.setActive(true);
+//            institution.getGameTypeIds().addAll(Arrays.asList("01"));
+//            institution.setInstitutionName("Test Institution " + i);
+//            institution.setPhoneNumber("12345" + i);
+//            institution.setStatus(true);
+//
+//            mongoRepositoryReactive.saveOrUpdate(institution);
+//
+//            Agent agent = (Agent) mongoRepositoryReactive.findById(String.valueOf(i), Agent.class).block();
+//            if (agent == null) {
+//                agent = new Agent();
+//                agent.setId(String.valueOf(i));
+//            }
+//            agent.setFirstName("Agent");
+//            agent.setLastName(String.valueOf(i));
+//            agent.setFullName(agent.getFirstName() + " " + agent.getLastName());
+//            agent.setEmailAddress("testcms " + i + "@gmail.com");
+//            Set<String> institutionIds = new HashSet<>();
+//            institutionIds.add(String.valueOf(i));
+//            Set<String> gameTypes = new HashSet<>();
+//            gameTypes.add(GameTypeReferenceData.POL_GAME_TYPE_ID);
+//            agent.setInstitutionIds(institutionIds);
+//            agent.setGameTypeIds(gameTypes);
+//
+//            Machine machine = (Machine) mongoRepositoryReactive.findById(String.valueOf(i), Machine.class).block();
+//            if (machine == null) {
+//                machine = new Machine();
+//                machine.setId(String.valueOf(i));
+//            }
+//            machine.setSerialNumber(String.format("%s%s%s%s", String.valueOf(i), String.valueOf(i + 1), String.valueOf(i + 2), String.valueOf(i + 3)));
+//            machine.setInstitutionId(String.valueOf(i));
+//
+//            PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById(String.valueOf(i), PaymentRecord.class).block();
+//            if (paymentRecord == null) {
+//                paymentRecord = new PaymentRecord();
+//                paymentRecord.setId(String.valueOf(i));
+//            }
+//            paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
+//            paymentRecord.setInstitutionId("" + i);
+//            paymentRecord.setGameTypeId("01");
+//            paymentRecord.setFeeId(fee.getId());
+//            paymentRecord.setLicenseTypeId(fee.getLicenseTypeId());
+//            License license = (License) mongoRepositoryReactive.findById(paymentRecord.getId(), License.class).block();
+//            if (license == null) {
+//                license = new License();
+//                license.setId("" + i);
+//            }
+//            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+//            license.setInstitutionId(paymentRecord.getInstitutionId());
+//            license.setGameTypeId("01");
+//            license.setPaymentRecordId(paymentRecord.getId());
+//            license.setEffectiveDate(LocalDate.now());
+//            LocalDate startDate = new LocalDate();
+//            license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getInstitutionLicenseDurationMonths()));
+//            license.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
+//
+//            if (i == 1) {
+//                license.setEffectiveDate(LocalDate.now());
+//                license.setLicenseStatusId(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
+//                license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getAipDurationMonths()));
+//
+//            }
+//            if (i == 3) {
+//                license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getGamingMachineLicenseDurationMonths()));
+//                license.setLicenseTypeId(LicenseTypeReferenceData.GAMING_MACHINE_ID);
+//
+//            }
+//            if (i == 4) {
+//                paymentRecord.setAgentId(agent.getId());
+//                license.setAgentId(paymentRecord.getAgentId());
+//                license.setExpiryDate(startDate.plusMonths(paymentRecord.getGameType().getAgentLicenseDurationMonths()));
+//                license.setLicenseTypeId(LicenseTypeReferenceData.AGENT_ID);
+//                agent.setEmailAddress("samelikzra@gmail.com");
+//
+//            }
+//            if (i == 5) {
+//                license.setLicenseStatusId(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
+//
+//            }
+//            license.setRenewalStatus("false");
+//            mongoRepositoryReactive.saveOrUpdate(machine);
+//            mongoRepositoryReactive.saveOrUpdate(agent);
+//            mongoRepositoryReactive.saveOrUpdate(paymentRecord);
+//            mongoRepositoryReactive.saveOrUpdate(license);
+//        }
     }
 }

@@ -263,6 +263,7 @@ public class DashboardController extends BaseController {
                 InstitutionDashboardSummaryDto institutionDashboardSummaryDto = new InstitutionDashboardSummaryDto();
 
                 institutionDashboardSummaryDto.setInstitutionId(institutionId);
+                institutionDashboardSummaryDto.setLicenseId(license.getId());
                 institutionDashboardSummaryDto.setLicenseNumber(license.getLicenseNumber());
                 institutionDashboardSummaryDto.setInstitutionName(getInstitution(institutionId).getInstitutionName());
                 institutionDashboardSummaryDto.setLicenseStatus(license.getLicenseStatusId());
@@ -273,6 +274,7 @@ public class DashboardController extends BaseController {
                 institutionDashboardSummaryDto.setNumberOfAgents(getAgentCountForInstitution(institutionId));
                 institutionDashboardSummaryDto.setNumberOfGamingMachines(getGamingMachineCountForInstitution(institutionId));
                 institutionDashboardSummaryDtoHashMap.put(license.getGameTypeId(), institutionDashboardSummaryDto);
+
 
             }
         }
