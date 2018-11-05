@@ -4,6 +4,7 @@ public class InstitutionDashboardSummaryDto {
     protected String institutionName;
     protected String institutionId;
     protected String licenseNumber;
+    protected String licenseId;
     protected long numberOfAgents;
     protected long numberOfGamingMachines;
     protected String licenseStatusId;
@@ -38,6 +39,14 @@ public class InstitutionDashboardSummaryDto {
 
     public String getLicenseNumber() {
         return licenseNumber;
+    }
+
+    public String getLicenseId() {
+        return licenseId;
+    }
+
+    public void setLicenseId(String licenseId) {
+        this.licenseId = licenseId;
     }
 
     public void setLicenseNumber(String licenseNumber) {
