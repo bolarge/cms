@@ -106,7 +106,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             licenseTransfers.forEach(licenseTransfer -> {
                 dtos.add(licenseTransfer.convertToDto());
             });
-            return Mono.just(new ResponseEntity<>(licenseTransfers, HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(dtos, HttpStatus.OK));
 
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while finding all license transfers", e);
