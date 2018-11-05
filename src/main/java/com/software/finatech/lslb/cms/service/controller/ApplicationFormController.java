@@ -156,6 +156,18 @@ public class ApplicationFormController {
         return applicationFormService.getApplicantContactDetails(applicationFormId);
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/get-aip-form-Id", params = {"institutionId","gameTypeId"})
+    @ApiOperation(value = "Get AIP FORM ID", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAIPFormID(@RequestParam("institutionId") String institutionId,
+                                             @RequestParam("gameTypeId") String gameTypeId) {
+        return applicationFormService.getAIPFormId(institutionId, gameTypeId);
+    }
+
     @RequestMapping(method = RequestMethod.POST, value = "/{applicationFormId}/save-applicant-contact-details")
     @ApiOperation(value = "Save applicant contact details", response = ApplicationFormDto.class, consumes = "application/json")
     @ApiResponses(value = {
