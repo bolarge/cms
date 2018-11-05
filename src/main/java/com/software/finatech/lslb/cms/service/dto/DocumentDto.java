@@ -27,7 +27,17 @@ public class DocumentDto {
     protected String owner;
     protected String approverId;
     protected String documentStatus;
+    protected String documentStatusId;
     protected List<CommentDto> comments = new ArrayList<>();
+
+
+    public String getDocumentStatusId() {
+        return documentStatusId;
+    }
+
+    public void setDocumentStatusId(String documentStatusId) {
+        this.documentStatusId = documentStatusId;
+    }
 
     public String getDocumentStatus() {
         return documentStatus;

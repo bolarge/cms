@@ -140,6 +140,9 @@ public class DocumentController extends BaseController {
                         //document.setValidFrom(new LocalDate(documentDto.getValidFrom()));
                         //document.setValidTo(new LocalDate(documentDto.getValidTo()));
                         document.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
+                        if (document.requiresApproval()) {
+                            document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+                        }
                         documents.add(document);
                         documentCheck.add(document);
                         //If there is an existing doc we set it to false
@@ -162,6 +165,7 @@ public class DocumentController extends BaseController {
                 return Mono.just(new ResponseEntity<>("Json & file length do not match. Please make sure the each file has a corresponding filename in the json.", HttpStatus.BAD_REQUEST));
             }
             documents.stream().forEach(doc -> {
+
                 mongoRepositoryReactive.saveOrUpdate(doc);
             });
 

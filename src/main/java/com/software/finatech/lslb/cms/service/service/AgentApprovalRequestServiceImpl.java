@@ -4,12 +4,10 @@ import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.AgentApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.dto.ApprovalRequestOperationtDto;
-import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AgentApprovalRequestTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentApprovalRequestService;
 import com.software.finatech.lslb.cms.service.util.AgentUserCreator;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
@@ -20,7 +18,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -151,23 +148,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
 
     @Override
     public Mono<ResponseEntity> getAllApprovalRequestStatus() {
-        try {
-            ArrayList<ApprovalRequestStatus> approvalRequestStatuses = (ArrayList<ApprovalRequestStatus>) mongoRepositoryReactive
-                    .findAll(new Query(), ApprovalRequestStatus.class).toStream().collect(Collectors.toList());
-
-            if (approvalRequestStatuses == null || approvalRequestStatuses.isEmpty()) {
-                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));
-            }
-            List<EnumeratedFactDto> approvalRequestStatusDtos = new ArrayList<>();
-            approvalRequestStatuses.forEach(approvalRequestStatus -> {
-                approvalRequestStatusDtos.add(approvalRequestStatus.convertToDto());
-            });
-
-            return Mono.just(new ResponseEntity<>(approvalRequestStatusDtos, HttpStatus.OK));
-        } catch (Exception e) {
-            String errorMsg = "An error occurred while getting all approval request statuses";
-            return logAndReturnError(logger, errorMsg, e);
-        }
+        return getAllEnumeratedEntity("ApprovalRequestStatus");
     }
 
     @Override

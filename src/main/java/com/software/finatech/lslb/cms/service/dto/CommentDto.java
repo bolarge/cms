@@ -47,7 +47,7 @@ public class CommentDto {
     public static CommentDto fromCommentAndUser(String comment, String userFullName) {
         CommentDto dto = new CommentDto();
         dto.setCommentDate(LocalDateTime.now().toString("dd-MM-yyyy"));
-        dto.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a)"));
+        dto.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
         dto.setComment(comment);
         dto.setUserFullName(userFullName);
         return dto;

@@ -11,7 +11,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.springframework.data.annotation.Transient;
 
-import javax.xml.stream.events.Comment;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -319,6 +318,7 @@ public class Document extends AbstractFact {
         ApprovalRequestStatus status = getApprovalRequestStatus();
         if (status != null) {
             dto.setDocumentStatus(status.toString());
+            dto.setDocumentStatusId(this.approvalRequestStatusId);
         }
 
         return dto;
@@ -389,5 +389,13 @@ public class Document extends AbstractFact {
             }
         }
         return approvalRequestStatus;
+    }
+
+    public boolean requiresApproval() {
+        DocumentType documentType = getDocumentType();
+        if (documentType != null) {
+            return !StringUtils.isEmpty(documentType.getApproverId());
+        }
+        return false;
     }
 }

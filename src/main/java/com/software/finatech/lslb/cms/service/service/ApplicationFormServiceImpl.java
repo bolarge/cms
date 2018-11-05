@@ -78,7 +78,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         try {
             Mono<ResponseEntity> validateCreateApplicationFormResponse = validateCreateApplicationForm(applicationFormCreateDto);
             if (validateCreateApplicationFormResponse != null) {
-                return validateCreateApplicationFormResponse;
+        //        return validateCreateApplicationFormResponse;
             }
 
             ApplicationForm applicationForm = fromCreateDto(applicationFormCreateDto);
@@ -580,6 +580,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
+            //Send email and update the application form to ready for approval
             applicationFormNotificationHelperAsync.sendApplicationFormSubmissionMailToLSLBAdmins(applicationForm);
             return Mono.just(new ResponseEntity<>("Application completed successfully and now in review", HttpStatus.OK));
         } catch (Exception e) {
@@ -1169,6 +1170,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         ApplicationForm applicationForm = new ApplicationForm();
         applicationForm.setId(UUID.randomUUID().toString());
         BeanUtils.copyProperties(applicationFormCreateDto, applicationForm);
+        applicationForm.setReadyForApproval(false);
         GameType gameType = applicationForm.getGameType();
         String gameTypePref = "";
         if (gameType != null && !StringUtils.isEmpty(gameType.getShortCode())) {
