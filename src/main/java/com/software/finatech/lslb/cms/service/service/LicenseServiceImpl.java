@@ -510,6 +510,34 @@ public class LicenseServiceImpl implements LicenseService {
         }
     }
 
+
+
+
+    public Mono<ResponseEntity> updateFromAIPDocToAIP(String institutionId, String gameTypeId) {
+        try {
+
+            //TODO: get all lslb admins that can recieve notification
+            ArrayList<AuthInfo> lslbAdmins = new ArrayList<>();
+
+
+            Query queryLicence = new Query();
+            queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
+            queryLicence.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+            License license = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
+
+            if (license == null) {
+                return Mono.just(new ResponseEntity<>("No Record Record", HttpStatus.BAD_REQUEST));
+            }
+            license.setLicenseStatusId(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
+            mongoRepositoryReactive.saveOrUpdate(license);
+            return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
+
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
+
+        }
+    }
+
     @Override
     public Mono<ResponseEntity> updateInReviewToLicense(String licenseId) {
         try {
