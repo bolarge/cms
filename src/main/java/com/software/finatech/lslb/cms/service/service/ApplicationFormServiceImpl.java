@@ -821,7 +821,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             applicationFormNotificationHelperAsync.sendDocumentReturnMailToInstitutionMembers(aipDocumentApproval, document);
 
             mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
-            licenseService.updateFromAIPDocToAIP(aipDocumentApproval.getInstitutionId(),aipDocumentApproval.getGameTypeId());
+            //licenseService.updateFromAIPDocToAIP(aipDocumentApproval.getInstitutionId(),aipDocumentApproval.getGameTypeId());
         }
     }
 
@@ -859,6 +859,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         if (aipDocumentApproval != null) {
             Query query = new Query();
             query.addCriteria(Criteria.where("entityId").is(aipDocumentApproval.getId()));
+            query.addCriteria(Criteria.where("isCurrent").is(true));
             List<Document> documents= (List<Document>) mongoRepositoryReactive.findAll(query, Document.class).collect(Collectors.toList());
             int countDocumentWithApproval=0;
             int countApprovedDocument=0;
