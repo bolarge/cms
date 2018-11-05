@@ -43,7 +43,7 @@ public class Document extends AbstractFact {
     protected String gameTypeId;
     protected String agentId;
     protected Boolean notificationSent = false;
-    protected String approvalRequestStatusId = ApprovalRequestStatusReferenceData.PENDING_ID;
+    protected String approvalRequestStatusId;
     protected List<CommentDto> comments = new ArrayList<>();
 
 

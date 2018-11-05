@@ -9,7 +9,6 @@ public class DocumentDto {
     protected String description;
     protected String filename;
     protected String mimeType;
-
     protected String entryDate;
     protected String validFrom;
     protected String validTo;
@@ -29,7 +28,6 @@ public class DocumentDto {
     protected String documentStatus;
     protected String documentStatusId;
     protected List<CommentDto> comments = new ArrayList<>();
-
 
     public String getDocumentStatusId() {
         return documentStatusId;
