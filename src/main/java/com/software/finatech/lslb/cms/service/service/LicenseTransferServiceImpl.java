@@ -106,7 +106,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             licenseTransfers.forEach(licenseTransfer -> {
                 dtos.add(licenseTransfer.convertToDto());
             });
-            return Mono.just(new ResponseEntity<>(licenseTransfers, HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(dtos, HttpStatus.OK));
 
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while finding all license transfers", e);
@@ -197,13 +197,13 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             LicenseTransferStatus oldStatus = licenseTransfer.getLicenseTransferStatus();
             if (licenseTransfer.isPendingInitialApproval()) {
                 licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.PENDING_NEW_INSTITUTION_ADDITION_ID);
-            }
-            if (licenseTransfer.isPendingAddInstitutionApproval()) {
+            } else if (licenseTransfer.isPendingAddInstitutionApproval()) {
                 licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.PENDING_FINAL_APPROVAL_ID);
-            }
-            if (licenseTransfer.isPendingFinalApproval()) {
+            } else if (licenseTransfer.isPendingFinalApproval()) {
                 licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.APPROVED_ID);
                 //TODO:: send email to transferee to make payment for license transfer
+            } else {
+                
             }
 
             licenseTransfer.getTransferDecisions().add(LicenseTransferDecision.fromNameNewAndOldStatus(loggedInUser.getFullName(), String.valueOf(oldStatus),
