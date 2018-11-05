@@ -357,7 +357,7 @@ public class Scheduler {
                 List<PaymentRecord> agentPaymentRecord=(List<PaymentRecord>)mongoRepositoryReactive.findAll(queryPayment,PaymentRecord.class).toStream().collect(Collectors.toList());
                 if(agentPaymentRecord.size()==0){
                     agent.setInactive(false);
-                    agent.setInactiveReason("You have been deactivated for lack license payment, please kindly click forget password below to begin re-activation");
+                    agent.setInactiveReason("You have been deactivated for lack of license payment, please kindly click forget password below to begin re-activation");
                     mongoRepositoryReactive.saveOrUpdate(agent);
                     NotificationDto notificationDto = new NotificationDto();
                     notificationDto.setDescription("You have been deactivated for lack license payment");
