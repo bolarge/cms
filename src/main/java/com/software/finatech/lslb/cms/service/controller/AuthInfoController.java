@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -583,7 +584,8 @@ public class AuthInfoController extends BaseController {
                                           @Param("size") @NotNull int size,
                                           @Param("sortProperty") String sortProperty,
                                           @Param("sorting") String sorting,
-                                          @Param("roleId") String roleId) {
+                                          @Param("roleId") String roleId,
+                                          HttpServletResponse httpServletResponse) {
         try {
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             //@TODO validate reqquest params
@@ -599,6 +601,11 @@ public class AuthInfoController extends BaseController {
             List<String> notAllowedRoleIds = getNotAllowedRoleIds();
             if (!notAllowedRoleIds.contains(loggedInUser.getAuthRoleId())) {
                 query.addCriteria(Criteria.where("authRoleId").nin(notAllowedRoleIds));
+            }
+
+            if (page == 0) {
+                long count = mongoRepositoryReactive.count(query, Agent.class).block();
+                httpServletResponse.setHeader("TotalCount", String.valueOf(count));
             }
 
             if (sorting != null && !sorting.isEmpty() && sortProperty != null && !sortProperty.isEmpty()) {
