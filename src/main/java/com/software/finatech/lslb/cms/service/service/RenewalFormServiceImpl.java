@@ -374,7 +374,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             if (renewalForm == null) {
                 return Mono.just(new ResponseEntity<>("Renewal Form does not exist", HttpStatus.BAD_REQUEST));
             }
-            if (!StringUtils.equals(RenewalFormStatusReferenceData.IN_REVIEW, renewalForm.getFormStatusId())) {
+            if (!StringUtils.equals(RenewalFormStatusReferenceData.SUBMITTED, renewalForm.getFormStatusId())) {
                 return Mono.just(new ResponseEntity<>("Renewal Form status has to be IN REVIEW for you to add a comment", HttpStatus.BAD_REQUEST));
             }
             AuthInfo lslbAdmin = authInfoService.getUserById(renewalFormCreateCommentDto.getUserId());
