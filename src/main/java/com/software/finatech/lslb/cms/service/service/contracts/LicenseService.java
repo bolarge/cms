@@ -3,7 +3,6 @@ package com.software.finatech.lslb.cms.service.service.contracts;
 import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
-import com.software.finatech.lslb.cms.service.dto.LicenseUpdateAIPToLicenseDto;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
@@ -35,7 +34,6 @@ public interface LicenseService {
     List<EnumeratedFactDto> getLicenseStatus();
     List<EnumeratedFactDto> getAllLicenseTypes();
     Mono<ResponseEntity> getInstitutionAIPs(String institutionId);
-    Mono<ResponseEntity> updateInReviewToLicense(String licenseId);
     Mono<ResponseEntity> getInstitutionCloseToExpirationLicenses(String institutionId);
     Mono<ResponseEntity> getAgentLicensesCloseToExpiration(String agentId);
     Mono<ResponseEntity> getGamingMachineLicensesCloseToExpiration(String gamingMachineId);

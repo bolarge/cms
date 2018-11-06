@@ -279,21 +279,6 @@ public class LicenseController {
 //
 //        }
 //    }
-    @RequestMapping(method = RequestMethod.GET, value = "/update-to-renewal-in-review-from-in-license", params = {"licenseId"})
-    @ApiOperation(value = "Update Renewal In review to Renewal License", response = String.class, consumes = "application/json")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK"),
-            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
-            @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> updateInReviewToInLicense(@RequestParam("licenseId") String licenseId) {
-        try {
-            return licenseService.updateInReviewToLicense(licenseId);
-        } catch (Exception ex) {
-            return Mono.just(new ResponseEntity<>("Error! Please contact Admin", HttpStatus.BAD_REQUEST));
-
-        }
-    }
 
 
     @RequestMapping(method = RequestMethod.GET, value = "/specific-license", params = {"institutionId", "agentId", "gamingMachineId", "gameTypeId", "licenseTypeId"})

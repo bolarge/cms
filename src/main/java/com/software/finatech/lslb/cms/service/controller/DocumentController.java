@@ -786,6 +786,8 @@ public class DocumentController extends BaseController {
     }
 
     private void doRenewalFormDocumentReupload(Document document) {
+        document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+        mongoRepositoryReactive.saveOrUpdate(document);
         renewalFormService.doDocumentReuploadNotification(document);
     }
 
@@ -794,6 +796,8 @@ public class DocumentController extends BaseController {
     }
 
     private void doAIPFormDocumentReupload(Document document) {
+        document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+        mongoRepositoryReactive.saveOrUpdate(document);
         applicationFormService.doAIPDocumentReuploadNotification(document);
     }
 
