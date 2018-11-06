@@ -744,10 +744,10 @@ public class DocumentController extends BaseController {
                 rejectApplicationFormDocument(document, documentOperationDto.getComment());
             }
             if (StringUtils.equalsIgnoreCase("renewalForm", entityName)) {
-                rejectRenewalFormDocument(document);
+                rejectRenewalFormDocument(document, documentOperationDto.getComment());
             }
             if (StringUtils.equalsIgnoreCase("aipForm", entityName)) {
-                rejectAIPFormDocument(document);
+                rejectAIPFormDocument(document, documentOperationDto.getComment());
             }
 
             String verbiage = String.format("Rejected document -> Document Type -> %s, File name -> %s, Id -> %s ", document.getDocumentType(), document.getFilename(), documentId);
@@ -765,12 +765,12 @@ public class DocumentController extends BaseController {
         applicationFormService.rejectApplicationFormDocument(document, latestComment);
     }
 
-    private void rejectAIPFormDocument(Document document) {
-        applicationFormService.rejectAIPFormDocument(document);
+    private void rejectAIPFormDocument(Document document, String comment) {
+        applicationFormService.rejectAIPFormDocument(document, comment);
     }
 
-    private void rejectRenewalFormDocument(Document document) {
-        renewalFormService.rejectRenewalFormDocument(document);
+    private void rejectRenewalFormDocument(Document document, String comment) {
+        renewalFormService.rejectRenewalFormDocument(document, comment);
     }
 
     private void approveApplicationFormDocument(Document document, String latestComment) {

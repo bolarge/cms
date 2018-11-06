@@ -15,7 +15,7 @@ public interface RenewalFormService {
     Mono<ResponseEntity> approveRenewalForm(String renewalFormId, String approverId, HttpServletRequest request);
     Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String renewalId, FormCreateCommentDto formCreateCommentDto, HttpServletRequest request);
     void approveRenewalFormDocument(Document document);
-    void rejectRenewalFormDocument(Document document);
+    void rejectRenewalFormDocument(Document document, String comment);
     void doDocumentReuploadNotification(Document document);
     Mono<ResponseEntity> completeRenewalForm(String renewalFormId, boolean isResubmit, HttpServletRequest request);
     Mono<ResponseEntity> rejectRenewalForm(String renewalFormId, RenewalFormRejectDto renewalFormRejectDto, HttpServletRequest request);
