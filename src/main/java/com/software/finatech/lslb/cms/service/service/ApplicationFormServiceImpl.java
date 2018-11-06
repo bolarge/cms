@@ -817,11 +817,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         if (aipDocumentApproval != null) {
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
             mongoRepositoryReactive.saveOrUpdate(document);
-
             applicationFormNotificationHelperAsync.sendDocumentReturnMailToInstitutionMembers(aipDocumentApproval, document);
-
-            mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
-            //licenseService.updateFromAIPDocToAIP(aipDocumentApproval.getInstitutionId(),aipDocumentApproval.getGameTypeId());
         }
     }
 
@@ -841,13 +837,8 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     @Override
     public void doAIPDocumentReuploadNotification(Document document) {
         AIPDocumentApproval aipDocumentApproval = document.getAIPForm();
-        String documentId = document.getId();
-        if (aipDocumentApproval != null) {
-            FormDocumentApproval formDocumentApproval = aipDocumentApproval.getDocumentApproval();
-            formDocumentApproval.getApprovalMap().put(documentId, false);
-            aipDocumentApproval.setDocumentApproval(formDocumentApproval);
-            mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
-            applicationFormNotificationHelperAsync.sendResubmissionNotificationForApplicationForm(aipDocumentApproval, document);
+       if (aipDocumentApproval != null) {
+             applicationFormNotificationHelperAsync.sendResubmissionNotificationForApplicationForm(aipDocumentApproval, document);
         }
     }
 
