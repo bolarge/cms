@@ -124,7 +124,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     private void sendRejectionMailToInstitutionUser(String institutionAdminEmail, ApplicationForm applicationForm, String emailContent) {
         try {
             String mailSubject = String.format("Notification on your application for %s licence", applicationForm.getGameTypeName());
-            emailService.sendEmail(emailContent, mailSubject, emailContent);
+            emailService.sendEmail(emailContent, mailSubject, institutionAdminEmail);
         } catch (Exception e) {
             logger.error("An error occurred while sending rejection mail to -> {}", institutionAdminEmail, e);
         }
@@ -133,7 +133,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     private void sendRejectionMailToInstitutionUser(String institutionAdminEmail, AIPDocumentApproval aipDocumentApproval, String emailContent) {
         try {
             String mailSubject = String.format("Notification on your AIP for %s licence", aipDocumentApproval.getGameTypeName());
-            emailService.sendEmail(emailContent, mailSubject, emailContent);
+            emailService.sendEmail(emailContent, mailSubject, institutionAdminEmail );
         } catch (Exception e) {
             logger.error("An error occurred while sending rejection mail to -> {}", institutionAdminEmail, e);
         }
@@ -142,7 +142,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     private void sendRejectionMailToInstitutionUser(String institutionAdminEmail, RenewalForm renewalForm, String emailContent) {
         try {
             String mailSubject = String.format("Notification on your application for %s licence", renewalForm.getGameTypeName());
-            emailService.sendEmail(emailContent, mailSubject, emailContent);
+            emailService.sendEmail(emailContent, mailSubject, institutionAdminEmail);
         } catch (Exception e) {
             logger.error("An error occurred while sending rejection mail to -> {}", institutionAdminEmail, e);
         }
