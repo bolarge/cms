@@ -538,16 +538,16 @@ public class LicenseServiceImpl implements LicenseService {
         }
     }
 
-    @Override
-    public Mono<ResponseEntity> updateInReviewToLicense(String licenseId) {
+
+    public String updateInReviewToLicense(String paymentRecordId) {
         try {
             Query queryLicence = new Query();
-            queryLicence.addCriteria(Criteria.where("id").is(licenseId));
+            queryLicence.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));
             queryLicence.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.RENEWAL_LICENSE_IN_REVIEW));
             License license = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
 
             if (license == null) {
-                return Mono.just(new ResponseEntity<>("No License Record", HttpStatus.BAD_REQUEST));
+                return "No License Record";
             }
             license.setLicenseStatusId(LicenseStatusReferenceData.RENEWED_ID);
             mongoRepositoryReactive.saveOrUpdate(license);
@@ -564,12 +564,13 @@ public class LicenseServiceImpl implements LicenseService {
                 sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
             });
 
-            return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
+            return "OK";
 
         } catch (Exception ex) {
-            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
+            return "Error! Please contact admin";
 
         }
+
     }
 
     @Override
