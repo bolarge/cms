@@ -431,12 +431,12 @@ public class RenewalFormServiceImpl implements RenewalFormService {
 
     }
     
-    public void rejectRenewalFormDocument(Document document) {
+    public void rejectRenewalFormDocument(Document document, String comment) {
         RenewalForm renewalForm = document.getRenewalForm();
          if (renewalForm != null) {
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
             mongoRepositoryReactive.saveOrUpdate(document);
-            renewalFormNotificationHelperAsync.sendDocumentReturnMailToInstitutionMembers(renewalForm, document);
+            renewalFormNotificationHelperAsync.sendDocumentReturnMailToInstitutionMembers(renewalForm, document, comment);
         }
     }
     

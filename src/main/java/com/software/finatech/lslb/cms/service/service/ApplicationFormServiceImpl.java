@@ -812,12 +812,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         }
     }
     @Override
-    public void rejectAIPFormDocument(Document document) {
+    public void rejectAIPFormDocument(Document document, String comment) {
         AIPDocumentApproval aipDocumentApproval = document.getAIPForm();
         if (aipDocumentApproval != null) {
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
             mongoRepositoryReactive.saveOrUpdate(document);
-            applicationFormNotificationHelperAsync.sendDocumentReturnMailToInstitutionMembers(aipDocumentApproval, document);
+            applicationFormNotificationHelperAsync.sendDocumentReturnMailToInstitutionMembers(aipDocumentApproval, document,comment);
         }
     }
 

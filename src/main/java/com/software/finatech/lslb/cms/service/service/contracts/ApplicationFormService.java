@@ -90,7 +90,7 @@ public interface ApplicationFormService {
 
     void rejectApplicationFormDocument(Document document, String latestComment);
 
-    void rejectAIPFormDocument(Document document);
+    void rejectAIPFormDocument(Document document, String comment);
 
     void doDocumentReuploadNotification(Document document);
 
