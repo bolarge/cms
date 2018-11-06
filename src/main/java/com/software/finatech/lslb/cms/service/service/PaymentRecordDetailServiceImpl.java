@@ -57,10 +57,9 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     private LicenseService licenseService;
     private ApplicationFormService applicationFormService;
     private PaymentEmailNotifierAsync paymentEmailNotifierAsync;
-    @Autowired
     private SpringSecurityAuditorAware springSecurityAuditorAware;
-    @Autowired
     private AuditLogHelper auditLogHelper;
+    private LicenseTransferService licenseTransferService;
 
     @Autowired
     public PaymentRecordDetailServiceImpl(FeeService feeService,
@@ -73,7 +72,10 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                                           AuthInfoService authInfoService,
                                           LicenseService licenseService,
                                           ApplicationFormService applicationFormService,
-                                          PaymentEmailNotifierAsync paymentEmailNotifierAsync) {
+                                          PaymentEmailNotifierAsync paymentEmailNotifierAsync,
+                                          SpringSecurityAuditorAware springSecurityAuditorAware,
+                                          AuditLogHelper auditLogHelper,
+                                          LicenseTransferService licenseTransferService) {
         this.feeService = feeService;
         this.paymentRecordService = paymentRecordService;
         this.mongoRepositoryReactive = mongoRepositoryReactive;
@@ -85,6 +87,9 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         this.licenseService = licenseService;
         this.applicationFormService = applicationFormService;
         this.paymentEmailNotifierAsync = paymentEmailNotifierAsync;
+        this.springSecurityAuditorAware = springSecurityAuditorAware;
+        this.auditLogHelper = auditLogHelper;
+        this.licenseTransferService = licenseTransferService;
     }
 
     @Override
@@ -529,7 +534,8 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         if (paymentRecord.getAmountOutstanding() <= 0) {
             paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
 
-            if (paymentRecord.isInstitutionPayment() && paymentRecord.isLicensePayment()) {
+            if (paymentRecord.isInstitutionPayment() &&
+                    (paymentRecord.isLicensePayment() || paymentRecord.isLicenseTransferPayment())) {
                 licenseService.createAIPLicenseForCompletedPayment(paymentRecord);
             }
 
@@ -556,25 +562,47 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     }
 
     private Mono<ResponseEntity> validateFirstPayment(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, Fee fee) throws Exception {
-        if (StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_RENEWAL_FEE_TYPE_ID, fee.getFeePaymentTypeId())) {
+        if (fee.isLicenseRenewalFee()) {
             Mono<ResponseEntity> validateRenewalLicenseResponse = validateLicenseRenewalPayment(paymentRecordDetailCreateDto, fee);
             if (validateRenewalLicenseResponse != null) {
                 return validateRenewalLicenseResponse;
             }
         }
 
-        if (StringUtils.equals(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID, fee.getFeePaymentTypeId())) {
+        if (fee.isApplicationFee()) {
             Mono<ResponseEntity> validateApplicationPaymentResponse = validateApplicationPayment(paymentRecordDetailCreateDto.getInstitutionId(), fee.getGameTypeId());
             if (validateApplicationPaymentResponse != null) {
                 return validateApplicationPaymentResponse;
             }
         }
 
-        if (StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, fee.getFeePaymentTypeId())) {
+        if (fee.isLicenseFee()) {
             Mono<ResponseEntity> validateLicensePaymentResponse = validateLicensePayment(paymentRecordDetailCreateDto, fee);
             if (validateLicensePaymentResponse != null) {
                 return validateLicensePaymentResponse;
             }
+        }
+
+        if (fee.isLicenseTransferFee()) {
+            Mono<ResponseEntity> validateLicenseTransferResponse = validateLicenceTransferPayment(paymentRecordDetailCreateDto, fee);
+            if (validateLicenseTransferResponse != null) {
+                return validateLicenseTransferResponse;
+            }
+        }
+        return null;
+    }
+
+    private Mono<ResponseEntity> validateLicenceTransferPayment(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, Fee fee) {
+        String licenseTransferId = paymentRecordDetailCreateDto.getLicenseTransferId();
+        if (StringUtils.isEmpty(licenseTransferId)) {
+            return Mono.just(new ResponseEntity<>("Licence Transfer id should not be empty", HttpStatus.BAD_REQUEST));
+        }
+        LicenseTransfer licenseTransfer = licenseTransferService.findLicenseTransferById(licenseTransferId);
+        if (licenseTransfer == null) {
+            return Mono.just(new ResponseEntity<>(String.format("Licence Transfer with id %s not found", licenseTransferId), HttpStatus.BAD_REQUEST));
+        }
+        if (!licenseTransfer.isFinallyApproved()) {
+            return Mono.just(new ResponseEntity<>("The Licence Transfer is not yet approved", HttpStatus.BAD_REQUEST));
         }
         return null;
     }
@@ -709,7 +737,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             paymentRecord.setGameTypeId(fee.getGameTypeId());
             paymentRecord.setLicenseTypeId(fee.getLicenseTypeId());
             paymentRecord.setFeePaymentTypeId(fee.getFeePaymentTypeId());
-
+            paymentRecord.setLicenseTransferId(createDto.getLicenseTransferId());
             paymentRecord.setPaymentReference(NumberUtil.generateTransactionReferenceForPaymentRecord());
             paymentRecord.setAgentId(createDto.getAgentId());
             paymentRecord.setInstitutionId(createDto.getInstitutionId());

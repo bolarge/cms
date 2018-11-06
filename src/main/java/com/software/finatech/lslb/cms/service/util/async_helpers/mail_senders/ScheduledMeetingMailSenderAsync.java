@@ -61,10 +61,11 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
         return mailContentBuilderService.build(model, templateName);
     }
 
-    private String buildOperatorMeetingMailContent(ScheduledMeeting scheduledMeeting, String templateName) {
+    private String buildOperatorMeetingMailContent(ScheduledMeeting scheduledMeeting, String templateName, Institution transferor) {
         Institution institution = institutionService.findByInstitutionId(scheduledMeeting.getInstitutionId());
         String meetingUrl = String.format("%s/schedule-presentation-view/%s", frontEndPropertyHelper.getFrontEndUrl(), scheduledMeeting.getId());
         String institutionName = institution.getInstitutionName();
+        String transferorName = transferor == null ? null : transferor.getInstitutionName();
         HashMap<String, Object> model = new HashMap<>();
         String meetingDateString = scheduledMeeting.getMeetingDateString();
         String meetingTimeString = scheduledMeeting.getMeetingTimeString();
@@ -76,6 +77,7 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
         model.put("venue", scheduledMeeting.getVenue());
         model.put("additionalNotes", scheduledMeeting.getMeetingDescription());
         model.put("date", presentDateString);
+        model.put("transferor", transferorName);
         model.put("frontEndUrl", meetingUrl);
         return mailContentBuilderService.build(model, templateName);
     }
@@ -93,10 +95,10 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
     }
 
     @Async
-    public void sendEmailToMeetingInvitedOperators(String templateName, String mailSubject, ScheduledMeeting scheduledMeeting) {
+    public void sendEmailToMeetingInvitedOperators(String templateName, String mailSubject, ScheduledMeeting scheduledMeeting, Institution transferor) {
         try {
             ArrayList<AuthInfo> operatorAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(scheduledMeeting.getInstitutionId());
-            String mailContent = buildOperatorMeetingMailContent(scheduledMeeting, templateName);
+            String mailContent = buildOperatorMeetingMailContent(scheduledMeeting, templateName, transferor);
             for (AuthInfo authInfo : operatorAdmins) {
                 logger.info("Sending meeting email to {}", authInfo.getEmailAddress());
                 emailService.sendEmail(mailContent, mailSubject, authInfo.getEmailAddress());

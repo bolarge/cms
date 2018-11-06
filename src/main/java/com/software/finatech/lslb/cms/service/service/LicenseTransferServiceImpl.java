@@ -11,6 +11,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseTransferService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.LicenseTransferMailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -46,18 +47,21 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
     private InstitutionService institutionService;
     private AuditLogHelper auditLogHelper;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
+    private LicenseTransferMailSenderAsync licenseTransferMailSenderAsync;
 
     @Autowired
     public LicenseTransferServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                                       LicenseService licenseService,
                                       InstitutionService institutionService,
                                       AuditLogHelper auditLogHelper,
-                                      SpringSecurityAuditorAware springSecurityAuditorAware) {
+                                      SpringSecurityAuditorAware springSecurityAuditorAware,
+                                      LicenseTransferMailSenderAsync licenseTransferMailSenderAsync) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.licenseService = licenseService;
         this.institutionService = institutionService;
         this.auditLogHelper = auditLogHelper;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
+        this.licenseTransferMailSenderAsync = licenseTransferMailSenderAsync;
     }
 
     @Override
@@ -141,8 +145,8 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(licenseAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institution.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            licenseTransferMailSenderAsync.sendLicenseTransferInitialMailNotificationsToLslbAdmins(licenseTransfer);
             return Mono.just(new ResponseEntity<>(licenseTransfer.convertToDto(), HttpStatus.OK));
-            //TODO::SEND EMAIL OF NEW LICENSE TRANSFER TO LSLB ADMINS
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while creating license transfer ", e);
         }
@@ -175,7 +179,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institution.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
-            //TODO:: send email to lslb admin to approve the request
+            licenseTransferMailSenderAsync.sendNewAddOperatorNotificationToLSlBAdmins(licenseTransfer);
             return Mono.just(new ResponseEntity<>(licenseTransfer.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding transferee to license transfer", e);
@@ -196,20 +200,20 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             }
             LicenseTransferStatus oldStatus = licenseTransfer.getLicenseTransferStatus();
             if (licenseTransfer.isPendingInitialApproval()) {
+                licenseTransferMailSenderAsync.sendInitialLicenseTransferApprovalMailToTransferorAdmins(licenseTransfer);
                 licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.PENDING_NEW_INSTITUTION_ADDITION_ID);
             } else if (licenseTransfer.isPendingAddInstitutionApproval()) {
                 licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.PENDING_FINAL_APPROVAL_ID);
             } else if (licenseTransfer.isPendingFinalApproval()) {
                 licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.APPROVED_ID);
-                //TODO:: send email to transferee to make payment for license transfer
+                licenseTransferMailSenderAsync.sendLicenseTransferApprovalMailToTransferorAndTransferee(licenseTransfer);
             } else {
-                
+                return Mono.just(new ResponseEntity<>("Licence Transfer is not in a  valid state to be approved", HttpStatus.BAD_REQUEST));
             }
 
             licenseTransfer.getTransferDecisions().add(LicenseTransferDecision.fromNameNewAndOldStatus(loggedInUser.getFullName(), String.valueOf(oldStatus),
                     String.valueOf(licenseTransfer.getLicenseTransferStatus())));
-
-            String verbiage = String.format("Approved License Transfer , Transferror -> %s, Transferee  -> %s, Category -> %s, License Number Number -> %s, Old Status -> %s, New Status -> %s, Id -> %s",
+            String verbiage = String.format("Approved License Transfer , Transferor -> %s, Transferee  -> %s, Category -> %s, License Number Number -> %s, Old Status -> %s, New Status -> %s, Id -> %s",
                     licenseTransfer.getFromInstitution(), licenseTransfer.getToInstitution(), licenseTransfer.getGameType(), licenseTransfer.getLicenseNumber(),
                     oldStatus, licenseTransfer.getLicenseTransferStatus(), licenseTransfer.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(licenseAuditActionId,
@@ -239,10 +243,16 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             licenseTransfer.getTransferDecisions().add(LicenseTransferDecision.fromNameNewAndOldStatus(loggedInUser.getFullName(), String.valueOf(oldStatus),
                     String.valueOf(licenseTransfer.getLicenseTransferStatus())));
             mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
-            if (StringUtils.equals(oldStatus.getId(), LicenseTransferStatusReferenceData.PENDING_FINAL_APPROVAL_ID)) {
-                //TODO:: Send email to transferror and transferee about failure of license transfer
-            }
 
+            if (oldStatus.isPendingFinalApproval()) {
+                licenseTransferMailSenderAsync.sendLicenseTransferRejectionMailToTransferorAndTransferee(licenseTransfer);
+            }
+            if (oldStatus.isPendingInitialApproval()) {
+                licenseTransferMailSenderAsync.sendInitialLicenseTransferRejectionMailToTransferor(licenseTransfer);
+            }
+            if (oldStatus.isPendingAddInstitutionApproval()) {
+                licenseTransferMailSenderAsync.sendRejectionNotificationToTransferee(licenseTransfer);
+            }
             String verbiage = String.format("Rejected License Transfer , Transferror -> %s, Transferee  -> %s, Category -> %s, License Number Number -> %s, Id -> %s",
                     licenseTransfer.getFromInstitution(), licenseTransfer.getToInstitution(), licenseTransfer.getGameType(), licenseTransfer.getLicenseNumber(), licenseTransfer.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(licenseAuditActionId,

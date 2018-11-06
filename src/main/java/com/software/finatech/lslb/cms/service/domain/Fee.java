@@ -1,7 +1,9 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.FeeDto;
+import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -17,6 +19,15 @@ public class Fee extends AbstractFact {
     protected String licenseTypeId;
     private LocalDate effectiveDate;
     private LocalDate endDate;
+    private LocalDate nextNotificationDate;
+
+    public LocalDate getNextNotificationDate() {
+        return nextNotificationDate;
+    }
+
+    public void setNextNotificationDate(LocalDate nextNotificationDate) {
+        this.nextNotificationDate = nextNotificationDate;
+    }
 
     public LocalDate getEffectiveDate() {
         return effectiveDate;
@@ -178,16 +189,31 @@ public class Fee extends AbstractFact {
         }
 
         LocalDate startDate = getEffectiveDate();
-        if (startDate != null){
+        if (startDate != null) {
             feeDto.setEffectiveDate(startDate.toString("dd-MM-yyyy"));
         }
         LocalDate endDate = getEndDate();
-        if (endDate != null){
+        if (endDate != null) {
             feeDto.setEndDate(endDate.toString("dd-MM-yyyy"));
         }
         return feeDto;
     }
 
+    public boolean isLicenseRenewalFee() {
+        return StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_RENEWAL_FEE_TYPE_ID, this.feePaymentTypeId);
+    }
+
+    public boolean isLicenseFee() {
+        return StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, this.feePaymentTypeId);
+    }
+
+    public boolean isApplicationFee() {
+        return StringUtils.equals(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID, this.feePaymentTypeId);
+    }
+
+    public boolean isLicenseTransferFee() {
+        return StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_TRANSFER_FEE_TYPE_ID, this.feePaymentTypeId);
+    }
 
     @Override
     public String getFactName() {

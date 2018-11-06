@@ -9,7 +9,7 @@ public class FeePaymentTypeReferenceData {
     public static final String LICENSE_RENEWAL_FEE_TYPE_ID= "03";
     public static final String TAX_FEE_TYPE_ID= "04";
     public static final String TAX_RENEWAL_FEE_TYPE_ID= "05";
-    public static final String TRANSFER_FEE_TYPE_ID= "06";
+    public static final String LICENSE_TRANSFER_FEE_TYPE_ID = "06";
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         FeePaymentType feePaymentType1 = (FeePaymentType) mongoRepositoryReactive.findById(APPLICATION_FEE_TYPE_ID, FeePaymentType.class).block();
         if (feePaymentType1 == null) {
@@ -45,12 +45,12 @@ public class FeePaymentTypeReferenceData {
         }
         feePaymentType5.setName("Tax Renewal Fees");
 
-        FeePaymentType feePaymentType6 = (FeePaymentType) mongoRepositoryReactive.findById(TRANSFER_FEE_TYPE_ID ,FeePaymentType.class).block();
+        FeePaymentType feePaymentType6 = (FeePaymentType) mongoRepositoryReactive.findById(LICENSE_TRANSFER_FEE_TYPE_ID,FeePaymentType.class).block();
         if (feePaymentType6 == null) {
             feePaymentType6 = new FeePaymentType();
-            feePaymentType6.setId(TRANSFER_FEE_TYPE_ID);
+            feePaymentType6.setId(LICENSE_TRANSFER_FEE_TYPE_ID);
         }
-        feePaymentType6.setName("TRANSFER FEE");
+        feePaymentType6.setName("License Transfer Fee");
 
         mongoRepositoryReactive.saveOrUpdate(feePaymentType1);
         mongoRepositoryReactive.saveOrUpdate(feePaymentType2);

@@ -561,22 +561,16 @@
                                                                             </h3>
                                                                             <div mc:edit="body"
                                                                                  style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
-                                                                                In line with your application for <span
-                                                                                    th:text="${gameType}"></span>
-                                                                                licence.
-                                                                                Your document uploaded for <span
-                                                                                    th:text="${documentType}"></span>
-                                                                                named "<span th:text="${fileName}"></span>" has
-                                                                                been rejected ,for the reason below
+                                                                                We are sorry to inform you that your
+                                                                                request to transfer your licence in
+                                                                                category
+                                                                                <span th:text="${gameType}"></span> to
+                                                                                <span th:text="${transferee}"></span>
+                                                                                has been rejected.
                                                                                 <br>
-                                                                                "<span th:text="${comment}"></span>".<br/>
-                                                                                You are therefore required to reupload a
-                                                                                document for <span
-                                                                                    th:text="${documentType}"></span>
-                                                                                so we can proceed with your application.
-                                                                                <br>
-                                                                                <br>
-                                                                                <p>Kindly click the link below to reupload the document.</p>
+                                                                                You can however review and re initiate
+                                                                                the request.
+                                                                                <br/>
                                                                                 Regards.
                                                                             </div>
                                                                         </td>
@@ -603,23 +597,6 @@
                                                                         <td style="padding-top:0;" align="center"
                                                                             valign="top" width="500"
                                                                             class="flexibleContainerCell">
-
-                                                                            <!-- CONTENT TABLE // -->
-                                                                            <table border="0" cellpadding="0"
-                                                                                   cellspacing="0" width="60%"
-                                                                                   class="emailButton"
-                                                                                   style="background-color: #3498DB;border-radius: 10px;">
-                                                                                <tr>
-                                                                                    <td align="center" valign="middle"
-                                                                                        class="buttonContent"
-                                                                                        style="padding-top:15px;padding-bottom:15px;padding-right:15px;padding-left:15px;">
-                                                                                        <a style="color:#FFFFFF;text-decoration:none;font-family:Helvetica,Arial,sans-serif;font-size:20px;line-height:135%;"
-                                                                                           th:href="@{${frontEndUrl}}"
-                                                                                           target="_blank">Reupload <span th:text="${documentType}"></span>
-                                                                                        </a>
-                                                                                    </td>
-                                                                                </tr>
-                                                                            </table>
                                                                             <!-- // CONTENT TABLE -->
 
                                                                         </td>

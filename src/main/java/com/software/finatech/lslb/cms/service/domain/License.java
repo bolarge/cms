@@ -28,6 +28,15 @@ public class License extends AbstractFact {
     protected String parentLicenseId;
     protected String licenseNumber;
     protected LocalDate lastSentExpiryEmailDate;
+    protected String licenseTransferId;
+
+    public String getLicenseTransferId() {
+        return licenseTransferId;
+    }
+
+    public void setLicenseTransferId(String licenseTransferId) {
+        this.licenseTransferId = licenseTransferId;
+    }
 
     public LocalDate getLastSentExpiryEmailDate() {
         return lastSentExpiryEmailDate;

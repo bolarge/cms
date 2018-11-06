@@ -50,4 +50,6 @@ public interface AuthInfoService {
     ArrayList<AuthInfo> findAllOtherActiveUsersForApproval(AuthInfo initiator);
 
     Mono<ResponseEntity> getUserFullDetail(String userId);
+
+    AuthInfo findActiveUserWithEmail(String emailAddres);
 }
