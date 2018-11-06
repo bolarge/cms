@@ -368,33 +368,33 @@ public class RenewalFormServiceImpl implements RenewalFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String renewalFormId, FormCreateCommentDto renewalFormCreateCommentDto, HttpServletRequest request) {
+    public Mono<ResponseEntity> addCommentsToForm(String renewalFormId, AddCommentDto addCommentDto, HttpServletRequest request) {
         try {
             RenewalForm renewalForm = getRenewalFormById(renewalFormId);
             if (renewalForm == null) {
-                return Mono.just(new ResponseEntity<>("Renewal Form does not exist", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>(String.format("Renewal form with id %s does not exist", renewalFormId), HttpStatus.BAD_REQUEST));
             }
-            if (!StringUtils.equals(RenewalFormStatusReferenceData.SUBMITTED, renewalForm.getFormStatusId())) {
-                return Mono.just(new ResponseEntity<>("Renewal Form status has to be IN REVIEW for you to add a comment", HttpStatus.BAD_REQUEST));
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
             }
-            AuthInfo lslbAdmin = authInfoService.getUserById(renewalFormCreateCommentDto.getUserId());
-            if (lslbAdmin == null) {
-                return Mono.just(new ResponseEntity<>("Commenting user does not exist", HttpStatus.BAD_REQUEST));
-            }
-            LslbAdminComment lslbAdminComment = new LslbAdminComment(renewalFormCreateCommentDto.getUserId(), renewalFormCreateCommentDto.getComment());
-            renewalForm.setLslbAdminComment(lslbAdminComment);
-            renewalForm.setFormStatusId(RenewalFormStatusReferenceData.PENDING_RESUBMISION);
-            saveRenewalForm(renewalForm);
 
-            String verbiage = String.format("Added comment to renewal form : %s ->  ", renewalForm.getId());
+            FormComment comment = new FormComment();
+            comment.setTimeCreated(LocalDateTime.now());
+            comment.setUserFullName(loggedInUser.getFullName());
+            comment.setComment(addCommentDto.getComment());
+            renewalForm.getFormComments().add(comment);
+            mongoRepositoryReactive.saveOrUpdate(renewalForm);
+
+            String verbiage = String.format("Added comment to renewal form  :Form Id -> %s ->  ,Category : -> %s , Comment -> %s",
+                    renewalForm.getId(), renewalForm.getGameTypeName(), addCommentDto.getComment());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), renewalForm.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            return Mono.just(new ResponseEntity<>(renewalForm.convertToDto(), HttpStatus.OK));
 
-            renewalFormNotificationHelperAsync.sendAdminCommentNotificationToInstitutionAdmins(renewalForm, lslbAdminComment.getComment());
-            return Mono.just(new ResponseEntity<>("Comment added successfully", HttpStatus.OK));
         } catch (Exception e) {
-            return logAndReturnError(logger, "An error occurred while adding comment to application form", e);
+            return logAndReturnError(logger, "An error occurred while adding comment", e);
         }
     }
     public RenewalForm getRenewalFormById(String renewalFormId) {

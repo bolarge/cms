@@ -1,10 +1,7 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
 import com.software.finatech.lslb.cms.service.domain.Document;
-import com.software.finatech.lslb.cms.service.dto.FormCreateCommentDto;
-import com.software.finatech.lslb.cms.service.dto.RenewalFormCreateDto;
-import com.software.finatech.lslb.cms.service.dto.RenewalFormRejectDto;
-import com.software.finatech.lslb.cms.service.dto.RenewalFormUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletRequest;
@@ -13,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 public interface RenewalFormService {
 
     Mono<ResponseEntity> approveRenewalForm(String renewalFormId, String approverId, HttpServletRequest request);
-    Mono<ResponseEntity> addCommentsToFormFromLslbAdmin(String renewalId, FormCreateCommentDto formCreateCommentDto, HttpServletRequest request);
+    Mono<ResponseEntity> addCommentsToForm(String renewalFormId, AddCommentDto addCommentDto, HttpServletRequest request);
     void approveRenewalFormDocument(Document document);
     void rejectRenewalFormDocument(Document document, String comment);
     void doDocumentReuploadNotification(Document document);
