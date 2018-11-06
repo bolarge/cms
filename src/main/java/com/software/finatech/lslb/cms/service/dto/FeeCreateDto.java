@@ -13,6 +13,15 @@ public class FeeCreateDto {
     protected String revenueNameId;
     @NotEmpty(message = "Please provide start date")
     private String startDate;
+    private String endDate;
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
+    }
 
     public String getStartDate() {
         return startDate;
@@ -53,5 +62,4 @@ public class FeeCreateDto {
     public void setFeePaymentTypeId(String feePaymentTypeId) {
         this.feePaymentTypeId = feePaymentTypeId;
     }
-
 }

@@ -207,11 +207,11 @@ public class ScheduledMeeting extends AbstractFact {
     }
 
 
-    private ScheduledMeetingPurpose getMeetingPurpose() {
+    public ScheduledMeetingPurpose getMeetingPurpose() {
         if (StringUtils.isEmpty(this.meetingPurposeId)) {
             return null;
         }
-        Map scheduledMeetingPurposeMap = Mapstore.STORE.get("ScheduledMeetingPurpose");
+        Map scheduledMeetingPurposeMap = Mapstore.STORE.get("MeetingPurpose");
         ScheduledMeetingPurpose scheduledMeetingPurpose = null;
         if (scheduledMeetingPurposeMap != null) {
             scheduledMeetingPurpose = (ScheduledMeetingPurpose) scheduledMeetingPurposeMap.get(this.meetingPurposeId);
@@ -276,6 +276,14 @@ public class ScheduledMeeting extends AbstractFact {
         }
         return (ApplicationForm) mongoRepositoryReactive.findById(this.entityId, ApplicationForm.class).block();
     }
+
+    public LicenseTransfer getLicenseTransfer() {
+        if (StringUtils.isEmpty(this.entityId)) {
+            return null;
+        }
+        return (LicenseTransfer) mongoRepositoryReactive.findById(this.entityId, LicenseTransfer.class).block();
+    }
+
 
     public String getMeetingDateTimeString() {
         LocalDateTime meetingDateTime = getMeetingDate();

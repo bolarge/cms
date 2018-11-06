@@ -16,6 +16,8 @@ public class LSLBAuthPermissionReferenceData {
     public static final String RECEIVE_CASE_NOTIFICATION_ID = "51";
     public static final String APPROVE_APPLICATION_FORM_ID = "57";
     public static final String RECEIVE_MACHINE_APPLICATION_NOTIFICATION_ID = "64";
+    public static final String RECEIVE_FEE_EXPIRIY_NOTIFICATION_ID = "65";
+    public static final String RECEIVE_LICENSE_TRANSFER_NOTIFICATION_ID = "66";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         AuthPermission permission = (AuthPermission) mongoRepositoryReactive.findById("1", AuthPermission.class).block();
@@ -618,6 +620,25 @@ public class LSLBAuthPermissionReferenceData {
         permission.setUsedBySystem(true);
         mongoRepositoryReactive.saveOrUpdate(permission);
 
+        permission = (AuthPermission) mongoRepositoryReactive.findById(RECEIVE_FEE_EXPIRIY_NOTIFICATION_ID, AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId(RECEIVE_FEE_EXPIRIY_NOTIFICATION_ID);
+        }
+        permission.setName("RECEIVE FEE EXPIRY NOTIFICATION");
+        permission.setDescription("Receive Fee Expiry Notification");
+        permission.setUsedBySystem(true);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById(RECEIVE_LICENSE_TRANSFER_NOTIFICATION_ID, AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId(RECEIVE_LICENSE_TRANSFER_NOTIFICATION_ID);
+        }
+        permission.setName("RECEIVE LICENSE TRANSFER NOTIFICATION");
+        permission.setDescription("Receive License Transfer Notification");
+        permission.setUsedBySystem(true);
+        mongoRepositoryReactive.saveOrUpdate(permission);
     }
 
 

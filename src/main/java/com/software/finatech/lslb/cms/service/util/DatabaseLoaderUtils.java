@@ -79,6 +79,7 @@ public class DatabaseLoaderUtils {
         MachineTypeReferenceData.load(mongoRepositoryReactive);
         MachineStatusReferenceData.load(mongoRepositoryReactive);
         LicenseTransferStatusReferenceData.load(mongoRepositoryReactive);
+        ScheduledMeetingPurposeReferenceData.load(mongoRepositoryReactive);
     }
 
     // @Profile("test")
@@ -119,6 +120,7 @@ public class DatabaseLoaderUtils {
         factEnums.put("MachineType", MachineType.class);
         factEnums.put("MachineStatus", MachineStatus.class);
         factEnums.put("LicenseTransferStatus", LicenseTransferStatus.class);
+        factEnums.put("MeetingPurpose", ScheduledMeetingPurpose.class);
 
         for (Map.Entry<String, Class> entry : factEnums.entrySet()) {
             logger.info("Importing ReferenceMasterData for > " + entry.getKey());

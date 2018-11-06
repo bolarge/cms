@@ -52,7 +52,7 @@ public class CustomerComplainReminder {
 
     private ArrayList<CustomerComplain> getAllValidCustomerComplainsForReminder() {
         Query query = new Query();
-        query.addCriteria(Criteria.where("customerComplainStatusId").is(CustomerComplainStatusReferenceData.OPEN_ID));
+        query.addCriteria(Criteria.where("customerComplainStatusId").is(CustomerComplainStatusReferenceData.IN_REVIEW_ID));
         query.addCriteria(Criteria.where("nextNotificationDateTime").lte(LocalDateTime.now()));
         return (ArrayList<CustomerComplain>) mongoRepositoryReactive.findAll(query, CustomerComplain.class).toStream().collect(Collectors.toList());
     }

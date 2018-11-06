@@ -511,8 +511,6 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
 
-
-
     public Mono<ResponseEntity> updateFromAIPDocToAIP(String institutionId, String gameTypeId) {
         try {
 
@@ -790,6 +788,7 @@ public class LicenseServiceImpl implements LicenseService {
             license.setId(UUID.randomUUID().toString());
             license.setInstitutionId(paymentRecord.getInstitutionId());
             license.setGameTypeId(paymentRecord.getGameTypeId());
+            license.setLicenseTransferId(paymentRecord.getLicenseTransferId());
             license.setLicenseStatusId(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
             license.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
             license.setEffectiveDate(effectiveDate);

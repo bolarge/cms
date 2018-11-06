@@ -30,7 +30,15 @@ public class PaymentRecord extends AbstractFact {
     private String paymentReference;
     private Set<String> gamingMachineIds = new HashSet<>();
     private Set<String> gamingTerminalIds = new HashSet<>();
+    private String licenseTransferId;
 
+    public String getLicenseTransferId() {
+        return licenseTransferId;
+    }
+
+    public void setLicenseTransferId(String licenseTransferId) {
+        this.licenseTransferId = licenseTransferId;
+    }
 
     public Set<String> getGamingMachineIds() {
         return gamingMachineIds;
@@ -344,6 +352,9 @@ public class PaymentRecord extends AbstractFact {
 
     public boolean isLicensePayment() {
         return StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, this.feePaymentTypeId);
+    }
+    public boolean isLicenseTransferPayment() {
+        return StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_TRANSFER_FEE_TYPE_ID, this.feePaymentTypeId);
     }
 
     public boolean isLicenseRenewalPayment() {

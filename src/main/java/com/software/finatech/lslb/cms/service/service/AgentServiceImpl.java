@@ -1,16 +1,14 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.Agent;
-import com.software.finatech.lslb.cms.service.domain.AgentApprovalRequest;
-import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
-import com.software.finatech.lslb.cms.service.domain.PendingAgent;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AgentApprovalRequestTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
+import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.LicenseValidatorUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
@@ -49,6 +47,7 @@ public class AgentServiceImpl implements AgentService {
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
     private AgentCreationNotifierAsync agentCreationNotifierAsync;
+    private AuthInfoService authInfoService;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static final Logger logger = LoggerFactory.getLogger(AgentServiceImpl.class);
@@ -60,12 +59,14 @@ public class AgentServiceImpl implements AgentService {
                             LicenseValidatorUtil licenseValidatorUtil,
                             SpringSecurityAuditorAware springSecurityAuditorAware,
                             AuditLogHelper auditLogHelper,
-                            AgentCreationNotifierAsync agentCreationNotifierAsync) {
+                            AgentCreationNotifierAsync agentCreationNotifierAsync,
+                            AuthInfoService authInfoService) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.licenseValidatorUtil = licenseValidatorUtil;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.auditLogHelper = auditLogHelper;
         this.agentCreationNotifierAsync = agentCreationNotifierAsync;
+        this.authInfoService = authInfoService;
     }
 
     @Override
@@ -308,7 +309,6 @@ public class AgentServiceImpl implements AgentService {
         if (agentWithEmail != null) {
             return Mono.just(new ResponseEntity<>(String.format("An agent already exist with the email address %s", email), HttpStatus.BAD_REQUEST));
         }
-
         //check if agent exist with bvn
         String bvn = agentCreateDto.getBvn();
         Query queryForAgentWithBvn = Query.query(Criteria.where("bvn").is(bvn));
@@ -319,6 +319,14 @@ public class AgentServiceImpl implements AgentService {
         Mono<ResponseEntity> validateLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(agentCreateDto.getInstitutionId(), agentCreateDto.getGameTypeId());
         if (validateLicenseResponse != null) {
             return validateLicenseResponse;
+        }
+        AuthInfo userWithAgentEmail = authInfoService.findActiveUserWithEmail(email);
+        if (userWithAgentEmail != null) {
+            return Mono.just(new ResponseEntity<>("A user already exit with agent email", HttpStatus.BAD_REQUEST));
+        }
+        PendingAgent pendingAgentWithEmail = findPendingApprovalAgentWithEmail(email);
+        if (pendingAgentWithEmail != null) {
+            return Mono.just(new ResponseEntity<>("An Agent is already pending approval with the same email address", HttpStatus.BAD_REQUEST));
         }
         return null;
     }
@@ -370,6 +378,13 @@ public class AgentServiceImpl implements AgentService {
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while getting agent by id", e);
         }
+    }
+
+    private PendingAgent findPendingApprovalAgentWithEmail(String email) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("emailAddress").is(email));
+        query.addCriteria(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID));
+        return (PendingAgent) mongoRepositoryReactive.find(query, PendingAgent.class).block();
     }
 
     private String generateAgentId() {

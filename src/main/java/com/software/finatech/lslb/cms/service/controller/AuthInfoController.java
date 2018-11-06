@@ -609,7 +609,7 @@ public class AuthInfoController extends BaseController {
             }
 
             if (page == 0) {
-                long count = mongoRepositoryReactive.count(query, Agent.class).block();
+                long count = mongoRepositoryReactive.count(query, AuthInfo.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
             }
 
@@ -814,8 +814,8 @@ public class AuthInfoController extends BaseController {
         return authInfoService.removePermissionFromUser(userAuthPermissionDto, request);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{id}")
-    @ApiOperation(value = "Get user full details", response = AuthInfoDto.class, consumes = "application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "/get-user-full-detail", params = {"userId"})
+    @ApiOperation(value = "Get User full details", response = AuthInfoDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -823,7 +823,7 @@ public class AuthInfoController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> getUserFullDetails(@PathVariable("id") String id) {
+    public Mono<ResponseEntity> getUserFullDetails(@RequestParam("userId") String id) {
         return authInfoService.getUserFullDetail(id);
     }
 
