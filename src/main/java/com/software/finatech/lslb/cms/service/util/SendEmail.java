@@ -21,6 +21,17 @@ public class SendEmail {
     public void setMongoRepositoryReactive(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
     }
+    public String sendEmailNotification(NotificationDto notificationDto, String subject) {
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("description", notificationDto.getDescription());
+        model.put("date", LocalDate.now().toString("dd-MM-YYYY"));
+        model.put("CallbackUrl", notificationDto.getCallBackUrl());
+        String content = mailContentBuilderService.build(model, notificationDto.getTemplate());
+        content = content.replaceAll("CallbackUrl", notificationDto.getCallBackUrl());
+        emailService.sendEmail(content, subject, notificationDto.getInstitutionEmail());
+        return "success";
+    }
+
     public String sendEmailLicenseApplicationNotification(NotificationDto notificationDto) {
         HashMap<String, Object> model = new HashMap<>();
         model.put("description", notificationDto.getDescription());

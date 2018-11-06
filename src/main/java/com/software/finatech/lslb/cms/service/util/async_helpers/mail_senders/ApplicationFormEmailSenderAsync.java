@@ -2,12 +2,16 @@ package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.DocumentNotification;
+import com.software.finatech.lslb.cms.service.dto.NotificationDto;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
+import com.software.finatech.lslb.cms.service.util.Mapstore;
+import com.software.finatech.lslb.cms.service.util.SendEmail;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Async;
@@ -21,7 +25,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
-
+    @Autowired
+    SendEmail sendEmail;
     private static final Logger logger = LoggerFactory.getLogger(ApplicationFormEmailSenderAsync.class);
 
     @Async
@@ -665,28 +670,57 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     }
 
     @Async
-    public void sendDocumentReturnMailToInstitutionMembers(AIPDocumentApproval aipDocumentApproval, Document document) {
+    public void sendDocumentReturnMailToInstitutionMembers(AIPDocumentApproval aipDocumentApproval, Document document, String comment) {
         ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(aipDocumentApproval.getInstitutionId());
-        String mailContent = buildDocumentReturnMailContent(aipDocumentApproval, document);
         for (AuthInfo institutionAdmin : institutionAdmins) {
             try {
                 String email = institutionAdmin.getEmailAddress();
+                String callbackUrl = String.format("%s/%s/reupload/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId(), document.getId());
+
+                NotificationDto notificationDto= new NotificationDto();
+                notificationDto.setInstitutionEmail(email);
+                notificationDto.setGameType(getGameType(aipDocumentApproval.getGameTypeId()).getName());
+                notificationDto.setCallBackUrl(callbackUrl);
+                notificationDto.setDescription("In line with your application for "+notificationDto.getGameType()+" licence. Your document uploaded for "+ document.getDocumentType().getName()+" named "+ document.getFilename()+" has been returned. Reason:" +
+                        "\n\n" +comment+
+                        ".\nYou are therefore required to reupload a document for "+ document.getDocumentType().getName()+", so we can proceed with your application. \n" +
+                        "\n" +
+                        "Kindly click the link below to reupload the document.\n" +
+                        "\n" );
+                notificationDto.setTemplate("AIPUpdate");
+                sendEmail.sendEmailNotification(notificationDto, "Notification on AIP");
+
                 logger.info("Sending document return email to {}", email);
-                emailService.sendEmail(mailContent, String.format("Notification on your AIP for %s licence ", aipDocumentApproval.getGameTypeName()), email);
+             //   emailService.sendEmail(mailContent, String.format("Notification on your AIP for %s licence ", aipDocumentApproval.getGameTypeName()), email);
             } catch (Exception e) {
                 logger.error("An error occurred while sending email", e);
             }
         }
     }
 
-    public void sendDocumentReturnMailToInstitutionMembers(RenewalForm renewalForm, Document document) {
+    public void sendDocumentReturnMailToInstitutionMembers(RenewalForm renewalForm, Document document, String comment) {
         ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(renewalForm.getInstitutionId());
-        String mailContent = buildDocumentReturnMailContent(renewalForm, document);
         for (AuthInfo institutionAdmin : institutionAdmins) {
             try {
                 String email = institutionAdmin.getEmailAddress();
+                String callbackUrl = String.format("%s/%s/reupload/%s", frontEndPropertyHelper.getFrontEndUrl(), renewalForm.getId(), document.getId());
+
+                NotificationDto notificationDto= new NotificationDto();
+                notificationDto.setInstitutionEmail(email);
+                notificationDto.setGameType(getGameType(renewalForm.getGameTypeId()).getName());
+                notificationDto.setCallBackUrl(callbackUrl);
+                notificationDto.setDescription("In line with your renewal application for "+notificationDto.getGameType()+" licence. Your document uploaded for "+ document.getDocumentType().getName()+" named "+ document.getFilename()+" has been returned. Reason: \n" +
+                        "\n\n" +comment+
+                        ".\nYou are therefore required to reupload a document for "+ document.getDocumentType().getName()+" so we can proceed with your application. \n" +
+                        "\n" +
+                        "Kindly click the link below to reupload the document.\n" +
+                        "\n" );
+                notificationDto.setTemplate("AIPUpdate");
+                sendEmail.sendEmailNotification(notificationDto, "Notification on Renewal");
+
                 logger.info("Sending document return email to {}", email);
-                emailService.sendEmail(mailContent, String.format("Notification on your renewal application for %s licence", renewalForm.getGameTypeName()), email);
+
+
             } catch (Exception e) {
                 logger.error("An error occurred while sending email", e);
             }
@@ -795,5 +829,23 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
             String mailContent = buildResubmissionNotificationForRenewalForm(renewalForm, document);
             emailService.sendEmail(mailContent, String.format("%s has resubmitted %s", renewalForm.getInstitutionName(), document.getDocumentType()), approver.getEmailAddress());
         }
+    }
+
+    public GameType getGameType(String gameTypeId) {
+        if (gameTypeId == null) {
+            return null;
+        }
+        Map gameTypeMap = Mapstore.STORE.get("GameType");
+        GameType gameType = null;
+        if (gameTypeMap != null) {
+            gameType = (GameType) gameTypeMap.get(gameTypeId);
+        }
+        if (gameType == null) {
+            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
+            if (gameType != null && gameTypeMap != null) {
+                gameTypeMap.put(gameTypeId, gameType);
+            }
+        }
+        return gameType;
     }
 }
