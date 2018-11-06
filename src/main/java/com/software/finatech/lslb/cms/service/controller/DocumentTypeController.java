@@ -148,7 +148,7 @@ public class DocumentTypeController extends BaseController {
         documentApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
         documentApprovalRequest.setDocumentApprovalRequestTypeId(DocumentApprovalRequestTypeReferenceData.CREATE_DOCUMENT_TYPE_ID);
         mongoRepositoryReactive.saveOrUpdate(documentApprovalRequest);
-        approvalRequestNotifierAsync.sendNewDocumentApprovalRequestEmailToAllOtherUsersInRole(loggedInUser,documentApprovalRequest);
+        approvalRequestNotifierAsync.sendNewDocumentApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, documentApprovalRequest);
         return Mono.just(new ResponseEntity<>(documentApprovalRequest.convertToHalfDto(), HttpStatus.OK));
     }
 
@@ -193,6 +193,7 @@ public class DocumentTypeController extends BaseController {
                 return Mono.just(new ResponseEntity<>(String.format("user with id %s does not exist", setApproverRequest.getApproverId()), HttpStatus.BAD_REQUEST));
             }
             DocumentApprovalRequest approvalRequest = new DocumentApprovalRequest();
+            approvalRequest.setId(UUID.randomUUID().toString());
             approvalRequest.setDocumentApprovalRequestTypeId(DocumentApprovalRequestTypeReferenceData.SET_APPROVER_ID);
             approvalRequest.setDocumentTypeId(documentType.getId());
             approvalRequest.setInitiatorId(loggedInUser.getId());
