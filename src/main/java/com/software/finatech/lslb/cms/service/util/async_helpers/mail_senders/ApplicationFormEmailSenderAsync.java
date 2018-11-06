@@ -672,7 +672,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
             try {
                 String email = institutionAdmin.getEmailAddress();
                 logger.info("Sending document return email to {}", email);
-                emailService.sendEmail(mailContent, String.format("Notification on your AIP for %s licence", aipDocumentApproval.getGameTypeName()), email);
+                emailService.sendEmail(mailContent, String.format("Notification on your AIP for %s licence ", aipDocumentApproval.getGameTypeName()), email);
             } catch (Exception e) {
                 logger.error("An error occurred while sending email", e);
             }

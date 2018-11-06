@@ -258,10 +258,18 @@ public class AuthInfoController extends BaseController {
     public Mono<ResponseEntity> login(@Valid @RequestBody LoginDto loginDto, HttpServletRequest request) {
         try {
 
+
+
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.find(new Query(Criteria.where("emailAddress").is(loginDto.getUserName())), AuthInfo.class).block();
+
+
             if (authInfo == null) {
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, loginDto.getUserName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User not found"));
                 return Mono.just(new ResponseEntity("Invalid Username/Password", HttpStatus.UNAUTHORIZED));
+            }
+            if (authInfo.isInactive() != false) {
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User Inactive"));
+                return Mono.just(new ResponseEntity(authInfo.getInactiveReason(), HttpStatus.UNAUTHORIZED));
             }
 
             if (authInfo.getEnabled() != true) {
@@ -269,10 +277,7 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity("User Deactivated", HttpStatus.UNAUTHORIZED));
             }
 
-            if (authInfo.isInactive() != false) {
-                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User Inactive"));
-                return Mono.just(new ResponseEntity(authInfo.getInactiveReason(), HttpStatus.UNAUTHORIZED));
-            }
+
 
             return authInfoService.loginToken(loginDto.getUserName(), loginDto.getPassword(), authInfo, request);
 

@@ -814,18 +814,14 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     @Override
     public void rejectAIPFormDocument(Document document) {
         AIPDocumentApproval aipDocumentApproval = document.getAIPForm();
-        String documentId = document.getId();
         if (aipDocumentApproval != null) {
-            FormDocumentApproval formDocumentApproval = aipDocumentApproval.getDocumentApproval();
-            if (formDocumentApproval != null) {
-                Map<String, Boolean> documentApprovalMap = formDocumentApproval.getApprovalMap();
-                documentApprovalMap.put(documentId, false);
-                applicationFormNotificationHelperAsync.sendDocumentReturnMailToInstitutionMembers(aipDocumentApproval, document);
-                formDocumentApproval.setApprovalMap(documentApprovalMap);
-                aipDocumentApproval.setDocumentApproval(formDocumentApproval);
-            }
+            document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
+            mongoRepositoryReactive.saveOrUpdate(document);
+
+            applicationFormNotificationHelperAsync.sendDocumentReturnMailToInstitutionMembers(aipDocumentApproval, document);
+
             mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
-            licenseService.updateFromAIPDocToAIP(aipDocumentApproval.getInstitutionId(),aipDocumentApproval.getGameTypeId());
+            //licenseService.updateFromAIPDocToAIP(aipDocumentApproval.getInstitutionId(),aipDocumentApproval.getGameTypeId());
         }
     }
 
@@ -857,29 +853,33 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
     @Override
     public void approveAIPFormDocument(Document document) {
+        document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
+        mongoRepositoryReactive.saveOrUpdate(document);
         AIPDocumentApproval aipDocumentApproval = document.getAIPForm();
-        String documentId = document.getId();
         if (aipDocumentApproval != null) {
-            FormDocumentApproval formDocumentApproval = aipDocumentApproval.getDocumentApproval();
-            if (formDocumentApproval != null) {
-                Map<String, Boolean> documentApprovalMap = formDocumentApproval.getApprovalMap();
-                documentApprovalMap.put(documentId, true);
-                Collection<Boolean> values = documentApprovalMap.values();
-                int count = 0;
-                for (Boolean value : values) {
-                    if (value) {
-                        count = count + 1;
+            Query query = new Query();
+            query.addCriteria(Criteria.where("entityId").is(aipDocumentApproval.getId()));
+            query.addCriteria(Criteria.where("isCurrent").is(true));
+            List<Document> documents= (List<Document>) mongoRepositoryReactive.findAll(query, Document.class).collect(Collectors.toList());
+            int countDocumentWithApproval=0;
+            int countApprovedDocument=0;
+
+            for (Document doc : documents) {
+                if(doc.getApprovalRequestStatusId()!=null){
+                    countDocumentWithApproval=+1;
+                    if(doc.getApprovalRequestStatusId().equals(ApprovalRequestStatusReferenceData.APPROVED_ID)){
+                        countApprovedDocument=+1;
                     }
                 }
-                if (count == formDocumentApproval.getSupposedLength()) {
+             }
+
+                if (countDocumentWithApproval == countApprovedDocument) {
+                    aipDocumentApproval.setReadyForApproval(true);
                     applicationFormNotificationHelperAsync.sendApproverMailToFinalApproval(aipDocumentApproval);
-                    formDocumentApproval.setComplete(true);
                 }
-                formDocumentApproval.setApprovalMap(documentApprovalMap);
             }
-            aipDocumentApproval.setDocumentApproval(formDocumentApproval);
             mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
-        }
+
     }
 
     @Override
@@ -1165,6 +1165,19 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding comment", e);
         }
+    }
+
+    @Override
+    public Mono<ResponseEntity> getAIPFormId(String institutionId, String gameTypeId) {
+        Query query= new Query();
+        query.addCriteria(Criteria.where("institutionId").is(institutionId));
+        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        AIPDocumentApproval aipDocumentApproval= (AIPDocumentApproval)mongoRepositoryReactive.find(query, AIPDocumentApproval.class).block();
+        if(aipDocumentApproval==null){
+            return Mono.just(new ResponseEntity<>("invalid Request", HttpStatus.BAD_REQUEST));
+        }
+        return Mono.just(new ResponseEntity<>(aipDocumentApproval.getId(), HttpStatus.OK));
+
     }
 
     private ApplicationForm fromCreateDto(ApplicationFormCreateDto applicationFormCreateDto) {
