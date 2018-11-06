@@ -406,7 +406,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
         Query query = new Query();
         query.addCriteria(Criteria.where("entityId").is(renewalForm.getId()));
         query.addCriteria(Criteria.where("isCurrent").is(true));
-        List<Document> documents= (List<Document>) mongoRepositoryReactive.findAll(query, Document.class).collect(Collectors.toList());
+        List<Document> documents= (List<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
         int countDocumentWithApproval=0;
         int countApprovedDocument=0;
 
