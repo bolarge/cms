@@ -105,7 +105,7 @@ public class RenewalFormController extends BaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> approveAIPForm(@RequestParam("renewalId") String renewalId,
+    public Mono<ResponseEntity> approveRenewalForm(@RequestParam("renewalId") String renewalId,
                                                @RequestParam("userId") String approverId,HttpServletRequest request) {
         return renewalFormService.approveRenewalForm(renewalId,approverId, request);
     }
@@ -118,8 +118,8 @@ public class RenewalFormController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> createAIPFormComment(@RequestParam("renewalId") String renewalId,
-                                                     @RequestBody @Valid FormCreateCommentDto formCreateCommentDto, HttpServletRequest request) {
-        return renewalFormService.addCommentsToFormFromLslbAdmin(renewalId, formCreateCommentDto, request);
+                                                     @RequestBody @Valid AddCommentDto addCommentDto, HttpServletRequest request) {
+        return renewalFormService.addCommentsToForm(renewalId, addCommentDto, request);
     }
     @RequestMapping(method = RequestMethod.POST, value = "/complete-renewal-form", params = {"renewalId"})
     @ApiOperation(value = "complete filling renewal form", response = String.class, consumes = "application/json")

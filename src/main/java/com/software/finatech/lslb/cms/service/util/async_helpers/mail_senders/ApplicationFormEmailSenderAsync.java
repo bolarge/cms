@@ -40,16 +40,6 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     }
 
     @Async
-    public void sendAdminCommentNotificationToInstitutionAdmins(RenewalForm renewalForm, String comment) {
-        ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(renewalForm.getInstitutionId());
-        String mailSubject = String.format("Notification on your renewal application for %s licence", renewalForm.getGameTypeName());
-        String emailContent = buildRenewalCommentFromLSLBAdminEmailContent(renewalForm);
-        for (AuthInfo institutionAdmin : institutionAdmins) {
-            sendCommentNotificationToInstitutionUser(institutionAdmin.getEmailAddress(), mailSubject, emailContent);
-        }
-    }
-
-    @Async
     public void sendAdminCommentNotificationToInstitutionAdmins(AIPDocumentApproval aipDocumentApproval, String comment) {
         ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(aipDocumentApproval.getInstitutionId());
         String mailSubject = String.format("Notification on your AIP application for %s licence", aipDocumentApproval.getGameTypeName());
@@ -88,15 +78,6 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         return mailContentBuilderService.build(model, "aip-form/AIPFormPendingUploadGAadmin");
     }
 
-    private String buildRenewalCommentFromLSLBAdminEmailContent(RenewalForm renewalForm) {
-        String presentDate = DateTime.now().toString("dd-MM-yyyy ");
-        String gameTypeName = renewalForm.getGameTypeName();
-        HashMap<String, Object> model = new HashMap<>();
-        model.put("comment", renewalForm.getLslbAdminComment());
-        model.put("date", presentDate);
-        model.put("gameType", gameTypeName);
-        return mailContentBuilderService.build(model, "renewal-form/RenewalFormPendingUploadGAadmin");
-    }
 
     @Async
     public void sendRejectionMailToInstitutionAdmins(ApplicationForm applicationForm) {
@@ -526,8 +507,6 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
                 sendApproverMailToFinalApproval(renewalForm);
                 return;
             }
-            FormDocumentApproval documentApproval = new FormDocumentApproval();
-            documentApproval.setSupposedLength(documentNotifications.size());
             Map<String, Boolean> approvalMap = new HashMap<>();
             String mailSubject = "New Renewal Application submission on LSLB Customer Management System";
             for (DocumentNotification documentNotification : documentNotifications) {
@@ -540,9 +519,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
                 approvalMap.put(document.getId(), false);
                 mongoRepositoryReactive.saveOrUpdate(document);
             }
-            documentApproval.setApprovalMap(approvalMap);
-            renewalForm.setDocumentApproval(documentApproval);
-            mongoRepositoryReactive.saveOrUpdate(renewalForm);
+             mongoRepositoryReactive.saveOrUpdate(renewalForm);
         } catch (Exception e) {
             logger.error("An error occurred while sending email to application form document approvers", e);
         }

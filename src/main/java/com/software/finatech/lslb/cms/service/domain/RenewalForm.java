@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.domain;
 
+import com.software.finatech.lslb.cms.service.dto.CommentDto;
 import com.software.finatech.lslb.cms.service.dto.RenewalFormDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
@@ -8,6 +9,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("serial")
@@ -34,11 +38,10 @@ public class RenewalForm extends AbstractFact {
     protected String checkNewInvestors;
     protected String newInvestors;
     protected String formStatusId;
-    protected LslbAdminComment lslbAdminComment;
+    protected List<FormComment> formComments = new ArrayList<>();
     protected String approverId;
     protected String rejectorId;
     protected String reasonForRejection;
-    protected FormDocumentApproval documentApproval;
     protected LocalDate submissionDate;
     protected Boolean readyForApproval;
 
@@ -50,12 +53,12 @@ public class RenewalForm extends AbstractFact {
         this.readyForApproval = readyForApproval;
     }
 
-    public LslbAdminComment getLslbAdminComment() {
-        return lslbAdminComment;
+    public List<FormComment> getFormComments() {
+        return formComments;
     }
 
-    public void setLslbAdminComment(LslbAdminComment lslbAdminComment) {
-        this.lslbAdminComment = lslbAdminComment;
+    public void setFormComments(List<FormComment> formComments) {
+        this.formComments = formComments;
     }
 
     public LocalDate getSubmissionDate() {
@@ -91,15 +94,7 @@ public class RenewalForm extends AbstractFact {
         this.approverId = approverId;
     }
 
-    public FormDocumentApproval getDocumentApproval() {
-        return documentApproval;
-    }
-
-    public void setDocumentApproval(FormDocumentApproval documentApproval) {
-        this.documentApproval = documentApproval;
-    }
-
-    public Institution getInstitution() {
+     public Institution getInstitution() {
         if (StringUtils.isEmpty(institutionId)) {
             return null;
         }
@@ -333,15 +328,9 @@ public class RenewalForm extends AbstractFact {
         renewalFormDto.setTechnicalPartner(getTechnicalPartner());
         renewalFormDto.setLicenseId(getLicensedId());
         renewalFormDto.setRejectionReason(getReasonForRejection());
-        LslbAdminComment lslbAdminComment = getLslbAdminComment();
-        if (lslbAdminComment != null) {
-            renewalFormDto.setLslbAdminComment(lslbAdminComment.getComment());
-            renewalFormDto.setLslbAdminCommented(true);
-            AuthInfo admin = getAuthInfo(lslbAdminComment.getUserId());
-            if (admin != null) {
-                renewalFormDto.setLslbAdminName(admin.getFullName());
-            }
-        }
+        List<CommentDto> comments = getComments();
+        Collections.reverse(comments);
+        renewalFormDto.setComments(comments);
         Query query=new Query();
         query.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));
         License license= (License) mongoRepositoryReactive.find(query,License.class).block();
@@ -382,6 +371,18 @@ public class RenewalForm extends AbstractFact {
 
         return renewalFormDto;
 
+    }
+    private List<CommentDto> getComments() {
+        List<CommentDto> comments = new ArrayList<>();
+        for (FormComment comment : this.formComments) {
+            CommentDto dto = new CommentDto();
+            dto.setComment(comment.getComment());
+            dto.setUserFullName(comment.getUserFullName());
+            dto.setCommentDate(comment.getTimeCreated().toString("dd-MM-yyyy"));
+            dto.setCommentTime(comment.getTimeCreated().toString("HH:mm:ss a"));
+            comments.add(dto);
+        }
+        return comments;
     }
 
     @Override

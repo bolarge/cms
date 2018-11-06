@@ -2,6 +2,8 @@ package com.software.finatech.lslb.cms.service.dto;
 
 import com.software.finatech.lslb.cms.service.domain.LicenseStatus;
 
+import java.util.List;
+
 public class RenewalFormDto {
     protected PaymentRecordDto paymentRecord;
     protected String checkStakeHoldersChange;
@@ -33,7 +35,7 @@ public class RenewalFormDto {
     protected String rejectionReason;
     private Boolean lslbAdminCommented;
     private String lslbAdminName;
-    private String lslbAdminComment;
+    private List<CommentDto> comments;
 
     public Boolean getLslbAdminCommented() {
         return lslbAdminCommented;
@@ -51,12 +53,12 @@ public class RenewalFormDto {
         this.lslbAdminName = lslbAdminName;
     }
 
-    public String getLslbAdminComment() {
-        return lslbAdminComment;
+    public List<CommentDto> getComments() {
+        return comments;
     }
 
-    public void setLslbAdminComment(String lslbAdminComment) {
-        this.lslbAdminComment = lslbAdminComment;
+    public void setComments(List<CommentDto> comments) {
+        this.comments = comments;
     }
 
     public String getRejectionReason() {
