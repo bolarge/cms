@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.service;
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.Institution;
+import com.software.finatech.lslb.cms.service.domain.LicenseTransfer;
 import com.software.finatech.lslb.cms.service.domain.ScheduledMeeting;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
@@ -166,18 +167,16 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
 
             ScheduledMeeting scheduledMeeting = fromCreateDto(scheduledMeetingCreateDto);
             saveScheduledMeeting(scheduledMeeting);
-            String creatorTemplateName = "";
-            String recipientTemplateName = "";
-            String operatorTemplateName;
-            String creatorMailSubject = String.format("Scheduled meeting with %s", invitedInstitution.getInstitutionName());
+            //         String creatorMailSubject = String.format("Scheduled meeting with %s", invitedInstitution.getInstitutionName());
+//
+//            scheduledMeetingMailSenderAsync.sendEmailToMeetingCreator("scheduled-meetings/ScheduledMeeting-InitialNotification-Creator", creatorMailSubject, scheduledMeeting);
+//            scheduledMeetingMailSenderAsync.sendEmailToMeetingInvitedOperators("scheduled-meetings/ScheduledMeeting-InitialNotification-Operator", "Meeting Invite With Lagos State Lotteries Board", scheduledMeeting, null);
+//            scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-InitialNotification-Recipient", creatorMailSubject, scheduledMeeting, recipientList);
 
-            scheduledMeetingMailSenderAsync.sendEmailToMeetingCreator("scheduled-meetings/ScheduledMeeting-InitialNotification-Creator", creatorMailSubject, scheduledMeeting);
-            scheduledMeetingMailSenderAsync.sendEmailToMeetingInvitedOperators("scheduled-meetings/ScheduledMeeting-InitialNotification-Operator", "Meeting Invite With Lagos State Lotteries Board", scheduledMeeting);
-            scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-InitialNotification-Recipient", creatorMailSubject, scheduledMeeting, recipientList);
-
+            sendInitialMeetingNotifications(scheduledMeeting, recipientList, invitedInstitution);
             String institutionName = invitedInstitution.getInstitutionName();
-            String verbiage = String.format("Created Scheduled Meeting, Institution Name-> %s , Meeting Date -> %s, Venue -> %s, Id -> %s",
-                    institutionName, scheduledMeeting.getMeetingDateString(), scheduledMeeting.getVenue(), scheduledMeeting.getId());
+            String verbiage = String.format("Created Scheduled Meeting, Institution Name-> %s , Meeting Purpose -> %s, Meeting Date -> %s, Venue -> %s, Id -> %s",
+                    institutionName,scheduledMeeting.getMeetingPurpose() ,scheduledMeeting.getMeetingDateString(), scheduledMeeting.getVenue(), scheduledMeeting.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
@@ -212,7 +211,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
 
             scheduledMeetingMailSenderAsync.sendEmailToMeetingCreator("scheduled-meetings/ScheduledMeeting-CancelNotification-LSLB", lslbMailSubject, scheduledMeeting);
             scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-CancelNotification-LSLB", lslbMailSubject, scheduledMeeting, recipients);
-            scheduledMeetingMailSenderAsync.sendEmailToMeetingInvitedOperators("scheduled-meetings/ScheduledMeeting-CancelNotification-Operator", "Update on meeting with Lagos State Lotteries Board", scheduledMeeting);
+            scheduledMeetingMailSenderAsync.sendEmailToMeetingInvitedOperators("scheduled-meetings/ScheduledMeeting-CancelNotification-Operator", "Update on meeting with Lagos State Lotteries Board", scheduledMeeting, null);
 
             String verbiage = String.format("Canceled Scheduled Meeting, Institution Name-> %s , Meeting Date -> %s, Venue -> %s, meetingId -> %s",
                     institutionName, scheduledMeeting.getMeetingDateString(), scheduledMeeting.getVenue(), scheduledMeeting.getId());
@@ -291,12 +290,13 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             existingScheduledMeeting.setReminderSent(false);
             saveScheduledMeeting(existingScheduledMeeting);
 
-            String lslbMailSubject = String.format("Update on Scheduled meeting with %s", invitedInstitution.getInstitutionName());
-            scheduledMeetingMailSenderAsync.sendEmailToMeetingCreator("scheduled-meetings/ScheduledMeeting-UpdateNotification-Creator", lslbMailSubject, existingScheduledMeeting);
-            scheduledMeetingMailSenderAsync.sendEmailToMeetingInvitedOperators("scheduled-meetings/ScheduledMeeting-UpdateNotification-Operator", "Update on meeting with Lagos State Lotteries Board", existingScheduledMeeting);
-            scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-UpdateNotification-Recipient", lslbMailSubject, existingScheduledMeeting, authInfoService.getUsersFromUserIds(recipientsForUpdateMail));
-            scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-UpdateNotificationRemove-Recipient", lslbMailSubject, existingScheduledMeeting, authInfoService.getUsersFromUserIds(recipientsForRemoveMail));
-            scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-InitialNotification-Recipient", String.format("Meeting with %s", invitedInstitution.getInstitutionName()), existingScheduledMeeting, authInfoService.getUsersFromUserIds(recipientsForNewInviteMail));
+//            String lslbMailSubject = String.format("Update on Scheduled meeting with %s", invitedInstitution.getInstitutionName());
+//            scheduledMeetingMailSenderAsync.sendEmailToMeetingCreator("scheduled-meetings/ScheduledMeeting-UpdateNotification-Creator", lslbMailSubject, existingScheduledMeeting);
+//            scheduledMeetingMailSenderAsync.sendEmailToMeetingInvitedOperators("scheduled-meetings/ScheduledMeeting-UpdateNotification-Operator", "Update on meeting with Lagos State Lotteries Board", existingScheduledMeeting, null);
+//            scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-UpdateNotification-Recipient", lslbMailSubject, existingScheduledMeeting, authInfoService.getUsersFromUserIds(recipientsForUpdateMail));
+//            scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-UpdateNotificationRemove-Recipient", lslbMailSubject, existingScheduledMeeting, authInfoService.getUsersFromUserIds(recipientsForRemoveMail));
+//            scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-InitialNotification-Recipient", String.format("Meeting with %s", invitedInstitution.getInstitutionName()), existingScheduledMeeting, authInfoService.getUsersFromUserIds(recipientsForNewInviteMail));
+            sendUpdatedMeetingNotifications(existingScheduledMeeting, invitedInstitution, recipientsForUpdateMail, recipientsForRemoveMail, recipientsForNewInviteMail);
 
             String verbiage = String.format("Updated Scheduled Meeting, Institution Name-> %s , Meeting Date -> %s, Venue -> %s, Id -> %s ",
                     invitedInstitution.getInstitutionName(), existingScheduledMeeting.getMeetingDateString(), existingScheduledMeeting.getVenue(), existingScheduledMeeting.getId());
@@ -393,17 +393,50 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
     }
 
     private void sendInitialMeetingNotifications(ScheduledMeeting scheduledMeeting, ArrayList<AuthInfo> recipients, Institution invitedInstitution) {
-        String creatorTemplateName = "";
-        String recipientTemplateName = "";
-        String operatorTemplateName;
-        String creatorMailSubject = String.format("Scheduled meeting with %s",invitedInstitution);
-
+        String operatorTemplateName = "";
+        Institution fromInstitution = null;
+        String creatorMailSubject = String.format("Scheduled meeting with %s", invitedInstitution);
         if (scheduledMeeting.isForLicenseApplicant()) {
             operatorTemplateName = "scheduled-meetings/ScheduledMeeting-InitialNotification-ApplicantOperator";
         }
+        if (scheduledMeeting.isForLicenseTransferee()) {
+            operatorTemplateName = "scheduled-meetings/ScheduledMeeting-InitialNotification-ApplicantOperator";
+        }
+        if (scheduledMeeting.isForLicenseTransferror()) {
+            operatorTemplateName = "scheduled-meetings/ScheduledMeeting-InitialNotification-ApplicantOperator";
+        }
+        LicenseTransfer licenseTransfer = scheduledMeeting.getLicenseTransfer();
+        if (licenseTransfer != null) {
+            fromInstitution = licenseTransfer.getFromInstitution();
+        }
         scheduledMeetingMailSenderAsync.sendEmailToMeetingCreator("scheduled-meetings/ScheduledMeeting-InitialNotification-Creator", creatorMailSubject, scheduledMeeting);
-        scheduledMeetingMailSenderAsync.sendEmailToMeetingInvitedOperators("scheduled-meetings/ScheduledMeeting-InitialNotification-Operator", "Meeting Invite With Lagos State Lotteries Board", scheduledMeeting);
+        scheduledMeetingMailSenderAsync.sendEmailToMeetingInvitedOperators(operatorTemplateName, "Meeting Invite With Lagos State Lotteries Board", scheduledMeeting, fromInstitution);
         scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-InitialNotification-Recipient", creatorMailSubject, scheduledMeeting, recipients);
+    }
 
+    private void sendUpdatedMeetingNotifications(ScheduledMeeting existingScheduledMeeting, Institution invitedInstitution, Set<String> recipientsForUpdateMail, Set<String> recipientsForRemoveMail,
+                                                 Set<String> recipientsForNewInviteMail) {
+        String operatorTemplateName = "";
+        Institution fromInstitution = null;
+        if (existingScheduledMeeting.isForLicenseApplicant()) {
+            operatorTemplateName = "scheduled-meetings/ScheduledMeeting-UpdateNotification-ApplicantOperator";
+        }
+        if (existingScheduledMeeting.isForLicenseTransferee()) {
+            operatorTemplateName = "scheduled-meetings/ScheduledMeeting-UpdateNotification-TransfereeOperator";
+        }
+        if (existingScheduledMeeting.isForLicenseTransferror()) {
+            operatorTemplateName = "scheduled-meetings/ScheduledMeeting-UpdateNotification-TransferorOperator";
+        }
+        LicenseTransfer licenseTransfer = existingScheduledMeeting.getLicenseTransfer();
+        if (licenseTransfer != null) {
+            fromInstitution = licenseTransfer.getFromInstitution();
+        }
+
+        String lslbMailSubject = String.format("Update on Scheduled meeting with %s", invitedInstitution.getInstitutionName());
+        scheduledMeetingMailSenderAsync.sendEmailToMeetingCreator("scheduled-meetings/ScheduledMeeting-UpdateNotification-Creator", lslbMailSubject, existingScheduledMeeting);
+        scheduledMeetingMailSenderAsync.sendEmailToMeetingInvitedOperators(operatorTemplateName, "Update on meeting with Lagos State Lotteries Board", existingScheduledMeeting, fromInstitution);
+        scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-UpdateNotification-Recipient", lslbMailSubject, existingScheduledMeeting, authInfoService.getUsersFromUserIds(recipientsForUpdateMail));
+        scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-UpdateNotificationRemove-Recipient", lslbMailSubject, existingScheduledMeeting, authInfoService.getUsersFromUserIds(recipientsForRemoveMail));
+        scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-InitialNotification-Recipient", String.format("Meeting with %s", invitedInstitution.getInstitutionName()), existingScheduledMeeting, authInfoService.getUsersFromUserIds(recipientsForNewInviteMail));
     }
 }

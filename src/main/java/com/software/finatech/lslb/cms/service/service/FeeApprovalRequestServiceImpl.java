@@ -1,9 +1,12 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.*;
-import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.Fee;
+import com.software.finatech.lslb.cms.service.domain.FeeApprovalRequest;
+import com.software.finatech.lslb.cms.service.domain.PendingFee;
 import com.software.finatech.lslb.cms.service.dto.FeeApprovalRequestDto;
+import com.software.finatech.lslb.cms.service.exception.ApprovalRequestProcessException;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
@@ -16,7 +19,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -30,7 +32,6 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -99,9 +100,9 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             //TODO:: make sure initiator is filtered out
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser != null) {
-              //  query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
+                //  query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
                 if (!loggedInUser.isSuperAdmin()) {
-               //     query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
+                    //     query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
                 }
             }
 
@@ -167,6 +168,8 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity<>(feeApprovalRequest.convertToDto(), HttpStatus.OK));
+        } catch (ApprovalRequestProcessException e) {
+            return logAndReturnError(logger, e.getMessage(), e);
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving request", e);
         }
@@ -235,13 +238,19 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
         }
     }
 
-    private void approveCreateFeeRequest(FeeApprovalRequest feeApprovalRequest) {
+    private void approveCreateFeeRequest(FeeApprovalRequest feeApprovalRequest) throws ApprovalRequestProcessException {
         PendingFee pendingFee = feeApprovalRequest.getPendingFee();
         if (pendingFee != null) {
             pendingFee.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
             Fee existingFee = feeService.findMostRecentFeeByLicenseTypeGameTypeAndFeePaymentType(pendingFee.getLicenseTypeId(), pendingFee.getGameTypeId(), pendingFee.getFeePaymentTypeId());
-            if (existingFee != null && pendingFee.getEffectiveDate().isBefore(existingFee.getEndDate())) {
-                return;
+            if (existingFee != null) {
+                if (existingFee.getEndDate() == null) {
+                    throw new ApprovalRequestProcessException("The previous fee configuration does not have end date set");
+                }
+                if (pendingFee.getEffectiveDate().isBefore(existingFee.getEndDate())) {
+                    String exceptionMessage = "The previous fee configuration end date is before the pending fee start date";
+                    throw new ApprovalRequestProcessException(exceptionMessage);
+                }
             }
             Fee fee = new Fee();
             fee.setId(UUID.randomUUID().toString());

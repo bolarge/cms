@@ -20,10 +20,19 @@ public class LicenseTransfer extends AbstractFact {
     private String licenseId;
     private String gameTypeId;
     private String licenseTransferStatusId;
+    private String rejectionReason;
     private List<LicenseTransferDecision> transferDecisions = new ArrayList<>();
 
     public List<LicenseTransferDecision> getTransferDecisions() {
         return transferDecisions;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
     }
 
     public void setTransferDecisions(List<LicenseTransferDecision> transferDecisions) {
@@ -143,7 +152,6 @@ public class LicenseTransfer extends AbstractFact {
         return gameType;
     }
 
-
     public boolean isPendingNewInstitutionAddition() {
         return StringUtils.equals(LicenseTransferStatusReferenceData.PENDING_NEW_INSTITUTION_ADDITION_ID, this.licenseTransferStatusId);
     }
@@ -158,6 +166,10 @@ public class LicenseTransfer extends AbstractFact {
 
     public boolean isPendingFinalApproval() {
         return StringUtils.equals(LicenseTransferStatusReferenceData.PENDING_FINAL_APPROVAL_ID, this.licenseTransferStatusId);
+    }
+
+    public boolean isFinallyApproved() {
+        return StringUtils.equals(LicenseTransferStatusReferenceData.APPROVED_ID, this.licenseTransferStatusId);
     }
 
     private Institution getInstitution(String institutionId) {

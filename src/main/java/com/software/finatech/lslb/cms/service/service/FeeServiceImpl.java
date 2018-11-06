@@ -67,8 +67,9 @@ public class FeeServiceImpl implements FeeService {
             }
             String gameTypeId = feeCreateDto.getGameTypeId();
             String feePaymentTypeId = feeCreateDto.getFeePaymentTypeId();
-            Fee existingFeeWithParams = findMostRecentFeeByLicenseTypeGameTypeAndFeePaymentType(feeCreateDto.getRevenueNameId(),
-                    feeCreateDto.getGameTypeId(), feeCreateDto.getFeePaymentTypeId());
+            String licenseTypeId = feeCreateDto.getRevenueNameId();
+            Fee existingFeeWithParams = findMostRecentFeeByLicenseTypeGameTypeAndFeePaymentType(licenseTypeId,
+                    gameTypeId, feePaymentTypeId);
             if (existingFeeWithParams != null) {
                 LocalDate existingFeeEndDate = existingFeeWithParams.getEndDate();
                 if (existingFeeEndDate == null) {
@@ -79,7 +80,19 @@ public class FeeServiceImpl implements FeeService {
                     return Mono.just(new ResponseEntity<>("New Fee start date should not be less than old fee end date", HttpStatus.BAD_REQUEST));
                 }
             }
+            PendingFee existingPendingFeeWithParams = findPendingApprovalPendingFeeLicenseTypeGameTypeAndFeePaymentType(licenseTypeId, gameTypeId, feePaymentTypeId);
+            if (existingPendingFeeWithParams != null) {
+                return Mono.just(new ResponseEntity<>("There is a pending fee with the same param, kindly wait for it to be approved", HttpStatus.BAD_REQUEST));
+            }
             PendingFee pendingFee = new PendingFee();
+
+            if (StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, feeCreateDto.getRevenueNameId())
+                    || StringUtils.equals(LicenseTypeReferenceData.GAMING_TERMINAL_ID, feeCreateDto.getRevenueNameId())) {
+                if (StringUtils.isEmpty(feeCreateDto.getEndDate())) {
+                    return Mono.just(new ResponseEntity<>("Please provide end date", HttpStatus.BAD_REQUEST));
+                }
+                pendingFee.setEndDate(new LocalDate(feeCreateDto.getEndDate()));
+            }
             pendingFee.setId(UUID.randomUUID().toString());
             pendingFee.setAmount(Double.valueOf(feeCreateDto.getAmount()));
             pendingFee.setFeePaymentTypeId(feePaymentTypeId);
@@ -140,7 +153,7 @@ public class FeeServiceImpl implements FeeService {
             feeApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
             feeApprovalRequest.setFeeApprovalRequestTypeId(FeeApprovalRequestTypeReferenceData.SET_FEE_END_DATE_ID);
             mongoRepositoryReactive.saveOrUpdate(feeApprovalRequest);
-            approvalRequestNotifierAsync.sendNewFeeApprovalRequestEmailToAllOtherUsersInRole(loggedInUser,feeApprovalRequest);
+            approvalRequestNotifierAsync.sendNewFeeApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, feeApprovalRequest);
             return Mono.just(new ResponseEntity<>(feeApprovalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while updating fee end date", e);
@@ -314,6 +327,7 @@ public class FeeServiceImpl implements FeeService {
                 feePaymentTypes.add(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID);
                 feePaymentTypes.add(FeePaymentTypeReferenceData.LICENSE_RENEWAL_FEE_TYPE_ID);
                 feePaymentTypes.add(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID);
+                feePaymentTypes.add(FeePaymentTypeReferenceData.LICENSE_TRANSFER_FEE_TYPE_ID);
             }
             if (feePaymentTypes.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
@@ -365,8 +379,18 @@ public class FeeServiceImpl implements FeeService {
         query.addCriteria(Criteria.where("licenseTypeId").is(licenseTypeId));
         query.addCriteria(Criteria.where("active").is(true));
         query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
-        query.with(new Sort(Sort.Direction.DESC, "endDate"));
+        query.with(new Sort(Sort.Direction.DESC, "effectiveDate"));
         return (Fee) mongoRepositoryReactive.find(query, Fee.class).block();
+    }
+
+    private PendingFee findPendingApprovalPendingFeeLicenseTypeGameTypeAndFeePaymentType(String licenseTypeId, String gameTypeId, String feePaymentTypeId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        query.addCriteria(Criteria.where("licenseTypeId").is(licenseTypeId));
+        query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
+        query.addCriteria(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID));
+        query.with(new Sort(Sort.Direction.DESC, "effectiveDate"));
+        return (PendingFee) mongoRepositoryReactive.find(query, PendingFee.class).block();
     }
 
 

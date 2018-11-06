@@ -2,10 +2,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:mc="http://www.w3.org/1999/xhtml">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="format-detection" content="telephone=no" />
+    <meta name="format-detection" content="telephone=no"/>
     <!-- disable auto telephone linking in iOS -->
     <title>Meeting Invitation</title>
     <style type="text/css">
@@ -309,6 +309,7 @@
                 width: 100% !important;
                 min-width: 100% !important;
             }
+
             /* Force iOS Mail to render the email at full width. */
             /* FRAMEWORK STYLES */
             /*
@@ -325,12 +326,14 @@
             td[class="flexibleContainerCell"] {
                 width: 100% !important;
             }
+
             td[class="flexibleContainerBox"],
             td[class="flexibleContainerBox"] table {
                 display: block;
                 width: 100%;
                 text-align: left;
             }
+
             /*
 				The following style rule makes any
 				image classed with 'flexibleImage'
@@ -344,21 +347,25 @@
                 width: 100% !important;
                 max-width: 100% !important;
             }
+
             img[class="flexibleImage"] {
                 height: auto !important;
                 width: 100% !important;
                 max-width: 100% !important;
             }
+
             img[class="flexibleImageSmall"] {
                 height: auto !important;
                 width: auto !important;
             }
+
             /*
 				Create top space for every second element in a block
 				*/
             table[class="flexibleContainerBoxNext"] {
                 padding-top: 10px !important;
             }
+
             /*
 				Make buttons in the email span the
 				full width of their container, allowing
@@ -367,9 +374,11 @@
             table[class="emailButton"] {
                 width: 100% !important;
             }
+
             td[class="buttonContent"] {
                 padding: 0 !important;
             }
+
             td[class="buttonContent"] a {
                 padding: 15px !important;
             }
@@ -379,22 +388,23 @@
 			*   http://developer.android.com/guide/webapps/targeting.html
 			*   http://pugetworks.com/2011/04/css-media-queries-for-targeting-different-mobile-devices/ ;
 			=====================================================*/
-        @media only screen and (-webkit-device-pixel-ratio:.75) {
+        @media only screen and (-webkit-device-pixel-ratio: .75) {
             /* Put CSS for low density (ldpi) Android layouts in here */
         }
 
-        @media only screen and (-webkit-device-pixel-ratio:1) {
+        @media only screen and (-webkit-device-pixel-ratio: 1) {
             /* Put CSS for medium density (mdpi) Android layouts in here */
         }
 
-        @media only screen and (-webkit-device-pixel-ratio:1.5) {
+        @media only screen and (-webkit-device-pixel-ratio: 1.5) {
             /* Put CSS for high density (hdpi) Android layouts in here */
         }
 
         /* end Android targeting */
         /* CONDITIONS FOR IOS DEVICES ONLY
 			=====================================================*/
-        @media only screen and (min-device-width: 320px) and (max-device-width:568px) {}
+        @media only screen and (min-device-width: 320px) and (max-device-width: 568px) {
+        }
 
         /* end IOS targeting */
     </style>
@@ -407,329 +417,444 @@
 			http://templates.mailchimp.com/development/css/outlook-conditional-css
 		-->
     <!--[if mso 12]>
-			<style type="text/css">
-				.flexibleContainer{display:block !important; width:100% !important;}
-			</style>
-		<![endif]-->
+    <style type="text/css">
+        .flexibleContainer {
+            display: block !important;
+            width: 100% !important;
+        }
+    </style>
+    <![endif]-->
     <!--[if mso 14]>
-			<style type="text/css">
-				.flexibleContainer{display:block !important; width:100% !important;}
-			</style>
-		<![endif]-->
+    <style type="text/css">
+        .flexibleContainer {
+            display: block !important;
+            width: 100% !important;
+        }
+    </style>
+    <![endif]-->
 </head>
 
 <body bgcolor="#E1E1E1" leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" offset="0">
 
-    <!-- CENTER THE EMAIL // -->
-    <!--
-		1.  The center tag should normally put all the
-			content in the middle of the email page.
-			I added "table-layout: fixed;" style to force
-			yahoomail which by default put the content left.
-		2.  For hotmail and yahoomail, the contents of
-			the email starts from this center, so we try to
-			apply necessary styling e.g. background-color.
-		-->
-    <center style="background-color:#E1E1E1;">
-        <table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="bodyTable" style="table-layout: fixed;max-width:100% !important;width: 100% !important;min-width: 100% !important;">
-            <tr>
-                <td align="center" valign="top" id="bodyCell">
+<!-- CENTER THE EMAIL // -->
+<!--
+    1.  The center tag should normally put all the
+        content in the middle of the email page.
+        I added "table-layout: fixed;" style to force
+        yahoomail which by default put the content left.
+    2.  For hotmail and yahoomail, the contents of
+        the email starts from this center, so we try to
+        apply necessary styling e.g. background-color.
+    -->
+<center style="background-color:#E1E1E1;">
+    <table border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="bodyTable"
+           style="table-layout: fixed;max-width:100% !important;width: 100% !important;min-width: 100% !important;">
+        <tr>
+            <td align="center" valign="top" id="bodyCell">
 
-                    <!-- EMAIL BODY // -->
+                <!-- EMAIL BODY // -->
+                <!--
+                        The table "emailBody" is the email's container.
+                        Its width can be set to 100% for a color band
+                        that spans the width of the page.
+                    -->
+                <table bgcolor="#FFFFFF" border="0" cellpadding="0" cellspacing="0" width="500" id="emailBody">
+
+                    <!-- MODULE ROW // -->
                     <!--
-							The table "emailBody" is the email's container.
-							Its width can be set to 100% for a color band
-							that spans the width of the page.
-						-->
-                    <table bgcolor="#FFFFFF" border="0" cellpadding="0" cellspacing="0" width="500" id="emailBody">
+                            To move or duplicate any of the design patterns
+                            in this email, simply move or copy the entire
+                            MODULE ROW section for each content block.
+                        -->
+                    <tr>
+                        <td align="center" valign="top">
+                            <!-- CENTERING TABLE // -->
+                            <!--
+                                    The centering table keeps the content
+                                    tables centered in the emailBody table,
+                                    in case its width is set to 100%.
+                                -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="color:#FFFFFF;"
+                                   bgcolor="#3498db">
+                                <tr>
+                                    <td align="center" valign="top">
+                                        <!-- FLEXIBLE CONTAINER // -->
+                                        <!--
+                                                The flexible container has a set width
+                                                that gets overridden by the media query.
+                                                Most content tables within can then be
+                                                given 100% widths.
+                                            -->
+                                        <table border="0" cellpadding="0" cellspacing="0" width="500"
+                                               class="flexibleContainer">
+                                            <tr>
+                                                <td align="center" valign="top" width="500"
+                                                    class="flexibleContainerCell">
 
-                        <!-- MODULE ROW // -->
-                        <!--
-								To move or duplicate any of the design patterns
-								in this email, simply move or copy the entire
-								MODULE ROW section for each content block.
-							-->
-                        <tr>
-                            <td align="center" valign="top">
-                                <!-- CENTERING TABLE // -->
-                                <!--
-										The centering table keeps the content
-										tables centered in the emailBody table,
-										in case its width is set to 100%.
-									-->
-                                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="color:#FFFFFF;" bgcolor="#3498db">
-                                    <tr>
-                                        <td align="center" valign="top">
-                                            <!-- FLEXIBLE CONTAINER // -->
-                                            <!--
-													The flexible container has a set width
-													that gets overridden by the media query.
-													Most content tables within can then be
-													given 100% widths.
-												-->
-                                            <table border="0" cellpadding="0" cellspacing="0" width="500" class="flexibleContainer">
-                                                <tr>
-                                                    <td align="center" valign="top" width="500" class="flexibleContainerCell">
+                                                    <!-- CONTENT TABLE // -->
+                                                    <!--
+                                                        The content table is the first element
+                                                            that's entirely separate from the structural
+                                                            framework of the email.
+                                                        -->
+                                                    <table border="0" cellpadding="20" cellspacing="0" width="100%">
+                                                        <tr>
+                                                            <td align="center" valign="top" class="textContent">
+                                                                <h1 style="color:#FFFFFF;line-height:100%;font-family:Helvetica,Arial,sans-serif;font-size:35px;font-weight:normal;margin-bottom:5px;text-align:center;">
+                                                                    Lagos
+                                                                    State Lotteries Board</h1>
+                                                                <h2 style="text-align:center;font-weight:normal;font-family:Helvetica,Arial,sans-serif;font-size:23px;margin-bottom:5px;color:#205478;line-height:135%;">
+                                                                    Customer
+                                                                    Management System</h2>
+                                                                <h2 style="text-align:center;font-weight:normal;font-family:Helvetica,Arial,sans-serif;font-size:13px;margin-bottom:2px;color:#205478;line-height:135%;">
+                                                                    [[${date}]]</h2>
 
-                                                        <!-- CONTENT TABLE // -->
-                                                        <!--
-															The content table is the first element
-																that's entirely separate from the structural
-																framework of the email.
-															-->
-                                                        <table border="0" cellpadding="20" cellspacing="0" width="100%">
-                                                            <tr>
-                                                                <td align="center" valign="top" class="textContent">
-                                                                    <h1 style="color:#FFFFFF;line-height:100%;font-family:Helvetica,Arial,sans-serif;font-size:35px;font-weight:normal;margin-bottom:5px;text-align:center;">Lagos
-                                                                        State Lotteries Board</h1>
-                                                                    <h2 style="text-align:center;font-weight:normal;font-family:Helvetica,Arial,sans-serif;font-size:23px;margin-bottom:5px;color:#205478;line-height:135%;">Customer
-                                                                        Management System</h2>
-                                                                    <h2 style="text-align:center;font-weight:normal;font-family:Helvetica,Arial,sans-serif;font-size:13px;margin-bottom:2px;color:#205478;line-height:135%;">[[${date}]]</h2>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <!-- // CONTENT TABLE -->
 
-                                                                </td>
-                                                            </tr>
-                                                        </table>
-                                                        <!-- // CONTENT TABLE -->
-
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                            <!-- // FLEXIBLE CONTAINER -->
-                                        </td>
-                                    </tr>
-                                </table>
-                                <!-- // CENTERING TABLE -->
-                            </td>
-                        </tr>
-                        <!-- // MODULE ROW -->
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <!-- // FLEXIBLE CONTAINER -->
+                                    </td>
+                                </tr>
+                            </table>
+                            <!-- // CENTERING TABLE -->
+                        </td>
+                    </tr>
+                    <!-- // MODULE ROW -->
 
 
-                        <!-- MODULE ROW // -->
-                        <tr>
-                            <td align="center" valign="top">
-                                <!-- CENTERING TABLE // -->
-                                <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#F8F8F8">
-                                    <tr>
-                                        <td align="center" valign="top">
-                                            <!-- FLEXIBLE CONTAINER // -->
-                                            <table border="0" cellpadding="0" cellspacing="0" width="500" class="flexibleContainer">
-                                                <tr>
-                                                    <td align="center" valign="top" width="500" class="flexibleContainerCell">
-                                                        <table border="0" cellpadding="30" cellspacing="0" width="100%">
-                                                            <tr>
-                                                                <td align="center" valign="top">
-                                                                    <!-- CONTENT TABLE // -->
-                                                                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                                                                        <tr>
-                                                                            <td valign="top" class="textContent">
-                                                                                <!--
-																						The "mc:edit" is a feature for MailChimp which allows
-																						you to edit certain row. It makes it easy for you to quickly edit row sections.
-																						http://kb.mailchimp.com/templates/code/create-editable-content-areas-with-mailchimps-template-language
-																					-->
-                                                                                <h3 mc:edit="header" style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;;margin-bottom:10px;">Dear
-                                                                                    Sir/Madam,
-                                                                                </h3>
-                                                                                <div mc:edit="body" style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
-                                                                                    In line with your  licence application for category [[${gameType}]] your organization is hereby invited to make a presentation to LSLB on your proposed gaming operations in Lagos State.
-                                                                                    <br>
-                                                                                    The meeting is scheduled as follows:
-                                                                                </div>
-                                                                            </td>
-                                                                        </tr>
-                                                                    </table>
-                                                                    <!-- // CONTENT TABLE -->
+                    <!-- MODULE ROW // -->
+                    <tr>
+                        <td align="center" valign="top">
+                            <!-- CENTERING TABLE // -->
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#F8F8F8">
+                                <tr>
+                                    <td align="center" valign="top">
+                                        <!-- FLEXIBLE CONTAINER // -->
+                                        <table border="0" cellpadding="0" cellspacing="0" width="500"
+                                               class="flexibleContainer">
+                                            <tr>
+                                                <td align="center" valign="top" width="500"
+                                                    class="flexibleContainerCell">
+                                                    <table border="0" cellpadding="30" cellspacing="0" width="100%">
+                                                        <tr>
+                                                            <td align="center" valign="top">
+                                                                <!-- CONTENT TABLE // -->
+                                                                <table border="0" cellpadding="0" cellspacing="0"
+                                                                       width="100%">
+                                                                    <tr>
+                                                                        <td valign="top" class="textContent">
+                                                                            <!--
+                                                                                    The "mc:edit" is a feature for MailChimp which allows
+                                                                                    you to edit certain row. It makes it easy for you to quickly edit row sections.
+                                                                                    http://kb.mailchimp.com/templates/code/create-editable-content-areas-with-mailchimps-template-language
+                                                                                -->
+                                                                            <h3 mc:edit="header"
+                                                                                style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;;margin-bottom:10px;">
+                                                                                Dear
+                                                                                Sir/Madam,
+                                                                            </h3>
+                                                                            <div mc:edit="body"
+                                                                                 style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
+                                                                                In line with your licence application
+                                                                                for category [[${gameType}]] your
+                                                                                organization is hereby invited to make a
+                                                                                presentation to LSLB on your proposed
+                                                                                gaming operations in Lagos State.
+                                                                                <br>
+                                                                                The meeting is scheduled as follows:
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                                <!-- // CONTENT TABLE -->
 
-                                                                </td>
-                                                            </tr>
-                                                        </table>
-                                                    </td>
-                                                </tr>
-                                                <!-- MODULE ROW // -->
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                            <!-- MODULE ROW // -->
 
-                                                 <!-- MODULE ROW // -->
-                        <tr>
-                            <td align="center" valign="top">
-                                <!-- CENTERING TABLE // -->
-                                <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#F8F8F8">
-                                    <tr>
-                                        <td align="center" valign="top">
-                                            <!-- FLEXIBLE CONTAINER // -->
-                                            <table border="0" cellpadding="0" cellspacing="0" width="500" class="flexibleContainer">
-                                                <tr>
-                                                    <td align="center" valign="top" width="500" class="flexibleContainerCell">
-                                                        <table border="0" cellpadding="30" cellspacing="0" width="100%">
-                                                            <tr>
-                                                                <td align="center" valign="top">
+                                            <!-- MODULE ROW // -->
+                                            <tr>
+                                                <td align="center" valign="top">
+                                                    <!-- CENTERING TABLE // -->
+                                                    <table border="0" cellpadding="0" cellspacing="0" width="100%"
+                                                           bgcolor="#F8F8F8">
+                                                        <tr>
+                                                            <td align="center" valign="top">
+                                                                <!-- FLEXIBLE CONTAINER // -->
+                                                                <table border="0" cellpadding="0" cellspacing="0"
+                                                                       width="500" class="flexibleContainer">
+                                                                    <tr>
+                                                                        <td align="center" valign="top" width="500"
+                                                                            class="flexibleContainerCell">
+                                                                            <table border="0" cellpadding="30"
+                                                                                   cellspacing="0" width="100%">
+                                                                                <tr>
+                                                                                    <td align="center" valign="top">
 
-                                                                    <!-- CONTENT TABLE // -->
-                                                                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                                                                        <tr>
-                                                                            <td valign="top" class="textContent">
-                                                                                <!--
-																						The "mc:edit" is a feature for MailChimp which allows
-																						you to edit certain row. It makes it easy for you to quickly edit row sections.
-																						http://kb.mailchimp.com/templates/code/create-editable-content-areas-with-mailchimps-template-language
-																					-->
-                                                                            </td>
-                                                                        </tr>
-                                                                    </table>
-                                                                    <!-- // CONTENT TABLE -->
+                                                                                        <!-- CONTENT TABLE // -->
+                                                                                        <table border="0"
+                                                                                               cellpadding="0"
+                                                                                               cellspacing="0"
+                                                                                               width="100%">
+                                                                                            <tr>
+                                                                                                <td valign="top"
+                                                                                                    class="textContent">
+                                                                                                    <!--
+                                                                                                            The "mc:edit" is a feature for MailChimp which allows
+                                                                                                            you to edit certain row. It makes it easy for you to quickly edit row sections.
+                                                                                                            http://kb.mailchimp.com/templates/code/create-editable-content-areas-with-mailchimps-template-language
+                                                                                                        -->
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </table>
+                                                                                        <!-- // CONTENT TABLE -->
 
-                                                                </td>
-                                                            </tr>
-                                                        </table>
-                                                    </td>
-                                                </tr>
-                                                <!-- MODULE ROW // -->
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <!-- MODULE ROW // -->
 
 
-                                                <!-- MODULE ROW // -->
-                                                <tr>
-                                                    <td align="center" valign="top">
-                                                        <!-- CENTERING TABLE // -->
-                                                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                                                            <tr>
-                                                                <td align="center" valign="top">
-                                                                    <!-- FLEXIBLE CONTAINER // -->
-                                                                    <table border="0" cellpadding="30" cellspacing="0" width="500" class="flexibleContainer">
-                                                                        <tr>
-                                                                            <td valign="top" width="500" class="flexibleContainerCell">
+                                                                    <!-- MODULE ROW // -->
+                                                                    <tr>
+                                                                        <td align="center" valign="top">
+                                                                            <!-- CENTERING TABLE // -->
+                                                                            <table border="0" cellpadding="0"
+                                                                                   cellspacing="0" width="100%">
+                                                                                <tr>
+                                                                                    <td align="center" valign="top">
+                                                                                        <!-- FLEXIBLE CONTAINER // -->
+                                                                                        <table border="0"
+                                                                                               cellpadding="30"
+                                                                                               cellspacing="0"
+                                                                                               width="500"
+                                                                                               class="flexibleContainer">
+                                                                                            <tr>
+                                                                                                <td valign="top"
+                                                                                                    width="500"
+                                                                                                    class="flexibleContainerCell">
 
-                                                                                <!-- CONTENT TABLE // -->
-                                                                                <table align="left" border="0" cellpadding="0" cellspacing="0" width="100%">
-                                                                                    <tr>
-                                                                                        <td align="left" valign="top" class="flexibleContainerBox">
-                                                                                            <table border="0" cellpadding="0" cellspacing="0" width="210" style="max-width: 100%;">
-                                                                                                <tr>
-                                                                                                    <td align="left" class="textContent">
-                                                                                                        <h3 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;">Date Of Meeting</h3>
-                                                                                                        <div style="text-align:left;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
-                                                                                                            [[${meetingDate}]]
-                                                                                                        </div>
-                                                                                                    </td>
-                                                                                                </tr>
-                                                                                            </table>
-                                                                                        </td>
-                                                                                        <td align="right" valign="top" class="flexibleContainerBox">
-                                                                                            <table class="flexibleContainerBoxNext" border="0" cellpadding="0" cellspacing="0" width="210" style="max-width: 100%;">
-                                                                                                <tr>
-                                                                                                    <td align="left" class="textContent">
-                                                                                                        <h3 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;">Venue
-                                                                                                            Of Meeting</h3>
-                                                                                                        <div style="text-align:left;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
-                                                                                                            [[${venue}]]
-                                                                                                        </div>
-                                                                                                    </td>
-                                                                                                </tr>
-                                                                                            </table>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                </table>
-                                                                                <!-- // CONTENT TABLE -->
+                                                                                                    <!-- CONTENT TABLE // -->
+                                                                                                    <table align="left"
+                                                                                                           border="0"
+                                                                                                           cellpadding="0"
+                                                                                                           cellspacing="0"
+                                                                                                           width="100%">
+                                                                                                        <tr>
+                                                                                                            <td align="left"
+                                                                                                                valign="top"
+                                                                                                                class="flexibleContainerBox">
+                                                                                                                <table border="0"
+                                                                                                                       cellpadding="0"
+                                                                                                                       cellspacing="0"
+                                                                                                                       width="210"
+                                                                                                                       style="max-width: 100%;">
+                                                                                                                    <tr>
+                                                                                                                        <td align="left"
+                                                                                                                            class="textContent">
+                                                                                                                            <h3 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;">
+                                                                                                                                Date
+                                                                                                                                Of
+                                                                                                                                Meeting</h3>
+                                                                                                                            <div style="text-align:left;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
+                                                                                                                                [[${meetingDate}]]
+                                                                                                                            </div>
+                                                                                                                        </td>
+                                                                                                                    </tr>
+                                                                                                                </table>
+                                                                                                            </td>
+                                                                                                            <td align="right"
+                                                                                                                valign="top"
+                                                                                                                class="flexibleContainerBox">
+                                                                                                                <table class="flexibleContainerBoxNext"
+                                                                                                                       border="0"
+                                                                                                                       cellpadding="0"
+                                                                                                                       cellspacing="0"
+                                                                                                                       width="210"
+                                                                                                                       style="max-width: 100%;">
+                                                                                                                    <tr>
+                                                                                                                        <td align="left"
+                                                                                                                            class="textContent">
+                                                                                                                            <h3 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;">
+                                                                                                                                Venue
+                                                                                                                                Of
+                                                                                                                                Meeting</h3>
+                                                                                                                            <div style="text-align:left;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
+                                                                                                                                [[${venue}]]
+                                                                                                                            </div>
+                                                                                                                        </td>
+                                                                                                                    </tr>
+                                                                                                                </table>
+                                                                                                            </td>
+                                                                                                        </tr>
+                                                                                                    </table>
+                                                                                                    <!-- // CONTENT TABLE -->
 
-                                                                            </td>
-                                                                        </tr>
-                                                                    </table>
-                                                                    <!-- // FLEXIBLE CONTAINER -->
-                                                                </td>
-                                                            </tr>
-                                                        </table>
-                                                        <!-- // CENTERING TABLE -->
-                                                    </td>
-                                                </tr>
-                                                <!-- MODULE ROW // -->
-                                                <tr>
-                                                    <td align="center" valign="top">
-                                                        <!-- CENTERING TABLE // -->
-                                                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                                                            <tr>
-                                                                <td align="center" valign="top">
-                                                                    <!-- FLEXIBLE CONTAINER // -->
-                                                                    <table border="0" cellpadding="30" cellspacing="0" width="500" class="flexibleContainer">
-                                                                        <tr>
-                                                                            <td valign="top" width="500" class="flexibleContainerCell">
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </table>
+                                                                                        <!-- // FLEXIBLE CONTAINER -->
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                            <!-- // CENTERING TABLE -->
+                                                                        </td>
+                                                                    </tr>
+                                                                    <!-- MODULE ROW // -->
+                                                                    <tr>
+                                                                        <td align="center" valign="top">
+                                                                            <!-- CENTERING TABLE // -->
+                                                                            <table border="0" cellpadding="0"
+                                                                                   cellspacing="0" width="100%">
+                                                                                <tr>
+                                                                                    <td align="center" valign="top">
+                                                                                        <!-- FLEXIBLE CONTAINER // -->
+                                                                                        <table border="0"
+                                                                                               cellpadding="30"
+                                                                                               cellspacing="0"
+                                                                                               width="500"
+                                                                                               class="flexibleContainer">
+                                                                                            <tr>
+                                                                                                <td valign="top"
+                                                                                                    width="500"
+                                                                                                    class="flexibleContainerCell">
 
-                                                                                <!-- CONTENT TABLE // -->
-                                                                                <table align="left" border="0" cellpadding="0" cellspacing="0" width="100%">
-                                                                                    <tr>
-                                                                                        <td align="left" valign="top" class="flexibleContainerBox">
-                                                                                            <table border="0" cellpadding="0" cellspacing="0" width="210" style="max-width: 100%;">
-                                                                                                <tr>
-                                                                                                    <td align="left" class="textContent">
-                                                                                                        <h3 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;">Time Of Meeting</h3>
-                                                                                                        <div style="text-align:left;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
-                                                                                                            [[${meetingTime}]]
-                                                                                                        </div>
-                                                                                                    </td>
-                                                                                                </tr>
-                                                                                            </table>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                </table><!-- // CONTENT TABLE -->
+                                                                                                    <!-- CONTENT TABLE // -->
+                                                                                                    <table align="left"
+                                                                                                           border="0"
+                                                                                                           cellpadding="0"
+                                                                                                           cellspacing="0"
+                                                                                                           width="100%">
+                                                                                                        <tr>
+                                                                                                            <td align="left"
+                                                                                                                valign="top"
+                                                                                                                class="flexibleContainerBox">
+                                                                                                                <table border="0"
+                                                                                                                       cellpadding="0"
+                                                                                                                       cellspacing="0"
+                                                                                                                       width="210"
+                                                                                                                       style="max-width: 100%;">
+                                                                                                                    <tr>
+                                                                                                                        <td align="left"
+                                                                                                                            class="textContent">
+                                                                                                                            <h3 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;">
+                                                                                                                                Time
+                                                                                                                                Of
+                                                                                                                                Meeting</h3>
+                                                                                                                            <div style="text-align:left;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
+                                                                                                                                [[${meetingTime}]]
+                                                                                                                            </div>
+                                                                                                                        </td>
+                                                                                                                    </tr>
+                                                                                                                </table>
+                                                                                                            </td>
+                                                                                                        </tr>
+                                                                                                    </table>
+                                                                                                    <!-- // CONTENT TABLE -->
 
-                                                                            </td>
-                                                                        </tr>
-                                                                    </table>
-                                                                    <!-- // FLEXIBLE CONTAINER -->
-                                                                </td>
-                                                            </tr>
-                                                        </table>
-                                                        <!-- // CENTERING TABLE -->
-                                                    </td>
-                                                </tr>
-                                                <!-- MODULE ROW // -->
-                                                <tr>
-                                                    <td align="center" valign="top">
-                                                        Kindly ensure at least 2(two) of your directors/shareholders are present at the meeting.
-                                                        <!-- CENTERING TABLE // -->
-                                                        <table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor='#3498DB'>
-                                                            <tr>
-                                                                <td align="center" valign="top">
-                                                                    <!-- FLEXIBLE CONTAINER // -->
-                                                                    <table border="0" cellpadding="0" cellspacing="0" width="500" class="flexibleContainer">
-                                                                        <tr>
-                                                                            <td align="center" valign="top" width="500" class="flexibleContainerCell">
-                                                                                <table border="0" cellpadding="20" cellspacing="0" width="100%">
-                                                                                    <tr>
-                                                                                        <td align="center" valign="top">
-                                                                                            <!-- CONTENT TABLE // -->
-                                                                                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                                                                                                <tr>
-                                                                                                    <td valign="top" class="textContent">
-                                                                                                        <div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;margin-top:2px;color:rgb(255, 255, 255);line-height:135%;">
-                                                                                                            For enquiries and issues, please send a mail to support@lslb.com.ng
-                                                                                                        </div>
-                                                                                                        <div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;margin-top:2px;color:rgb(255, 255, 255);line-height:135%;">
-                                                                                                            &#169;LAGOS STATE LOTTERIES BOARD
-                                                                                                        </div>
-                                                                                                    </td>
-                                                                                                </tr>
-                                                                                            </table>
-                                                                                            <!-- // CONTENT TABLE -->
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </table>
+                                                                                        <!-- // FLEXIBLE CONTAINER -->
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                            <!-- // CENTERING TABLE -->
+                                                                        </td>
+                                                                    </tr>
+                                                                    <!-- MODULE ROW // -->
+                                                                    <tr>
+                                                                        <td align="center" valign="top">
+                                                                            Kindly ensure at least 2(two) of your
+                                                                            directors/shareholders are present at the
+                                                                            meeting.
+                                                                            <!-- CENTERING TABLE // -->
+                                                                            <table border="0" cellpadding="0"
+                                                                                   cellspacing="0" width="100%"
+                                                                                   bgcolor='#3498DB'>
+                                                                                <tr>
+                                                                                    <td align="center" valign="top">
+                                                                                        <!-- FLEXIBLE CONTAINER // -->
+                                                                                        <table border="0"
+                                                                                               cellpadding="0"
+                                                                                               cellspacing="0"
+                                                                                               width="500"
+                                                                                               class="flexibleContainer">
+                                                                                            <tr>
+                                                                                                <td align="center"
+                                                                                                    valign="top"
+                                                                                                    width="500"
+                                                                                                    class="flexibleContainerCell">
+                                                                                                    <table border="0"
+                                                                                                           cellpadding="20"
+                                                                                                           cellspacing="0"
+                                                                                                           width="100%">
+                                                                                                        <tr>
+                                                                                                            <td align="center"
+                                                                                                                valign="top">
+                                                                                                                <!-- CONTENT TABLE // -->
+                                                                                                                <table border="0"
+                                                                                                                       cellpadding="0"
+                                                                                                                       cellspacing="0"
+                                                                                                                       width="100%">
+                                                                                                                    <tr>
+                                                                                                                        <td valign="top"
+                                                                                                                            class="textContent">
+                                                                                                                            <div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;margin-top:2px;color:rgb(255, 255, 255);line-height:135%;">
+                                                                                                                                For
+                                                                                                                                enquiries
+                                                                                                                                and
+                                                                                                                                issues,
+                                                                                                                                please
+                                                                                                                                send
+                                                                                                                                a
+                                                                                                                                mail
+                                                                                                                                to
+                                                                                                                                support@lslb.com.ng
+                                                                                                                            </div>
+                                                                                                                            <div style="text-align:center;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin-bottom:0;margin-top:2px;color:rgb(255, 255, 255);line-height:135%;">
+                                                                                                                                &#169;LAGOS
+                                                                                                                                STATE
+                                                                                                                                LOTTERIES
+                                                                                                                                BOARD
+                                                                                                                            </div>
+                                                                                                                        </td>
+                                                                                                                    </tr>
+                                                                                                                </table>
+                                                                                                                <!-- // CONTENT TABLE -->
 
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                </table>
-                                                                            </td>
-                                                                        </tr>
-                                                                    </table>
-                                                                    <!-- // FLEXIBLE CONTAINER -->
-                                                                </td>
-                                                            </tr>
-                                                        </table>
-                                                        <!-- // CENTERING TABLE -->
-                                                    </td>
-                                                </tr>
-                                                <!-- // MODULE ROW -->
+                                                                                                            </td>
+                                                                                                        </tr>
+                                                                                                    </table>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </table>
+                                                                                        <!-- // FLEXIBLE CONTAINER -->
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                            <!-- // CENTERING TABLE -->
+                                                                        </td>
+                                                                    </tr>
+                                                                    <!-- // MODULE ROW -->
 
-                                            </table>
-                                            <!-- // END -->
+                                                                </table>
+                                                                <!-- // END -->
 
-                                        </td>
-                                    </tr>
-                                </table>
-    </center>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+</center>
 </body>
 
 </html>

@@ -2,7 +2,6 @@ package com.software.finatech.lslb.cms.service.dto;
 
 import org.apache.commons.lang3.StringUtils;
 
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +15,15 @@ public class PaymentRecordDetailCreateDto {
     private String agentId;
     private Set<String> gamingMachineIds = new HashSet<>();
     private Set<String> gamingTerminalIds = new HashSet<>();
+    private String licenseTransferId;
+
+    public String getLicenseTransferId() {
+        return licenseTransferId;
+    }
+
+    public void setLicenseTransferId(String licenseTransferId) {
+        this.licenseTransferId = licenseTransferId;
+    }
 
     public Set<String> getGamingMachineIds() {
         return gamingMachineIds;
@@ -78,7 +86,6 @@ public class PaymentRecordDetailCreateDto {
                 && this.gamingMachineIds.isEmpty()
                 && this.gamingTerminalIds.isEmpty()
                 && !StringUtils.isEmpty(this.getInstitutionId());
-
     }
 
     public boolean isAgentPayment() {
@@ -86,20 +93,22 @@ public class PaymentRecordDetailCreateDto {
                 && this.gamingTerminalIds.isEmpty()
                 && this.gamingMachineIds.isEmpty()
                 && StringUtils.isEmpty(this.getInstitutionId());
-
     }
+
     public boolean isGamingMachinePayment() {
         return StringUtils.isEmpty(this.getAgentId())
                 && !this.gamingMachineIds.isEmpty()
                 && this.gamingTerminalIds.isEmpty()
-                && !StringUtils.isEmpty(this.getInstitutionId());
+                && !StringUtils.isEmpty(this.getInstitutionId())
+                && StringUtils.isEmpty(this.licenseTransferId);
     }
 
-    public boolean isGamingTerminalPayment(){
+    public boolean isGamingTerminalPayment() {
         return StringUtils.isEmpty(this.institutionId)
                 && !StringUtils.isEmpty(this.agentId)
                 && this.gamingMachineIds.isEmpty()
-                && !this.gamingTerminalIds.isEmpty();
+                && !this.gamingTerminalIds.isEmpty()
+                && StringUtils.isEmpty(this.licenseTransferId);
     }
 
     public boolean isFirstPayment() {

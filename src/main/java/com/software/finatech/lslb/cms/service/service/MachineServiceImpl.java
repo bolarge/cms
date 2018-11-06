@@ -470,7 +470,7 @@ public class MachineServiceImpl implements MachineService {
                 Map<String, Machine> gamingMachineMap = new HashMap<>();
                 for (int i = 1; i < rows.length; i++) {
                     String[] columns = rows[i].split(",");
-                    if (columns.length < 8) {
+                    if (columns.length < 7) {
                         failedLines.add(FailedLine.fromLineAndReason(rows[i], "Line has less than 6 fields"));
                     } else {
                         try {
@@ -489,20 +489,20 @@ public class MachineServiceImpl implements MachineService {
                                     continue;
                                 }
                                 machine.setMachineTypeId(machineTypeId);
-                                String machineStatusId = columns[5];
-                                MachineStatus machineStatus = getMachineStatus(machineStatusId);
-                                if (machineStatus == null) {
-                                    failedLines.add(FailedLine.fromLineAndReason(rows[i], String.format("Machine status with id %s not found", machineStatusId)));
-                                    continue;
-                                }
-                                machine.setMachineStatusId(machineStatusId);
+                                //String machineStatusId = columns[5];
+                               // MachineStatus machineStatus = getMachineStatus(machineStatusId);
+                               // if (machineStatus == null) {
+                                 //   failedLines.add(FailedLine.fromLineAndReason(rows[i], String.format("Machine status with id %s not found", machineStatusId)));
+                                 //   continue;
+                              //  }
+                              //  machine.setMachineStatusId(machineStatusId);
 
                             }
                             machine.setGameTypeId(gameTypeId);
                             machineGame.setId(UUID.randomUUID().toString());
                             machineGame.setMachineId(machine.getId());
-                            machineGame.setGameName(columns[6]);
-                            machineGame.setGameVersion(columns[7]);
+                            machineGame.setGameName(columns[5]);
+                            machineGame.setGameVersion(columns[6]);
                             machineGame.setActive(true);
                             machine.setInstitutionId(institutionId);
                             machineList.add(machine);

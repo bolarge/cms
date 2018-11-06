@@ -561,23 +561,20 @@
                                                                             </h3>
                                                                             <div mc:edit="body"
                                                                                  style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
-                                                                                In line with your application for <span
+                                                                                The Fee Configured for <span
+                                                                                    th:text="${licenseType}"></span>
+                                                                                <span th:text="${feePaymentType}"></span>
+                                                                                for category <span
                                                                                     th:text="${gameType}"></span>
-                                                                                licence.
-                                                                                Your document uploaded for <span
-                                                                                    th:text="${documentType}"></span>
-                                                                                named "<span th:text="${fileName}"></span>" has
-                                                                                been rejected ,for the reason below
-                                                                                <br>
-                                                                                "<span th:text="${comment}"></span>".<br/>
-                                                                                You are therefore required to reupload a
-                                                                                document for <span
-                                                                                    th:text="${documentType}"></span>
-                                                                                so we can proceed with your application.
+                                                                                is going to become inactive
+                                                                                on <span th:text="${endDate}">
+                                                                                kindly create another fee for the next year.
+                                                                            </span>
                                                                                 <br>
                                                                                 <br>
-                                                                                <p>Kindly click the link below to reupload the document.</p>
-                                                                                Regards.
+                                                                                <p>Kindly click the link below to view
+                                                                                    the
+                                                                                    Fee</p>
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -615,7 +612,7 @@
                                                                                         style="padding-top:15px;padding-bottom:15px;padding-right:15px;padding-left:15px;">
                                                                                         <a style="color:#FFFFFF;text-decoration:none;font-family:Helvetica,Arial,sans-serif;font-size:20px;line-height:135%;"
                                                                                            th:href="@{${frontEndUrl}}"
-                                                                                           target="_blank">Reupload <span th:text="${documentType}"></span>
+                                                                                           target="_blank">View Fee
                                                                                         </a>
                                                                                     </td>
                                                                                 </tr>

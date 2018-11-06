@@ -91,7 +91,7 @@ public class MachineApprovalRequestMailSenderAsync extends AbstractMailSender {
         model.put("approvalType", convertToTitleCaseIteratingChars(String.valueOf(machineApprovalRequest.getMachineApprovalRequestType())));
         model.put("serialNumber", gamingTerminal.getSerialNumber());
         model.put("frontEndUrl", frontEndUrl);
-        return mailContentBuilderService.build(model, "machine-approvals/Agent-ChangeMachine-Operator-Notification");
+        return mailContentBuilderService.build(model, "machine-approvals/Agent-MachineApproval-Operator-Notification");
     }
 
     private String buildNewMachineApprovalRequestNotificationMailContent(MachineApprovalRequest machineApprovalRequest) {
@@ -116,6 +116,6 @@ public class MachineApprovalRequestMailSenderAsync extends AbstractMailSender {
         model.put("isApproved", approvalRequest.isApproved());
         model.put("rejectionReason", approvalRequest.getRejectionReason());
         model.put("institutionName", approvalRequest.getInstitutionName());
-        return mailContentBuilderService.build(model, "machine-approvals/NewMachineApprovalRequest");
+        return mailContentBuilderService.build(model, "machine-approvals/Machine-ApprovalNotifcation-Operator");
     }
 }

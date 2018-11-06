@@ -19,8 +19,8 @@ import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
-import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.NewUserEmailNotifierAsync;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApprovalRequestNotifierAsync;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.NewUserEmailNotifierAsync;
 import io.advantageous.boon.json.JsonFactory;
 import io.advantageous.boon.json.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -966,6 +966,15 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while getting user full detail", e);
         }
+    }
+
+    @Override
+    public AuthInfo findActiveUserWithEmail(String emailAddres) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("emailAddress").is(emailAddres));
+        query.addCriteria(Criteria.where("enabled").is(true));
+        query.addCriteria(Criteria.where("accountLocked").is(false));
+        return (AuthInfo) mongoRepositoryReactive.find(query, AuthInfo.class).block();
     }
 
     private CreateAuthInfoResponse toCreateAuthInfoResponse(AuthInfo authInfo, VerificationToken verificationToken) {
