@@ -632,16 +632,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         }
     }
 
-    private String buildAIPFormSubmissionApprovalEmailContent(AIPDocumentApproval aipDocumentApproval) {
-        String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId());
-        String presentDate = DateTime.now().toString("dd-MM-yyyy ");
-        HashMap<String, Object> model = new HashMap<>();
-        model.put("date", presentDate);
-        model.put("gameType", aipDocumentApproval.getGameTypeName());
-        model.put("applicantName", aipDocumentApproval.getInstitutionName());
-        model.put("frontEndUrl", callbackUrl);
-        return mailContentBuilderService.build(model, "aip-form/AIPFormSubmissionApprovalLSLB");
-    }
+
 
     private String buildApplicationFormSubmissionApprovalEmailContent(ApplicationForm applicationForm) {
         String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId());
@@ -654,16 +645,6 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         return mailContentBuilderService.build(model, "application-form/ApplicationFormSubmissionApprovalLSLB");
     }
 
-    private String buildRenewalFormFormSubmissionApprovalEmailContent(RenewalForm renewalForm) {
-        String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), renewalForm.getId());
-        String presentDate = DateTime.now().toString("dd-MM-yyyy ");
-        HashMap<String, Object> model = new HashMap<>();
-        model.put("date", presentDate);
-        model.put("gameType", renewalForm.getGameTypeName());
-        model.put("applicantName", renewalForm.getInstitutionName());
-        model.put("frontEndUrl", callbackUrl);
-        return mailContentBuilderService.build(model, "renewal-form/RenewalFormSubmissionApprovalLSLB");
-    }
 
     @Async
     public void sendDocumentReturnMailToInstitutionMembers(ApplicationForm applicationForm, Document document, String latestComment) {
@@ -686,7 +667,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         for (AuthInfo institutionAdmin : institutionAdmins) {
             try {
                 String email = institutionAdmin.getEmailAddress();
-                String callbackUrl = String.format("%s/%s/reupload/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId(), document.getId());
+                String callbackUrl = String.format("%s/%s/reupload/%s/aipForm", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId(), document.getId());
 
                 NotificationDto notificationDto= new NotificationDto();
                 notificationDto.setInstitutionEmail(email);
@@ -714,7 +695,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         for (AuthInfo institutionAdmin : institutionAdmins) {
             try {
                 String email = institutionAdmin.getEmailAddress();
-                String callbackUrl = String.format("%s/%s/reupload/%s", frontEndPropertyHelper.getFrontEndUrl(), renewalForm.getId(), document.getId());
+                String callbackUrl = String.format("%s/%s/reupload/%s/renewalForm", frontEndPropertyHelper.getFrontEndUrl(), renewalForm.getId(), document.getId());
 
                 NotificationDto notificationDto= new NotificationDto();
                 notificationDto.setInstitutionEmail(email);
