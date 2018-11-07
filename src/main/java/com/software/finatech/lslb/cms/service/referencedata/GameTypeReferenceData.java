@@ -7,7 +7,7 @@ public class GameTypeReferenceData {
 
     public static String OSB_GAME_TYPE_ID = "02";
     public static String POL_GAME_TYPE_ID = "01";
-    public static String GAMING_MACHINE_OPERATOR_ID = "03";
+    public static String GAMING_MACHINE_ID = "03";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         GameType gameType1 = (GameType) mongoRepositoryReactive.findById(POL_GAME_TYPE_ID, GameType.class).block();
@@ -43,13 +43,13 @@ public class GameTypeReferenceData {
         gameType2.setGamingMachineLicenseDurationMonths(12);
         gameType2.setAgentLicenseDurationMonths(12);
 
-        GameType gameType3 = (GameType) mongoRepositoryReactive.findById(GAMING_MACHINE_OPERATOR_ID, GameType.class).block();
+        GameType gameType3 = (GameType) mongoRepositoryReactive.findById(GAMING_MACHINE_ID, GameType.class).block();
         if (gameType3 == null) {
             gameType3 = new GameType();
-            gameType3.setId(GAMING_MACHINE_OPERATOR_ID);
+            gameType3.setId(GAMING_MACHINE_ID);
         }
-        gameType3.setDescription("Casino (Category with gaming Machines)");
-        gameType3.setName("Casino");
+        gameType3.setDescription("Category with gaming Machines");
+        gameType3.setName("Gaming Machine");
         gameType3.setShortCode("CS");
         gameType3.setAipDurationMonths(3);
         gameType3.setAllowsGamingMachine(true);

@@ -1,10 +1,6 @@
 package com.software.finatech.lslb.cms.service.controller;
 
-import com.software.finatech.lslb.cms.service.domain.ScheduledMeeting;
-import com.software.finatech.lslb.cms.service.dto.AddCommentDto;
-import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingCreateDto;
-import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingDto;
-import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.service.contracts.ScheduledMeetingService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -66,7 +62,7 @@ public class ScheduledMeetingController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-meeting-purpose")
-    @ApiOperation(value = "Get all meeting Purposes", response = ScheduledMeetingDto.class, consumes = "application/json")
+    @ApiOperation(value = "Get all meeting Purposes", response = EnumeratedFactDto.class, responseContainer = "list", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -100,7 +96,7 @@ public class ScheduledMeetingController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/cancel")
-    @ApiOperation(value = "Cancel a scheduled meeting",response = ScheduledMeetingDto.class, consumes = "application/json")
+    @ApiOperation(value = "Cancel a scheduled meeting", response = ScheduledMeetingDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -129,11 +125,11 @@ public class ScheduledMeetingController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getById(@PathVariable("id") String meetingId) {
-       return scheduledMeetingService.getScheduledMeetingById(meetingId);
+        return scheduledMeetingService.getScheduledMeetingById(meetingId);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/add-comment")
-    @ApiOperation(value = "Add Comment to Scheduled Meeting", response= String.class, consumes = "application/json")
+    @ApiOperation(value = "Add Comment to Scheduled Meeting", response = String.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),

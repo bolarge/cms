@@ -8,7 +8,6 @@ import com.software.finatech.lslb.cms.service.domain.ScheduledMeeting;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil;
 import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
@@ -50,7 +49,6 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
     private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private AuthInfoService authInfoService;
-    private ApplicationFormService applicationFormService;
     private AuditLogHelper auditLogHelper;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private ScheduledMeetingMailSenderAsync scheduledMeetingMailSenderAsync;
@@ -62,13 +60,11 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
     @Autowired
     public ScheduledMeetingServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                                        AuthInfoService authInfoService,
-                                       ApplicationFormService applicationFormService,
                                        AuditLogHelper auditLogHelper,
                                        SpringSecurityAuditorAware springSecurityAuditorAware,
                                        ScheduledMeetingMailSenderAsync scheduledMeetingMailSenderAsync) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.authInfoService = authInfoService;
-        this.applicationFormService = applicationFormService;
         this.auditLogHelper = auditLogHelper;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.scheduledMeetingMailSenderAsync = scheduledMeetingMailSenderAsync;
@@ -366,6 +362,14 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding comments", e);
         }
+    }
+
+    @Override
+    public ScheduledMeeting findScheduledMeetingByEntityId(String entityId) {
+        if (StringUtils.isEmpty(entityId)) {
+            return null;
+        }
+        return (ScheduledMeeting) mongoRepositoryReactive.find(Query.query(Criteria.where("entityId").is(entityId)), ScheduledMeeting.class).block();
     }
 
     private ScheduledMeeting fromCreateDto(ScheduledMeetingCreateDto scheduledMeetingCreateDto) {

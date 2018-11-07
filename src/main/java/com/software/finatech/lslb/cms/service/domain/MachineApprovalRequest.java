@@ -178,7 +178,19 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
         }
         dto.setNewMachineStatusName(getNewMachineStatusName());
         dto.setGameUpgrades(getMachineGameUpgrades());
+        Agent agent = getAgent();
+        if (agent != null) {
+            dto.setAgentId(this.agentId);
+            dto.setAgentFullName(agent.getFullName());
+        }
         return dto;
+    }
+
+    public Agent getAgent() {
+        if (StringUtils.isEmpty(this.agentId)) {
+            return null;
+        }
+        return (Agent) mongoRepositoryReactive.findById(this.agentId, Agent.class).block();
     }
 
     public boolean isCreateGamingMachine() {

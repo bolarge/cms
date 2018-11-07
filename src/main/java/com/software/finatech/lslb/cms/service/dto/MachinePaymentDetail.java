@@ -5,6 +5,15 @@ public class MachinePaymentDetail {
     private String machineSerialNumber;
     private double amount;
     private String gameTypeName;
+    private String machineType;
+
+    public String getMachineType() {
+        return machineType;
+    }
+
+    public void setMachineType(String machineType) {
+        this.machineType = machineType;
+    }
 
     public String getFeePaymentTypeName() {
         return feePaymentTypeName;

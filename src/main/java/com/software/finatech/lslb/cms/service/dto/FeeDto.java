@@ -5,7 +5,7 @@ public class FeeDto {
     private String gameTypeName;
     private String gameTypeId;
     protected String id;
-    protected boolean active;
+    protected Boolean active;
     private String feePaymentTypeName;
     private String feePaymentTypeId;
     private String revenueName;
@@ -29,11 +29,11 @@ public class FeeDto {
         this.endDate = endDate;
     }
 
-    public boolean isActive() {
+    public Boolean getActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(Boolean active) {
         this.active = active;
     }
 

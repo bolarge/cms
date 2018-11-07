@@ -60,11 +60,13 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
 
     private String buildApplicationCommentFromLSLBAdminEmailContent(ApplicationForm applicationForm) {
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
+        String callbackUrl = String.format("%s/register/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId());
         String gameTypeName = applicationForm.getGameTypeName();
         HashMap<String, Object> model = new HashMap<>();
         model.put("comment", applicationForm.getLslbAdminComment().getComment());
         model.put("date", presentDate);
         model.put("gameType", gameTypeName);
+        model.put("frontEndUrl", callbackUrl);
         return mailContentBuilderService.build(model, "application-form/ApplicationFormPendingUploadGAadmin");
     }
 
@@ -119,7 +121,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     private void sendRejectionMailToInstitutionUser(String institutionAdminEmail, AIPDocumentApproval aipDocumentApproval, String emailContent) {
         try {
             String mailSubject = String.format("Notification on your AIP for %s licence", aipDocumentApproval.getGameTypeName());
-            emailService.sendEmail(emailContent, mailSubject, institutionAdminEmail );
+            emailService.sendEmail(emailContent, mailSubject, institutionAdminEmail);
         } catch (Exception e) {
             logger.error("An error occurred while sending rejection mail to -> {}", institutionAdminEmail, e);
         }
@@ -519,7 +521,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
                 approvalMap.put(document.getId(), false);
                 mongoRepositoryReactive.saveOrUpdate(document);
             }
-             mongoRepositoryReactive.saveOrUpdate(renewalForm);
+            mongoRepositoryReactive.saveOrUpdate(renewalForm);
         } catch (Exception e) {
             logger.error("An error occurred while sending email to application form document approvers", e);
         }
@@ -669,21 +671,21 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
                 String email = institutionAdmin.getEmailAddress();
                 String callbackUrl = String.format("%s/%s/reupload/%s/aipForm", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId(), document.getId());
 
-                NotificationDto notificationDto= new NotificationDto();
+                NotificationDto notificationDto = new NotificationDto();
                 notificationDto.setInstitutionEmail(email);
                 notificationDto.setGameType(getGameType(aipDocumentApproval.getGameTypeId()).getName());
                 notificationDto.setCallBackUrl(callbackUrl);
-                notificationDto.setDescription("In line with your application for "+notificationDto.getGameType()+" licence. Your document uploaded for "+ document.getDocumentType().getName()+" named "+ document.getFilename()+" has been returned. Reason:" +
-                        "\n\n" +comment+
-                        ".\nYou are therefore required to reupload a document for "+ document.getDocumentType().getName()+", so we can proceed with your application. \n" +
+                notificationDto.setDescription("In line with your application for " + notificationDto.getGameType() + " licence. Your document uploaded for " + document.getDocumentType().getName() + " named " + document.getFilename() + " has been returned. Reason:" +
+                        "\n\n" + comment +
+                        ".\nYou are therefore required to reupload a document for " + document.getDocumentType().getName() + ", so we can proceed with your application. \n" +
                         "\n" +
                         "Kindly click the link below to reupload the document.\n" +
-                        "\n" );
+                        "\n");
                 notificationDto.setTemplate("AIPUpdate");
                 sendEmail.sendEmailNotification(notificationDto, "Notification on AIP");
 
                 logger.info("Sending document return email to {}", email);
-             //   emailService.sendEmail(mailContent, String.format("Notification on your AIP for %s licence ", aipDocumentApproval.getGameTypeName()), email);
+                //   emailService.sendEmail(mailContent, String.format("Notification on your AIP for %s licence ", aipDocumentApproval.getGameTypeName()), email);
             } catch (Exception e) {
                 logger.error("An error occurred while sending email", e);
             }
@@ -697,16 +699,16 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
                 String email = institutionAdmin.getEmailAddress();
                 String callbackUrl = String.format("%s/%s/reupload/%s/renewalForm", frontEndPropertyHelper.getFrontEndUrl(), renewalForm.getId(), document.getId());
 
-                NotificationDto notificationDto= new NotificationDto();
+                NotificationDto notificationDto = new NotificationDto();
                 notificationDto.setInstitutionEmail(email);
                 notificationDto.setGameType(getGameType(renewalForm.getGameTypeId()).getName());
                 notificationDto.setCallBackUrl(callbackUrl);
-                notificationDto.setDescription("In line with your renewal application for "+notificationDto.getGameType()+" licence. Your document uploaded for "+ document.getDocumentType().getName()+" named "+ document.getFilename()+" has been returned. Reason: \n" +
-                        "\n\n" +comment+
-                        ".\nYou are therefore required to reupload a document for "+ document.getDocumentType().getName()+" so we can proceed with your application. \n" +
+                notificationDto.setDescription("In line with your renewal application for " + notificationDto.getGameType() + " licence. Your document uploaded for " + document.getDocumentType().getName() + " named " + document.getFilename() + " has been returned. Reason: \n" +
+                        "\n\n" + comment +
+                        ".\nYou are therefore required to reupload a document for " + document.getDocumentType().getName() + " so we can proceed with your application. \n" +
                         "\n" +
                         "Kindly click the link below to reupload the document.\n" +
-                        "\n" );
+                        "\n");
                 notificationDto.setTemplate("AIPUpdate");
                 sendEmail.sendEmailNotification(notificationDto, "Notification on Renewal");
 

@@ -6,15 +6,11 @@ import com.software.finatech.lslb.cms.service.referencedata.MachineTypeReference
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.adapters.AgentInstitutionAdapter;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
@@ -28,20 +24,28 @@ public class Agent extends AbstractFact {
     protected String emailAddress;
     protected String phoneNumber;
     protected List<AgentInstitution> agentInstitutions = new ArrayList<>();
-    protected LocalDate dateOfBirth;
+    protected String dateOfBirth;
     protected String residentialAddress;
     protected List<String> businessAddresses = new ArrayList<>();
     protected String meansOfId;
     protected String idNumber;
     protected String bvn;
-    protected Set<String> institutionIds;
-    protected Set<String> gameTypeIds;
+    protected Set<String> institutionIds = new HashSet<>();
+    protected Set<String> gameTypeIds = new HashSet<>();
     protected String vgPayCustomerCode;
     private String title;
     private String authInfoId;
     private String agentId;
     private boolean enabled;
+    private Set<String> phoneNumbers = new HashSet<>();
 
+    public Set<String> getPhoneNumbers() {
+        return phoneNumbers;
+    }
+
+    public void setPhoneNumbers(Set<String> phoneNumbers) {
+        this.phoneNumbers = phoneNumbers;
+    }
 
     public boolean isEnabled() {
         return enabled;
@@ -83,11 +87,11 @@ public class Agent extends AbstractFact {
         this.vgPayCustomerCode = vgPayCustomerCode;
     }
 
-    public LocalDate getDateOfBirth() {
+    public String getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(LocalDate dateOfBirth) {
+    public void setDateOfBirth(String dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
@@ -225,10 +229,7 @@ public class Agent extends AbstractFact {
         agentDto.setResidentialAddress(getResidentialAddress());
         agentDto.setBusinessAddresses(getBusinessAddresses());
         agentDto.setBvn(getBvn());
-        LocalDate dateOfBirth = getDateOfBirth();
-        if (dateOfBirth != null) {
-            agentDto.setDateOfBirth(dateOfBirth.toString("yyyy-MM-dd"));
-        }
+        agentDto.setDateOfBirth(getDateOfBirth());
         agentDto.setAgentId(getAgentId());
         agentDto.setInstitutions(getInstitutions());
         agentDto.setGameTypes(getGameTypes());

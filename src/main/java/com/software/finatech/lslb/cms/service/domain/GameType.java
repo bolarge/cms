@@ -12,8 +12,8 @@ public class GameType extends EnumeratedFact {
     protected int agentLicenseDurationMonths;
     protected int gamingMachineLicenseDurationMonths;
     protected String shortCode;
-    protected Boolean allowsGamingTerminal;
-    protected Boolean allowsGamingMachine;
+    protected boolean allowsGamingTerminal;
+    protected boolean allowsGamingMachine;
 
     public Boolean getAllowsGamingTerminal() {
         return allowsGamingTerminal;
