@@ -759,6 +759,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         paymentRecord.setFeePaymentTypeId(FeePaymentTypeReferenceData.TAX_FEE_TYPE_ID);
         paymentRecord.setPaymentReference(NumberUtil.generateTransactionReferenceForPaymentRecord());
         paymentRecord.setAgentId(createDto.getAgentId());
+        paymentRecord.setMachineMultiplePayment(machineMultiplePayment);
         paymentRecord.setInstitutionId(createDto.getInstitutionId());
         if (createDto.isGamingMachinePayment()) {
             paymentRecord.setLicenseTypeId(LicenseTypeReferenceData.GAMING_MACHINE_ID);
@@ -810,10 +811,11 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             MachinePaymentDetail paymentDetail = new MachinePaymentDetail();
             double amount = fee.getAmount();
             paymentDetail.setAmount(amount);
-            totalAmount = totalAmount + amount;
             paymentDetail.setFeePaymentTypeName(String.valueOf(fee.getFeePaymentType()));
             paymentDetail.setGameTypeName(String.valueOf(fee.getGameType()));
             paymentDetail.setMachineSerialNumber(gamingMachine.getSerialNumber());
+            paymentDetail.setMachineType(String.valueOf(gamingMachine.getMachineType()));
+            totalAmount = totalAmount + amount;
             machinePaymentDetails.add(paymentDetail);
         }
         MachineMultiplePayment machineMultiplePayment = new MachineMultiplePayment();
@@ -866,6 +868,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             paymentDetail.setFeePaymentTypeName(String.valueOf(fee.getFeePaymentType()));
             paymentDetail.setGameTypeName(String.valueOf(fee.getGameType()));
             paymentDetail.setMachineSerialNumber(gamingMachine.getSerialNumber());
+            paymentDetail.setMachineType(String.valueOf(gamingMachine.getMachineType()));
             totalAmount = totalAmount + amount;
             machinePaymentDetails.add(paymentDetail);
         }

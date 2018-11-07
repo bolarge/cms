@@ -193,17 +193,17 @@ public class DeviceMagicAdapter {
                     JSONObject addressObject = businessAddressArray.getJSONObject(0);
                     JSONObject streetAddressObject = addressObject.getJSONObject(STREET_ADDRESS);
                     if (streetAddressObject != null) {
-                        agent.setBusinessaddressstreet2(streetAddressObject.getString(VALUE));
+                        agent.setBusinessaddressstreet3(streetAddressObject.getString(VALUE));
                     }
 
                     JSONObject stateObject = addressObject.getJSONObject(STATE);
                     if (stateObject != null) {
-                        agent.setBusinessaddressstate2(stateObject.getString(VALUE));
+                        agent.setBusinessaddressstate3(stateObject.getString(VALUE));
                     }
 
                     JSONObject cityObject = addressObject.getJSONObject(CITY);
                     if (cityObject != null) {
-                        agent.setBusinessaddresscity2(cityObject.getString(VALUE));
+                        agent.setBusinessaddresscity3(cityObject.getString(VALUE));
                     }
                 }
             } catch (Exception e) {
@@ -216,17 +216,17 @@ public class DeviceMagicAdapter {
                     JSONObject addressObject = businessAddressArray.getJSONObject(0);
                     JSONObject streetAddressObject = addressObject.getJSONObject(STREET_ADDRESS);
                     if (streetAddressObject != null) {
-                        agent.setBusinessaddressstreet2(streetAddressObject.getString(VALUE));
+                        agent.setBusinessaddressstreet4(streetAddressObject.getString(VALUE));
                     }
 
                     JSONObject stateObject = addressObject.getJSONObject(STATE);
                     if (stateObject != null) {
-                        agent.setBusinessaddressstate2(stateObject.getString(VALUE));
+                        agent.setBusinessaddressstate4(stateObject.getString(VALUE));
                     }
 
                     JSONObject cityObject = addressObject.getJSONObject(CITY);
                     if (cityObject != null) {
-                        agent.setBusinessaddresscity2(cityObject.getString(VALUE));
+                        agent.setBusinessaddresscity4(cityObject.getString(VALUE));
                     }
                 }
             } catch (Exception e) {

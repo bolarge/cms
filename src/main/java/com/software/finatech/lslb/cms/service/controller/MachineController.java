@@ -177,6 +177,18 @@ public class MachineController {
     }
 
 
+    @RequestMapping(method = RequestMethod.GET, value = "/machine-types-by-category", params = {"id"})
+    @ApiOperation(value = "Get Machine Type By Game Type ", response = MachineDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> findMachineTypesByGameType(@RequestParam("id") String id) {
+        return machineService.getMachineTypesByGameType(id);
+    }
+
+
     @RequestMapping(method = RequestMethod.GET, value = "/find-machines-by-params")
     @ApiOperation(value = "Get Machines By Params ", response = MachineDto.class, consumes = "application/json",
             notes = "Used from the payment page to get machines for institution or agent")

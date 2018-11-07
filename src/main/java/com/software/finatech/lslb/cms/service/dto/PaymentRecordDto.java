@@ -28,6 +28,16 @@ public class PaymentRecordDto {
     private List<MachineDto> gamingMachines = new ArrayList<>();
     private List<MachineDto> gamingTerminals = new ArrayList<>();
     private String paymentReference;
+    private MachineMultiplePayment machineMultiplePayment;
+
+
+    public MachineMultiplePayment getMachineMultiplePayment() {
+        return machineMultiplePayment;
+    }
+
+    public void setMachineMultiplePayment(MachineMultiplePayment machineMultiplePayment) {
+        this.machineMultiplePayment = machineMultiplePayment;
+    }
 
     public String getPaymentReference() {
         return paymentReference;

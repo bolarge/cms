@@ -240,7 +240,7 @@ public class Machine extends AbstractFact {
         return machineGameDetails;
     }
 
-    private License getLicense() {
+    public License getLicense() {
         if (StringUtils.isEmpty(this.licenseId)) {
             return null;
         }

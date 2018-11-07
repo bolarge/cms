@@ -183,7 +183,7 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
                 approveAssignTerminalToAgent(approvalRequest);
             } else if (approvalRequest.isUpgradeGamingMachineGames()) {
                 approveUpgradeGamingMachineGames(approvalRequest);
-            } else if (approvalRequest.isUpgradeGamingMachineGames()) {
+            } else if (approvalRequest.isUpgradeGamingTerminalGames()) {
                 approveUpgradeGamingTerminalGames(approvalRequest, approvingUser);
             } else {
                 return Mono.just(new ResponseEntity<>("Invalid Request supplied", HttpStatus.BAD_REQUEST));

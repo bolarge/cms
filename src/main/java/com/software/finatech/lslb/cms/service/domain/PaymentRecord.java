@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.MachineDto;
+import com.software.finatech.lslb.cms.service.dto.MachineMultiplePayment;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
@@ -31,9 +32,18 @@ public class PaymentRecord extends AbstractFact {
     private Set<String> gamingMachineIds = new HashSet<>();
     private Set<String> gamingTerminalIds = new HashSet<>();
     private String licenseTransferId;
+    private MachineMultiplePayment machineMultiplePayment;
 
     public String getLicenseTransferId() {
         return licenseTransferId;
+    }
+
+    public MachineMultiplePayment getMachineMultiplePayment() {
+        return machineMultiplePayment;
+    }
+
+    public void setMachineMultiplePayment(MachineMultiplePayment machineMultiplePayment) {
+        this.machineMultiplePayment = machineMultiplePayment;
     }
 
     public void setLicenseTransferId(String licenseTransferId) {
@@ -321,6 +331,7 @@ public class PaymentRecord extends AbstractFact {
         PaymentRecordDto dto = convertToDto();
         dto.setGamingMachines(getGamingMachineDtos());
         dto.setGamingTerminals(getGamingTerminalDtos());
+        dto.setMachineMultiplePayment(getMachineMultiplePayment());
         return dto;
     }
 
@@ -353,6 +364,7 @@ public class PaymentRecord extends AbstractFact {
     public boolean isLicensePayment() {
         return StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_FEE_TYPE_ID, this.feePaymentTypeId);
     }
+
     public boolean isLicenseTransferPayment() {
         return StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_TRANSFER_FEE_TYPE_ID, this.feePaymentTypeId);
     }

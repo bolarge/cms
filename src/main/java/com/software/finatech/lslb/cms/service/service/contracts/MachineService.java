@@ -48,4 +48,6 @@ public interface MachineService {
     Mono<ResponseEntity> getMachineByParam(String agentId, String institutionId);
 
     Mono<ResponseEntity> upgradeMachineGames(MachineGameUpgradeRequest machineGameUpgradeDto, HttpServletRequest request);
+
+    Mono<ResponseEntity> getMachineTypesByGameType(String gameTypeId);
 }
