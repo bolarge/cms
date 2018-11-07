@@ -529,14 +529,10 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         try {
             List<DocumentNotification> documentNotifications = getDocumentNotificationsForAIPForm(aipDocumentApproval);
             if (documentNotifications.isEmpty()) {
-                aipDocumentApproval.setReadyForApproval(true);
-                mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
+                 mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
                 sendApproverMailToFinalApproval(aipDocumentApproval);
                 return;
             }
-            FormDocumentApproval documentApproval = new FormDocumentApproval();
-            documentApproval.setSupposedLength(documentNotifications.size());
-            Map<String, Boolean> approvalMap = new HashMap<>();
             String mailSubject = "New AIP submission on LSLB Customer Management System";
             for (DocumentNotification documentNotification : documentNotifications) {
                 String email = documentNotification.getApproverEmail();
@@ -544,13 +540,26 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
                 Document document = documentNotification.getDocument();
                 String mailContent = buildDocumentSubmissionMailContentLSLB(aipDocumentApproval, document);
                 emailService.sendEmail(mailContent, mailSubject, email);
+                try {
+                    String callbackUrl = String.format("%s/applications/aip/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId());
+                    NotificationDto notificationDto= new NotificationDto();
+                    notificationDto.setInstitutionEmail(email);
+                    notificationDto.setGameType(getGameType(aipDocumentApproval.getGameTypeId()).getName());
+                    notificationDto.setCallBackUrl(callbackUrl);
+                    notificationDto.setDescription(aipDocumentApproval.getInstitutionName()+" submitted a new AIP Application on LSLB Customer Management System by for category "+ aipDocumentApproval.getGameTypeName()+" and it contains document which requires your approval." );
+                    notificationDto.setTemplate("AIPUpdate");
+                    sendEmail.sendEmailNotification(notificationDto, mailSubject);
+
+                    logger.info("Sending document return email to {}", email);
+
+
+                } catch (Exception e) {
+                    logger.error("An error occurred while sending email", e);
+                }
                 document.setNotificationSent(true);
-                approvalMap.put(document.getId(), false);
                 mongoRepositoryReactive.saveOrUpdate(document);
             }
-            documentApproval.setApprovalMap(approvalMap);
-            aipDocumentApproval.setDocumentApproval(documentApproval);
-            mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
+             mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
         } catch (Exception e) {
             logger.error("An error occurred while sending email to AIP form document approvers", e);
         }
@@ -576,12 +585,24 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
             logger.info("No final approvers for application form");
             return;
         }
-        String mailContent = buildAIPFormSubmissionApprovalEmailContent(aipDocumentApproval);
         for (AuthInfo authInfo : finalApprovers) {
             String emailAddress = authInfo.getEmailAddress();
-            logger.info("Sending final approver email to {}", emailAddress);
-            emailService.sendEmail(mailContent, "New AIP Submission on LSLB Customer Management System", emailAddress);
-        }
+            try {
+                String callbackUrl = String.format("%s/applications/aip/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId());
+                NotificationDto notificationDto= new NotificationDto();
+                notificationDto.setInstitutionEmail(emailAddress);
+                notificationDto.setGameType(getGameType(aipDocumentApproval.getGameTypeId()).getName());
+                notificationDto.setCallBackUrl(callbackUrl);
+                notificationDto.setDescription("A new AIP application that requires your approval has been submitted on LSLB Customer Management System by for category "+notificationDto.getGameType() );
+                notificationDto.setTemplate("AIPUpdate");
+                sendEmail.sendEmailNotification(notificationDto, "New AIP Application Submission on LSLB Customer Management System");
+
+                logger.info("Sending document return email to {}", emailAddress);
+
+
+            } catch (Exception e) {
+                logger.error("An error occurred while sending email", e);
+            } }
     }
 
     public void sendApproverMailToFinalApproval(RenewalForm renewalForm) {
@@ -590,11 +611,24 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
             logger.info("No final approvers for application form");
             return;
         }
-        String mailContent = buildRenewalFormFormSubmissionApprovalEmailContent(renewalForm);
         for (AuthInfo authInfo : finalApprovers) {
             String emailAddress = authInfo.getEmailAddress();
-            logger.info("Sending final approver email to {}", emailAddress);
-            emailService.sendEmail(mailContent, "New Application Submission on LSLB Customer Management System", emailAddress);
+            try {
+                String callbackUrl = String.format("%s/applications/renewal/%s", frontEndPropertyHelper.getFrontEndUrl(), renewalForm.getId());
+                NotificationDto notificationDto= new NotificationDto();
+                notificationDto.setInstitutionEmail(emailAddress);
+                notificationDto.setGameType(getGameType(renewalForm.getGameTypeId()).getName());
+                notificationDto.setCallBackUrl(callbackUrl);
+                notificationDto.setDescription("A new renewal application that requires your approval has been submitted on LSLB Customer Management System by for category "+notificationDto.getGameType() );
+                notificationDto.setTemplate("AIPUpdate");
+                sendEmail.sendEmailNotification(notificationDto, "New Renewal Application Submission on LSLB Customer Management System");
+
+                logger.info("Sending document return email to {}", emailAddress);
+
+
+            } catch (Exception e) {
+                logger.error("An error occurred while sending email", e);
+            }   //emailService.sendEmail(mailContent, "New Renewal Application Submission on LSLB Customer Management System", emailAddress);
         }
     }
 
@@ -718,32 +752,8 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         return mailContentBuilderService.build(model, "application-form/ApplicationFormDocumentReturnGAAdmin");
     }
 
-    private String buildDocumentReturnMailContent(AIPDocumentApproval aipDocumentApproval, Document document) {
-        String callbackUrl = String.format("%s/%s/reupload/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId(), document.getId());
-        String presentDate = DateTime.now().toString("dd-MM-yyyy ");
-        HashMap<String, Object> model = new HashMap<>();
-        model.put("date", presentDate);
-        model.put("gameType", aipDocumentApproval.getGameTypeName());
-        model.put("applicantName", aipDocumentApproval.getInstitutionName());
-        model.put("frontEndUrl", callbackUrl);
-        model.put("fileName", document.getFilename());
-        //    model.put("comment", document.getComment());
-        model.put("documentType", String.valueOf(document.getDocumentType()));
-        return mailContentBuilderService.build(model, "aip-form/AIPFormDocumentReturnGAAdmin");
-    }
 
-    private String buildDocumentReturnMailContent(RenewalForm renewalForm, Document document) {
-        String callbackUrl = String.format("%s/%s/reupload/%s", frontEndPropertyHelper.getFrontEndUrl(), renewalForm.getId(), document.getId());
-        String presentDate = DateTime.now().toString("dd-MM-yyyy ");
-        HashMap<String, Object> model = new HashMap<>();
-        model.put("date", presentDate);
-        model.put("gameType", renewalForm.getGameTypeName());
-        model.put("applicantName", renewalForm.getInstitutionName());
-        model.put("frontEndUrl", callbackUrl);
-        model.put("fileName", document.getFilename());
-        model.put("documentType", String.valueOf(document.getDocumentType()));
-        return mailContentBuilderService.build(model, "renewal-form/RenewalFormDocumentReturnGAAdmin");
-    }
+
 
     private String buildResubmissionNotificationForApplicationForm(ApplicationForm applicationForm, Document document) {
         String callbackUrl = String.format("%s/application-view/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId());
@@ -767,6 +777,8 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("frontEndUrl", callbackUrl);
         model.put("documentType", String.valueOf(document.getDocumentType()));
         return mailContentBuilderService.build(model, "aip-form/AIPFormDocumentResubmissionLSLB");
+
+
     }
 
     private String buildResubmissionNotificationForRenewalForm(RenewalForm renewalForm, Document document) {

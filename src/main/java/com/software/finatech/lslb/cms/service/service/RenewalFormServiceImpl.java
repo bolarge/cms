@@ -244,7 +244,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> getAllRenewalForms(int page, int pageSize, String sortType, String sortParam, String institutionId, String formStatusId, String gameTypeIds, HttpServletResponse httpServletResponse) {
+    public Mono<ResponseEntity> getAllRenewalForms(int page, int pageSize, String sortType, String sortParam, String institutionId, String formStatusId, String gameTypeIds, String renewalId, HttpServletResponse httpServletResponse) {
         try {
             Query query = new Query();
             if (!StringUtils.isEmpty(gameTypeIds)) {
@@ -253,6 +253,9 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             }
             if (!StringUtils.isEmpty(institutionId)) {
                 query.addCriteria(Criteria.where("institutionId").is(institutionId));
+            }
+            if (!StringUtils.isEmpty(renewalId)) {
+                query.addCriteria(Criteria.where("id").is(renewalId));
             }
             if (!StringUtils.isEmpty(formStatusId)) {
                 query.addCriteria(Criteria.where("formStatusId").is(formStatusId));
