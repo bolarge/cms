@@ -8,6 +8,7 @@ import com.software.finatech.lslb.cms.service.domain.ScheduledMeeting;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil;
 import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
@@ -40,6 +41,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Service
@@ -84,6 +86,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                                                          String dateProperty,
                                                          String creatorId,
                                                          String cancelerId,
+                                                         String purposeId,
                                                          HttpServletResponse httpServletResponse) {
         try {
             Query query = new Query();
@@ -95,6 +98,9 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             }
             if (!StringUtils.isEmpty(cancelerId)) {
                 query.addCriteria(Criteria.where("cancelerId").is(cancelerId));
+            }
+            if (!StringUtils.isEmpty(purposeId)) {
+                query.addCriteria(Criteria.where("meetingPurposeId").is(purposeId));
             }
             if (page == 0) {
                 Long count = mongoRepositoryReactive.count(query, ScheduledMeeting.class).block();
@@ -138,6 +144,11 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
     }
 
     @Override
+    public Mono<ResponseEntity> getAllMeetingPurposes() {
+        return getAllEnumeratedEntity("MeetingPurpose");
+    }
+
+    @Override
     public Mono<ResponseEntity> createScheduledMeeting(ScheduledMeetingCreateDto scheduledMeetingCreateDto, HttpServletRequest request) {
         try {
             HttpStatus badRequestStatus = HttpStatus.BAD_REQUEST;
@@ -176,7 +187,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             sendInitialMeetingNotifications(scheduledMeeting, recipientList, invitedInstitution);
             String institutionName = invitedInstitution.getInstitutionName();
             String verbiage = String.format("Created Scheduled Meeting, Institution Name-> %s , Meeting Purpose -> %s, Meeting Date -> %s, Venue -> %s, Id -> %s",
-                    institutionName,scheduledMeeting.getMeetingPurpose() ,scheduledMeeting.getMeetingDateString(), scheduledMeeting.getVenue(), scheduledMeeting.getId());
+                    institutionName, scheduledMeeting.getMeetingPurpose(), scheduledMeeting.getMeetingDateString(), scheduledMeeting.getVenue(), scheduledMeeting.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));

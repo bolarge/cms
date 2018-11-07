@@ -32,7 +32,7 @@ public class ScheduledMeetingController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize",
-            "sortType", "sortProperty", "startDate", "endDate", "creatorId", "cancelerId"})
+            "sortType", "sortProperty", "startDate", "endDate", "creatorId", "cancelerId", "meetingPurposeId"})
     @ApiOperation(value = "Get all Scheduled meetings", response = ScheduledMeetingDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -49,6 +49,7 @@ public class ScheduledMeetingController {
                                                         @RequestParam("dateProperty") String dateProperty,
                                                         @RequestParam("creatorId") String creatorId,
                                                         @RequestParam("cancelerId") String cancelerId,
+                                                        @RequestParam("meetingPurposeId") String meetingPurposeId,
                                                         HttpServletResponse httpServletResponse) {
         return scheduledMeetingService.findAllScheduledMeetings(page,
                 pageSize,
@@ -60,8 +61,21 @@ public class ScheduledMeetingController {
                 dateProperty,
                 creatorId,
                 cancelerId,
+                meetingPurposeId,
                 httpServletResponse);
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/all-meeting-purpose")
+    @ApiOperation(value = "Get all meeting Purposes", response = ScheduledMeetingDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllMeetingPurposes() {
+        return scheduledMeetingService.getAllMeetingPurposes();
+    }
+
 
     @RequestMapping(method = RequestMethod.POST, value = "/create")
     @ApiOperation(value = "Create a scheduled meeting", response = ScheduledMeetingDto.class, consumes = "application/json")

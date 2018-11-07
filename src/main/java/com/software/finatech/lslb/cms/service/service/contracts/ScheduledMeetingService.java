@@ -29,10 +29,13 @@ public interface ScheduledMeetingService {
                                                   String dateProperty,
                                                   String creatorId,
                                                   String cancelerId,
+                                                  String purposeId,
                                                   HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getScheduledMeetingById(String meetingId);
 
     Mono<ResponseEntity> addCommentsToMeeting(String meetingId, AddCommentDto addCommentDto, HttpServletRequest request);
+
+    Mono<ResponseEntity> getAllMeetingPurposes();
 }
 
