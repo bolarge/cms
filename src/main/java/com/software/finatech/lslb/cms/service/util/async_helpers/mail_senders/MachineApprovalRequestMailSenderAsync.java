@@ -1,9 +1,6 @@
 package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
-import com.software.finatech.lslb.cms.service.domain.Agent;
-import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.domain.Machine;
-import com.software.finatech.lslb.cms.service.domain.MachineApprovalRequest;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -55,6 +52,26 @@ public class MachineApprovalRequestMailSenderAsync extends AbstractMailSender {
             }
         }
     }
+
+    @Async
+    public void sendMultipleMachineCreateRequestToLSLBAdmins(String institutionName, String count) {
+        List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_MACHINE_APPLICATION_NOTIFICATION_ID);
+        if (lslbAdmins.isEmpty()) {
+            logger.info("There are no lslb admins that can receive new machine requests");
+            return;
+        }
+        String content = buildMultipleMachineCreateApprovalNotificationOperator(institutionName, count);
+        for (AuthInfo authInfo : lslbAdmins) {
+            String email = authInfo.getEmailAddress();
+            try {
+                logger.info("Sending initial machine request email to {}", email);
+                emailService.sendEmail(content, "New Multiple Machine Approval Request on LSLB Customer Management System", email);
+            } catch (Exception e) {
+                logger.error("An error occurred while sending initial machine approval notification to {}", email, e);
+            }
+        }
+    }
+
 
     @Async
     public void sendMachineApprovalNotificationToRequestInitiator(MachineApprovalRequest approvalRequest) {
@@ -117,5 +134,15 @@ public class MachineApprovalRequestMailSenderAsync extends AbstractMailSender {
         model.put("rejectionReason", approvalRequest.getRejectionReason());
         model.put("institutionName", approvalRequest.getInstitutionName());
         return mailContentBuilderService.build(model, "machine-approvals/Machine-ApprovalNotifcation-Operator");
+    }
+
+    private String buildMultipleMachineCreateApprovalNotificationOperator(String institutionName, String count) {
+        String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("date", presentDateString);
+        model.put("count", count);
+        model.put("frontEndUrl", frontEndPropertyHelper.getFrontEndUrl());
+        model.put("initiatorName", institutionName);
+        return mailContentBuilderService.build(model, "machine-approvals/NewMultipleMachineApprovalRequest");
     }
 }
