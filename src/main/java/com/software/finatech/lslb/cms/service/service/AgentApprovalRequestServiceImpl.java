@@ -317,6 +317,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             agent.setFirstName(pendingAgent.getFirstName());
             agent.setLastName(pendingAgent.getLastName());
             agent.setMeansOfId(pendingAgent.getMeansOfId());
+            agent.setPhoneNumber(pendingAgent.getPhoneNumber());
             agent.setIdNumber(pendingAgent.getIdNumber());
             agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
             agentApprovalRequest.setApproverId(userId);
