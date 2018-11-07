@@ -7,6 +7,7 @@ import com.software.finatech.lslb.cms.service.model.MachineGameDetails;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
+import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
 import com.software.finatech.lslb.cms.service.service.contracts.MachineService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
@@ -55,6 +56,7 @@ public class MachineServiceImpl implements MachineService {
     private AgentService agentService;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
+    private GameTypeService gameTypeService;
     private MachineApprovalRequestMailSenderAsync machineApprovalRequestMailSenderAsync;
 
     @Autowired
@@ -64,11 +66,13 @@ public class MachineServiceImpl implements MachineService {
                               AgentService agentService,
                               SpringSecurityAuditorAware springSecurityAuditorAware,
                               AuditLogHelper auditLogHelper,
+                              GameTypeService gameTypeService,
                               MachineApprovalRequestMailSenderAsync machineApprovalRequestMailSenderAsync) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.licenseValidatorUtil = licenseValidatorUtil;
         this.institutionService = institutionService;
         this.agentService = agentService;
+        this.gameTypeService = gameTypeService;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.auditLogHelper = auditLogHelper;
         this.machineApprovalRequestMailSenderAsync = machineApprovalRequestMailSenderAsync;
@@ -490,12 +494,12 @@ public class MachineServiceImpl implements MachineService {
                                 }
                                 machine.setMachineTypeId(machineTypeId);
                                 //String machineStatusId = columns[5];
-                               // MachineStatus machineStatus = getMachineStatus(machineStatusId);
-                               // if (machineStatus == null) {
-                                 //   failedLines.add(FailedLine.fromLineAndReason(rows[i], String.format("Machine status with id %s not found", machineStatusId)));
-                                 //   continue;
-                              //  }
-                              //  machine.setMachineStatusId(machineStatusId);
+                                // MachineStatus machineStatus = getMachineStatus(machineStatusId);
+                                // if (machineStatus == null) {
+                                //   failedLines.add(FailedLine.fromLineAndReason(rows[i], String.format("Machine status with id %s not found", machineStatusId)));
+                                //   continue;
+                                //  }
+                                //  machine.setMachineStatusId(machineStatusId);
 
                             }
                             machine.setGameTypeId(gameTypeId);
@@ -677,6 +681,13 @@ public class MachineServiceImpl implements MachineService {
 
             List<MachineDto> dtos = new ArrayList<>();
             for (Machine machine : machines) {
+                License license = machine.getLicense();
+                if (license != null) {
+                    LocalDate startOfYear = LocalDate.now().dayOfYear().withMinimumValue();
+                    if (startOfYear.isEqual(license.getEffectiveDate())) {
+                        continue;
+                    }
+                }
                 MachineDto dto = new MachineDto();
                 dto.setId(machine.getId());
                 dto.setSerialNumber(machine.getSerialNumber());
@@ -686,6 +697,38 @@ public class MachineServiceImpl implements MachineService {
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while getting machines by params", e);
         }
+    }
+
+    @Override
+    public Mono<ResponseEntity> getMachineTypesByGameType(String gameTypeId) {
+        try {
+            GameType gameType = gameTypeService.findById(gameTypeId);
+            if (gameType == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Category with id %s not found", gameTypeId), HttpStatus.BAD_REQUEST));
+            }
+            List<String> machineTypeIds = new ArrayList<>();
+            if (gameType.getAllowsGamingMachine()) {
+                machineTypeIds.add(MachineTypeReferenceData.GAMING_MACHINE_ID);
+            }
+            if (gameType.getAllowsGamingTerminal()) {
+                machineTypeIds.add(MachineTypeReferenceData.GAMING_TERMINAL_ID);
+            }
+            return Mono.just(new ResponseEntity<>(machineTypesFromIds(machineTypeIds), HttpStatus.OK));
+
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while getting machine types by game type", e);
+        }
+    }
+
+    private List<EnumeratedFactDto> machineTypesFromIds(List<String> machineTypeIds) {
+        List<EnumeratedFactDto> dtos = new ArrayList<>();
+        for (String id : machineTypeIds) {
+            MachineType machineType = getMachineType(id);
+            if (machineType != null) {
+                dtos.add(machineType.convertToDto());
+            }
+        }
+        return dtos;
     }
 
     private MachineGame findMachineGameById(String id) {

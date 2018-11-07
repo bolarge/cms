@@ -57,7 +57,6 @@ public class PaymentRecordDetailController extends BaseController {
         return paymentRecordDetailService.createWebPaymentPaymentRecordDetail(paymentRecordDetailCreateDto, request);
     }
 
-
     @RequestMapping(method = RequestMethod.POST, value = "/update-web")
     @ApiOperation(value = "Update an existing payment record detail", response = PaymentRecordDetailDto.class, consumes = "application/json")
     @ApiResponses(value = {
