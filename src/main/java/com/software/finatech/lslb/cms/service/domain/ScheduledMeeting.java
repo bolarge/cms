@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
 import com.software.finatech.lslb.cms.service.dto.CommentDto;
 import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingDto;
 import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingPurposeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
@@ -363,6 +364,10 @@ public class ScheduledMeeting extends AbstractFact {
 
     public boolean isForLicenseTransferee() {
         return StringUtils.equals(ScheduledMeetingPurposeReferenceData.TRANSFEREE_ID, this.meetingPurposeId);
+    }
+
+    public boolean isCompleted() {
+        return StringUtils.equals(ScheduledMeetingStatusReferenceData.COMPLETED_STATUS_ID, this.scheduledMeetingStatusId);
     }
 
     @Override

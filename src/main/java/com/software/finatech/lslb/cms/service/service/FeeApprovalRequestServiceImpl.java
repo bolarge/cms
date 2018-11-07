@@ -153,10 +153,10 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
 
             if (feeApprovalRequest.isCreateFee()) {
                 approveCreateFeeRequest(feeApprovalRequest);
-            }
-
-            if (feeApprovalRequest.isSetFeeEndDate()) {
+            } else if (feeApprovalRequest.isSetFeeEndDate()) {
                 approveSetFeeEndDateRequest(feeApprovalRequest);
+            } else {
+                return Mono.just(new ResponseEntity<>("Invalid Request supplied", HttpStatus.BAD_REQUEST));
             }
             feeApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
             feeApprovalRequest.setApproverId(loggedInUser.getId());

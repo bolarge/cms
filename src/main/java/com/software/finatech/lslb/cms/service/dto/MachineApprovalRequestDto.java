@@ -10,6 +10,24 @@ public class MachineApprovalRequestDto extends AbstractApprovalRequestDto {
     private Set<MachineGameDetails> newGameDetails = new HashSet<>();
     private String newMachineStatusName;
     private Set<GameUpgrade> gameUpgrades = new HashSet<>();
+    private String agentFullName;
+    private String agentId;
+
+    public String getAgentFullName() {
+        return agentFullName;
+    }
+
+    public void setAgentFullName(String agentFullName) {
+        this.agentFullName = agentFullName;
+    }
+
+    public String getAgentId() {
+        return agentId;
+    }
+
+    public void setAgentId(String agentId) {
+        this.agentId = agentId;
+    }
 
     public Set<GameUpgrade> getGameUpgrades() {
         return gameUpgrades;

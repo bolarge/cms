@@ -162,13 +162,12 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             AuthInfo approvingUser = springSecurityAuditorAware.getLoggedInUser();
             if (approvingUser == null) {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
-            }
-
-            if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.CREATE_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
+            } else if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.CREATE_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
                 approveAgentCreationRequest(agentApprovalRequest, approvingUser.getId());
-            }
-            if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.ADD_INSTITUTION_TO_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
+            } else if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.ADD_INSTITUTION_TO_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
                 approveAddInstitutionToAgentRequest(agentApprovalRequest, approvingUser.getId());
+            } else {
+                return Mono.just(new ResponseEntity<>("Invalid request supplied", HttpStatus.BAD_REQUEST));
             }
 
             String verbiage = String.format("Approved agent approval request -> Type: %s ", agentApprovalRequest.getAgentApprovalRequestTypeName());

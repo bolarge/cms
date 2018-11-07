@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
+import com.software.finatech.lslb.cms.service.domain.ScheduledMeeting;
 import com.software.finatech.lslb.cms.service.dto.AddCommentDto;
 import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingCreateDto;
 import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingUpdateDto;
@@ -37,5 +38,7 @@ public interface ScheduledMeetingService {
     Mono<ResponseEntity> addCommentsToMeeting(String meetingId, AddCommentDto addCommentDto, HttpServletRequest request);
 
     Mono<ResponseEntity> getAllMeetingPurposes();
+
+    ScheduledMeeting findScheduledMeetingByEntityId(String entityId);
 }
 
