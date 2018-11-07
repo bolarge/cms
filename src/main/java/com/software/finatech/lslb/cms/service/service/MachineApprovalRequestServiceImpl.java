@@ -367,7 +367,6 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             machineGame.setGameVersion(gameDetails.getGameVersion());
             machineGame.setMachineId(machine.getId());
             machineGame.setActive(true);
-            machineGame.setId(UUID.randomUUID().toString());
             mongoRepositoryReactive.saveOrUpdate(machineGame);
         }
     }
@@ -384,7 +383,7 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
         if (machineGame != null) {
             machineGame.setActive(false);
             MachineGame newMachineGame = new MachineGame();
-            machineGame.setId(UUID.randomUUID().toString());
+            newMachineGame.setId(UUID.randomUUID().toString());
             newMachineGame.setActive(true);
             newMachineGame.setGameVersion(gameUpgrade.getNewGameVersion());
             newMachineGame.setGameName(machineGame.getGameName());
