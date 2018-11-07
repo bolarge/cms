@@ -123,7 +123,7 @@ public class LicenseServiceImpl implements LicenseService {
                 sort = new Sort((sortDirection.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC),
                         sortProperty);
             } else {
-                sort = new Sort(Sort.Direction.DESC, "id");
+                sort = new Sort(Sort.Direction.DESC, "createdAt");
             }
             query.with(PageRequest.of(page, pageSize, sort));
             query.with(sort);
