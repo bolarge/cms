@@ -34,7 +34,6 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -461,9 +460,6 @@ public class MachineServiceImpl implements MachineService {
             return validateGamingMachineLicenseResponse;
         }
 
-        List<Machine> machineList = new ArrayList<>();
-        List<MachineGame> machineGames = new ArrayList<>();
-
         List<FailedLine> failedLines = new ArrayList<>();
         UploadTransactionResponse uploadTransactionResponse = new UploadTransactionResponse();
         if (!multipartFile.isEmpty()) {
@@ -471,17 +467,17 @@ public class MachineServiceImpl implements MachineService {
                 byte[] bytes = multipartFile.getBytes();
                 String completeData = new String(bytes);
                 String[] rows = completeData.split("\\r?\\n");
-                Map<String, Machine> gamingMachineMap = new HashMap<>();
+                Map<String, PendingMachine> pendingMachineMap = new HashMap<>();
                 for (int i = 1; i < rows.length; i++) {
                     String[] columns = rows[i].split(",");
                     if (columns.length < 7) {
                         failedLines.add(FailedLine.fromLineAndReason(rows[i], "Line has less than 6 fields"));
                     } else {
                         try {
-                            Machine machine = getGamingMachineBySerialNumberFromMap(columns[0], gamingMachineMap);
-                            MachineGame machineGame = new MachineGame();
+                            //   Machine machine = getGamingMachineBySerialNumberFromMap(columns[0], gamingMachineMap);
+                            PendingMachine machine = pendingMachineMap.get(columns[0]);
                             if (machine == null) {
-                                machine = new Machine();
+                                machine = new PendingMachine();
                                 machine.setId(UUID.randomUUID().toString());
                                 machine.setSerialNumber(columns[0]);
                                 machine.setManufacturer(columns[1]);
@@ -493,56 +489,45 @@ public class MachineServiceImpl implements MachineService {
                                     continue;
                                 }
                                 machine.setMachineTypeId(machineTypeId);
-                                //String machineStatusId = columns[5];
-                                // MachineStatus machineStatus = getMachineStatus(machineStatusId);
-                                // if (machineStatus == null) {
-                                //   failedLines.add(FailedLine.fromLineAndReason(rows[i], String.format("Machine status with id %s not found", machineStatusId)));
-                                //   continue;
-                                //  }
-                                //  machine.setMachineStatusId(machineStatusId);
-
                             }
                             machine.setGameTypeId(gameTypeId);
-                            machineGame.setId(UUID.randomUUID().toString());
-                            machineGame.setMachineId(machine.getId());
-                            machineGame.setGameName(columns[5]);
-                            machineGame.setGameVersion(columns[6]);
-                            machineGame.setActive(true);
+                            machine.getGameDetailsList().add(MachineGameDetails.fromGameNameAndVersion(columns[5], columns[6]));
                             machine.setInstitutionId(institutionId);
-                            machineList.add(machine);
-                            machineGames.add(machineGame);
-                            gamingMachineMap.put(machine.getSerialNumber(), machine);
+                            pendingMachineMap.put(machine.getSerialNumber(), machine);
                         } catch (Exception e) {
                             logger.error(String.format("Error parsing line %s", rows[i]), e);
                             failedLines.add(FailedLine.fromLineAndReason(rows[i], "An error occurred while parsing line"));
                         }
                     }
                 }
-
                 if (!failedLines.isEmpty()) {
                     uploadTransactionResponse.setFailedLines(failedLines);
                     uploadTransactionResponse.setFailedTransactionCount(failedLines.size());
                     uploadTransactionResponse.setMessage("Please review with sample file and re upload");
                     return Mono.just(new ResponseEntity<>(uploadTransactionResponse, HttpStatus.BAD_REQUEST));
                 } else {
-                    for (Machine gamingMachine : machineList) {
+                    if (pendingMachineMap.values().isEmpty()) {
+                        return Mono.just(new ResponseEntity<>("No Machines supplied in the file", HttpStatus.BAD_REQUEST));
+                    }
+                    for (PendingMachine pendingMachine : pendingMachineMap.values()) {
                         try {
-                            mongoRepositoryReactive.saveOrUpdate(gamingMachine);
+                            mongoRepositoryReactive.saveOrUpdate(pendingMachine);
+                            MachineApprovalRequest machineApprovalRequest = fromPendingMachine(pendingMachine);
+                            mongoRepositoryReactive.saveOrUpdate(machineApprovalRequest);
                         } catch (Exception e) {
-                            logger.error("An error occurred while saving gaming machine with serial number {}", gamingMachine.getSerialNumber());
-                            String line = String.format("%s,%s,%s", gamingMachine.getSerialNumber(), gamingMachine.getManufacturer(), gamingMachine.getMachineAddress());
+                            logger.error("An error occurred while creating approval request for  gaming machine with serial number {}", pendingMachine.getSerialNumber());
+                            String line = String.format("%s,%s,%s", pendingMachine.getSerialNumber(), pendingMachine.getManufacturer(), pendingMachine.getMachineAddress());
                             failedLines.add(FailedLine.fromLineAndReason(line, "An error occurred while saving line"));
                         }
-                        for (MachineGame machineGame : machineGames) {
-                            mongoRepositoryReactive.saveOrUpdate(machineGame);
-                        }
                     }
+
                     if (!failedLines.isEmpty()) {
                         uploadTransactionResponse.setMessage("Upload partially successful, please see failed records");
                         uploadTransactionResponse.setFailedLines(failedLines);
                         uploadTransactionResponse.setFailedTransactionCount(failedLines.size());
                     } else {
                         uploadTransactionResponse.setMessage("Upload successful");
+                        machineApprovalRequestMailSenderAsync.sendMultipleMachineCreateRequestToLSLBAdmins(institution.getInstitutionName(), String.valueOf(pendingMachineMap.size()));
                     }
 
                     String verbiage = "Uploaded multiple gaming machines ";
@@ -558,6 +543,7 @@ public class MachineServiceImpl implements MachineService {
         } else {
             return Mono.just(new ResponseEntity<>("File is empty", HttpStatus.BAD_REQUEST));
         }
+
     }
 
     private Machine findBySerialNumber(String serialNumber) {
@@ -565,11 +551,6 @@ public class MachineServiceImpl implements MachineService {
         query.addCriteria(Criteria.where("serialNumber").is(serialNumber));
         return (Machine) mongoRepositoryReactive.find(query, Machine.class).block();
     }
-
-    private Machine getGamingMachineBySerialNumberFromMap(String serialNumber, @NotNull Map<String, Machine> gamingMachineMap) {
-        return gamingMachineMap.get(serialNumber);
-    }
-
 
     private PendingMachine fromGamingMachineCreateDto(MachineCreateDto machineCreateDto) {
         PendingMachine pendingMachine = new PendingMachine();
@@ -779,5 +760,21 @@ public class MachineServiceImpl implements MachineService {
         approvalRequest.setInitiatorId(loggedInUser.getId());
         approvalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_OPERATOR_APPROVAL_ID);
         machineApprovalRequestMailSenderAsync.sendInitialMachineStateUpdateToAgentOperators(approvalRequest);
+    }
+
+    private MachineApprovalRequest fromPendingMachine(PendingMachine pendingMachine) {
+        MachineApprovalRequest approvalRequest = new MachineApprovalRequest();
+        approvalRequest.setId(UUID.randomUUID().toString());
+        approvalRequest.setPendingMachineId(pendingMachine.getId());
+        approvalRequest.setMachineTypeId(pendingMachine.getMachineTypeId());
+        if (pendingMachine.isGamingTerminal()) {
+            approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.CREATE_GAMING_TERMINAL_ID);
+        }
+        if (pendingMachine.isGamingMachine()) {
+            approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.CREATE_GAMING_MACHINE_ID);
+        }
+        approvalRequest.setInitiatedByInstitution(true);
+        approvalRequest.setInstitutionId(pendingMachine.getInstitutionId());
+        return approvalRequest;
     }
 }
