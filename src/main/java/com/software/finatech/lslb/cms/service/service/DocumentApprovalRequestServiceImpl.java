@@ -154,8 +154,11 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
             if (documentApprovalRequest.isCreateDocumentType()) {
                 approverCreateDocumentType(documentApprovalRequest);
             }
-            if (documentApprovalRequest.isSetApprover()) {
+            else if (documentApprovalRequest.isSetApprover()) {
                 approveSetApprover(documentApprovalRequest);
+            }
+            else {
+                return Mono.just(new ResponseEntity<>("Invallid Request supplied", HttpStatus.BAD_REQUEST));
             }
 
             documentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);

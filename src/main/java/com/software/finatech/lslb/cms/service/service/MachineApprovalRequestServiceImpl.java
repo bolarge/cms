@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.ApprovalRequestOperationtDto;
 import com.software.finatech.lslb.cms.service.dto.GameUpgrade;
 import com.software.finatech.lslb.cms.service.dto.MachineApprovalRequestDto;
+import com.software.finatech.lslb.cms.service.exception.ApprovalRequestProcessException;
 import com.software.finatech.lslb.cms.service.model.MachineGameDetails;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
@@ -170,29 +171,23 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
 
             if (approvalRequest.isCreateGamingTerminal() || approvalRequest.isCreateGamingMachine()) {
                 approveCreateMachine(approvalRequest);
-            }
-            if (approvalRequest.isAddGamesToGamingMachine()) {
+            } else if (approvalRequest.isAddGamesToGamingMachine()) {
                 approveAddGamesToGamingMachine(approvalRequest);
-            }
-            if (approvalRequest.isAddGamesToGamingTerminal()) {
+            } else if (approvalRequest.isAddGamesToGamingTerminal()) {
                 approveAddGamesToGamingTerminal(approvalRequest, approvingUser);
-            }
-            if (approvalRequest.isChangeGamingMachineStatus()) {
+            } else if (approvalRequest.isChangeGamingMachineStatus()) {
                 approveChangeGamingMachineStatus(approvalRequest);
-            }
-            if (approvalRequest.isChangeGamingTerminalStatus()) {
+            } else if (approvalRequest.isChangeGamingTerminalStatus()) {
                 approveChangeGamingTerminalStatus(approvalRequest, approvingUser);
-            }
-            if (approvalRequest.isAssignTerminalToAgent()) {
+            } else if (approvalRequest.isAssignTerminalToAgent()) {
                 approveAssignTerminalToAgent(approvalRequest);
-            }
-            if (approvalRequest.isUpgradeGamingMachineGames()) {
+            } else if (approvalRequest.isUpgradeGamingMachineGames()) {
                 approveUpgradeGamingMachineGames(approvalRequest);
-            }
-            if (approvalRequest.isUpgradeGamingMachineGames()) {
+            } else if (approvalRequest.isUpgradeGamingMachineGames()) {
                 approveUpgradeGamingTerminalGames(approvalRequest, approvingUser);
+            } else {
+                return Mono.just(new ResponseEntity<>("Invalid Request supplied", HttpStatus.BAD_REQUEST));
             }
-
 
             if (approvingUser.isLSLBMember()) {
                 approvalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
@@ -208,6 +203,8 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
+        } catch (ApprovalRequestProcessException e) {
+            return logAndReturnError(logger, e.getMessage(), e);
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving request", e);
         }
@@ -276,13 +273,14 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
         approveChangeMachineStatus(approvalRequest);
     }
 
-    private void approveChangeGamingTerminalStatus(MachineApprovalRequest approvalRequest, AuthInfo loggedInUser) {
+    private void approveChangeGamingTerminalStatus(MachineApprovalRequest approvalRequest, AuthInfo loggedInUser) throws ApprovalRequestProcessException {
         if (loggedInUser.isLSLBMember()) {
             approveChangeMachineStatus(approvalRequest);
-        }
-        if (loggedInUser.isGamingOperator()) {
+        } else if (loggedInUser.isGamingOperator()) {
             approvalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
             machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
+        } else {
+            throw new ApprovalRequestProcessException("The approving user should be either an lslb member or a gaming operator");
         }
     }
 
@@ -309,16 +307,17 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
         }
     }
 
-    private void approveAddGamesToGamingTerminal(MachineApprovalRequest approvalRequest, AuthInfo loggedInUser) {
+    private void approveAddGamesToGamingTerminal(MachineApprovalRequest approvalRequest, AuthInfo loggedInUser) throws ApprovalRequestProcessException {
         if (loggedInUser.isGamingOperator()) {
             approvalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
             machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
-        }
-        if (loggedInUser.isLSLBMember()) {
+        } else if (loggedInUser.isLSLBMember()) {
             Machine machine = approvalRequest.getMachine();
             if (machine != null) {
                 addGamesToMachine(approvalRequest.getNewMachineGames(), machine);
             }
+        } else {
+            throw new ApprovalRequestProcessException("The approving user should be either an lslb member or a gaming operator");
         }
     }
 
@@ -326,13 +325,14 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
         approveUpgradeMachineGames(approvalRequest);
     }
 
-    private void approveUpgradeGamingTerminalGames(MachineApprovalRequest approvalRequest, AuthInfo loggedInUser) {
+    private void approveUpgradeGamingTerminalGames(MachineApprovalRequest approvalRequest, AuthInfo loggedInUser) throws ApprovalRequestProcessException {
         if (loggedInUser.isGamingOperator()) {
             approvalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
             machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
-        }
-        if (loggedInUser.isLSLBMember()) {
+        } else if (loggedInUser.isLSLBMember()) {
             approveUpgradeMachineGames(approvalRequest);
+        } else {
+            throw new ApprovalRequestProcessException("The approving user should be either an lslb member or a gaming operator");
         }
     }
 

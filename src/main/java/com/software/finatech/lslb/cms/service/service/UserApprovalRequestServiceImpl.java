@@ -173,21 +173,18 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
 
             if (userApprovalRequest.isCreateUser()) {
                 approveCreateUser(userApprovalRequest);
-            }
-            if (userApprovalRequest.isUpdateUserRole()) {
+            } else if (userApprovalRequest.isUpdateUserRole()) {
                 approveChangeUserRole(userApprovalRequest);
-            }
-            if (userApprovalRequest.isRemovePermissionFromUser()) {
+            } else if (userApprovalRequest.isRemovePermissionFromUser()) {
                 approveRemovePermissionFromUser(userApprovalRequest);
-            }
-            if (userApprovalRequest.isAddPermissionToUser()) {
+            } else if (userApprovalRequest.isAddPermissionToUser()) {
                 approveAddPermissionsToUser(userApprovalRequest);
-            }
-            if (userApprovalRequest.isEnableUser()) {
+            } else if (userApprovalRequest.isEnableUser()) {
                 approveEnableUser(userApprovalRequest);
-            }
-            if (userApprovalRequest.isDisableUser()) {
+            } else if (userApprovalRequest.isDisableUser()) {
                 approveDisableUser(userApprovalRequest);
+            } else {
+                return Mono.just(new ResponseEntity<>("Invalid Request supplied", HttpStatus.BAD_REQUEST));
             }
 
             userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
@@ -346,4 +343,5 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             return null;
         }
         return (PendingAuthInfo) mongoRepositoryReactive.findById(pendingAuthInfoId, PendingAuthInfo.class).block();
-    }}
+    }
+}

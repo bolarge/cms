@@ -158,11 +158,12 @@ public class AgentServiceImpl implements AgentService {
                 return validateCreateAgent;
             }
             PendingAgent agent = fromCreateAgentDto(agentCreateDto);
-            saveAgent(agent);
+            mongoRepositoryReactive.saveOrUpdate(agent);
             AgentApprovalRequest agentApprovalRequest = fromAgentCreateDto(agentCreateDto, agent);
             mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
 
-            String verbiage = String.format("Created agent approval request ->  Type :%s", agentApprovalRequest.getAgentApprovalRequestTypeName());
+            String verbiage = String.format("Created agent approval request ->  Type :%s, Agent Name -> %s",
+                    agentApprovalRequest.getAgentApprovalRequestTypeName(), agent.getFullName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), agentApprovalRequest.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
@@ -208,7 +209,7 @@ public class AgentServiceImpl implements AgentService {
             saveAgent(agent);
 
             Pair<String, String> newPhoneAndAddress = new ImmutablePair<>(agent.getPhoneNumber(), agent.getResidentialAddress());
-            String verbiage = String.format("Updated Agent Details -> Agent Id: %s ", agent.getAgentId());
+            String verbiage = String.format("Updated Agent Details -> Agent Id: %s , Agent Name -> %s", agent.getAgentId(), agent.getFullName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
@@ -345,8 +346,7 @@ public class AgentServiceImpl implements AgentService {
         agent.setMeansOfId(agentCreateDto.getMeansOfId());
         agent.setIdNumber(agentCreateDto.getIdNumber());
         agent.setResidentialAddress(agentCreateDto.getResidentialAddress());
-        LocalDate dateOfBirth = FORMATTER.parseLocalDate(agentCreateDto.getDateOfBirth());
-        agent.setDateOfBirth(dateOfBirth);
+        agent.setDateOfBirth(agentCreateDto.getDateOfBirth());
         Set<String> gameTypeIds = new HashSet<>();
         Set<String> institutionIds = new HashSet<>();
         AgentInstitution agentInstitution = new AgentInstitution();
