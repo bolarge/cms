@@ -17,7 +17,7 @@ public interface RenewalFormService {
     Mono<ResponseEntity> completeRenewalForm(String renewalFormId, boolean isResubmit, HttpServletRequest request);
     Mono<ResponseEntity> rejectRenewalForm(String renewalFormId, RenewalFormRejectDto renewalFormRejectDto, HttpServletRequest request);
     Mono<ResponseEntity> createRenewalForm(RenewalFormCreateDto renewalFormCreateDto);
-    Mono<ResponseEntity>  getAllRenewalForms(int page, int pageSize, String sortType, String sortParam, String institutionId, String formStatusId, String gameTypeIds, HttpServletResponse httpServletResponse);
+    Mono<ResponseEntity>  getAllRenewalForms(int page, int pageSize, String sortType, String sortParam, String institutionId, String formStatusId, String gameTypeIds,String renewalId, HttpServletResponse httpServletResponse);
     Mono<ResponseEntity> updateRenewalForm(RenewalFormUpdateDto renewalFormUpdateDto);
     Mono<ResponseEntity> getRenewalFormStatus();
     Mono<ResponseEntity> getAllRenewalForms(String institutionId);
