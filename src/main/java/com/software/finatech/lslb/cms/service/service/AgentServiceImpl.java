@@ -345,7 +345,7 @@ public class AgentServiceImpl implements AgentService {
         agent.setMeansOfId(agentCreateDto.getMeansOfId());
         agent.setIdNumber(agentCreateDto.getIdNumber());
         agent.setResidentialAddress(agentCreateDto.getResidentialAddress());
-       // agent.setDateOfBirth(agentCreateDto.getDateOfBirth());
+        agent.setDateOfBirth(agentCreateDto.getDateOfBirth());
         Set<String> gameTypeIds = new HashSet<>();
         Set<String> institutionIds = new HashSet<>();
         AgentInstitution agentInstitution = new AgentInstitution();

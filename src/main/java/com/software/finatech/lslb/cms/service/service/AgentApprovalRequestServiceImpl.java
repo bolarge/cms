@@ -320,6 +320,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             agent.setResidentialAddress(pendingAgent.getResidentialAddress());
             agent.setEmailAddress(pendingAgent.getEmailAddress());
             agent.setTitle(pendingAgent.getTitle());
+            agent.setBvn(pendingAgent.getBvn());
             agent.setFullName(pendingAgent.getFullName());
             agent.setFirstName(pendingAgent.getFirstName());
             agent.setLastName(pendingAgent.getLastName());
