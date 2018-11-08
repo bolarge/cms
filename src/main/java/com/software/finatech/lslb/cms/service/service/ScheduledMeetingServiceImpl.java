@@ -8,9 +8,7 @@ import com.software.finatech.lslb.cms.service.domain.ScheduledMeeting;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingPurposeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingStatusReferenceData;
-import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.ScheduledMeetingService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
@@ -157,6 +155,11 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             if (!isValidMeetingPurpose(scheduledMeetingCreateDto.getMeetingPurposeId())) {
                 return Mono.just(new ResponseEntity<>("Invalid Meeting Purpose supplied", HttpStatus.BAD_REQUEST));
             }
+
+            if (!isValidMeetingForEntity(scheduledMeetingCreateDto.getEntityId())) {
+                return Mono.just(new ResponseEntity<>("Please complete your previous meeting for the purpose", HttpStatus.BAD_REQUEST));
+            }
+
 
             String institutionId = scheduledMeetingCreateDto.getInstitutionId();
             Institution invitedInstitution = getInstitution(institutionId);
@@ -458,5 +461,21 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
         scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-UpdateNotification-Recipient", lslbMailSubject, existingScheduledMeeting, authInfoService.getUsersFromUserIds(recipientsForUpdateMail));
         scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-UpdateNotificationRemove-Recipient", lslbMailSubject, existingScheduledMeeting, authInfoService.getUsersFromUserIds(recipientsForRemoveMail));
         scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-InitialNotification-Recipient", String.format("Meeting with %s", invitedInstitution.getInstitutionName()), existingScheduledMeeting, authInfoService.getUsersFromUserIds(recipientsForNewInviteMail));
+    }
+
+    private boolean isValidMeetingForEntity(String entityId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("entityId").is(entityId));
+        ArrayList<ScheduledMeeting> meetings = (ArrayList<ScheduledMeeting>) mongoRepositoryReactive.
+                findAll(query, ScheduledMeeting.class).toStream().collect(Collectors.toList());
+        if (meetings.isEmpty()) {
+            return true;
+        }
+        for (ScheduledMeeting meeting : meetings) {
+            if (!meeting.isCompleted()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -37,4 +37,6 @@ public interface AgentService {
     Mono<ResponseEntity> getAgentFullDetailById(String agentId);
 
     Mono<ResponseEntity> validateAgentProfileOnSystem(AgentValidationDto agentValidationDto);
+
+    Mono<ResponseEntity> createUserForAgent(String agentId);
 }

@@ -26,6 +26,15 @@ public class Institution extends AbstractFact {
     protected Boolean status;
     protected String vgPayCustomerCode;
     protected String website;
+    private String tradeName;
+
+    public String getTradeName() {
+        return tradeName;
+    }
+
+    public void setTradeName(String tradeName) {
+        this.tradeName = tradeName;
+    }
 
     public String getWebsite() {
         return website;
@@ -146,6 +155,7 @@ public class Institution extends AbstractFact {
         institutionDto.setDescription(getDescription());
         institutionDto.setLicenseId(getLicenseId());
         institutionDto.setStatus(getStatus());
+        institutionDto.setTradeName(getTradeName());
         try {
             setAssociatedProperties();
             Set<GameTypeDto> gameTypeDtoList = new HashSet<>();
