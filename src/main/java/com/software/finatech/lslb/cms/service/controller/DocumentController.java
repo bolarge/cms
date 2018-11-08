@@ -271,6 +271,7 @@ public class DocumentController extends BaseController {
             document.setOriginalFilename(originalFilename);
             document.setMimeType(multipartFile.getContentType());
             document.setArchive(false);
+            document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
             document.setInstitutionId(documentCreateDto.getInstitutionId());
             document.setAgentId(documentCreateDto.getAgentId());
             document.setPreviousDocumentId(documentCreateDto.getPreviousDocumentId());

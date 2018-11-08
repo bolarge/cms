@@ -2,14 +2,14 @@ package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
-import com.software.finatech.lslb.cms.service.referencedata.LoggedCaseStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -273,6 +273,7 @@ public class DashboardController extends BaseController {
                 institutionDashboardSummaryDto.setGameType(getGameType(license.getGameTypeId()).getName());
                 institutionDashboardSummaryDto.setNumberOfAgents(getAgentCountForInstitution(institutionId));
                 institutionDashboardSummaryDto.setNumberOfGamingMachines(getGamingMachineCountForInstitution(institutionId));
+                institutionDashboardSummaryDto.setNumberOfGamingTerminals(getGamingTerminalCountForInstitution(institutionId));
                 institutionDashboardSummaryDtoHashMap.put(license.getGameTypeId(), institutionDashboardSummaryDto);
 
 
@@ -283,6 +284,113 @@ public class DashboardController extends BaseController {
         }
 
         return Mono.just(new ResponseEntity<>(institutionDashboardSummaryDtoHashMap.values(), HttpStatus.OK));
+    }
+
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/machine-summary", params={"institutionId","type"})
+    @ApiOperation(value = "Get operator Machine summary ", response = DashboardMachineStatusCountDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getGamingMachineSummary(
+            @RequestParam ("institutionId") String institutionId,
+            @RequestParam ("type") String type) {
+
+        try {
+                 ArrayList<String> statusList = new ArrayList<>();
+                statusList.addAll(Arrays.asList(
+                        MachineStatusReferenceData.ACTIVE_ID,
+                        MachineStatusReferenceData.IN_ACTIVE_ID,
+                        MachineStatusReferenceData.FAULTY_ID,
+                        MachineStatusReferenceData.STOLEN_ID));
+                DashboardMachineStatusCountDto dashboardMachineStatusCountDto= new DashboardMachineStatusCountDto();
+                Map<String,Long> statusCountMap= new HashMap<>();
+                statusList.stream().forEach(status->{
+
+                    Criteria criteria = new Criteria();
+                    List<Criteria> filterCriteria = new ArrayList<>();
+
+
+                    if (!org.springframework.util.StringUtils.isEmpty(institutionId)) {
+                        filterCriteria.add(Criteria.where("institutionId").is(institutionId));
+                    }
+
+                    if (type.equalsIgnoreCase("machine")) {
+                        filterCriteria.add(Criteria.where("machineTypeId").is(MachineTypeReferenceData.GAMING_MACHINE_ID));
+                    }else if (type.equalsIgnoreCase("terminal")) {
+                        filterCriteria.add(Criteria.where("machineTypeId").is(MachineTypeReferenceData.GAMING_TERMINAL_ID));
+                    }
+                    Aggregation sumStatusCount = Aggregation.newAggregation(
+                            Aggregation.match(criteria),
+                            Aggregation.group("machineStatusId").count().as("totalCount")
+                    );
+
+                    DashboardSummaryCountDto statusCountValue = mongoTemplate.aggregate(sumStatusCount, Machine.class, DashboardSummaryCountDto.class).getUniqueMappedResult();
+                    statusCountMap.put(status, statusCountValue.getTotalCount());
+
+                });
+
+                dashboardMachineStatusCountDto.setActiveCount(statusCountMap.get(MachineStatusReferenceData.ACTIVE_ID));
+                dashboardMachineStatusCountDto.setFaultyCount(statusCountMap.get(MachineStatusReferenceData.FAULTY_ID));
+                dashboardMachineStatusCountDto.setInactiveCount(statusCountMap.get(MachineStatusReferenceData.IN_ACTIVE_ID));
+                dashboardMachineStatusCountDto.setStolenCount(statusCountMap.get(MachineStatusReferenceData.STOLEN_ID));
+
+                return Mono.just(new ResponseEntity(dashboardMachineStatusCountDto, HttpStatus.OK));
+        }catch (Exception e) {
+            e.printStackTrace();
+            return  null;
+        }
+        }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/institution-agent-summary", params={"institutionId"})
+    @ApiOperation(value = "Get operator Agent summary ", response = DashboardMachineStatusCountDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getInstitutionAgentSummary(
+            @RequestParam ("institutionId") String institutionId) {
+
+        try {
+            ArrayList<String> statusList = new ArrayList<>();
+            statusList.addAll(Arrays.asList(
+                    AgentStatusReferenceData.ACTIVE_ID,
+                    AgentStatusReferenceData.IN_ACTIVE_ID,
+                    AgentStatusReferenceData.BLACK_LISTED_ID));
+            DashboardAgentStatusCountDto dashboardAgentStatusCountDto= new DashboardAgentStatusCountDto();
+            Map<String,Long> statusCountMap= new HashMap<>();
+            statusList.stream().forEach(status->{
+
+                Criteria criteria = new Criteria();
+                List<Criteria> filterCriteria = new ArrayList<>();
+
+                if (!org.springframework.util.StringUtils.isEmpty(institutionId)) {
+                    filterCriteria.add(Criteria.where("institutionId").in(institutionId));
+                }
+                Aggregation sumStatusCount = Aggregation.newAggregation(
+                        Aggregation.match(criteria),
+                        Aggregation.group("agentStatusId").count().as("totalCount")
+                );
+
+                DashboardSummaryCountDto statusCountValue = mongoTemplate.aggregate(sumStatusCount, Agent.class, DashboardSummaryCountDto.class).getUniqueMappedResult();
+                statusCountMap.put(status, statusCountValue.getTotalCount());
+
+            });
+
+            dashboardAgentStatusCountDto.setActiveCount(statusCountMap.get(AgentStatusReferenceData.ACTIVE_ID));
+            dashboardAgentStatusCountDto.setBlackListCount(statusCountMap.get(AgentStatusReferenceData.BLACK_LISTED_ID));
+            dashboardAgentStatusCountDto.setInactiveCount(statusCountMap.get(AgentStatusReferenceData.IN_ACTIVE_ID));
+          //  dashboardMachineStatusCountDto.setStolenCount(statusCountMap.get(MachineStatusReferenceData.STOLEN_ID));
+
+            return Mono.just(new ResponseEntity(dashboardAgentStatusCountDto, HttpStatus.OK));
+        }catch (Exception e) {
+            e.printStackTrace();
+            return  null;
+        }
     }
 
 
@@ -313,6 +421,14 @@ public class DashboardController extends BaseController {
     public long getGamingMachineCountForInstitution(String institutionId){
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").in(institutionId));
+        query.addCriteria(Criteria.where("machineTypeId").in(MachineTypeReferenceData.GAMING_MACHINE_ID));
+        return mongoRepositoryReactive.count(query, Machine.class).block();
+    }
+
+    public long getGamingTerminalCountForInstitution(String institutionId){
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").in(institutionId));
+        query.addCriteria(Criteria.where("machineTypeId").in(MachineTypeReferenceData.GAMING_TERMINAL_ID));
         return mongoRepositoryReactive.count(query, Machine.class).block();
     }
 
