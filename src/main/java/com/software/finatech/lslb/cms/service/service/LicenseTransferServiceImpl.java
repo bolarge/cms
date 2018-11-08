@@ -186,6 +186,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             licenseTransfer.setToInstitutionId(toInstitutionId);
             licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.PENDING_ADD_INSTITUTION_APPROVAL_ID);
             mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
+            licenseTransferMailSenderAsync.sendNewAddOperatorNotificationToLSlBAdmins(licenseTransfer);
 
             String verbiage = String.format("Created Added Self as Transferee to License Transfer , Category -> %s, License Number Number -> %s, License Transferor -> %s,Id -> %s",
                     licenseTransfer.getGameType(), licenseTransfer.getLicenseNumber(), licenseTransfer.getFromInstitution(), licenseTransfer.getId());
@@ -193,7 +194,6 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institution.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
-            licenseTransferMailSenderAsync.sendNewAddOperatorNotificationToLSlBAdmins(licenseTransfer);
             return Mono.just(new ResponseEntity<>(licenseTransfer.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding transferee to license transfer", e);
