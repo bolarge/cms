@@ -346,7 +346,7 @@ public class DashboardController extends BaseController {
         }
 
     @RequestMapping(method = RequestMethod.GET, value = "/institution-agent-summary", params={"institutionId"})
-    @ApiOperation(value = "Get operator Agent summary ", response = DashboardMachineStatusCountDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiOperation(value = "Get operator Agent summary ", response = DashboardAgentStatusCountDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
