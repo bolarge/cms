@@ -7,11 +7,20 @@ public class InstitutionDashboardSummaryDto {
     protected String licenseId;
     protected long numberOfAgents;
     protected long numberOfGamingMachines;
+    protected long numberOfGamingTerminals;
     protected String licenseStatusId;
     protected String licenseStatus;
     protected String effectiveDate;
     protected String expiryDate;
     protected String gameType;
+
+    public long getNumberOfGamingTerminals() {
+        return numberOfGamingTerminals;
+    }
+
+    public void setNumberOfGamingTerminals(long numberOfGamingTerminals) {
+        this.numberOfGamingTerminals = numberOfGamingTerminals;
+    }
 
     public String getGameType() {
         return gameType;
