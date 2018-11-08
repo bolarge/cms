@@ -4,9 +4,7 @@ import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.AgentApprovalRequestTypeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
@@ -377,6 +375,42 @@ public class AgentServiceImpl implements AgentService {
             return Mono.just(new ResponseEntity<>(agent.convertToFullDetailDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while getting agent by id", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> createUserForAgent(String agentId) {
+        try {
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+            Agent agent = findAgentById(agentId);
+            if (agent == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Agent with id %s not found", agentId), HttpStatus.BAD_REQUEST));
+            }
+            PendingAuthInfo pendingAuthInfo = new PendingAuthInfo();
+            pendingAuthInfo.setId(UUID.randomUUID().toString());
+            pendingAuthInfo.setAuthRoleId(LSLBAuthRoleReferenceData.AGENT_ROLE_ID);
+            pendingAuthInfo.setPhoneNumber(agent.getPhoneNumber());
+            pendingAuthInfo.setEmailAddress(agent.getEmailAddress());
+            pendingAuthInfo.setFirstName(agent.getFirstName());
+            pendingAuthInfo.setFullName(agent.getFullName());
+            pendingAuthInfo.setLastName(agent.getLastName());
+            pendingAuthInfo.setTitle(agent.getTitle());
+            pendingAuthInfo.setAgentId(agentId);
+
+            UserApprovalRequest approvalRequest = new UserApprovalRequest();
+            approvalRequest.setId(UUID.randomUUID().toString());
+            approvalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.CREATE_USER_ID);
+            approvalRequest.setPendingAuthInfoId(pendingAuthInfo.getId());
+            approvalRequest.setInitiatorId(loggedInUser.getId());
+            approvalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
+            mongoRepositoryReactive.saveOrUpdate(pendingAuthInfo);
+            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+            return Mono.just(new ResponseEntity<>(approvalRequest.convertToHalfDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while creating user for agent", e);
         }
     }
 

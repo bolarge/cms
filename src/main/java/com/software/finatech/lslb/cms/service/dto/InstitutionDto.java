@@ -20,6 +20,7 @@ public class InstitutionDto {
     protected String vatFormulaId;
     protected String settlementCycleId;
     protected Set<String> dataSourceIds = new java.util.HashSet<>();
+    protected String tradeName;
 
 
     protected String tenantId;
@@ -32,6 +33,15 @@ public class InstitutionDto {
 
     public void setDataSourceIds(Set<String> dataSourceIds) {
         this.dataSourceIds = dataSourceIds;
+    }
+
+
+    public String getTradeName() {
+        return tradeName;
+    }
+
+    public void setTradeName(String tradeName) {
+        this.tradeName = tradeName;
     }
 
     @Transient
@@ -176,6 +186,4 @@ public class InstitutionDto {
     public void setSettlementCycleId(String settlementCycleId) {
         this.settlementCycleId = settlementCycleId;
     }
-
-
 }

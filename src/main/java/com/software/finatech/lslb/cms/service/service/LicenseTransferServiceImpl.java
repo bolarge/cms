@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.referencedata.LicenseTransferStatu
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseTransferService;
+import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.LicenseTransferMailSenderAsync;
@@ -48,6 +49,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
     private AuditLogHelper auditLogHelper;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private LicenseTransferMailSenderAsync licenseTransferMailSenderAsync;
+    private PaymentRecordService paymentRecordService;
 
     @Autowired
     public LicenseTransferServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
@@ -55,13 +57,15 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
                                       InstitutionService institutionService,
                                       AuditLogHelper auditLogHelper,
                                       SpringSecurityAuditorAware springSecurityAuditorAware,
-                                      LicenseTransferMailSenderAsync licenseTransferMailSenderAsync) {
+                                      LicenseTransferMailSenderAsync licenseTransferMailSenderAsync,
+                                      PaymentRecordService paymentRecordService) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.licenseService = licenseService;
         this.institutionService = institutionService;
         this.auditLogHelper = auditLogHelper;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.licenseTransferMailSenderAsync = licenseTransferMailSenderAsync;
+        this.paymentRecordService = paymentRecordService;
     }
 
     @Override
@@ -132,11 +136,17 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             if (license == null) {
                 return Mono.just(new ResponseEntity<>(String.format("License with id %s not found", licenseId), HttpStatus.BAD_REQUEST));
             }
+            String gameTypeId = license.getGameTypeId();
+            Mono<ResponseEntity> validateResponse = validateLicenseTransfer(institutionId,gameTypeId);
+            if (validateResponse != null) {
+                return validateResponse;
+            }
+
             LicenseTransfer licenseTransfer = new LicenseTransfer();
             licenseTransfer.setId(UUID.randomUUID().toString());
             licenseTransfer.setFromInstitutionId(institutionId);
             licenseTransfer.setLicenseId(licenseId);
-            licenseTransfer.setGameTypeId(license.getGameTypeId());
+            licenseTransfer.setGameTypeId(gameTypeId);
             licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.PENDING_INITIAL_APPROVAL_ID);
             mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
 
@@ -168,13 +178,17 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             if (!licenseTransfer.isPendingNewInstitutionAddition()) {
                 return Mono.just(new ResponseEntity<>("Licence Transfer is not pending new operator addition", HttpStatus.BAD_REQUEST));
             }
+            PaymentRecord existingConfirmedPaymentRecord = paymentRecordService.findExistingConfirmedApplicationFeeForInstitutionAndGameType(toInstitutionId, licenseTransfer.getGameTypeId());
+            if (existingConfirmedPaymentRecord == null) {
+                return Mono.just(new ResponseEntity<>("Kindly make application fee payment for category to proceed", HttpStatus.BAD_REQUEST));
+            }
 
             licenseTransfer.setToInstitutionId(toInstitutionId);
             licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.PENDING_ADD_INSTITUTION_APPROVAL_ID);
             mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
 
-            String verbiage = String.format("Created Added Self as Transferee to License Transfer , Category -> %s, License Number Number -> %s, Id -> %s",
-                    licenseTransfer.getGameType(), licenseTransfer.getLicenseNumber(), licenseTransfer.getId());
+            String verbiage = String.format("Created Added Self as Transferee to License Transfer , Category -> %s, License Number Number -> %s, License Transferor -> %s,Id -> %s",
+                    licenseTransfer.getGameType(), licenseTransfer.getLicenseNumber(), licenseTransfer.getFromInstitution(), licenseTransfer.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(licenseAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institution.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
@@ -294,6 +308,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
     /**
      * Get License
      * transfer for payment
+     *
      * @param institutionId
      * @return
      */
@@ -324,5 +339,27 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while getting license transfer for institution", e);
         }
+    }
+
+    public LicenseTransfer findLicenseTransferByInstitutionAndGameType(String institutionId, String gameTypeId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(institutionId));
+        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        return (LicenseTransfer) mongoRepositoryReactive.find(query, LicenseTransfer.class).block();
+    }
+
+    private Mono<ResponseEntity> validateLicenseTransfer(String institutionId, String gameTypeId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(institutionId));
+        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        ArrayList<LicenseTransfer> transfers = (ArrayList<LicenseTransfer>) mongoRepositoryReactive.findAll(query, LicenseTransfer.class).toStream().collect(Collectors.toList());
+        if (!transfers.isEmpty()) {
+            for (LicenseTransfer transfer : transfers) {
+                if (!transfer.isFinallyApproved()) {
+                    return Mono.just(new ResponseEntity<>("You Currently have a licence Transfer in the category pending", HttpStatus.BAD_REQUEST));
+                }
+            }
+        }
+        return null;
     }
 }

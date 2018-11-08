@@ -447,6 +447,12 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
 
+
+    private void loadInstitution(MultipartFile multipartFile){
+
+
+    }
+
     private Institution fromCreateInstitutionDto(InstitutionCreateDto institutionCreateDto) {
         Institution institution = new Institution();
         institution.setId(UUID.randomUUID().toString());
