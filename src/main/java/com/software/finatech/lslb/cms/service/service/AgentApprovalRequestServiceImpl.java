@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.dto.AgentApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.dto.ApprovalRequestOperationtDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AgentApprovalRequestTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.AgentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentApprovalRequestService;
@@ -318,6 +319,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             agent.setMeansOfId(pendingAgent.getMeansOfId());
             agent.setPhoneNumber(pendingAgent.getPhoneNumber());
             agent.setIdNumber(pendingAgent.getIdNumber());
+            agent.setAgentStatusId(AgentStatusReferenceData.ACTIVE_ID);
             agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
             agentApprovalRequest.setApproverId(userId);
             mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);

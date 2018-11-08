@@ -137,7 +137,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
                 return Mono.just(new ResponseEntity<>(String.format("License with id %s not found", licenseId), HttpStatus.BAD_REQUEST));
             }
             String gameTypeId = license.getGameTypeId();
-            Mono<ResponseEntity> validateResponse = validateLicenseTransfer(institutionId,gameTypeId);
+            Mono<ResponseEntity> validateResponse = validateLicenseTransfer(institutionId, license);
             if (validateResponse != null) {
                 return validateResponse;
             }
@@ -348,14 +348,21 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
         return (LicenseTransfer) mongoRepositoryReactive.find(query, LicenseTransfer.class).block();
     }
 
-    private Mono<ResponseEntity> validateLicenseTransfer(String institutionId, String gameTypeId) {
+    private Mono<ResponseEntity> validateLicenseTransfer(String institutionId, License license) {
         Query query = new Query();
+        query.addCriteria(Criteria.where("licenseId").is(license.getId()));
+        LicenseTransfer transfer = (LicenseTransfer) mongoRepositoryReactive.find(query, LicenseTransfer.class).block();
+        if (transfer != null) {
+            return Mono.just(new ResponseEntity<>("A license Transfer already exists for the Licence", HttpStatus.BAD_REQUEST));
+        }
+
+        query = new Query();
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
-        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        query.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
         ArrayList<LicenseTransfer> transfers = (ArrayList<LicenseTransfer>) mongoRepositoryReactive.findAll(query, LicenseTransfer.class).toStream().collect(Collectors.toList());
         if (!transfers.isEmpty()) {
-            for (LicenseTransfer transfer : transfers) {
-                if (!transfer.isFinallyApproved()) {
+            for (LicenseTransfer licenseTransfer : transfers) {
+                if (!licenseTransfer.isFinallyApproved()) {
                     return Mono.just(new ResponseEntity<>("You Currently have a licence Transfer in the category pending", HttpStatus.BAD_REQUEST));
                 }
             }

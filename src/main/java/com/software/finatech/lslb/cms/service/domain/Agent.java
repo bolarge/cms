@@ -38,6 +38,15 @@ public class Agent extends AbstractFact {
     private String agentId;
     private boolean enabled;
     private Set<String> phoneNumbers = new HashSet<>();
+    private String agentStatusId;
+
+    public String getAgentStatusId() {
+        return agentStatusId;
+    }
+
+    public void setAgentStatusId(String agentStatusId) {
+        this.agentStatusId = agentStatusId;
+    }
 
     public Set<String> getPhoneNumbers() {
         return phoneNumbers;
@@ -217,6 +226,11 @@ public class Agent extends AbstractFact {
         agentDto.setTitle(getTitle());
         agentDto.setAgentId(getAgentId());
         agentDto.setId(getId());
+        AgentStatus agentStatus = getAgentStatus();
+        if (agentStatus != null){
+            agentDto.setAgentStatusId(this.agentStatusId);
+            agentDto.setAgentStatusName(String.valueOf(agentStatus));
+        }
         return agentDto;
     }
 
@@ -309,6 +323,21 @@ public class Agent extends AbstractFact {
 
     public AuthInfo getAuthInfo() {
         return (AuthInfo) mongoRepositoryReactive.find(Query.query(Criteria.where("agentId").is(this.getId())), AuthInfo.class).block();
+    }
+
+    public AgentStatus getAgentStatus() {
+        AgentStatus agentStatus = null;
+        Map<String, FactObject> agentStatusMap = Mapstore.STORE.get("AgentStatus");
+        if (agentStatusMap != null) {
+            agentStatus = (AgentStatus) agentStatusMap.get(this.agentStatusId);
+        }
+        if (agentStatus == null) {
+            agentStatus = (AgentStatus) mongoRepositoryReactive.findById(this.agentStatusId, AgentStatus.class).block();
+            if (agentStatus != null && agentStatusMap != null) {
+                agentStatusMap.put(this.agentStatusId, agentStatus);
+            }
+        }
+        return agentStatus;
     }
 
     private List<MachineDto> getAllGamingTerminals() {
