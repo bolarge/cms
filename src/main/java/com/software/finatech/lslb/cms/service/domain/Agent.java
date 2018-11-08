@@ -24,7 +24,7 @@ public class Agent extends AbstractFact {
     protected String emailAddress;
     protected String phoneNumber;
     protected List<AgentInstitution> agentInstitutions = new ArrayList<>();
-   // protected String dateOfBirth;
+    protected String dateOfBirth;
     protected String residentialAddress;
     protected List<String> businessAddresses = new ArrayList<>();
     protected String meansOfId;
@@ -96,14 +96,13 @@ public class Agent extends AbstractFact {
         this.vgPayCustomerCode = vgPayCustomerCode;
     }
 
-//    public String getDateOfBirth() {
-//     return "";
-//      //  return dateOfBirth;
-//    }
-//
-//    public void setDateOfBirth(String dateOfBirth) {
-//        this.dateOfBirth = dateOfBirth;
-//    }
+    public String getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(String dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
 
     public String getResidentialAddress() {
         return residentialAddress;
@@ -228,7 +227,7 @@ public class Agent extends AbstractFact {
         agentDto.setAgentId(getAgentId());
         agentDto.setId(getId());
         AgentStatus agentStatus = getAgentStatus();
-        if (agentStatus != null){
+        if (agentStatus != null) {
             agentDto.setAgentStatusId(this.agentStatusId);
             agentDto.setAgentStatusName(String.valueOf(agentStatus));
         }
@@ -244,7 +243,7 @@ public class Agent extends AbstractFact {
         agentDto.setResidentialAddress(getResidentialAddress());
         agentDto.setBusinessAddresses(getBusinessAddresses());
         agentDto.setBvn(getBvn());
-    //    agentDto.setDateOfBirth(getDateOfBirth());
+        agentDto.setDateOfBirth(getDateOfBirth());
         agentDto.setInstitutions(getInstitutions());
         agentDto.setGameTypes(getGameTypes());
         agentDto.setBusinessAddresses(getBusinessAddresses());
@@ -326,6 +325,9 @@ public class Agent extends AbstractFact {
     }
 
     public AgentStatus getAgentStatus() {
+        if (StringUtils.isEmpty(this.agentStatusId)) {
+            return null;
+        }
         AgentStatus agentStatus = null;
         Map<String, FactObject> agentStatusMap = Mapstore.STORE.get("AgentStatus");
         if (agentStatusMap != null) {

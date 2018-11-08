@@ -160,7 +160,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             if (agentApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Agent approval request with id %s does not exist", agentApprovalRequestId), HttpStatus.BAD_REQUEST));
             }
-            if(agentApprovalRequest.isApprovedRequest() || agentApprovalRequest.isRejectedRequest()){
+            if (agentApprovalRequest.isApprovedRequest() || agentApprovalRequest.isRejectedRequest()) {
                 return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
             }
             AuthInfo approvingUser = springSecurityAuditorAware.getLoggedInUser();
@@ -199,7 +199,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             if (agentApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Agent approval request with id %s does not exist", agentApprovalRequestId), HttpStatus.BAD_REQUEST));
             }
-            if(agentApprovalRequest.isApprovedRequest() || agentApprovalRequest.isRejectedRequest()){
+            if (agentApprovalRequest.isApprovedRequest() || agentApprovalRequest.isRejectedRequest()) {
                 return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
             }
 
@@ -312,7 +312,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             Agent agent = new Agent();
             agent.setId(UUID.randomUUID().toString());
             agent.setEnabled(true);
-          //  agent.setDateOfBirth(pendingAgent.getDateOfBirth());
+            //  agent.setDateOfBirth(pendingAgent.getDateOfBirth());
             agent.setAgentId(pendingAgent.getAgentId());
             agent.setBusinessAddresses(pendingAgent.getBusinessAddresses());
             agent.setGameTypeIds(pendingAgent.getGameTypeIds());
@@ -320,6 +320,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             agent.setResidentialAddress(pendingAgent.getResidentialAddress());
             agent.setEmailAddress(pendingAgent.getEmailAddress());
             agent.setTitle(pendingAgent.getTitle());
+            agent.setBvn(pendingAgent.getBvn());
             agent.setFullName(pendingAgent.getFullName());
             agent.setFirstName(pendingAgent.getFirstName());
             agent.setLastName(pendingAgent.getLastName());
@@ -331,6 +332,11 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             agentApprovalRequest.setApproverId(userId);
             mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
             mongoRepositoryReactive.saveOrUpdate(agent);
+            Document document = (Document) mongoRepositoryReactive.find(Query.query(Criteria.where("entityId").is(pendingAgent.getId())), Document.class).block();
+            if (document != null) {
+                document.setEntityId(agent.getAgentId());
+                mongoRepositoryReactive.saveOrUpdate(document);
+            }
             agentUserCreatorAsync.createUserAndCustomerCodeForAgent(agent);
         }
     }
