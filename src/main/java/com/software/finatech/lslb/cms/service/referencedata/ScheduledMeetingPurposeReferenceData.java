@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.referencedata;
 
 import com.software.finatech.lslb.cms.service.domain.ScheduledMeetingPurpose;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import org.apache.commons.lang3.StringUtils;
 
 public class ScheduledMeetingPurposeReferenceData {
     public static final String APPLICANT_ID = "1";
@@ -23,5 +24,11 @@ public class ScheduledMeetingPurposeReferenceData {
         purpose.setName(name);
         purpose.setDescription(name);
         mongoRepositoryReactive.saveOrUpdate(purpose);
+    }
+
+    public static boolean isValidMeetingPurpose(String id) {
+        return StringUtils.equals(APPLICANT_ID, id)
+                || StringUtils.equals(TRANSFEREE_ID, id)
+                || StringUtils.equals(TRANSFEROR_ID, id);
     }
 }

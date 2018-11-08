@@ -814,7 +814,8 @@ public class LicenseServiceImpl implements LicenseService {
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), aipDocumentApproval.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
             aipMailSenderAsync.sendAipNotificationToInstitutionAdmins(paymentRecord);
-
+            paymentRecord.setLicenseId(license.getId());
+            mongoRepositoryReactive.saveOrUpdate(paymentRecord);
         } catch (Exception e) {
             logger.error("An error occurred while creating AIP license for institution {}", paymentRecord.getInstitutionId(), e);
         }
@@ -842,6 +843,8 @@ public class LicenseServiceImpl implements LicenseService {
             license.setPaymentRecordId(paymentRecord.getId());
             license.setLicenseNumber(generateLicenseNumberForPaymentRecord(paymentRecord));
             mongoRepositoryReactive.saveOrUpdate(license);
+            paymentRecord.setLicenseId(license.getId());
+            mongoRepositoryReactive.saveOrUpdate(paymentRecord);
         } catch (Exception e) {
             logger.error("An error occurred while creating initial license for agent {}", paymentRecord.getAgentId(), e);
         }
@@ -860,6 +863,8 @@ public class LicenseServiceImpl implements LicenseService {
             License license = findExistingGamingMachineLicenseInPresentYear(paymentRecord);
             if (license != null) {
                 addLicenseToMachines(license, gamingMachines);
+                paymentRecord.setLicenseId(license.getId());
+                mongoRepositoryReactive.saveOrUpdate(paymentRecord);
                 return;
             }
 
@@ -882,6 +887,8 @@ public class LicenseServiceImpl implements LicenseService {
             license.setPaymentRecordId(paymentRecord.getId());
             mongoRepositoryReactive.saveOrUpdate(license);
             addLicenseToMachines(license, gamingMachines);
+            paymentRecord.setLicenseId(license.getId());
+            mongoRepositoryReactive.saveOrUpdate(paymentRecord);
         } catch (Exception e) {
             logger.error("An error occurred while creating license for gaming machines", e);
         }
@@ -901,6 +908,8 @@ public class LicenseServiceImpl implements LicenseService {
             License license = findExistingGamingTerminalLicenseInPresentYear(paymentRecord);
             if (license != null) {
                 addLicenseToMachines(license, gamingTerminals);
+                paymentRecord.setLicenseId(license.getId());
+                mongoRepositoryReactive.saveOrUpdate(paymentRecord);
                 return;
             }
 
@@ -923,6 +932,8 @@ public class LicenseServiceImpl implements LicenseService {
             license.setPaymentRecordId(paymentRecord.getId());
             mongoRepositoryReactive.saveOrUpdate(license);
             addLicenseToMachines(license, gamingTerminals);
+            paymentRecord.setLicenseId(license.getId());
+            mongoRepositoryReactive.saveOrUpdate(paymentRecord);
         } catch (Exception e) {
             logger.error("An error occurred while creating license for gaming machines", e);
         }
@@ -968,6 +979,8 @@ public class LicenseServiceImpl implements LicenseService {
             newPendingApprovalRenewedLicense.setParentLicenseId(latestLicense.getId());
             newPendingApprovalRenewedLicense.setLicenseNumber(latestLicense.getLicenseNumber());
             mongoRepositoryReactive.saveOrUpdate(newPendingApprovalRenewedLicense);
+            paymentRecord.setLicenseId(newPendingApprovalRenewedLicense.getId());
+            mongoRepositoryReactive.saveOrUpdate(paymentRecord);
 
 //            verbiage = "UPDATED : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from AIP DOC UPLOADED to AIP COMPLETED";
 //            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.AIP_ID,

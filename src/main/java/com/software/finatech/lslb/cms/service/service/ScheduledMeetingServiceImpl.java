@@ -8,6 +8,7 @@ import com.software.finatech.lslb.cms.service.domain.ScheduledMeeting;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingPurposeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
@@ -41,6 +42,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
+import static com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingPurposeReferenceData.isValidMeetingPurpose;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Service
@@ -151,6 +153,9 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             AuthInfo creator = getUser(scheduledMeetingCreateDto.getCreatorId());
             if (creator == null) {
                 return Mono.just(new ResponseEntity<>("Creating user does not exist", badRequestStatus));
+            }
+            if (!isValidMeetingPurpose(scheduledMeetingCreateDto.getMeetingPurposeId())) {
+                return Mono.just(new ResponseEntity<>("Invalid Meeting Purpose supplied", HttpStatus.BAD_REQUEST));
             }
 
             String institutionId = scheduledMeetingCreateDto.getInstitutionId();
@@ -415,10 +420,10 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             operatorTemplateName = "scheduled-meetings/ScheduledMeeting-InitialNotification-ApplicantOperator";
         }
         if (scheduledMeeting.isForLicenseTransferee()) {
-            operatorTemplateName = "scheduled-meetings/ScheduledMeeting-InitialNotification-ApplicantOperator";
+            operatorTemplateName = "scheduled-meetings/ScheduledMeeting-InitialNotification-TransfereeOperator";
         }
         if (scheduledMeeting.isForLicenseTransferror()) {
-            operatorTemplateName = "scheduled-meetings/ScheduledMeeting-InitialNotification-ApplicantOperator";
+            operatorTemplateName = "scheduled-meetings/ScheduledMeeting-InitialNotification-TransferorOperator";
         }
         LicenseTransfer licenseTransfer = scheduledMeeting.getLicenseTransfer();
         if (licenseTransfer != null) {
