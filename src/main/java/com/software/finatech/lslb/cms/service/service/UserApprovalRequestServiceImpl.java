@@ -165,6 +165,9 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             if (userApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("User approval request with id %s not found", approvalRequestId), HttpStatus.BAD_REQUEST));
             }
+            if(userApprovalRequest.isApprovedRequest() || userApprovalRequest.isRejectedRequest()){
+                return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
+            }
 
             AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
             if (user == null) {
@@ -216,6 +219,9 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             UserApprovalRequest userApprovalRequest = findApprovalRequestById(approvalRequestId);
             if (userApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("User approval request with id %s not found", approvalRequestId), HttpStatus.BAD_REQUEST));
+            }
+            if (userApprovalRequest.isApprovedRequest() || userApprovalRequest.isRejectedRequest()){
+                return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
             }
             AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
             if (user == null) {

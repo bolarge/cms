@@ -244,7 +244,6 @@ public class Agent extends AbstractFact {
         agentDto.setBusinessAddresses(getBusinessAddresses());
         agentDto.setBvn(getBvn());
         agentDto.setDateOfBirth(getDateOfBirth());
-        agentDto.setAgentId(getAgentId());
         agentDto.setInstitutions(getInstitutions());
         agentDto.setGameTypes(getGameTypes());
         agentDto.setBusinessAddresses(getBusinessAddresses());
