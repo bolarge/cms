@@ -312,7 +312,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             Agent agent = new Agent();
             agent.setId(pendingAgent.getId());
             agent.setEnabled(true);
-            //  agent.setDateOfBirth(pendingAgent.getDateOfBirth());
+              agent.setDateOfBirth(pendingAgent.getDateOfBirth());
             agent.setAgentId(pendingAgent.getAgentId());
             agent.setBusinessAddresses(pendingAgent.getBusinessAddresses());
             agent.setGameTypeIds(pendingAgent.getGameTypeIds());
