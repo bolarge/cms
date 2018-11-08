@@ -276,7 +276,7 @@ public class DocumentController extends BaseController {
             document.setAgentId(documentCreateDto.getAgentId());
             document.setPreviousDocumentId(documentCreateDto.getPreviousDocumentId());
             if (document.requiresApproval()) {
-                document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+                document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID );
             }
             try {
                 document.setFile(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
