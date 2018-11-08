@@ -34,4 +34,6 @@ public interface LicenseTransferService {
     Mono<ResponseEntity> getLicenseTransferFullDetail(String id);
 
     Mono<ResponseEntity> getAllLicenseTransferStatus();
+
+    Mono<ResponseEntity> getAllLicenseTransferForPayment(String institutionId, String gameTypeId);
 }

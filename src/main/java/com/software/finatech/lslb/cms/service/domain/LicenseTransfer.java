@@ -22,6 +22,15 @@ public class LicenseTransfer extends AbstractFact {
     private String licenseTransferStatusId;
     private String rejectionReason;
     private List<LicenseTransferDecision> transferDecisions = new ArrayList<>();
+    private String paymentRecordId;
+
+    public String getPaymentRecordId() {
+        return paymentRecordId;
+    }
+
+    public void setPaymentRecordId(String paymentRecordId) {
+        this.paymentRecordId = paymentRecordId;
+    }
 
     public List<LicenseTransferDecision> getTransferDecisions() {
         return transferDecisions;

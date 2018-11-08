@@ -4,9 +4,6 @@ import com.software.finatech.lslb.cms.service.domain.LicenseType;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 
 public class LicenseTypeReferenceData {
-//    public static final String INSTITUTION_ID = "INSTITUTION";
-//    public static final String AGENT_ID = "AGENT_ID";
-//    public static final String MACHINE_ID = "MACHINE_ID";
 
     public static final String INSTITUTION_ID = "01";
     public static final String AGENT_ID = "02";
@@ -19,7 +16,7 @@ public class LicenseTypeReferenceData {
             licenseType = new LicenseType();
             licenseType.setId(INSTITUTION_ID);
         }
-        licenseType.setName("INSTITUTION");
+        licenseType.setName("OPERATOR");
         LicenseType licenseType1 = (LicenseType) mongoRepositoryReactive.findById(AGENT_ID, LicenseType.class).block();
         if (licenseType1 == null) {
             licenseType1 = new LicenseType();

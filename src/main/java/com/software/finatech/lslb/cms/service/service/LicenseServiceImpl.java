@@ -855,6 +855,7 @@ public class LicenseServiceImpl implements LicenseService {
                 return;
             }
 
+            ///add license to payment record
             Set<Machine> gamingMachines = paymentRecord.getGamingMachines();
             License license = findExistingGamingMachineLicenseInPresentYear(paymentRecord);
             if (license != null) {
@@ -893,6 +894,9 @@ public class LicenseServiceImpl implements LicenseService {
                 logger.info("payment record with id {} is not completed, skipping creation of License for gaming machine", paymentRecord.getId());
                 return;
             }
+
+
+            //add licence to payment record
             Set<Machine> gamingTerminals = paymentRecord.getGamingTerminals();
             License license = findExistingGamingTerminalLicenseInPresentYear(paymentRecord);
             if (license != null) {

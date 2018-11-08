@@ -33,6 +33,16 @@ public class PaymentRecord extends AbstractFact {
     private Set<String> gamingTerminalIds = new HashSet<>();
     private String licenseTransferId;
     private MachineMultiplePayment machineMultiplePayment;
+    private String licenseId;
+
+
+    public String getLicenseId() {
+        return licenseId;
+    }
+
+    public void setLicenseId(String licenseId) {
+        this.licenseId = licenseId;
+    }
 
     public String getLicenseTransferId() {
         return licenseTransferId;
@@ -445,6 +455,13 @@ public class PaymentRecord extends AbstractFact {
 
     private Machine findMachineById(String id) {
         return (Machine) mongoRepositoryReactive.findById(id, Machine.class).block();
+    }
+
+    public LicenseTransfer getLicenseTransfer() {
+        if (StringUtils.isEmpty(this.licenseTransferId)) {
+            return null;
+        }
+        return (LicenseTransfer) mongoRepositoryReactive.findById(this.licenseTransferId, LicenseTransfer.class).block();
     }
 
     @Override

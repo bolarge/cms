@@ -100,7 +100,7 @@ public class LicenseTransferController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getFullDetail(@PathVariable("id")String id) {
+    public Mono<ResponseEntity> getFullDetail(@PathVariable("id") String id) {
         return licenseTransferService.getLicenseTransferFullDetail(id);
     }
 
@@ -112,7 +112,19 @@ public class LicenseTransferController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getFullDetail() {
+    public Mono<ResponseEntity> getAllLicenseTransferStatus() {
         return licenseTransferService.getAllLicenseTransferStatus();
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/all-licence-transfer-for-payment", produces = "application/json", params = {"institutionId", "gameTypeId"})
+    @ApiOperation(value = "Get All License Transfer For Payment", response = LicenseTransferDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllLicenseTransferForPayment(@RequestParam("institutionId") String institutionId,
+                                                                @RequestParam("gameTypeId") String gameTypeId) {
+        return licenseTransferService.getAllLicenseTransferForPayment(institutionId, gameTypeId);
     }
 }
