@@ -289,4 +289,40 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
     public Mono<ResponseEntity> getAllLicenseTransferStatus() {
         return getAllEnumeratedEntity("LicenseTransferStatus");
     }
+
+
+    /**
+     * Get License
+     * transfer for payment
+     * @param institutionId
+     * @return
+     */
+    @Override
+    public Mono<ResponseEntity> getAllLicenseTransferForPayment(String institutionId, String gameTypeId) {
+        try {
+            Query query = new Query();
+            query.addCriteria(Criteria.where("toInstitutionId").is(institutionId));
+            query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+            query.addCriteria(Criteria.where("licenseTransferStatusId").is(LicenseTransferStatusReferenceData.APPROVED_ID));
+            ArrayList<LicenseTransfer> licenseTransfers = (ArrayList<LicenseTransfer>) mongoRepositoryReactive.findAll(query, LicenseTransfer.class).toStream().collect(Collectors.toList());
+            if (licenseTransfers.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
+            }
+            ArrayList<LicenseTransferDto> dtos = new ArrayList<>();
+            for (LicenseTransfer licenseTransfer : licenseTransfers) {
+                if (StringUtils.isEmpty(licenseTransfer.getPaymentRecordId())) {
+                    LicenseTransferDto dto = new LicenseTransferDto();
+                    dto.setId(licenseTransfer.getId());
+                    dto.setFromInstitutionName(String.valueOf(licenseTransfer.getFromInstitution()));
+                    dtos.add(dto);
+                }
+            }
+            if (dtos.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
+            }
+            return Mono.just(new ResponseEntity<>(dtos, HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while getting license transfer for institution", e);
+        }
+    }
 }
