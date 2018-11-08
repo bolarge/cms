@@ -310,7 +310,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             pendingAgent.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
             mongoRepositoryReactive.saveOrUpdate(pendingAgent);
             Agent agent = new Agent();
-            agent.setId(UUID.randomUUID().toString());
+            agent.setId(pendingAgent.getId());
             agent.setEnabled(true);
             //  agent.setDateOfBirth(pendingAgent.getDateOfBirth());
             agent.setAgentId(pendingAgent.getAgentId());
@@ -332,11 +332,6 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             agentApprovalRequest.setApproverId(userId);
             mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
             mongoRepositoryReactive.saveOrUpdate(agent);
-            Document document = (Document) mongoRepositoryReactive.find(Query.query(Criteria.where("entityId").is(pendingAgent.getId())), Document.class).block();
-            if (document != null) {
-                document.setEntityId(agent.getAgentId());
-                mongoRepositoryReactive.saveOrUpdate(document);
-            }
             agentUserCreatorAsync.createUserAndCustomerCodeForAgent(agent);
         }
     }
