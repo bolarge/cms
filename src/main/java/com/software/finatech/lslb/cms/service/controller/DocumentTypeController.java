@@ -167,6 +167,8 @@ public class DocumentTypeController extends BaseController {
         documentType.setActive(documentTypeUpdateDto.isActive());
         documentType.setRequired(documentTypeUpdateDto.isRequired());
         documentType.setDescription(documentTypeUpdateDto.getDescription());
+        documentType.setName(documentTypeUpdateDto.getName());
+        documentTypeUpdateDto.setDescription(documentTypeUpdateDto.getDescription());
         mongoRepositoryReactive.saveOrUpdate(documentType);
         return Mono.just(new ResponseEntity(documentType.convertToDto(), HttpStatus.OK));
     }

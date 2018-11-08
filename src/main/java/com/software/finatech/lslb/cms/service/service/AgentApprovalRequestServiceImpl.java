@@ -160,6 +160,9 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             if (agentApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Agent approval request with id %s does not exist", agentApprovalRequestId), HttpStatus.BAD_REQUEST));
             }
+            if(agentApprovalRequest.isApprovedRequest() || agentApprovalRequest.isRejectedRequest()){
+                return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
+            }
             AuthInfo approvingUser = springSecurityAuditorAware.getLoggedInUser();
             if (approvingUser == null) {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
@@ -196,6 +199,10 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             if (agentApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Agent approval request with id %s does not exist", agentApprovalRequestId), HttpStatus.BAD_REQUEST));
             }
+            if(agentApprovalRequest.isApprovedRequest() || agentApprovalRequest.isRejectedRequest()){
+                return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
+            }
+
             AuthInfo rejectingUser = springSecurityAuditorAware.getLoggedInUser();
             if (rejectingUser == null) {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));

@@ -9,6 +9,6 @@ public class ErrorResponseUtil {
 
     public static Mono<ResponseEntity> logAndReturnError(Logger logger, String errorMsg, Throwable e) {
         logger.error(errorMsg, e);
-        return Mono.just(new ResponseEntity<>(errorMsg, HttpStatus.INTERNAL_SERVER_ERROR));
+        return Mono.just(new ResponseEntity<>(String.format("%s - %s", errorMsg, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR));
     }
 }

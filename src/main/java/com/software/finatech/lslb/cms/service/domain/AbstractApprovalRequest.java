@@ -133,6 +133,15 @@ public abstract class AbstractApprovalRequest extends AbstractFact {
         return StringUtils.equals(ApprovalRequestStatusReferenceData.APPROVED_ID, this.approvalRequestStatusId);
     }
 
+    public boolean isApprovedRequest() {
+        return StringUtils.equals(ApprovalRequestStatusReferenceData.APPROVED_ID, this.approvalRequestStatusId);
+    }
+
+    public boolean isRejectedRequest() {
+        return StringUtils.equals(ApprovalRequestStatusReferenceData.REJECTED_ID, this.approvalRequestStatusId);
+    }
+
+
     public AuthInfo getApprover() {
         return getAuthInfo(this.approverId);
     }

@@ -147,6 +147,10 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             if (feeApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Fee Approval Request With id %s does not exist", feeApprovalRequestId), HttpStatus.BAD_REQUEST));
             }
+            if(feeApprovalRequest.isApprovedRequest() || feeApprovalRequest.isRejectedRequest()){
+                return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
+            }
+
             if (loggedInUser == null) {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
@@ -183,6 +187,10 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             if (feeApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Fee Approval Request With id %s does not exist", feeApprovalRequestId), HttpStatus.BAD_REQUEST));
             }
+            if(feeApprovalRequest.isApprovedRequest() || feeApprovalRequest.isRejectedRequest()){
+                return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
+            }
+
             if (loggedInUser == null) {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
