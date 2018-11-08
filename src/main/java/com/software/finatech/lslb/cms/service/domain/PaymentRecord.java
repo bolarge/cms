@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.domain;
 
+import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.dto.MachineDto;
 import com.software.finatech.lslb.cms.service.dto.MachineMultiplePayment;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
@@ -34,7 +35,6 @@ public class PaymentRecord extends AbstractFact {
     private String licenseTransferId;
     private MachineMultiplePayment machineMultiplePayment;
     private String licenseId;
-
 
     public String getLicenseId() {
         return licenseId;
@@ -346,6 +346,10 @@ public class PaymentRecord extends AbstractFact {
     }
 
     public License getLicense() {
+        License license = (License) mongoRepositoryReactive.findById(this.licenseId, License.class).block();
+        if (license != null) {
+            return license;
+        }
         Query query = new Query();
         query.addCriteria(Criteria.where("paymentRecordId").is(this.id));
         return (License) mongoRepositoryReactive.find(query, License.class).block();
