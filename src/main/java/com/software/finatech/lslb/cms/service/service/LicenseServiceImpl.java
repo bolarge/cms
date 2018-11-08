@@ -670,8 +670,31 @@ public class LicenseServiceImpl implements LicenseService {
                 return Mono.just(new ResponseEntity<>("Operator has not uploaded AIP document", HttpStatus.BAD_REQUEST));
 
             }
-            license.setLicenseStatusId(LicenseStatusReferenceData.AIP_COMPLETED);
+            LicenseTransfer licenseTransfer = license.getLicenseTransfer();
             License createLicense = new License();
+            String licenseNumber = "";
+
+            if(licenseTransfer!=null){
+                License transferorLicense = licenseTransfer.getLicense();
+                 transferorLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_TRANSFERED);
+                 mongoRepositoryReactive.saveOrUpdate(transferorLicense);
+
+                 createLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+                licenseNumber = transferorLicense.getLicenseNumber();
+                 createLicense.setLicenseNumber(licenseNumber);
+                 createLicense.setExpiryDate(transferorLicense.getExpiryDate());
+                 createLicense.setEffectiveDate(LocalDate.now());
+                 createLicense.setPaymentRecordId(license.getPaymentRecordId());
+                createLicense.setRenewalStatus("false");
+                createLicense.setInstitutionId(license.getInstitutionId());
+                 createLicense.setGameTypeId(license.getGameTypeId());
+                createLicense.setParentLicenseId(license.getId());
+                createLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
+
+
+            }else{
+
+            license.setLicenseStatusId(LicenseStatusReferenceData.AIP_COMPLETED);
 
             Query queryGameType = new Query();
 
@@ -688,7 +711,6 @@ public class LicenseServiceImpl implements LicenseService {
             LocalDate licenseEndDate = license.getExpiryDate().plusMonths(duration);
             // }
             PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById(license.getPaymentRecordId(), PaymentRecord.class).block();
-            String licenseNumber = "";
             if (paymentRecord != null) {
                 licenseNumber = generateLicenseNumberForPaymentRecord(paymentRecord);
                 createLicense.setLicenseNumber(licenseNumber);
@@ -703,6 +725,7 @@ public class LicenseServiceImpl implements LicenseService {
             createLicense.setParentLicenseId(license.getId());
             createLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
             createLicense.setPaymentRecordId(license.getPaymentRecordId());
+            }
             mongoRepositoryReactive.saveOrUpdate(license);
             verbiage = "UPDATED : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from AIP DOC UPLOADED to AIP COMPLETED";
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.AIP_ID,

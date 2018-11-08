@@ -1,7 +1,5 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import com.software.finatech.lslb.cms.service.domain.Machine;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +24,25 @@ public class AgentDto {
     private String agentId;
     private List<MachineDto> gamingTerminals = new ArrayList<>();
     private List<String> businessAddresses = new ArrayList<>();
+    private String agentStatusId;
+    private String agentStatusName;
+
+
+    public String getAgentStatusId() {
+        return agentStatusId;
+    }
+
+    public void setAgentStatusId(String agentStatusId) {
+        this.agentStatusId = agentStatusId;
+    }
+
+    public String getAgentStatusName() {
+        return agentStatusName;
+    }
+
+    public void setAgentStatusName(String agentStatusName) {
+        this.agentStatusName = agentStatusName;
+    }
 
     public List<InstitutionDto> getInstitutions() {
         return institutions;

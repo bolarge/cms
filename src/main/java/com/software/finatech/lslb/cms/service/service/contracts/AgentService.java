@@ -39,4 +39,6 @@ public interface AgentService {
     Mono<ResponseEntity> validateAgentProfileOnSystem(AgentValidationDto agentValidationDto);
 
     Mono<ResponseEntity> createUserForAgent(String agentId);
+
+    Mono<ResponseEntity> getAllAgentStatus();
 }

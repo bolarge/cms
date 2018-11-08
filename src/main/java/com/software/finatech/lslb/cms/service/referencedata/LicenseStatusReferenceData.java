@@ -15,6 +15,7 @@ public class LicenseStatusReferenceData {
     public static final String LICENSE_RUNNING = "09";
     public static final String RENEWAL_LICENSE_IN_REVIEW = "08";
     public static final String RENEWED_ID = "10";
+    public static final String LICENSE_TRANSFERED="11";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         LicenseStatus licenseStatus1 = (LicenseStatus) mongoRepositoryReactive.findById(AIP_LICENSE_STATUS_ID, LicenseStatus.class).block();
@@ -92,6 +93,13 @@ public class LicenseStatusReferenceData {
         }
         licenseStatus10.setName("RENEWED");
 
+        LicenseStatus licenseStatus11 = (LicenseStatus) mongoRepositoryReactive.findById(LICENSE_TRANSFERED, LicenseStatus.class).block();
+        if (licenseStatus11 == null) {
+            licenseStatus11 = new LicenseStatus();
+            licenseStatus11.setId(LICENSE_TRANSFERED);
+        }
+        licenseStatus11.setName("LICENSE TRANSFERRED");
+
         mongoRepositoryReactive.saveOrUpdate(licenseStatus1);
         mongoRepositoryReactive.saveOrUpdate(licenseStatus2);
         mongoRepositoryReactive.saveOrUpdate(licenseStatus3);
@@ -102,6 +110,7 @@ public class LicenseStatusReferenceData {
         mongoRepositoryReactive.saveOrUpdate(licenseStatus8);
         mongoRepositoryReactive.saveOrUpdate(licenseStatus9);
         mongoRepositoryReactive.saveOrUpdate(licenseStatus10);
+        mongoRepositoryReactive.saveOrUpdate(licenseStatus11);
 
     }
 }

@@ -114,7 +114,7 @@ public class AgentController extends BaseController {
         return agentService.findAgentsBySearchKey(searchKey);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/create-user-for-agent")
+    @RequestMapping(method = RequestMethod.POST, value = "/create-user-for-agent", params = {"agentId"})
     @ApiOperation(value = "Validate Agent profile On System", response = AgentDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -123,5 +123,16 @@ public class AgentController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> createUserWithAgent(@RequestParam("agentId") String agentId) {
         return agentService.createUserForAgent(agentId);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/all-agent-status")
+    @ApiOperation(value = "Get All Agent Status", response = AgentDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllAgentStatus() {
+        return agentService.getAllAgentStatus();
     }
 }

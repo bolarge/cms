@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Service
@@ -361,6 +362,7 @@ public class AgentServiceImpl implements AgentService {
         agent.setAgentInstitutions(agentInstitutions);
         agent.setBusinessAddresses(agentInstitution.getBusinessAddressList());
         agent.setAgentId(generateAgentId());
+        agent.setAgentStatusId(AgentStatusReferenceData.IN_ACTIVE_ID);
         return agent;
     }
 
@@ -412,6 +414,11 @@ public class AgentServiceImpl implements AgentService {
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while creating user for agent", e);
         }
+    }
+
+    @Override
+    public Mono<ResponseEntity> getAllAgentStatus() {
+        return getAllEnumeratedEntity("AgentStatus");
     }
 
     private PendingAgent findPendingApprovalAgentWithEmail(String email) {

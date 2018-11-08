@@ -300,6 +300,13 @@ public class License extends AbstractFact {
         return null;
     }
 
+    public LicenseTransfer getLicenseTransfer(){
+        if (StringUtils.isEmpty(this.licenseTransferId)){
+            return null;
+        }
+        return (LicenseTransfer)mongoRepositoryReactive.findById(this.licenseTransferId, LicenseTransfer.class).block();
+    }
+
     @Override
     public String getFactName() {
         return "License";
