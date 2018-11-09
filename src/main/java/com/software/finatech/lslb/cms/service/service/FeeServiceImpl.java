@@ -89,9 +89,9 @@ public class FeeServiceImpl implements FeeService {
             if (StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, feeCreateDto.getRevenueNameId())
                     || StringUtils.equals(LicenseTypeReferenceData.GAMING_TERMINAL_ID, feeCreateDto.getRevenueNameId())) {
                 if (StringUtils.isEmpty(feeCreateDto.getEndDate())) {
-                    return Mono.just(new ResponseEntity<>("Please provide end date", HttpStatus.BAD_REQUEST));
+              //      return Mono.just(new ResponseEntity<>("Please provide end date", HttpStatus.BAD_REQUEST));
                 }
-                pendingFee.setEndDate(new LocalDate(feeCreateDto.getEndDate()));
+             //   pendingFee.setEndDate(new LocalDate(feeCreateDto.getEndDate()));
             }
             pendingFee.setId(UUID.randomUUID().toString());
             pendingFee.setAmount(Double.valueOf(feeCreateDto.getAmount()));
