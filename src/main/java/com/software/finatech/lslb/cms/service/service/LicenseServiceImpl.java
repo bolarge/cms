@@ -813,6 +813,7 @@ public class LicenseServiceImpl implements LicenseService {
                 License transferredLicense = paymentRecord.getLicense();
                 transferredLicense.setLicenseTransferId(licenseTransfer.getId());
                 transferredLicense.setInstitutionId(paymentRecord.getInstitutionId());
+                transferredLicense.setPaymentRecordId(paymentRecord.getId());
                 mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
                 String verbiage = String.format("Transferred License Number -> %s , Category ->%s, Transferor -> %s, Transfereree -> %s",
                         transferredLicense.getLicenseNumber(), transferredLicense.getGameType(), licenseTransfer.getFromInstitution(), licenseTransfer.getToInstitution());
