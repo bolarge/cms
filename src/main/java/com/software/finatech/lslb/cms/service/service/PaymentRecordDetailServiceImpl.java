@@ -534,18 +534,18 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         if (paymentRecord.getAmountOutstanding() <= 0) {
             paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
 
-            if (paymentRecord.isInstitutionPayment() && paymentRecord.isLicensePayment()) {
+            if (paymentRecord.isInstitutionPayment() &&
+                    (paymentRecord.isLicensePayment() || paymentRecord.isLicenseTransferPayment())) {
                 licenseService.createAIPLicenseForCompletedPayment(paymentRecord);
+                if (paymentRecord.isLicenseTransferPayment()) {
+                    LicenseTransfer licenseTransfer = paymentRecord.getLicenseTransfer();
+                    if (licenseTransfer != null) {
+                        licenseTransfer.setPaymentRecordId(paymentRecord.getId());
+                        mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
+                    }
+                }
             }
 
-            if (paymentRecord.isInstitutionPayment() && paymentRecord.isLicenseTransferPayment()) {
-                LicenseTransfer licenseTransfer = paymentRecord.getLicenseTransfer();
-                if (licenseTransfer != null) {
-                    licenseTransfer.setPaymentRecordId(paymentRecord.getId());
-                    mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
-                }
-                licenseService.createAIPLicenseForCompletedPayment(paymentRecord);
-            }
 
             if (paymentRecord.isGamingMachinePayment() && paymentRecord.isTaxPayment()) {
                 licenseService.createLicenseForGamingMachinePayment(paymentRecord);
