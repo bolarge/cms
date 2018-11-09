@@ -311,7 +311,7 @@ public class DashboardController extends BaseController {
                     List<Criteria> filterCriteria = new ArrayList<>();
 
 
-                    if (!org.springframework.util.StringUtils.isEmpty(institutionId)) {
+                    if (!StringUtils.isEmpty(institutionId)) {
                         filterCriteria.add(Criteria.where("institutionId").is(institutionId));
                     }
 
@@ -320,6 +320,9 @@ public class DashboardController extends BaseController {
                     }else if (type.equalsIgnoreCase("terminal")) {
                         filterCriteria.add(Criteria.where("machineTypeId").is(MachineTypeReferenceData.GAMING_TERMINAL_ID));
                     }
+            if (filterCriteria.size() > 0) {
+                criteria.andOperator(filterCriteria.toArray(new Criteria[filterCriteria.size()]));
+            }
                     Aggregation sumStatusCount = Aggregation.newAggregation(
                             Aggregation.match(criteria),
                             Aggregation.group("machineStatusId").count().as("machineStatusCount"),
@@ -364,9 +367,12 @@ public class DashboardController extends BaseController {
                  Criteria criteria = new Criteria();
                 List<Criteria> filterCriteria = new ArrayList<>();
 
-                if (!org.springframework.util.StringUtils.isEmpty(institutionId)) {
+                if (!StringUtils.isEmpty(institutionId)) {
                     filterCriteria.add(Criteria.where("institutionId").in(institutionId));
                 }
+            if (filterCriteria.size() > 0) {
+                criteria.andOperator(filterCriteria.toArray(new Criteria[filterCriteria.size()]));
+            }
                 Aggregation sumStatusCount = Aggregation.newAggregation(
                         Aggregation.match(criteria),
                         Aggregation.group("agentStatusId").count().as("agentStatusCount"),
