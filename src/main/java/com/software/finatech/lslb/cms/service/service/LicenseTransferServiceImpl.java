@@ -139,7 +139,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             String gameTypeId = license.getGameTypeId();
             Mono<ResponseEntity> validateResponse = validateLicenseTransfer(institutionId, license);
             if (validateResponse != null) {
-                return validateResponse;
+             //   return validateResponse;
             }
 
             LicenseTransfer licenseTransfer = new LicenseTransfer();
@@ -325,12 +325,12 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             }
             ArrayList<LicenseTransferDto> dtos = new ArrayList<>();
             for (LicenseTransfer licenseTransfer : licenseTransfers) {
-                if (StringUtils.isEmpty(licenseTransfer.getPaymentRecordId())) {
+              //  if (StringUtils.isEmpty(licenseTransfer.getPaymentRecordId())) {
                     LicenseTransferDto dto = new LicenseTransferDto();
                     dto.setId(licenseTransfer.getId());
                     dto.setFromInstitutionName(String.valueOf(licenseTransfer.getFromInstitution()));
                     dtos.add(dto);
-                }
+            //    }
             }
             if (dtos.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
