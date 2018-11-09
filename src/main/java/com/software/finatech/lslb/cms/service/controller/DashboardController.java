@@ -300,17 +300,14 @@ public class DashboardController extends BaseController {
             @RequestParam ("type") String type) {
 
         try {
-                 ArrayList<String> statusList = new ArrayList<>();
-                statusList.addAll(Arrays.asList(
+               /*  statusList.addAll(Arrays.asList(
                         MachineStatusReferenceData.ACTIVE_ID,
                         MachineStatusReferenceData.IN_ACTIVE_ID,
                         MachineStatusReferenceData.FAULTY_ID,
-                        MachineStatusReferenceData.STOLEN_ID));
+                        MachineStatusReferenceData.STOLEN_ID));*/
                 DashboardMachineStatusCountDto dashboardMachineStatusCountDto= new DashboardMachineStatusCountDto();
-                Map<String,Long> statusCountMap= new HashMap<>();
-                statusList.stream().forEach(status->{
-
-                    Criteria criteria = new Criteria();
+               // Map<String,Long> statusCountMap= new HashMap<>();
+                     Criteria criteria = new Criteria();
                     List<Criteria> filterCriteria = new ArrayList<>();
 
 
@@ -325,18 +322,25 @@ public class DashboardController extends BaseController {
                     }
                     Aggregation sumStatusCount = Aggregation.newAggregation(
                             Aggregation.match(criteria),
-                            Aggregation.group("machineStatusId").count().as("totalCount")
+                            Aggregation.group("machineStatusId").count().as("machineStatusCount"),
+                            Aggregation.project("machineStatusCount").and("machineStatusId").previousOperation()
                     );
 
-                    DashboardSummaryCountDto statusCountValue = mongoTemplate.aggregate(sumStatusCount, Machine.class, DashboardSummaryCountDto.class).getUniqueMappedResult();
-                    statusCountMap.put(status, statusCountValue.getTotalCount());
+                    List<DashboardMachineStatusDto> statusCountValue = mongoTemplate.aggregate(sumStatusCount, Machine.class, DashboardMachineStatusDto.class).getMappedResults();
+                    statusCountValue.stream().forEach(statusCount->{
+                        if(statusCount.getMachineStatusId().equals(MachineStatusReferenceData.ACTIVE_ID)){
+                            dashboardMachineStatusCountDto.setActiveCount(statusCount.getMachineStatusCount());
 
-                });
+                        }if(statusCount.getMachineStatusId().equals(MachineStatusReferenceData.IN_ACTIVE_ID)){
+                            dashboardMachineStatusCountDto.setInactiveCount(statusCount.getMachineStatusCount());
 
-                dashboardMachineStatusCountDto.setActiveCount(statusCountMap.get(MachineStatusReferenceData.ACTIVE_ID));
-                dashboardMachineStatusCountDto.setFaultyCount(statusCountMap.get(MachineStatusReferenceData.FAULTY_ID));
-                dashboardMachineStatusCountDto.setInactiveCount(statusCountMap.get(MachineStatusReferenceData.IN_ACTIVE_ID));
-                dashboardMachineStatusCountDto.setStolenCount(statusCountMap.get(MachineStatusReferenceData.STOLEN_ID));
+                        }if(statusCount.getMachineStatusId().equals(MachineStatusReferenceData.FAULTY_ID)){
+                            dashboardMachineStatusCountDto.setStolenCount(statusCount.getMachineStatusCount());
+
+                        }if(statusCount.getMachineStatusId().equals(MachineStatusReferenceData.STOLEN_ID)){
+                            dashboardMachineStatusCountDto.setFaultyCount(statusCount.getMachineStatusCount());
+                        }
+                    });
 
                 return Mono.just(new ResponseEntity(dashboardMachineStatusCountDto, HttpStatus.OK));
         }catch (Exception e) {
@@ -356,16 +360,8 @@ public class DashboardController extends BaseController {
             @RequestParam ("institutionId") String institutionId) {
 
         try {
-            ArrayList<String> statusList = new ArrayList<>();
-            statusList.addAll(Arrays.asList(
-                    AgentStatusReferenceData.ACTIVE_ID,
-                    AgentStatusReferenceData.IN_ACTIVE_ID,
-                    AgentStatusReferenceData.BLACK_LISTED_ID));
-            DashboardAgentStatusCountDto dashboardAgentStatusCountDto= new DashboardAgentStatusCountDto();
-            Map<String,Long> statusCountMap= new HashMap<>();
-            statusList.stream().forEach(status->{
-
-                Criteria criteria = new Criteria();
+             DashboardAgentStatusCountDto dashboardAgentStatusCountDto= new DashboardAgentStatusCountDto();
+                 Criteria criteria = new Criteria();
                 List<Criteria> filterCriteria = new ArrayList<>();
 
                 if (!org.springframework.util.StringUtils.isEmpty(institutionId)) {
@@ -373,18 +369,24 @@ public class DashboardController extends BaseController {
                 }
                 Aggregation sumStatusCount = Aggregation.newAggregation(
                         Aggregation.match(criteria),
-                        Aggregation.group("agentStatusId").count().as("totalCount")
+                        Aggregation.group("agentStatusId").count().as("agentStatusCount"),
+                        Aggregation.project("agentStatusCount").and("agentStatusId").previousOperation()
                 );
 
-                DashboardSummaryCountDto statusCountValue = mongoTemplate.aggregate(sumStatusCount, Agent.class, DashboardSummaryCountDto.class).getUniqueMappedResult();
-                statusCountMap.put(status, statusCountValue.getTotalCount());
+            List<DashboardAgentStatusDto> statusCountValue = mongoTemplate.aggregate(sumStatusCount, Agent.class, DashboardAgentStatusDto.class).getMappedResults();
+              statusCountValue.stream().forEach(statusCount->{
+                  if(statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.ACTIVE_ID)){
+                      dashboardAgentStatusCountDto.setActiveCount(statusCount.getAgentStatusCount());
+                  } if(statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.IN_ACTIVE_ID)){
+                      dashboardAgentStatusCountDto.setInactiveCount(statusCount.getAgentStatusCount());
 
-            });
+                  } if(statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.BLACK_LISTED_ID)){
+                      dashboardAgentStatusCountDto.setBlackListCount(statusCount.getAgentStatusCount());
+                  }
 
-            dashboardAgentStatusCountDto.setActiveCount(statusCountMap.get(AgentStatusReferenceData.ACTIVE_ID));
-            dashboardAgentStatusCountDto.setBlackListCount(statusCountMap.get(AgentStatusReferenceData.BLACK_LISTED_ID));
-            dashboardAgentStatusCountDto.setInactiveCount(statusCountMap.get(AgentStatusReferenceData.IN_ACTIVE_ID));
-          //  dashboardMachineStatusCountDto.setStolenCount(statusCountMap.get(MachineStatusReferenceData.STOLEN_ID));
+              });
+
+           //  dashboardMachineStatusCountDto.setStolenCount(statusCountMap.get(MachineStatusReferenceData.STOLEN_ID));
 
             return Mono.just(new ResponseEntity(dashboardAgentStatusCountDto, HttpStatus.OK));
         }catch (Exception e) {
