@@ -539,12 +539,12 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             }
 
             if (paymentRecord.isInstitutionPayment() && paymentRecord.isLicenseTransferPayment()) {
-                licenseService.createAIPLicenseForCompletedPayment(paymentRecord);
                 LicenseTransfer licenseTransfer = paymentRecord.getLicenseTransfer();
                 if (licenseTransfer != null) {
                     licenseTransfer.setPaymentRecordId(paymentRecord.getId());
                     mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
                 }
+                licenseService.createAIPLicenseForCompletedPayment(paymentRecord);
             }
 
             if (paymentRecord.isGamingMachinePayment() && paymentRecord.isTaxPayment()) {
