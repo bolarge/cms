@@ -275,6 +275,9 @@ public class DocumentController extends BaseController {
             document.setInstitutionId(documentCreateDto.getInstitutionId());
             document.setAgentId(documentCreateDto.getAgentId());
             document.setPreviousDocumentId(documentCreateDto.getPreviousDocumentId());
+            if (document.requiresApproval()) {
+                document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID );
+            }
             try {
                 document.setFile(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
             } catch (IOException e) {

@@ -39,6 +39,7 @@ public class AgentStatusReferenceData {
             } else {
                 agent.setAgentStatusId(IN_ACTIVE_ID);
             }
+            mongoRepositoryReactive.saveOrUpdate(agent);
         }
     }
 }

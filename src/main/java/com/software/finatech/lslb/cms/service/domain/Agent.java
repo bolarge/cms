@@ -227,7 +227,7 @@ public class Agent extends AbstractFact {
         agentDto.setAgentId(getAgentId());
         agentDto.setId(getId());
         AgentStatus agentStatus = getAgentStatus();
-        if (agentStatus != null){
+        if (agentStatus != null) {
             agentDto.setAgentStatusId(this.agentStatusId);
             agentDto.setAgentStatusName(String.valueOf(agentStatus));
         }
@@ -244,7 +244,6 @@ public class Agent extends AbstractFact {
         agentDto.setBusinessAddresses(getBusinessAddresses());
         agentDto.setBvn(getBvn());
         agentDto.setDateOfBirth(getDateOfBirth());
-        agentDto.setAgentId(getAgentId());
         agentDto.setInstitutions(getInstitutions());
         agentDto.setGameTypes(getGameTypes());
         agentDto.setBusinessAddresses(getBusinessAddresses());
@@ -326,6 +325,9 @@ public class Agent extends AbstractFact {
     }
 
     public AgentStatus getAgentStatus() {
+        if (StringUtils.isEmpty(this.agentStatusId)) {
+            return null;
+        }
         AgentStatus agentStatus = null;
         Map<String, FactObject> agentStatusMap = Mapstore.STORE.get("AgentStatus");
         if (agentStatusMap != null) {

@@ -670,37 +670,40 @@ public class LicenseServiceImpl implements LicenseService {
                 return Mono.just(new ResponseEntity<>("Operator has not uploaded AIP document", HttpStatus.BAD_REQUEST));
 
             }
-            LicenseTransfer licenseTransfer = license.getLicenseTransfer();
+           // LicenseTransfer licenseTransfer = license.getLicenseTransfer();
             License createLicense = new License();
             String licenseNumber = "";
 
-            if(licenseTransfer!=null){
-                License transferorLicense = licenseTransfer.getLicense();
-                 transferorLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_TRANSFERED);
-                 mongoRepositoryReactive.saveOrUpdate(transferorLicense);
+            if (!StringUtils.isEmpty(license.getLicenseTransferId())) {
+                license.setLicenseStatusId(LicenseStatusReferenceData.AIP_COMPLETED);
+                mongoRepositoryReactive.saveOrUpdate(license);
+                return Mono.just(new ResponseEntity<>("Updated Successfully", HttpStatus.OK));
+//                License transferorLicense = licenseTransfer.getLicense();
+//                transferorLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_TRANSFERED);
+//                mongoRepositoryReactive.saveOrUpdate(transferorLicense);
+//
+//                createLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+//                licenseNumber = transferorLicense.getLicenseNumber();
+//                createLicense.setLicenseNumber(licenseNumber);
+//                createLicense.setExpiryDate(transferorLicense.getExpiryDate());
+//                createLicense.setEffectiveDate(LocalDate.now());
+//                createLicense.setPaymentRecordId(license.getPaymentRecordId());
+//                createLicense.setRenewalStatus("false");
+//                createLicense.setInstitutionId(license.getInstitutionId());
+//                createLicense.setGameTypeId(license.getGameTypeId());
+//                createLicense.setParentLicenseId(license.getId());
+//                createLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
 
-                 createLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
-                licenseNumber = transferorLicense.getLicenseNumber();
-                 createLicense.setLicenseNumber(licenseNumber);
-                 createLicense.setExpiryDate(transferorLicense.getExpiryDate());
-                 createLicense.setEffectiveDate(LocalDate.now());
-                 createLicense.setPaymentRecordId(license.getPaymentRecordId());
-                createLicense.setRenewalStatus("false");
-                createLicense.setInstitutionId(license.getInstitutionId());
-                 createLicense.setGameTypeId(license.getGameTypeId());
-                createLicense.setParentLicenseId(license.getId());
-                createLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
 
+            } else {
 
-            }else{
+                license.setLicenseStatusId(LicenseStatusReferenceData.AIP_COMPLETED);
 
-            license.setLicenseStatusId(LicenseStatusReferenceData.AIP_COMPLETED);
+                Query queryGameType = new Query();
 
-            Query queryGameType = new Query();
-
-            queryGameType.addCriteria(Criteria.where("id").is(license.getGameTypeId()));
-            GameType gameType = (GameType) mongoRepositoryReactive.find(queryGameType, GameType.class).block();
-            int duration = gameType.getInstitutionLicenseDurationMonths();
+                queryGameType.addCriteria(Criteria.where("id").is(license.getGameTypeId()));
+                GameType gameType = (GameType) mongoRepositoryReactive.find(queryGameType, GameType.class).block();
+                int duration = gameType.getInstitutionLicenseDurationMonths();
            /* int days_diff = 0;
             LocalDate licenseEndDate = LocalDate.now();
             if (license.getExpiryDate().isAfter(LocalDate.now())) {
@@ -708,23 +711,23 @@ public class LicenseServiceImpl implements LicenseService {
                 licenseEndDate = licenseEndDate.plusMonths(duration);
                 licenseEndDate = licenseEndDate.plusDays(days_diff);
             } else {*/
-            LocalDate licenseEndDate = license.getExpiryDate().plusMonths(duration);
-            // }
-            PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById(license.getPaymentRecordId(), PaymentRecord.class).block();
-            if (paymentRecord != null) {
-                licenseNumber = generateLicenseNumberForPaymentRecord(paymentRecord);
-                createLicense.setLicenseNumber(licenseNumber);
-            }
-            createLicense.setId(UUID.randomUUID().toString());
-            createLicense.setEffectiveDate(license.getExpiryDate().plusDays(1));
-            createLicense.setExpiryDate(licenseEndDate);
-            createLicense.setRenewalStatus("false");
-            createLicense.setInstitutionId(license.getInstitutionId());
-            createLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
-            createLicense.setGameTypeId(license.getGameTypeId());
-            createLicense.setParentLicenseId(license.getId());
-            createLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
-            createLicense.setPaymentRecordId(license.getPaymentRecordId());
+                LocalDate licenseEndDate = license.getExpiryDate().plusMonths(duration);
+                // }
+                PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById(license.getPaymentRecordId(), PaymentRecord.class).block();
+                if (paymentRecord != null) {
+                    licenseNumber = generateLicenseNumberForPaymentRecord(paymentRecord);
+                    createLicense.setLicenseNumber(licenseNumber);
+                }
+                createLicense.setId(UUID.randomUUID().toString());
+                createLicense.setEffectiveDate(license.getExpiryDate().plusDays(1));
+                createLicense.setExpiryDate(licenseEndDate);
+                createLicense.setRenewalStatus("false");
+                createLicense.setInstitutionId(license.getInstitutionId());
+                createLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+                createLicense.setGameTypeId(license.getGameTypeId());
+                createLicense.setParentLicenseId(license.getId());
+                createLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
+                createLicense.setPaymentRecordId(license.getPaymentRecordId());
             }
             mongoRepositoryReactive.saveOrUpdate(license);
             verbiage = "UPDATED : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from AIP DOC UPLOADED to AIP COMPLETED";
@@ -804,6 +807,19 @@ public class LicenseServiceImpl implements LicenseService {
                 logger.info("payment record with id {} is not completed, skipping creation of AIP institution", paymentRecord.getId());
                 return;
             }
+
+            if (paymentRecord.isLicenseTransferPayment()) {
+                LicenseTransfer licenseTransfer = paymentRecord.getLicenseTransfer();
+                License transferredLicense = paymentRecord.getLicense();
+                transferredLicense.setLicenseTransferId(licenseTransfer.getId());
+                transferredLicense.setInstitutionId(paymentRecord.getInstitutionId());
+                mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
+                String verbiage = String.format("Transferred License Number -> %s , Category ->%s, Transferor -> %s, Transfereree -> %s",
+                        transferredLicense.getLicenseNumber(), transferredLicense.getGameType(), licenseTransfer.getFromInstitution(), licenseTransfer.getToInstitution());
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LICENCE_ID, "System Admin",
+                        String.valueOf(licenseTransfer.getToInstitution()), LocalDateTime.now(), LocalDate.now(), true, null, verbiage));
+            }
+
             GameType gameType = paymentRecord.getGameType();
             LocalDate effectiveDate = LocalDate.now();
             LocalDate expiryDate = effectiveDate.plusMonths(gameType.getAipDurationMonths()).minusDays(1);

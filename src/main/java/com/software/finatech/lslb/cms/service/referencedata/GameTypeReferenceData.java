@@ -48,7 +48,7 @@ public class GameTypeReferenceData {
             gameType3 = new GameType();
             gameType3.setId(GAMING_MACHINE_ID);
         }
-        gameType3.setDescription("Category with gaming Machines");
+        gameType3.setDescription("Gaming Machine");
         gameType3.setName("Gaming Machine");
         gameType3.setShortCode("CS");
         gameType3.setAipDurationMonths(3);

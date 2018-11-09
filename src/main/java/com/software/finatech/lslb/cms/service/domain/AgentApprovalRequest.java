@@ -63,14 +63,6 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
         this.gameTypeId = gameTypeId;
     }
 
-    public boolean isApprovedRequest() {
-        return StringUtils.equals(ApprovalRequestStatusReferenceData.APPROVED_ID, this.approvalRequestStatusId);
-    }
-
-    public boolean isRejectedRequest() {
-        return StringUtils.equals(ApprovalRequestStatusReferenceData.REJECTED_ID, this.approvalRequestStatusId);
-    }
-
     private GameType getGameType() {
         if (StringUtils.isEmpty(this.gameTypeId)) {
             return null;

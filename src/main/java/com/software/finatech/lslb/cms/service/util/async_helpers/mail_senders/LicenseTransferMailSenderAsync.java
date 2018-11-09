@@ -67,6 +67,7 @@ public class LicenseTransferMailSenderAsync extends AbstractMailSender {
 
     @Async
     public void sendLicenseTransferApprovalMailToTransferorAndTransferee(LicenseTransfer licenseTransfer) {
+        //send mail to license transferor
         List<AuthInfo> transferorAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(licenseTransfer.getFromInstitutionId());
         String transferorMailContent = buildLicenceTransferEmailContent(licenseTransfer, "license-transfer/LicenseTransferFinalApprovalNotificationTransferor");
         for (AuthInfo transferorAdmin : transferorAdmins) {

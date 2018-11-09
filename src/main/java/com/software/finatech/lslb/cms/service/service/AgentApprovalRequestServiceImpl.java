@@ -160,6 +160,9 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             if (agentApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Agent approval request with id %s does not exist", agentApprovalRequestId), HttpStatus.BAD_REQUEST));
             }
+            if (agentApprovalRequest.isApprovedRequest() || agentApprovalRequest.isRejectedRequest()) {
+                return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
+            }
             AuthInfo approvingUser = springSecurityAuditorAware.getLoggedInUser();
             if (approvingUser == null) {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
@@ -196,6 +199,10 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             if (agentApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Agent approval request with id %s does not exist", agentApprovalRequestId), HttpStatus.BAD_REQUEST));
             }
+            if (agentApprovalRequest.isApprovedRequest() || agentApprovalRequest.isRejectedRequest()) {
+                return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
+            }
+
             AuthInfo rejectingUser = springSecurityAuditorAware.getLoggedInUser();
             if (rejectingUser == null) {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
@@ -303,9 +310,9 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             pendingAgent.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
             mongoRepositoryReactive.saveOrUpdate(pendingAgent);
             Agent agent = new Agent();
-            agent.setId(UUID.randomUUID().toString());
+            agent.setId(pendingAgent.getId());
             agent.setEnabled(true);
-            agent.setDateOfBirth(pendingAgent.getDateOfBirth());
+              agent.setDateOfBirth(pendingAgent.getDateOfBirth());
             agent.setAgentId(pendingAgent.getAgentId());
             agent.setBusinessAddresses(pendingAgent.getBusinessAddresses());
             agent.setGameTypeIds(pendingAgent.getGameTypeIds());
@@ -313,6 +320,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             agent.setResidentialAddress(pendingAgent.getResidentialAddress());
             agent.setEmailAddress(pendingAgent.getEmailAddress());
             agent.setTitle(pendingAgent.getTitle());
+            agent.setBvn(pendingAgent.getBvn());
             agent.setFullName(pendingAgent.getFullName());
             agent.setFirstName(pendingAgent.getFirstName());
             agent.setLastName(pendingAgent.getLastName());

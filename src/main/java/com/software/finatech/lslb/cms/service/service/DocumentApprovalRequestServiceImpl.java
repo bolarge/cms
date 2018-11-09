@@ -145,6 +145,9 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
             if (documentApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Approval request with id %s not found", approvalRequestId), HttpStatus.BAD_REQUEST));
             }
+            if(documentApprovalRequest.isApprovedRequest() || documentApprovalRequest.isRejectedRequest()){
+                return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
+            }
 
             AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
             if (user == null) {
@@ -183,6 +186,10 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
             if (documentApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Approval request with id %s not found", approvalRequestId), HttpStatus.BAD_REQUEST));
             }
+            if(documentApprovalRequest.isApprovedRequest() || documentApprovalRequest.isRejectedRequest()){
+                return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
+            }
+
             AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
             if (user == null) {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));

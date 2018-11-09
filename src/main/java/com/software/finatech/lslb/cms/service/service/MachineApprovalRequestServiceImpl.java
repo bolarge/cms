@@ -164,6 +164,10 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             if (approvalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Approval request with id %s does not exist", approvalRequestId), HttpStatus.BAD_REQUEST));
             }
+            if(approvalRequest.isApprovedRequest() || approvalRequest.isRejectedRequest()){
+                return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
+            }
+
             AuthInfo approvingUser = springSecurityAuditorAware.getLoggedInUser();
             if (approvingUser == null) {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
@@ -223,6 +227,10 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             if (approvalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Approval request with id %s does not exist", approvalRequestId), HttpStatus.BAD_REQUEST));
             }
+            if(approvalRequest.isApprovedRequest() || approvalRequest.isRejectedRequest()){
+                return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
+            }
+
             AuthInfo rejectingUser = springSecurityAuditorAware.getLoggedInUser();
             if (rejectingUser == null) {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
