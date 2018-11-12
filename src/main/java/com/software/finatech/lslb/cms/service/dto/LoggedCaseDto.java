@@ -24,6 +24,24 @@ public class LoggedCaseDto {
     private String category;
     private String machineSerialNumber;
     private String machineId;
+    private String otherCategoryName;
+    private String otherTypeName;
+
+    public String getOtherCategoryName() {
+        return otherCategoryName;
+    }
+
+    public void setOtherCategoryName(String otherCategoryName) {
+        this.otherCategoryName = otherCategoryName;
+    }
+
+    public String getOtherTypeName() {
+        return otherTypeName;
+    }
+
+    public void setOtherTypeName(String otherTypeName) {
+        this.otherTypeName = otherTypeName;
+    }
 
 
     public String getMachineSerialNumber() {

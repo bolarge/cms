@@ -285,6 +285,8 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
         newCase.setCaseAndComplainTypeId(caseCreateDto.getCaseAndComplainTypeId());
         newCase.setGamingMachineId(caseCreateDto.getGamingMachineId());
         newCase.setGamingTerminalId(caseCreateDto.getGamingTerminalId());
+        newCase.setOtherCategoryName(caseCreateDto.getOtherCategoryName());
+        newCase.setOtherTypeName(caseCreateDto.getOtherTypeName());
         return newCase;
     }
 
