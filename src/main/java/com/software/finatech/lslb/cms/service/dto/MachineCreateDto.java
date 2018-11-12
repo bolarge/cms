@@ -14,7 +14,6 @@ public class MachineCreateDto {
     private String manufacturer;
     @NotEmpty(message = "please provide machine serial Number")
     private String serialNumber;
-    @NotNull(message = "please provide game details")
     private Set<MachineGameDetails> gameDetailsList;
     @NotEmpty(message = "please provide institutionId")
     private String institutionId;

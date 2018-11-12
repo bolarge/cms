@@ -1,11 +1,21 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ApprovalRequestOperationtDto {
-    @NotEmpty(message = "please provide approval request id")
     private String approvalRequestId;
     private String reason;
+    private Set<String> approvalRequestIds = new HashSet<>();
+
+    public Set<String> getApprovalRequestIds() {
+        return approvalRequestIds;
+    }
+
+    public void setApprovalRequestIds(Set<String> approvalRequestIds) {
+        this.approvalRequestIds = approvalRequestIds;
+    }
 
     public String getApprovalRequestId() {
         return approvalRequestId;

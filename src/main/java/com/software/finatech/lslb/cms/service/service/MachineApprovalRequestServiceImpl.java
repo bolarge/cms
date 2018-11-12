@@ -164,7 +164,7 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             if (approvalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Approval request with id %s does not exist", approvalRequestId), HttpStatus.BAD_REQUEST));
             }
-            if(approvalRequest.isApprovedRequest() || approvalRequest.isRejectedRequest()){
+            if (approvalRequest.isApprovedRequest() || approvalRequest.isRejectedRequest()) {
                 return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
             }
 
@@ -227,7 +227,7 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             if (approvalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Approval request with id %s does not exist", approvalRequestId), HttpStatus.BAD_REQUEST));
             }
-            if(approvalRequest.isApprovedRequest() || approvalRequest.isRejectedRequest()){
+            if (approvalRequest.isApprovedRequest() || approvalRequest.isRejectedRequest()) {
                 return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
             }
 
@@ -274,6 +274,20 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
         } catch (Exception e) {
             return logAndReturnError(logger,
                     String.format("An error occurred while getting full detail of machine approval request with id %s", approvalRequestId), e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> approveMultipleRequest(ApprovalRequestOperationtDto approvalRequestOperationtDto, HttpServletRequest request) {
+        try {
+            for (String approvalRequestId : approvalRequestOperationtDto.getApprovalRequestIds()) {
+                ApprovalRequestOperationtDto operationtDto = new ApprovalRequestOperationtDto();
+                operationtDto.setApprovalRequestId(approvalRequestId);
+                approveRequest(operationtDto, request).block();
+            }
+            return Mono.just(new ResponseEntity<>("Approved Successfully", HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while approving multiple request", e);
         }
     }
 

@@ -38,4 +38,5 @@ public interface MachineApprovalRequestService {
     Mono<ResponseEntity> getMachineApprovalRequestFullDetail(String approvalRequestId);
 
 
+    Mono<ResponseEntity> approveMultipleRequest(ApprovalRequestOperationtDto approvalRequestOperationtDto, HttpServletRequest request);
 }
