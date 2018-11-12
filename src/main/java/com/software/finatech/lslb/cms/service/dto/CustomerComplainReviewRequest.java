@@ -9,6 +9,24 @@ public class CustomerComplainReviewRequest {
     private String categoryId;
     @NotEmpty(message = "Please provide type id")
     private String typeId;
+    private String otherCategoryName;
+    private String otherTypeName;
+
+    public String getOtherCategoryName() {
+        return otherCategoryName;
+    }
+
+    public void setOtherCategoryName(String otherCategoryName) {
+        this.otherCategoryName = otherCategoryName;
+    }
+
+    public String getOtherTypeName() {
+        return otherTypeName;
+    }
+
+    public void setOtherTypeName(String otherTypeName) {
+        this.otherTypeName = otherTypeName;
+    }
 
     public String getCustomerComplainId() {
         return customerComplainId;

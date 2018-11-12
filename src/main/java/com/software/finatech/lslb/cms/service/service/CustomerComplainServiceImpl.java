@@ -279,6 +279,8 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             customerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.IN_REVIEW_ID);
             customerComplain.setCaseAndComplainCategoryId(reviewRequest.getCategoryId());
             customerComplain.setCaseAndComplainTypeId(reviewRequest.getTypeId());
+            customerComplain.setOtherCategoryName(reviewRequest.getOtherCategoryName());
+            customerComplain.setOtherTypeName(reviewRequest.getOtherTypeName());
             mongoRepositoryReactive.saveOrUpdate(customerComplain);
 
             String verbiage = String.format("Started Customer complain Review -> Ticket Id: ->  %s, Category -> %s , Type -> %s ", customerComplain.getTicketId(), customerComplain.getCaseAndComplainCategory(), customerComplain.getCaseAndComplainType());

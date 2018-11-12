@@ -32,6 +32,24 @@ public class LoggedCase extends AbstractFact {
     private String caseAndComplainTypeId;
     private String gamingMachineId;
     private String gamingTerminalId;
+    private String otherCategoryName;
+    private String otherTypeName;
+
+    public String getOtherCategoryName() {
+        return otherCategoryName;
+    }
+
+    public void setOtherCategoryName(String otherCategoryName) {
+        this.otherCategoryName = otherCategoryName;
+    }
+
+    public String getOtherTypeName() {
+        return otherTypeName;
+    }
+
+    public void setOtherTypeName(String otherTypeName) {
+        this.otherTypeName = otherTypeName;
+    }
 
     public String getGamingMachineId() {
         return gamingMachineId;
@@ -225,6 +243,8 @@ public class LoggedCase extends AbstractFact {
             dto.setCategory(String.valueOf(category));
             dto.setCategoryId(category.getId());
         }
+        dto.setOtherCategoryName(getOtherCategoryName());
+        dto.setOtherTypeName(getOtherTypeName());
         return dto;
     }
 

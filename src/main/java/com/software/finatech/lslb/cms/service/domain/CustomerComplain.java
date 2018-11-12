@@ -33,6 +33,24 @@ public class CustomerComplain extends AbstractFact {
     private LocalDateTime nextNotificationDateTime;
     private String caseAndComplainCategoryId;
     private String caseAndComplainTypeId;
+    private String otherCategoryName;
+    private String otherTypeName;
+
+    public String getOtherCategoryName() {
+        return otherCategoryName;
+    }
+
+    public void setOtherCategoryName(String otherCategoryName) {
+        this.otherCategoryName = otherCategoryName;
+    }
+
+    public String getOtherTypeName() {
+        return otherTypeName;
+    }
+
+    public void setOtherTypeName(String otherTypeName) {
+        this.otherTypeName = otherTypeName;
+    }
 
     public String getCaseAndComplainCategoryId() {
         return caseAndComplainCategoryId;
@@ -49,7 +67,6 @@ public class CustomerComplain extends AbstractFact {
     public void setCaseAndComplainTypeId(String caseAndComplainTypeId) {
         this.caseAndComplainTypeId = caseAndComplainTypeId;
     }
-
 
 
     public String getNameOfOperator() {
@@ -199,8 +216,8 @@ public class CustomerComplain extends AbstractFact {
         dto.setComplainSubject(getComplainSubject());
         dto.setNameOfOperator(getNameOfOperator());
         dto.setTicketId(getTicketId());
-        LocalDateTime timeReported= getTimeReported();
-        if(timeReported != null){
+        LocalDateTime timeReported = getTimeReported();
+        if (timeReported != null) {
             dto.setTimeReported(timeReported.toString("dd-MM-yyyy HH:mm a"));
         }
         CustomerComplainStatus customerComplainStatus = getCustomerComplainStatus(getCustomerComplainStatusId());
@@ -209,15 +226,17 @@ public class CustomerComplain extends AbstractFact {
             dto.setCustomerComplainStatusName(customerComplainStatus.getName());
         }
         CaseAndComplainType type = getCaseAndComplainType();
-        if (type != null){
+        if (type != null) {
             dto.setType(String.valueOf(type));
             dto.setTypeId(type.getId());
         }
         CaseAndComplainCategory category = getCaseAndComplainCategory();
-        if (category != null){
+        if (category != null) {
             dto.setCategory(String.valueOf(category));
             dto.setCategoryId(category.getId());
         }
+        dto.setOtherCategoryName(getOtherCategoryName());
+        dto.setOtherTypeName(getOtherTypeName());
         return dto;
     }
 
@@ -279,13 +298,13 @@ public class CustomerComplain extends AbstractFact {
         }
         CaseAndComplainType type = null;
         Map<String, FactObject> typeMap = Mapstore.STORE.get("CaseAndComplainType");
-        if (typeMap != null){
-            type = (CaseAndComplainType)typeMap.get(this.caseAndComplainTypeId);
+        if (typeMap != null) {
+            type = (CaseAndComplainType) typeMap.get(this.caseAndComplainTypeId);
         }
-        if (type == null){
-            type = (CaseAndComplainType)mongoRepositoryReactive.findById(this.caseAndComplainTypeId, CaseAndComplainType.class).block();
-            if (type != null && typeMap != null){
-                typeMap.put(this.caseAndComplainTypeId,type);
+        if (type == null) {
+            type = (CaseAndComplainType) mongoRepositoryReactive.findById(this.caseAndComplainTypeId, CaseAndComplainType.class).block();
+            if (type != null && typeMap != null) {
+                typeMap.put(this.caseAndComplainTypeId, type);
             }
         }
         return type;
