@@ -21,6 +21,42 @@ public class CustomerComplainDto {
     private String address;
     private String stateOfResidence;
     private String nameOfOperator;
+    private String typeId;
+    private String type;
+    private String categoryId;
+    private String category;
+
+    public String getTypeId() {
+        return typeId;
+    }
+
+    public void setTypeId(String typeId) {
+        this.typeId = typeId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(String categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
 
     public String getNameOfOperator() {
         return nameOfOperator;

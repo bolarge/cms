@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.GameUpgrade;
 import com.software.finatech.lslb.cms.service.dto.MachineApprovalRequestDto;
+import com.software.finatech.lslb.cms.service.dto.MachineDto;
 import com.software.finatech.lslb.cms.service.model.MachineGameDetails;
 import com.software.finatech.lslb.cms.service.referencedata.MachineApprovalRequestTypeReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
@@ -26,6 +27,15 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
     private boolean initiatedByInstitution;
     private String newMachineStatusId;
     private Set<GameUpgrade> machineGameUpgrades = new HashSet<>();
+    private Set<String> machineIds = new HashSet<>();
+
+    public Set<String> getMachineIds() {
+        return machineIds;
+    }
+
+    public void setMachineIds(Set<String> machineIds) {
+        this.machineIds = machineIds;
+    }
 
     public Set<GameUpgrade> getMachineGameUpgrades() {
         return machineGameUpgrades;
@@ -183,6 +193,7 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
             dto.setAgentId(this.agentId);
             dto.setAgentFullName(agent.getFullName());
         }
+        dto.setPendingMachines(getPendingMachineDtos());
         return dto;
     }
 
@@ -229,6 +240,11 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
         return StringUtils.equals(MachineApprovalRequestTypeReferenceData.UPGRADE_GAMING_MACHINE_GAMES, this.machineApprovalRequestTypeId);
     }
 
+    public boolean isAssignMultipleTerminalsToAgent() {
+        return StringUtils.equals(MachineApprovalRequestTypeReferenceData.ASSIGN_MULTIPLE_TERMINALS_TO_AGENT, this.machineApprovalRequestTypeId);
+    }
+
+
     public PendingMachine getPendingMachine() {
         if (StringUtils.isEmpty(this.pendingMachineId)) {
             return null;
@@ -236,11 +252,42 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
         return (PendingMachine) mongoRepositoryReactive.findById(this.pendingMachineId, PendingMachine.class).block();
     }
 
+    public Machine getMachine(String machineId) {
+        if (StringUtils.isEmpty(machineId)) {
+            return null;
+        }
+        return (Machine) mongoRepositoryReactive.findById(machineId, Machine.class).block();
+    }
+
     public Machine getMachine() {
         if (StringUtils.isEmpty(this.machineId)) {
             return null;
         }
         return (Machine) mongoRepositoryReactive.findById(this.machineId, Machine.class).block();
+    }
+
+
+    public Set<MachineDto> getPendingMachineDtos() {
+        Set<MachineDto> dtos = new HashSet<>();
+        for (String machineId : this.machineIds) {
+            Machine machine = getMachine(machineId);
+            if (machine != null) {
+                dtos.add(machine.convertToDto());
+            }
+        }
+        return dtos;
+    }
+
+
+    public Set<Machine> getPendingMachines() {
+        Set<Machine> machines = new HashSet<>();
+        for (String machineId : this.machineIds) {
+            Machine machine = getMachine(machineId);
+            if (machine != null) {
+                machines.add(machine);
+            }
+        }
+        return machines;
     }
 
     @Override
@@ -294,11 +341,10 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
         if (pendingMachine != null) {
             return pendingMachine.getSerialNumber();
         }
-        Machine machine = getMachine();
+        Machine machine = getMachine(this.machineId);
         if (machine != null) {
             return machine.getSerialNumber();
         }
         return null;
     }
-
 }

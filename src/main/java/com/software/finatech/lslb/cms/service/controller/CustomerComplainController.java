@@ -1,9 +1,6 @@
 package com.software.finatech.lslb.cms.service.controller;
 
-import com.software.finatech.lslb.cms.service.dto.CustomerComplainCreateDto;
-import com.software.finatech.lslb.cms.service.dto.CustomerComplainDto;
-import com.software.finatech.lslb.cms.service.dto.CustomerComplainUpdateDto;
-import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.service.contracts.CustomerComplainService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -47,8 +44,10 @@ public class CustomerComplainController {
                                                        @RequestParam("statusId") String statusId,
                                                        @RequestParam("startDate") String startDate,
                                                        @RequestParam("endDate") String endDate,
+                                                       @RequestParam("categoryId") String categoryId,
+                                                       @RequestParam("typeId") String typeId,
                                                        HttpServletResponse httpServletResponse) {
-        return customerComplainService.findAllCustomerComplains(page, pageSize, sortType, sortParam, customerEmail, customerPhone, statusId, startDate, endDate, httpServletResponse);
+        return customerComplainService.findAllCustomerComplains(page, pageSize, sortType, sortParam, customerEmail, customerPhone, statusId, startDate, endDate, categoryId, typeId, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create", produces = "application/json")
@@ -97,7 +96,7 @@ public class CustomerComplainController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-customer-complain-status", produces = "application/json")
-    @ApiOperation(value = "Get all customer complain status", response = EnumeratedFactDto.class,  responseContainer = "List",consumes = "application/json")
+    @ApiOperation(value = "Get all customer complain status", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -105,6 +104,18 @@ public class CustomerComplainController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllCustomerComplainStatus() {
         return customerComplainService.getAllCustomerComplainStatus();
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/start-review", produces = "application/json")
+    @ApiOperation(value = "Start Customer Complain Review", response = CustomerComplainDto.class, consumes = "application/json",
+            notes = "Supply the  category and type to proceed to review")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> beginCustomerComplainReview(CustomerComplainReviewRequest reviewRequest, HttpServletRequest request) {
+        return customerComplainService.beginCustomerComplainReview(reviewRequest, request);
     }
 }
 

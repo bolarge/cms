@@ -36,17 +36,19 @@ public class LoggedCaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllLoggedCases(@RequestParam("page") int page,
-                                                       @RequestParam("pageSize") int pageSize,
-                                                       @RequestParam("sortType") String sortType,
-                                                       @RequestParam("sortProperty") String sortParam,
-                                                       @RequestParam("reporterId") String reporterId,
-                                                       @RequestParam("institutionId") String institutionId,
-                                                       @RequestParam("agentId") String agentId,
-                                                       @RequestParam("startDate") String startDate,
-                                                       @RequestParam("endDate") String endDate,
-                                                       @RequestParam("statusId") String statusId,
-                                                       HttpServletResponse httpServletResponse) {
-        return loggedCaseService.findAllLoggedCases(page, pageSize, sortType, sortParam, reporterId, institutionId, statusId, agentId, startDate, endDate, httpServletResponse);
+                                                  @RequestParam("pageSize") int pageSize,
+                                                  @RequestParam("sortType") String sortType,
+                                                  @RequestParam("sortProperty") String sortParam,
+                                                  @RequestParam("reporterId") String reporterId,
+                                                  @RequestParam("institutionId") String institutionId,
+                                                  @RequestParam("agentId") String agentId,
+                                                  @RequestParam("startDate") String startDate,
+                                                  @RequestParam("endDate") String endDate,
+                                                  @RequestParam("statusId") String statusId,
+                                                  @RequestParam("categoryId") String categoryId,
+                                                  @RequestParam("typeId") String typeId,
+                                                  HttpServletResponse httpServletResponse) {
+        return loggedCaseService.findAllLoggedCases(page, pageSize, sortType, sortParam, reporterId, institutionId, statusId, agentId, startDate, endDate, categoryId, typeId, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create", produces = "application/json")
@@ -93,7 +95,6 @@ public class LoggedCaseController {
         return loggedCaseService.getAllLoggedCaseStatus();
     }
 
-
     @RequestMapping(method = RequestMethod.GET, value = "/{id}", produces = "application/json")
     @ApiOperation(value = "Get logged case full detail", response = LoggedCaseDto.class, consumes = "application/json")
     @ApiResponses(value = {
@@ -103,5 +104,26 @@ public class LoggedCaseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getLoggedCaseFullDetail(@PathVariable("id") String caseId) {
         return loggedCaseService.getLoggedCaseFullDetail(caseId);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/all-case-and-complain-category", produces = "application/json")
+    @ApiOperation(value = "Get all Case/Complain category", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllCaseAndComplainCategory() {
+        return loggedCaseService.getAllCaseAndComplainCategory();
+    }
+    @RequestMapping(method = RequestMethod.GET, value = "/all-case-and-complain-type", produces = "application/json")
+    @ApiOperation(value = "Get all Case/Complain Type", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllCaseAndComplainType() {
+        return loggedCaseService.getAllCaseAndComplainType();
     }
 }

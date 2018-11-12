@@ -1,7 +1,5 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import org.apache.commons.lang3.StringUtils;
-
 import javax.validation.constraints.NotEmpty;
 
 public class LoggedCaseCreateDto {
@@ -13,6 +11,54 @@ public class LoggedCaseCreateDto {
     private String caseSubject;
     @NotEmpty(message = "please provide case details")
     private String caseDetails;
+    @NotEmpty(message = "please provide license type")
+    private String licenseTypeId;
+    @NotEmpty(message = "please provide case/complain category")
+    private String caseAndComplainCategoryId;
+    @NotEmpty(message = "please provide case/complain type")
+    private String caseAndComplainTypeId;
+    private String gamingTerminalId;
+    private String gamingMachineId;
+
+    public String getGamingTerminalId() {
+        return gamingTerminalId;
+    }
+
+    public void setGamingTerminalId(String gamingTerminalId) {
+        this.gamingTerminalId = gamingTerminalId;
+    }
+
+    public String getGamingMachineId() {
+        return gamingMachineId;
+    }
+
+    public void setGamingMachineId(String gamingMachineId) {
+        this.gamingMachineId = gamingMachineId;
+    }
+
+    public String getLicenseTypeId() {
+        return licenseTypeId;
+    }
+
+    public void setLicenseTypeId(String licenseTypeId) {
+        this.licenseTypeId = licenseTypeId;
+    }
+
+    public String getCaseAndComplainCategoryId() {
+        return caseAndComplainCategoryId;
+    }
+
+    public void setCaseAndComplainCategoryId(String caseAndComplainCategoryId) {
+        this.caseAndComplainCategoryId = caseAndComplainCategoryId;
+    }
+
+    public String getCaseAndComplainTypeId() {
+        return caseAndComplainTypeId;
+    }
+
+    public void setCaseAndComplainTypeId(String caseAndComplainTypeId) {
+        this.caseAndComplainTypeId = caseAndComplainTypeId;
+    }
 
     public String getAgentId() {
         return agentId;
@@ -52,10 +98,5 @@ public class LoggedCaseCreateDto {
 
     public void setCaseDetails(String caseDetails) {
         this.caseDetails = caseDetails;
-    }
-
-    public boolean isValid() {
-        return (StringUtils.isEmpty(this.agentId) && !StringUtils.isEmpty(this.institutionId)) ||
-                (StringUtils.isEmpty(this.institutionId) && !StringUtils.isEmpty(this.agentId));
     }
 }

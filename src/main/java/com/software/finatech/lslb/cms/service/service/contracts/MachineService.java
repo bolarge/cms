@@ -50,4 +50,6 @@ public interface MachineService {
     Mono<ResponseEntity> upgradeMachineGames(MachineGameUpgradeRequest machineGameUpgradeDto, HttpServletRequest request);
 
     Mono<ResponseEntity> getMachineTypesByGameType(String gameTypeId);
+
+    Mono<ResponseEntity> assignMultipleMachinesToAgent(MachineAgentAddDto dto, HttpServletRequest request);
 }

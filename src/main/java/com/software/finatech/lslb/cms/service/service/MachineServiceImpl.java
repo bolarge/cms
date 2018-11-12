@@ -701,6 +701,41 @@ public class MachineServiceImpl implements MachineService {
         }
     }
 
+    @Override
+    public Mono<ResponseEntity> assignMultipleMachinesToAgent(MachineAgentAddDto dto, HttpServletRequest request) {
+        try {
+            Set<String> machineIds = dto.getMachineIds();
+            if (machineIds.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("Empty machine ids supplied", HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+            for (String machineId : machineIds) {
+                Machine terminal = findMachineById(machineId);
+                if (terminal == null) {
+                    return Mono.just(new ResponseEntity<>(String.format("Gaming terminal with id %s not found", machineId), HttpStatus.BAD_REQUEST));
+                }
+                if (!terminal.isGamingTerminal()) {
+                    return Mono.just(new ResponseEntity<>(String.format("Machine with serial number %s is not a gaming terminal", terminal.getSerialNumber()), HttpStatus.BAD_REQUEST));
+                }
+            }
+            MachineApprovalRequest approvalRequest = new MachineApprovalRequest();
+            approvalRequest.setId(UUID.randomUUID().toString());
+            approvalRequest.setInitiatedByInstitution(true);
+            approvalRequest.setMachineTypeId(MachineTypeReferenceData.GAMING_TERMINAL_ID);
+            approvalRequest.setMachineApprovalRequestTypeId(MachineApprovalRequestTypeReferenceData.ASSIGN_MULTIPLE_TERMINALS_TO_AGENT);
+            approvalRequest.setAgentId(dto.getAgentId());
+            approvalRequest.setMachineIds(machineIds);
+            approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
+            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+            return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while assigning multiple machines to agent", e);
+        }
+    }
+
     private List<EnumeratedFactDto> machineTypesFromIds(List<String> machineTypeIds) {
         List<EnumeratedFactDto> dtos = new ArrayList<>();
         for (String id : machineTypeIds) {

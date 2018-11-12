@@ -23,6 +23,8 @@ public interface LoggedCaseService {
                                             String agentId,
                                             String startDate,
                                             String endDate,
+                                            String categoryId,
+                                            String typeId,
                                             HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> createCase(LoggedCaseCreateDto loggedCaseCreateDto, HttpServletRequest request);
@@ -36,4 +38,8 @@ public interface LoggedCaseService {
     Mono<ResponseEntity> getLoggedCaseFullDetail(String loggedCaseId);
 
     LoggedCase findCaseById(String caseId);
+
+    Mono<ResponseEntity> getAllCaseAndComplainType();
+
+    Mono<ResponseEntity> getAllCaseAndComplainCategory();
 }

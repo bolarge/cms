@@ -2,12 +2,12 @@ package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
-import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.dto.LoggedCaseActionCreateDto;
+import com.software.finatech.lslb.cms.service.dto.LoggedCaseCommentCreateDto;
+import com.software.finatech.lslb.cms.service.dto.LoggedCaseCreateDto;
+import com.software.finatech.lslb.cms.service.dto.LoggedCaseDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LoggedCaseStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.LoggedCaseService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
@@ -68,6 +68,8 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
                                                    String agentId,
                                                    String startDate,
                                                    String endDate,
+                                                   String categoryId,
+                                                   String typeId,
                                                    HttpServletResponse httpServletResponse) {
         try {
 
@@ -83,6 +85,12 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             }
             if (!StringUtils.isEmpty(loggedCaseStatusId)) {
                 query.addCriteria(Criteria.where("loggedCaseStatusId").is(loggedCaseStatusId));
+            }
+            if (!StringUtils.isEmpty(categoryId)) {
+                query.addCriteria(Criteria.where("caseAndComplainCategoryId").is(categoryId));
+            }
+            if (!StringUtils.isEmpty(typeId)) {
+                query.addCriteria(Criteria.where("caseAndComplainTypeId").is(typeId));
             }
             if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
                 LocalDate fromDate = new LocalDate(startDate);
@@ -122,10 +130,6 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
     @Override
     public Mono<ResponseEntity> createCase(LoggedCaseCreateDto loggedCaseCreateDto, HttpServletRequest request) {
         try {
-            //  String userId = loggedCaseCreateDto.getUserId();
-            if (!loggedCaseCreateDto.isValid()) {
-                return Mono.just(new ResponseEntity<>("Please provide either agent id or institution id alone", HttpStatus.BAD_REQUEST));
-            }
             AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
             if (user == null) {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
@@ -230,23 +234,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
 
     @Override
     public Mono<ResponseEntity> getAllLoggedCaseStatus() {
-        try {
-            ArrayList<LoggedCaseStatus> loggedCaseStatuses = (ArrayList<LoggedCaseStatus>) mongoRepositoryReactive
-                    .findAll(new Query(), LoggedCaseStatus.class).toStream().collect(Collectors.toList());
-
-            if (loggedCaseStatuses == null || loggedCaseStatuses.isEmpty()) {
-                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));
-            }
-            List<EnumeratedFactDto> enumeratedFactDtos = new ArrayList<>();
-            loggedCaseStatuses.forEach(loggedCaseStatus -> {
-                enumeratedFactDtos.add(loggedCaseStatus.convertToDto());
-            });
-
-            return Mono.just(new ResponseEntity<>(enumeratedFactDtos, HttpStatus.OK));
-        } catch (Exception e) {
-            String errorMsg = "An error occurred while getting all logged case statuses";
-            return logAndReturnError(logger, errorMsg, e);
-        }
+        return ReferenceDataUtil.getAllEnumeratedEntity("LoggedCaseStatus");
     }
 
     @Override
@@ -271,6 +259,16 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
         }
     }
 
+    @Override
+    public Mono<ResponseEntity> getAllCaseAndComplainType() {
+        return ReferenceDataUtil.getAllEnumeratedEntity("CaseAndComplainType");
+    }
+
+    @Override
+    public Mono<ResponseEntity> getAllCaseAndComplainCategory() {
+        return ReferenceDataUtil.getAllEnumeratedEntity("CaseAndComplainCategory");
+    }
+
     private LoggedCase fromLoggedCaseCreateDto(LoggedCaseCreateDto caseCreateDto) {
         LoggedCase newCase = new LoggedCase();
         newCase.setId(UUID.randomUUID().toString());
@@ -282,6 +280,11 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
         newCase.setLoggedCaseStatusId(LoggedCaseStatusReferenceData.OPEN_ID);
         newCase.setTicketId(generateTicketId());
         newCase.setDateTimeReported(LocalDateTime.now());
+        newCase.setLicenseTypeId(caseCreateDto.getLicenseTypeId());
+        newCase.setCaseAndComplainCategoryId(caseCreateDto.getCaseAndComplainCategoryId());
+        newCase.setCaseAndComplainTypeId(caseCreateDto.getCaseAndComplainTypeId());
+        newCase.setGamingMachineId(caseCreateDto.getGamingMachineId());
+        newCase.setGamingTerminalId(caseCreateDto.getGamingTerminalId());
         return newCase;
     }
 

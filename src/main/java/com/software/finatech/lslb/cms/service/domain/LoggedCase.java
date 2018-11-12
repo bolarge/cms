@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.LoggedCaseActionDto;
 import com.software.finatech.lslb.cms.service.dto.LoggedCaseCommentDto;
 import com.software.finatech.lslb.cms.service.dto.LoggedCaseDto;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LoggedCaseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +27,51 @@ public class LoggedCase extends AbstractFact {
     private LocalDateTime dateTimeReported;
     private Set<LoggedCaseComment> caseComments = new HashSet<>();
     private Set<LoggedCaseAction> caseActions = new HashSet<>();
+    private String licenseTypeId;
+    private String caseAndComplainCategoryId;
+    private String caseAndComplainTypeId;
+    private String gamingMachineId;
+    private String gamingTerminalId;
 
+    public String getGamingMachineId() {
+        return gamingMachineId;
+    }
+
+    public void setGamingMachineId(String gamingMachineId) {
+        this.gamingMachineId = gamingMachineId;
+    }
+
+    public String getGamingTerminalId() {
+        return gamingTerminalId;
+    }
+
+    public void setGamingTerminalId(String gamingTerminalId) {
+        this.gamingTerminalId = gamingTerminalId;
+    }
+
+    public String getCaseAndComplainCategoryId() {
+        return caseAndComplainCategoryId;
+    }
+
+    public void setCaseAndComplainCategoryId(String caseAndComplainCategoryId) {
+        this.caseAndComplainCategoryId = caseAndComplainCategoryId;
+    }
+
+    public String getCaseAndComplainTypeId() {
+        return caseAndComplainTypeId;
+    }
+
+    public void setCaseAndComplainTypeId(String caseAndComplainTypeId) {
+        this.caseAndComplainTypeId = caseAndComplainTypeId;
+    }
+
+    public String getLicenseTypeId() {
+        return licenseTypeId;
+    }
+
+    public void setLicenseTypeId(String licenseTypeId) {
+        this.licenseTypeId = licenseTypeId;
+    }
 
     public LocalDateTime getDateTimeReported() {
         return dateTimeReported;
@@ -156,7 +201,7 @@ public class LoggedCase extends AbstractFact {
         dto.setInstitutionId(getInstitutionId());
         LocalDateTime reportTime = getDateTimeReported();
         if (reportTime != null) {
-            dto.setDateReported(reportTime.toString("dd-MM-yyyy HH:mm:ss"));
+            dto.setDateReported(reportTime.toString("dd-MM-yyyy HH:mm a"));
         }
         dto.setCaseSubject(getCaseSubject());
         AuthInfo reporter = getUser(this.reporterId);
@@ -170,6 +215,16 @@ public class LoggedCase extends AbstractFact {
             dto.setLoggedCaseStatusName(caseStatus.getName());
         }
         dto.setTicketId(getTicketId());
+        CaseAndComplainType type = getCaseAndComplainType();
+        if (type != null) {
+            dto.setType(String.valueOf(type));
+            dto.setTypeId(type.getId());
+        }
+        CaseAndComplainCategory category = getCaseAndComplainCategory();
+        if (category != null) {
+            dto.setCategory(String.valueOf(category));
+            dto.setCategoryId(category.getId());
+        }
         return dto;
     }
 
@@ -178,6 +233,10 @@ public class LoggedCase extends AbstractFact {
         dto.setCaseActions(convertCaseActionsToDto(getCaseActions()));
         dto.setCaseComments(convertCaseCommentsToDto(getCaseComments()));
         dto.setCaseDetails(getCaseDetails());
+        Machine machine = getMachine();
+        if (machine != null) {
+            dto.setMachineSerialNumber(machine.getSerialNumber());
+        }
         return dto;
     }
 
@@ -207,7 +266,7 @@ public class LoggedCase extends AbstractFact {
         caseCommentDto.setComment(caseComment.getComment());
         LocalDateTime commentTime = caseComment.getCommentTime();
         if (commentTime != null) {
-            caseCommentDto.setCommentTime(commentTime.toString("dd-MM-yyyy HH:mm:ss a"));
+            caseCommentDto.setCommentTime(commentTime.toString("dd-MM-yyyy HH:mm a"));
         }
         return caseCommentDto;
     }
@@ -268,12 +327,92 @@ public class LoggedCase extends AbstractFact {
         return null;
     }
 
+    public LicenseType getLicenseType() {
+        if (licenseTypeId == null) {
+            return null;
+        }
+        Map licenseTypeMap = Mapstore.STORE.get("LicenseType");
+
+        LicenseType licenseType = null;
+        if (licenseTypeMap != null) {
+            licenseType = (LicenseType) licenseTypeMap.get(licenseTypeId);
+        }
+        if (licenseType == null) {
+            licenseType = (LicenseType) mongoRepositoryReactive.findById(licenseTypeId, LicenseType.class).block();
+            if (licenseType != null && licenseTypeMap != null) {
+                licenseTypeMap.put(licenseTypeId, licenseType);
+            }
+        }
+        return licenseType;
+    }
+
+
+    public CaseAndComplainCategory getCaseAndComplainCategory() {
+        if (StringUtils.isEmpty(this.caseAndComplainCategoryId)) {
+            return null;
+        }
+        CaseAndComplainCategory category = null;
+        Map<String, FactObject> categoryMap = Mapstore.STORE.get("CaseAndComplainCategory");
+        if (categoryMap != null) {
+            category = (CaseAndComplainCategory) categoryMap.get(this.caseAndComplainCategoryId);
+        }
+        if (category == null) {
+            category = (CaseAndComplainCategory) mongoRepositoryReactive.findById(this.caseAndComplainCategoryId, CaseAndComplainCategory.class).block();
+            if (category != null && categoryMap != null) {
+                categoryMap.put(this.caseAndComplainCategoryId, category);
+            }
+        }
+        return category;
+    }
+
+    public CaseAndComplainType getCaseAndComplainType() {
+        if (StringUtils.isEmpty(this.caseAndComplainTypeId)) {
+            return null;
+        }
+        CaseAndComplainType type = null;
+        Map<String, FactObject> typeMap = Mapstore.STORE.get("CaseAndComplainType");
+        if (typeMap != null) {
+            type = (CaseAndComplainType) typeMap.get(this.caseAndComplainTypeId);
+        }
+        if (type == null) {
+            type = (CaseAndComplainType) mongoRepositoryReactive.findById(this.caseAndComplainTypeId, CaseAndComplainType.class).block();
+            if (type != null && typeMap != null) {
+                typeMap.put(this.caseAndComplainTypeId, type);
+            }
+        }
+        return type;
+    }
+
     public boolean isLoggedAgainstAgent() {
-        return !StringUtils.isEmpty(this.agentId) && StringUtils.isEmpty(this.institutionId);
+        return StringUtils.equals(LicenseTypeReferenceData.AGENT_ID, this.licenseTypeId);
     }
 
     public boolean isLoggedAgainstInstitution() {
-        return StringUtils.isEmpty(this.agentId) && !StringUtils.isEmpty(this.institutionId);
+        return StringUtils.equals(LicenseTypeReferenceData.INSTITUTION_ID, this.licenseTypeId);
+    }
+
+    public boolean isLoggedAgainstGamingMachine() {
+        return StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, this.licenseTypeId);
+    }
+
+    public boolean isLoggedAgainstGamingTerminal() {
+        return StringUtils.equals(LicenseTypeReferenceData.GAMING_TERMINAL_ID, this.licenseTypeId);
+    }
+
+
+    public Machine getMachine() {
+        Machine machine = null;
+        String machineId = null;
+        if (isLoggedAgainstGamingMachine()) {
+            machineId = this.gamingMachineId;
+        }
+        if (isLoggedAgainstGamingTerminal()) {
+            machineId = this.gamingTerminalId;
+        }
+        if (!StringUtils.isEmpty(machineId)) {
+            return (Machine) mongoRepositoryReactive.findById(machineId, Machine.class).block();
+        }
+        return null;
     }
 
     public boolean isClosed() {
