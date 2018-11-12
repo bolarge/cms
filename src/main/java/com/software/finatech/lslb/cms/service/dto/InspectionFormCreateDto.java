@@ -16,8 +16,17 @@ public class InspectionFormCreateDto {
     protected String userRoleId;
     protected String agentId;
     protected String gamingMachineId;
+    protected String agentBusinessAddress;
     @NotEmpty(message = "Provide User role")
     protected String subject;
+
+    public String getAgentBusinessAddress() {
+        return agentBusinessAddress;
+    }
+
+    public void setAgentBusinessAddress(String agentBusinessAddress) {
+        this.agentBusinessAddress = agentBusinessAddress;
+    }
 
     public String getSubject() {
         return subject;
