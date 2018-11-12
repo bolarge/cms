@@ -16,7 +16,6 @@ import java.util.Map;
 @SuppressWarnings("serial")
 @Document(collection = "CustomerComplains")
 public class CustomerComplain extends AbstractFact {
-
     private String customerFullName;
     private String customerPhoneNumber;
     private String customerEmailAddress;
@@ -32,6 +31,25 @@ public class CustomerComplain extends AbstractFact {
     private String stateOfResidence;
     private List<CustomerComplainAction> customerComplainActionList = new ArrayList<>();
     private LocalDateTime nextNotificationDateTime;
+    private String caseAndComplainCategoryId;
+    private String caseAndComplainTypeId;
+
+    public String getCaseAndComplainCategoryId() {
+        return caseAndComplainCategoryId;
+    }
+
+    public void setCaseAndComplainCategoryId(String caseAndComplainCategoryId) {
+        this.caseAndComplainCategoryId = caseAndComplainCategoryId;
+    }
+
+    public String getCaseAndComplainTypeId() {
+        return caseAndComplainTypeId;
+    }
+
+    public void setCaseAndComplainTypeId(String caseAndComplainTypeId) {
+        this.caseAndComplainTypeId = caseAndComplainTypeId;
+    }
+
 
 
     public String getNameOfOperator() {
@@ -183,12 +201,22 @@ public class CustomerComplain extends AbstractFact {
         dto.setTicketId(getTicketId());
         LocalDateTime timeReported= getTimeReported();
         if(timeReported != null){
-            dto.setTimeReported(timeReported.toString("dd-MM-yyyy HH:mm:ss"));
+            dto.setTimeReported(timeReported.toString("dd-MM-yyyy HH:mm a"));
         }
         CustomerComplainStatus customerComplainStatus = getCustomerComplainStatus(getCustomerComplainStatusId());
         if (customerComplainStatus != null) {
             dto.setCustomerComplainStatusId(getCustomerComplainStatusId());
             dto.setCustomerComplainStatusName(customerComplainStatus.getName());
+        }
+        CaseAndComplainType type = getCaseAndComplainType();
+        if (type != null){
+            dto.setType(String.valueOf(type));
+            dto.setTypeId(type.getId());
+        }
+        CaseAndComplainCategory category = getCaseAndComplainCategory();
+        if (category != null){
+            dto.setCategory(String.valueOf(category));
+            dto.setCategoryId(category.getId());
         }
         return dto;
     }
@@ -225,6 +253,42 @@ public class CustomerComplain extends AbstractFact {
             }
         }
         return complainActions;
+    }
+
+    public CaseAndComplainCategory getCaseAndComplainCategory() {
+        if (StringUtils.isEmpty(this.caseAndComplainCategoryId)) {
+            return null;
+        }
+        CaseAndComplainCategory category = null;
+        Map<String, FactObject> categoryMap = Mapstore.STORE.get("CaseAndComplainCategory");
+        if (categoryMap != null) {
+            category = (CaseAndComplainCategory) categoryMap.get(this.caseAndComplainCategoryId);
+        }
+        if (category == null) {
+            category = (CaseAndComplainCategory) mongoRepositoryReactive.findById(this.caseAndComplainCategoryId, CaseAndComplainCategory.class).block();
+            if (category != null && categoryMap != null) {
+                categoryMap.put(this.caseAndComplainCategoryId, category);
+            }
+        }
+        return category;
+    }
+
+    public CaseAndComplainType getCaseAndComplainType() {
+        if (StringUtils.isEmpty(this.caseAndComplainTypeId)) {
+            return null;
+        }
+        CaseAndComplainType type = null;
+        Map<String, FactObject> typeMap = Mapstore.STORE.get("CaseAndComplainType");
+        if (typeMap != null){
+            type = (CaseAndComplainType)typeMap.get(this.caseAndComplainTypeId);
+        }
+        if (type == null){
+            type = (CaseAndComplainType)mongoRepositoryReactive.findById(this.caseAndComplainTypeId, CaseAndComplainType.class).block();
+            if (type != null && typeMap != null){
+                typeMap.put(this.caseAndComplainTypeId,type);
+            }
+        }
+        return type;
     }
 
     private AuthInfo getUser(String userId) {

@@ -4,16 +4,12 @@ import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.CustomerComplain;
 import com.software.finatech.lslb.cms.service.domain.CustomerComplainAction;
-import com.software.finatech.lslb.cms.service.domain.CustomerComplainStatus;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainCreateDto;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainDto;
+import com.software.finatech.lslb.cms.service.dto.CustomerComplainReviewRequest;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainUpdateDto;
-import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.CustomerComplainStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.CustomerComplainService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
@@ -77,6 +73,8 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
                                                          String customerComplainStatusId,
                                                          String startDate,
                                                          String endDate,
+                                                         String categoryId,
+                                                         String typeId,
                                                          HttpServletResponse httpServletResponse) {
 
         try {
@@ -89,6 +87,12 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             }
             if (!StringUtils.isEmpty(customerComplainStatusId)) {
                 query.addCriteria(Criteria.where("customerComplainStatusId").is(customerComplainStatusId));
+            }
+            if (!StringUtils.isEmpty(categoryId)) {
+                query.addCriteria(Criteria.where("caseAndComplainCategoryId").is(categoryId));
+            }
+            if (!StringUtils.isEmpty(typeId)) {
+                query.addCriteria(Criteria.where("caseAndComplainTypeId").is(typeId));
             }
             if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
                 LocalDate fromDate = new LocalDate(startDate);
@@ -162,6 +166,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             return logAndReturnError(logger, String.format("An error occurred while getting customer complain with id %s dull detail", customerComplainId), e);
         }
     }
+
     @Override
     public CustomerComplain findCustomerComplainById(String customerComplainId) {
         if (StringUtils.isEmpty(customerComplainId)) {
@@ -244,7 +249,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
                 customerComplaintEmailSenderAsync.sendClosedCustomerComplaintToCustomer(existingCustomerComplain);
             }
 
-            String verbiage = String.format("Updated Customer complain status -> Ticket Id: %s ", existingCustomerComplain.getTicketId());
+            String verbiage = String.format("Updated Customer complain status -> Ticket Id: ->  %s ", existingCustomerComplain.getTicketId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(customerComplainAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
@@ -257,22 +262,33 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
 
     @Override
     public Mono<ResponseEntity> getAllCustomerComplainStatus() {
+        return ReferenceDataUtil.getAllEnumeratedEntity("CustomerComplainStatus");
+    }
+
+    @Override
+    public Mono<ResponseEntity> beginCustomerComplainReview(CustomerComplainReviewRequest reviewRequest, HttpServletRequest request) {
         try {
-            ArrayList<CustomerComplainStatus> customerComplainStatuses = (ArrayList<CustomerComplainStatus>) mongoRepositoryReactive
-                    .findAll(new Query(), CustomerComplainStatus.class).toStream().collect(Collectors.toList());
-
-            if (customerComplainStatuses == null || customerComplainStatuses.isEmpty()) {
-                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.OK));
+            String complaintId = reviewRequest.getCustomerComplainId();
+            CustomerComplain customerComplain = findCustomerComplainById(complaintId);
+            if (customerComplain == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Customer complaint with id %s does not exist", complaintId), HttpStatus.BAD_REQUEST));
             }
-            List<EnumeratedFactDto> enumeratedFactDtos = new ArrayList<>();
-            customerComplainStatuses.forEach(customerComplainStatus -> {
-                enumeratedFactDtos.add(customerComplainStatus.convertToDto());
-            });
+            if (StringUtils.equals(customerComplain.getCustomerComplainStatusId(), CustomerComplainStatusReferenceData.PENDING_ID)) {
+                return Mono.just(new ResponseEntity<>("Customer complaint is not pending", HttpStatus.BAD_REQUEST));
+            }
+            customerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.IN_REVIEW_ID);
+            customerComplain.setCaseAndComplainCategoryId(reviewRequest.getCategoryId());
+            customerComplain.setCaseAndComplainTypeId(reviewRequest.getTypeId());
+            mongoRepositoryReactive.saveOrUpdate(customerComplain);
 
-            return Mono.just(new ResponseEntity<>(enumeratedFactDtos, HttpStatus.OK));
+            String verbiage = String.format("Started Customer complain Review -> Ticket Id: ->  %s, Category -> %s , Type -> %s ", customerComplain.getTicketId(), customerComplain.getCaseAndComplainCategory(), customerComplain.getCaseAndComplainType());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(customerComplainAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            return Mono.just(new ResponseEntity<>(customerComplain.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
-            String errorMsg = "An error occurred while getting all customer complain statuses";
-            return logAndReturnError(logger, errorMsg, e);
+            return logAndReturnError(logger, "An error occurred while starting  customer complain review", e);
         }
     }
 

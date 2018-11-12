@@ -116,4 +116,15 @@ public class MachineApprovalRequestController {
         return machineApprovalRequestService.approveMultipleRequest(approvalRequestOperationtDto, request);
     }
 
+    @RequestMapping(method = RequestMethod.POST, value = "/reject-multiple")
+    @ApiOperation(value = "Reject Multiple Machine approval request", response = MachineApprovalRequestDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> rejectMultipleRequest(@RequestBody  ApprovalRequestOperationtDto approvalRequestOperationtDto, HttpServletRequest request) {
+        return machineApprovalRequestService.rejectMultipleRequest(approvalRequestOperationtDto, request);
+    }
+
 }

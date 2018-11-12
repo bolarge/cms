@@ -153,6 +153,17 @@ public class MachineController {
         return machineService.assignMachineToAgent(dto, request);
     }
 
+    @RequestMapping(method = RequestMethod.POST, value = "/assign-multiple-machine-to-agent")
+    @ApiOperation(value = "Assign machine to agent", response = MachineApprovalRequestDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> assignMultipleMachineToAgent(@RequestBody MachineAgentAddDto dto, HttpServletRequest request) {
+        return machineService.assignMultipleMachinesToAgent(dto, request);
+    }
+
 
     @RequestMapping(method = RequestMethod.POST, value = "/remove-games-from-machine")
     @ApiOperation(value = "Remove Games From Machine", response = MachineDto.class, consumes = "application/json")

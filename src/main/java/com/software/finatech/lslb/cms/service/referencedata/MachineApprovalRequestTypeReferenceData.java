@@ -14,6 +14,7 @@ public class MachineApprovalRequestTypeReferenceData {
     public static final String ASSIGN_TERMINAL_TO_AGENT = "7";
     public static final String UPGRADE_GAMING_MACHINE_GAMES = "8";
     public static final String UPGRADE_GAMING_TERMINAL_GAMES = "9";
+    public static final String ASSIGN_MULTIPLE_TERMINALS_TO_AGENT = "10";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         loadForId(CREATE_GAMING_MACHINE_ID, mongoRepositoryReactive, "CREATE GAMING MACHINE");
@@ -25,6 +26,7 @@ public class MachineApprovalRequestTypeReferenceData {
         loadForId(ASSIGN_TERMINAL_TO_AGENT, mongoRepositoryReactive, "ASSIGN TERMINAL TO AGENT");
         loadForId(UPGRADE_GAMING_MACHINE_GAMES, mongoRepositoryReactive, "UPGRADE GAMING MACHINE GAMES");
         loadForId(UPGRADE_GAMING_TERMINAL_GAMES, mongoRepositoryReactive, "UPGRADE GAMING TERMINAL GAMES");
+        loadForId(ASSIGN_MULTIPLE_TERMINALS_TO_AGENT, mongoRepositoryReactive,"ASSIGN MULTIPLE TERMINALS TO AGENT");
     }
 
     private static void loadForId(String id, MongoRepositoryReactiveImpl mongoRepositoryReactive, String name) {

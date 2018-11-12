@@ -18,6 +18,61 @@ public class LoggedCaseDto {
     private String dateReported;
     private Set<LoggedCaseActionDto> caseActions = new HashSet<>();
     private Set<LoggedCaseCommentDto> caseComments = new HashSet<>();
+    private String typeId;
+    private String type;
+    private String categoryId;
+    private String category;
+    private String machineSerialNumber;
+    private String machineId;
+
+
+    public String getMachineSerialNumber() {
+        return machineSerialNumber;
+    }
+
+    public void setMachineSerialNumber(String machineSerialNumber) {
+        this.machineSerialNumber = machineSerialNumber;
+    }
+
+    public String getMachineId() {
+        return machineId;
+    }
+
+    public void setMachineId(String machineId) {
+        this.machineId = machineId;
+    }
+
+    public String getTypeId() {
+        return typeId;
+    }
+
+    public void setTypeId(String typeId) {
+        this.typeId = typeId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(String categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
 
     public String getInstitutionId() {
         return institutionId;

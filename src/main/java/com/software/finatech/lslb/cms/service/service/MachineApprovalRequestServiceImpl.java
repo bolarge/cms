@@ -189,6 +189,8 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
                 approveUpgradeGamingMachineGames(approvalRequest);
             } else if (approvalRequest.isUpgradeGamingTerminalGames()) {
                 approveUpgradeGamingTerminalGames(approvalRequest, approvingUser);
+            } else if (approvalRequest.isAssignMultipleTerminalsToAgent()) {
+                approveAssignMultipleTerminalsToAgent(approvalRequest);
             } else {
                 return Mono.just(new ResponseEntity<>("Invalid Request supplied", HttpStatus.BAD_REQUEST));
             }
@@ -281,13 +283,27 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
     public Mono<ResponseEntity> approveMultipleRequest(ApprovalRequestOperationtDto approvalRequestOperationtDto, HttpServletRequest request) {
         try {
             for (String approvalRequestId : approvalRequestOperationtDto.getApprovalRequestIds()) {
-                ApprovalRequestOperationtDto operationtDto = new ApprovalRequestOperationtDto();
-                operationtDto.setApprovalRequestId(approvalRequestId);
-                approveRequest(operationtDto, request).block();
+                ApprovalRequestOperationtDto operationDto = new ApprovalRequestOperationtDto();
+                operationDto.setApprovalRequestId(approvalRequestId);
+                approveRequest(operationDto, request).block();
             }
             return Mono.just(new ResponseEntity<>("Approved Successfully", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving multiple request", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> rejectMultipleRequest(ApprovalRequestOperationtDto approvalRequestOperationtDto, HttpServletRequest request) {
+        try {
+            for (String approvalRequestId : approvalRequestOperationtDto.getApprovalRequestIds()) {
+                ApprovalRequestOperationtDto operationDto = new ApprovalRequestOperationtDto();
+                operationDto.setApprovalRequestId(approvalRequestId);
+                rejectRequest(operationDto, request).block();
+            }
+            return Mono.just(new ResponseEntity<>("Rejected Successfully", HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while rejecting multiple requests", e);
         }
     }
 
@@ -303,6 +319,13 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
         } else {
             throw new ApprovalRequestProcessException("The approving user should be either an lslb member or a gaming operator");
+        }
+    }
+
+    private void approveAssignMultipleTerminalsToAgent(MachineApprovalRequest approvalRequest) {
+        for (Machine machine : approvalRequest.getPendingMachines()) {
+            machine.setAgentId(approvalRequest.getAgentId());
+            mongoRepositoryReactive.saveOrUpdate(machine);
         }
     }
 

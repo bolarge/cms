@@ -39,4 +39,6 @@ public interface MachineApprovalRequestService {
 
 
     Mono<ResponseEntity> approveMultipleRequest(ApprovalRequestOperationtDto approvalRequestOperationtDto, HttpServletRequest request);
+
+    Mono<ResponseEntity> rejectMultipleRequest(ApprovalRequestOperationtDto approvalRequestOperationtDto, HttpServletRequest request);
 }
