@@ -40,5 +40,7 @@ public interface ScheduledMeetingService {
     Mono<ResponseEntity> getAllMeetingPurposes();
 
     ScheduledMeeting findScheduledMeetingByEntityId(String entityId);
+
+    ScheduledMeeting findCompletedMeetingForEntity(String entityId, String meetingPurposeId);
 }
 

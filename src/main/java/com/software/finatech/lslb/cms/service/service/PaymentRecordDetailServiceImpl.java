@@ -533,6 +533,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     private void updatePaymentRecord(PaymentRecord paymentRecord) {
         if (paymentRecord.getAmountOutstanding() <= 0) {
             paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
+            paymentRecord.setCompletionDate(LocalDateTime.now());
 
             if (paymentRecord.isInstitutionPayment() && !paymentRecord.isLicenseRenewalPayment()) {
                 licenseService.createAIPLicenseForCompletedPayment(paymentRecord);
@@ -702,7 +703,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             int pageSize = 1000;
 
             Mono<ResponseEntity> paymentRecordsResponse = paymentRecordService.findAllPaymentRecords(page,
-                    pageSize, sortDirection, sortProperty, institutionId, agentId, null, gameTypeId, feePaymentTypeId, revenueNameId, null, null);
+                    pageSize, sortDirection, sortProperty, institutionId, agentId, null, gameTypeId, feePaymentTypeId, revenueNameId, null, null,null, null,null);
 
             if (paymentRecordsResponse.block().getStatusCode() == HttpStatus.NOT_FOUND) {
                 return null;

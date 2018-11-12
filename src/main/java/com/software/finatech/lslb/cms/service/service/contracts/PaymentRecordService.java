@@ -20,6 +20,9 @@ public interface PaymentRecordService {
                                                String feePaymentTypeId,
                                                String revenueNameId,
                                                String paymentStatusId,
+                                               String startDate,
+                                               String endDate,
+                                               String dateProperty,
                                                HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getAllPaymentStatus();

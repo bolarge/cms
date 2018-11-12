@@ -1,6 +1,5 @@
 package com.software.finatech.lslb.cms.service.domain;
 
-import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.dto.MachineDto;
 import com.software.finatech.lslb.cms.service.dto.MachineMultiplePayment;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
@@ -9,6 +8,7 @@ import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReference
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -35,6 +35,24 @@ public class PaymentRecord extends AbstractFact {
     private String licenseTransferId;
     private MachineMultiplePayment machineMultiplePayment;
     private String licenseId;
+    private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime completionDate;
+
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public LocalDateTime getCompletionDate() {
+        return completionDate;
+    }
+
+    public void setCompletionDate(LocalDateTime completionDate) {
+        this.completionDate = completionDate;
+    }
 
     public String getLicenseId() {
         return licenseId;
@@ -334,6 +352,8 @@ public class PaymentRecord extends AbstractFact {
         }
         paymentRecordDto.setOwnerName(ownerName);
         paymentRecordDto.setPaymentReference(getPaymentReference());
+        paymentRecordDto.setCreationDate(getCreationDateString());
+        paymentRecordDto.setCompletionDate(getCompletionDateString());
         return paymentRecordDto;
     }
 
@@ -343,6 +363,22 @@ public class PaymentRecord extends AbstractFact {
         dto.setGamingTerminals(getGamingTerminalDtos());
         dto.setMachineMultiplePayment(getMachineMultiplePayment());
         return dto;
+    }
+
+    private String getCreationDateString() {
+        LocalDateTime localDateTime = getCreationDate();
+        if (localDateTime != null) {
+            return localDateTime.toString("dd-MM-yyyy HH:mm a");
+        }
+        return null;
+    }
+
+    private String getCompletionDateString() {
+        LocalDateTime localDateTime = getCompletionDate();
+        if (localDateTime != null) {
+            return localDateTime.toString("dd-MM-yyyy HH:mm a");
+        }
+        return null;
     }
 
     public License getLicense() {

@@ -17,7 +17,7 @@ public class LicenseTypeReferenceData {
             licenseType = new LicenseType();
             licenseType.setId(INSTITUTION_ID);
         }
-        licenseType.setName("OPERATOR");
+        licenseType.setName("GAMING OPERATOR");
         LicenseType licenseType1 = (LicenseType) mongoRepositoryReactive.findById(AGENT_ID, LicenseType.class).block();
         if (licenseType1 == null) {
             licenseType1 = new LicenseType();

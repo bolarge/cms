@@ -222,4 +222,26 @@ public class MachineController {
     public Mono<ResponseEntity> upgradeMachineGames(@RequestBody @Valid MachineGameUpgradeRequest machineGameUpgradeRequest, HttpServletRequest request) {
         return machineService.upgradeMachineGames(machineGameUpgradeRequest, request);
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/get-machines-by-agent-number", params = {"agentNumber"})
+    @ApiOperation(value = "Get Terminals By Agent Number", response = MachineDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getMachinesByAgentId(@RequestParam("agentNumber") String agentNumber) {
+        return machineService.getMachinesByAgentNumber(agentNumber);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/get-full-detail-by-serial-number", params = {"serialNumber"})
+    @ApiOperation(value = "Get Full Detail From Serial Number", response = MachineDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getMachineFullDetailBySerialNumber(@RequestParam("serialNumber") String serialNumber) {
+        return machineService.getMachineFullDetailBySerialNumber(serialNumber);
+    }
 }

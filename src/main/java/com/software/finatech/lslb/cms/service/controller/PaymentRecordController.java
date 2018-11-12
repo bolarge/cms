@@ -31,7 +31,7 @@ public class PaymentRecordController extends BaseController {
 
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "agentId",
-            "institutionId", "gamingMachineId", "gameTypeId", "feePaymentTypeId", "licenseTypeId", "paymentStatusId"})
+            "institutionId", "gamingMachineId", "gameTypeId", "feePaymentTypeId", "licenseTypeId", "paymentStatusId", "startDate", "endDate", "dateProperty"})
     @ApiOperation(value = "Get all payment records", response = PaymentRecordDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -49,10 +49,13 @@ public class PaymentRecordController extends BaseController {
                                                      @RequestParam("licenseTypeId") String revenueNameId,
                                                      @RequestParam("agentId") String agentId,
                                                      @RequestParam("paymentStatusId") String paymentStatusId,
+                                                     @RequestParam("startDate") String startDate,
+                                                     @RequestParam("endDate") String endDate,
+                                                     @RequestParam("dateProperty") String dateProperty,
                                                      HttpServletResponse httpServletResponse) {
         try {
-            return paymentRecordService.findAllPaymentRecords(page, pageSize, sortType, sortParam, institutionId,
-                    agentId, gamingMachineId, gameTypeId, feePaymentTypeId, revenueNameId, paymentStatusId, httpServletResponse);
+            return paymentRecordService.findAllPaymentRecords(page, pageSize, sortType, sortParam, institutionId, agentId, gamingMachineId, gameTypeId,
+                    feePaymentTypeId, revenueNameId, paymentStatusId,startDate, endDate, dateProperty, httpServletResponse);
         } catch (Exception ex) {
             return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
 

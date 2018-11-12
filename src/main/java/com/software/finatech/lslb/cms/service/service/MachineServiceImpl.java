@@ -736,6 +736,42 @@ public class MachineServiceImpl implements MachineService {
         }
     }
 
+    @Override
+    public Mono<ResponseEntity> getMachinesByAgentNumber(String agentNumber) {
+        try {
+            List<MachineDto> dtos = new ArrayList<>();
+            Agent agent = agentService.findAgentByAgentNumber(agentNumber);
+            if (agent == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Agent with number %s not found", agentNumber), HttpStatus.BAD_REQUEST));
+            }
+            Query query = new Query();
+            query.addCriteria(Criteria.where("agentId").is(agent.getId()));
+            ArrayList<Machine> machines = (ArrayList<Machine>) mongoRepositoryReactive.findAll(query, Machine.class).toStream().collect(Collectors.toList());
+            if (machines == null || machines.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
+            }
+            for (Machine machine : machines) {
+                dtos.add(machine.convertToFullDto());
+            }
+            return Mono.just(new ResponseEntity<>(dtos, HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while getting terminals  by agent id", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> getMachineFullDetailBySerialNumber(String serialNumber) {
+        try {
+            Machine machine = findBySerialNumber(serialNumber);
+            if (machine == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Machine with serial number %s not found", serialNumber), HttpStatus.NOT_FOUND));
+            }
+            return Mono.just(new ResponseEntity<>(machine.convertToFullDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while getting machine details by serial number", e);
+        }
+    }
+
     private List<EnumeratedFactDto> machineTypesFromIds(List<String> machineTypeIds) {
         List<EnumeratedFactDto> dtos = new ArrayList<>();
         for (String id : machineTypeIds) {
