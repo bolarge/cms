@@ -41,4 +41,6 @@ public interface AgentService {
     Mono<ResponseEntity> createUserForAgent(String agentId);
 
     Mono<ResponseEntity> getAllAgentStatus();
+
+    Agent findAgentByAgentNumber(String agentNumber);
 }

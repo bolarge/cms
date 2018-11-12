@@ -27,8 +27,8 @@ public class LoggedCaseController {
         this.loggedCaseService = loggedCaseService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize",
-            "sortType", "sortProperty", "institutionId", "agentId", "statusId", "reporterId", "startDate", "endDate"})
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "institutionId",
+            "agentId", "statusId", "reporterId", "startDate", "endDate", "categoryId", "typeId"})
     @ApiOperation(value = "Get all logged cases", response = LoggedCaseDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),

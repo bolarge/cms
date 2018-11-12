@@ -6,10 +6,8 @@ import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTransferStatusReferenceData;
-import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
-import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
-import com.software.finatech.lslb.cms.service.service.contracts.LicenseTransferService;
-import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
+import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingPurposeReferenceData;
+import com.software.finatech.lslb.cms.service.service.contracts.*;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.LicenseTransferMailSenderAsync;
@@ -50,6 +48,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private LicenseTransferMailSenderAsync licenseTransferMailSenderAsync;
     private PaymentRecordService paymentRecordService;
+    private ScheduledMeetingService scheduledMeetingService;
 
     @Autowired
     public LicenseTransferServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
@@ -58,7 +57,8 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
                                       AuditLogHelper auditLogHelper,
                                       SpringSecurityAuditorAware springSecurityAuditorAware,
                                       LicenseTransferMailSenderAsync licenseTransferMailSenderAsync,
-                                      PaymentRecordService paymentRecordService) {
+                                      PaymentRecordService paymentRecordService,
+                                      ScheduledMeetingService scheduledMeetingService) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.licenseService = licenseService;
         this.institutionService = institutionService;
@@ -66,6 +66,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.licenseTransferMailSenderAsync = licenseTransferMailSenderAsync;
         this.paymentRecordService = paymentRecordService;
+        this.scheduledMeetingService = scheduledMeetingService;
     }
 
     @Override
@@ -139,7 +140,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             String gameTypeId = license.getGameTypeId();
             Mono<ResponseEntity> validateResponse = validateLicenseTransfer(institutionId, license);
             if (validateResponse != null) {
-             //   return validateResponse;
+                //   return validateResponse;
             }
 
             LicenseTransfer licenseTransfer = new LicenseTransfer();
@@ -214,11 +215,19 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             }
             LicenseTransferStatus oldStatus = licenseTransfer.getLicenseTransferStatus();
             if (licenseTransfer.isPendingInitialApproval()) {
+                ScheduledMeeting scheduledMeeting = scheduledMeetingService.findCompletedMeetingForEntity(licenseTransferId, ScheduledMeetingPurposeReferenceData.TRANSFEROR_ID);
+                if (scheduledMeeting == null) {
+                    return Mono.just(new ResponseEntity<>("There is no completed exit meeting scheduled for Transferor", HttpStatus.BAD_REQUEST));
+                }
                 licenseTransferMailSenderAsync.sendInitialLicenseTransferApprovalMailToTransferorAdmins(licenseTransfer);
                 licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.PENDING_NEW_INSTITUTION_ADDITION_ID);
             } else if (licenseTransfer.isPendingAddInstitutionApproval()) {
                 licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.PENDING_FINAL_APPROVAL_ID);
             } else if (licenseTransfer.isPendingFinalApproval()) {
+                ScheduledMeeting scheduledMeeting = scheduledMeetingService.findCompletedMeetingForEntity(licenseTransferId, ScheduledMeetingPurposeReferenceData.TRANSFEREE_ID);
+                if (scheduledMeeting == null) {
+                    return Mono.just(new ResponseEntity<>("There is no completed presentation scheduled for Transferee", HttpStatus.BAD_REQUEST));
+                }
                 licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.APPROVED_ID);
                 licenseTransferMailSenderAsync.sendLicenseTransferApprovalMailToTransferorAndTransferee(licenseTransfer);
             } else {
@@ -325,12 +334,12 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             }
             ArrayList<LicenseTransferDto> dtos = new ArrayList<>();
             for (LicenseTransfer licenseTransfer : licenseTransfers) {
-              //  if (StringUtils.isEmpty(licenseTransfer.getPaymentRecordId())) {
+                if (StringUtils.isEmpty(licenseTransfer.getPaymentRecordId())) {
                     LicenseTransferDto dto = new LicenseTransferDto();
                     dto.setId(licenseTransfer.getId());
                     dto.setFromInstitutionName(String.valueOf(licenseTransfer.getFromInstitution()));
                     dtos.add(dto);
-            //    }
+                }
             }
             if (dtos.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
@@ -339,13 +348,6 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while getting license transfer for institution", e);
         }
-    }
-
-    public LicenseTransfer findLicenseTransferByInstitutionAndGameType(String institutionId, String gameTypeId) {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("institutionId").is(institutionId));
-        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-        return (LicenseTransfer) mongoRepositoryReactive.find(query, LicenseTransfer.class).block();
     }
 
     private Mono<ResponseEntity> validateLicenseTransfer(String institutionId, License license) {

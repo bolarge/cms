@@ -52,4 +52,8 @@ public interface MachineService {
     Mono<ResponseEntity> getMachineTypesByGameType(String gameTypeId);
 
     Mono<ResponseEntity> assignMultipleMachinesToAgent(MachineAgentAddDto dto, HttpServletRequest request);
+
+    Mono<ResponseEntity> getMachinesByAgentNumber(String agentNumber);
+
+    Mono<ResponseEntity> getMachineFullDetailBySerialNumber(String serialNumber);
 }

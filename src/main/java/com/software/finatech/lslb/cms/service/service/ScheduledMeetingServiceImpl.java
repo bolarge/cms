@@ -380,6 +380,15 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
         return (ScheduledMeeting) mongoRepositoryReactive.find(Query.query(Criteria.where("entityId").is(entityId)), ScheduledMeeting.class).block();
     }
 
+    @Override
+    public ScheduledMeeting findCompletedMeetingForEntity(String entityId, String meetingPurposeId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("entityId").is(entityId));
+        query.addCriteria(Criteria.where("scheduledMeetingStatusId").is(ScheduledMeetingStatusReferenceData.COMPLETED_STATUS_ID));
+        query.addCriteria(Criteria.where("meetingPurposeId").is(meetingPurposeId));
+        return (ScheduledMeeting) mongoRepositoryReactive.find(query, ScheduledMeeting.class).block();
+    }
+
     private ScheduledMeeting fromCreateDto(ScheduledMeetingCreateDto scheduledMeetingCreateDto) {
         ScheduledMeeting scheduledMeeting = new ScheduledMeeting();
         scheduledMeeting.setInstitutionId(scheduledMeetingCreateDto.getInstitutionId());
