@@ -27,8 +27,8 @@ public class CustomerComplainController {
         this.customerComplainService = customerComplainService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize",
-            "sortType", "sortProperty", "customerEmail", "customerPhone", "statusId", "startDate", "endDate"})
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "customerEmail",
+            "customerPhone", "statusId", "startDate", "endDate", "categoryId", "typeId"})
     @ApiOperation(value = "Get all customer complains", response = CustomerComplainDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),

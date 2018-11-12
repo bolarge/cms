@@ -29,7 +29,25 @@ public class PaymentRecordDto {
     private List<MachineDto> gamingTerminals = new ArrayList<>();
     private String paymentReference;
     private MachineMultiplePayment machineMultiplePayment;
+    private String creationDate;
+    private String completionDate;
 
+
+    public String getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(String creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public String getCompletionDate() {
+        return completionDate;
+    }
+
+    public void setCompletionDate(String completionDate) {
+        this.completionDate = completionDate;
+    }
 
     public MachineMultiplePayment getMachineMultiplePayment() {
         return machineMultiplePayment;

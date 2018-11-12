@@ -421,6 +421,11 @@ public class AgentServiceImpl implements AgentService {
         return getAllEnumeratedEntity("AgentStatus");
     }
 
+    @Override
+    public Agent findAgentByAgentNumber(String agentNumber) {
+        return (Agent) mongoRepositoryReactive.find(Query.query(Criteria.where("agentId").is(agentNumber)), Agent.class).block();
+    }
+
     private PendingAgent findPendingApprovalAgentWithEmail(String email) {
         Query query = new Query();
         query.addCriteria(Criteria.where("emailAddress").is(email));
