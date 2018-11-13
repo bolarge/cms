@@ -70,6 +70,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
                                                    String endDate,
                                                    String categoryId,
                                                    String typeId,
+                                                   String gameTypeId,
                                                    HttpServletResponse httpServletResponse) {
         try {
 
@@ -91,6 +92,9 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             }
             if (!StringUtils.isEmpty(typeId)) {
                 query.addCriteria(Criteria.where("caseAndComplainTypeId").is(typeId));
+            }
+            if (!StringUtils.isEmpty(gameTypeId)) {
+                query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             }
             if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
                 LocalDate fromDate = new LocalDate(startDate);
@@ -147,7 +151,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             LoggedCase loggedCase = fromLoggedCaseCreateDto(loggedCaseCreateDto);
             mongoRepositoryReactive.saveOrUpdate(loggedCase);
             String verbiage = String.format("Created logged case ,Ticket id : -> %s, Type -> %s, Category -> %s , Logged Against -> %s",
-                    loggedCase.getTicketId(),loggedCase.getCaseAndComplainType(), loggedCase.getCaseAndComplainCategory(), loggedCase.getLicenseType());
+                    loggedCase.getTicketId(), loggedCase.getCaseAndComplainType(), loggedCase.getCaseAndComplainCategory(), loggedCase.getLicenseType());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(loggedCaseAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), loggedCase.getReportedEntityName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
@@ -287,6 +291,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
         newCase.setCaseSubject(caseCreateDto.getCaseSubject());
         newCase.setLoggedCaseStatusId(LoggedCaseStatusReferenceData.OPEN_ID);
         newCase.setTicketId(generateTicketId());
+        newCase.setGameTypeId(caseCreateDto.getGameTypeId());
         newCase.setDateTimeReported(LocalDateTime.now());
         newCase.setLicenseTypeId(caseCreateDto.getLicenseTypeId());
         newCase.setCaseAndComplainCategoryId(caseCreateDto.getCaseAndComplainCategoryId());

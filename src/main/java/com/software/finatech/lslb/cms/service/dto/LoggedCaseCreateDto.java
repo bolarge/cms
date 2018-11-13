@@ -21,6 +21,15 @@ public class LoggedCaseCreateDto {
     private String gamingMachineId;
     private String otherCategoryName;
     private String otherTypeName;
+    private String gameTypeId;
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
 
     public String getOtherCategoryName() {
         return otherCategoryName;
