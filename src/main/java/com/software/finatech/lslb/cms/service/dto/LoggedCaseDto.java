@@ -26,6 +26,25 @@ public class LoggedCaseDto {
     private String machineId;
     private String otherCategoryName;
     private String otherTypeName;
+    private String licenseTypeId;
+    private String licenseType;
+
+
+    public String getLicenseType() {
+        return licenseType;
+    }
+
+    public void setLicenseType(String licenseType) {
+        this.licenseType = licenseType;
+    }
+
+    public String getLicenseTypeId() {
+        return licenseTypeId;
+    }
+
+    public void setLicenseTypeId(String licenseTypeId) {
+        this.licenseTypeId = licenseTypeId;
+    }
 
     public String getOtherCategoryName() {
         return otherCategoryName;
