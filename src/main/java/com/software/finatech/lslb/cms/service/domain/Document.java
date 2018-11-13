@@ -1,9 +1,8 @@
 package com.software.finatech.lslb.cms.service.domain;
 
-import com.software.finatech.lslb.cms.service.dto.CommentDto;
+import com.software.finatech.lslb.cms.service.dto.CommentDetail;
 import com.software.finatech.lslb.cms.service.dto.DocumentDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
-import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.Binary;
@@ -45,14 +44,14 @@ public class Document extends AbstractFact {
     protected Boolean notificationSent = false;
     protected String approvalRequestStatusId;
     protected LocalDate nextReminderDate;
-    protected List<CommentDto> comments = new ArrayList<>();
+    protected List<CommentDetail> comments = new ArrayList<>();
 
 
-    public List<CommentDto> getComments() {
+    public List<CommentDetail> getComments() {
         return comments;
     }
 
-    public void setComments(List<CommentDto> comments) {
+    public void setComments(List<CommentDetail> comments) {
         this.comments = comments;
     }
 
@@ -321,7 +320,7 @@ public class Document extends AbstractFact {
         dto.setValidTo(getValidTo() == null ? null : getValidTo().toString("dd-MM-yyyy"));
         dto.setOwner(getOwner());
         dto.setGameTypeId(getGameTypeId());
-        List<CommentDto> commentDtos = getComments();
+        List<CommentDetail> commentDtos = getComments();
         Collections.reverse(commentDtos);
         dto.setComments(commentDtos);
         ApprovalRequestStatus status = getApprovalRequestStatus();

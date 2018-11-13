@@ -2,7 +2,7 @@ package com.software.finatech.lslb.cms.service.domain;
 
 
 import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
-import com.software.finatech.lslb.cms.service.dto.CommentDto;
+import com.software.finatech.lslb.cms.service.dto.CommentDetail;
 import com.software.finatech.lslb.cms.service.dto.ScheduledMeetingDto;
 import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingPurposeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingStatusReferenceData;
@@ -32,7 +32,7 @@ public class ScheduledMeeting extends AbstractFact {
     private int reminderNotificationCount = 0;
     private boolean reminderSent;
     private String meetingPurposeId;
-    private List<CommentDto> comments = new ArrayList<>();
+    private List<CommentDetail> comments = new ArrayList<>();
 
     public String getMeetingPurposeId() {
         return meetingPurposeId;
@@ -46,11 +46,11 @@ public class ScheduledMeeting extends AbstractFact {
         return recipientIds;
     }
 
-    public List<CommentDto> getComments() {
+    public List<CommentDetail> getComments() {
         return comments;
     }
 
-    public void setComments(List<CommentDto> comments) {
+    public void setComments(List<CommentDetail> comments) {
         this.comments = comments;
     }
 
@@ -257,7 +257,7 @@ public class ScheduledMeeting extends AbstractFact {
     public ScheduledMeetingDto convertToFullDto() {
         ScheduledMeetingDto dto = convertToDto();
         dto.setRecipients(getRecipientDto());
-        List<CommentDto> comments = getComments();
+        List<CommentDetail> comments = getComments();
         Collections.reverse(comments);
         dto.setComment(comments);
         return dto;

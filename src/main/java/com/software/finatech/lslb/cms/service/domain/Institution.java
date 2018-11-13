@@ -5,12 +5,11 @@ import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.joda.time.LocalDate;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("serial")
 @Document(collection = "Institutions")
@@ -22,11 +21,18 @@ public class Institution extends AbstractFact {
     protected Boolean active;
     private String address;
     protected String phoneNumber;
-    protected String licenseId;
-    protected Boolean status;
     protected String vgPayCustomerCode;
     protected String website;
     private String tradeName;
+    private List<InstitutionCategoryDetails> institutionCategoryDetailsList = new ArrayList<>();
+
+    public List<InstitutionCategoryDetails> getInstitutionCategoryDetailsList() {
+        return institutionCategoryDetailsList;
+    }
+
+    public void setInstitutionCategoryDetailsList(List<InstitutionCategoryDetails> institutionCategoryDetailsList) {
+        this.institutionCategoryDetailsList = institutionCategoryDetailsList;
+    }
 
     public String getTradeName() {
         return tradeName;
@@ -81,14 +87,6 @@ public class Institution extends AbstractFact {
         this.gameTypes = gameTypes;
     }
 
-    public Boolean getStatus() {
-        return status;
-    }
-
-    public void setStatus(Boolean status) {
-        this.status = status;
-    }
-
     public String getInstitutionName() {
         return institutionName;
     }
@@ -129,14 +127,6 @@ public class Institution extends AbstractFact {
         this.phoneNumber = phoneNumber;
     }
 
-    public String getLicenseId() {
-        return licenseId;
-    }
-
-    public void setLicenseId(String licenseId) {
-        this.licenseId = licenseId;
-    }
-
     @Override
     public String getFactName() {
         return "Institution";
@@ -153,9 +143,8 @@ public class Institution extends AbstractFact {
         institutionDto.setTenantId(getTenantId());
         institutionDto.setInstitutionName(getInstitutionName());
         institutionDto.setDescription(getDescription());
-        institutionDto.setLicenseId(getLicenseId());
-        institutionDto.setStatus(getStatus());
-        institutionDto.setTradeName(getTradeName());
+        institutionDto.setActive(getActive());
+        institutionDto.setInstitutionCategoryDetails(getInstitutionCategoryDetailsList());
         try {
             setAssociatedProperties();
             Set<GameTypeDto> gameTypeDtoList = new HashSet<>();

@@ -318,9 +318,9 @@ public class InstitutionServiceImpl implements InstitutionService {
                                 failedLines.add(FailedLine.fromLineAndReason(rows[i], "The Category specified does not exist"));
                                 continue;
                             }
-                            institutionUpload.setGameTypeId(gameTypeId);
-                            institutionUpload.setLicenseStartDate(new LocalDate(columns[6]));
-                            institutionUpload.setLicenseEndDate(new LocalDate(columns[7]));
+//                            institutionUpload.setGameTypeId(gameTypeId);
+//                            institutionUpload.setLicenseStartDate(new LocalDate(columns[6]));
+//                            institutionUpload.setLicenseEndDate(new LocalDate(columns[7]));
                             institutionUploadList.add(institutionUpload);
                         } catch (IllegalArgumentException e) {
                             failedLines.add(FailedLine.fromLineAndReason(rows[i], "Invalid date format in one of the date fields please use YYYY-MM-dd"));
@@ -415,7 +415,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         institution.setInstitutionName(institutionUpload.getInstitutionName());
         institution.setAddress(institutionUpload.getAddress());
         institution.setEmailAddress(institutionUpload.getEmailAddress());
-        institution.getGameTypeIds().add(institutionUpload.getGameTypeId());
+    //    institution.getGameTypeIds().add(institutionUpload.getGameTypeId());
         institution.setDescription(institutionUpload.getDescription());
         institution.setPhoneNumber(institutionUpload.getPhoneNumber());
         institution.setId(UUID.randomUUID().toString());
@@ -426,11 +426,11 @@ public class InstitutionServiceImpl implements InstitutionService {
         License license = new License();
         license.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
         license.setInstitutionId(institution.getId());
-        license.setEffectiveDate(institutionUpload.getLicenseStartDate());
-        license.setExpiryDate(institutionUpload.getLicenseEndDate());
+//        license.setEffectiveDate(institutionUpload.getLicenseStartDate());
+//        license.setExpiryDate(institutionUpload.getLicenseEndDate());
         license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
         license.setLicenseNumber(generateLicenseNumberForInstitutionUpload(institutionUpload));
-        license.setGameTypeId(institutionUpload.getGameTypeId());
+       // license.setGameTypeId(institutionUpload.getGameTypeId());
         license.setId(UUID.randomUUID().toString());
         return license;
     }
@@ -439,18 +439,16 @@ public class InstitutionServiceImpl implements InstitutionService {
         String prefix = "LSLB-";
         prefix = prefix + "OP-";
         String randomDigit = String.valueOf(NumberUtil.getRandomNumberInRange(10, 1000));
-        GameType gameType = gameTypeService.findById(institutionUpload.getGameTypeId());
-        if (gameType != null && !StringUtils.isEmpty(gameType.getShortCode())) {
-            prefix = prefix + gameType.getShortCode() + "-";
-        }
+//        GameType gameType = gameTypeService.findById(institutionUpload.getGameTypeId());
+//        if (gameType != null && !StringUtils.isEmpty(gameType.getShortCode())) {
+//            prefix = prefix + gameType.getShortCode() + "-";
+//        }
         return String.format("%s%s%s", prefix, randomDigit, LocalDateTime.now().getSecondOfMinute());
     }
 
 
 
     private void loadInstitution(MultipartFile multipartFile){
-
-
     }
 
     private Institution fromCreateInstitutionDto(InstitutionCreateDto institutionCreateDto) {

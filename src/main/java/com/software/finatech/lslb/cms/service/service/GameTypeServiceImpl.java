@@ -2,12 +2,14 @@ package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.Agent;
+import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.domain.GameType;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.dto.GameTypeCreateDto;
 import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
@@ -33,7 +35,7 @@ import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logA
 @Service
 public class GameTypeServiceImpl implements GameTypeService {
     private static final Logger logger = LoggerFactory.getLogger(GameTypeServiceImpl.class);
-    private static  final String configurationsAuditActionId = AuditActionReferenceData.CONFIGURATIONS_ID;
+    private static final String configurationsAuditActionId = AuditActionReferenceData.CONFIGURATIONS_ID;
 
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
@@ -72,6 +74,22 @@ public class GameTypeServiceImpl implements GameTypeService {
             }
         }
         return gameType;
+    }
+
+    @Override
+    public GameType findGameTypeBySearchKey(String searchKey) {
+        if (StringUtils.equalsIgnoreCase("Scartch Card", searchKey)) {
+            searchKey = "Scratch Card";
+        }
+        Collection<FactObject> gameTypes = ReferenceDataUtil.getAllEnumeratedFacts("GameType");
+        for (FactObject factObject : gameTypes) {
+            GameType gameType = (GameType) factObject;
+            if (StringUtils.equalsIgnoreCase(searchKey, gameType.getName())
+                    || StringUtils.equalsIgnoreCase(searchKey, gameType.getShortCode())) {
+                return gameType;
+            }
+        }
+        return null;
     }
 
     @Override

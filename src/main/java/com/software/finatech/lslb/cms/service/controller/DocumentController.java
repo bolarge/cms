@@ -660,7 +660,7 @@ public class DocumentController extends BaseController {
             if (loggedInUser == null) {
                 return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
             }
-            document.getComments().add(CommentDto.fromCommentAndUser(documentCommentDto.getComment(), loggedInUser.getFullName()));
+            document.getComments().add(CommentDetail.fromCommentAndUser(documentCommentDto.getComment(), loggedInUser.getFullName()));
             mongoRepositoryReactive.saveOrUpdate(document);
             return Mono.just(new ResponseEntity<>(document.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -693,7 +693,7 @@ public class DocumentController extends BaseController {
                 return Mono.just(new ResponseEntity<>("Approving user should be document type approver", HttpStatus.BAD_REQUEST));
             }
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
-            document.getComments().add(CommentDto.fromCommentAndUser(documentOperationDto.getComment(), loggedInUser.getFullName()));
+            document.getComments().add(CommentDetail.fromCommentAndUser(documentOperationDto.getComment(), loggedInUser.getFullName()));
             mongoRepositoryReactive.saveOrUpdate(document);
 
             if (StringUtils.equalsIgnoreCase("applicationForm", entityName)) {
@@ -741,7 +741,7 @@ public class DocumentController extends BaseController {
                 return Mono.just(new ResponseEntity<>("Rejecting user should be document type approver", HttpStatus.BAD_REQUEST));
             }
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
-            document.getComments().add(CommentDto.fromCommentAndUser(documentOperationDto.getComment(), loggedInUser.getFullName()));
+            document.getComments().add(CommentDetail.fromCommentAndUser(documentOperationDto.getComment(), loggedInUser.getFullName()));
             mongoRepositoryReactive.saveOrUpdate(document);
 
             if (StringUtils.equalsIgnoreCase("applicationForm", entityName)) {

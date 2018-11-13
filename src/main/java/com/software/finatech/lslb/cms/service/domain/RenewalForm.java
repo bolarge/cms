@@ -1,6 +1,6 @@
 package com.software.finatech.lslb.cms.service.domain;
 
-import com.software.finatech.lslb.cms.service.dto.CommentDto;
+import com.software.finatech.lslb.cms.service.dto.CommentDetail;
 import com.software.finatech.lslb.cms.service.dto.RenewalFormDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
@@ -328,7 +328,7 @@ public class RenewalForm extends AbstractFact {
         renewalFormDto.setTechnicalPartner(getTechnicalPartner());
         renewalFormDto.setLicenseId(getLicensedId());
         renewalFormDto.setRejectionReason(getReasonForRejection());
-        List<CommentDto> comments = getComments();
+        List<CommentDetail> comments = getComments();
         Collections.reverse(comments);
         renewalFormDto.setComments(comments);
         Query query=new Query();
@@ -372,10 +372,10 @@ public class RenewalForm extends AbstractFact {
         return renewalFormDto;
 
     }
-    private List<CommentDto> getComments() {
-        List<CommentDto> comments = new ArrayList<>();
+    private List<CommentDetail> getComments() {
+        List<CommentDetail> comments = new ArrayList<>();
         for (FormComment comment : this.formComments) {
-            CommentDto dto = new CommentDto();
+            CommentDetail dto = new CommentDetail();
             dto.setComment(comment.getComment());
             dto.setUserFullName(comment.getUserFullName());
             dto.setCommentDate(comment.getTimeCreated().toString("dd-MM-yyyy"));
