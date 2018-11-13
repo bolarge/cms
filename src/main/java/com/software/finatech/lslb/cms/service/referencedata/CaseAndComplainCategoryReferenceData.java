@@ -5,7 +5,7 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 
 public class CaseAndComplainCategoryReferenceData {
 
-    private static final String OTHERS_ID = "7";
+    public static final String OTHERS_ID = "7";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         loadForIdAndName("1", mongoRepositoryReactive, "Player – Operator");

@@ -137,9 +137,17 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             if (!canUpdateCase(user)) {
                 return Mono.just(new ResponseEntity<>("User  cannot create logged case, please check user role and user status", HttpStatus.BAD_REQUEST));
             }
+            if ((!StringUtils.equals(CaseAndComplainTypeReferenceData.OTHERS_ID, loggedCaseCreateDto.getCaseAndComplainTypeId())
+                    && !StringUtils.isEmpty(loggedCaseCreateDto.getOtherTypeName()))
+                    ||
+                    (!StringUtils.equals(CaseAndComplainCategoryReferenceData.OTHERS_ID, loggedCaseCreateDto.getCaseAndComplainCategoryId())
+                            && !StringUtils.isEmpty(loggedCaseCreateDto.getOtherCategoryName()))) {
+                return Mono.just(new ResponseEntity<>("Invalid Request", HttpStatus.BAD_REQUEST));
+            }
             LoggedCase loggedCase = fromLoggedCaseCreateDto(loggedCaseCreateDto);
             mongoRepositoryReactive.saveOrUpdate(loggedCase);
-            String verbiage = String.format("Created logged case ,Ticket id : -> %s ", loggedCase.getTicketId());
+            String verbiage = String.format("Created logged case ,Ticket id : -> %s, Type -> %s, Category -> %s , Logged Against -> %s",
+                    loggedCase.getTicketId(),loggedCase.getCaseAndComplainType(), loggedCase.getCaseAndComplainCategory(), loggedCase.getLicenseType());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(loggedCaseAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), loggedCase.getReportedEntityName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
