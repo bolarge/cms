@@ -34,6 +34,15 @@ public class LoggedCase extends AbstractFact {
     private String gamingTerminalId;
     private String otherCategoryName;
     private String otherTypeName;
+    private String gameTypeId;
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
 
     public String getOtherCategoryName() {
         return otherCategoryName;
@@ -250,6 +259,11 @@ public class LoggedCase extends AbstractFact {
             dto.setLicenseType(licenseType.toString());
             dto.setLicenseTypeId(this.licenseTypeId);
         }
+        GameType gameType = getGameType();
+        if (gameType != null){
+            dto.setGameTypeId(this.gameTypeId);
+            dto.setGameTypeName(gameType.toString());
+        }
         return dto;
     }
 
@@ -424,9 +438,25 @@ public class LoggedCase extends AbstractFact {
         return StringUtils.equals(LicenseTypeReferenceData.GAMING_TERMINAL_ID, this.licenseTypeId);
     }
 
+    public GameType getGameType() {
+        if (StringUtils.isEmpty(this.gameTypeId)) {
+            return null;
+        }
+        Map gameTypeMap = Mapstore.STORE.get("GameType");
+        GameType gameType = null;
+        if (gameTypeMap != null) {
+            gameType = (GameType) gameTypeMap.get(gameTypeId);
+        }
+        if (gameType == null) {
+            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
+            if (gameType != null && gameTypeMap != null) {
+                gameTypeMap.put(gameTypeId, gameType);
+            }
+        }
+        return gameType;
+    }
 
     public Machine getMachine() {
-        Machine machine = null;
         String machineId = null;
         if (isLoggedAgainstGamingMachine()) {
             machineId = this.gamingMachineId;
