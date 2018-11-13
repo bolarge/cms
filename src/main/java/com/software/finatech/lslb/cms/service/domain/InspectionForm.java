@@ -7,6 +7,7 @@ import org.joda.time.LocalDate;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 @SuppressWarnings("serial")
@@ -14,8 +15,8 @@ import java.util.Map;
 public class InspectionForm extends AbstractFact {
     protected String institutionId;
     protected String gameTypeId;
-    protected String comment;
-
+    protected ArrayList<String> comments;
+    protected String agentBusinessAddress;
     protected String userId;
     protected LocalDate inspectionDate;
     protected String agentId;
@@ -28,6 +29,21 @@ public class InspectionForm extends AbstractFact {
     @Transient
     protected String reporter;
 
+    public String getAgentBusinessAddress() {
+        return agentBusinessAddress;
+    }
+
+    public void setAgentBusinessAddress(String agentBusinessAddress) {
+        this.agentBusinessAddress = agentBusinessAddress;
+    }
+
+    public ArrayList<String> getComments() {
+        return comments;
+    }
+
+    public void setComments(ArrayList<String> comments) {
+        this.comments = comments;
+    }
 
     public String getUserId() {
         return userId;
@@ -93,13 +109,6 @@ public class InspectionForm extends AbstractFact {
         this.gameTypeId = gameTypeId;
     }
 
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
 
 
     public LocalDate getInspectionDate() {
@@ -112,9 +121,10 @@ public class InspectionForm extends AbstractFact {
 
     public InspectionFormDto convertToDto(){
         InspectionFormDto inspectionFormDto = new InspectionFormDto();
-        inspectionFormDto.setComment(getComment());
+        inspectionFormDto.setComments(getComments());
         inspectionFormDto.setSubject(getSubject());
         inspectionFormDto.setOwnerName(getOwnerName());
+        inspectionFormDto.setAgentBusinessAddress(getAgentBusinessAddress()==null?null:getAgentBusinessAddress());
         Agent agent =(Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
         if(agent!=null){
             inspectionFormDto.setAgent(agent.convertToDto());

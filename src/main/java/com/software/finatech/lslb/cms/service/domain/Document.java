@@ -44,6 +44,7 @@ public class Document extends AbstractFact {
     protected String agentId;
     protected Boolean notificationSent = false;
     protected String approvalRequestStatusId;
+    protected LocalDate nextReminderDate;
     protected List<CommentDto> comments = new ArrayList<>();
 
 
@@ -53,6 +54,14 @@ public class Document extends AbstractFact {
 
     public void setComments(List<CommentDto> comments) {
         this.comments = comments;
+    }
+
+    public LocalDate getNextReminderDate() {
+        return nextReminderDate;
+    }
+
+    public void setNextReminderDate(LocalDate nextReminderDate) {
+        this.nextReminderDate = nextReminderDate;
     }
 
     public String getRenewalFormId() {

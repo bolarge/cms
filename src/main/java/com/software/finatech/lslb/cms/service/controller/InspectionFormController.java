@@ -1,7 +1,9 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
+import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.domain.InspectionForm;
+import com.software.finatech.lslb.cms.service.dto.InspectionCommentCreateDto;
 import com.software.finatech.lslb.cms.service.dto.InspectionFormCreateDto;
 import com.software.finatech.lslb.cms.service.dto.InspectionFormDto;
 import io.swagger.annotations.Api;
@@ -125,16 +127,70 @@ public class InspectionFormController extends BaseController {
             InspectionForm inspectionForm = new InspectionForm();
             inspectionForm.setId(UUID.randomUUID().toString());
             inspectionForm.setAgentId(inspectionFormCreateDto.getAgentId());
-            inspectionForm.setComment(inspectionFormCreateDto.getComment());
+            ArrayList<String>comments= new ArrayList<>();
+            comments.add(inspectionFormCreateDto.getComment());
+            inspectionForm.setComments(comments);
             inspectionForm.setGameTypeId(inspectionFormCreateDto.getGameTypeId());
             inspectionForm.setGamingMachineId(inspectionFormCreateDto.getGamingMachineId());
             inspectionForm.setSubject(inspectionFormCreateDto.getSubject());
             inspectionForm.setInspectionDate(fromDate);
+            inspectionForm.setAgentBusinessAddress(inspectionFormCreateDto.getAgentBusinessAddress());
             //inspectionForm.setUserRoleId(inspectionFormCreateDto.getUserRoleId());
             inspectionForm.setInstitutionId(inspectionFormCreateDto.getInstitutionId());
             mongoRepositoryReactive.saveOrUpdate(inspectionForm);
 
             return Mono.just(new ResponseEntity<>(inspectionForm.convertToDto(), HttpStatus.OK));
+        }catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Error! Please Contact Admin", HttpStatus.BAD_REQUEST));
+
+        }
+
+    }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/add-comment")
+    @ApiOperation(value = "Add comment to Inspection Form", response = InspectionForm.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")
+    }
+    )
+    public Mono<ResponseEntity> createComment(@RequestBody @Valid InspectionCommentCreateDto inspectionCommentCreateDto) {
+
+        try {
+
+            InspectionForm inspectionForm =(InspectionForm)mongoRepositoryReactive.findById(inspectionCommentCreateDto.getInspectionFormId(),InspectionForm.class).block();
+            inspectionForm.getComments().add(inspectionCommentCreateDto.getComment());
+            mongoRepositoryReactive.saveOrUpdate(inspectionForm);
+
+            return Mono.just(new ResponseEntity<>(inspectionForm.convertToDto(), HttpStatus.OK));
+        }catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Error! Please Contact Admin", HttpStatus.BAD_REQUEST));
+
+        }
+
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/agent-addresses", params = {"agentId"})
+    @ApiOperation(value = "Get Agent Addresses", response = ArrayList.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")
+    }
+    )
+    public Mono<ResponseEntity> getAgentAddresses(@RequestParam("agentId") String agentId) {
+
+        try {
+            Agent agent =(Agent) mongoRepositoryReactive.findById(agentId,Agent.class).block();
+            if(agent==null){
+                return Mono.just(new ResponseEntity<>("Invalid Agent", HttpStatus.BAD_REQUEST));
+
+            }
+            return Mono.just(new ResponseEntity<>( agent.getBusinessAddresses(), HttpStatus.OK));
         }catch (Exception ex){
             return Mono.just(new ResponseEntity<>("Error! Please Contact Admin", HttpStatus.BAD_REQUEST));
 

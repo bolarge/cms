@@ -3,10 +3,7 @@ package com.software.finatech.lslb.cms.service.background_jobs;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.NotificationDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.PaymentRecordServiceImpl;
@@ -371,6 +368,34 @@ public class Scheduler {
 
 
         });
+
+    }
+    @Scheduled(cron = "0 0 6 * * *")
+    public void sendReminderEmail(){
+        Query queryDoc= new Query();
+        queryDoc.addCriteria(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID));
+        List<Document>documents = (List<Document>) mongoRepositoryReactive.findAll(queryDoc, Document.class).toStream().collect(Collectors.toList());
+        for (Document document: documents) {
+            boolean sentEmail=false;
+            if(document.getNextReminderDate()==null){
+                sentEmail=true;
+            }else{
+                if(document.getNextReminderDate()==LocalDate.now()) {
+                    sentEmail=true;
+                }
+            }
+            if(sentEmail==true) {
+                AuthInfo approverAuthInfo = document.getDocumentType().getApprover();
+                NotificationDto notificationDto = new NotificationDto();
+                notificationDto.setDescription("You have " + document.getDocumentType().getName() + " documents pending your approval ");
+                notificationDto.setLslbApprovalEmailAddress(approverAuthInfo.getEmailAddress());
+                sendEmail.sendPendingDocumentEmailNotification(notificationDto, "Pending Document Approval");
+              document.setNextReminderDate(LocalDate.now().plusDays(3));
+              mongoRepositoryReactive.saveOrUpdate(document);
+            }
+
+        }
+
 
     }
 }

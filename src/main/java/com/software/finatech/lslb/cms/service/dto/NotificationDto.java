@@ -16,6 +16,15 @@ public class NotificationDto {
     protected String description;
     protected String template;
     protected String callBackUrl;
+    protected String lslbApprovalEmailAddress;
+
+    public String getLslbApprovalEmailAddress() {
+        return lslbApprovalEmailAddress;
+    }
+
+    public void setLslbApprovalEmailAddress(String lslbApprovalEmailAddress) {
+        this.lslbApprovalEmailAddress = lslbApprovalEmailAddress;
+    }
 
     public String getCallBackUrl() {
         return callBackUrl;

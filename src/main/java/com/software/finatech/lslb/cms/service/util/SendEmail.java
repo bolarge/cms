@@ -32,6 +32,15 @@ public class SendEmail {
         return "success";
     }
 
+    public String sendPendingDocumentEmailNotification(NotificationDto notificationDto, String subject) {
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("description", notificationDto.getDescription());
+        model.put("date", LocalDate.now().toString("dd-MM-YYYY"));
+        String content = mailContentBuilderService.build(model, "LicenseUpdate");
+        emailService.sendEmail(content, subject, notificationDto.getLslbApprovalEmailAddress());
+        return "success";
+    }
+
     public String sendEmailLicenseApplicationNotification(NotificationDto notificationDto) {
         HashMap<String, Object> model = new HashMap<>();
         model.put("description", notificationDto.getDescription());
