@@ -4,7 +4,7 @@ import com.software.finatech.lslb.cms.service.domain.CaseAndComplainType;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 
 public class CaseAndComplainTypeReferenceData {
-    private static final String OTHERS_ID = "9";
+    public static final String OTHERS_ID = "9";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         loadAndForIdAndName("1", mongoRepositoryReactive, "Deposit Issues");
