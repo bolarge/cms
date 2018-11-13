@@ -1,13 +1,15 @@
 package com.software.finatech.lslb.cms.service.model.applicantDetails;
 
-import com.software.finatech.lslb.cms.service.dto.CommentDto;
+import com.software.finatech.lslb.cms.service.dto.CommentDetail;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ApplicantDetails {
 
     private String applicantName;
+    @NotEmpty
     private String tradingName;
     private String registeredAddress;
     private String dateOfIncorporation;
@@ -32,13 +34,13 @@ public class ApplicantDetails {
     private String applicantMemberGamingExperienceDetails;
     private Boolean applicantIndigenous;
     private String applicantIndigenousDetails;
-    private List<CommentDto> comments = new ArrayList<>();
+    private List<CommentDetail> comments = new ArrayList<>();
 
-    public List<CommentDto> getComments() {
+    public List<CommentDetail> getComments() {
         return comments;
     }
 
-    public void setComments(List<CommentDto> comments) {
+    public void setComments(List<CommentDetail> comments) {
         this.comments = comments;
     }
 

@@ -109,4 +109,6 @@ public interface ApplicationFormService {
     Mono<ResponseEntity> saveApplicantOutletInformationComment(String applicationFormId, AddCommentDto addCommentDto, HttpServletRequest request);
 
     Mono<ResponseEntity> getAIPFormId(String institutionId, String gameTypeId);
+
+    String getApprovedApplicationTradeNameForOperator(String institutionId, String gameTypeId);
 }

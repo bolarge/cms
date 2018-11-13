@@ -1,6 +1,6 @@
 package com.software.finatech.lslb.cms.service.model.contactDetails;
 
-import com.software.finatech.lslb.cms.service.dto.CommentDto;
+import com.software.finatech.lslb.cms.service.dto.CommentDetail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +13,13 @@ public class ApplicantContactDetails {
     private String mobileNumber;
     private String workNumber;
     private String emailAddress;
-    private List<CommentDto> comments = new ArrayList<>();
+    private List<CommentDetail> comments = new ArrayList<>();
 
-    public List<CommentDto> getComments() {
+    public List<CommentDetail> getComments() {
         return comments;
     }
 
-    public void setComments(List<CommentDto> comments) {
+    public void setComments(List<CommentDetail> comments) {
         this.comments = comments;
     }
 

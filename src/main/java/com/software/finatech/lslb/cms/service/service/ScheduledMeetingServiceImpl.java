@@ -351,7 +351,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             if (loggedInUser == null) {
                 return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
             }
-            CommentDto commentDto = new CommentDto();
+            CommentDetail commentDto = new CommentDetail();
             commentDto.setComment(addCommentDto.getComment());
             commentDto.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
             commentDto.setCommentDate(LocalDateTime.now().toString("dd-MM-yyyy"));

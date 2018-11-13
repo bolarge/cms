@@ -8,6 +8,7 @@ import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.dto.NotificationDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
+import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.*;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
@@ -56,6 +57,8 @@ public class LicenseServiceImpl implements LicenseService {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     @Autowired
     private AIPMailSenderAsync aipMailSenderAsync;
+    @Autowired
+    private ApplicationFormService applicationFormService;
 
     @Autowired
     private AuthInfoServiceImpl authInfoService;
@@ -670,7 +673,7 @@ public class LicenseServiceImpl implements LicenseService {
                 return Mono.just(new ResponseEntity<>("Operator has not uploaded AIP document", HttpStatus.BAD_REQUEST));
 
             }
-           // LicenseTransfer licenseTransfer = license.getLicenseTransfer();
+            // LicenseTransfer licenseTransfer = license.getLicenseTransfer();
             License createLicense = new License();
             String licenseNumber = "";
 
@@ -808,6 +811,7 @@ public class LicenseServiceImpl implements LicenseService {
                 return;
             }
 
+            Institution paymentInitiatingInstitution = paymentRecord.getInstitution();
             if (paymentRecord.isLicenseTransferPayment()) {
                 LicenseTransfer licenseTransfer = paymentRecord.getLicenseTransfer();
                 License transferredLicense = paymentRecord.getLicense();
@@ -836,6 +840,16 @@ public class LicenseServiceImpl implements LicenseService {
             license.setPaymentRecordId(paymentRecord.getId());
             //     license.setLicenseNumber(generateLicenseNumberForPaymentRecord(paymentRecord));
             mongoRepositoryReactive.saveOrUpdate(license);
+            String tradeName = applicationFormService.getApprovedApplicationTradeNameForOperator(paymentRecord.getInstitutionId(), paymentRecord.getGameTypeId());
+            if (tradeName != null) {
+                InstitutionCategoryDetails institutionCategoryDetails = new InstitutionCategoryDetails();
+                institutionCategoryDetails.setGameTypeId(gameType.getId());
+                institutionCategoryDetails.setGameTypeName(gameType.getName());
+                institutionCategoryDetails.setTradeName(tradeName);
+                institutionCategoryDetails.setFirstCommencementDate(LocalDate.now());
+                paymentInitiatingInstitution.getInstitutionCategoryDetailsList().add(institutionCategoryDetails);
+                mongoRepositoryReactive.saveOrUpdate(paymentInitiatingInstitution);
+            }
 //           String verbiage = "Moved : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status to AIP";
 //            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.AIP_ID,
 //                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),

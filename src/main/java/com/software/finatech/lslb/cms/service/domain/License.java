@@ -222,6 +222,7 @@ public class License extends AbstractFact {
 
     public LicenseDto convertToDto() {
         LicenseDto licenseDto = new LicenseDto();
+        String ownerName = null;
         licenseDto.setId(getId());
         licenseDto.setGamingMachineId(getGamingMachineId());
         licenseDto.setPaymentRecordId(getPaymentRecordId());
@@ -241,11 +242,18 @@ public class License extends AbstractFact {
         Agent agent = getAgent();
         if (agent != null) {
             licenseDto.setAgentId(getAgentId());
-            licenseDto.setOwnerName(agent.getFullName());
+            ownerName = agent.getFullName();
         }
         Institution institution = getInstitution();
         if (institution != null) {
-            licenseDto.setOwnerName(institution.getInstitutionName());
+            for (InstitutionCategoryDetails categoryDetails : institution.getInstitutionCategoryDetailsList()) {
+                if (StringUtils.equals(this.gameTypeId, categoryDetails.getGameTypeId())) {
+                    ownerName = institution.getInstitutionName();
+                }
+            }
+            if (StringUtils.isEmpty(ownerName)) {
+                ownerName = institution.getInstitutionName();
+            }
             licenseDto.setInstitutionId(getInstitutionId());
         }
         LicenseStatus licenseStatus = getLicenseStatus();
@@ -257,6 +265,7 @@ public class License extends AbstractFact {
         if (paymentRecord != null) {
             licenseDto.setAmountPaid(paymentRecord.getAmountPaid());
         }
+        licenseDto.setOwnerName(ownerName);
         return licenseDto;
     }
 
@@ -300,11 +309,11 @@ public class License extends AbstractFact {
         return null;
     }
 
-    public LicenseTransfer getLicenseTransfer(){
-        if (StringUtils.isEmpty(this.licenseTransferId)){
+    public LicenseTransfer getLicenseTransfer() {
+        if (StringUtils.isEmpty(this.licenseTransferId)) {
             return null;
         }
-        return (LicenseTransfer)mongoRepositoryReactive.findById(this.licenseTransferId, LicenseTransfer.class).block();
+        return (LicenseTransfer) mongoRepositoryReactive.findById(this.licenseTransferId, LicenseTransfer.class).block();
     }
 
     @Override

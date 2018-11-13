@@ -27,7 +27,7 @@ public class DocumentDto {
     protected String approverId;
     protected String documentStatus;
     protected String documentStatusId;
-    protected List<CommentDto> comments = new ArrayList<>();
+    protected List<CommentDetail> comments = new ArrayList<>();
 
     public String getDocumentStatusId() {
         return documentStatusId;
@@ -41,11 +41,11 @@ public class DocumentDto {
         return documentStatus;
     }
 
-    public List<CommentDto> getComments() {
+    public List<CommentDetail> getComments() {
         return comments;
     }
 
-    public void setComments(List<CommentDto> comments) {
+    public void setComments(List<CommentDetail> comments) {
         this.comments = comments;
     }
 

@@ -97,7 +97,7 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> saveApplicantDetails(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantDetails applicantDetails, HttpServletRequest request) {
+    public Mono<ResponseEntity> saveApplicantDetails(@PathVariable("applicationFormId") String applicationFormId, @RequestBody @Valid ApplicantDetails applicantDetails, HttpServletRequest request) {
         return applicationFormService.saveApplicantDetails(applicationFormId, applicantDetails, request);
     }
 
@@ -156,7 +156,7 @@ public class ApplicationFormController {
         return applicationFormService.getApplicantContactDetails(applicationFormId);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/get-aip-form-Id", params = {"institutionId","gameTypeId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/get-aip-form-Id", params = {"institutionId", "gameTypeId"})
     @ApiOperation(value = "Get AIP FORM ID", response = String.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -334,15 +334,15 @@ public class ApplicationFormController {
         return applicationFormService.approveApplicationForm(applicationFormId, approverId, request);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/approve-aip-form", params = {"institutionId","gameTypeId","userId"})
+    @RequestMapping(method = RequestMethod.POST, value = "/approve-aip-form", params = {"institutionId", "gameTypeId", "userId"})
     @ApiOperation(value = "Approve aip form", response = String.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> approveAIPForm(@RequestParam("institutionId") String institutionId,@RequestParam("gameTypeId") String gameTypeId, @RequestParam("userId") String approverId, HttpServletRequest request) {
-        return applicationFormService.approveAIPForm(institutionId,gameTypeId, approverId, request);
+    public Mono<ResponseEntity> approveAIPForm(@RequestParam("institutionId") String institutionId, @RequestParam("gameTypeId") String gameTypeId, @RequestParam("userId") String approverId, HttpServletRequest request) {
+        return applicationFormService.approveAIPForm(institutionId, gameTypeId, approverId, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/reject-application-form", params = {"applicationFormId"})
@@ -367,7 +367,8 @@ public class ApplicationFormController {
     public Mono<ResponseEntity> completeApplicationForm(@RequestParam("applicationFormId") String applicationFormId, @RequestParam("isResubmit") boolean isResubmit, HttpServletRequest request) {
         return applicationFormService.completeApplicationForm(applicationFormId, isResubmit, request);
     }
-    @RequestMapping(method = RequestMethod.POST, value = "/complete-aip-form", params = {"institutionId","gameTypeId"})
+
+    @RequestMapping(method = RequestMethod.POST, value = "/complete-aip-form", params = {"institutionId", "gameTypeId"})
     @ApiOperation(value = "complete filling AIP form", response = String.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -376,7 +377,7 @@ public class ApplicationFormController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> completeAIPForm(@RequestParam("institutionId") String institutionId,
                                                 @RequestParam("gameTypeId") String gameTypeId, HttpServletRequest request) {
-        return applicationFormService.completeAIPForm(institutionId,gameTypeId, request);
+        return applicationFormService.completeAIPForm(institutionId, gameTypeId, request);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/payment-records", params = {"applicationFormId"})
@@ -401,6 +402,7 @@ public class ApplicationFormController {
                                                              @RequestBody @Valid ApplicationFormCreateCommentDto formCreateCommentDto, HttpServletRequest request) {
         return applicationFormService.addCommentsToFormFromLslbAdmin(applicationFormId, formCreateCommentDto, request);
     }
+
     @RequestMapping(method = RequestMethod.POST, value = "/create-aip-comment", params = {"aipFormId"})
     @ApiOperation(value = "Create comment for AIP form from LSLB Admin", response = String.class, consumes = "application/json")
     @ApiResponses(value = {

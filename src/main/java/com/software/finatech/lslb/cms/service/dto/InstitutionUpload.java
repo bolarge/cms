@@ -1,17 +1,24 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import org.joda.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class InstitutionUpload {
     private String institutionName;
     private String emailAddress;
     private String phoneNumber;
     private String address;
-    private LocalDate licenseStartDate;
-    private String gameTypeId;
-    private LocalDate licenseEndDate;
     private String description;
     private String line;
+    private List<InstitutionLoadDetails> institutionLoadDetails = new ArrayList<>();
+
+    public List<InstitutionLoadDetails> getInstitutionLoadDetails() {
+        return institutionLoadDetails;
+    }
+
+    public void setInstitutionLoadDetails(List<InstitutionLoadDetails> institutionLoadDetails) {
+        this.institutionLoadDetails = institutionLoadDetails;
+    }
 
     public String getLine() {
         return line;
@@ -53,35 +60,11 @@ public class InstitutionUpload {
         this.address = address;
     }
 
-    public String getGameTypeId() {
-        return gameTypeId;
-    }
-
-    public void setGameTypeId(String gameTypeId) {
-        this.gameTypeId = gameTypeId;
-    }
-
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public LocalDate getLicenseStartDate() {
-        return licenseStartDate;
-    }
-
-    public void setLicenseStartDate(LocalDate licenseStartDate) {
-        this.licenseStartDate = licenseStartDate;
-    }
-
-    public LocalDate getLicenseEndDate() {
-        return licenseEndDate;
-    }
-
-    public void setLicenseEndDate(LocalDate licenseEndDate) {
-        this.licenseEndDate = licenseEndDate;
     }
 }

@@ -3,13 +3,13 @@ package com.software.finatech.lslb.cms.service.dto;
 
 import org.joda.time.LocalDateTime;
 
-public class CommentDto {
+public class CommentDetail {
     private String commentTime;
     private String commentDate;
     private String userFullName;
     private String comment;
 
-    public CommentDto() {
+    public CommentDetail() {
     }
 
     public String getCommentTime() {
@@ -44,10 +44,10 @@ public class CommentDto {
         this.comment = comment;
     }
 
-    public static CommentDto fromCommentAndUser(String comment, String userFullName) {
-        CommentDto dto = new CommentDto();
+    public static CommentDetail fromCommentAndUser(String comment, String userFullName) {
+        CommentDetail dto = new CommentDetail();
         dto.setCommentDate(LocalDateTime.now().toString("dd-MM-yyyy"));
-        dto.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
+        dto.setCommentTime(LocalDateTime.now().toString("HH:mm a"));
         dto.setComment(comment);
         dto.setUserFullName(userFullName);
         return dto;
