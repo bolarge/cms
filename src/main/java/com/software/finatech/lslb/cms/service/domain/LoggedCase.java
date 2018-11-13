@@ -245,6 +245,11 @@ public class LoggedCase extends AbstractFact {
         }
         dto.setOtherCategoryName(getOtherCategoryName());
         dto.setOtherTypeName(getOtherTypeName());
+        LicenseType licenseType = getLicenseType();
+        if (licenseType != null){
+            dto.setLicenseType(licenseType.toString());
+            dto.setLicenseTypeId(this.licenseTypeId);
+        }
         return dto;
     }
 
