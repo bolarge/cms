@@ -8,6 +8,16 @@ public class InspectionCommentCreateDto {
     private String inspectionFormId;
     @NotEmpty(message = "please provide comment")
     private String comment;
+    @NotEmpty(message = "please provide userId")
+    private String userId;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public String getInspectionFormId() {
         return inspectionFormId;
