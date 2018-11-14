@@ -16,6 +16,7 @@ public class DocumentPurposeReferenceData {
     public static final String ADD_GAMES_TO_MACHINES_ID = "9";
     public static final String LICENSE_TRANSFER_ID = "10";
 
+
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         DocumentPurpose purpose1 = (DocumentPurpose) mongoRepositoryReactive.findById(APPLICATION_FORM_DOCUMENT_PURPOSE_ID, DocumentPurpose.class).block();
         if (purpose1 == null) {
