@@ -143,6 +143,7 @@ public class InspectionForm extends AbstractFact {
         inspectionFormDto.setInspectionFormComments(inspectionFormCommentDtos);
         inspectionFormDto.setSubject(getSubject());
         inspectionFormDto.setOwnerName(getOwnerName());
+        inspectionFormDto.setBody(getBody());
         inspectionFormDto.setAgentBusinessAddress(getAgentBusinessAddress()==null?null:getAgentBusinessAddress());
         Agent agent =(Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
         if(agent!=null){

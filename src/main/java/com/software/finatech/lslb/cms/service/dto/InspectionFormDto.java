@@ -13,6 +13,7 @@ public class InspectionFormDto {
     //protected AuthRoleDto userRole;
     protected String inspectionDate;
     protected AgentDto agent;
+    protected String body;
     protected MachineDto gamingMachine;
     protected String id;
     protected String subject;
@@ -21,6 +22,14 @@ public class InspectionFormDto {
 
     public String getAgentBusinessAddress() {
         return agentBusinessAddress;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 
     public void setAgentBusinessAddress(String agentBusinessAddress) {
