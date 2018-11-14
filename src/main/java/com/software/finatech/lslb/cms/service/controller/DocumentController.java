@@ -369,6 +369,38 @@ public class DocumentController extends BaseController {
         return Mono.just(new ResponseEntity(documentsDto, HttpStatus.OK));
     }
 
+
+    @RequestMapping(method = RequestMethod.GET, value = "/unlink-document", params = {"documentId"})
+    @ApiOperation(value = "Delete unwanted document", response = ApplicationFormDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getByInstitution(@RequestParam("documentId") String documentId) {
+
+        if (StringUtils.isEmpty(documentId)) {
+            return Mono.just(new ResponseEntity("documentId is required", HttpStatus.BAD_REQUEST));
+
+        }
+
+
+        Document document = (Document) mongoRepositoryReactive.findById(documentId, Document.class).block();
+
+        if (document == null) {
+            return Mono.just(new ResponseEntity("No document found found", HttpStatus.NOT_FOUND));
+        }
+
+        document.setUnLinkedEntityId(document.getEntityId());
+        document.setUnLinkedInstitutionId(document.getInstitutionId());
+        document.setEntityId(null);
+        document.setInstitutionId(null);
+
+        mongoRepositoryReactive.saveOrUpdate(document);
+
+        return Mono.just(new ResponseEntity("Success", HttpStatus.OK));
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = "/downloadById/{id}")
     @ApiOperation(value = "Download Bytes By Id")
     @ApiResponses(value = {
