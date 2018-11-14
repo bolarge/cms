@@ -35,6 +35,15 @@ public class LoggedCase extends AbstractFact {
     private String otherCategoryName;
     private String otherTypeName;
     private String gameTypeId;
+    private String loggedCaseOutcomeId;
+
+    public String getLoggedCaseOutcomeId() {
+        return loggedCaseOutcomeId;
+    }
+
+    public void setLoggedCaseOutcomeId(String loggedCaseOutcomeId) {
+        this.loggedCaseOutcomeId = loggedCaseOutcomeId;
+    }
 
     public String getGameTypeId() {
         return gameTypeId;
@@ -255,12 +264,12 @@ public class LoggedCase extends AbstractFact {
         dto.setOtherCategoryName(getOtherCategoryName());
         dto.setOtherTypeName(getOtherTypeName());
         LicenseType licenseType = getLicenseType();
-        if (licenseType != null){
+        if (licenseType != null) {
             dto.setLicenseType(licenseType.toString());
             dto.setLicenseTypeId(this.licenseTypeId);
         }
         GameType gameType = getGameType();
-        if (gameType != null){
+        if (gameType != null) {
             dto.setGameTypeId(this.gameTypeId);
             dto.setGameTypeName(gameType.toString());
         }
@@ -275,6 +284,11 @@ public class LoggedCase extends AbstractFact {
         Machine machine = getMachine();
         if (machine != null) {
             dto.setMachineSerialNumber(machine.getSerialNumber());
+        }
+        LoggedCaseOutcome outcome = getLoggedCaseOutcome();
+        if (outcome != null) {
+            dto.setOutcomeId(this.loggedCaseOutcomeId);
+            dto.setOutcomeName(outcome.getName());
         }
         return dto;
     }
@@ -402,6 +416,24 @@ public class LoggedCase extends AbstractFact {
             }
         }
         return category;
+    }
+
+    public LoggedCaseOutcome getLoggedCaseOutcome() {
+        if (StringUtils.isEmpty(this.loggedCaseOutcomeId)) {
+            return null;
+        }
+        LoggedCaseOutcome outcome = null;
+        Map<String, FactObject> outcomeMap = Mapstore.STORE.get("LoggedCaseOutcome");
+        if (outcomeMap != null) {
+            outcome = (LoggedCaseOutcome) outcomeMap.get(this.loggedCaseOutcomeId);
+        }
+        if (outcome == null) {
+            outcome = (LoggedCaseOutcome) mongoRepositoryReactive.findById(this.loggedCaseOutcomeId, LoggedCaseOutcome.class).block();
+            if (outcome != null && outcomeMap != null) {
+                outcomeMap.put(this.loggedCaseOutcomeId, outcome);
+            }
+        }
+        return outcome;
     }
 
     public CaseAndComplainType getCaseAndComplainType() {

@@ -23,25 +23,45 @@ public interface LicenseService {
                                         String paymentRecordId,
                                         String date,
                                         String licenseNumber,
-                                        String licenseTypeId, HttpServletResponse httpServletResponse);
+                                        String licenseTypeId,
+                                        String startDate,
+                                        String endDate,
+                                        String dateProperty,
+                                        HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getAllLicenseStatus();
-    Mono<ResponseEntity> findLicense(String licenseId, String institutionId, String agentId, String gamingMachineId,String gameTypeId);
+
+    Mono<ResponseEntity> findLicense(String licenseId, String institutionId, String agentId, String gamingMachineId, String gameTypeId);
+
     Mono<ResponseEntity> getExpiringLicenses();
+
     Mono<ResponseEntity> getExpiringAIPs();
+
     Mono<ResponseEntity> getExpiredLicenses();
+
     Mono<ResponseEntity> getExpiredAIPs();
+
     List<EnumeratedFactDto> getLicenseStatus();
+
     List<EnumeratedFactDto> getAllLicenseTypes();
+
     Mono<ResponseEntity> getInstitutionAIPs(String institutionId);
+
     Mono<ResponseEntity> getInstitutionCloseToExpirationLicenses(String institutionId);
+
     Mono<ResponseEntity> getAgentLicensesCloseToExpiration(String agentId);
+
     Mono<ResponseEntity> getGamingMachineLicensesCloseToExpiration(String gamingMachineId);
-    Mono<ResponseEntity>updateRenewalLicenseToReview(String paymentRecordId);
+
+    Mono<ResponseEntity> updateRenewalLicenseToReview(String paymentRecordId);
+
     Mono<ResponseEntity> getInstitutionAIPUploaded(String institutionId);
+
     Mono<ResponseEntity> getLicensesInRenewalInReview(String institutionId);
+
     //Mono<ResponseEntity> updateRenewalReviewToInProgress(RenewalFormCommentDto renewalFormCommentDto);
     License findRenewalLicense(String institutionId, String agentId, String gamingMachineId, String gameTypeId, String licenseTypeId);
+
     boolean institutionIsLicensedForGameType(String institutionId, String gameTypeId);
 
     void createAIPLicenseForCompletedPayment(PaymentRecord paymentRecord);

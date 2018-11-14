@@ -80,7 +80,11 @@ public class LicenseServiceImpl implements LicenseService {
                                                String paymentRecordId,
                                                String date,
                                                String licenseNumber,
-                                               String licenseTypeId, HttpServletResponse httpServletResponse) {
+                                               String licenseTypeId,
+                                               String startDate,
+                                               String endDate,
+                                               String dateProperty,
+                                               HttpServletResponse httpServletResponse) {
 
         try {
             Query query = new Query();
@@ -108,12 +112,11 @@ public class LicenseServiceImpl implements LicenseService {
             if (!StringUtils.isEmpty(licenseNumber)) {
                 query.addCriteria(Criteria.where("licenseNumber").is(licenseNumber));
             }
-
             if (!StringUtils.isEmpty(date)) {
                 LocalDate localDate = new LocalDate(date);
                 query.addCriteria(Criteria.where("effectiveDate").lte(localDate).andOperator(Criteria.where("expiryDate").gte(localDate)));
             }
-
+            QueryUtils.addDateToQuery(query, startDate, endDate, dateProperty);
             if (page == 0) {
                 if (httpServletResponse != null) {
                     long count = mongoRepositoryReactive.count(query, License.class).block();

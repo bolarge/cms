@@ -15,6 +15,7 @@ import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.*;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
+import com.software.finatech.lslb.cms.service.util.QueryUtils;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApplicationFormEmailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
@@ -131,16 +132,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             if (!StringUtils.isEmpty(gameTypeId)) {
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             }
-
-            if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
-                if (StringUtils.isEmpty(dateProperty)) {
-                    dateProperty = "creationDate";
-                }
-                LocalDateTime startDateTime = new LocalDateTime(startDate);
-                LocalDateTime endDateTime = new LocalDateTime(endDate);
-                query.addCriteria(Criteria.where(dateProperty).gte(startDateTime).lte(endDateTime));
-            }
-
+            QueryUtils.addDateToQuery(query, startDate, endDate, dateProperty);
             if (page == 0) {
                 Long count = mongoRepositoryReactive.count(query, ApplicationForm.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));

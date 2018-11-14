@@ -2,7 +2,9 @@ package com.software.finatech.lslb.cms.service.controller;
 
 
 import com.software.finatech.lslb.cms.service.domain.License;
-import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.dto.AIPCheckDto;
+import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
+import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -12,11 +14,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 
 @Api(value = "License", description = "For everything related to gaming operators licenses", tags = "Licence Controller")
 @RestController
@@ -30,9 +34,9 @@ public class LicenseController {
         this.licenseService = licenseService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize",
-            "sortType", "sortProperty", "institutionId", "gamingMachineId",
-            "agentId", "licenseStatusId", "gameTypeId", "paymentRecordId", "licenseTypeId", "date", "licenseNumber"})
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty",
+            "institutionId", "gamingMachineId", "agentId", "licenseStatusId", "gameTypeId",
+            "paymentRecordId", "licenseTypeId", "date", "licenseNumber", "startDate", "endDate", "dateProperty"})
     @ApiOperation(value = "Get all licenses", response = LicenseDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -52,9 +56,12 @@ public class LicenseController {
                                                @RequestParam("paymentRecordId") String paymentRecordId,
                                                @RequestParam("date") String date,
                                                @RequestParam("licenseNumber") String licenseNumber,
+                                               @RequestParam("startDate") String startDate,
+                                               @RequestParam("endDate") String endDate,
+                                               @RequestParam("dateProperty") String dateProperty,
                                                HttpServletResponse httpServletResponse) {
-        return licenseService.findAllLicense(page, pageSize, sortType, sortParam, institutionId,
-                agentId, gamingMachineId, licenseStatusId, gameTypeId, paymentRecordId, date, licenseNumber,licenseType, httpServletResponse);
+        return licenseService.findAllLicense(page, pageSize, sortType, sortParam, institutionId, agentId, gamingMachineId, licenseStatusId, gameTypeId, paymentRecordId, date, licenseNumber,
+                licenseType, startDate, endDate, dateProperty, httpServletResponse);
     }
 
 
@@ -167,6 +174,7 @@ public class LicenseController {
 
         }
     }
+
     @RequestMapping(method = RequestMethod.GET, value = "/get-renewal-review-licenses", params = {"institutionId"})
     @ApiOperation(value = "Get all Institution licenses In Renewal In Review", response = License.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
@@ -182,6 +190,7 @@ public class LicenseController {
 
         }
     }
+
     @RequestMapping(method = RequestMethod.GET, value = "/get-institution-uploaded-aips", params = {"institutionId"})
     @ApiOperation(value = "Get all Institution Uploaded Document AIPs", response = AIPCheckDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
@@ -214,6 +223,7 @@ public class LicenseController {
 
         }
     }
+
     @RequestMapping(method = RequestMethod.GET, value = "/get-agent-licenses-close-to-expiration", params = {"agentId"})
     @ApiOperation(value = "Get Agent Licenses that are close to expiration", response = License.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
@@ -229,6 +239,7 @@ public class LicenseController {
 
         }
     }
+
     @RequestMapping(method = RequestMethod.GET, value = "/get-gaming-machine-licenses-close-to-expiration", params = {"gamingMachineId"})
     @ApiOperation(value = "Get Gaming Machine Licenses that are close to expiration", response = License.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
@@ -244,7 +255,6 @@ public class LicenseController {
 
         }
     }
-
 
 
     @RequestMapping(method = RequestMethod.GET, value = "/update-to-renewal-in-review-from-in-progress", params = {"paymentRecordId"})
@@ -289,11 +299,11 @@ public class LicenseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getSpecificLicense(@RequestParam("institutionId") String institutionId,
-                                                               @RequestParam("gameTypeId") String gameTypeId,
-                                                               @RequestParam("agentId") String agentId,
-                                                               @RequestParam("gamingMachineId") String gamingMachineId,
-                                                               @RequestParam("licenseTypeId") String licenseTypeId
-                                                              ) {
+                                                   @RequestParam("gameTypeId") String gameTypeId,
+                                                   @RequestParam("agentId") String agentId,
+                                                   @RequestParam("gamingMachineId") String gamingMachineId,
+                                                   @RequestParam("licenseTypeId") String licenseTypeId
+    ) {
         try {
             if (StringUtils.isEmpty(institutionId) && StringUtils.isEmpty(agentId) && StringUtils.isEmpty(gamingMachineId)) {
                 return Mono.just(new ResponseEntity<>("Provide InstitutionId or agentId or Gaming Machine Id", HttpStatus.BAD_REQUEST));
@@ -306,19 +316,20 @@ public class LicenseController {
             if (StringUtils.isEmpty(gameTypeId)) {
                 return Mono.just(new ResponseEntity<>("Provide GameTypeId", HttpStatus.BAD_REQUEST));
 
-            } if (StringUtils.isEmpty(licenseTypeId)) {
+            }
+            if (StringUtils.isEmpty(licenseTypeId)) {
                 return Mono.just(new ResponseEntity<>("Provide LicenseType", HttpStatus.BAD_REQUEST));
 
             }
             License licenseRecords = licenseService.findRenewalLicense(institutionId, agentId, gamingMachineId, gameTypeId, licenseTypeId);
 
-           if(licenseRecords==null){
-               return Mono.just(new ResponseEntity<>("No Payment Record Found or An Incomplete Renewal Application Exists", HttpStatus.BAD_REQUEST));
+            if (licenseRecords == null) {
+                return Mono.just(new ResponseEntity<>("No Payment Record Found or An Incomplete Renewal Application Exists", HttpStatus.BAD_REQUEST));
 
-           }else{
-               return Mono.just(new ResponseEntity<>(licenseRecords.convertToDto(), HttpStatus.OK));
+            } else {
+                return Mono.just(new ResponseEntity<>(licenseRecords.convertToDto(), HttpStatus.OK));
 
-           }
+            }
         } catch (Exception ex) {
             return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
