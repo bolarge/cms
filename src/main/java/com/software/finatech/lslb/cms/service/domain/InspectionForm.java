@@ -1,27 +1,34 @@
 package com.software.finatech.lslb.cms.service.domain;
 
+import com.software.finatech.lslb.cms.service.dto.InspectionFormCommentDto;
 import com.software.finatech.lslb.cms.service.dto.InspectionFormDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 @Document(collection = "InspectionForm")
 public class InspectionForm extends AbstractFact {
     protected String institutionId;
     protected String gameTypeId;
-    protected ArrayList<String> comments;
+    protected ArrayList<InspectionFormComments> inspectionFormComments;
     protected String agentBusinessAddress;
     protected String userId;
     protected LocalDate inspectionDate;
     protected String agentId;
     protected String gamingMachineId;
     protected String subject;
+    protected String body;
 
     @Transient
     protected String ownerName;
@@ -37,12 +44,12 @@ public class InspectionForm extends AbstractFact {
         this.agentBusinessAddress = agentBusinessAddress;
     }
 
-    public ArrayList<String> getComments() {
-        return comments;
+    public String getBody() {
+        return body;
     }
 
-    public void setComments(ArrayList<String> comments) {
-        this.comments = comments;
+    public void setBody(String body) {
+        this.body = body;
     }
 
     public String getUserId() {
@@ -110,6 +117,13 @@ public class InspectionForm extends AbstractFact {
     }
 
 
+    public ArrayList<InspectionFormComments> getInspectionFormComments() {
+        return inspectionFormComments;
+    }
+
+    public void setInspectionFormComments(ArrayList<InspectionFormComments> inspectionFormComments) {
+        this.inspectionFormComments = inspectionFormComments;
+    }
 
     public LocalDate getInspectionDate() {
         return inspectionDate;
@@ -121,9 +135,15 @@ public class InspectionForm extends AbstractFact {
 
     public InspectionFormDto convertToDto(){
         InspectionFormDto inspectionFormDto = new InspectionFormDto();
-        inspectionFormDto.setComments(getComments());
+        ArrayList<InspectionFormComments> inspectionFormComments= (ArrayList<InspectionFormComments>)mongoRepositoryReactive.findAll(new Query(Criteria.where("inspectionFormId").is(getId())), InspectionFormComments.class).toStream().collect(Collectors.toList()) ;
+        ArrayList<InspectionFormCommentDto>inspectionFormCommentDtos= new ArrayList<>();
+        inspectionFormComments.stream().forEach(inspectionFormComments1 -> {
+            inspectionFormCommentDtos.add(inspectionFormComments1.convertToDto());
+        });
+        inspectionFormDto.setInspectionFormComments(inspectionFormCommentDtos);
         inspectionFormDto.setSubject(getSubject());
         inspectionFormDto.setOwnerName(getOwnerName());
+        inspectionFormDto.setBody(getBody());
         inspectionFormDto.setAgentBusinessAddress(getAgentBusinessAddress()==null?null:getAgentBusinessAddress());
         Agent agent =(Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
         if(agent!=null){

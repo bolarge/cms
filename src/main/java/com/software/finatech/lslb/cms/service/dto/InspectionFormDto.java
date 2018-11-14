@@ -1,15 +1,19 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import com.software.finatech.lslb.cms.service.domain.InspectionFormComments;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class InspectionFormDto {
     protected InstitutionDto institution;
     protected GameTypeDto gameType;
-    protected ArrayList<String> comments;
+    protected ArrayList<InspectionFormCommentDto> inspectionFormComments;
     protected String reporter;
     //protected AuthRoleDto userRole;
     protected String inspectionDate;
     protected AgentDto agent;
+    protected String body;
     protected MachineDto gamingMachine;
     protected String id;
     protected String subject;
@@ -18,6 +22,14 @@ public class InspectionFormDto {
 
     public String getAgentBusinessAddress() {
         return agentBusinessAddress;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 
     public void setAgentBusinessAddress(String agentBusinessAddress) {
@@ -93,12 +105,12 @@ public class InspectionFormDto {
     }
 
 
-    public ArrayList<String> getComments() {
-        return comments;
+    public ArrayList<InspectionFormCommentDto> getInspectionFormComments() {
+        return inspectionFormComments;
     }
 
-    public void setComments(ArrayList<String> comments) {
-        this.comments = comments;
+    public void setInspectionFormComments(ArrayList<InspectionFormCommentDto> inspectionFormComments) {
+        this.inspectionFormComments = inspectionFormComments;
     }
 
     public String getInspectionDate() {
