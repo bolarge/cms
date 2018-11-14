@@ -657,7 +657,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         int pageSize = 10000;
         String sortDirection = "DESC";
         String sortProperty = "createdAt";
-        Mono<ResponseEntity> findLicenseResponse = licenseService.findAllLicense(page, pageSize, sortDirection, sortProperty, institutionId, agentId, null, null, gameTypeId, null, null, null, null, null);
+        Mono<ResponseEntity> findLicenseResponse = licenseService.findAllLicense(page, pageSize, sortDirection, sortProperty, institutionId, agentId, null, null, gameTypeId, null, null, null, null, null, null, null, null);
         if (findLicenseResponse.block().getStatusCode() != HttpStatus.OK) {
             String categoryName = fee.getGameTypeName();
             return Mono.just(new ResponseEntity<>(String.format("You do not have an existing license for category %s, please get licensed for category %s before attempting to pay for license renewal for the category", categoryName, categoryName), HttpStatus.BAD_REQUEST));
