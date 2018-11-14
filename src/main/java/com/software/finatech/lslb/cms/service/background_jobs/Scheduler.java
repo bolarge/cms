@@ -357,7 +357,7 @@ public class Scheduler {
                     agent.setInactiveReason("You have been deactivated for lack of license payment, please kindly click forget password below to begin re-activation");
                     mongoRepositoryReactive.saveOrUpdate(agent);
                     NotificationDto notificationDto = new NotificationDto();
-                    notificationDto.setDescription("You have been deactivated for lack license payment");
+                    notificationDto.setDescription("You have been deactivated for lack of license payment");
                     notificationDto.setTemplate("Agent_Deactivation");
                     notificationDto.setCallBackUrl(frontEndPropertyHelper.getFrontEndUrl() + "/forgot-password");
                     notificationDto.setAgentEmailAddress(agent.getEmailAddress());

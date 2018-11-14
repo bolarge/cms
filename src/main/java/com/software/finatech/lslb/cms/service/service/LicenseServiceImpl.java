@@ -562,7 +562,7 @@ public class LicenseServiceImpl implements LicenseService {
                         notificationDto.getGameType() + " has been approved. License is valid from " + license.getEffectiveDate().toString("dd/MM/YYY") + " to " +
                         notificationDto.getEndDate());
                 notificationDto.setInstitutionEmail(institutionAdmin.getEmailAddress());
-                sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
+                sendEmail.sendEmailRenewalNotification(notificationDto,"Renewal Form Application Status");
             });
 
             return "OK";
