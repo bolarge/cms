@@ -33,11 +33,10 @@ public class Document extends AbstractFact {
     protected DocumentType documentType;
     protected String entity;
     protected String entityId;
+    protected String unLinkedEntityId;
+    protected String unLinkedInstitutionId;
     protected String previousDocumentId;
     protected String originalFilename;
-    private String applicationFormId;
-    private String renewalFormId;
-    private String aipFormId;
     protected String institutionId;
     protected String gameTypeId;
     protected String agentId;
@@ -55,28 +54,28 @@ public class Document extends AbstractFact {
         this.comments = comments;
     }
 
+    public String getUnLinkedEntityId() {
+        return unLinkedEntityId;
+    }
+
+    public void setUnLinkedEntityId(String unLinkedEntityId) {
+        this.unLinkedEntityId = unLinkedEntityId;
+    }
+
+    public String getUnLinkedInstitutionId() {
+        return unLinkedInstitutionId;
+    }
+
+    public void setUnLinkedInstitutionId(String unLinkedInstitutionId) {
+        this.unLinkedInstitutionId = unLinkedInstitutionId;
+    }
+
     public LocalDate getNextReminderDate() {
         return nextReminderDate;
     }
 
     public void setNextReminderDate(LocalDate nextReminderDate) {
         this.nextReminderDate = nextReminderDate;
-    }
-
-    public String getRenewalFormId() {
-        return renewalFormId;
-    }
-
-    public void setRenewalFormId(String renewalFormId) {
-        this.renewalFormId = renewalFormId;
-    }
-
-    public String getAipFormId() {
-        return aipFormId;
-    }
-
-    public void setAipFormId(String aipFormId) {
-        this.aipFormId = aipFormId;
     }
 
     public String getApprovalRequestStatusId() {
@@ -135,14 +134,6 @@ public class Document extends AbstractFact {
 
     public void setPreviousDocumentId(String previousDocumentId) {
         this.previousDocumentId = previousDocumentId;
-    }
-
-    public String getApplicationFormId() {
-        return applicationFormId;
-    }
-
-    public void setApplicationFormId(String applicationFormId) {
-        this.applicationFormId = applicationFormId;
     }
 
     public Binary getFile() {
