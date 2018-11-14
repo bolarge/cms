@@ -1,5 +1,8 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
+import org.apache.commons.lang3.StringUtils;
+
 import javax.validation.constraints.NotEmpty;
 
 public class PaymentRecordDetailUpdateDto {
@@ -28,6 +31,10 @@ public class PaymentRecordDetailUpdateDto {
 
     public String getPaymentStatusId() {
         return paymentStatusId;
+    }
+
+    public boolean isSuccessFulPayment() {
+        return StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, this.paymentStatusId);
     }
 
     public void setPaymentStatusId(String paymentStatusId) {

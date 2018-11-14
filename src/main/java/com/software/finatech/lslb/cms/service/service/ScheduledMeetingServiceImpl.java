@@ -10,6 +10,7 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
+import com.software.finatech.lslb.cms.service.service.contracts.InstitutionOnboardingWorkflowService;
 import com.software.finatech.lslb.cms.service.service.contracts.ScheduledMeetingService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
@@ -52,6 +53,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
     private AuditLogHelper auditLogHelper;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private ScheduledMeetingMailSenderAsync scheduledMeetingMailSenderAsync;
+    private InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService;
 
     private static final int NUMBER_OF_DAYS_BEFORE_MEETING_REMINDER = 1;
     private static final int POST_MEETING_REMINDER_DAYS = 7;
@@ -62,12 +64,14 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                                        AuthInfoService authInfoService,
                                        AuditLogHelper auditLogHelper,
                                        SpringSecurityAuditorAware springSecurityAuditorAware,
-                                       ScheduledMeetingMailSenderAsync scheduledMeetingMailSenderAsync) {
+                                       ScheduledMeetingMailSenderAsync scheduledMeetingMailSenderAsync,
+                                       InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.authInfoService = authInfoService;
         this.auditLogHelper = auditLogHelper;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.scheduledMeetingMailSenderAsync = scheduledMeetingMailSenderAsync;
+        this.institutionOnboardingWorkflowService = institutionOnboardingWorkflowService;
     }
 
 
@@ -195,7 +199,9 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-
+            if (scheduledMeeting.isForLicenseApplicant()) {
+                institutionOnboardingWorkflowService.updateWorkflowForNewApplicantMeeting(scheduledMeeting);
+            }
             return Mono.just(new ResponseEntity<>(scheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format for meeting date , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
@@ -233,6 +239,9 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            if (scheduledMeeting.isForLicenseApplicant()) {
+                institutionOnboardingWorkflowService.updateWorkflowForCanceledMeeting(scheduledMeeting);
+            }
             return Mono.just(new ResponseEntity<>(scheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while canceling the scheduled meeting", e);
@@ -255,7 +264,9 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-
+            if (scheduledMeeting.isForLicenseApplicant()) {
+                institutionOnboardingWorkflowService.updateWorkflowForCompletedMeeting(scheduledMeeting);
+            }
             return Mono.just(new ResponseEntity<>(scheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while completing the scheduled meeting", e);

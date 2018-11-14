@@ -757,10 +757,9 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
     @Override
     public ArrayList<AuthInfo> getAllActiveGamingOperatorUsersForInstitution(String institutionId) {
-        String gamingOperatorRoleId = LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID;
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
-        query.addCriteria(Criteria.where("authRoleId").is(gamingOperatorRoleId));
+        query.addCriteria(Criteria.where("authRoleId").in(Arrays.asList(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID, LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID)));
         query.addCriteria(Criteria.where("enabled").is(true));
         return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
     }
@@ -804,6 +803,13 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         return users;
     }
 
+
+    public ArrayList<AuthInfo> getOperatorUsers(String institutionId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(institutionId));
+        query.addCriteria(Criteria.where("authRoleId").in(Arrays.asList(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID, LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID)));
+        return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
+    }
 
     private ArrayList<AuthInfo> getAllEnabledLSLBMembers() {
         Query query = new Query();
@@ -975,6 +981,19 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         query.addCriteria(Criteria.where("enabled").is(true));
         query.addCriteria(Criteria.where("accountLocked").is(false));
         return (AuthInfo) mongoRepositoryReactive.find(query, AuthInfo.class).block();
+    }
+
+    @Override
+    public void updateInstitutionMembersToGamingOperatorRole(String institutionId) {
+        ArrayList<AuthInfo> operatorUsers = getOperatorUsers(institutionId);
+        for (AuthInfo operatorUser : operatorUsers) {
+            try {
+                operatorUser.setAuthRoleId(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID);
+                mongoRepositoryReactive.saveOrUpdate(operatorUser);
+            } catch (Exception e) {
+                logger.error("An error occurred while getting updating user status");
+            }
+        }
     }
 
     private CreateAuthInfoResponse toCreateAuthInfoResponse(AuthInfo authInfo, VerificationToken verificationToken) {

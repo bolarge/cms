@@ -8,10 +8,10 @@ import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
+import com.software.finatech.lslb.cms.service.service.contracts.InstitutionOnboardingWorkflowService;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
@@ -22,6 +22,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -54,17 +55,21 @@ public class InstitutionServiceImpl implements InstitutionService {
     private AuditLogHelper auditLogHelper;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private GameTypeService gameTypeService;
+    private InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService;
 
+    @Autowired
     public InstitutionServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                                   CustomerCodeCreatorAsync customerCodeCreatorAsync,
                                   AuditLogHelper auditLogHelper,
                                   SpringSecurityAuditorAware springSecurityAuditorAware,
-                                  GameTypeService gameTypeService) {
+                                  GameTypeService gameTypeService,
+                                  InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.customerCodeCreatorAsync = customerCodeCreatorAsync;
         this.auditLogHelper = auditLogHelper;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.gameTypeService = gameTypeService;
+        this.institutionOnboardingWorkflowService = institutionOnboardingWorkflowService;
     }
 
     @Override
@@ -255,7 +260,6 @@ public class InstitutionServiceImpl implements InstitutionService {
         if (existingInstitutionWithEmail != null) {
             return Mono.just(new ResponseEntity<>(String.format("An institution already exist with email %s", emailAddress), HttpStatus.BAD_REQUEST));
         }
-
         return null;
     }
 
@@ -268,10 +272,10 @@ public class InstitutionServiceImpl implements InstitutionService {
         Institution newInstitution = fromCreateInstitutionDto(institutionCreateDto);
         try {
             mongoRepositoryReactive.saveOrUpdate(newInstitution);
-            applicantUser.setAuthRoleId(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID);
             applicantUser.setInstitutionId(newInstitution.getId());
             mongoRepositoryReactive.saveOrUpdate(applicantUser);
             customerCodeCreatorAsync.createVigipayCustomerCodeForInstitution(newInstitution);
+            institutionOnboardingWorkflowService.createInstitutionOnBoardingWorkflow(newInstitution.getId());
             return Mono.just(new ResponseEntity<>(newInstitution.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while trying to save institution";
@@ -415,7 +419,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         institution.setInstitutionName(institutionUpload.getInstitutionName());
         institution.setAddress(institutionUpload.getAddress());
         institution.setEmailAddress(institutionUpload.getEmailAddress());
-    //    institution.getGameTypeIds().add(institutionUpload.getGameTypeId());
+        //    institution.getGameTypeIds().add(institutionUpload.getGameTypeId());
         institution.setDescription(institutionUpload.getDescription());
         institution.setPhoneNumber(institutionUpload.getPhoneNumber());
         institution.setId(UUID.randomUUID().toString());
@@ -430,7 +434,7 @@ public class InstitutionServiceImpl implements InstitutionService {
 //        license.setExpiryDate(institutionUpload.getLicenseEndDate());
         license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
         license.setLicenseNumber(generateLicenseNumberForInstitutionUpload(institutionUpload));
-       // license.setGameTypeId(institutionUpload.getGameTypeId());
+        // license.setGameTypeId(institutionUpload.getGameTypeId());
         license.setId(UUID.randomUUID().toString());
         return license;
     }
@@ -447,8 +451,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
 
-
-    private void loadInstitution(MultipartFile multipartFile){
+    private void loadInstitution(MultipartFile multipartFile) {
     }
 
     private Institution fromCreateInstitutionDto(InstitutionCreateDto institutionCreateDto) {

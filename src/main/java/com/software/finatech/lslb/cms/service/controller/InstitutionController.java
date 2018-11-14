@@ -3,10 +3,8 @@ package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.Institution;
-import com.software.finatech.lslb.cms.service.dto.InstitutionCreateDto;
-import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
-import com.software.finatech.lslb.cms.service.dto.InstitutionUpdateDto;
-import com.software.finatech.lslb.cms.service.dto.UploadTransactionResponse;
+import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.service.contracts.InstitutionOnboardingWorkflowService;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,11 +29,18 @@ public class InstitutionController extends BaseController {
 
 
     private InstitutionService institutionService;
+    private InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService;
+
+    @Autowired
+    public void setInstitutionOnboardingWorkflowService(InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService) {
+        this.institutionOnboardingWorkflowService = institutionOnboardingWorkflowService;
+    }
 
     @Autowired
     public void setInstitutionService(InstitutionService institutionService) {
         this.institutionService = institutionService;
     }
+
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "gameTypeIds", "institutionId"})
     @ApiOperation(value = "Get all institutions", response = InstitutionDto.class, responseContainer = "List", consumes = "application/json")
@@ -126,5 +131,16 @@ public class InstitutionController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> searchInstitutions(@RequestParam("searchKey") String searchKey) {
         return institutionService.findInstitutionsBySearchKey(searchKey);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/get-onboarding-workflow", params = {"institutionId"})
+    @ApiOperation(value = "Gets Institution Onboarding work flow", response = InstitutionOnboardingWorkFlowDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getInstitutionOnboardinWorkflow(@RequestParam("institutionId") String institutionId) {
+        return institutionOnboardingWorkflowService.getWorkflowByInstitutionId(institutionId);
     }
 }

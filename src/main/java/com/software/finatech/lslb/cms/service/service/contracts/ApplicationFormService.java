@@ -28,6 +28,9 @@ public interface ApplicationFormService {
                                                 String applicationFormStatusId,
                                                 String approverId,
                                                 String gameTypeId,
+                                                String startDate,
+                                                String endDate,
+                                                String dateProperty,
                                                 HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getAllApplicationFormStatus();
@@ -64,11 +67,11 @@ public interface ApplicationFormService {
 
     Mono<ResponseEntity> rejectApplicationForm(String applicationFormId, ApplicationFormRejectDto applicationFormRejectDto, HttpServletRequest request);
 
-    Mono<ResponseEntity> approveAIPForm(String institutionId,String gameTypeId, String approverId, HttpServletRequest request);
+    Mono<ResponseEntity> approveAIPForm(String institutionId, String gameTypeId, String approverId, HttpServletRequest request);
 
     Mono<ResponseEntity> completeApplicationForm(String applicationFormId, boolean isResubmit, HttpServletRequest request);
 
-    Mono<ResponseEntity> completeAIPForm(String institutionId,String gameTypeId, HttpServletRequest request);
+    Mono<ResponseEntity> completeAIPForm(String institutionId, String gameTypeId, HttpServletRequest request);
 
     Mono<ResponseEntity> getPaymentRecordsForApplicationForm(String applicationFormId);
 
