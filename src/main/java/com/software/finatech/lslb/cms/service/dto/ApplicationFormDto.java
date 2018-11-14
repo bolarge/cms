@@ -32,7 +32,24 @@ public class ApplicationFormDto {
     private String applicationFormId;
     private Boolean readyForApproval;
     private List<CommentDetail> comments = new ArrayList<>();
+    private String creationDate;
+    private String submissionDate;
 
+    public String getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(String creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public String getSubmissionDate() {
+        return submissionDate;
+    }
+
+    public void setSubmissionDate(String submissionDate) {
+        this.submissionDate = submissionDate;
+    }
 
     public List<CommentDetail> getComments() {
         return comments;

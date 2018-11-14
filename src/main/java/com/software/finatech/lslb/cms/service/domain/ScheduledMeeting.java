@@ -207,6 +207,13 @@ public class ScheduledMeeting extends AbstractFact {
         return scheduledMeetingStatus;
     }
 
+    public String getMeetingStatusString() {
+        ScheduledMeetingStatus scheduledMeetingStatus = getMeetingStatus();
+        if (scheduledMeetingStatus != null) {
+            return scheduledMeetingStatus.getName();
+        }
+        return null;
+    }
 
     public ScheduledMeetingPurpose getMeetingPurpose() {
         if (StringUtils.isEmpty(this.meetingPurposeId)) {

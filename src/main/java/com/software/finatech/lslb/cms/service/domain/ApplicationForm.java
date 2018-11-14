@@ -11,7 +11,7 @@ import com.software.finatech.lslb.cms.service.model.otherInformation.ApplicantOt
 import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantOutletInformation;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.*;
@@ -36,13 +36,29 @@ public class ApplicationForm extends AbstractFact {
     protected ApplicantContactDetails applicantContactDetails;
     protected LslbAdminComment lslbAdminComment;
     protected String reasonForRejection;
-    protected LocalDate submissionDate;
     protected String applicationFormId;
     protected String approverId;
     protected FormDocumentApproval documentApproval;
     protected Boolean readyForApproval;
     protected List<FormComment> formComments = new ArrayList<>();
+    protected LocalDateTime creationDate;
+    protected LocalDateTime submissionDate;
 
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public LocalDateTime getSubmissionDate() {
+        return submissionDate;
+    }
+
+    public void setSubmissionDate(LocalDateTime submissionDate) {
+        this.submissionDate = submissionDate;
+    }
 
     public List<FormComment> getFormComments() {
         return formComments;
@@ -74,14 +90,6 @@ public class ApplicationForm extends AbstractFact {
 
     public void setApplicationFormId(String applicationFormId) {
         this.applicationFormId = applicationFormId;
-    }
-
-    public LocalDate getSubmissionDate() {
-        return submissionDate;
-    }
-
-    public void setSubmissionDate(LocalDate submissionDate) {
-        this.submissionDate = submissionDate;
     }
 
     public String getReasonForRejection() {
@@ -351,7 +359,17 @@ public class ApplicationForm extends AbstractFact {
         List<CommentDetail> comments = getComments();
         Collections.reverse(comments);
         applicationFormDto.setComments(comments);
+        applicationFormDto.setCreationDate(getDateString(getCreationDate()));
+        applicationFormDto.setSubmissionDate(getDateString(getSubmissionDate()));
         return applicationFormDto;
+    }
+
+
+    private String getDateString(LocalDateTime localDateTime) {
+        if (localDateTime != null) {
+            return localDateTime.toString("dd-MM-yyyy");
+        }
+        return null;
     }
 
     private List<CommentDetail> getComments() {

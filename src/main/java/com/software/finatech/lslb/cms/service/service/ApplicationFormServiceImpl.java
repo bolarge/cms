@@ -12,10 +12,7 @@ import com.software.finatech.lslb.cms.service.model.otherInformation.ApplicantOt
 import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantOutletInformation;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
-import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
-import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
-import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
-import com.software.finatech.lslb.cms.service.service.contracts.ScheduledMeetingService;
+import com.software.finatech.lslb.cms.service.service.contracts.*;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
@@ -54,9 +51,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
     private ScheduledMeetingService scheduledMeetingService;
-
-
-    @Autowired
+    private InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService;
     private LicenseServiceImpl licenseService;
 
     private static final String applicationAuditActionId = AuditActionReferenceData.APPLICATION_ID;
@@ -68,7 +63,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                                       ApplicationFormEmailSenderAsync applicationFormNotificationHelperAsync,
                                       SpringSecurityAuditorAware springSecurityAuditorAware,
                                       AuditLogHelper auditLogHelper,
-                                      ScheduledMeetingService scheduledMeetingService) {
+                                      ScheduledMeetingService scheduledMeetingService,
+                                      InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService,
+                                      LicenseServiceImpl licenseService) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.authInfoService = authInfoService;
         this.paymentRecordService = paymentRecordService;
@@ -76,6 +73,8 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.auditLogHelper = auditLogHelper;
         this.scheduledMeetingService = scheduledMeetingService;
+        this.institutionOnboardingWorkflowService = institutionOnboardingWorkflowService;
+        this.licenseService = licenseService;
     }
 
     @Override
@@ -83,7 +82,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         try {
             Mono<ResponseEntity> validateCreateApplicationFormResponse = validateCreateApplicationForm(applicationFormCreateDto);
             if (validateCreateApplicationFormResponse != null) {
-                //        return validateCreateApplicationFormResponse;
+                //return validateCreateApplicationFormResponse;
             }
 
             ApplicationForm applicationForm = fromCreateDto(applicationFormCreateDto);
@@ -95,6 +94,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            institutionOnboardingWorkflowService.updateWorkflowForCreateApplicationForm(applicationForm);
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while creating the application form";
@@ -112,6 +112,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                                                        String applicationFormStatusId,
                                                        String approverId,
                                                        String gameTypeId,
+                                                       String startDate,
+                                                       String endDate,
+                                                       String dateProperty,
                                                        HttpServletResponse httpServletResponse) {
 
         try {
@@ -127,6 +130,15 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             }
             if (!StringUtils.isEmpty(gameTypeId)) {
                 query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+            }
+
+            if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
+                if (StringUtils.isEmpty(dateProperty)) {
+                    dateProperty = "creationDate";
+                }
+                LocalDateTime startDateTime = new LocalDateTime(startDate);
+                LocalDateTime endDateTime = new LocalDateTime(endDate);
+                query.addCriteria(Criteria.where(dateProperty).gte(startDateTime).lte(endDateTime));
             }
 
             if (page == 0) {
@@ -154,6 +166,8 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             });
 
             return Mono.just(new ResponseEntity<>(applicationFormDtos, HttpStatus.OK));
+        } catch (IllegalArgumentException e) {
+            return Mono.just(new ResponseEntity<>("Invalid Date format , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
             String errorMsg = "An error occurred while finding application forms";
             return logAndReturnError(logger, errorMsg, e);
@@ -512,8 +526,12 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-
+            //update workflow
+            institutionOnboardingWorkflowService.updateWorkflowForApprovedApplicationForm(applicationForm);
+            //send notifications
             applicationFormNotificationHelperAsync.sendApprovedMailToInstitutionAdmins(applicationForm);
+            //update institution memebrs to gamingOperatorRole
+            authInfoService.updateInstitutionMembersToGamingOperatorRole(applicationForm.getInstitutionId());
             return Mono.just(new ResponseEntity<>("Application form approved successfully", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving application form", e);
@@ -579,7 +597,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             }
             String inReviewApplicationFormStatusId = ApplicationFormStatusReferenceData.IN_REVIEW_STATUS_ID;
             applicationForm.setApplicationFormStatusId(inReviewApplicationFormStatusId);
-            applicationForm.setSubmissionDate(LocalDate.now());
+            applicationForm.setSubmissionDate(LocalDateTime.now());
             saveApplicationForm(applicationForm);
 
             String verbiage = String.format("Submitted application form : %s ->  ", applicationForm.getApplicationFormId());
@@ -587,6 +605,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
+            institutionOnboardingWorkflowService.updateWorkflowForCompleteApplicationForm(applicationForm);
             //Send email and update the application form to ready for approval
             applicationFormNotificationHelperAsync.sendApplicationFormSubmissionMailToLSLBAdmins(applicationForm);
             return Mono.just(new ResponseEntity<>("Application completed successfully and now in review", HttpStatus.OK));

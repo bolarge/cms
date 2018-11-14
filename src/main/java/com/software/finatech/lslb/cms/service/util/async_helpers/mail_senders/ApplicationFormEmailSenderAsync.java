@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.SendEmail;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -288,7 +289,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     private String buildRejectionEmailContent(ApplicationForm applicationForm) {
         String gameTypeName = applicationForm.getGameTypeName();
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
-        LocalDate submissionDate = applicationForm.getSubmissionDate();
+        LocalDateTime submissionDate = applicationForm.getSubmissionDate();
         String submissionDateString = "";
         if (submissionDate != null) {
             submissionDateString = submissionDate.toString("dd-MM-yyyy");

@@ -35,7 +35,7 @@ public class PaymentRecord extends AbstractFact {
     private String licenseTransferId;
     private MachineMultiplePayment machineMultiplePayment;
     private String licenseId;
-    private LocalDateTime creationDate = LocalDateTime.now();
+    private LocalDateTime creationDate;
     private LocalDateTime completionDate;
 
     public LocalDateTime getCreationDate() {
@@ -417,6 +417,10 @@ public class PaymentRecord extends AbstractFact {
 
     public boolean isLicenseTransferPayment() {
         return StringUtils.equals(FeePaymentTypeReferenceData.LICENSE_TRANSFER_FEE_TYPE_ID, this.feePaymentTypeId);
+    }
+
+    public boolean isApplicationPayment() {
+        return StringUtils.equals(FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID, this.feePaymentTypeId);
     }
 
     public boolean isLicenseRenewalPayment() {
