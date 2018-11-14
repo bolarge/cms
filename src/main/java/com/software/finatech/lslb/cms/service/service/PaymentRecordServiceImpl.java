@@ -11,9 +11,9 @@ import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReference
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
+import com.software.finatech.lslb.cms.service.util.QueryUtils;
 import com.software.finatech.lslb.cms.service.util.SendEmail;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -90,19 +90,10 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             if (!StringUtils.isEmpty(paymentStatusId)) {
                 query.addCriteria(Criteria.where("paymentStatusId").is(paymentStatusId));
             }
-
-            if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
-                if (StringUtils.isEmpty(dateProperty)) {
-                    dateProperty = "creationDate";
-                }
-                LocalDateTime startDateTime = new LocalDateTime(startDate);
-                LocalDateTime endDateTime = new LocalDateTime(endDate);
-                query.addCriteria(Criteria.where(dateProperty).gte(startDateTime).lte(endDateTime));
-            }
-
+            QueryUtils.addDateToQuery(query, startDate, endDate, dateProperty);
             if (page == 0 && httpServletResponse != null) {
                 long count = mongoRepositoryReactive.count(query, PaymentRecord.class).block();
-                    httpServletResponse.setHeader("TotalCount", String.valueOf(count));
+                httpServletResponse.setHeader("TotalCount", String.valueOf(count));
             }
 
             Sort sort;

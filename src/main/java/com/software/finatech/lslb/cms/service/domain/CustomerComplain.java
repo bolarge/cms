@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainActionDto;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainDto;
+import com.software.finatech.lslb.cms.service.referencedata.CustomerComplainStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
 import org.apache.commons.lang3.StringUtils;
@@ -315,6 +316,10 @@ public class CustomerComplain extends AbstractFact {
             return null;
         }
         return (AuthInfo) mongoRepositoryReactive.findById(userId, AuthInfo.class).block();
+    }
+
+    public boolean isPending() {
+        return StringUtils.equals(CustomerComplainStatusReferenceData.PENDING_ID, this.customerComplainStatusId);
     }
 
     @Override

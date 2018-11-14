@@ -52,4 +52,6 @@ public interface AuthInfoService {
     Mono<ResponseEntity> getUserFullDetail(String userId);
 
     AuthInfo findActiveUserWithEmail(String emailAddres);
+
+    void updateInstitutionMembersToGamingOperatorRole(String institutionId);
 }

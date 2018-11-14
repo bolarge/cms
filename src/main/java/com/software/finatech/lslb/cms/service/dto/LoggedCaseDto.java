@@ -30,9 +30,27 @@ public class LoggedCaseDto {
     private String licenseType;
     private String gameTypeId;
     private String gameTypeName;
+    private String outcomeId;
+    private String outcomeName;
 
     public String getGameTypeId() {
         return gameTypeId;
+    }
+
+    public String getOutcomeId() {
+        return outcomeId;
+    }
+
+    public void setOutcomeId(String outcomeId) {
+        this.outcomeId = outcomeId;
+    }
+
+    public String getOutcomeName() {
+        return outcomeName;
+    }
+
+    public void setOutcomeName(String outcomeName) {
+        this.outcomeName = outcomeName;
     }
 
     public void setGameTypeId(String gameTypeId) {
