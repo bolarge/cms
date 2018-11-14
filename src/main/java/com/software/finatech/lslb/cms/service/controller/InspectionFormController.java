@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.domain.InspectionForm;
+import com.software.finatech.lslb.cms.service.domain.InspectionFormComments;
 import com.software.finatech.lslb.cms.service.dto.InspectionCommentCreateDto;
 import com.software.finatech.lslb.cms.service.dto.InspectionFormCreateDto;
 import com.software.finatech.lslb.cms.service.dto.InspectionFormDto;
@@ -127,9 +128,7 @@ public class InspectionFormController extends BaseController {
             InspectionForm inspectionForm = new InspectionForm();
             inspectionForm.setId(UUID.randomUUID().toString());
             inspectionForm.setAgentId(inspectionFormCreateDto.getAgentId());
-            ArrayList<String>comments= new ArrayList<>();
-            comments.add(inspectionFormCreateDto.getComment());
-            inspectionForm.setComments(comments);
+            inspectionForm.setBody(inspectionFormCreateDto.getBody());
             inspectionForm.setGameTypeId(inspectionFormCreateDto.getGameTypeId());
             inspectionForm.setGamingMachineId(inspectionFormCreateDto.getGamingMachineId());
             inspectionForm.setSubject(inspectionFormCreateDto.getSubject());
@@ -161,10 +160,17 @@ public class InspectionFormController extends BaseController {
 
         try {
 
-            InspectionForm inspectionForm =(InspectionForm)mongoRepositoryReactive.findById(inspectionCommentCreateDto.getInspectionFormId(),InspectionForm.class).block();
-            inspectionForm.getComments().add(inspectionCommentCreateDto.getComment());
-            mongoRepositoryReactive.saveOrUpdate(inspectionForm);
+            InspectionFormComments inspectionFormComments = new InspectionFormComments();
+            inspectionFormComments.setComment(inspectionCommentCreateDto.getComment());
+            inspectionFormComments.setInspectionFormId(inspectionCommentCreateDto.getInspectionFormId());
+            inspectionFormComments.setUserId(inspectionCommentCreateDto.getUserId());
 
+            mongoRepositoryReactive.saveOrUpdate(inspectionFormComments);
+            InspectionForm inspectionForm= (InspectionForm)mongoRepositoryReactive.findById(inspectionCommentCreateDto.getInspectionFormId(), InspectionForm.class).block();
+                if(inspectionForm==null){
+                    return Mono.just(new ResponseEntity<>("Invalid Inspection Form", HttpStatus.BAD_REQUEST));
+
+                }
             return Mono.just(new ResponseEntity<>(inspectionForm.convertToDto(), HttpStatus.OK));
         }catch (Exception ex){
             return Mono.just(new ResponseEntity<>("Error! Please Contact Admin", HttpStatus.BAD_REQUEST));

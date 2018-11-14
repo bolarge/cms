@@ -6,10 +6,10 @@ import javax.validation.constraints.NotEmpty;
 public class InspectionFormCreateDto {
     protected String institutionId;
     protected String gameTypeId;
-    @NotEmpty(message = "Provide Comment")
-    protected String comment;
     @NotEmpty(message = "Provide User ID")
     protected String userId;
+    @NotEmpty(message = "Provide Body Message")
+    protected String body;
     @NotEmpty(message = "Provide reportDate")
     protected String inspectionDate;
     @NotEmpty(message = "Provide User role")
@@ -17,7 +17,18 @@ public class InspectionFormCreateDto {
     protected String agentId;
     protected String gamingMachineId;
     protected String agentBusinessAddress;
+
+    public String getBody() {
+        return body;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
     @NotEmpty(message = "Provide User role")
+
+
     protected String subject;
 
     public String getAgentBusinessAddress() {
@@ -82,14 +93,6 @@ public class InspectionFormCreateDto {
 
     public void setGameTypeId(String gameTypeId) {
         this.gameTypeId = gameTypeId;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
     }
 
 
