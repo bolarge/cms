@@ -276,6 +276,13 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             if (StringUtils.equals(customerComplain.getCustomerComplainStatusId(), CustomerComplainStatusReferenceData.PENDING_ID)) {
                 return Mono.just(new ResponseEntity<>("Customer complaint is not pending", HttpStatus.BAD_REQUEST));
             }
+            if ((!StringUtils.equals(CaseAndComplainTypeReferenceData.OTHERS_ID, reviewRequest.getTypeId())
+                    && !StringUtils.isEmpty(reviewRequest.getOtherTypeName()))
+                    ||
+                    (!StringUtils.equals(CaseAndComplainCategoryReferenceData.OTHERS_ID, reviewRequest.getCategoryId())
+                            && !StringUtils.isEmpty(reviewRequest.getOtherCategoryName()))) {
+                return Mono.just(new ResponseEntity<>("Invalid Request", HttpStatus.BAD_REQUEST));
+            }
             customerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.IN_REVIEW_ID);
             customerComplain.setCaseAndComplainCategoryId(reviewRequest.getCategoryId());
             customerComplain.setCaseAndComplainTypeId(reviewRequest.getTypeId());

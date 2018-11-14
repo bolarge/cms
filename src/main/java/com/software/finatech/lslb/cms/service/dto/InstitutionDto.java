@@ -1,8 +1,11 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 
+import com.software.finatech.lslb.cms.service.domain.InstitutionCategoryDetails;
 import org.springframework.data.annotation.Transient;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class InstitutionDto {
@@ -19,29 +22,18 @@ public class InstitutionDto {
     protected String licenseId;
     protected String vatFormulaId;
     protected String settlementCycleId;
-    protected Set<String> dataSourceIds = new java.util.HashSet<>();
-    protected String tradeName;
-
+    private List<InstitutionCategoryDetails> institutionCategoryDetails = new ArrayList<>();
 
     protected String tenantId;
     protected Boolean status;
     protected Set<String> gameTypeIds = new java.util.HashSet<>();
 
-    public Set<String> getDataSourceIds() {
-        return dataSourceIds;
+    public List<InstitutionCategoryDetails> getInstitutionCategoryDetails() {
+        return institutionCategoryDetails;
     }
 
-    public void setDataSourceIds(Set<String> dataSourceIds) {
-        this.dataSourceIds = dataSourceIds;
-    }
-
-
-    public String getTradeName() {
-        return tradeName;
-    }
-
-    public void setTradeName(String tradeName) {
-        this.tradeName = tradeName;
+    public void setInstitutionCategoryDetails(List<InstitutionCategoryDetails> institutionCategoryDetails) {
+        this.institutionCategoryDetails = institutionCategoryDetails;
     }
 
     @Transient

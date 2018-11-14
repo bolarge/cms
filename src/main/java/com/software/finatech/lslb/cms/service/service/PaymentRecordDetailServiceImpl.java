@@ -601,6 +601,9 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         if (licenseTransfer == null) {
             return Mono.just(new ResponseEntity<>(String.format("Licence Transfer with id %s not found", licenseTransferId), HttpStatus.BAD_REQUEST));
         }
+        if (!StringUtils.equals(licenseTransfer.getGameTypeId(), fee.getGameTypeId())) {
+            return Mono.just(new ResponseEntity<>("Kindly Select the correct category for Licence Transfer", HttpStatus.BAD_REQUEST));
+        }
         if (!licenseTransfer.isFinallyApproved()) {
             return Mono.just(new ResponseEntity<>("The Licence Transfer is not yet approved", HttpStatus.BAD_REQUEST));
         }
@@ -703,7 +706,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             int pageSize = 1000;
 
             Mono<ResponseEntity> paymentRecordsResponse = paymentRecordService.findAllPaymentRecords(page,
-                    pageSize, sortDirection, sortProperty, institutionId, agentId, null, gameTypeId, feePaymentTypeId, revenueNameId, null, null,null, null,null);
+                    pageSize, sortDirection, sortProperty, institutionId, agentId, null, gameTypeId, feePaymentTypeId, revenueNameId, null, null, null, null, null);
 
             if (paymentRecordsResponse.block().getStatusCode() == HttpStatus.NOT_FOUND) {
                 return null;

@@ -33,6 +33,8 @@ public class FeeExpiryUpdater {
         ArrayList<Fee> feeForExpiryNotification = getPendingFeesForNotification();
         for (Fee fee : feeForExpiryNotification) {
             feeMailSenderAsync.sendFeeExpiryNotificationForFeeSync(fee);
+            fee.setNextNotificationDate(fee.getNextNotificationDate().plusDays(1));
+            mongoRepositoryReactive.saveOrUpdate(fee);
         }
     }
 

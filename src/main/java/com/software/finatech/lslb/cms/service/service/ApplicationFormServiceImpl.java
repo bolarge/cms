@@ -176,7 +176,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantDetails == null) {
                     return Mono.just(new ResponseEntity<>("No applicant details found for application form", HttpStatus.NOT_FOUND));
                 } else {
-                    List<CommentDto> comments = applicantDetails.getComments();
+                    List<CommentDetail> comments = applicantDetails.getComments();
                     Collections.reverse(comments);
                     applicantDetails.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantDetails, HttpStatus.OK));
@@ -219,7 +219,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantMemberDetails == null) {
                     return Mono.just(new ResponseEntity<>("No applicant member details found for application form", HttpStatus.NOT_FOUND));
                 } else {
-                    List<CommentDto> comments = applicantMemberDetails.getComments();
+                    List<CommentDetail> comments = applicantMemberDetails.getComments();
                     Collections.reverse(comments);
                     applicantMemberDetails.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantMemberDetails, HttpStatus.OK));
@@ -263,7 +263,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantContactDetails == null) {
                     return Mono.just(new ResponseEntity<>("No applicant contact details found for application form", HttpStatus.NOT_FOUND));
                 } else {
-                    List<CommentDto> comments = applicantContactDetails.getComments();
+                    List<CommentDetail> comments = applicantContactDetails.getComments();
                     Collections.reverse(comments);
                     applicantContactDetails.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantContactDetails, HttpStatus.OK));
@@ -308,7 +308,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantCriminalityDetails == null) {
                     return Mono.just(new ResponseEntity<>("No criminality details found for application form", HttpStatus.NOT_FOUND));
                 } else {
-                    List<CommentDto> comments = applicantCriminalityDetails.getComments();
+                    List<CommentDetail> comments = applicantCriminalityDetails.getComments();
                     Collections.reverse(comments);
                     applicantCriminalityDetails.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantCriminalityDetails, HttpStatus.OK));
@@ -352,7 +352,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantDeclarationDetails == null) {
                     return Mono.just(new ResponseEntity<>("No applicant declarations details found for application form", HttpStatus.NOT_FOUND));
                 } else {
-                    List<CommentDto> comments = applicantDeclarationDetails.getComments();
+                    List<CommentDetail> comments = applicantDeclarationDetails.getComments();
                     Collections.reverse(comments);
                     applicantDeclarationDetails.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantDeclarationDetails, HttpStatus.OK));
@@ -396,7 +396,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantOtherInformation == null) {
                     return Mono.just(new ResponseEntity<>("No applicant other information found for application form", HttpStatus.NOT_FOUND));
                 } else {
-                    List<CommentDto> comments = applicantOtherInformation.getComments();
+                    List<CommentDetail> comments = applicantOtherInformation.getComments();
                     Collections.reverse(comments);
                     applicantOtherInformation.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantOtherInformation, HttpStatus.OK));
@@ -440,7 +440,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 if (applicantOutletInformation == null) {
                     return Mono.just(new ResponseEntity<>("No applicant outlet details found for application form", HttpStatus.NOT_FOUND));
                 } else {
-                    List<CommentDto> comments = applicantOutletInformation.getComments();
+                    List<CommentDetail> comments = applicantOutletInformation.getComments();
                     Collections.reverse(comments);
                     applicantOutletInformation.setComments(comments);
                     return Mono.just(new ResponseEntity<>(applicantOutletInformation, HttpStatus.OK));
@@ -939,7 +939,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>("Applicant has not filled applicant details", HttpStatus.BAD_REQUEST));
             }
 
-            CommentDto comment = new CommentDto();
+            CommentDetail comment = new CommentDetail();
             comment.setCommentDate(LocalDate.now().toString("dd-MM-yyyy"));
             comment.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
             comment.setUserFullName(loggedInUser.getFullName());
@@ -976,7 +976,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>("Applicant has not filled members details", HttpStatus.BAD_REQUEST));
             }
 
-            CommentDto comment = new CommentDto();
+            CommentDetail comment = new CommentDetail();
             comment.setCommentDate(LocalDate.now().toString("dd-MM-yyyy"));
             comment.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
             comment.setUserFullName(loggedInUser.getFullName());
@@ -1012,7 +1012,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>("Applicant has not filled contact details", HttpStatus.BAD_REQUEST));
             }
 
-            CommentDto comment = new CommentDto();
+            CommentDetail comment = new CommentDetail();
             comment.setCommentDate(LocalDate.now().toString("dd-MM-yyyy"));
             comment.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
             comment.setUserFullName(loggedInUser.getFullName());
@@ -1048,7 +1048,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>("Applicant has not filled criminality details", HttpStatus.BAD_REQUEST));
             }
 
-            CommentDto comment = new CommentDto();
+            CommentDetail comment = new CommentDetail();
             comment.setCommentDate(LocalDate.now().toString("dd-MM-yyyy"));
             comment.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
             comment.setUserFullName(loggedInUser.getFullName());
@@ -1080,7 +1080,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
             }
 
-            CommentDto comment = new CommentDto();
+            CommentDetail comment = new CommentDetail();
             comment.setCommentDate(LocalDate.now().toString("dd-MM-yyyy"));
             comment.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
             comment.setUserFullName(loggedInUser.getFullName());
@@ -1120,7 +1120,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>("Applicant has not filled other information", HttpStatus.BAD_REQUEST));
             }
 
-            CommentDto comment = new CommentDto();
+            CommentDetail comment = new CommentDetail();
             comment.setCommentDate(LocalDate.now().toString("dd-MM-yyyy"));
             comment.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
             comment.setUserFullName(loggedInUser.getFullName());
@@ -1156,7 +1156,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>("Applicant has not filled outlet information", HttpStatus.BAD_REQUEST));
             }
 
-            CommentDto comment = new CommentDto();
+            CommentDetail comment = new CommentDetail();
             comment.setCommentDate(LocalDate.now().toString("dd-MM-yyyy"));
             comment.setCommentTime(LocalDateTime.now().toString("HH:mm:ss a"));
             comment.setUserFullName(loggedInUser.getFullName());
@@ -1187,6 +1187,26 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         }
         return Mono.just(new ResponseEntity<>(aipDocumentApproval.getId(), HttpStatus.OK));
 
+    }
+
+    private ApplicationForm getApprovedApplicationFormForInstitution(String institutionId, String gameTypeId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(institutionId));
+        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        query.addCriteria(Criteria.where("applicationFormStatusId").is(ApplicationFormStatusReferenceData.APPROVED_STATUS_ID));
+        return (ApplicationForm) mongoRepositoryReactive.find(query, ApplicationForm.class).block();
+    }
+
+    @Override
+    public String getApprovedApplicationTradeNameForOperator(String institutionId, String gameTypeId) {
+        ApplicationForm applicationForm = getApprovedApplicationFormForInstitution(institutionId, gameTypeId);
+        if (applicationForm != null) {
+            ApplicantDetails applicantDetails = applicationForm.getApplicantDetails();
+            if (applicantDetails != null) {
+                return applicantDetails.getTradingName();
+            }
+        }
+        return null;
     }
 
     private ApplicationForm fromCreateDto(ApplicationFormCreateDto applicationFormCreateDto) {

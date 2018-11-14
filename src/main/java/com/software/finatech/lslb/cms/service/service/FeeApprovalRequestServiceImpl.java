@@ -147,7 +147,7 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             if (feeApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Fee Approval Request With id %s does not exist", feeApprovalRequestId), HttpStatus.BAD_REQUEST));
             }
-            if(feeApprovalRequest.isApprovedRequest() || feeApprovalRequest.isRejectedRequest()){
+            if (feeApprovalRequest.isApprovedRequest() || feeApprovalRequest.isRejectedRequest()) {
                 return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
             }
 
@@ -187,7 +187,7 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             if (feeApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Fee Approval Request With id %s does not exist", feeApprovalRequestId), HttpStatus.BAD_REQUEST));
             }
-            if(feeApprovalRequest.isApprovedRequest() || feeApprovalRequest.isRejectedRequest()){
+            if (feeApprovalRequest.isApprovedRequest() || feeApprovalRequest.isRejectedRequest()) {
                 return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
             }
 
@@ -241,7 +241,10 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
         Fee fee = feeApprovalRequest.getFee();
         if (fee != null) {
             fee.setEndDate(feeApprovalRequest.getEndDate());
-            fee.setActive(false);
+            if (fee.getEndDate().isBefore(LocalDate.now())) {
+                fee.setActive(false);
+            }
+            fee.setNextNotificationDate(fee.getEndDate().minusDays(7));
             mongoRepositoryReactive.saveOrUpdate(fee);
         }
     }
@@ -262,12 +265,17 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             }
             Fee fee = new Fee();
             fee.setId(UUID.randomUUID().toString());
-            fee.setActive(true);
+            if (pendingFee.getEffectiveDate().isBefore(LocalDate.now()) || pendingFee.getEffectiveDate().isEqual(LocalDate.now())) {
+                fee.setActive(true);
+            } else {
+                fee.setActive(false);
+            }
             fee.setGameTypeId(pendingFee.getGameTypeId());
             fee.setFeePaymentTypeId(pendingFee.getFeePaymentTypeId());
             fee.setLicenseTypeId(pendingFee.getLicenseTypeId());
             fee.setEffectiveDate(pendingFee.getEffectiveDate());
             fee.setAmount(pendingFee.getAmount());
+            fee.setEndDate(pendingFee.getEndDate());
             mongoRepositoryReactive.saveOrUpdate(fee);
             mongoRepositoryReactive.saveOrUpdate(pendingFee);
         }

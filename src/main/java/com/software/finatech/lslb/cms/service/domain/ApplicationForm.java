@@ -1,7 +1,7 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
-import com.software.finatech.lslb.cms.service.dto.CommentDto;
+import com.software.finatech.lslb.cms.service.dto.CommentDetail;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
 import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
 import com.software.finatech.lslb.cms.service.model.contactDetails.ApplicantContactDetails;
@@ -348,20 +348,20 @@ public class ApplicationForm extends AbstractFact {
         applicationFormDto.setFilledApplicantDetails(getApplicantDetails() != null);
         applicationFormDto.setApplicationFormId(getApplicationFormId());
         applicationFormDto.setReadyForApproval(getReadyForApproval());
-        List<CommentDto> comments = getComments();
+        List<CommentDetail> comments = getComments();
         Collections.reverse(comments);
         applicationFormDto.setComments(comments);
         return applicationFormDto;
     }
 
-    private List<CommentDto> getComments() {
-        List<CommentDto> comments = new ArrayList<>();
+    private List<CommentDetail> getComments() {
+        List<CommentDetail> comments = new ArrayList<>();
         for (FormComment comment : this.formComments) {
-            CommentDto dto = new CommentDto();
+            CommentDetail dto = new CommentDetail();
             dto.setComment(comment.getComment());
             dto.setUserFullName(comment.getUserFullName());
             dto.setCommentDate(comment.getTimeCreated().toString("dd-MM-yyyy"));
-            dto.setCommentTime(comment.getTimeCreated().toString("HH:mm:ss a"));
+            dto.setCommentTime(comment.getTimeCreated().toString("HH:mm a"));
             comments.add(dto);
         }
         return comments;

@@ -1,6 +1,6 @@
 package com.software.finatech.lslb.cms.service.model.outletInformation;
 
-import com.software.finatech.lslb.cms.service.dto.CommentDto;
+import com.software.finatech.lslb.cms.service.dto.CommentDetail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,13 +8,13 @@ import java.util.List;
 public class ApplicantOutletInformation {
     private String businessName;
     private int numberOfOutlets;
-    private List<CommentDto> comments = new ArrayList<>();
+    private List<CommentDetail> comments = new ArrayList<>();
 
-    public List<CommentDto> getComments() {
+    public List<CommentDetail> getComments() {
         return comments;
     }
 
-    public void setComments(List<CommentDto> comments) {
+    public void setComments(List<CommentDetail> comments) {
         this.comments = comments;
     }
 

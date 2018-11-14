@@ -31,14 +31,14 @@ public class ApplicationFormDto {
     private String lslbAdminComment;
     private String applicationFormId;
     private Boolean readyForApproval;
-    private List<CommentDto> comments = new ArrayList<>();
+    private List<CommentDetail> comments = new ArrayList<>();
 
 
-    public List<CommentDto> getComments() {
+    public List<CommentDetail> getComments() {
         return comments;
     }
 
-    public void setComments(List<CommentDto> comments) {
+    public void setComments(List<CommentDetail> comments) {
         this.comments = comments;
     }
 

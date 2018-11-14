@@ -86,13 +86,6 @@ public class FeeServiceImpl implements FeeService {
             }
             PendingFee pendingFee = new PendingFee();
 
-            if (StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, feeCreateDto.getRevenueNameId())
-                    || StringUtils.equals(LicenseTypeReferenceData.GAMING_TERMINAL_ID, feeCreateDto.getRevenueNameId())) {
-                if (StringUtils.isEmpty(feeCreateDto.getEndDate())) {
-              //      return Mono.just(new ResponseEntity<>("Please provide end date", HttpStatus.BAD_REQUEST));
-                }
-             //   pendingFee.setEndDate(new LocalDate(feeCreateDto.getEndDate()));
-            }
             pendingFee.setId(UUID.randomUUID().toString());
             pendingFee.setAmount(Double.valueOf(feeCreateDto.getAmount()));
             pendingFee.setFeePaymentTypeId(feePaymentTypeId);
@@ -100,6 +93,9 @@ public class FeeServiceImpl implements FeeService {
             pendingFee.setActive(true);
             pendingFee.setLicenseTypeId(feeCreateDto.getRevenueNameId());
             pendingFee.setEffectiveDate(new LocalDate(feeCreateDto.getStartDate()));
+            if (!StringUtils.isEmpty(feeCreateDto.getEndDate())) {
+                pendingFee.setEndDate(new LocalDate(feeCreateDto.getEndDate()));
+            }
             mongoRepositoryReactive.saveOrUpdate(pendingFee);
 
             FeeApprovalRequest feeApprovalRequest = new FeeApprovalRequest();

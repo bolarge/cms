@@ -25,6 +25,7 @@ public interface LoggedCaseService {
                                             String endDate,
                                             String categoryId,
                                             String typeId,
+                                            String gameTypeId,
                                             HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> createCase(LoggedCaseCreateDto loggedCaseCreateDto, HttpServletRequest request);
