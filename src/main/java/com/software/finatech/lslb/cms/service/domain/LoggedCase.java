@@ -208,10 +208,10 @@ public class LoggedCase extends AbstractFact {
     }
 
     public LoggedCaseStatus getCaseStatus(String caseStatusId) {
-        if (StringUtils.isEmpty(this.loggedCaseStatusId)) {
+        if (StringUtils.isEmpty(caseStatusId)) {
             return null;
         }
-        Map caseStatusMap = Mapstore.STORE.get("LoggedCaseStatus");
+        Map<String,FactObject> caseStatusMap = Mapstore.STORE.get("LoggedCaseStatus");
         LoggedCaseStatus caseStatus = null;
         if (caseStatusMap != null) {
             caseStatus = (LoggedCaseStatus) caseStatusMap.get(caseStatusId);
@@ -219,7 +219,7 @@ public class LoggedCase extends AbstractFact {
         if (caseStatus == null) {
             caseStatus = (LoggedCaseStatus) mongoRepositoryReactive.findById(caseStatusId, LoggedCaseStatus.class).block();
             if (caseStatus != null && caseStatusMap != null) {
-                caseStatusMap.put(caseStatus, caseStatusMap);
+                caseStatusMap.put(caseStatus.getId(), caseStatus);
             }
         }
         return caseStatus;
