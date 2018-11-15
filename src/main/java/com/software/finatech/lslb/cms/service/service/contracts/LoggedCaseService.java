@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
 import com.software.finatech.lslb.cms.service.domain.LoggedCase;
+import com.software.finatech.lslb.cms.service.dto.CaseOutcomeRequest;
 import com.software.finatech.lslb.cms.service.dto.LoggedCaseActionCreateDto;
 import com.software.finatech.lslb.cms.service.dto.LoggedCaseCommentCreateDto;
 import com.software.finatech.lslb.cms.service.dto.LoggedCaseCreateDto;
@@ -43,4 +44,8 @@ public interface LoggedCaseService {
     Mono<ResponseEntity> getAllCaseAndComplainType();
 
     Mono<ResponseEntity> getAllCaseAndComplainCategory();
+
+    Mono<ResponseEntity> takeActionOnCase(CaseOutcomeRequest caseActionRequest, HttpServletRequest request);
+
+    Mono<ResponseEntity> getAllCaseOutcomes();
 }

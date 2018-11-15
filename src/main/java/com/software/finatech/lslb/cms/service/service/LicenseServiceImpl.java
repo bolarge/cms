@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData.getAllowedLicensedStatusIds;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Service
@@ -846,11 +847,12 @@ public class LicenseServiceImpl implements LicenseService {
             String tradeName = applicationFormService.getApprovedApplicationTradeNameForOperator(paymentRecord.getInstitutionId(), paymentRecord.getGameTypeId());
             if (tradeName != null) {
                 InstitutionCategoryDetails institutionCategoryDetails = new InstitutionCategoryDetails();
+                institutionCategoryDetails.setId(UUID.randomUUID().toString());
+                institutionCategoryDetails.setInstitutionId(paymentRecord.getInstitutionId());
                 institutionCategoryDetails.setGameTypeId(gameType.getId());
-                institutionCategoryDetails.setGameTypeName(gameType.getName());
                 institutionCategoryDetails.setTradeName(tradeName);
                 institutionCategoryDetails.setFirstCommencementDate(LocalDate.now());
-                paymentInitiatingInstitution.getInstitutionCategoryDetailsList().add(institutionCategoryDetails);
+                paymentInitiatingInstitution.getInstitutionCategoryDetailIds().add(institutionCategoryDetails.getId());
                 mongoRepositoryReactive.saveOrUpdate(paymentInitiatingInstitution);
             }
 //           String verbiage = "Moved : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status to AIP";
@@ -1057,12 +1059,15 @@ public class LicenseServiceImpl implements LicenseService {
         return (License) mongoRepositoryReactive.findById(id, License.class).block();
     }
 
-    private List<String> getAllowedLicensedStatusIds() {
-        List<String> allowedLicenseStatusIds = new ArrayList<>();
-        allowedLicenseStatusIds.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
-        allowedLicenseStatusIds.add(LicenseStatusReferenceData.AIP_COMPLETED);
-        allowedLicenseStatusIds.add(LicenseStatusReferenceData.RENEWED_ID);
-        return allowedLicenseStatusIds;
+    @Override
+    public License findInstitutionActiveLicenseInGameType(String institutionId, String gameTypeId) {
+        Query queryForLicensedInstitutionInGameType = new Query();
+        LocalDate today = LocalDate.now();
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("institutionId").is(institutionId));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
+        queryForLicensedInstitutionInGameType.addCriteria(new Criteria().andOperator(Criteria.where("effectiveDate").lte(today), (Criteria.where("expiryDate").gte(today))));
+        return (License) mongoRepositoryReactive.find(queryForLicensedInstitutionInGameType, License.class).block();
     }
 
     private LocalDate getNewLicenseEndDate(License latestLicense, GameType gameType) throws Exception {

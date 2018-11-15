@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class FeeController extends BaseController {
         return feeService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"feePaymentTypeId", "gameTypeId", "licenseTypeId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"feePaymentTypeId", "gameTypeId", "licenseTypeId", "page", "pageSize"})
     @ApiOperation(value = "Get all Fees", response = FeeDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -37,8 +38,11 @@ public class FeeController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllFees(@RequestParam("feePaymentTypeId") String feePaymentTypeId,
                                            @RequestParam("gameTypeId") String gameTypeId,
-                                           @RequestParam("licenseTypeId") String revenueNameId) {
-        return feeService.getAllFees(feePaymentTypeId, gameTypeId, revenueNameId);
+                                           @RequestParam("licenseTypeId") String revenueNameId,
+                                           @RequestParam("page") int page,
+                                           @RequestParam("pageSize") int pageSize,
+                                           HttpServletResponse httpServletResponse) {
+        return feeService.getAllFees(feePaymentTypeId, gameTypeId, revenueNameId, page, pageSize, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-fee-payment-types")

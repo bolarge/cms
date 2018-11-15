@@ -87,9 +87,6 @@ public class DatabaseLoaderUtils {
     }
 
     // @Profile("test")
-    public void runLoadTestData() {
-        TestData.generateTestData(mongoRepositoryReactive);
-    }
 
     public void generateAuthTestData() {
         TestData.generateAuthTestData(mongoRepositoryReactive);

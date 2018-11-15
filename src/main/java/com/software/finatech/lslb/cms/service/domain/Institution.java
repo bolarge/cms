@@ -2,10 +2,10 @@ package com.software.finatech.lslb.cms.service.domain;
 
 
 import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
+import com.software.finatech.lslb.cms.service.dto.InstitutionCategoryDetailsDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
-import org.joda.time.LocalDate;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -24,14 +24,14 @@ public class Institution extends AbstractFact {
     protected String vgPayCustomerCode;
     protected String website;
     private String tradeName;
-    private List<InstitutionCategoryDetails> institutionCategoryDetailsList = new ArrayList<>();
+    private List<String> institutionCategoryDetailIds = new ArrayList<>();
 
-    public List<InstitutionCategoryDetails> getInstitutionCategoryDetailsList() {
-        return institutionCategoryDetailsList;
+    public List<String> getInstitutionCategoryDetailIds() {
+        return institutionCategoryDetailIds;
     }
 
-    public void setInstitutionCategoryDetailsList(List<InstitutionCategoryDetails> institutionCategoryDetailsList) {
-        this.institutionCategoryDetailsList = institutionCategoryDetailsList;
+    public void setInstitutionCategoryDetailIds(List<String> institutionCategoryDetailIds) {
+        this.institutionCategoryDetailIds = institutionCategoryDetailIds;
     }
 
     public String getTradeName() {
@@ -134,7 +134,6 @@ public class Institution extends AbstractFact {
 
 
     public InstitutionDto convertToDto() {
-
         InstitutionDto institutionDto = new InstitutionDto();
         institutionDto.setActive(getActive());
         institutionDto.setId(getId());
@@ -156,6 +155,24 @@ public class Institution extends AbstractFact {
             e.printStackTrace();
         }
         return institutionDto;
+    }
+
+
+    public List<InstitutionCategoryDetailsDto> getInstitutionCategoryDetailsList() {
+        List<InstitutionCategoryDetailsDto> dtos = new ArrayList<>();
+        if (!this.institutionCategoryDetailIds.isEmpty()) {
+            for (String id : this.institutionCategoryDetailIds) {
+                InstitutionCategoryDetails categoryDetails = getInstitutionCategoryDetailById(id);
+                if (categoryDetails != null) {
+                    dtos.add(categoryDetails.convertToDto());
+                }
+            }
+        }
+        return dtos;
+    }
+
+    public InstitutionCategoryDetails getInstitutionCategoryDetailById(String id) {
+        return (InstitutionCategoryDetails) mongoRepositoryReactive.findById(id, InstitutionCategoryDetails.class).block();
     }
 
     public void setAssociatedProperties() {
