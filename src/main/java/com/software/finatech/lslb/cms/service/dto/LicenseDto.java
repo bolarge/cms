@@ -18,6 +18,15 @@ public class LicenseDto {
     protected String agentId;
     private double amountPaid;
     private String ownerName;
+    private String licenseChangeReason;
+
+    public String getLicenseChangeReason() {
+        return licenseChangeReason;
+    }
+
+    public void setLicenseChangeReason(String licenseChangeReason) {
+        this.licenseChangeReason = licenseChangeReason;
+    }
 
     public String getOwnerName() {
         return ownerName;

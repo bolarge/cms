@@ -4,6 +4,7 @@ import com.software.finatech.lslb.cms.service.dto.LoggedCaseActionDto;
 import com.software.finatech.lslb.cms.service.dto.LoggedCaseCommentDto;
 import com.software.finatech.lslb.cms.service.dto.LoggedCaseDto;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LoggedCaseOutcomeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LoggedCaseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +37,15 @@ public class LoggedCase extends AbstractFact {
     private String otherTypeName;
     private String gameTypeId;
     private String loggedCaseOutcomeId;
+    private String outcomeReason;
+
+    public String getOutcomeReason() {
+        return outcomeReason;
+    }
+
+    public void setOutcomeReason(String outcomeReason) {
+        this.outcomeReason = outcomeReason;
+    }
 
     public String getLoggedCaseOutcomeId() {
         return loggedCaseOutcomeId;
@@ -198,10 +208,10 @@ public class LoggedCase extends AbstractFact {
     }
 
     public LoggedCaseStatus getCaseStatus(String caseStatusId) {
-        if (StringUtils.isEmpty(this.loggedCaseStatusId)) {
+        if (StringUtils.isEmpty(caseStatusId)) {
             return null;
         }
-        Map caseStatusMap = Mapstore.STORE.get("LoggedCaseStatus");
+        Map<String, FactObject> caseStatusMap = Mapstore.STORE.get("LoggedCaseStatus");
         LoggedCaseStatus caseStatus = null;
         if (caseStatusMap != null) {
             caseStatus = (LoggedCaseStatus) caseStatusMap.get(caseStatusId);
@@ -209,7 +219,7 @@ public class LoggedCase extends AbstractFact {
         if (caseStatus == null) {
             caseStatus = (LoggedCaseStatus) mongoRepositoryReactive.findById(caseStatusId, LoggedCaseStatus.class).block();
             if (caseStatus != null && caseStatusMap != null) {
-                caseStatusMap.put(caseStatus, caseStatusMap);
+                caseStatusMap.put(caseStatus.getId(), caseStatus);
             }
         }
         return caseStatus;
@@ -273,6 +283,11 @@ public class LoggedCase extends AbstractFact {
             dto.setGameTypeId(this.gameTypeId);
             dto.setGameTypeName(gameType.toString());
         }
+        LoggedCaseOutcome outcome = getLoggedCaseOutcome(this.loggedCaseOutcomeId);
+        if (outcome != null) {
+            dto.setOutcomeId(this.loggedCaseOutcomeId);
+            dto.setOutcomeName(outcome.getName());
+        }
         return dto;
     }
 
@@ -285,11 +300,7 @@ public class LoggedCase extends AbstractFact {
         if (machine != null) {
             dto.setMachineSerialNumber(machine.getSerialNumber());
         }
-        LoggedCaseOutcome outcome = getLoggedCaseOutcome();
-        if (outcome != null) {
-            dto.setOutcomeId(this.loggedCaseOutcomeId);
-            dto.setOutcomeName(outcome.getName());
-        }
+        dto.setOutcomeReason(getOutcomeReason());
         return dto;
     }
 
@@ -327,15 +338,18 @@ public class LoggedCase extends AbstractFact {
     private LoggedCaseActionDto convertCaseActionToDto(LoggedCaseAction caseAction) {
         LoggedCaseActionDto caseActionDto = new LoggedCaseActionDto();
         LoggedCaseStatus caseStatus = getCaseStatus(caseAction.getLslbCaseStatusId());
+        LoggedCaseOutcome loggedCaseOutcome = getLoggedCaseOutcome(caseAction.getLslbCaseOutcomeId());
         AuthInfo user = getUser(caseAction.getUserId());
         LocalDateTime actionTime = caseAction.getActionTime();
-        if (caseStatus != null && user != null && actionTime != null) {
-            caseActionDto.setCaseStatusName(caseStatus.getName());
+        if (user != null && actionTime != null) {
+            if (caseStatus != null) {
+                caseActionDto.setCaseStatusName(caseStatus.getName());
+            }
+            if (loggedCaseOutcome != null) {
+                caseActionDto.setCaseStatusName(loggedCaseOutcome.getName());
+            }
             caseActionDto.setUserName(user.getFullName());
-            caseActionDto.setActionTime(actionTime.toString("dd-MM-yyyy HH:mm:ss"));
-            String actionString = String.format("%s moved this to %s at %s", user.getFullName(),
-                    caseStatus.getName(), actionTime.toString("dd-MM-yyyy HH:mm:ss"));
-            caseActionDto.setActionString(actionString);
+            caseActionDto.setActionTime(actionTime.toString("dd-MM-yyyy HH:mm a"));
         }
         return caseActionDto;
     }
@@ -351,6 +365,12 @@ public class LoggedCase extends AbstractFact {
             return getAgentFullName();
         }
         if (isLoggedAgainstInstitution()) {
+            return getInstitutionName();
+        }
+        if (isLoggedAgainstGamingTerminal()) {
+            return getAgentFullName();
+        }
+        if (isLoggedAgainstGamingMachine()) {
             return getInstitutionName();
         }
         return null;
@@ -418,19 +438,19 @@ public class LoggedCase extends AbstractFact {
         return category;
     }
 
-    public LoggedCaseOutcome getLoggedCaseOutcome() {
-        if (StringUtils.isEmpty(this.loggedCaseOutcomeId)) {
+    public LoggedCaseOutcome getLoggedCaseOutcome(String loggedCaseOutcomeId) {
+        if (StringUtils.isEmpty(loggedCaseOutcomeId)) {
             return null;
         }
         LoggedCaseOutcome outcome = null;
         Map<String, FactObject> outcomeMap = Mapstore.STORE.get("LoggedCaseOutcome");
         if (outcomeMap != null) {
-            outcome = (LoggedCaseOutcome) outcomeMap.get(this.loggedCaseOutcomeId);
+            outcome = (LoggedCaseOutcome) outcomeMap.get(loggedCaseOutcomeId);
         }
         if (outcome == null) {
-            outcome = (LoggedCaseOutcome) mongoRepositoryReactive.findById(this.loggedCaseOutcomeId, LoggedCaseOutcome.class).block();
+            outcome = (LoggedCaseOutcome) mongoRepositoryReactive.findById(loggedCaseOutcomeId, LoggedCaseOutcome.class).block();
             if (outcome != null && outcomeMap != null) {
-                outcomeMap.put(this.loggedCaseOutcomeId, outcome);
+                outcomeMap.put(loggedCaseOutcomeId, outcome);
             }
         }
         return outcome;
@@ -502,7 +522,27 @@ public class LoggedCase extends AbstractFact {
         return null;
     }
 
+    public boolean isOutcomeLicenseRevoked() {
+        return StringUtils.equals(LoggedCaseOutcomeReferenceData.LICENSE_REVOKED_ID, this.loggedCaseOutcomeId);
+    }
+
+    public boolean isOutcomeLicenseSuspended() {
+        return StringUtils.equals(LoggedCaseOutcomeReferenceData.LICENSE_SUSPENDED_ID, this.loggedCaseOutcomeId);
+    }
+
+    public boolean isOutcomeLicenseTerminated() {
+        return StringUtils.equals(LoggedCaseOutcomeReferenceData.LICENSE_TERMINATED_ID, this.loggedCaseOutcomeId);
+    }
+
+    public boolean isOutcomePenalty() {
+        return StringUtils.equals(LoggedCaseOutcomeReferenceData.PENALTY_ID, this.loggedCaseOutcomeId);
+    }
+
     public boolean isClosed() {
         return StringUtils.equals(LoggedCaseStatusReferenceData.CLOSED_ID, this.loggedCaseStatusId);
+    }
+
+    public boolean hasOutcome() {
+        return !StringUtils.isEmpty(this.loggedCaseOutcomeId);
     }
 }

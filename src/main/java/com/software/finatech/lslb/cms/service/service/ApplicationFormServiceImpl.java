@@ -137,7 +137,6 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 Long count = mongoRepositoryReactive.count(query, ApplicationForm.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
             }
-
             Sort sort;
             if (!StringUtils.isEmpty(sortDirection) && !StringUtils.isEmpty(sortProperty)) {
                 sort = new Sort((sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC),
@@ -1233,6 +1232,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         LocalDateTime presentTime = LocalDateTime.now();
         String applicationFormId = String.format("LSLB-APP%s-%s%s%s", gameTypePref, NumberUtil.getRandomNumberInRange(10, 100), presentTime.getSecondOfMinute(), presentTime.getMinuteOfHour());
         applicationForm.setApplicationFormId(applicationFormId);
+        applicationForm.setCreationDate(LocalDateTime.now());
         return applicationForm;
     }
 

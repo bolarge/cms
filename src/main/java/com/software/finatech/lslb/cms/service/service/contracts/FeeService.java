@@ -7,12 +7,13 @@ import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 public interface FeeService {
     Mono<ResponseEntity> createFee(FeeCreateDto feeCreateDto, HttpServletRequest request);
 
-    Mono<ResponseEntity> getAllFees(String feePaymentTypeId, String gameTypeId, String revenueNameId);
+    Mono<ResponseEntity> getAllFees(String feePaymentTypeId, String gameTypeId, String revenueNameId, int page, int pageSize, HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getAllFeePaymentType();
 

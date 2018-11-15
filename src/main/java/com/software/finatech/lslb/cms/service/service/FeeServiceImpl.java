@@ -17,6 +17,7 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -246,7 +248,12 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public Mono<ResponseEntity> getAllFees(String feePaymentTypeId, String gameTypeId, String revenueNameId) {
+    public Mono<ResponseEntity> getAllFees(String feePaymentTypeId,
+                                           String gameTypeId,
+                                           String revenueNameId,
+                                           int page,
+                                           int pageSize,
+                                           HttpServletResponse httpServletResponse) {
         try {
             Query query = new Query();
             if (!StringUtils.isEmpty(feePaymentTypeId)) {
@@ -259,6 +266,14 @@ public class FeeServiceImpl implements FeeService {
                 query.addCriteria(Criteria.where("licenseTypeId").is(revenueNameId));
             }
 
+            if (page == 0) {
+                Long count = mongoRepositoryReactive.count(query, Fee.class).block();
+                httpServletResponse.setHeader("TotalCount", String.valueOf(count));
+            }
+            Sort sort = new Sort(Sort.Direction.DESC, "createdAt");
+
+            query.with(PageRequest.of(page, pageSize, sort));
+            query.with(sort);
 
             ArrayList<Fee> fees = (ArrayList<Fee>) mongoRepositoryReactive.findAll(query, Fee.class).toStream().collect(Collectors.toList());
             if (fees == null || fees.isEmpty()) {

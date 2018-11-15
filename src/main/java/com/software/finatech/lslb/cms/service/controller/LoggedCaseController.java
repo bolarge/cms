@@ -49,7 +49,7 @@ public class LoggedCaseController {
                                                   @RequestParam("typeId") String typeId,
                                                   @RequestParam("gameTypeId") String gameTypeId,
                                                   HttpServletResponse httpServletResponse) {
-        return loggedCaseService.findAllLoggedCases(page, pageSize, sortType, sortParam, reporterId, institutionId, statusId, agentId, startDate, endDate, categoryId, typeId,gameTypeId, httpServletResponse);
+        return loggedCaseService.findAllLoggedCases(page, pageSize, sortType, sortParam, reporterId, institutionId, statusId, agentId, startDate, endDate, categoryId, typeId, gameTypeId, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create", produces = "application/json")
@@ -117,6 +117,7 @@ public class LoggedCaseController {
     public Mono<ResponseEntity> getAllCaseAndComplainCategory() {
         return loggedCaseService.getAllCaseAndComplainCategory();
     }
+
     @RequestMapping(method = RequestMethod.GET, value = "/all-case-and-complain-type", produces = "application/json")
     @ApiOperation(value = "Get all Case/Complain Type", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
@@ -126,5 +127,27 @@ public class LoggedCaseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllCaseAndComplainType() {
         return loggedCaseService.getAllCaseAndComplainType();
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/all-case-outcomes", produces = "application/json")
+    @ApiOperation(value = "Get all Case Actions", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAllCaseOutcomes() {
+        return loggedCaseService.getAllCaseOutcomes();
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/take-action", produces = "application/json")
+    @ApiOperation(value = "Take Action on Logged Case", response = LoggedCaseDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> takeAction(@RequestBody CaseOutcomeRequest caseActionRequest, HttpServletRequest request) {
+        return loggedCaseService.takeActionOnCase(caseActionRequest, request);
     }
 }

@@ -32,9 +32,18 @@ public class LoggedCaseDto {
     private String gameTypeName;
     private String outcomeId;
     private String outcomeName;
+    private String outcomeReason;
 
     public String getGameTypeId() {
         return gameTypeId;
+    }
+
+    public String getOutcomeReason() {
+        return outcomeReason;
+    }
+
+    public void setOutcomeReason(String outcomeReason) {
+        this.outcomeReason = outcomeReason;
     }
 
     public String getOutcomeId() {

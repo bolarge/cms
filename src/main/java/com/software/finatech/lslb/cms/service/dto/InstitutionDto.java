@@ -22,17 +22,18 @@ public class InstitutionDto {
     protected String licenseId;
     protected String vatFormulaId;
     protected String settlementCycleId;
-    private List<InstitutionCategoryDetails> institutionCategoryDetails = new ArrayList<>();
+    private List<InstitutionCategoryDetailsDto> institutionCategoryDetails = new ArrayList<>();
 
     protected String tenantId;
     protected Boolean status;
     protected Set<String> gameTypeIds = new java.util.HashSet<>();
 
-    public List<InstitutionCategoryDetails> getInstitutionCategoryDetails() {
+
+    public List<InstitutionCategoryDetailsDto> getInstitutionCategoryDetails() {
         return institutionCategoryDetails;
     }
 
-    public void setInstitutionCategoryDetails(List<InstitutionCategoryDetails> institutionCategoryDetails) {
+    public void setInstitutionCategoryDetails(List<InstitutionCategoryDetailsDto> institutionCategoryDetails) {
         this.institutionCategoryDetails = institutionCategoryDetails;
     }
 
