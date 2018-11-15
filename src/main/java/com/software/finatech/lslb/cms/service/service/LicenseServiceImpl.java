@@ -487,8 +487,6 @@ public class LicenseServiceImpl implements LicenseService {
         try {
 
             //TODO: get all lslb admins that can recieve notification
-            ArrayList<AuthInfo> lslbAdmins = new ArrayList<>();
-
 
             Query queryLicence = new Query();
             queryLicence.addCriteria(Criteria.where("id").is(licenseId));
@@ -499,15 +497,22 @@ public class LicenseServiceImpl implements LicenseService {
             }
             license.setLicenseStatusId(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID);
             mongoRepositoryReactive.saveOrUpdate(license);
-            NotificationDto notificationDto = new NotificationDto();
-            notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
-            notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
-            notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ",  has uploaded " +
-                    notificationDto.getGameType() + " AIP Documents.");
-            notificationDto.setTemplate("AIPUpdate");
-            notificationDto.setCallBackUrl(frontEndPropertyHelper.getFrontEndUrl() + "/all-aips");
-            notificationDto.setInstitutionEmail(adminEmail);
-            sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
+            List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_AIP_ID);
+            if(lslbAdmins.size()!=0) {
+                lslbAdmins.stream().forEach(lslbAdmin -> {
+                    NotificationDto notificationDto = new NotificationDto();
+                    notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
+                    notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
+                    notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ",  has uploaded " +
+                            notificationDto.getGameType() + " AIP Documents.");
+                    notificationDto.setTemplate("AIPUpdate");
+                    notificationDto.setCallBackUrl(frontEndPropertyHelper.getFrontEndUrl() + "/all-aips");
+                    notificationDto.setInstitutionEmail(lslbAdmin.getEmailAddress());
+                    sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
+
+                });
+
+            }
 
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
 
