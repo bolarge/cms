@@ -283,6 +283,11 @@ public class LoggedCase extends AbstractFact {
             dto.setGameTypeId(this.gameTypeId);
             dto.setGameTypeName(gameType.toString());
         }
+        LoggedCaseOutcome outcome = getLoggedCaseOutcome(this.loggedCaseOutcomeId);
+        if (outcome != null) {
+            dto.setOutcomeId(this.loggedCaseOutcomeId);
+            dto.setOutcomeName(outcome.getName());
+        }
         return dto;
     }
 
@@ -294,11 +299,6 @@ public class LoggedCase extends AbstractFact {
         Machine machine = getMachine();
         if (machine != null) {
             dto.setMachineSerialNumber(machine.getSerialNumber());
-        }
-        LoggedCaseOutcome outcome = getLoggedCaseOutcome(this.loggedCaseOutcomeId);
-        if (outcome != null) {
-            dto.setOutcomeId(this.loggedCaseOutcomeId);
-            dto.setOutcomeName(outcome.getName());
         }
         dto.setOutcomeReason(getOutcomeReason());
         return dto;
