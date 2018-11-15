@@ -6,6 +6,15 @@ public class LoggedCaseAction {
     private LocalDateTime actionTime;
     private String userId;
     private String lslbCaseStatusId;
+    private String lslbCaseOutcomeId;
+
+    public String getLslbCaseOutcomeId() {
+        return lslbCaseOutcomeId;
+    }
+
+    public void setLslbCaseOutcomeId(String lslbCaseOutcomeId) {
+        this.lslbCaseOutcomeId = lslbCaseOutcomeId;
+    }
 
     public LocalDateTime getActionTime() {
         return actionTime;

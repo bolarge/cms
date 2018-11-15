@@ -1,11 +1,14 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.beans.Transient;
 import java.util.Map;
@@ -29,6 +32,15 @@ public class License extends AbstractFact {
     protected String licenseNumber;
     protected LocalDate lastSentExpiryEmailDate;
     protected String licenseTransferId;
+    protected String licenseChangeReason;
+
+    public String getLicenseChangeReason() {
+        return licenseChangeReason;
+    }
+
+    public void setLicenseChangeReason(String licenseChangeReason) {
+        this.licenseChangeReason = licenseChangeReason;
+    }
 
     public String getLicenseTransferId() {
         return licenseTransferId;
@@ -246,10 +258,9 @@ public class License extends AbstractFact {
         }
         Institution institution = getInstitution();
         if (institution != null) {
-            for (InstitutionCategoryDetails categoryDetails : institution.getInstitutionCategoryDetailsList()) {
-                if (StringUtils.equals(this.gameTypeId, categoryDetails.getGameTypeId())) {
-                    ownerName = institution.getInstitutionName();
-                }
+            InstitutionCategoryDetails institutionCategoryDetails = getInstitutionCategoryDetails();
+            if (institutionCategoryDetails != null) {
+                ownerName = institutionCategoryDetails.getTradeName();
             }
             if (StringUtils.isEmpty(ownerName)) {
                 ownerName = institution.getInstitutionName();
@@ -267,6 +278,16 @@ public class License extends AbstractFact {
         }
         licenseDto.setOwnerName(ownerName);
         return licenseDto;
+    }
+
+    private InstitutionCategoryDetails getInstitutionCategoryDetails() {
+        if (!StringUtils.isEmpty(this.institutionId) && !StringUtils.isEmpty(this.gameTypeId)) {
+            Query query = new Query();
+            query.addCriteria(Criteria.where("institutionId").is(this.institutionId));
+            query.addCriteria(Criteria.where("gameTypeId").is(this.gameTypeId));
+            return (InstitutionCategoryDetails) mongoRepositoryReactive.find(query, InstitutionCategoryDetails.class).block();
+        }
+        return null;
     }
 
     public boolean isInstitutionLicense() {
@@ -314,6 +335,22 @@ public class License extends AbstractFact {
             return null;
         }
         return (LicenseTransfer) mongoRepositoryReactive.findById(this.licenseTransferId, LicenseTransfer.class).block();
+    }
+
+    public boolean isSuspendedLicence(){
+        return StringUtils.equals(LicenseStatusReferenceData.LICENSE_SUSPENDED_ID, this.licenseStatusId);
+    }
+
+    public boolean isTerminatedLicence(){
+        return StringUtils.equals(LicenseStatusReferenceData.LICENSE_TERMINATED_ID, this.licenseStatusId);
+    }
+
+    public boolean isRevokedLicence(){
+        return StringUtils.equals(LicenseStatusReferenceData.LICENSE_REVOKED_ID, this.licenseStatusId);
+    }
+
+    public boolean isExpiredLicence(){
+        return StringUtils.equals(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID, this.licenseStatusId);
     }
 
     @Override

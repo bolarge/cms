@@ -1,6 +1,9 @@
 package com.software.finatech.lslb.cms.service.util.data_updater;
 
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.GameType;
+import com.software.finatech.lslb.cms.service.domain.Institution;
+import com.software.finatech.lslb.cms.service.domain.InstitutionCategoryDetails;
+import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.dto.InstitutionLoadDetails;
 import com.software.finatech.lslb.cms.service.dto.InstitutionUpload;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
@@ -109,13 +112,15 @@ public class ExistingOperatorLoader {
             pendingInstitution.setPhoneNumber(institutionUpload.getPhoneNumber());
             pendingInstitution.setAddress(institutionUpload.getAddress());
             for (InstitutionLoadDetails institutionLoadDetails : institutionUpload.getInstitutionLoadDetails()) {
-                GameType gameType = gameTypeService.findById(institutionLoadDetails.getGameTypeId());
                 InstitutionCategoryDetails institutionCategoryDetails = new InstitutionCategoryDetails();
+                institutionCategoryDetails.setId(UUID.randomUUID().toString());
                 institutionCategoryDetails.setFirstCommencementDate(institutionLoadDetails.getFirstCommencementDate());
-                institutionCategoryDetails.setGameTypeId(gameType.getId());
-                institutionCategoryDetails.setGameTypeName(gameType.toString());
+                institutionCategoryDetails.setGameTypeId(institutionLoadDetails.getGameTypeId());
                 institutionCategoryDetails.setTradeName(institutionLoadDetails.getTradeName());
-                pendingInstitution.getInstitutionCategoryDetailsList().add(institutionCategoryDetails);
+                institutionCategoryDetails.setInstitutionId(pendingInstitution.getId());
+                mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
+                pendingInstitution.getInstitutionCategoryDetailIds().add(institutionCategoryDetails.getId());
+
                 License pendingLicense = new License();
                 pendingLicense.setId(UUID.randomUUID().toString());
                 pendingLicense.setInstitutionId(pendingInstitution.getId());

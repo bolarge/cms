@@ -42,7 +42,7 @@ public class MongoRepositoryReactiveImpl implements MongoRepositoryReactive<Fact
 
 	@Override
 	public void delete(FactObject fact) {
-		reactiveMongoTemplate.remove(fact);//.subscribe();
+		reactiveMongoTemplate.remove(fact).block();//.subscribe();
 	}
 
 	@Override

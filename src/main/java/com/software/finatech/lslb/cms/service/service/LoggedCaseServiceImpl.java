@@ -2,12 +2,10 @@ package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
-import com.software.finatech.lslb.cms.service.dto.LoggedCaseActionCreateDto;
-import com.software.finatech.lslb.cms.service.dto.LoggedCaseCommentCreateDto;
-import com.software.finatech.lslb.cms.service.dto.LoggedCaseCreateDto;
-import com.software.finatech.lslb.cms.service.dto.LoggedCaseDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
+import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.service.contracts.LoggedCaseService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
@@ -31,6 +29,7 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -46,15 +45,18 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
     private LoggedCaseMailSenderAsync loggedCaseMailSenderAsync;
     private AuditLogHelper auditLogHelper;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
+    private LicenseService licenseService;
 
     @Autowired
     public LoggedCaseServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                                  LoggedCaseMailSenderAsync loggedCaseMailSenderAsync,
-                                 AuditLogHelper auditLogHelper, SpringSecurityAuditorAware springSecurityAuditorAware) {
+                                 AuditLogHelper auditLogHelper, SpringSecurityAuditorAware springSecurityAuditorAware,
+                                 LicenseService licenseService) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.loggedCaseMailSenderAsync = loggedCaseMailSenderAsync;
         this.auditLogHelper = auditLogHelper;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
+        this.licenseService = licenseService;
     }
 
     @Override
@@ -264,7 +266,6 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             if (loggedCase == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Case with id %s does not exist", loggedCaseId), HttpStatus.BAD_REQUEST));
             }
-
             return Mono.just(new ResponseEntity<>(loggedCase.convertToFullDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while getting logged case full detail", e);
@@ -279,6 +280,77 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
     @Override
     public Mono<ResponseEntity> getAllCaseAndComplainCategory() {
         return ReferenceDataUtil.getAllEnumeratedEntity("CaseAndComplainCategory");
+    }
+
+    @Override
+    public Mono<ResponseEntity> getAllCaseOutcomes() {
+        return ReferenceDataUtil.getAllEnumeratedEntity("LoggedCaseOutcome");
+    }
+
+    @Override
+    public Mono<ResponseEntity> takeActionOnCase(CaseOutcomeRequest caseActionRequest, HttpServletRequest request) {
+        try {
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+
+            LoggedCase loggedCase = findCaseById(caseActionRequest.getLoggedCaseId());
+            if (loggedCase == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Logged case with id %s not found", caseActionRequest.getLoggedCaseId()), HttpStatus.BAD_REQUEST));
+            }
+            if (loggedCase.isClosed()) {
+                return Mono.just(new ResponseEntity<>("The case is already closed", HttpStatus.BAD_REQUEST));
+            }
+            LoggedCaseOutcome loggedCaseOutcome = findLoggedCaseOutcome(caseActionRequest.getCaseOutcomeId());
+            if (loggedCaseOutcome == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Logged case outcome with id %s not found",
+                        caseActionRequest.getCaseOutcomeId()), HttpStatus.BAD_REQUEST));
+            }
+
+            loggedCase.setLoggedCaseOutcomeId(caseActionRequest.getCaseOutcomeId());
+            loggedCase.setLoggedCaseStatusId(LoggedCaseStatusReferenceData.CLOSED_ID);
+            loggedCase.setOutcomeReason(caseActionRequest.getReason());
+
+            LoggedCaseAction action = new LoggedCaseAction();
+            action.setActionTime(LocalDateTime.now());
+            action.setUserId(loggedInUser.getId());
+            action.setLslbCaseOutcomeId(caseActionRequest.getCaseOutcomeId());
+            loggedCase.getCaseActions().add(action);
+            makeOutComeEffectOnOperatorLicense(loggedCase, caseActionRequest.getReason());
+            mongoRepositoryReactive.saveOrUpdate(loggedCase);
+
+            String verbiage = String.format("Made Outcome on Logged Case, Ticket id: -> %s, Outcome -> %s",
+                    loggedCase.getTicketId(), loggedCaseOutcome);
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(loggedCaseAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), loggedCase.getReportedEntityName(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            return Mono.just(new ResponseEntity<>(loggedCase.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while taking action on case", e);
+        }
+    }
+
+    private void makeOutComeEffectOnOperatorLicense(LoggedCase loggedCase, String reason) {
+        License license = licenseService.findInstitutionActiveLicenseInGameType(loggedCase.getInstitutionId(), loggedCase.getGameTypeId());
+        if (license != null) {
+            if (loggedCase.isOutcomeLicenseRevoked()) {
+                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_REVOKED_ID);
+                license.setLicenseChangeReason(reason);
+            }
+            if (loggedCase.isOutcomeLicenseSuspended()) {
+                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_SUSPENDED_ID);
+                license.setLicenseChangeReason(reason);
+            }
+            if (loggedCase.isOutcomeLicenseTerminated()) {
+                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_TERMINATED_ID);
+                license.setLicenseChangeReason(reason);
+            }
+            if (loggedCase.isOutcomePenalty()) {
+                loggedCaseMailSenderAsync.sendPenaltyMailToOffender(loggedCase);
+            }
+            mongoRepositoryReactive.saveOrUpdate(license);
+        }
     }
 
     private LoggedCase fromLoggedCaseCreateDto(LoggedCaseCreateDto caseCreateDto) {
@@ -314,6 +386,19 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             return false;
         }
         return user.getEnabled() && getValidRoleIds().contains(user.getAuthRoleId());
+    }
+
+    private LoggedCaseOutcome findLoggedCaseOutcome(String id) {
+        Collection<FactObject> factObjects = ReferenceDataUtil.getAllEnumeratedFacts("LoggedCaseOutcome");
+        if (factObjects != null) {
+            for (FactObject factObject : factObjects) {
+                LoggedCaseOutcome loggedCaseOutcome = (LoggedCaseOutcome) factObject;
+                if (StringUtils.equals(id, loggedCaseOutcome.getId())) {
+                    return loggedCaseOutcome;
+                }
+            }
+        }
+        return null;
     }
 
     private List<String> getValidRoleIds() {

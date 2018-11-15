@@ -4,14 +4,9 @@ package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.LoggedCase;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
-import com.software.finatech.lslb.cms.service.service.EmailService;
-import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
-import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
-import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -58,5 +53,8 @@ public class LoggedCaseMailSenderAsync extends AbstractMailSender {
         model.put("reportedName", loggedCase.getReportedEntityName());
         model.put("reporterName", loggedCase.getReporterName());
         return mailContentBuilderService.build(model, "NewCaseLSLBAdmin");
+    }
+
+    public void sendPenaltyMailToOffender(LoggedCase loggedCase) {
     }
 }

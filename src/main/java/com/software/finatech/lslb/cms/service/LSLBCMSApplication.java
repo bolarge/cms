@@ -35,10 +35,6 @@ public class LSLBCMSApplication {
         databaseLoaderUtils.runSeedData(env);
 
         if (Arrays.asList(env.getActiveProfiles()).contains("development") || Arrays.asList(env.getActiveProfiles()).contains("test")) {
-            databaseLoaderUtils.runLoadTestData();
-        }
-
-        if (Arrays.asList(env.getActiveProfiles()).contains("development") || Arrays.asList(env.getActiveProfiles()).contains("test")) {
             databaseLoaderUtils.generateAuthTestData();
         }
         databaseLoaderUtils.runLoadData();
