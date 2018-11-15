@@ -13,6 +13,24 @@ public class InstitutionDashboardSummaryDto {
     protected String effectiveDate;
     protected String expiryDate;
     protected String gameType;
+    protected boolean allowsGamingTerminal;
+    protected boolean allowsGamingMachine;
+
+    public boolean isAllowsGamingTerminal() {
+        return allowsGamingTerminal;
+    }
+
+    public void setAllowsGamingTerminal(boolean allowsGamingTerminal) {
+        this.allowsGamingTerminal = allowsGamingTerminal;
+    }
+
+    public boolean isAllowsGamingMachine() {
+        return allowsGamingMachine;
+    }
+
+    public void setAllowsGamingMachine(boolean allowsGamingMachine) {
+        this.allowsGamingMachine = allowsGamingMachine;
+    }
 
     public long getNumberOfGamingTerminals() {
         return numberOfGamingTerminals;

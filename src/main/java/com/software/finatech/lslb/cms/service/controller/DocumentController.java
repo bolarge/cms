@@ -371,7 +371,7 @@ public class DocumentController extends BaseController {
 
 
     @RequestMapping(method = RequestMethod.GET, value = "/unlink-document", params = {"documentId"})
-    @ApiOperation(value = "Delete unwanted document", response = ApplicationFormDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiOperation(value = "Delete unwanted document", response = String.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
