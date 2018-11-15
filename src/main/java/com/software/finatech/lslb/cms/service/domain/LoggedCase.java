@@ -211,7 +211,7 @@ public class LoggedCase extends AbstractFact {
         if (StringUtils.isEmpty(caseStatusId)) {
             return null;
         }
-        Map<String,FactObject> caseStatusMap = Mapstore.STORE.get("LoggedCaseStatus");
+        Map<String, FactObject> caseStatusMap = Mapstore.STORE.get("LoggedCaseStatus");
         LoggedCaseStatus caseStatus = null;
         if (caseStatusMap != null) {
             caseStatus = (LoggedCaseStatus) caseStatusMap.get(caseStatusId);
@@ -350,9 +350,6 @@ public class LoggedCase extends AbstractFact {
             }
             caseActionDto.setUserName(user.getFullName());
             caseActionDto.setActionTime(actionTime.toString("dd-MM-yyyy HH:mm a"));
-            String actionString = String.format("%s moved this to %s at %s", user.getFullName(),
-                    caseStatus.getName(), actionTime.toString("dd-MM-yyyy HH:mm a"));
-            caseActionDto.setActionString(actionString);
         }
         return caseActionDto;
     }
