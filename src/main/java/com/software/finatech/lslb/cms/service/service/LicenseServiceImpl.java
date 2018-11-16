@@ -840,7 +840,6 @@ public class LicenseServiceImpl implements LicenseService {
             LocalDate expiryDate = effectiveDate.plusMonths(gameType.getAipDurationMonths()).minusDays(1);
             License license = new License();
             license.setId(UUID.randomUUID().toString());
-            license.setId(UUID.randomUUID().toString());
             license.setInstitutionId(paymentRecord.getInstitutionId());
             license.setGameTypeId(paymentRecord.getGameTypeId());
             license.setLicenseTransferId(paymentRecord.getLicenseTransferId());
