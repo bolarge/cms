@@ -83,7 +83,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         try {
             Mono<ResponseEntity> validateCreateApplicationFormResponse = validateCreateApplicationForm(applicationFormCreateDto);
             if (validateCreateApplicationFormResponse != null) {
-                //return validateCreateApplicationFormResponse;
+                return validateCreateApplicationFormResponse;
             }
 
             ApplicationForm applicationForm = fromCreateDto(applicationFormCreateDto);
