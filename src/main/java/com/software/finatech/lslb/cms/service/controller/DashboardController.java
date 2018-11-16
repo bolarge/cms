@@ -274,6 +274,8 @@ public class DashboardController extends BaseController {
                 institutionDashboardSummaryDto.setNumberOfAgents(getAgentCountForInstitution(institutionId));
                 institutionDashboardSummaryDto.setNumberOfGamingMachines(getGamingMachineCountForInstitution(institutionId));
                 institutionDashboardSummaryDto.setNumberOfGamingTerminals(getGamingTerminalCountForInstitution(institutionId));
+                institutionDashboardSummaryDto.setAllowsGamingMachine(getGameType(license.getGameTypeId()).getAllowsGamingMachine());
+                institutionDashboardSummaryDto.setAllowsGamingTerminal(getGameType(license.getGameTypeId()).getAllowsGamingTerminal());
                 institutionDashboardSummaryDtoHashMap.put(license.getGameTypeId(), institutionDashboardSummaryDto);
 
 

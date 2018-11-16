@@ -10,6 +10,8 @@ public class DocumentTypeReferenceData {
 
     private static String applicationFormDocumentPurposeId = DocumentPurposeReferenceData.APPLICATION_FORM_DOCUMENT_PURPOSE_ID;
     private static String AIPDocumentPurposeId = DocumentPurposeReferenceData.AIP_LICENSE_ID;
+    private static String AIPReportDocumentPurposeId = DocumentPurposeReferenceData.AIP_REPORT_ID;
+
     private static String RENEWALDocumentPurposeId = DocumentPurposeReferenceData.RENEWAL_LICENSE_ID;
     private static String INSPECTION_ID = DocumentPurposeReferenceData.INSPECTION_ID;
 
@@ -220,7 +222,7 @@ public class DocumentTypeReferenceData {
             documentType26.setId("26");
         }
         documentType26.setName("AIP Assessment Document Type");
-        documentType26.setDocumentPurposeId(AIPDocumentPurposeId);
+        documentType26.setDocumentPurposeId(AIPReportDocumentPurposeId);
         documentType26.setGameTypeIds(getOSbAndPolGameTypeIdSet());
         documentType26.setActive(true);
         documentType26.setRequired(false);

@@ -12,6 +12,7 @@ public class LSLBAuthPermissionReferenceData {
     public static final String RECEIVE_APPLICATION_ID = "31";
     public static final String RECEIVE_PAYMENT_NOTIFICATION_ID = "32";
     public static final String RECEIVE_CUSTOMER_COMPLAIN_ID = "33";
+    public static final String RECEIVE_AIP_ID = "71";
     public static final String RECEIVE_AGENT_APPROVAL_AGENT_REQUEST_ID = "48";
     public static final String RECEIVE_CASE_NOTIFICATION_ID = "51";
     public static final String APPROVE_APPLICATION_FORM_ID = "57";
@@ -460,6 +461,8 @@ public class LSLBAuthPermissionReferenceData {
         permission.setUsedBySystem(true);
         mongoRepositoryReactive.saveOrUpdate(permission);
 
+
+
         permission = (AuthPermission) mongoRepositoryReactive.findById("49", AuthPermission.class).block();
         if (permission == null) {
             permission = new AuthPermission();
@@ -639,6 +642,16 @@ public class LSLBAuthPermissionReferenceData {
         permission.setDescription("Receive License Transfer Notification");
         permission.setUsedBySystem(true);
         mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById(RECEIVE_AIP_ID, AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId(RECEIVE_AIP_ID);
+        }
+        permission.setName("RECEIVE AIP REQUEST NOTIFICATION");
+        permission.setDescription("Receive AIP request Notification");
+        permission.setUsedBySystem(true);
+        mongoRepositoryReactive.saveOrUpdate(permission);
     }
 
 
@@ -681,6 +694,7 @@ public class LSLBAuthPermissionReferenceData {
         permissions.add("43");
         permissions.add("45");
         permissions.add("46");
+        permissions.add("71");
         return permissions;
     }
 
@@ -816,6 +830,7 @@ public class LSLBAuthPermissionReferenceData {
         permissions.add("45");
         permissions.add("49");
         permissions.add("50");
+        permissions.add("71");
         return permissions;
     }
 
@@ -832,6 +847,7 @@ public class LSLBAuthPermissionReferenceData {
     public static List<String> getCodeUsedPermissions() {
         List<String> codePermissions = new ArrayList<>();
         codePermissions.add(RECEIVE_APPLICATION_ID);
+        codePermissions.add(RECEIVE_AIP_ID);
         codePermissions.add(RECEIVE_CUSTOMER_COMPLAIN_ID);
         codePermissions.add(RECEIVE_PAYMENT_NOTIFICATION_ID);
         codePermissions.add(RECEIVE_AGENT_APPROVAL_AGENT_REQUEST_ID);
