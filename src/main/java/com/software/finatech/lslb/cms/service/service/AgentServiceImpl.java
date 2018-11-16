@@ -75,6 +75,7 @@ public class AgentServiceImpl implements AgentService {
                                               String sortProperty,
                                               String institutionIds,
                                               String gameTypeIds,
+                                              String agentStatusId,
                                               HttpServletResponse httpServletResponse) {
         try {
             Query query = new Query();
@@ -86,7 +87,9 @@ public class AgentServiceImpl implements AgentService {
                 List<String> gameTypeIdList = Arrays.asList(gameTypeIds.split("\\s*,\\s*"));
                 query.addCriteria(Criteria.where("gameTypeIds").in(gameTypeIdList));
             }
-
+            if (!StringUtils.isEmpty(agentStatusId)) {
+                query.addCriteria(Criteria.where("agentStatusId").is(agentStatusId));
+            }
 
             if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, Agent.class).block();
