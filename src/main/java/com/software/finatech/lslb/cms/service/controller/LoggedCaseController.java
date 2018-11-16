@@ -28,7 +28,7 @@ public class LoggedCaseController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "institutionId",
-            "agentId", "statusId", "reporterId", "startDate", "endDate", "categoryId", "typeId", "gameTypeId", "outcomeId"})
+            "agentId", "statusId", "reporterId", "startDate", "endDate", "categoryId", "typeId", "gameTypeId", "outcomeId", "licenseTypeId"})
     @ApiOperation(value = "Get all logged cases", response = LoggedCaseDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -49,9 +49,10 @@ public class LoggedCaseController {
                                                   @RequestParam("typeId") String typeId,
                                                   @RequestParam("gameTypeId") String gameTypeId,
                                                   @RequestParam("outcomeId") String outcomeId,
+                                                  @RequestParam("licenseTypeId") String licenseTypeId,
                                                   HttpServletResponse httpServletResponse) {
         return loggedCaseService.findAllLoggedCases(page, pageSize, sortType, sortParam, reporterId,
-                institutionId, statusId, agentId, startDate, endDate, categoryId, typeId, gameTypeId, outcomeId, httpServletResponse);
+                institutionId, statusId, agentId, startDate, endDate, categoryId, typeId, gameTypeId, outcomeId,licenseTypeId, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create", produces = "application/json")
