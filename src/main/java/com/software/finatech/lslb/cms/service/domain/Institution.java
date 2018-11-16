@@ -4,8 +4,8 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionCategoryDetailsDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
-import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -25,6 +25,8 @@ public class Institution extends AbstractFact {
     protected String website;
     private String tradeName;
     private List<String> institutionCategoryDetailIds = new ArrayList<>();
+    protected Set<String> gameTypeIds = new HashSet<>();
+
 
     public List<String> getInstitutionCategoryDetailIds() {
         return institutionCategoryDetailIds;
@@ -65,8 +67,6 @@ public class Institution extends AbstractFact {
     public void setVgPayCustomerCode(String vgPayCustomerCode) {
         this.vgPayCustomerCode = vgPayCustomerCode;
     }
-
-    protected Set<String> gameTypeIds = new HashSet<>();
 
     @Transient
     protected Set<GameType> gameTypes = new java.util.HashSet<>();
@@ -144,16 +144,7 @@ public class Institution extends AbstractFact {
         institutionDto.setDescription(getDescription());
         institutionDto.setActive(getActive());
         institutionDto.setInstitutionCategoryDetails(getInstitutionCategoryDetailsList());
-        try {
-            setAssociatedProperties();
-            Set<GameTypeDto> gameTypeDtoList = new HashSet<>();
-            getGameTypes().stream().forEach(entry -> {
-                gameTypeDtoList.add(entry.convertToDto());
-            });
-            institutionDto.setGameTypes(gameTypeDtoList);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        institutionDto.setGameTypes(getGameTypeDtos());
         return institutionDto;
     }
 
@@ -175,36 +166,41 @@ public class Institution extends AbstractFact {
         return (InstitutionCategoryDetails) mongoRepositoryReactive.findById(id, InstitutionCategoryDetails.class).block();
     }
 
-    public void setAssociatedProperties() {
 
-        if (gameTypeIds.size() > 0) {
-            gameTypeIds.stream().forEach(gameTypeId -> {
-                Map gameTypeMap = Mapstore.STORE.get("GameType");
-                GameType gameType = null;
-                if (gameTypeMap != null) {
-                    gameType = (GameType) gameTypeMap.get(gameTypeId);
-                }
-                if (gameType == null) {
-                    gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
-                    if (gameType == null) {
-                        try {
-                            throw new FactNotFoundException("GameType", gameTypeId);
-                        } catch (FactNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        Mapstore.STORE.get("GameType").put(gameType.getId(), gameType);
-                    }
-                }
-                getGameTypes().add(gameType);
-            });
+    private Set<GameTypeDto> getGameTypeDtos() {
+        Set<GameTypeDto> dtos = new HashSet<>();
+        for (String gameTypeId : this.gameTypeIds) {
+            GameType type = getGameType(gameTypeId);
+            if (type != null) {
+                dtos.add(type.convertToDto());
+            }
         }
+        return dtos;
     }
 
     @Override
     public String toString() {
         return this.getInstitutionName();
     }
+
+    public GameType getGameType(String gameTypeId) {
+        if (StringUtils.isEmpty(gameTypeId)) {
+            return null;
+        }
+        Map<String, FactObject> gameTypeMap = Mapstore.STORE.get("GameType");
+        GameType gameType = null;
+        if (gameTypeMap != null) {
+            gameType = (GameType) gameTypeMap.get(gameTypeId);
+        }
+        if (gameType == null) {
+            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
+            if (gameType != null && gameTypeMap != null) {
+                gameTypeMap.put(gameTypeId, gameType);
+            }
+        }
+        return gameType;
+    }
+
 
     @Override
     public boolean equals(Object obj) {

@@ -45,6 +45,7 @@ public class FeePaymentTypeReferenceData {
             feePaymentType5.setId(TAX_RENEWAL_FEE_TYPE_ID);
         }
         feePaymentType5.setName("Tax Renewal Fees");
+        mongoRepositoryReactive.delete(feePaymentType5);
 
         FeePaymentType feePaymentType6 = (FeePaymentType) mongoRepositoryReactive.findById(LICENSE_TRANSFER_FEE_TYPE_ID, FeePaymentType.class).block();
         if (feePaymentType6 == null) {
