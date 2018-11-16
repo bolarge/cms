@@ -857,6 +857,7 @@ public class LicenseServiceImpl implements LicenseService {
                 institutionCategoryDetails.setGameTypeId(gameType.getId());
                 institutionCategoryDetails.setTradeName(tradeName);
                 institutionCategoryDetails.setFirstCommencementDate(LocalDate.now());
+                mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
                 paymentInitiatingInstitution.getInstitutionCategoryDetailIds().add(institutionCategoryDetails.getId());
                 mongoRepositoryReactive.saveOrUpdate(paymentInitiatingInstitution);
             }

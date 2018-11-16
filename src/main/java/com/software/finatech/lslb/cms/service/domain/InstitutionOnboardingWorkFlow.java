@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 @SuppressWarnings("serial")
-@Document(collection = "InstitutionOnboardinWorkFlows")
+@Document(collection = "InstitutionOnboardingWorkFlows")
 public class InstitutionOnboardingWorkFlow extends AbstractFact {
     private String institutionId;
     private boolean createdInstitution;
