@@ -827,6 +827,7 @@ public class LicenseServiceImpl implements LicenseService {
                 transferredLicense.setLicenseTransferId(licenseTransfer.getId());
                 transferredLicense.setInstitutionId(paymentRecord.getInstitutionId());
                 transferredLicense.setPaymentRecordId(paymentRecord.getId());
+                mongoRepositoryReactive.saveOrUpdate(transferredLicense);
                 mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
                 String verbiage = String.format("Transferred License Number -> %s , Category ->%s, Transferor -> %s, Transfereree -> %s",
                         transferredLicense.getLicenseNumber(), transferredLicense.getGameType(), licenseTransfer.getFromInstitution(), licenseTransfer.getToInstitution());
@@ -838,6 +839,7 @@ public class LicenseServiceImpl implements LicenseService {
             LocalDate effectiveDate = LocalDate.now();
             LocalDate expiryDate = effectiveDate.plusMonths(gameType.getAipDurationMonths()).minusDays(1);
             License license = new License();
+            license.setId(UUID.randomUUID().toString());
             license.setId(UUID.randomUUID().toString());
             license.setInstitutionId(paymentRecord.getInstitutionId());
             license.setGameTypeId(paymentRecord.getGameTypeId());
