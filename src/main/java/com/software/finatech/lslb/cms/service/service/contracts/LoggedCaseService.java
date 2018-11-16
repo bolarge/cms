@@ -28,6 +28,7 @@ public interface LoggedCaseService {
                                             String typeId,
                                             String gameTypeId,
                                             String outcomeId,
+                                            String licenseTypeId,
                                             HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> createCase(LoggedCaseCreateDto loggedCaseCreateDto, HttpServletRequest request);

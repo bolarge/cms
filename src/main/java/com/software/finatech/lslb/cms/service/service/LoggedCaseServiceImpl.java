@@ -74,6 +74,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
                                                    String typeId,
                                                    String gameTypeId,
                                                    String outcomeId,
+                                                   String licenseTypeId,
                                                    HttpServletResponse httpServletResponse) {
         try {
 
@@ -101,6 +102,9 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             }
             if (!StringUtils.isEmpty(outcomeId)) {
                 query.addCriteria(Criteria.where("loggedCaseOutcomeId").is(outcomeId));
+            }
+            if (!StringUtils.isEmpty(licenseTypeId)) {
+                query.addCriteria(Criteria.where("licenseTypeId").is(licenseTypeId));
             }
             if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
                 LocalDate fromDate = new LocalDate(startDate);
