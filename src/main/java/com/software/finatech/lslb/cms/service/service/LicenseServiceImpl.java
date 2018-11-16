@@ -498,7 +498,7 @@ public class LicenseServiceImpl implements LicenseService {
             license.setLicenseStatusId(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID);
             mongoRepositoryReactive.saveOrUpdate(license);
             List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_AIP_ID);
-            if(lslbAdmins.size()!=0) {
+            if (lslbAdmins.size() != 0) {
                 lslbAdmins.stream().forEach(lslbAdmin -> {
                     NotificationDto notificationDto = new NotificationDto();
                     notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
@@ -571,7 +571,7 @@ public class LicenseServiceImpl implements LicenseService {
                         notificationDto.getGameType() + " has been approved. License is valid from " + license.getEffectiveDate().toString("dd/MM/YYY") + " to " +
                         notificationDto.getEndDate());
                 notificationDto.setInstitutionEmail(institutionAdmin.getEmailAddress());
-                sendEmail.sendEmailRenewalNotification(notificationDto,"Renewal Form Application Status");
+                sendEmail.sendEmailRenewalNotification(notificationDto, "Renewal Form Application Status");
             });
 
             return "OK";
@@ -823,7 +823,7 @@ public class LicenseServiceImpl implements LicenseService {
             Institution paymentInitiatingInstitution = paymentRecord.getInstitution();
             if (paymentRecord.isLicenseTransferPayment()) {
                 LicenseTransfer licenseTransfer = paymentRecord.getLicenseTransfer();
-                License transferredLicense = paymentRecord.getLicense();
+                License transferredLicense = licenseTransfer.getLicense();
                 transferredLicense.setLicenseTransferId(licenseTransfer.getId());
                 transferredLicense.setInstitutionId(paymentRecord.getInstitutionId());
                 transferredLicense.setPaymentRecordId(paymentRecord.getId());
