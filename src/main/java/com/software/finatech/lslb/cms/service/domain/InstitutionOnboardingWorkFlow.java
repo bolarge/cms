@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 @SuppressWarnings("serial")
-@Document(collection = "InstitutionOnboardinWorkFlows")
+@Document(collection = "InstitutionOnboardingWorkFlows")
 public class InstitutionOnboardingWorkFlow extends AbstractFact {
     private String institutionId;
     private boolean createdInstitution;
@@ -114,7 +114,7 @@ public class InstitutionOnboardingWorkFlow extends AbstractFact {
             query.addCriteria(Criteria.where("institutionId").is(this.institutionId));
             query.addCriteria(Criteria.where("meetingPurposeId").is(ScheduledMeetingPurposeReferenceData.APPLICANT_ID));
             query.addCriteria(Criteria.where("scheduledMeetingStatusId").is(ScheduledMeetingStatusReferenceData.PENDING_STATUS_ID));
-            query.addCriteria(Criteria.where("meetingDate").lte(LocalDate.now()));
+            query.addCriteria(Criteria.where("meetingDate").gte(LocalDate.now()));
             return (ScheduledMeeting) mongoRepositoryReactive.find(query, ScheduledMeeting.class).block();
         }
         return null;
