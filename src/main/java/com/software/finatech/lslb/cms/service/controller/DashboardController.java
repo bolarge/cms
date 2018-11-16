@@ -81,16 +81,36 @@ public class DashboardController extends BaseController {
 
         }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/loggedcases-summary")
+    @RequestMapping(method = RequestMethod.GET, value = "/loggedcases-summary", params={"institutionId","gameTypeId","licenseTypeId"})
     @ApiOperation(value = "Get dashboard Logged Cases summary ", response = CasesDashboardStatusCountDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getAllCasesSummary() {
+    public Mono<ResponseEntity> getAllCasesSummary(@RequestParam("institutionId")String institutionId,
+                                                   @RequestParam("gameTypeId")String gameTypeId,
+                                                   @RequestParam("licenseTypeId")String licenseTypeId) {
+
+        Criteria criteria = new Criteria();
+        List<Criteria> filterCriteria = new ArrayList<>();
+        if (gameTypeId != null && !gameTypeId.isEmpty()) {
+            filterCriteria.add(Criteria.where("gameTypeId").is(gameTypeId));
+        }
+        if (institutionId != null && !institutionId.isEmpty()) {
+            filterCriteria.add(Criteria.where("institutionId").is(institutionId));
+        }
+
+        if (licenseTypeId != null && !licenseTypeId.isEmpty()) {
+            filterCriteria.add(Criteria.where("licenseTypeId").is(licenseTypeId));
+        }
+
+        if (filterCriteria.size() > 0) {
+            criteria.andOperator(filterCriteria.toArray(new Criteria[filterCriteria.size()]));
+        }
 
         Aggregation agg = Aggregation.newAggregation(
+                Aggregation.match(criteria),
                  Aggregation.group("loggedCaseStatusId").count().as("loggedStatusCount"),
                 Aggregation.project("loggedStatusCount").and("loggedCaseStatusId").previousOperation()
 
@@ -301,7 +321,7 @@ public class DashboardController extends BaseController {
 
 
 
-    @RequestMapping(method = RequestMethod.GET, value = "/machine-summary", params={"institutionId","type"})
+    @RequestMapping(method = RequestMethod.GET, value = "/machine-summary", params={"institutionId","type","gameTypeId"})
     @ApiOperation(value = "Get operator Machine summary ", response = DashboardMachineStatusCountDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -310,7 +330,8 @@ public class DashboardController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getGamingMachineSummary(
             @RequestParam ("institutionId") String institutionId,
-            @RequestParam ("type") String type) {
+            @RequestParam ("type") String type,
+            @RequestParam ("gameTypeId") String gameTypeId) {
 
         try {
                /*  statusList.addAll(Arrays.asList(
@@ -326,6 +347,9 @@ public class DashboardController extends BaseController {
 
                     if (!StringUtils.isEmpty(institutionId)) {
                         filterCriteria.add(Criteria.where("institutionId").is(institutionId));
+                    }
+                    if (!StringUtils.isEmpty(gameTypeId)) {
+                        filterCriteria.add(Criteria.where("gameTypeId").is(gameTypeId));
                     }
 
                     if (type.equalsIgnoreCase("machine")) {
@@ -365,7 +389,7 @@ public class DashboardController extends BaseController {
         }
         }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/institution-agents-status-summary", params={"institutionId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/institution-agents-status-summary", params={"institutionId","gameTypeId"})
     @ApiOperation(value = "Get operator Agent status summary ", response = DashboardAgentStatusCountDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -373,7 +397,7 @@ public class DashboardController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getInstitutionAgentSummary(
-            @RequestParam ("institutionId") String institutionId) {
+            @RequestParam ("institutionId") String institutionId,@RequestParam ("gameTypeId") String gameTypeId) {
 
         try {
              DashboardAgentStatusCountDto dashboardAgentStatusCountDto= new DashboardAgentStatusCountDto();
@@ -383,6 +407,9 @@ public class DashboardController extends BaseController {
                 if (!StringUtils.isEmpty(institutionId)) {
                     filterCriteria.add(Criteria.where("institutionId").in(institutionId));
                 }
+            if (!StringUtils.isEmpty(gameTypeId)) {
+                filterCriteria.add(Criteria.where("gameTypeId").in(gameTypeId));
+            }
             if (filterCriteria.size() > 0) {
                 criteria.andOperator(filterCriteria.toArray(new Criteria[filterCriteria.size()]));
             }
