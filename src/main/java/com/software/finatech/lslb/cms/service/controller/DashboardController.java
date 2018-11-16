@@ -129,18 +129,29 @@ public class DashboardController extends BaseController {
     public Mono<ResponseEntity> getDashBoardSummary(@RequestParam("institutionId") String institutionId,
                                                   @RequestParam("gameTypeId") String gameTypeId) {
         Query query = new Query();
+        Query queryTerminal = new Query();
+        Query queryMachine = new Query();
         Query queryCasesTotalCount = new Query();
         Query queryAgentTotalCount = new Query();
         if(!StringUtils.isEmpty(gameTypeId)){
             query.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
+            queryMachine.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
+            queryTerminal.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
             queryAgentTotalCount.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
         }if(!StringUtils.isEmpty(institutionId)){
             query.addCriteria(Criteria.where("id").is(institutionId));
+            queryMachine.addCriteria(Criteria.where("institutionId").is(institutionId));
+            queryTerminal.addCriteria(Criteria.where("institutionId").is(institutionId));
             queryAgentTotalCount.addCriteria(Criteria.where("institutionIds").in(institutionId));
             queryCasesTotalCount.addCriteria(Criteria.where("institutionId").is(institutionId));
         }
+        queryMachine.addCriteria(Criteria.where("machineTypeId").is(MachineTypeReferenceData.GAMING_MACHINE_ID));
+        queryTerminal.addCriteria(Criteria.where("machineTypeId").is(MachineTypeReferenceData.GAMING_TERMINAL_ID));
         long institutionTotalCount=mongoRepositoryReactive.count(query, Institution.class).block();
-        long gamingMachineTotalCount=mongoRepositoryReactive.count(query, Machine.class).block();
+
+        long gamingMachineTotalCount=mongoRepositoryReactive.count(queryMachine, Machine.class).block();
+        long gamingTerminalTotalCount=mongoRepositoryReactive.count(queryTerminal, Machine.class).block();
+
         long agentTotalCount=mongoRepositoryReactive.count(queryAgentTotalCount, Agent.class).block();
         long casesTotalCount=mongoRepositoryReactive.count(queryCasesTotalCount, LoggedCase.class).block();
 
@@ -150,7 +161,7 @@ public class DashboardController extends BaseController {
         dashboardSummaryDto.setCasesTotalCount(casesTotalCount);
         dashboardSummaryDto.setGamingMachineTotalCount(gamingMachineTotalCount);
         dashboardSummaryDto.setInstitutionTotalCount(institutionTotalCount);
-        dashboardSummaryDto.setGamingTerminalTotalCount(0);
+        dashboardSummaryDto.setGamingTerminalTotalCount(gamingTerminalTotalCount);
 
 
         return Mono.just(new ResponseEntity<>(dashboardSummaryDto, HttpStatus.OK));
