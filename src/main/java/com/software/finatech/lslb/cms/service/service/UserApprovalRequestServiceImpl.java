@@ -104,11 +104,6 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
                 query.addCriteria(Criteria.where("dateCreated").gte(new LocalDate(startDate)).lte(new LocalDate(endDate)));
             }
 
-
-            /**
-             *   Get the logged in user and use him to filter requests
-             */
-            //TODO:: make sure initiator is filtered out
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser != null) {
                 query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));

@@ -94,7 +94,7 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
             if (loggedInUser != null) {
                 query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
                 if (!loggedInUser.isSuperAdmin()) {
-                    query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
+                  //  query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
                 }
             }
 

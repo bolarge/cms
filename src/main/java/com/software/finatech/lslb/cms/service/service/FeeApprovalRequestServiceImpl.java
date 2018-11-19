@@ -93,16 +93,11 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
                 query.addCriteria(Criteria.where("dateCreated").gte(new LocalDate(startDate)).lte(new LocalDate(endDate)));
             }
 
-
-            /**
-             *   Get the logged in user and use him to filter requests
-             */
-            //TODO:: make sure initiator is filtered out
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser != null) {
                 query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
                 if (!loggedInUser.isSuperAdmin()) {
-                    query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
+              //      query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
                 }
             }
 
