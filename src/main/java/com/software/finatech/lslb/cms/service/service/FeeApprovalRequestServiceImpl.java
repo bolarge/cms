@@ -100,9 +100,9 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             //TODO:: make sure initiator is filtered out
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser != null) {
-                //  query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
+                query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
                 if (!loggedInUser.isSuperAdmin()) {
-                    //     query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
+                    query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
                 }
             }
 
@@ -143,16 +143,17 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
     public Mono<ResponseEntity> approveFeeApprovalRequest(String feeApprovalRequestId, HttpServletRequest request) {
         try {
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
+            }
             FeeApprovalRequest feeApprovalRequest = findFeeApprovalRequestById(feeApprovalRequestId);
             if (feeApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Fee Approval Request With id %s does not exist", feeApprovalRequestId), HttpStatus.BAD_REQUEST));
             }
-            if (feeApprovalRequest.isApprovedRequest() || feeApprovalRequest.isRejectedRequest()) {
+            if (feeApprovalRequest.isApprovedRequest()
+                    || feeApprovalRequest.isRejectedRequest() ||
+                    !feeApprovalRequest.canBeApprovedByUser(loggedInUser.getId())) {
                 return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
-            }
-
-            if (loggedInUser == null) {
-                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
 
             if (feeApprovalRequest.isCreateFee()) {
@@ -183,16 +184,17 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
     public Mono<ResponseEntity> rejectFeeApprovalRequest(String feeApprovalRequestId, HttpServletRequest request) {
         try {
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
+            }
             FeeApprovalRequest feeApprovalRequest = findFeeApprovalRequestById(feeApprovalRequestId);
             if (feeApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Fee Approval Request With id %s does not exist", feeApprovalRequestId), HttpStatus.BAD_REQUEST));
             }
-            if (feeApprovalRequest.isApprovedRequest() || feeApprovalRequest.isRejectedRequest()) {
+            if (feeApprovalRequest.isApprovedRequest() ||
+                    feeApprovalRequest.isRejectedRequest() ||
+                    !feeApprovalRequest.canBeApprovedByUser(loggedInUser.getId())) {
                 return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
-            }
-
-            if (loggedInUser == null) {
-                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
 
             if (feeApprovalRequest.isCreateFee()) {
