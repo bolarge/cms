@@ -111,7 +111,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             //TODO:: make sure initiator is filtered out
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser != null) {
-                //  query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
+                query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
                 if (!loggedInUser.isSuperAdmin()) {
                     query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
                 }
@@ -159,19 +159,20 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
     @Override
     public Mono<ResponseEntity> approveRequest(ApprovalRequestOperationtDto requestOperationtDto, HttpServletRequest request) {
         try {
+            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
+            if (user == null) {
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
             String approvalRequestId = requestOperationtDto.getApprovalRequestId();
-
             UserApprovalRequest userApprovalRequest = findApprovalRequestById(approvalRequestId);
             if (userApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("User approval request with id %s not found", approvalRequestId), HttpStatus.BAD_REQUEST));
             }
-            if(userApprovalRequest.isApprovedRequest() || userApprovalRequest.isRejectedRequest()){
+            if (userApprovalRequest.isApprovedRequest() ||
+                    userApprovalRequest.isRejectedRequest() ||
+                    !userApprovalRequest.canBeApprovedByUser(user.getId())
+                    ) {
                 return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
-            }
-
-            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
-            if (user == null) {
-                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
             }
 
             if (userApprovalRequest.isCreateUser()) {
@@ -215,17 +216,19 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
     @Override
     public Mono<ResponseEntity> rejectRequest(ApprovalRequestOperationtDto requestOperationtDto, HttpServletRequest request) {
         try {
+            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
+            if (user == null) {
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
             String approvalRequestId = requestOperationtDto.getApprovalRequestId();
             UserApprovalRequest userApprovalRequest = findApprovalRequestById(approvalRequestId);
             if (userApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("User approval request with id %s not found", approvalRequestId), HttpStatus.BAD_REQUEST));
             }
-            if (userApprovalRequest.isApprovedRequest() || userApprovalRequest.isRejectedRequest()){
+            if (userApprovalRequest.isApprovedRequest() ||
+                    userApprovalRequest.isRejectedRequest()||
+                   !userApprovalRequest.canBeApprovedByUser(user.getId())) {
                 return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
-            }
-            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
-            if (user == null) {
-                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
             }
             if (userApprovalRequest.isCreateUser()) {
                 rejectCreateUserRequest(userApprovalRequest);
@@ -275,7 +278,6 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             mongoRepositoryReactive.saveOrUpdate(user);
         }
     }
-
 
     private void approveEnableUser(UserApprovalRequest userApprovalRequest) {
         AuthInfo user = userApprovalRequest.getAuthInfo(userApprovalRequest.getAuthInfoId());

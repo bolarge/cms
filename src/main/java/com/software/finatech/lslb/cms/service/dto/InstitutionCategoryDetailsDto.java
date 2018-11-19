@@ -1,6 +1,6 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-public class InstitutionCategoryDetailsDto {
+public class   InstitutionCategoryDetailsDto {
     private String firstCommencementDate;
     private String gameTypeName;
     private String tradeName;
