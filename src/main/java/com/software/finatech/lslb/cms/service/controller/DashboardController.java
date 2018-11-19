@@ -36,7 +36,7 @@ public class DashboardController extends BaseController {
     private static Logger logger = LoggerFactory.getLogger(DocumentController.class);
 
 
-    @RequestMapping(method = RequestMethod.GET, value = "/license-status-count-summary", params = {"licenseTypeId","gameTypeId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/license-status-count-summary", params = {"licenseTypeId","gameTypeId","institutionId"})
     @ApiOperation(value = "Get all license summary count", response = LicenseStatusSummaryDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -44,7 +44,8 @@ public class DashboardController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getLicenseSummary(@RequestParam("licenseTypeId") String licenseTypeId,
-                                                  @RequestParam("gameTypeId") String gameTypeId) {
+                                                  @RequestParam("gameTypeId") String gameTypeId,
+                                                  @RequestParam("institutionId") String institutionId) {
 
              Criteria criteria = new Criteria();
             List<Criteria> filterCriteria = new ArrayList<>();
@@ -52,8 +53,11 @@ public class DashboardController extends BaseController {
                 filterCriteria.add(Criteria.where("gameTypeId").is(gameTypeId));
             }
 
+            if (institutionId != null && !institutionId.isEmpty()) {
+                filterCriteria.add(Criteria.where("institutionId").is(institutionId));
+            }
             if (licenseTypeId != null && !licenseTypeId.isEmpty()) {
-            filterCriteria.add(Criteria.where("licenseTypeId").is(licenseTypeId));
+                    filterCriteria.add(Criteria.where("licenseTypeId").is(licenseTypeId));
             }
 
             if (filterCriteria.size() > 0) {
