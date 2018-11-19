@@ -462,7 +462,6 @@ public class LSLBAuthPermissionReferenceData {
         mongoRepositoryReactive.saveOrUpdate(permission);
 
 
-
         permission = (AuthPermission) mongoRepositoryReactive.findById("49", AuthPermission.class).block();
         if (permission == null) {
             permission = new AuthPermission();
@@ -638,8 +637,8 @@ public class LSLBAuthPermissionReferenceData {
             permission = new AuthPermission();
             permission.setId(RECEIVE_LICENSE_TRANSFER_NOTIFICATION_ID);
         }
-        permission.setName("RECEIVE LICENSE TRANSFER NOTIFICATION");
-        permission.setDescription("Receive License Transfer Notification");
+        permission.setName("RECEIVE LICENCE TRANSFER NOTIFICATION");
+        permission.setDescription("Receive Licence Transfer Notification");
         permission.setUsedBySystem(true);
         mongoRepositoryReactive.saveOrUpdate(permission);
 
@@ -651,6 +650,157 @@ public class LSLBAuthPermissionReferenceData {
         permission.setName("RECEIVE AIP REQUEST NOTIFICATION");
         permission.setDescription("Receive AIP request Notification");
         permission.setUsedBySystem(true);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("72", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("72");
+        }
+        permission.setName("ASSIGN TERMINALS TO AGENT");
+        permission.setDescription("ASSIGN TERMINALS TO AGENT");
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("73", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("73");
+        }
+        permission.setName("EDIT AGENT DETAILS");
+        permission.setDescription("EDIT AGENT DETAILS");
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("74", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("74");
+        }
+        permission.setName("CREATE GAMING TERMINALS");
+        permission.setDescription("CREATE GAMING TERMINALS");
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("75", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("75");
+        }
+        permission.setName("VIEW GAMING TERMINALS");
+        permission.setDescription("VIEW GAMING TERMINALS");
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("76", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("76");
+        }
+        permission.setName("VIEW GAMING TERMINAL APPROVAL REQUESTS");
+        permission.setDescription("VIEW GAMING TERMINAL APPROVAL REQUESTS");
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("77", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("77");
+        }
+        permission.setName("APPROVE/REJECT GAMING TERMINAL APPROVAL REQUESTS");
+        permission.setDescription("APPROVE/REJECT GAMING TERMINAL APPROVAL REQUESTS");
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("78", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("78");
+        }
+        permission.setName("UPLOAD OPERATORS LEGACY DOCUMENTS");
+        permission.setDescription("UPLOAD OPERATORS LEGACY DOCUMENTS");
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("79", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("79");
+        }
+        permission.setName("VIEW LICENCE TRANSFERS");
+        permission.setDescription("VIEW LICENCE TRANSFERS");
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("80", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("80");
+        }
+        permission.setName("APPROVE/REJECT LICENCE TRANSFER");
+        permission.setDescription("APPROVE LICENCE TRANSFER");
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("81", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("81");
+        }
+        permission.setName("APPROVE/REJECT FINAL APPROVAL LICENCE TRANSFER");
+        permission.setDescription("APPROVE/REJECT FINAL APPROVAL LICENCE TRANSFER");
+        permission.setAuthRoleId(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID);
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("82", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("82");
+        }
+        permission.setName("SCHEDULE PRESENTATION FOR LICENCE TRANSFER");
+        permission.setDescription("SCHEDULE PRESENTATION FOR LICENCE TRANSFER");
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("83", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("83");
+        }
+        permission.setName("VIEW DOCUMENT APPROVAL REQUESTS");
+        permission.setDescription("VIEW DOCUMENT APPROVAL REQUESTS");
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("84", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("84");
+        }
+        permission.setName("APPROVE/REJECT DOCUMENT APPROVAL REQUESTS");
+        permission.setDescription("APPROVE/REJECT DOCUMENT APPROVAL REQUESTS");
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("85", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("85");
+        }
+        permission.setName("SET APPROVER TO DOCUMENT TYPE");
+        permission.setDescription("SET APPROVER TO DOCUMENT TYPE");
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("86", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("86");
+        }
+        permission.setName("EFFECT OUTCOME ON LOGGED CASES");
+        permission.setDescription("EFFECT OUTCOME ON LOGGED CASES");
+        permission.setUsedBySystem(false);
         mongoRepositoryReactive.saveOrUpdate(permission);
     }
 
