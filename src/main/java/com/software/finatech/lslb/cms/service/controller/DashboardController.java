@@ -131,12 +131,13 @@ public class DashboardController extends BaseController {
                 casesDashboardStatusCountDto.setClosedCount(result==null?0:result.getLoggedStatusCount());
             }
 
-            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.OPEN_ID)){
+            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.PENDING_ID)){
                 casesDashboardStatusCountDto.setPendingCount(result==null?0:result.getLoggedStatusCount());
             }
 
         });
         Query query = new Query();
+        query.addCriteria(criteria);
         long totalCount=mongoRepositoryReactive.count(query, LoggedCase.class).block();
         casesDashboardStatusCountDto.setTotalCount(totalCount);
 
