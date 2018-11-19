@@ -90,12 +90,11 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
             /**
              *   Get the logged in user and use him to filter requests
              */
-            //TODO:: make sure initiator is filtered out
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser != null) {
-                //  query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
+                query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
                 if (!loggedInUser.isSuperAdmin()) {
-               //     query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
+                    query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
                 }
             }
 
@@ -140,27 +139,26 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
     @Override
     public Mono<ResponseEntity> approveRequest(ApprovalRequestOperationtDto requestOperationtDto, HttpServletRequest request) {
         try {
+            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
+            if (user == null) {
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
+            }
             String approvalRequestId = requestOperationtDto.getApprovalRequestId();
             DocumentApprovalRequest documentApprovalRequest = findApprovalRequestById(approvalRequestId);
             if (documentApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Approval request with id %s not found", approvalRequestId), HttpStatus.BAD_REQUEST));
             }
-            if(documentApprovalRequest.isApprovedRequest() || documentApprovalRequest.isRejectedRequest()){
+            if (documentApprovalRequest.isApprovedRequest() ||
+                    documentApprovalRequest.isRejectedRequest() ||
+                    !documentApprovalRequest.canBeApprovedByUser(user.getId())) {
                 return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
-            }
-
-            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
-            if (user == null) {
-                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
 
             if (documentApprovalRequest.isCreateDocumentType()) {
                 approverCreateDocumentType(documentApprovalRequest);
-            }
-            else if (documentApprovalRequest.isSetApprover()) {
+            } else if (documentApprovalRequest.isSetApprover()) {
                 approveSetApprover(documentApprovalRequest);
-            }
-            else {
+            } else {
                 return Mono.just(new ResponseEntity<>("Invallid Request supplied", HttpStatus.BAD_REQUEST));
             }
 
@@ -181,18 +179,20 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
     @Override
     public Mono<ResponseEntity> rejectRequest(ApprovalRequestOperationtDto requestOperationtDto, HttpServletRequest request) {
         try {
+            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
+            if (user == null) {
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
+            }
+
             String approvalRequestId = requestOperationtDto.getApprovalRequestId();
             DocumentApprovalRequest documentApprovalRequest = findApprovalRequestById(approvalRequestId);
             if (documentApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Approval request with id %s not found", approvalRequestId), HttpStatus.BAD_REQUEST));
             }
-            if(documentApprovalRequest.isApprovedRequest() || documentApprovalRequest.isRejectedRequest()){
+            if (documentApprovalRequest.isApprovedRequest() ||
+                    documentApprovalRequest.isRejectedRequest() ||
+                    !documentApprovalRequest.canBeApprovedByUser(user.getId())) {
                 return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
-            }
-
-            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
-            if (user == null) {
-                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
             if (documentApprovalRequest.isCreateDocumentType()) {
                 rejectCreateDocumentTypeRequest(documentApprovalRequest);

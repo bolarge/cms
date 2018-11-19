@@ -142,6 +142,10 @@ public abstract class AbstractApprovalRequest extends AbstractFact {
     }
 
 
+    public boolean canBeApprovedByUser(String userId) {
+        return !StringUtils.equals(this.initiatorId, userId);
+    }
+
     public AuthInfo getApprover() {
         return getAuthInfo(this.approverId);
     }
