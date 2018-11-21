@@ -427,6 +427,11 @@ public class AgentServiceImpl implements AgentService {
     }
 
     @Override
+    public Mono<ResponseEntity> getAllAgentGender() {
+        return getAllEnumeratedEntity("Gender");
+    }
+
+    @Override
     public Agent findAgentByAgentNumber(String agentNumber) {
         return (Agent) mongoRepositoryReactive.find(Query.query(Criteria.where("agentId").is(agentNumber)), Agent.class).block();
     }

@@ -8,7 +8,6 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
@@ -33,7 +32,6 @@ public class ExistingAgentLoader {
         return null;
     }
 
-    @Async
     public void loadExistingAgents() {
         for (int i = 30670000; i < 33700000; i++) {
             loadAgentForFilePath(String.valueOf(i));
@@ -45,11 +43,11 @@ public class ExistingAgentLoader {
         try {
             File file = ResourceUtils.getFile(resourceFileName);
             DeviceMagicAgent deviceMagicAgent = agentFromFile(file);
-            deviceMagicAgent.setSubmissionId(filePath);
             if (deviceMagicAgent == null) {
                 logger.info("No Device Magic Agent for submission {}", filePath);
                 return;
             }
+            deviceMagicAgent.setSubmissionId(filePath);
             deviceMagicAgentAdapter.saveDeviceMagicAgentToAgentDb(deviceMagicAgent);
         } catch (FileNotFoundException e) {
             //     logger.error("File with resource filepath {} not found , message -> {}", filePath, e.getMessage());

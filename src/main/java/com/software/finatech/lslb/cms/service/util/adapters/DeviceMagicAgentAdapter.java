@@ -35,15 +35,18 @@ public class DeviceMagicAgentAdapter {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
 
     public void saveDeviceMagicAgentToAgentDb(DeviceMagicAgent deviceMagicAgent) {
-        if (StringUtils.isEmpty(deviceMagicAgent.getEmail())){
+        if (StringUtils.isEmpty(deviceMagicAgent.getEmail())) {
             logger.info("Submission with id {} does not have email, skipping creation", deviceMagicAgent.getSubmissionId());
             return;
         }
         Agent agent = findAgentBySubmissionId(deviceMagicAgent.getSubmissionId());
+        boolean isNewAgent = false;
         if (agent == null) {
+            isNewAgent = true;
             agent = new Agent();
             agent.setId(UUID.randomUUID().toString());
         }
+        agent.setSubmissionId(deviceMagicAgent.getSubmissionId());
         agent.setFullName(String.format("%s %s", deviceMagicAgent.getFirstName(), deviceMagicAgent.getLastName()));
         agent.setFirstName(deviceMagicAgent.getFirstName());
         agent.setLastName(deviceMagicAgent.getLastName());
@@ -57,7 +60,6 @@ public class DeviceMagicAgentAdapter {
         agent.setAgentId(generateAgentId());
         agent.setAgentStatusId(AgentStatusReferenceData.ACTIVE_ID);
         agent.setEnabled(true);
-        agent.setSubmissionId(deviceMagicAgent.getSubmissionId());
         agent.setIdNumber(deviceMagicAgent.getIdNumber());
         String address = buildAddress(deviceMagicAgent.getResidentialAddressStreet(),
                 deviceMagicAgent.getResindetialAddressCity(), deviceMagicAgent.getResidentialAddressState());
@@ -99,8 +101,11 @@ public class DeviceMagicAgentAdapter {
                 agentInstitution.getGameTypeIds().add(gameType.getId());
                 agentInstitution.setBusinessAddressList(agent.getBusinessAddresses());
                 agentInstitution.setInstitutionId(institutionId);
+            } else {
+                logger.info("GameType with name /String {} not found", gameTypeString);
             }
         }
+        agent.getAgentInstitutions().add(agentInstitution);
         DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
         String dob = deviceMagicAgent.getDateOfBirth();
         if (!StringUtils.isEmpty(dob)) {
@@ -114,8 +119,12 @@ public class DeviceMagicAgentAdapter {
         agent.setSkipVigipay(true);
         agent.setFromDeviceMagic(true);
         mongoRepositoryReactive.saveOrUpdate(agent);
-        saveDocumentForAgent(deviceMagicAgent, agent);
-        logger.info("Saved Agent for submission {} , Agent Id {}", deviceMagicAgent.getSubmissionId(), agent.getId());
+        if (isNewAgent) {
+            saveDocumentForAgent(deviceMagicAgent, agent);
+            logger.info("Saved Agent for submission {} , Agent Id {}", deviceMagicAgent.getSubmissionId(), agent.getId());
+        }else {
+            logger.info("Updated Agent for submission {} , Agent Id {}", deviceMagicAgent.getSubmissionId(), agent.getId());
+        }
     }
 
 
@@ -161,12 +170,42 @@ public class DeviceMagicAgentAdapter {
         if (StringUtils.isEmpty(operatorId)) {
             return null;
         }
+        if (StringUtils.equalsIgnoreCase("1960 BET", operatorId)) {
+            operatorId = "1960bet";
+        }
+        if (StringUtils.equalsIgnoreCase("FORTUNE BET", operatorId)) {
+            operatorId = "Fortunebet";
+        }
+        if (StringUtils.equalsIgnoreCase("WINNERS GOLDEN BET", operatorId)) {
+            operatorId = "WGB";
+        }
+        if (StringUtils.equalsIgnoreCase("WINNERS GOLDEN CHANCE", operatorId)) {
+            operatorId = "Golden Chance";
+        }
+        if (StringUtils.equalsIgnoreCase("BONANZA WIN", operatorId)) {
+            //  operatorId = "BonanzaWin";
+        }
+        if (StringUtils.equalsIgnoreCase("SPORTY BET", operatorId)) {
+            //      operatorId = "Sportybet";
+        }
+        if (StringUtils.equalsIgnoreCase("POWER BET", operatorId)) {
+            operatorId = "Supabet";
+        }
+        if (StringUtils.equalsIgnoreCase("GIVE n TAKE", operatorId)) {
+            operatorId = "Give 'n' Take";
+        }
+        if (StringUtils.equalsIgnoreCase("Access Bet", operatorId)) {
+            //  return null;
+        }
+
         Query query = new Query();
         query.addCriteria(Criteria.where("tradeName").regex(operatorId, "i"));
         InstitutionCategoryDetails institutionCategoryDetails = (InstitutionCategoryDetails) mongoRepositoryReactive.find(query, InstitutionCategoryDetails.class).block();
         if (institutionCategoryDetails != null) {
             return institutionCategoryDetails.getInstitutionId();
         }
+
+
         return null;
     }
 
