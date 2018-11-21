@@ -362,9 +362,11 @@ public class Scheduler {
         queryAgent.addCriteria(Criteria.where("createdAt").lte(LocalDateTime.now().minusDays(7)));
         queryAgent.addCriteria(Criteria.where("inactive").is(false));
         queryAgent.addCriteria(Criteria.where("authRoleId").is(LSLBAuthRoleReferenceData.AGENT_ROLE_ID));
+        queryAgent.addCriteria(Criteria.where("ssoUserId").ne(null));
         queryAgent.limit(1000);
         List<AuthInfo> agents= (List<AuthInfo>)mongoRepositoryReactive.findAll(queryAgent, AuthInfo.class).toStream().collect(Collectors.toList());
         agents.parallelStream().forEach(agent -> {
+
             int days=0;
             boolean check = false;
             if(agent.getLastInactiveDate()!=null){
