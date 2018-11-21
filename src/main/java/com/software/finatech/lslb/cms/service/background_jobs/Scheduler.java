@@ -4,10 +4,12 @@ import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.NotificationDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
+import com.software.finatech.lslb.cms.service.service.AuthInfoServiceImpl;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.PaymentRecordServiceImpl;
 import com.software.finatech.lslb.cms.service.util.*;
+import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -41,8 +43,12 @@ public class Scheduler {
     @Autowired
     SendEmail sendEmail;
 
-    @Value("${email-username}")
-    String adminEmail;
+
+    @Autowired
+    private AuthInfoServiceImpl authInfoService;
+
+    private static final int ONE_HOUR = 360 * 60 * 1000;
+
     @Autowired
     private FrontEndPropertyHelper frontEndPropertyHelper;
     private static final Logger logger = LoggerFactory.getLogger(PaymentRecordServiceImpl.class);
@@ -55,6 +61,7 @@ public class Scheduler {
 
 
     @Scheduled(cron = "0 0 6 * * *")
+    @SchedulerLock(name = "Check For Licenses Close To Expirations", lockAtMostFor = ONE_HOUR, lockAtLeastFor = ONE_HOUR)
     protected void checkForLicensesCloseToExpirations(){
         logger.info(" checkForLicensesCloseToExpirations");
         ArrayList<String> licenseStatuses= new ArrayList<>();
@@ -123,6 +130,7 @@ public class Scheduler {
 
     }
     @Scheduled(cron = "0 0 6 * * *")
+    @SchedulerLock(name = "Check For AIP Close To Expiration", lockAtMostFor = ONE_HOUR, lockAtLeastFor = ONE_HOUR)
     protected void checkForAIPCloseToExpirations(){
 
         logger.info("checkForAIPCloseToExpirations");
@@ -130,38 +138,44 @@ public class Scheduler {
         licenseStatuses.add(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
         licenseStatuses.add(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID);
         List<License> licenses= expirationList.getExpiringLicences(14, licenseStatuses);
-        List<NotificationDto> notificationDtos= new ArrayList<>();
-        LocalDate endDate;
-        dateTime=dateTime.plusDays(14);
-        if(licenses!=null){
-            for(License license: licenses){
-                int days=0;
-                NotificationDto notificationDto= new NotificationDto();
-                endDate=license.getExpiryDate();
-                days= Days.daysBetween(dateTime,endDate).getDays();
-                notificationDto.setDaysToExpiration(days);
-                Map gameTypeMap = Mapstore.STORE.get("GameType");
-                GameType gameType = null;
-                if (gameTypeMap != null) {
-                    gameType = (GameType) gameTypeMap.get(license.getGameTypeId());
-                }
-                if (gameType == null) {
-                    gameType = (GameType) mongoRepositoryReactive.findById(license.getGameTypeId(), GameType.class).block();
-                    if (gameType != null && gameTypeMap != null) {
-                        gameTypeMap.put(license.getGameTypeId(), gameType);
+        List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_AIP_ID);
+        if (lslbAdmins.size() != 0) {
+            lslbAdmins.stream().forEach(lslbAdmin -> {
+
+                List<NotificationDto> notificationDtos = new ArrayList<>();
+                LocalDate endDate;
+                dateTime = dateTime.plusDays(14);
+                if (licenses != null) {
+                    for (License license : licenses) {
+                        int days = 0;
+                        NotificationDto notificationDto = new NotificationDto();
+                        endDate = license.getExpiryDate();
+                        days = Days.daysBetween(dateTime, endDate).getDays();
+                        notificationDto.setDaysToExpiration(days);
+                        Map gameTypeMap = Mapstore.STORE.get("GameType");
+                        GameType gameType = null;
+                        if (gameTypeMap != null) {
+                            gameType = (GameType) gameTypeMap.get(license.getGameTypeId());
+                        }
+                        if (gameType == null) {
+                            gameType = (GameType) mongoRepositoryReactive.findById(license.getGameTypeId(), GameType.class).block();
+                            if (gameType != null && gameTypeMap != null) {
+                                gameTypeMap.put(license.getGameTypeId(), gameType);
+                            }
+                        }
+                        notificationDto.setGameType(gameType.getDescription());
+                        notificationDto.setInstitutionId(license.getInstitutionId());
+                        notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
+                        Institution institution = (Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),
+                                Institution.class).block();
+                        notificationDto.setInstitutionName(institution.getInstitutionName());
+                        notificationDto.setInstitutionEmail(institution.getEmailAddress());
+                        notificationDto.setTemplate("LicenseUpdate");
+                        notificationDtos.add(notificationDto);
                     }
+                    sendEmailNotification(notificationDtos, "AIPExpiring");
                 }
-                notificationDto.setGameType(gameType.getDescription());
-                notificationDto.setInstitutionId(license.getInstitutionId());
-                notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
-                Institution institution=(Institution) mongoRepositoryReactive.findById(license.getInstitutionId(),
-                        Institution.class).block();
-                notificationDto.setInstitutionName(institution.getInstitutionName());
-                notificationDto.setInstitutionEmail(institution.getEmailAddress());
-                notificationDto.setTemplate("LicenseUpdate");
-                notificationDtos.add(notificationDto);
-            }
-            sendEmailNotification(notificationDtos,"AIPExpiring");
+            });
         }
 
     }
@@ -203,24 +217,35 @@ public class Scheduler {
             model.put("gameType", notificationDto.getGameType());
             model.put("date", LocalDate.now().toString("dd-MM-YYYY"));
             String content = mailContentBuilderService.build(model, notificationDto.getTemplate());
+            List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_AIP_ID);
 
             if((type=="AIPExpired")||(type=="AIPExpiring")){
-                emailService.sendEmail(content,"AIP Expiration Notification", adminEmail);
-                emailService.sendEmail(content,"AIP Expiration Notification", notificationDto.getInstitutionEmail());
+                if (lslbAdmins.size() != 0) {
+                    lslbAdmins.stream().forEach(lslbAdmin -> {
 
-            }else{
-                if(!StringUtils.isEmpty(notificationDto.getAgentId())){
-                    emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getAgentEmailAddress());
+                        emailService.sendEmail(content, "AIP Expiration Notification", lslbAdmin.getEmailAddress());
+                        emailService.sendEmail(content, "AIP Expiration Notification", notificationDto.getInstitutionEmail());
+                    });
+            }else {
+                    if (!StringUtils.isEmpty(notificationDto.getAgentId())) {
+                        emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getAgentEmailAddress());
 
+                    }
+                    if (lslbAdmins.size() != 0) {
+                        lslbAdmins.stream().forEach(lslbAdmin -> {
+
+                            emailService.sendEmail(content, "Licence Expiration Notification", lslbAdmin.getEmailAddress());
+                            emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getInstitutionEmail());
+                        });
+
+                    }
                 }
-                emailService.sendEmail(content, "Licence Expiration Notification", adminEmail);
-                emailService.sendEmail(content, "Licence Expiration Notification", notificationDto.getInstitutionEmail());
-
-            }
-
         }
     }
+    }
+
     @Scheduled(cron = "0 0 6 * * *")
+    @SchedulerLock(name = "Check For Expired Licenses", lockAtMostFor = ONE_HOUR, lockAtLeastFor = ONE_HOUR)
     protected void InstitutionsWithExpiredLicense(){
         ArrayList<String> licenseStatuses= new ArrayList<>();
         licenseStatuses.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
@@ -283,6 +308,7 @@ public class Scheduler {
         }
     }
     @Scheduled(cron = "0 0 6 * * *")
+    @SchedulerLock(name = "Deactivate Institutions With Expired License", lockAtMostFor = ONE_HOUR, lockAtLeastFor = ONE_HOUR)
     protected void deactivateInstitutionsWithExpiredLicense() {
         ArrayList<String> licenseStatuses = new ArrayList<>();
         licenseStatuses.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
@@ -290,6 +316,7 @@ public class Scheduler {
 
     }
     @Scheduled(cron = "0 0 6 * * *")
+    @SchedulerLock(name = "Send Email With Expired AIP", lockAtMostFor = ONE_HOUR, lockAtLeastFor = ONE_HOUR)
     protected void WithExpiredAIP(){
         ArrayList<String> licenseStatuses= new ArrayList<>();
         licenseStatuses.add(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
@@ -328,15 +355,18 @@ public class Scheduler {
     }
 
     @Scheduled(cron = "0 0 20 * * *")
+    @SchedulerLock(name = "Deactivate Agent With No Payment", lockAtMostFor = ONE_HOUR, lockAtLeastFor = ONE_HOUR)
     public void deactivateAgentWithNoPayment(){
         Query queryAgent= new Query();
 
         queryAgent.addCriteria(Criteria.where("createdAt").lte(LocalDateTime.now().minusDays(7)));
         queryAgent.addCriteria(Criteria.where("inactive").is(false));
         queryAgent.addCriteria(Criteria.where("authRoleId").is(LSLBAuthRoleReferenceData.AGENT_ROLE_ID));
+        queryAgent.addCriteria(Criteria.where("ssoUserId").ne(null));
         queryAgent.limit(1000);
         List<AuthInfo> agents= (List<AuthInfo>)mongoRepositoryReactive.findAll(queryAgent, AuthInfo.class).toStream().collect(Collectors.toList());
         agents.parallelStream().forEach(agent -> {
+
             int days=0;
             boolean check = false;
             if(agent.getLastInactiveDate()!=null){

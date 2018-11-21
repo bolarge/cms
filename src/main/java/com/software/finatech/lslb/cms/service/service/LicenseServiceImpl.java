@@ -63,8 +63,7 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Autowired
     private AuthInfoServiceImpl authInfoService;
-    @Value("${email-username}")
-    String adminEmail;
+
     @Autowired
     private FrontEndPropertyHelper frontEndPropertyHelper;
 
@@ -470,10 +469,18 @@ public class LicenseServiceImpl implements LicenseService {
             if (gameType != null) {
                 aipCheckDto.setGameType(gameType.convertToDto());
             }
+            Query aipFormQuery= new Query();
+            aipFormQuery.addCriteria(Criteria.where("institutionId").is(aipForInstitution.getInstitutionId()));
+            aipFormQuery.addCriteria(Criteria.where("gameTypeId").is(aipForInstitution.getGameTypeId()));
+            AIPDocumentApproval aipDocumentApproval= (AIPDocumentApproval)mongoRepositoryReactive.find(aipFormQuery, AIPDocumentApproval.class).block();
+            if(aipDocumentApproval!=null){
+                aipCheckDto.setAipFormId(aipDocumentApproval.getId());
+            }
             aipCheckDto.setInstitutionId(aipForInstitution.getInstitutionId());
             aipCheckDto.setInstitutionName(aipForInstitution.getInstitution().convertToDto().getInstitutionName());
             aipCheckDto.setLicensedId(aipForInstitution.getId());
             aipCheckDto.setLicenseStatusId(aipForInstitution.getLicenseStatusId());
+
             aipCheckDtos.add(aipCheckDto);
 
         });
@@ -603,18 +610,23 @@ public class LicenseServiceImpl implements LicenseService {
 
             license.setLicenseStatusId(LicenseStatusReferenceData.RENEWAL_LICENSE_IN_REVIEW);
             mongoRepositoryReactive.saveOrUpdate(license);
+            List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_AIP_ID);
+            if (lslbAdmins.size() != 0) {
+                lslbAdmins.stream().forEach(lslbAdmin -> {
 
-            NotificationDto notificationDto = new NotificationDto();
-            notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
-            notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
-            notificationDto.setTemplate("LicenseUpdate");
-            notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ",  has submitted renewal application and uploaded the requested documents for " +
-                    notificationDto.getGameType());
-            //@TODO: Send email to lslb admin with permission
-            notificationDto.setInstitutionEmail(adminEmail);
-            sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
-
+                    NotificationDto notificationDto = new NotificationDto();
+                    notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
+                    notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
+                    notificationDto.setTemplate("LicenseUpdate");
+                    notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ",  has submitted renewal application and uploaded the requested documents for " +
+                            notificationDto.getGameType());
+                    //@TODO: Send email to lslb admin with permission
+                    notificationDto.setInstitutionEmail(lslbAdmin.getEmailAddress());
+                    sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
+                });
+            }
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
+
         } catch (Exception ex) {
             return Mono.just(new ResponseEntity<>("Error while moving to renewal license in review", HttpStatus.BAD_REQUEST));
 

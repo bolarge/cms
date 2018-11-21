@@ -267,7 +267,7 @@ public class AuthInfoController extends BaseController {
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, loginDto.getUserName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User not found"));
                 return Mono.just(new ResponseEntity("Invalid Username/Password", HttpStatus.UNAUTHORIZED));
             }
-            if (authInfo.isInactive() != false) {
+            if (authInfo.isInactive() == true) {
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User Inactive"));
                 return Mono.just(new ResponseEntity(authInfo.getInactiveReason(), HttpStatus.UNAUTHORIZED));
             }
