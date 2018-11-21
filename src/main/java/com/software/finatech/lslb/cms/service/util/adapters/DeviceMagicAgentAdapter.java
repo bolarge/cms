@@ -3,10 +3,7 @@ package com.software.finatech.lslb.cms.service.util.adapters;
 import com.google.common.io.Files;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.DocumentTypeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.GameTypeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.GenderReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.BsonBinarySubType;
@@ -38,6 +35,10 @@ public class DeviceMagicAgentAdapter {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
 
     public void saveDeviceMagicAgentToAgentDb(DeviceMagicAgent deviceMagicAgent) {
+        if (StringUtils.isEmpty(deviceMagicAgent.getEmail())){
+            logger.info("Submission with id {} does not have email, skipping creation", deviceMagicAgent.getSubmissionId());
+            return;
+        }
         Agent agent = findAgentBySubmissionId(deviceMagicAgent.getSubmissionId());
         if (agent == null) {
             agent = new Agent();
@@ -54,6 +55,8 @@ public class DeviceMagicAgentAdapter {
         agent.setTitle(deviceMagicAgent.getTitle());
         agent.setBvn(deviceMagicAgent.getBvn());
         agent.setAgentId(generateAgentId());
+        agent.setAgentStatusId(AgentStatusReferenceData.ACTIVE_ID);
+        agent.setEnabled(true);
         agent.setSubmissionId(deviceMagicAgent.getSubmissionId());
         agent.setIdNumber(deviceMagicAgent.getIdNumber());
         String address = buildAddress(deviceMagicAgent.getResidentialAddressStreet(),
@@ -108,6 +111,8 @@ public class DeviceMagicAgentAdapter {
             agent.setGenderId(gender.getId());
         }
         agent.setTitle(deviceMagicAgent.getTitle());
+        agent.setSkipVigipay(true);
+        agent.setFromDeviceMagic(true);
         mongoRepositoryReactive.saveOrUpdate(agent);
         saveDocumentForAgent(deviceMagicAgent, agent);
         logger.info("Saved Agent for submission {} , Agent Id {}", deviceMagicAgent.getSubmissionId(), agent.getId());

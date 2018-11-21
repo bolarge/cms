@@ -57,6 +57,7 @@ public class CustomerCodeCreator {
         }
 
 
+        query.addCriteria(Criteria.where("skipVigipay").is(false));
         ArrayList<Agent> agentWithoutVigiPayCustomerCode = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
         for (Agent agent : agentWithoutVigiPayCustomerCode) {
             String customerCode = vigipayService.createCustomerCodeForAgent(agent);

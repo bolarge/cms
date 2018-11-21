@@ -42,6 +42,24 @@ public class Agent extends AbstractFact {
     private String agentStatusId;
     private String genderId;
     private String submissionId;
+    private boolean skipVigipay;
+    private boolean fromDeviceMagic;
+
+    public boolean isFromDeviceMagic() {
+        return fromDeviceMagic;
+    }
+
+    public void setFromDeviceMagic(boolean fromDeviceMagic) {
+        this.fromDeviceMagic = fromDeviceMagic;
+    }
+
+    public boolean isSkipVigipay() {
+        return skipVigipay;
+    }
+
+    public void setSkipVigipay(boolean skipVigipay) {
+        this.skipVigipay = skipVigipay;
+    }
 
     public String getSubmissionId() {
         return submissionId;
