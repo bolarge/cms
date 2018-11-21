@@ -156,7 +156,15 @@ public class Agent extends AbstractFact {
         if (dob != null) {
             return dob.toString("dd-MM-yyyy");
         }
-        return getDateOfBirth();
+        String dobString = getDateOfBirth();
+        try {
+            if (!StringUtils.isEmpty(dobString)) {
+                return new LocalDate(dobString).toString("dd-MM-yyyy");
+            }
+            return dobString;
+        } catch (Exception e) {
+            return getDateOfBirth();
+        }
     }
 
     public String getResidentialAddress() {
