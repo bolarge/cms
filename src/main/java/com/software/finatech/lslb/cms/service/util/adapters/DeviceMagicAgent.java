@@ -46,7 +46,16 @@ public class DeviceMagicAgent {
     private String idNumber;
     private String imageBase64;
     private String imageurl;
+    private String imageFileName;
 
+
+    public String getImageFileName() {
+        return imageFileName;
+    }
+
+    public void setImageFileName(String imageFileName) {
+        this.imageFileName = imageFileName;
+    }
 
     public String getTitle() {
         return title;
@@ -387,5 +396,47 @@ public class DeviceMagicAgent {
         query.addCriteria(Criteria.where("institutionName").regex(institutionName, "i"));
         return (Institution) mongoRepositoryReactive.find(query,
                 Institution.class).block();
+    }
+
+    @Override
+    public String toString() {
+        return "DeviceMagicAgent{" +
+                "title='" + title + '\'' +
+                ", submittingDevice='" + submittingDevice + '\'' +
+                ", deviceUser='" + deviceUser + '\'' +
+                ", formCompletedDate='" + formCompletedDate + '\'' +
+                ", uploadCompletedTime='" + uploadCompletedTime + '\'' +
+                ", submissionId='" + submissionId + '\'' +
+                ", submissionIdGeneratedByDevice='" + submissionIdGeneratedByDevice + '\'' +
+                ", operatorId='" + operatorId + '\'' +
+                ", gamingCategopry='" + gamingCategopry + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", dateOfBirth='" + dateOfBirth + '\'' +
+                ", phoneNumber1='" + phoneNumber1 + '\'' +
+                ", phoneNumber2='" + phoneNumber2 + '\'' +
+                ", residentialAddressStreet='" + residentialAddressStreet + '\'' +
+                ", resindetialAddressCity='" + resindetialAddressCity + '\'' +
+                ", residentialAddressState='" + residentialAddressState + '\'' +
+                ", businessAddressStreet1='" + businessAddressStreet1 + '\'' +
+                ", businessAddressCity1='" + businessAddressCity1 + '\'' +
+                ", businessAddressState1='" + businessAddressState1 + '\'' +
+                ", businessAddressStreet2='" + businessAddressStreet2 + '\'' +
+                ", businessAddressCity2='" + businessAddressCity2 + '\'' +
+                ", businessAddressState2='" + businessAddressState2 + '\'' +
+                ", businessAddressStreet3='" + businessAddressStreet3 + '\'' +
+                ", businessAddressCity3='" + businessAddressCity3 + '\'' +
+                ", businessAddressState3='" + businessAddressState3 + '\'' +
+                ", businessAddressStreet4='" + businessAddressStreet4 + '\'' +
+                ", businessAddressCity4='" + businessAddressCity4 + '\'' +
+                ", businessAddressState4='" + businessAddressState4 + '\'' +
+                ", email='" + email + '\'' +
+                ", bvn='" + bvn + '\'' +
+                ", meansOfId='" + meansOfId + '\'' +
+                ", idNumber='" + idNumber + '\'' +
+                ", imageBase64='" + imageBase64 + '\'' +
+                ", imageurl='" + imageurl + '\'' +
+                ", imageFileName='" + imageFileName + '\'' +
+                '}';
     }
 }

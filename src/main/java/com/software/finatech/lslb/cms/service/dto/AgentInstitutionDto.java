@@ -7,8 +7,7 @@ import java.util.List;
 public class AgentInstitutionDto {
     private String institutionName;
     private String institutionId;
-    private String gameTypeId;
-    private String gameTypeName;
+    private List<EnumeratedFactDto> gameTypes = new ArrayList<>();
     private List<String> businessAddressList = new ArrayList<>();
 
     public List<String> getBusinessAddressList() {
@@ -35,19 +34,11 @@ public class AgentInstitutionDto {
         this.institutionId = institutionId;
     }
 
-    public String getGameTypeId() {
-        return gameTypeId;
+    public List<EnumeratedFactDto> getGameTypes() {
+        return gameTypes;
     }
 
-    public void setGameTypeId(String gameTypeId) {
-        this.gameTypeId = gameTypeId;
-    }
-
-    public String getGameTypeName() {
-        return gameTypeName;
-    }
-
-    public void setGameTypeName(String gameTypeName) {
-        this.gameTypeName = gameTypeName;
+    public void setGameTypes(List<EnumeratedFactDto> gameTypes) {
+        this.gameTypes = gameTypes;
     }
 }

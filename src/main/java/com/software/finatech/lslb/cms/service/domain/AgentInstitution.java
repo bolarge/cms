@@ -7,7 +7,7 @@ import java.util.Set;
 
 public class AgentInstitution {
     private String institutionId;
-    private String gameTypeId;
+    private List<String> gameTypeIds;
     private List<String> businessAddressList = new ArrayList<>();
 
     public List<String> getBusinessAddressList() {
@@ -26,11 +26,11 @@ public class AgentInstitution {
         this.institutionId = institutionId;
     }
 
-    public String getGameTypeId() {
-        return gameTypeId;
+    public List<String> getGameTypeIds() {
+        return gameTypeIds;
     }
 
-    public void setGameTypeId(String gameTypeId) {
-        this.gameTypeId = gameTypeId;
+    public void setGameTypeIds(List<String> gameTypeIds) {
+        this.gameTypeIds = gameTypeIds;
     }
 }

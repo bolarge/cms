@@ -894,11 +894,10 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 //            mongoRepositoryReactive.saveOrUpdate(user);
             //     return Mono.just(new ResponseEntity<>(user.convertToDto(), HttpStatus.OK));
 
-            String loggedInUserId = userAuthPermissionDto.getLoggedInUserId();
             String subjectUserId = userAuthPermissionDto.getUserId();
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser == null) {
-                return Mono.just(new ResponseEntity<>(String.format("User with Id %s does not exist", loggedInUserId), HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.BAD_REQUEST));
             }
             AuthInfo subjectUser = getUserById(subjectUserId);
             if (subjectUser == null) {
@@ -907,7 +906,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
             UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
             userApprovalRequest.setId(UUID.randomUUID().toString());
-            userApprovalRequest.setInitiatorId(loggedInUserId);
+            userApprovalRequest.setInitiatorId(loggedInUser.getId());
             userApprovalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
             userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
             userApprovalRequest.setUserApprovalRequestTypeId(UserApprovalRequestTypeReferenceData.REMOVE_PERMISSION_FROM_USER_ID);
@@ -916,7 +915,6 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
             approvalRequestNotifierAsync.sendNewUserApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Created user approval request to remove permissions from user %s", subjectUser.getFullName())));
-
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
             return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while removing permission from user", e);
