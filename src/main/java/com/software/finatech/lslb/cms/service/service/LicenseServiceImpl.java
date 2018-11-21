@@ -63,8 +63,7 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Autowired
     private AuthInfoServiceImpl authInfoService;
-    @Value("${email-username}")
-    String adminEmail;
+
     @Autowired
     private FrontEndPropertyHelper frontEndPropertyHelper;
 
