@@ -143,6 +143,7 @@ public class AgentServiceImpl implements AgentService {
                 AgentDto dto = new AgentDto();
                 dto.setId(agent.getId());
                 dto.setFullName(agent.getFullName());
+                dto.setBusinessAddresses(agent.getBusinessAddresses());
                 agentDtos.add(dto);
             });
             return Mono.just(new ResponseEntity<>(agentDtos, HttpStatus.OK));
@@ -355,7 +356,7 @@ public class AgentServiceImpl implements AgentService {
         gameTypeIds.add(gameTypeId);
         institutionIds.add(institutionId);
         agentInstitution.setBusinessAddressList(agentCreateDto.getBusinessAddressList());
-      //TODO:: fix this !!!!!!!!!!!!!!!!!!!!!
+        //TODO:: fix this !!!!!!!!!!!!!!!!!!!!!
         //  agentInstitution.setGameTypeId(gameTypeId);
         agentInstitution.setInstitutionId(institutionId);
         List<AgentInstitution> agentInstitutions = new ArrayList<>();
