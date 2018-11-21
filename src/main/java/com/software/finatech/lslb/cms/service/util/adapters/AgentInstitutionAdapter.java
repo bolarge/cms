@@ -4,10 +4,13 @@ import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
 import com.software.finatech.lslb.cms.service.domain.GameType;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.dto.AgentInstitutionDto;
+import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class AgentInstitutionAdapter {
@@ -20,11 +23,17 @@ public class AgentInstitutionAdapter {
             agentInstitutionDto.setInstitutionName(institution.getInstitutionName());
         }
 
-        GameType gameType = getGameType(agentInstitution.getGameTypeId(), mongoRepositoryReactive);
-        if (gameType != null) {
-            agentInstitutionDto.setGameTypeId(gameType.getId());
-            agentInstitutionDto.setGameTypeName(gameType.getName());
+        List<EnumeratedFactDto> gameTypeDtos = new ArrayList<>();
+        for (String gameTypeId : agentInstitution.getGameTypeIds()) {
+            GameType gameType = getGameType(gameTypeId, mongoRepositoryReactive);
+            if (gameType != null) {
+                EnumeratedFactDto dto = new EnumeratedFactDto();
+                dto.setName(gameType.getName());
+                dto.setId(gameType.getId());
+                gameTypeDtos.add(dto);
+            }
         }
+        agentInstitutionDto.setGameTypes(gameTypeDtos);
         agentInstitutionDto.setBusinessAddressList(agentInstitution.getBusinessAddressList());
         return agentInstitutionDto;
     }

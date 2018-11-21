@@ -355,7 +355,8 @@ public class AgentServiceImpl implements AgentService {
         gameTypeIds.add(gameTypeId);
         institutionIds.add(institutionId);
         agentInstitution.setBusinessAddressList(agentCreateDto.getBusinessAddressList());
-        agentInstitution.setGameTypeId(gameTypeId);
+      //TODO:: fix this !!!!!!!!!!!!!!!!!!!!!
+        //  agentInstitution.setGameTypeId(gameTypeId);
         agentInstitution.setInstitutionId(institutionId);
         List<AgentInstitution> agentInstitutions = new ArrayList<>();
         agentInstitutions.add(agentInstitution);

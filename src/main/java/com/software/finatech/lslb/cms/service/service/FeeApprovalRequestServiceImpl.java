@@ -96,9 +96,6 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser != null) {
                 query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
-                if (!loggedInUser.isSuperAdmin()) {
-              //      query.addCriteria(Criteria.where("initiatorAuthRoleId").is(loggedInUser.getAuthRoleId()));
-                }
             }
 
             if (page == 0) {

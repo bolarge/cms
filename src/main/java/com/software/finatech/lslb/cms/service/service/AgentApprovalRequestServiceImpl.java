@@ -282,7 +282,8 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
         String gameTypeId = agentApprovalRequest.getGameTypeId();
         String institutionId = agentApprovalRequest.getInstitutionId();
         AgentInstitution agentInstitution = new AgentInstitution();
-        agentInstitution.setGameTypeId(gameTypeId);
+   //TODO:: Fix this !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //     agentInstitution.setGameTypeId(gameTypeId);
         agentInstitution.setInstitutionId(institutionId);
         agentInstitution.setBusinessAddressList(agentApprovalRequest.getBusinessAddressList());
         agentInstitutions.add(agentInstitution);

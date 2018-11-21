@@ -593,7 +593,6 @@ public class AuthInfoController extends BaseController {
                                           HttpServletResponse httpServletResponse) {
         try {
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
-            //@TODO validate reqquest params
             Query query = new Query();
             if (institutionId != null && !institutionId.isEmpty()) {
                 query.addCriteria(Criteria.where("institutionId").is(institutionId));

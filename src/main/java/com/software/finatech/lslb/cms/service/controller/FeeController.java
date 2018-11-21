@@ -25,7 +25,7 @@ public class FeeController extends BaseController {
     public FeeService feeService;
 
     @Autowired
-    public FeeService getFeeService() {
+    public FeeService setFeeService() {
         return feeService;
     }
 

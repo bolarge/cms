@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jackson.JsonObjectDeserializer;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -348,5 +349,64 @@ public class DeviceMagicAdapter {
             List<Agent> agents = agentFromDeviceMagicAgents(deviceMagicAgents);
             logger.info("{}", agents);
         }
+    }
+
+
+    public DeviceMagicAgent fromJsonString(String jsonString) {
+        String VALUE = "value";
+        String STREET_ADDRESS = "Street_Address";
+        String STATE = "State";
+        String CITY = "City";
+        DeviceMagicAgent agent = new DeviceMagicAgent();
+        JSONObject jsonObject = new JSONObject(jsonString);
+        try {
+            JSONObject answerJsonObject = jsonObject.getJSONObject("answers");
+            try {
+                JSONObject operatorIdJsonObject = answerJsonObject.getJSONObject("Operator_ID");
+                if (operatorIdJsonObject != null) {
+                    String operatorId = operatorIdJsonObject.getString(VALUE);
+                    agent.setOperatorid(operatorId);
+                }
+            } catch (Exception e) {
+            }
+            try {
+                JSONObject gamingCategoryJsonObject = answerJsonObject.getJSONObject("Gaming_Category");
+                if (gamingCategoryJsonObject != null) {
+                    agent.setGamingcategopry(gamingCategoryJsonObject.getString(VALUE));
+                }
+            } catch (Exception e) {
+            }
+            try {
+                JSONObject firstNameJsonObject = answerJsonObject.getJSONObject("First_Name");
+                if (firstNameJsonObject != null) {
+                    agent.setFirstname(firstNameJsonObject.getString(VALUE));
+                }
+            } catch (Exception e) {
+
+            }
+
+            try {
+                JSONObject lastNameJsonObject = answerJsonObject.getJSONObject("Last_Name");
+                if (lastNameJsonObject != null) {
+                    agent.setLastname(lastNameJsonObject.getString(VALUE));
+                }
+            } catch (Exception e) {
+            }
+
+            try {
+                JSONObject titleJsonObject = answerJsonObject.getJSONObject("Title");
+                if (titleJsonObject != null) {
+                    agent.setTitle(titleJsonObject.getString(VALUE));
+                }
+            } catch (Exception e) {
+            }
+
+
+
+
+        } catch (Exception e) {
+            logger.error("Json Object \"answer\" does not exist ");
+        }
+        return agent;
     }
 }
