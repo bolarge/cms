@@ -15,6 +15,8 @@ public class DocumentTypeReferenceData {
     private static String RENEWALDocumentPurposeId = DocumentPurposeReferenceData.RENEWAL_LICENSE_ID;
     private static String INSPECTION_ID = DocumentPurposeReferenceData.INSPECTION_ID;
 
+    public static final String AGENT_PASSPORT_ID = "9";
+
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
 
@@ -113,10 +115,10 @@ public class DocumentTypeReferenceData {
         documentType8.setActive(true);
         documentType8.setRequired(false);
 
-        DocumentType documentType9 = (DocumentType) mongoRepositoryReactive.findById("9", DocumentType.class).block();
+        DocumentType documentType9 = (DocumentType) mongoRepositoryReactive.findById(AGENT_PASSPORT_ID, DocumentType.class).block();
         if (documentType9 == null) {
             documentType9 = new DocumentType();
-            documentType9.setId("9");
+            documentType9.setId(AGENT_PASSPORT_ID);
         }
         documentType9.setName("Agent Passport");
         documentType9.setDocumentPurposeId(DocumentPurposeReferenceData.AGENT_REGISTRATION_ID);

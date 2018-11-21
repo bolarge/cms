@@ -561,15 +561,12 @@
                                                                             </h3>
                                                                             <div mc:edit="body"
                                                                                  style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
-                                                                                This is to inform you that your
-                                                                                complaint on our platform has been
-                                                                                successfully logged with ticket id <span
-                                                                                    th:text="${ticketId}"></span> and we
-                                                                                are working to resolve the
-                                                                                issue.
+                                                                                A new complaint has been submitted on
+                                                                                LSLB Customer Management System by <span
+                                                                                    th:text="${customerNameEmail}"></span> with ticket id <span th:text="${ticketId}"></span>.
                                                                                 <br>
-                                                                                We will keep you updated on progress made.
                                                                                 <br>
+                                                                                <p>Kindly click the link below to view the complaint details</p>
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -597,6 +594,21 @@
                                                                             class="flexibleContainerCell">
 
                                                                             <!-- CONTENT TABLE // -->
+                                                                            <table border="0" cellpadding="0"
+                                                                                   cellspacing="0" width="60%"
+                                                                                   class="emailButton"
+                                                                                   style="background-color: #3498DB;border-radius: 10px;">
+                                                                                <tr>
+                                                                                    <td align="center" valign="middle"
+                                                                                        class="buttonContent"
+                                                                                        style="padding-top:15px;padding-bottom:15px;padding-right:15px;padding-left:15px;">
+                                                                                        <a style="color:#FFFFFF;text-decoration:none;font-family:Helvetica,Arial,sans-serif;font-size:20px;line-height:135%;"
+                                                                                           th:href="@{${frontEndUrl}}"
+                                                                                           target="_blank">View Complain
+                                                                                        </a>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
                                                                             <!-- // CONTENT TABLE -->
 
                                                                         </td>

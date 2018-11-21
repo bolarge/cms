@@ -50,7 +50,7 @@ public class DeviceMagicAdapter {
                 JSONObject operatorIdJsonObject = submissionObject.getJSONObject("Operator_ID");
                 if (operatorIdJsonObject != null) {
                     String operatorId = operatorIdJsonObject.getString(VALUE);
-                    agent.setOperatorid(operatorId);
+                    agent.setOperatorId(operatorId);
                 }
 
             } catch (Exception e) {
@@ -60,7 +60,7 @@ public class DeviceMagicAdapter {
             try {
                 JSONObject gamingCategoryJsonObject = submissionObject.getJSONObject("Gaming_Category");
                 if (gamingCategoryJsonObject != null) {
-                    agent.setGamingcategopry(gamingCategoryJsonObject.getString(VALUE));
+                    agent.setGamingCategopry(gamingCategoryJsonObject.getString(VALUE));
                 }
             } catch (Exception e) {
 
@@ -69,7 +69,7 @@ public class DeviceMagicAdapter {
             try {
                 JSONObject firstNameJsonObject = submissionObject.getJSONObject("First_Name");
                 if (firstNameJsonObject != null) {
-                    agent.setFirstname(firstNameJsonObject.getString(VALUE));
+                    agent.setFirstName(firstNameJsonObject.getString(VALUE));
                 }
             } catch (Exception e) {
 
@@ -78,7 +78,7 @@ public class DeviceMagicAdapter {
             try {
                 JSONObject lastNameJsonObject = submissionObject.getJSONObject("Last_Name");
                 if (lastNameJsonObject != null) {
-                    agent.setLastname(lastNameJsonObject.getString(VALUE));
+                    agent.setLastName(lastNameJsonObject.getString(VALUE));
                 }
             } catch (Exception e) {
             }
@@ -95,7 +95,7 @@ public class DeviceMagicAdapter {
             try {
                 JSONObject dateOfBirthJsonObject = submissionObject.getJSONObject("Date_Of_Birth");
                 if (dateOfBirthJsonObject != null) {
-                    agent.setDateofbirth(dateOfBirthJsonObject.getString(VALUE));
+                    agent.setDateOfBirth(dateOfBirthJsonObject.getString(VALUE));
                 }
             } catch (Exception e) {
             }
@@ -103,7 +103,7 @@ public class DeviceMagicAdapter {
             try {
                 JSONObject phoneNumber1JsonObject = submissionObject.getJSONObject("Phone_No__1");
                 if (phoneNumber1JsonObject != null) {
-                    agent.setPhonenumber1(phoneNumber1JsonObject.getString(VALUE));
+                    agent.setPhoneNumber1(phoneNumber1JsonObject.getString(VALUE));
                 }
             } catch (Exception e) {
 
@@ -112,7 +112,7 @@ public class DeviceMagicAdapter {
             try {
                 JSONObject phoneNumber2JsonObject = submissionObject.getJSONObject("Phone_No__2");
                 if (phoneNumber2JsonObject != null) {
-                    agent.setPhonenumber2(phoneNumber2JsonObject.getString(VALUE));
+                    agent.setPhoneNumber2(phoneNumber2JsonObject.getString(VALUE));
                 }
             } catch (Exception e) {
 
@@ -125,17 +125,17 @@ public class DeviceMagicAdapter {
                     JSONObject addressObject = addressArray.getJSONObject(0);
                     JSONObject streetAddressObject = addressObject.getJSONObject(STREET_ADDRESS);
                     if (streetAddressObject != null) {
-                        agent.setResidentialaddressstreet(streetAddressObject.getString(VALUE));
+                        agent.setResidentialAddressStreet(streetAddressObject.getString(VALUE));
                     }
 
                     JSONObject stateObject = addressObject.getJSONObject(STATE);
                     if (stateObject != null) {
-                        agent.setResidentialaddressstate(stateObject.getString(VALUE));
+                        agent.setResidentialAddressState(stateObject.getString(VALUE));
                     }
 
                     JSONObject cityObject = addressObject.getJSONObject(CITY);
                     if (cityObject != null) {
-                        agent.setResindetialaddresscity(cityObject.getString(VALUE));
+                        agent.setResindetialAddressCity(cityObject.getString(VALUE));
                     }
                 }
             } catch (Exception e) {
@@ -148,17 +148,17 @@ public class DeviceMagicAdapter {
                     JSONObject addressObject = businessAddressArray.getJSONObject(0);
                     JSONObject streetAddressObject = addressObject.getJSONObject(STREET_ADDRESS);
                     if (streetAddressObject != null) {
-                        agent.setBusinessaddressstreet1(streetAddressObject.getString(VALUE));
+                        agent.setBusinessAddressStreet1(streetAddressObject.getString(VALUE));
                     }
 
                     JSONObject stateObject = addressObject.getJSONObject(STATE);
                     if (stateObject != null) {
-                        agent.setBusinessaddressstate1(stateObject.getString(VALUE));
+                        agent.setBusinessAddressState1(stateObject.getString(VALUE));
                     }
 
                     JSONObject cityObject = addressObject.getJSONObject(CITY);
                     if (cityObject != null) {
-                        agent.setBusinessaddresscity1(cityObject.getString(VALUE));
+                        agent.setBusinessAddressCity1(cityObject.getString(VALUE));
                     }
                 }
             } catch (Exception e) {
@@ -171,17 +171,17 @@ public class DeviceMagicAdapter {
                     JSONObject addressObject = businessAddressArray.getJSONObject(0);
                     JSONObject streetAddressObject = addressObject.getJSONObject(STREET_ADDRESS);
                     if (streetAddressObject != null) {
-                        agent.setBusinessaddressstreet2(streetAddressObject.getString(VALUE));
+                        agent.setBusinessAddressStreet2(streetAddressObject.getString(VALUE));
                     }
 
                     JSONObject stateObject = addressObject.getJSONObject(STATE);
                     if (stateObject != null) {
-                        agent.setBusinessaddressstate2(stateObject.getString(VALUE));
+                        agent.setBusinessAddressState2(stateObject.getString(VALUE));
                     }
 
                     JSONObject cityObject = addressObject.getJSONObject(CITY);
                     if (cityObject != null) {
-                        agent.setBusinessaddresscity2(cityObject.getString(VALUE));
+                        agent.setBusinessAddressCity2(cityObject.getString(VALUE));
                     }
                 }
             } catch (Exception e) {
@@ -194,17 +194,17 @@ public class DeviceMagicAdapter {
                     JSONObject addressObject = businessAddressArray.getJSONObject(0);
                     JSONObject streetAddressObject = addressObject.getJSONObject(STREET_ADDRESS);
                     if (streetAddressObject != null) {
-                        agent.setBusinessaddressstreet3(streetAddressObject.getString(VALUE));
+                        agent.setBusinessAddressStreet3(streetAddressObject.getString(VALUE));
                     }
 
                     JSONObject stateObject = addressObject.getJSONObject(STATE);
                     if (stateObject != null) {
-                        agent.setBusinessaddressstate3(stateObject.getString(VALUE));
+                        agent.setBusinessAddressState3(stateObject.getString(VALUE));
                     }
 
                     JSONObject cityObject = addressObject.getJSONObject(CITY);
                     if (cityObject != null) {
-                        agent.setBusinessaddresscity3(cityObject.getString(VALUE));
+                        agent.setBusinessAddressCity3(cityObject.getString(VALUE));
                     }
                 }
             } catch (Exception e) {
@@ -217,17 +217,17 @@ public class DeviceMagicAdapter {
                     JSONObject addressObject = businessAddressArray.getJSONObject(0);
                     JSONObject streetAddressObject = addressObject.getJSONObject(STREET_ADDRESS);
                     if (streetAddressObject != null) {
-                        agent.setBusinessaddressstreet4(streetAddressObject.getString(VALUE));
+                        agent.setBusinessAddressStreet4(streetAddressObject.getString(VALUE));
                     }
 
                     JSONObject stateObject = addressObject.getJSONObject(STATE);
                     if (stateObject != null) {
-                        agent.setBusinessaddressstate4(stateObject.getString(VALUE));
+                        agent.setBusinessAddressState4(stateObject.getString(VALUE));
                     }
 
                     JSONObject cityObject = addressObject.getJSONObject(CITY);
                     if (cityObject != null) {
-                        agent.setBusinessaddresscity4(cityObject.getString(VALUE));
+                        agent.setBusinessAddressCity4(cityObject.getString(VALUE));
                     }
                 }
             } catch (Exception e) {
@@ -252,7 +252,7 @@ public class DeviceMagicAdapter {
             try {
                 JSONObject meansOfIdJsonObject = submissionObject.getJSONObject("Means_of_ID");
                 if (meansOfIdJsonObject != null) {
-                    agent.setMeansofid(meansOfIdJsonObject.getString(VALUE));
+                    agent.setMeansOfId(meansOfIdJsonObject.getString(VALUE));
                 }
             } catch (Exception e) {
             }
@@ -260,68 +260,53 @@ public class DeviceMagicAdapter {
             try {
                 JSONObject idNumberJsonObject = submissionObject.getJSONObject("ID_Number");
                 if (idNumberJsonObject != null) {
-                    agent.setIdnumber(idNumberJsonObject.getString(VALUE));
+                    agent.setIdNumber(idNumberJsonObject.getString(VALUE));
                 }
             } catch (Exception e) {
             }
 
-            try {
-                JSONObject pictureJsonObject = submissionObject.getJSONObject("Picture");
-                if (pictureJsonObject != null) {
-                    agent.setImageurl(pictureJsonObject.getString(VALUE));
-                }
-            } catch (Exception e) {
-            }
 
             agentList.add(agent);
         }
         return agentList;
     }
 
-    public void setAgentImagesBase64AndSave(List<DeviceMagicAgent> agentList) {
-        for (DeviceMagicAgent agent : agentList) {
-            RestTemplate restTemplate = new RestTemplate();
-            restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
-            HttpHeaders headers = new HttpHeaders();
-            headers.setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM));
-            headers.set("Authorization", "Basic WlRTVW9TTXFqVUZ1d3dILVNEMVo6eA==");
-            headers.set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.84 Safari/537.36");
-            headers.set("Postman-Token", "9cb4f3c5-8231-493c-8bf2-3b4b45500bb5");
-            headers.set("Cache-Control", "no-cache");
-            headers.setCacheControl("no-cache");
+//    public void setAgentImagesBase64AndSave(List<DeviceMagicAgent> agentList) {
+//        for (DeviceMagicAgent agent : agentList) {
+//            RestTemplate restTemplate = new RestTemplate();
+//            restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM));
+//            headers.set("Authorization", "Basic WlRTVW9TTXFqVUZ1d3dILVNEMVo6eA==");
+//            headers.set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.84 Safari/537.36");
+//            headers.set("Postman-Token", "9cb4f3c5-8231-493c-8bf2-3b4b45500bb5");
+//            headers.set("Cache-Control", "no-cache");
+//            headers.setCacheControl("no-cache");
+//
+//            HttpEntity<String> entity = new HttpEntity<>(headers);
+//            HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+//            HttpClient httpClient = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
+//            requestFactory.setHttpClient(httpClient);
+//            //   restTemplate.setRequestFactory(requestFactory);
+//            try {
+//                ResponseEntity<byte[]> response = restTemplate.exchange(agent.getImageurl(), HttpMethod.GET,
+//                        entity, byte[].class);
+//
+//                byte[] bytes = response.getBody();
+//                HttpStatus httpStatus = response.getStatusCode();
+//                logger.info("http status : {}", httpStatus);
+//
+//            } catch (Exception e) {
+//                logger.error("Error fetching image ", e);
+//            } finally {
+//                logger.info("tunde");
+//                //   mongoRepositoryReactive.saveOrUpdate(agent);
+//            }
+//        }
+//    }
 
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-            HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-            HttpClient httpClient = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
-            requestFactory.setHttpClient(httpClient);
-            //   restTemplate.setRequestFactory(requestFactory);
-            try {
-                ResponseEntity<byte[]> response = restTemplate.exchange(agent.getImageurl(), HttpMethod.GET,
-                        entity, byte[].class);
 
-                byte[] bytes = response.getBody();
-                HttpStatus httpStatus = response.getStatusCode();
-                logger.info("http status : {}", httpStatus);
-
-            } catch (Exception e) {
-                logger.error("Error fetching image ", e);
-            } finally {
-                logger.info("tunde");
-                //   mongoRepositoryReactive.saveOrUpdate(agent);
-            }
-        }
-    }
-
-    public List<Agent> agentFromDeviceMagicAgents(List<DeviceMagicAgent> deviceMagicAgents) {
-        List<Agent> agents = new ArrayList<>();
-        for (DeviceMagicAgent deviceMagicAgent : deviceMagicAgents) {
-            Agent agent = deviceMagicAgentAdapter.convertDeviceMagicAgentToAgent(deviceMagicAgent);
-            agents.add(agent);
-        }
-        return agents;
-    }
-
-    public String getDeviceMagicResponseStrings() {
+    private String getDeviceMagicResponseStrings() {
         String url = "https://www.devicemagic.com/api/forms/7306863/device_magic_database.json";
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -342,71 +327,71 @@ public class DeviceMagicAdapter {
         }
     }
 
-    public void getAgentLists() {
-        String responseJson = getDeviceMagicResponseStrings();
-        if (responseJson != null) {
-            List<DeviceMagicAgent> deviceMagicAgents = getAgentsFromAPIResponse(responseJson);
-            List<Agent> agents = agentFromDeviceMagicAgents(deviceMagicAgents);
-            logger.info("{}", agents);
-        }
-    }
+//    public void getAgentLists() {
+//        String responseJson = getDeviceMagicResponseStrings();
+//        if (responseJson != null) {
+//            List<DeviceMagicAgent> deviceMagicAgents = getAgentsFromAPIResponse(responseJson);
+//            List<Agent> agents = agentFromDeviceMagicAgents(deviceMagicAgents);
+//            logger.info("{}", agents);
+//        }
+   // }
 
 
-    public DeviceMagicAgent fromJsonString(String jsonString) {
-        String VALUE = "value";
-        String STREET_ADDRESS = "Street_Address";
-        String STATE = "State";
-        String CITY = "City";
-        DeviceMagicAgent agent = new DeviceMagicAgent();
-        JSONObject jsonObject = new JSONObject(jsonString);
-        try {
-            JSONObject answerJsonObject = jsonObject.getJSONObject("answers");
-            try {
-                JSONObject operatorIdJsonObject = answerJsonObject.getJSONObject("Operator_ID");
-                if (operatorIdJsonObject != null) {
-                    String operatorId = operatorIdJsonObject.getString(VALUE);
-                    agent.setOperatorid(operatorId);
-                }
-            } catch (Exception e) {
-            }
-            try {
-                JSONObject gamingCategoryJsonObject = answerJsonObject.getJSONObject("Gaming_Category");
-                if (gamingCategoryJsonObject != null) {
-                    agent.setGamingcategopry(gamingCategoryJsonObject.getString(VALUE));
-                }
-            } catch (Exception e) {
-            }
-            try {
-                JSONObject firstNameJsonObject = answerJsonObject.getJSONObject("First_Name");
-                if (firstNameJsonObject != null) {
-                    agent.setFirstname(firstNameJsonObject.getString(VALUE));
-                }
-            } catch (Exception e) {
-
-            }
-
-            try {
-                JSONObject lastNameJsonObject = answerJsonObject.getJSONObject("Last_Name");
-                if (lastNameJsonObject != null) {
-                    agent.setLastname(lastNameJsonObject.getString(VALUE));
-                }
-            } catch (Exception e) {
-            }
-
-            try {
-                JSONObject titleJsonObject = answerJsonObject.getJSONObject("Title");
-                if (titleJsonObject != null) {
-                    agent.setTitle(titleJsonObject.getString(VALUE));
-                }
-            } catch (Exception e) {
-            }
-
-
-
-
-        } catch (Exception e) {
-            logger.error("Json Object \"answer\" does not exist ");
-        }
-        return agent;
-    }
+//    public DeviceMagicAgent fromJsonString(String jsonString) {
+//        String VALUE = "value";
+//        String STREET_ADDRESS = "Street_Address";
+//        String STATE = "State";
+//        String CITY = "City";
+//        DeviceMagicAgent agent = new DeviceMagicAgent();
+//        JSONObject jsonObject = new JSONObject(jsonString);
+//        try {
+//            JSONObject answerJsonObject = jsonObject.getJSONObject("answers");
+//            try {
+//                JSONObject operatorIdJsonObject = answerJsonObject.getJSONObject("Operator_ID");
+//                if (operatorIdJsonObject != null) {
+//                    String operatorId = operatorIdJsonObject.getString(VALUE);
+//                    agent.setOperatorid(operatorId);
+//                }
+//            } catch (Exception e) {
+//            }
+//            try {
+//                JSONObject gamingCategoryJsonObject = answerJsonObject.getJSONObject("Gaming_Category");
+//                if (gamingCategoryJsonObject != null) {
+//                    agent.setGamingcategopry(gamingCategoryJsonObject.getString(VALUE));
+//                }
+//            } catch (Exception e) {
+//            }
+//            try {
+//                JSONObject firstNameJsonObject = answerJsonObject.getJSONObject("First_Name");
+//                if (firstNameJsonObject != null) {
+//                    agent.setFirstname(firstNameJsonObject.getString(VALUE));
+//                }
+//            } catch (Exception e) {
+//
+//            }
+//
+//            try {
+//                JSONObject lastNameJsonObject = answerJsonObject.getJSONObject("Last_Name");
+//                if (lastNameJsonObject != null) {
+//                    agent.setLastname(lastNameJsonObject.getString(VALUE));
+//                }
+//            } catch (Exception e) {
+//            }
+//
+//            try {
+//                JSONObject titleJsonObject = answerJsonObject.getJSONObject("Title");
+//                if (titleJsonObject != null) {
+//                    agent.setTitle(titleJsonObject.getString(VALUE));
+//                }
+//            } catch (Exception e) {
+//            }
+//
+//
+//
+//
+//        } catch (Exception e) {
+//            logger.error("Json Object \"answer\" does not exist ");
+//        }
+//        return agent;
+//    }
 }
