@@ -25,7 +25,7 @@ public class Agent extends AbstractFact {
     protected String emailAddress;
     protected String phoneNumber;
     protected List<AgentInstitution> agentInstitutions = new ArrayList<>();
-    protected LocalDate dateOfBirth;
+    protected String dateOfBirth;
     protected String residentialAddress;
     protected List<String> businessAddresses = new ArrayList<>();
     protected String meansOfId;
@@ -44,6 +44,15 @@ public class Agent extends AbstractFact {
     private String submissionId;
     private boolean skipVigipay;
     private boolean fromDeviceMagic;
+    private LocalDate dob;
+
+    public LocalDate getDob() {
+        return dob;
+    }
+
+    public void setDob(LocalDate dob) {
+        this.dob = dob;
+    }
 
     public boolean isFromDeviceMagic() {
         return fromDeviceMagic;
@@ -56,6 +65,7 @@ public class Agent extends AbstractFact {
     public boolean isSkipVigipay() {
         return skipVigipay;
     }
+
 
     public void setSkipVigipay(boolean skipVigipay) {
         this.skipVigipay = skipVigipay;
@@ -133,20 +143,20 @@ public class Agent extends AbstractFact {
         this.vgPayCustomerCode = vgPayCustomerCode;
     }
 
-    public LocalDate getDateOfBirth() {
+    public String getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(LocalDate dateOfBirth) {
+    public void setDateOfBirth(String dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
     private String getDateOfBirthString() {
-        LocalDate dob = getDateOfBirth();
+        LocalDate dob = getDob();
         if (dob != null) {
             return dob.toString("dd-MM-yyyy");
         }
-        return null;
+        return getDateOfBirth();
     }
 
     public String getResidentialAddress() {
@@ -295,7 +305,7 @@ public class Agent extends AbstractFact {
         agentDto.setAgentInstitutions(convertAgentInstitutions());
         agentDto.setGamingTerminals(getAllGamingTerminals());
         Gender gender = getGender();
-        if (gender != null){
+        if (gender != null) {
             agentDto.setGenderId(this.genderId);
             agentDto.setGenderName(gender.getName());
         }

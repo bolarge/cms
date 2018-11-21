@@ -104,7 +104,7 @@ public class DeviceMagicAgentAdapter {
         DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
         String dob = deviceMagicAgent.getDateOfBirth();
         if (!StringUtils.isEmpty(dob)) {
-            agent.setDateOfBirth(dateTimeFormatter.parseLocalDate(dob));
+            agent.setDob(dateTimeFormatter.parseLocalDate(dob));
         }
         Gender gender = getGenderFromDeviceMagicName(deviceMagicAgent.getGender());
         if (gender != null) {

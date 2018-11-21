@@ -3,7 +3,7 @@ package com.software.finatech.lslb.cms.service.util.data_updater;
 import com.software.finatech.lslb.cms.service.domain.AbstractFact;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "Agents")
+@Document(collection = "AgentsFaked")
 public class FakeAgent extends AbstractFact {
     private String dateOfBirth;
     private String firstName;
