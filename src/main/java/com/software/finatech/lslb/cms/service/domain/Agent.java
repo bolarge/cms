@@ -41,7 +41,15 @@ public class Agent extends AbstractFact {
     private Set<String> phoneNumbers = new HashSet<>();
     private String agentStatusId;
     private String genderId;
+    private String submissionId;
 
+    public String getSubmissionId() {
+        return submissionId;
+    }
+
+    public void setSubmissionId(String submissionId) {
+        this.submissionId = submissionId;
+    }
 
     public String getGenderId() {
         return genderId;

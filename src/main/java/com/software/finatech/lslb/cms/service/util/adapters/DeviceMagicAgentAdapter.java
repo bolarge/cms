@@ -38,8 +38,11 @@ public class DeviceMagicAgentAdapter {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
 
     public void saveDeviceMagicAgentToAgentDb(DeviceMagicAgent deviceMagicAgent) {
-        Agent agent = new Agent();
-        agent.setId(UUID.randomUUID().toString());
+        Agent agent = findAgentBySubmissionId(deviceMagicAgent.getSubmissionId());
+        if (agent == null) {
+            agent = new Agent();
+            agent.setId(UUID.randomUUID().toString());
+        }
         agent.setFullName(String.format("%s %s", deviceMagicAgent.getFirstName(), deviceMagicAgent.getLastName()));
         agent.setFirstName(deviceMagicAgent.getFirstName());
         agent.setLastName(deviceMagicAgent.getLastName());
@@ -51,6 +54,7 @@ public class DeviceMagicAgentAdapter {
         agent.setTitle(deviceMagicAgent.getTitle());
         agent.setBvn(deviceMagicAgent.getBvn());
         agent.setAgentId(generateAgentId());
+        agent.setSubmissionId(deviceMagicAgent.getSubmissionId());
         agent.setIdNumber(deviceMagicAgent.getIdNumber());
         String address = buildAddress(deviceMagicAgent.getResidentialAddressStreet(),
                 deviceMagicAgent.getResindetialAddressCity(), deviceMagicAgent.getResidentialAddressState());
@@ -395,8 +399,8 @@ public class DeviceMagicAgentAdapter {
             try {
                 JSONObject bvnJsonObject = (JSONObject) answerJsonObject.get("BVN");
                 if (bvnJsonObject != null) {
-                    Long bvn = (Long)bvnJsonObject.get(VALUE);
-                    if (bvn != null){
+                    Long bvn = (Long) bvnJsonObject.get(VALUE);
+                    if (bvn != null) {
                         agent.setBvn(String.valueOf(bvn));
                     }
                 }
@@ -423,5 +427,11 @@ public class DeviceMagicAgentAdapter {
             logger.error("Json Object \"answer\" does not exist ");
         }
         return agent;
+    }
+
+    private Agent findAgentBySubmissionId(String submissionId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("submissionId").is(submissionId));
+        return (Agent) mongoRepositoryReactive.find(query, Agent.class).block();
     }
 }
