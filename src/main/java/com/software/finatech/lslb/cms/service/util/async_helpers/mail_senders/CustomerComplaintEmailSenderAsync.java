@@ -46,9 +46,9 @@ public class CustomerComplaintEmailSenderAsync extends AbstractMailSender {
             HashMap<String, Object> model = new HashMap<>();
             model.put("date", presentDateString);
             model.put("ticketId", ticketId);
-            String mailContent = mailContentBuilderService.build(model, "NewCustomerComplainCustomer");
+            String mailContent = mailContentBuilderService.build(model, "customer-complaint/NewCustomerComplainCustomer");
             logger.info("Sending new customer complain notification to customer with email address {}", customerComplain.getCustomerEmailAddress());
-            emailService.sendEmail(mailContent, "LSLB have received your complain", customerComplain.getCustomerEmailAddress());
+            emailService.sendEmail(mailContent, "We have received your complain", customerComplain.getCustomerEmailAddress());
         } catch (Exception e) {
             logger.error(String.format("An error occurred while sending customer complain acknowledgement to customer with email %s", customerComplain.getCustomerEmailAddress()), e);
         }
@@ -64,7 +64,7 @@ public class CustomerComplaintEmailSenderAsync extends AbstractMailSender {
         model.put("customerNameEmail", customerNameEmail);
         model.put("frontEndUrl", frontEndUrl);
         model.put("ticketId", customerComplain.getTicketId());
-        return mailContentBuilderService.build(model, "NewCustomerComplainLSLBAdmin");
+        return mailContentBuilderService.build(model, "customer-complaint/NewCustomerComplainLSLBAdmin");
     }
 
     private void sendNewCustomerComplainEmailToLSLBAdmin(String lslbAdminEmailAddress, String mailContent) {

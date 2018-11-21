@@ -34,7 +34,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
@@ -282,18 +281,13 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
         String gameTypeId = agentApprovalRequest.getGameTypeId();
         String institutionId = agentApprovalRequest.getInstitutionId();
         AgentInstitution agentInstitution = new AgentInstitution();
-   //TODO:: Fix this !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        //     agentInstitution.setGameTypeId(gameTypeId);
+        agentInstitution.getGameTypeIds().add(gameTypeId);
         agentInstitution.setInstitutionId(institutionId);
         agentInstitution.setBusinessAddressList(agentApprovalRequest.getBusinessAddressList());
         agentInstitutions.add(agentInstitution);
         agent.setAgentInstitutions(agentInstitutions);
-        if (!gameTypeIds.contains(gameTypeId)) {
-            gameTypeIds.add(gameTypeId);
-        }
-        if (!institutionIds.contains(institutionId)) {
-            institutionIds.add(institutionId);
-        }
+        gameTypeIds.add(gameTypeId);
+        institutionIds.add(institutionId);
         agentBusinessAddresses.addAll(agentApprovalRequest.getBusinessAddressList());
         agent.setBusinessAddresses(agentBusinessAddresses);
         agent.setInstitutionIds(institutionIds);
@@ -313,7 +307,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             Agent agent = new Agent();
             agent.setId(pendingAgent.getId());
             agent.setEnabled(true);
-              agent.setDateOfBirth(pendingAgent.getDateOfBirth());
+            agent.setDateOfBirth(pendingAgent.getDateOfBirth());
             agent.setAgentId(pendingAgent.getAgentId());
             agent.setBusinessAddresses(pendingAgent.getBusinessAddresses());
             agent.setGameTypeIds(pendingAgent.getGameTypeIds());

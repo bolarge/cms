@@ -7,6 +7,7 @@ import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordDetailService;
 import com.software.finatech.lslb.cms.service.service.contracts.VigipayService;
+import com.software.finatech.lslb.cms.service.util.data_updater.ExistingAgentLoader;
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingOperatorLoader;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,8 @@ public class TestController extends BaseController {
     private PaymentRecordDetailService paymentRecordDetailService;
     @Autowired
     private ExistingOperatorLoader existingOperatorLoader;
+    @Autowired
+    private ExistingAgentLoader existingAgentLoader;
 
     @RequestMapping(method = RequestMethod.GET, value = "/create-customer")
     public String testGetCustomerCode(@RequestParam("inst") String institutionId) {
@@ -44,12 +47,22 @@ public class TestController extends BaseController {
         return paymentRecordDetailService.createInBranchPaymentRecordDetail(paymentRecordDetailCreateDto, request);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/load-existing")
+    @RequestMapping(method = RequestMethod.POST, value = "/load-existing-operators")
     public Mono<ResponseEntity> create(@RequestParam("file") MultipartFile multipartFile) {
         try {
             existingOperatorLoader.loadFromCsv(multipartFile);
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (LicenseServiceException e) {
+            return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/load-existing-agents")
+    public Mono<ResponseEntity> createAgents() {
+        try {
+            existingAgentLoader.loadExistingAgents();
+            return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
+        } catch (Exception e) {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
