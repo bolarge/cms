@@ -23,7 +23,7 @@ public class LicenseStatusReferenceData {
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         loadForIdAndName(AIP_LICENSE_STATUS_ID, mongoRepositoryReactive, "APPROVAL IN PRINCIPLE");
-        loadForIdAndName(LICENSED_LICENSE_STATUS_ID, mongoRepositoryReactive, "LICENCED");
+        loadForIdAndName(LICENSED_LICENSE_STATUS_ID, mongoRepositoryReactive, "LICENSED");
         loadForIdAndName(LICENSE_REVOKED_ID, mongoRepositoryReactive, "LICENCE REVOKED");
         loadForIdAndName(RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID, mongoRepositoryReactive, "RENEWAL IN PROGRESS");
         loadForIdAndName(LICENSE_EXPIRED_STATUS_ID, mongoRepositoryReactive, "EXPIRED");
