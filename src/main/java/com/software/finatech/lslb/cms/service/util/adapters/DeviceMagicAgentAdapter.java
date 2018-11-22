@@ -205,7 +205,6 @@ public class DeviceMagicAgentAdapter {
             return institutionCategoryDetails.getInstitutionId();
         }
 
-
         return null;
     }
 

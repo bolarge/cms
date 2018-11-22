@@ -345,14 +345,17 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             if (loggedCase.isOutcomeLicenseRevoked()) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_REVOKED_ID);
                 license.setLicenseChangeReason(reason);
+                loggedCaseMailSenderAsync.sendOutcomeMailToOffender(loggedCase);
             }
             if (loggedCase.isOutcomeLicenseSuspended()) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_SUSPENDED_ID);
                 license.setLicenseChangeReason(reason);
+                loggedCaseMailSenderAsync.sendOutcomeMailToOffender(loggedCase);
             }
             if (loggedCase.isOutcomeLicenseTerminated()) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_TERMINATED_ID);
                 license.setLicenseChangeReason(reason);
+                loggedCaseMailSenderAsync.sendOutcomeMailToOffender(loggedCase);
             }
             if (loggedCase.isOutcomePenalty()) {
                 loggedCaseMailSenderAsync.sendPenaltyMailToOffender(loggedCase);
