@@ -225,7 +225,7 @@ public class LoggedCase extends AbstractFact {
         return caseStatus;
     }
 
-    private Agent getAgent() {
+    public Agent getAgent() {
         if (StringUtils.isEmpty(this.agentId)) {
             return null;
         }

@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -21,8 +21,6 @@ public class ExistingAgentLoader {
     private static final Logger logger = LoggerFactory.getLogger(ExistingAgentLoader.class);
     @Autowired
     private DeviceMagicAgentAdapter deviceMagicAgentAdapter;
-//    private String[] fileNames = new String[]{"30676121.json", "30676511.json"};
-
     private DeviceMagicAgent agentFromFile(File file) throws IOException, ParseException {
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(new FileReader(file));
@@ -33,44 +31,29 @@ public class ExistingAgentLoader {
     }
 
     public void loadExistingAgents() {
-        for (int i = 30670000; i < 33700000; i++) {
-            loadAgentForFilePath(String.valueOf(i));
-        }
-    }
-
-    private void loadAgentForFilePath(String filePath) {
-        String resourceFileName = String.format("classpath:agent-data/json/%s.json", filePath);
         try {
-            File file = ResourceUtils.getFile(resourceFileName);
-            DeviceMagicAgent deviceMagicAgent = agentFromFile(file);
-            if (deviceMagicAgent == null) {
-                logger.info("No Device Magic Agent for submission {}", filePath);
-                return;
+            File folder = ResourceUtils.getFile("classpath:agent-data/json");
+            File[] listOfFiles = folder.listFiles();
+            if (listOfFiles != null) {
+                for (File listOfFile : listOfFiles) {
+                    if (listOfFile.isFile()) {
+                        loadAgentForFile(listOfFile);
+                    }
+                }
             }
-            deviceMagicAgent.setSubmissionId(filePath);
-            deviceMagicAgentAdapter.saveDeviceMagicAgentToAgentDb(deviceMagicAgent);
-        } catch (FileNotFoundException e) {
-            //     logger.error("File with resource filepath {} not found , message -> {}", filePath, e.getMessage());
         } catch (Exception e) {
-            logger.error("Error occurred ", e);
+            logger.error("Error occurred while parsing file", e);
         }
     }
 
-//
-//
-//    private void loadAgents() {
-//        for (String fileName : fileNames) {
-//            String resourceFileName = String.format("classpath:agent-data/json/%s", fileName);
-//            try {
-//                File file = ResourceUtils.getFile(resourceFileName);
-//                DeviceMagicAgent deviceMagicAgent = agentFromFile(file);
-//                if (deviceMagicAgent != null) {
-//                    deviceMagicAgent.setImageFileName(fileName);
-//                }
-//                logger.info("Agent found \n\n\n\n {}", deviceMagicAgent);
-//            } catch (Exception e) {
-//                logger.error("Error occurred ", e);
-//            }
-//        }
-//    }
+    private void loadAgentForFile(File file) throws IOException, ParseException {
+        DeviceMagicAgent deviceMagicAgent = agentFromFile(file);
+        String submissionId = file.getName().replace(".json", "");
+        if (deviceMagicAgent == null) {
+            logger.info("No Device Magic Agent for submission {}", submissionId);
+            return;
+        }
+        deviceMagicAgent.setSubmissionId(submissionId);
+        deviceMagicAgentAdapter.saveDeviceMagicAgentToAgentDb(deviceMagicAgent);
+    }
 }
