@@ -27,7 +27,7 @@ import javax.validation.Valid;
         tags = "Application Form Controller")
 @RestController
 @RequestMapping("/api/v1/application-form")
-public class ApplicationFormController {
+public class ApplicationFormController  extends BaseController{
 
 
     private ApplicationFormService applicationFormService;

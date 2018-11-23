@@ -18,7 +18,7 @@ import javax.validation.Valid;
 @Api(value = "Scheduled meetings", description = "For everything related to scheduled meetings with gaming operators", tags = "Scheduled Meetings")
 @RestController
 @RequestMapping("/api/v1/scheduled-meetings")
-public class ScheduledMeetingController {
+public class ScheduledMeetingController  extends BaseController{
 
     private ScheduledMeetingService scheduledMeetingService;
 

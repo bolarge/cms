@@ -23,7 +23,7 @@ import javax.validation.Valid;
         description = "For everything related to agent approval requests", tags = "Agent Approval Requests Controller")
 @RestController
 @RequestMapping("/api/v1/agent-approval-requests")
-public class AgentApprovalRequestController {
+public class AgentApprovalRequestController  extends BaseController{
 
     private AgentApprovalRequestService agentApprovalRequestService;
 

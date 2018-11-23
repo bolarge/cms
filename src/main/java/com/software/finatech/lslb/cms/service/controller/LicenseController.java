@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 @Api(value = "License", description = "For everything related to gaming operators licenses", tags = "Licence Controller")
 @RestController
 @RequestMapping("/api/v1/license")
-public class LicenseController {
+public class LicenseController  extends BaseController{
     @Autowired
     private LicenseService licenseService;
 
