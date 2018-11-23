@@ -261,6 +261,7 @@ public class CustomerComplain extends AbstractFact {
         dto.setDateOfIncident(getDateOfIncident());
         dto.setStateOfResidence(getStateOfResidence());
         dto.setAddress(getAddress());
+        dto.setComments(getComments());
         return dto;
     }
 

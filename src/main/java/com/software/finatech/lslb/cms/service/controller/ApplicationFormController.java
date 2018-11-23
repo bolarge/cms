@@ -3,7 +3,7 @@ package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
-import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
+import com.software.finatech.lslb.cms.service.model.applicantMembers.OperatorMemberDetails;
 import com.software.finatech.lslb.cms.service.model.contactDetails.ApplicantContactDetails;
 import com.software.finatech.lslb.cms.service.model.criminalityDetails.ApplicantCriminalityDetails;
 import com.software.finatech.lslb.cms.service.model.declaration.ApplicantDeclarationDetails;
@@ -117,7 +117,7 @@ public class ApplicationFormController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/get-applicant-members-details", params = {"applicationFormId"})
-    @ApiOperation(value = "Get applicant members details", response = ApplicantMemberDetails.class, consumes = "application/json")
+    @ApiOperation(value = "Get applicant members details", response = OperatorMemberDetails.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -134,7 +134,7 @@ public class ApplicationFormController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> saveApplicantMemberDetails(@PathVariable("applicationFormId") String applicationFormId, @RequestBody ApplicantMemberDetails applicantMemberDetails, HttpServletRequest request) {
+    public Mono<ResponseEntity> saveApplicantMemberDetails(@PathVariable("applicationFormId") String applicationFormId, @RequestBody OperatorMemberDetails applicantMemberDetails, HttpServletRequest request) {
         return applicationFormService.saveApplicantMembersDetails(applicationFormId, applicantMemberDetails, request);
     }
 

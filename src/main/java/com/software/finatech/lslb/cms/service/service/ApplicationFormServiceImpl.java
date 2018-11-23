@@ -4,7 +4,7 @@ import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
-import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
+import com.software.finatech.lslb.cms.service.model.applicantMembers.OperatorMemberDetails;
 import com.software.finatech.lslb.cms.service.model.contactDetails.ApplicantContactDetails;
 import com.software.finatech.lslb.cms.service.model.criminalityDetails.ApplicantCriminalityDetails;
 import com.software.finatech.lslb.cms.service.model.declaration.ApplicantDeclarationDetails;
@@ -220,7 +220,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             if (applicationForm == null) {
                 return Mono.just(new ResponseEntity<>(String.format("ApplicationForm with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
             } else {
-                ApplicantMemberDetails applicantMemberDetails = applicationForm.getApplicantMemberDetails();
+                OperatorMemberDetails applicantMemberDetails = applicationForm.getApplicantMemberDetails();
                 if (applicantMemberDetails == null) {
                     return Mono.just(new ResponseEntity<>("No applicant member details found for application form", HttpStatus.NOT_FOUND));
                 } else {
@@ -236,7 +236,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     }
 
     @Override
-    public Mono<ResponseEntity> saveApplicantMembersDetails(String applicationFormId, ApplicantMemberDetails applicantMemberDetails, HttpServletRequest request) {
+    public Mono<ResponseEntity> saveApplicantMembersDetails(String applicationFormId, OperatorMemberDetails applicantMemberDetails, HttpServletRequest request) {
         try {
             ApplicationForm applicationForm = getApplicationFormById(applicationFormId);
             if (applicationForm == null) {
@@ -250,6 +250,11 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            //save opeators shareholders and management details
+            Institution institution = applicationForm.getInstitution();
+            institution.setOperatorMemberDetails(applicantMemberDetails);
+            mongoRepositoryReactive.saveOrUpdate(institution);
 
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -981,7 +986,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
             }
 
-            ApplicantMemberDetails memberDetails = applicationForm.getApplicantMemberDetails();
+            OperatorMemberDetails memberDetails = applicationForm.getApplicantMemberDetails();
             if (memberDetails == null) {
                 return Mono.just(new ResponseEntity<>("Applicant has not filled members details", HttpStatus.BAD_REQUEST));
             }
