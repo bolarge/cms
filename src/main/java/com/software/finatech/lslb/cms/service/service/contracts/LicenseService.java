@@ -41,9 +41,7 @@ public interface LicenseService {
 
     Mono<ResponseEntity> getExpiredAIPs();
 
-    List<EnumeratedFactDto> getLicenseStatus();
-
-    List<EnumeratedFactDto> getAllLicenseTypes();
+    Mono<ResponseEntity> getAllLicenseTypes();
 
     Mono<ResponseEntity> getInstitutionAIPs(String institutionId);
 

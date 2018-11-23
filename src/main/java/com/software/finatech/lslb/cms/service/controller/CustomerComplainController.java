@@ -117,5 +117,16 @@ public class CustomerComplainController {
     public Mono<ResponseEntity> beginCustomerComplainReview(CustomerComplainReviewRequest reviewRequest, HttpServletRequest request) {
         return customerComplainService.beginCustomerComplainReview(reviewRequest, request);
     }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/add-comment", produces = "application/json")
+    @ApiOperation(value = "Add comment Customer Complain", response = CustomerComplainDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> createNewCommentToCustomerComplain(@RequestBody @Valid CustomerComplainCommentCreateDto customerComplainCommentCreateDto, HttpServletRequest request) {
+        return customerComplainService.addCustomerComplaintComment(customerComplainCommentCreateDto, request);
+    }
 }
 

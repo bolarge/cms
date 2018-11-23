@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
 import com.software.finatech.lslb.cms.service.domain.CustomerComplain;
+import com.software.finatech.lslb.cms.service.dto.CustomerComplainCommentCreateDto;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainCreateDto;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainReviewRequest;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainUpdateDto;
@@ -37,4 +38,6 @@ public interface CustomerComplainService {
     Mono<ResponseEntity> getAllCustomerComplainStatus();
 
     Mono<ResponseEntity> beginCustomerComplainReview(CustomerComplainReviewRequest reviewRequest, HttpServletRequest request);
+
+    Mono<ResponseEntity> addCustomerComplaintComment(CustomerComplainCommentCreateDto customerComplainCommentCreateDto, HttpServletRequest request);
 }
