@@ -21,7 +21,7 @@ import javax.validation.Valid;
 @Api(value = "License Transfer", description = "For License Transfers ", tags = "License Transfer Controller")
 @RestController
 @RequestMapping("/api/v1/license-transfers")
-public class LicenseTransferController {
+public class LicenseTransferController  extends BaseController{
     private LicenseTransferService licenseTransferService;
 
     @Autowired

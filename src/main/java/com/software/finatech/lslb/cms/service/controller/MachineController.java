@@ -19,7 +19,7 @@ import javax.validation.Valid;
 @Api(value = "Machines", description = "For everything related to Machines (Gaming terminals and Gaming Machines)", tags = "Machine Controller(Gaming Machines and Terminals)")
 @RestController
 @RequestMapping("/api/v1/machines")
-public class MachineController {
+public class MachineController  extends BaseController{
 
     private MachineService machineService;
 

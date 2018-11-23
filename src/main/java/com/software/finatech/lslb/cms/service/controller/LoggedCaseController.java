@@ -18,7 +18,7 @@ import javax.validation.Valid;
 @Api(value = "Logged Cases", description = "For everything related to logged cases by LSLB", tags = "Logged Cases Controller")
 @RestController
 @RequestMapping("/api/v1/logged-cases")
-public class LoggedCaseController {
+public class LoggedCaseController  extends BaseController{
 
     private LoggedCaseService loggedCaseService;
 

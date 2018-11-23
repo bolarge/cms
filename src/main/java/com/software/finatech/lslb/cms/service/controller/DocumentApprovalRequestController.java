@@ -21,7 +21,7 @@ import javax.validation.Valid;
         description = "For everything related to document approval requests", tags = "Document Approval Requests Controller")
 @RestController
 @RequestMapping("/api/v1/document-approval-requests")
-public class DocumentApprovalRequestController {
+public class DocumentApprovalRequestController  extends BaseController{
 
     private DocumentApprovalRequestService documentApprovalRequestService;
 

@@ -18,7 +18,7 @@ import javax.validation.Valid;
 @Api(value = "Customer Complains", description = "For everything related to customer complains on th CMS platform", tags = "Customer Complain Controller")
 @RestController
 @RequestMapping("/api/v1/customer-complains")
-public class CustomerComplainController {
+public class CustomerComplainController  extends BaseController{
 
     private CustomerComplainService customerComplainService;
 
