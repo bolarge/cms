@@ -66,7 +66,7 @@ public class FeeUpdater {
 
 
     //TODO:: fix thisss to 15 min
-    @Scheduled(fixedRate = 60 * 1000)
+    @Scheduled(fixedRate =5* 60 * 1000)
     @SchedulerLock(name = "Activate Fees For Today", lockAtMostFor = 60 * 1000, lockAtLeastFor = 60 * 1000)
     public void startNewFees() {
         try {
