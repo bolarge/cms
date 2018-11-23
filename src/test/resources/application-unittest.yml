@@ -1,0 +1,52 @@
+mongodb:
+  hosts: 52.215.123.210:27017,34.255.164.20:27017
+  username:
+  password:
+  database: LslbCMSDbTest
+  authDb: admin
+  replicaSet: mylab
+
+logging:
+  level:
+    ROOT: INFO
+    #Rememeber to change the credentials for SSO
+sso:
+  baseIdentityURL: https://sso.test.vggdev.com/identity
+  baseAPIURL: http://ssoapi.test.vggdev.com
+  apiUsername: lslb-cms-api
+  apiPassword: fhhsnns___===i1omnsnaa
+  clientId: lslb-cms
+  clientSecret:  fhhsnns___===i1omnsnaa
+  baseLogoutURL: https://sso.test.vggdev.com
+  publicKeyURL: https://sso.test.vggdev.com/identity/.well-known/jwks
+  applicationName: lslb-cms
+
+jwt:
+  header: Authorization
+
+
+racs:
+  ui:
+    host: localhost
+    port: 3000
+
+
+
+vigipay:
+  client-id: LAGOS_STATE_LOTTERIES_BOARD_TEST_API1DH9V9PLSI4W
+  client-secret: vgPsvZAUJMLmHHhe
+  username: adeboludeyi@gmail.com
+  password: vigipayP@ssw0rd
+  scope: ebipsgatewayapi offline_access roles profile
+  grant-type: password
+  token-url: https://ebipssso.test.vggdev.com/core/connect/token
+  loop-base-url: https://ebipsgateway.test.vggdev.com/api
+  country-code: 566
+  location-code: LSG
+  currency-code: NGN
+  corporate-revenue-code: 1234
+
+email-host: smtp.gmail.com
+email-username: lslbcms@gmail.com
+email-password: password@123456
+email-port: 587
