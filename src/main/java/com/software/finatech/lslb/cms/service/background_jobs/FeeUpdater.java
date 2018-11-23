@@ -104,7 +104,7 @@ public class FeeUpdater {
 
     private ArrayList<Fee> getFeesForActivation() {
         Query query = new Query();
-        query.addCriteria(Criteria.where("effectiveDate").is(LocalDateTime.now()));
+        query.addCriteria(Criteria.where("effectiveDate").lte(LocalDateTime.now()));
         query.addCriteria(Criteria.where("active").is(false));
         return (ArrayList<Fee>) mongoRepositoryReactive.findAll(query, Fee.class).toStream().collect(Collectors.toList());
     }
