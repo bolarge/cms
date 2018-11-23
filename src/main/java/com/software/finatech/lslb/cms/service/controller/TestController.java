@@ -7,7 +7,6 @@ import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.domain.InstitutionCategoryDetails;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
-import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.DocumentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordDetailService;
 import com.software.finatech.lslb.cms.service.service.contracts.VigipayService;
@@ -23,23 +22,21 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.ResourceUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-@RestController
-@RequestMapping("/test")
+//@RestController
+//@RequestMapping("/test")
 public class TestController extends BaseController {
     @Autowired
     private VigipayService vigipayService;
-    @Autowired
-    private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     @Autowired
     private PaymentRecordDetailService paymentRecordDetailService;
     @Autowired

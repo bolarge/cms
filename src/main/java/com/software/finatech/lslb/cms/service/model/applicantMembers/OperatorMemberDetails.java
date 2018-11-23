@@ -5,7 +5,7 @@ import com.software.finatech.lslb.cms.service.dto.CommentDetail;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ApplicantMemberDetails {
+public class OperatorMemberDetails {
     private List<ManagementDetail> managementDetailList;
     private List<Shareholder> shareholderList;
     private List<CommentDetail> comments = new ArrayList<>();

@@ -4,6 +4,7 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionCategoryDetailsDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
+import com.software.finatech.lslb.cms.service.model.applicantMembers.OperatorMemberDetails;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Transient;
@@ -26,10 +27,19 @@ public class Institution extends AbstractFact {
     private String tradeName;
     private List<String> institutionCategoryDetailIds = new ArrayList<>();
     protected Set<String> gameTypeIds = new HashSet<>();
+    private OperatorMemberDetails operatorMemberDetails;
 
 
     public List<String> getInstitutionCategoryDetailIds() {
         return institutionCategoryDetailIds;
+    }
+
+    public OperatorMemberDetails getOperatorMemberDetails() {
+        return operatorMemberDetails;
+    }
+
+    public void setOperatorMemberDetails(OperatorMemberDetails operatorMemberDetails) {
+        this.operatorMemberDetails = operatorMemberDetails;
     }
 
     public void setInstitutionCategoryDetailIds(List<String> institutionCategoryDetailIds) {

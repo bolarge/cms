@@ -3,7 +3,6 @@ package com.software.finatech.lslb.cms.service.service;
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.AIPCheckDto;
-import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.dto.NotificationDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
@@ -20,7 +19,6 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -232,33 +230,15 @@ public class LicenseServiceImpl implements LicenseService {
         return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
     }
 
-    @Override
-    public List<EnumeratedFactDto> getLicenseStatus() {
-        Map licenseMap = Mapstore.STORE.get("LicenseStatus");
-        ArrayList<LicenseStatus> licenseStatuses = new ArrayList<LicenseStatus>(licenseMap.values());
-        List<EnumeratedFactDto> licenseStatusDtoLists = new ArrayList<>();
-        licenseStatuses.forEach(factObject -> {
-            LicenseStatus licenseStatus = factObject;
-            licenseStatusDtoLists.add(licenseStatus.convertToDto());
-        });
-        return licenseStatusDtoLists;
-    }
 
     @Override
-    public List<EnumeratedFactDto> getAllLicenseTypes() {
-        Map licenseMap = Mapstore.STORE.get("LicenseTypes");
-        ArrayList<LicenseType> licenseTypes = new ArrayList<LicenseType>(licenseMap.values());
-        List<EnumeratedFactDto> licenseTypesDtoLists = new ArrayList<>();
-        licenseTypes.forEach(factObject -> {
-            LicenseType licenseType = factObject;
-            licenseTypesDtoLists.add(licenseType.convertToDto());
-        });
-        return licenseTypesDtoLists;
+    public Mono<ResponseEntity> getAllLicenseTypes() {
+        return ReferenceDataUtil.getAllEnumeratedEntity("LicenseTypes");
     }
 
     @Override
     public Mono<ResponseEntity> getAllLicenseStatus() {
-        return Mono.just(new ResponseEntity<>(getLicenseStatus(), HttpStatus.OK));
+        return ReferenceDataUtil.getAllEnumeratedEntity("LicenseStatus");
     }
 
     @Override
@@ -270,7 +250,7 @@ public class LicenseServiceImpl implements LicenseService {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
         }
         List<LicenseDto> licenseDtos = new ArrayList<>();
-        licenses.stream().forEach(license -> {
+        licenses.forEach(license -> {
             licenseDtos.add(license.convertToDto());
         });
         return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
@@ -469,11 +449,11 @@ public class LicenseServiceImpl implements LicenseService {
             if (gameType != null) {
                 aipCheckDto.setGameType(gameType.convertToDto());
             }
-            Query aipFormQuery= new Query();
+            Query aipFormQuery = new Query();
             aipFormQuery.addCriteria(Criteria.where("institutionId").is(aipForInstitution.getInstitutionId()));
             aipFormQuery.addCriteria(Criteria.where("gameTypeId").is(aipForInstitution.getGameTypeId()));
-            AIPDocumentApproval aipDocumentApproval= (AIPDocumentApproval)mongoRepositoryReactive.find(aipFormQuery, AIPDocumentApproval.class).block();
-            if(aipDocumentApproval!=null){
+            AIPDocumentApproval aipDocumentApproval = (AIPDocumentApproval) mongoRepositoryReactive.find(aipFormQuery, AIPDocumentApproval.class).block();
+            if (aipDocumentApproval != null) {
                 aipCheckDto.setAipFormId(aipDocumentApproval.getId());
             }
             aipCheckDto.setInstitutionId(aipForInstitution.getInstitutionId());
