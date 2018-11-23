@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.FeeMailSenderAsync;
 import net.javacrumbs.shedlock.core.SchedulerLock;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,8 +104,9 @@ public class FeeUpdater {
     }
 
     private ArrayList<Fee> getFeesForActivation() {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("effectiveDate").lte(LocalDateTime.now()));
+        Query query  = new Query();
+        query.addCriteria(Criteria.where("effectiveDate").lte(LocalDate.now()));
+        query.addCriteria(Criteria.where("endDate").gte(LocalDate.now()));
         query.addCriteria(Criteria.where("active").is(false));
         return (ArrayList<Fee>) mongoRepositoryReactive.findAll(query, Fee.class).toStream().collect(Collectors.toList());
     }
