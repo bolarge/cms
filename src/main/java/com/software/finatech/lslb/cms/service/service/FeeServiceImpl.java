@@ -353,10 +353,10 @@ public class FeeServiceImpl implements FeeService {
     public Mono<ResponseEntity> findLicenseTypeByParams(String institutionId, String agentId) {
         LicenseTypeSearch search = new LicenseTypeSearch(institutionId, agentId);
         try {
-            Collection<FactObject> factObjects = ReferenceDataUtil.getAllEnumeratedFacts("LicenseType");
+            Collection<EnumeratedFact> enumeratedFacts = ReferenceDataUtil.getAllEnumeratedFacts("LicenseType");
             List<EnumeratedFactDto> dtos = new ArrayList<>();
-            for (FactObject factObject : factObjects) {
-                LicenseType licenseType = (LicenseType) factObject;
+            for (EnumeratedFact enumeratedFact : enumeratedFacts) {
+                LicenseType licenseType = (LicenseType) enumeratedFact;
                 if (search.isAgentSearch() && licenseType.appliesToAgent()) {
                     dtos.add(licenseType.convertToDto());
                 }

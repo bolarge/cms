@@ -65,8 +65,9 @@ public class FeeUpdater {
     }
 
 
-    @Scheduled(fixedRate = 15 * 60 * 1000)
-    @SchedulerLock(name = "Activate Fees For Today", lockAtMostFor = FIFTEEN_MIN, lockAtLeastFor = FIFTEEN_MIN)
+    //TODO:: fix thisss to 15 min
+    @Scheduled(fixedRate =5* 60 * 1000)
+    @SchedulerLock(name = "Activate Fees For Today", lockAtMostFor = 60 * 1000, lockAtLeastFor = 60 * 1000)
     public void startNewFees() {
         try {
             ArrayList<Fee> feeForStarting = getFeesForActivation();
@@ -104,9 +105,9 @@ public class FeeUpdater {
     }
 
     private ArrayList<Fee> getFeesForActivation() {
-        Query query  = new Query();
+        Query query = new Query();
         query.addCriteria(Criteria.where("effectiveDate").lte(LocalDate.now()));
-        query.addCriteria(Criteria.where("endDate").gte(LocalDate.now()));
+          query.addCriteria(Criteria.where("endDate").gte(LocalDate.now()));
         query.addCriteria(Criteria.where("active").is(false));
         return (ArrayList<Fee>) mongoRepositoryReactive.findAll(query, Fee.class).toStream().collect(Collectors.toList());
     }

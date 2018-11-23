@@ -400,8 +400,8 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
     }
 
     private LoggedCaseOutcome findLoggedCaseOutcome(String id) {
-        Collection<FactObject> factObjects = ReferenceDataUtil.getAllEnumeratedFacts("LoggedCaseOutcome");
-        if (factObjects != null) {
+        Collection<EnumeratedFact> factObjects = ReferenceDataUtil.getAllEnumeratedFacts("LoggedCaseOutcome");
+        if (!factObjects.isEmpty()) {
             for (FactObject factObject : factObjects) {
                 LoggedCaseOutcome loggedCaseOutcome = (LoggedCaseOutcome) factObject;
                 if (StringUtils.equals(id, loggedCaseOutcome.getId())) {
