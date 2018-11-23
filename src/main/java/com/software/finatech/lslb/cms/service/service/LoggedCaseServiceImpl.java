@@ -357,10 +357,10 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
                 license.setLicenseChangeReason(reason);
                 loggedCaseMailSenderAsync.sendOutcomeMailToOffender(loggedCase);
             }
-            if (loggedCase.isOutcomePenalty()) {
-                loggedCaseMailSenderAsync.sendPenaltyMailToOffender(loggedCase);
-            }
             mongoRepositoryReactive.saveOrUpdate(license);
+        }
+        if (loggedCase.isOutcomePenalty()) {
+            loggedCaseMailSenderAsync.sendPenaltyMailToOffender(loggedCase);
         }
     }
 
