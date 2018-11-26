@@ -163,6 +163,7 @@ public class DashboardController extends BaseController {
             queryMachine.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
             queryTerminal.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
             queryAgentTotalCount.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
+            queryCasesTotalCount.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
         }if(!StringUtils.isEmpty(institutionId)){
             query.addCriteria(Criteria.where("id").is(institutionId));
             queryMachine.addCriteria(Criteria.where("institutionId").is(institutionId));
