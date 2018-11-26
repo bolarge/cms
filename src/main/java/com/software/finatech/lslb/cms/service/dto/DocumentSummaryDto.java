@@ -3,19 +3,25 @@ package com.software.finatech.lslb.cms.service.dto;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
-public class DocumentSummaryDto extends AbstractApprovalRequestDto {
+public class DocumentSummaryDto {
 
     private String id;
     private String documentTypeId;
+    private String approvalRequestStatusId;
     private LocalDate nextReminderDate;
 
+    public String getApprovalRequestStatusId() {
+        return approvalRequestStatusId;
+    }
 
-    @Override
+    public void setApprovalRequestStatusId(String approvalRequestStatusId) {
+        this.approvalRequestStatusId = approvalRequestStatusId;
+    }
+
     public String getId() {
         return id;
     }
 
-    @Override
     public void setId(String id) {
         this.id = id;
     }

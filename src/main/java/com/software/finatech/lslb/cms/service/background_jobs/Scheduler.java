@@ -405,17 +405,21 @@ public class Scheduler {
 
     }
     //@TODO fix pending document approval email
-  //  @Scheduled(fixedRate = 5*60*1000)
+   @Scheduled(fixedRate = 1000)
     public void sendReminderEmail(){
-        Aggregation documentAgg = Aggregation.newAggregation(
-                Aggregation.match(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID)),
-             Aggregation.project("id","documentTypeId","nextReminderDate"),
-                Aggregation.group("approvalRequestStatusId")
-        );
+//        Aggregation documentAgg = Aggregation.newAggregation(
+//                Aggregation.match(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID)),
+//             Aggregation.project("id","documentTypeId","nextReminderDate","approvalRequestStatusId"),
+//                Aggregation.group("documentTypeId")
+//        );
 
-        List<DocumentSummaryDto> results = mongoTemplate.aggregate(documentAgg, Document.class, DocumentSummaryDto.class).getMappedResults();
+       Query query= new Query();
+       query.addCriteria(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID));
+       List<Document>documents= (List<Document>)mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
 
-        for (DocumentSummaryDto document: results) {
+       // List<DocumentSummaryDto> results = mongoTemplate.aggregate(documentAgg, Document.class, DocumentSummaryDto.class).getMappedResults();
+
+        for (Document document: documents) {
             boolean sentEmail=false;
             if(document.getNextReminderDate()==null){
                 sentEmail=true;
