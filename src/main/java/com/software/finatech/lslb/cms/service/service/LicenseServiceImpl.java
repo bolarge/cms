@@ -503,7 +503,7 @@ public class LicenseServiceImpl implements LicenseService {
 
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
 
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
         }
@@ -529,7 +529,7 @@ public class LicenseServiceImpl implements LicenseService {
             mongoRepositoryReactive.saveOrUpdate(license);
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
 
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
         }
@@ -563,7 +563,7 @@ public class LicenseServiceImpl implements LicenseService {
 
             return "OK";
 
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             return "Error! Please contact admin";
 
         }
@@ -607,7 +607,7 @@ public class LicenseServiceImpl implements LicenseService {
             }
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
 
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             return Mono.just(new ResponseEntity<>("Error while moving to renewal license in review", HttpStatus.BAD_REQUEST));
 
         }
@@ -643,7 +643,7 @@ public class LicenseServiceImpl implements LicenseService {
 //            });
 
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             return Mono.just(new ResponseEntity<>("Error while moving to renewal license in progress", HttpStatus.BAD_REQUEST));
 
         }
@@ -758,7 +758,7 @@ public class LicenseServiceImpl implements LicenseService {
             }
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
 
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             return Mono.just(new ResponseEntity<>("Error occurred. Please contact admin", HttpStatus.BAD_REQUEST));
 
         }
