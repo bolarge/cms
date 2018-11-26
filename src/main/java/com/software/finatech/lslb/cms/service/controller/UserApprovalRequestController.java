@@ -21,7 +21,7 @@ import javax.validation.Valid;
         description = "For everything related to user approval requests", tags = "User Approval Requests Controller")
 @RestController
 @RequestMapping("/api/v1/user-approval-requests")
-public class UserApprovalRequestController {
+public class UserApprovalRequestController  extends BaseController{
 
     private UserApprovalRequestService userApprovalRequestService;
 

@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 @Api(value = "License", description = "For everything related to gaming operators licenses", tags = "Licence Controller")
 @RestController
 @RequestMapping("/api/v1/license")
-public class LicenseController {
+public class LicenseController  extends BaseController{
     @Autowired
     private LicenseService licenseService;
 
@@ -101,7 +101,7 @@ public class LicenseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllLicenseTypes() {
-        return Mono.just(new ResponseEntity<>(licenseService.getAllLicenseTypes(), HttpStatus.OK));
+        return licenseService.getAllLicenseTypes();
 
     }
 

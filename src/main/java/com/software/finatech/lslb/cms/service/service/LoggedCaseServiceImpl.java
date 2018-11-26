@@ -345,19 +345,22 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             if (loggedCase.isOutcomeLicenseRevoked()) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_REVOKED_ID);
                 license.setLicenseChangeReason(reason);
+                loggedCaseMailSenderAsync.sendOutcomeMailToOffender(loggedCase);
             }
             if (loggedCase.isOutcomeLicenseSuspended()) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_SUSPENDED_ID);
                 license.setLicenseChangeReason(reason);
+                loggedCaseMailSenderAsync.sendOutcomeMailToOffender(loggedCase);
             }
             if (loggedCase.isOutcomeLicenseTerminated()) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_TERMINATED_ID);
                 license.setLicenseChangeReason(reason);
-            }
-            if (loggedCase.isOutcomePenalty()) {
-                loggedCaseMailSenderAsync.sendPenaltyMailToOffender(loggedCase);
+                loggedCaseMailSenderAsync.sendOutcomeMailToOffender(loggedCase);
             }
             mongoRepositoryReactive.saveOrUpdate(license);
+        }
+        if (loggedCase.isOutcomePenalty()) {
+            loggedCaseMailSenderAsync.sendPenaltyMailToOffender(loggedCase);
         }
     }
 
@@ -397,8 +400,8 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
     }
 
     private LoggedCaseOutcome findLoggedCaseOutcome(String id) {
-        Collection<FactObject> factObjects = ReferenceDataUtil.getAllEnumeratedFacts("LoggedCaseOutcome");
-        if (factObjects != null) {
+        Collection<EnumeratedFact> factObjects = ReferenceDataUtil.getAllEnumeratedFacts("LoggedCaseOutcome");
+        if (!factObjects.isEmpty()) {
             for (FactObject factObject : factObjects) {
                 LoggedCaseOutcome loggedCaseOutcome = (LoggedCaseOutcome) factObject;
                 if (StringUtils.equals(id, loggedCaseOutcome.getId())) {

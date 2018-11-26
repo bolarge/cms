@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.referencedata.MachineTypeReference
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.adapters.AgentInstitutionAdapter;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -39,6 +40,52 @@ public class Agent extends AbstractFact {
     private boolean enabled;
     private Set<String> phoneNumbers = new HashSet<>();
     private String agentStatusId;
+    private String genderId;
+    private String submissionId;
+    private boolean skipVigipay;
+    private boolean fromDeviceMagic;
+    private LocalDate dob;
+
+    public LocalDate getDob() {
+        return dob;
+    }
+
+    public void setDob(LocalDate dob) {
+        this.dob = dob;
+    }
+
+    public boolean isFromDeviceMagic() {
+        return fromDeviceMagic;
+    }
+
+    public void setFromDeviceMagic(boolean fromDeviceMagic) {
+        this.fromDeviceMagic = fromDeviceMagic;
+    }
+
+    public boolean isSkipVigipay() {
+        return skipVigipay;
+    }
+
+
+    public void setSkipVigipay(boolean skipVigipay) {
+        this.skipVigipay = skipVigipay;
+    }
+
+    public String getSubmissionId() {
+        return submissionId;
+    }
+
+    public void setSubmissionId(String submissionId) {
+        this.submissionId = submissionId;
+    }
+
+    public String getGenderId() {
+        return genderId;
+    }
+
+    public void setGenderId(String genderId) {
+        this.genderId = genderId;
+    }
 
     public String getAgentStatusId() {
         return agentStatusId;
@@ -102,6 +149,22 @@ public class Agent extends AbstractFact {
 
     public void setDateOfBirth(String dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
+    }
+
+    private String getDateOfBirthString() {
+        LocalDate dob = getDob();
+        if (dob != null) {
+            return dob.toString("dd-MM-yyyy");
+        }
+        String dobString = getDateOfBirth();
+        try {
+            if (!StringUtils.isEmpty(dobString)) {
+                return new LocalDate(dobString).toString("dd-MM-yyyy");
+            }
+            return dobString;
+        } catch (Exception e) {
+            return getDateOfBirth();
+        }
     }
 
     public String getResidentialAddress() {
@@ -243,12 +306,17 @@ public class Agent extends AbstractFact {
         agentDto.setResidentialAddress(getResidentialAddress());
         agentDto.setBusinessAddresses(getBusinessAddresses());
         agentDto.setBvn(getBvn());
-        agentDto.setDateOfBirth(getDateOfBirth());
+        agentDto.setDateOfBirth(getDateOfBirthString());
         agentDto.setInstitutions(getInstitutions());
         agentDto.setGameTypes(getGameTypes());
         agentDto.setBusinessAddresses(getBusinessAddresses());
         agentDto.setAgentInstitutions(convertAgentInstitutions());
         agentDto.setGamingTerminals(getAllGamingTerminals());
+        Gender gender = getGender();
+        if (gender != null) {
+            agentDto.setGenderId(this.genderId);
+            agentDto.setGenderName(gender.getName());
+        }
         return agentDto;
     }
 
@@ -272,7 +340,6 @@ public class Agent extends AbstractFact {
                 enumeratedFactDtos.add(enumeratedFactDto);
             }
         }
-
         return enumeratedFactDtos;
     }
 
@@ -311,6 +378,25 @@ public class Agent extends AbstractFact {
             }
         }
         return gameType;
+    }
+
+
+    private Gender getGender() {
+        if (StringUtils.isEmpty(this.genderId)) {
+            return null;
+        }
+        Map genderMap = Mapstore.STORE.get("Gender");
+        Gender gender = null;
+        if (genderMap != null) {
+            gender = (Gender) genderMap.get(this.genderId);
+        }
+        if (gender == null) {
+            gender = (Gender) mongoRepositoryReactive.findById(this.genderId, Gender.class).block();
+            if (gender != null && genderMap != null) {
+                genderMap.put(this.genderId, gender);
+            }
+        }
+        return gender;
     }
 
     public Institution getInstitution(String institutionId) {

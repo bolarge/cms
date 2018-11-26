@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
+import static com.software.finatech.lslb.cms.service.util.NumberUtil.generateAgentId;
 
 @Service
 public class AgentServiceImpl implements AgentService {
@@ -349,15 +350,14 @@ public class AgentServiceImpl implements AgentService {
         agent.setMeansOfId(agentCreateDto.getMeansOfId());
         agent.setIdNumber(agentCreateDto.getIdNumber());
         agent.setResidentialAddress(agentCreateDto.getResidentialAddress());
-        agent.setDateOfBirth(agentCreateDto.getDateOfBirth());
+        agent.setDob(new LocalDate(agentCreateDto.getDateOfBirth()));
         Set<String> gameTypeIds = new HashSet<>();
         Set<String> institutionIds = new HashSet<>();
         AgentInstitution agentInstitution = new AgentInstitution();
         gameTypeIds.add(gameTypeId);
         institutionIds.add(institutionId);
         agentInstitution.setBusinessAddressList(agentCreateDto.getBusinessAddressList());
-        //TODO:: fix this !!!!!!!!!!!!!!!!!!!!!
-        //  agentInstitution.setGameTypeId(gameTypeId);
+         agentInstitution.getGameTypeIds().add(gameTypeId);
         agentInstitution.setInstitutionId(institutionId);
         List<AgentInstitution> agentInstitutions = new ArrayList<>();
         agentInstitutions.add(agentInstitution);
@@ -427,6 +427,11 @@ public class AgentServiceImpl implements AgentService {
     }
 
     @Override
+    public Mono<ResponseEntity> getAllAgentGender() {
+        return getAllEnumeratedEntity("Gender");
+    }
+
+    @Override
     public Agent findAgentByAgentNumber(String agentNumber) {
         return (Agent) mongoRepositoryReactive.find(Query.query(Criteria.where("agentId").is(agentNumber)), Agent.class).block();
     }
@@ -436,9 +441,5 @@ public class AgentServiceImpl implements AgentService {
         query.addCriteria(Criteria.where("emailAddress").is(email));
         query.addCriteria(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID));
         return (PendingAgent) mongoRepositoryReactive.find(query, PendingAgent.class).block();
-    }
-
-    private String generateAgentId() {
-        return String.format("LAGOS-AG-%s%s", NumberUtil.getRandomNumberInRange(20, 1000), LocalDateTime.now().getSecondOfMinute());
     }
 }

@@ -4,10 +4,7 @@ import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.CustomerComplain;
 import com.software.finatech.lslb.cms.service.domain.CustomerComplainAction;
-import com.software.finatech.lslb.cms.service.dto.CustomerComplainCreateDto;
-import com.software.finatech.lslb.cms.service.dto.CustomerComplainDto;
-import com.software.finatech.lslb.cms.service.dto.CustomerComplainReviewRequest;
-import com.software.finatech.lslb.cms.service.dto.CustomerComplainUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.CustomerComplainService;
@@ -298,6 +295,39 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             return Mono.just(new ResponseEntity<>(customerComplain.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while starting  customer complain review", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> addCustomerComplaintComment(CustomerComplainCommentCreateDto customerComplainCommentCreateDto, HttpServletRequest request) {
+        try {
+            String complaintId = customerComplainCommentCreateDto.getComplaintId();
+            CustomerComplain customerComplain = findCustomerComplainById(complaintId);
+            if (customerComplain == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Customer complaint with is %s not found", complaintId), HttpStatus.BAD_REQUEST));
+            }
+            if (customerComplain.isClosed()) {
+                return Mono.just(new ResponseEntity<>("The Customer complaint is already closed", HttpStatus.BAD_REQUEST));
+            }
+            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
+            if (user == null) {
+                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
+            }
+            if (!canResolveCustomerComplain(user)) {
+                return Mono.just(new ResponseEntity<>("User cannot add comment to customer complaint,please check user role and user status", HttpStatus.BAD_REQUEST));
+            }
+            customerComplain.getComments().add(CommentDetail.fromCommentAndUser(customerComplainCommentCreateDto.getComment(), user.getFullName()));
+            mongoRepositoryReactive.saveOrUpdate(customerComplain);
+
+            String verbiage = String.format("Added Comment to Customer complaints, Ticket id: -> %s ,Comment -> \"%s\"",
+                    customerComplain.getTicketId(), customerComplainCommentCreateDto.getComment());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(customerComplainAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), customerComplain.getCustomerEmailAddress(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            return Mono.just(new ResponseEntity<>(customerComplain.convertToFullDetailDto(), HttpStatus.OK));
+
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while adding comment to customer compalin", e);
         }
     }
 

@@ -4,7 +4,7 @@ import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
 import com.software.finatech.lslb.cms.service.domain.Document;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
-import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
+import com.software.finatech.lslb.cms.service.model.applicantMembers.OperatorMemberDetails;
 import com.software.finatech.lslb.cms.service.model.contactDetails.ApplicantContactDetails;
 import com.software.finatech.lslb.cms.service.model.criminalityDetails.ApplicantCriminalityDetails;
 import com.software.finatech.lslb.cms.service.model.declaration.ApplicantDeclarationDetails;
@@ -41,7 +41,7 @@ public interface ApplicationFormService {
 
     Mono<ResponseEntity> getApplicantMembersDetails(String applicationFormId);
 
-    Mono<ResponseEntity> saveApplicantMembersDetails(String applicationFormId, ApplicantMemberDetails applicantMemberDetails, HttpServletRequest request);
+    Mono<ResponseEntity> saveApplicantMembersDetails(String applicationFormId, OperatorMemberDetails applicantMemberDetails, HttpServletRequest request);
 
     Mono<ResponseEntity> getApplicantContactDetails(String applicationFormId);
 

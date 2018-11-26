@@ -19,35 +19,8 @@ import java.io.IOException;
 @Component
 public class ExistingAgentLoader {
     private static final Logger logger = LoggerFactory.getLogger(ExistingAgentLoader.class);
-
     @Autowired
     private DeviceMagicAgentAdapter deviceMagicAgentAdapter;
-    private String[] fileNames = new String[]{"30676121.json", "30676511.json"};
-
-    // file =ResourceUtils.getFile("classpath:date-csv/Invoices.csv");
-
-   // @PostConstruct
-    public void init() {
-        loadAgents();
-    }
-
-
-    private void loadAgents() {
-        for (String fileName : fileNames) {
-            String resourceFileName = String.format("classpath:agent-data/json/%s", fileName);
-            try {
-                File file = ResourceUtils.getFile(resourceFileName);
-                DeviceMagicAgent deviceMagicAgent = agentFromFile(file);
-                if (deviceMagicAgent != null) {
-                    deviceMagicAgent.setImageFileName(fileName);
-                }
-                logger.info("Agent found \n\n\n\n {}", deviceMagicAgent);
-            } catch (Exception e) {
-                logger.error("Error occurred ", e);
-            }
-        }
-    }
-
     private DeviceMagicAgent agentFromFile(File file) throws IOException, ParseException {
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(new FileReader(file));
@@ -55,5 +28,32 @@ public class ExistingAgentLoader {
             return deviceMagicAgentAdapter.fromJsonObject(jsonObject);
         }
         return null;
+    }
+
+    public void loadExistingAgents() {
+        try {
+            File folder = ResourceUtils.getFile("classpath:agent-data/json");
+            File[] listOfFiles = folder.listFiles();
+            if (listOfFiles != null) {
+                for (File listOfFile : listOfFiles) {
+                    if (listOfFile.isFile()) {
+                        loadAgentForFile(listOfFile);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error occurred while parsing file", e);
+        }
+    }
+
+    private void loadAgentForFile(File file) throws IOException, ParseException {
+        DeviceMagicAgent deviceMagicAgent = agentFromFile(file);
+        String submissionId = file.getName().replace(".json", "");
+        if (deviceMagicAgent == null) {
+            logger.info("No Device Magic Agent for submission {}", submissionId);
+            return;
+        }
+        deviceMagicAgent.setSubmissionId(submissionId);
+        deviceMagicAgentAdapter.saveDeviceMagicAgentToAgentDb(deviceMagicAgent);
     }
 }

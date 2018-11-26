@@ -4,22 +4,26 @@ import com.software.finatech.lslb.cms.service.domain.EnumeratedFact;
 import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 public class ReferenceDataUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ReferenceDataUtil.class);
+    private static Comparator<EnumeratedFact> enumeratedFactComparator = new Comparator<EnumeratedFact>() {
+        @Override
+        public int compare(EnumeratedFact o1, EnumeratedFact o2) {
+            return StringUtils.compare(o1.toString(), o2.toString());
+        }
+    };
 
     public static Mono<ResponseEntity> getAllEnumeratedEntity(String entityMapName) {
         try {
@@ -31,9 +35,9 @@ public class ReferenceDataUtil {
             if (factObjects.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
             }
+            Collection<EnumeratedFact> enumeratedFacts = toSortedEnumeratedFacts(factObjects);
             List<EnumeratedFactDto> enumeratedFactDtoList = new ArrayList<>();
-            for (FactObject factObject : factObjects) {
-                EnumeratedFact enumeratedFact = (EnumeratedFact) factObject;
+            for (EnumeratedFact enumeratedFact : enumeratedFacts) {
                 enumeratedFactDtoList.add(enumeratedFact.convertToDto());
             }
             return Mono.just(new ResponseEntity<>(enumeratedFactDtoList, HttpStatus.OK));
@@ -42,16 +46,26 @@ public class ReferenceDataUtil {
         }
     }
 
-    public static Collection<FactObject> getAllEnumeratedFacts(String entityMapName) {
+    public static List<EnumeratedFact> getAllEnumeratedFacts(String entityMapName) {
         try {
             Map<String, FactObject> entityMap = Mapstore.STORE.get(entityMapName);
             if (entityMap == null) {
                 return new ArrayList<>();
             }
-            return entityMap.values();
+            return new ArrayList<>(toSortedEnumeratedFacts(entityMap.values()));
         } catch (Exception e) {
             logger.error(String.format("An error occurred while getting all values of %s from map store", entityMapName));
             return new ArrayList<>();
         }
+    }
+
+    private static Collection<EnumeratedFact> toSortedEnumeratedFacts(Collection<FactObject> factObjects) {
+        List<EnumeratedFact> enumeratedFacts = new ArrayList<>();
+        for (FactObject factObject : factObjects) {
+            EnumeratedFact enumeratedFact = (EnumeratedFact) factObject;
+            enumeratedFacts.add(enumeratedFact);
+        }
+        enumeratedFacts.sort(enumeratedFactComparator);
+        return enumeratedFacts;
     }
 }

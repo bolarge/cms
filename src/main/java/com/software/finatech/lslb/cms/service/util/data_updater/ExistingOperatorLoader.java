@@ -109,7 +109,7 @@ public class ExistingOperatorLoader {
             pendingInstitution.setActive(true);
             pendingInstitution.setDescription(institutionUpload.getDescription());
             pendingInstitution.setEmailAddress(institutionUpload.getEmailAddress());
-            pendingInstitution.setPhoneNumber(institutionUpload.getPhoneNumber());
+            pendingInstitution.setPhoneNumber(String.format("0%s", institutionUpload.getPhoneNumber()));
             pendingInstitution.setAddress(institutionUpload.getAddress());
             for (InstitutionLoadDetails institutionLoadDetails : institutionUpload.getInstitutionLoadDetails()) {
                 InstitutionCategoryDetails institutionCategoryDetails = new InstitutionCategoryDetails();
@@ -118,6 +118,7 @@ public class ExistingOperatorLoader {
                 institutionCategoryDetails.setGameTypeId(institutionLoadDetails.getGameTypeId());
                 institutionCategoryDetails.setTradeName(institutionLoadDetails.getTradeName());
                 institutionCategoryDetails.setInstitutionId(pendingInstitution.getId());
+                pendingInstitution.getGameTypeIds().add(institutionLoadDetails.getGameTypeId());
                 mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
                 pendingInstitution.getInstitutionCategoryDetailIds().add(institutionCategoryDetails.getId());
 

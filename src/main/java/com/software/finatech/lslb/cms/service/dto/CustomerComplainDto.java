@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.dto;
 
 import com.software.finatech.lslb.cms.service.domain.CustomerComplainAction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CustomerComplainDto {
@@ -27,6 +28,15 @@ public class CustomerComplainDto {
     private String category;
     private String otherCategoryName;
     private String otherTypeName;
+    private List<CommentDetail> comments = new ArrayList<>();
+
+    public List<CommentDetail> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<CommentDetail> comments) {
+        this.comments = comments;
+    }
 
     public String getOtherCategoryName() {
         return otherCategoryName;

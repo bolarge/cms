@@ -25,4 +25,8 @@ public class NumberUtil {
                 presentDateTime.getMinuteOfHour(),
                 presentDateTime.getSecondOfMinute());
     }
+
+    public static String generateAgentId() {
+        return String.format("LAGOS-AG-%s%s%s", NumberUtil.getRandomNumberInRange(20, 100), LocalDateTime.now().getMinuteOfHour(), LocalDateTime.now().getSecondOfMinute());
+    }
 }

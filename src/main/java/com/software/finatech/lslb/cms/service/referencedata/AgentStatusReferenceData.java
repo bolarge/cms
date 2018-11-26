@@ -3,6 +3,8 @@ package com.software.finatech.lslb.cms.service.referencedata;
 import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.domain.AgentStatus;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import org.joda.time.LocalDate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.ArrayList;
@@ -31,15 +33,25 @@ public class AgentStatusReferenceData {
         mongoRepositoryReactive.saveOrUpdate(status);
     }
 
+    //TODO:: Remove this agent updater
     private static void updateAgents(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
-        ArrayList<Agent> agents = (ArrayList<Agent>) mongoRepositoryReactive.findAll(new Query(), Agent.class).toStream().collect(Collectors.toList());
-        for (Agent agent : agents) {
-            if (agent.isEnabled()) {
-                agent.setAgentStatusId(ACTIVE_ID);
-            } else {
-                agent.setAgentStatusId(IN_ACTIVE_ID);
-            }
-            mongoRepositoryReactive.saveOrUpdate(agent);
-        }
+//        Query query = new Query();
+//        query.addCriteria(Criteria.where("agentStatusId").is(null));
+//        ArrayList<Agent> agents = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
+//        for (Agent agent : agents) {
+//            if (agent.isEnabled()) {
+//                agent.setAgentStatusId(ACTIVE_ID);
+//            } else {
+//                agent.setAgentStatusId(IN_ACTIVE_ID);
+//            }
+//            mongoRepositoryReactive.saveOrUpdate(agent);
+//        }
+
+//        query = new Query();
+//        query.addCriteria(Criteria.where("createdAt").gte(LocalDate.now()));
+//        agents = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
+//        for (Agent agent : agents) {
+//            mongoRepositoryReactive.delete(agent);
+//        }
     }
 }

@@ -44,4 +44,6 @@ public interface AgentService {
     Mono<ResponseEntity> getAllAgentStatus();
 
     Agent findAgentByAgentNumber(String agentNumber);
+
+    Mono<ResponseEntity> getAllAgentGender();
 }
