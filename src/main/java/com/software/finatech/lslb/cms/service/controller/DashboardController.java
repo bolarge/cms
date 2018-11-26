@@ -375,15 +375,20 @@ public class DashboardController extends BaseController {
                     statusCountValue.stream().forEach(statusCount->{
                         if(statusCount.getMachineStatusId().equals(MachineStatusReferenceData.ACTIVE_ID)){
                             dashboardMachineStatusCountDto.setActiveCount(statusCount.getMachineStatusCount());
+                            dashboardMachineStatusCountDto.setActiveStatusId(MachineStatusReferenceData.ACTIVE_ID);
 
                         }if(statusCount.getMachineStatusId().equals(MachineStatusReferenceData.IN_ACTIVE_ID)){
                             dashboardMachineStatusCountDto.setInactiveCount(statusCount.getMachineStatusCount());
+                            dashboardMachineStatusCountDto.setInactiveStatusId(MachineStatusReferenceData.IN_ACTIVE_ID);
 
                         }if(statusCount.getMachineStatusId().equals(MachineStatusReferenceData.FAULTY_ID)){
-                            dashboardMachineStatusCountDto.setStolenCount(statusCount.getMachineStatusCount());
+                            dashboardMachineStatusCountDto.setFaultyCount(statusCount.getMachineStatusCount());
+                            dashboardMachineStatusCountDto.setFaultyStatusId(MachineStatusReferenceData.FAULTY_ID);
 
                         }if(statusCount.getMachineStatusId().equals(MachineStatusReferenceData.STOLEN_ID)){
-                            dashboardMachineStatusCountDto.setFaultyCount(statusCount.getMachineStatusCount());
+                            dashboardMachineStatusCountDto.setStolenCount(statusCount.getMachineStatusCount());
+                            dashboardMachineStatusCountDto.setStolenStatusId(MachineStatusReferenceData.STOLEN_ID);
+
                         }
                     });
 
@@ -428,11 +433,15 @@ public class DashboardController extends BaseController {
               statusCountValue.stream().forEach(statusCount->{
                   if(statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.ACTIVE_ID)){
                       dashboardAgentStatusCountDto.setActiveCount(statusCount.getAgentStatusCount());
+                      dashboardAgentStatusCountDto.setActiveStatusId(AgentStatusReferenceData.ACTIVE_ID);
                   } if(statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.IN_ACTIVE_ID)){
                       dashboardAgentStatusCountDto.setInactiveCount(statusCount.getAgentStatusCount());
+                      dashboardAgentStatusCountDto.setInactiveStatusId(AgentStatusReferenceData.IN_ACTIVE_ID);
 
                   } if(statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.BLACK_LISTED_ID)){
                       dashboardAgentStatusCountDto.setBlackListCount(statusCount.getAgentStatusCount());
+                      dashboardAgentStatusCountDto.setBlackListStatusId(AgentStatusReferenceData.BLACK_LISTED_ID);
+
                   }
 
               });
