@@ -30,73 +30,85 @@ public class ExpirationList {
         Query queryLicence= new Query();
         queryLicence.addCriteria(Criteria.where("expiryDate").lt(dateTime));
         queryLicence.addCriteria(Criteria.where("licenseStatusId").in(licenseStatusIds));
-        List<License> licenses= (List<License>) mongoRepositoryReactive.findAll(queryLicence,License.class).toStream().collect(Collectors.toList());
-        if(licenses.size()==0){
-            return null;
-        }
-        for(License license: licenses) {
-            if(license.getLicenseStatusId().equalsIgnoreCase(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
-            license.setRenewalStatus("true");
-                mongoRepositoryReactive.saveOrUpdate(license);
+        try {
+            List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicence, License.class).toStream().collect(Collectors.toList());
+            if (licenses.size() == 0) {
+                return null;
             }
-         }
+            for (License license : licenses) {
+                if (license.getLicenseStatusId().equalsIgnoreCase(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)) {
+                    license.setRenewalStatus("true");
+                    mongoRepositoryReactive.saveOrUpdate(license);
+                }
+            }
 
-        return licenses;
-
+            return licenses;
+        }catch(Throwable ex){
+            logger.info(ex.getMessage());
+        }
+        return null;
         }
 
-    public List<License> getExpiredLicences( ArrayList<String> licenseStatuses){
+    public List<License> getExpiredLicences( ArrayList<String> licenseStatuses) {
         LocalDateTime dateTime = new LocalDateTime();
-        Query queryLicence= new Query();
+        Query queryLicence = new Query();
         queryLicence.addCriteria(Criteria.where("expiryDate").lte(dateTime));
         queryLicence.addCriteria(Criteria.where("licenseStatusId").in(licenseStatuses));//orOperator(Criteria.where("licenseStatusId").is("03")));
 
-         List<License> licenses= (List<License>) mongoRepositoryReactive.findAll(queryLicence,License.class).toStream().collect(Collectors.toList());
+        try {
+            List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicence, License.class).toStream().collect(Collectors.toList());
 
-        if(licenseStatuses.get(0).equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)){
-            for(License license: licenses){
-                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
-                license.setRenewalStatus("true");
-                mongoRepositoryReactive.saveOrUpdate(license);
-                Query queryRenewalDocuments= new Query();
-                queryRenewalDocuments.addCriteria(Criteria.where("institutionId").is(license.getInstitutionId()));
-                queryRenewalDocuments.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
-                List<Document> documents = (List<Document>)mongoRepositoryReactive.findAll(queryRenewalDocuments, Document.class).toStream().collect(Collectors.toList());
-                if(documents.size()!=0) {
-                    List<DocumentType> documentTypes = new ArrayList<>();
-                    documents.stream().forEach(document -> {
-                        documentTypes.add(document.getDocumentType());
-                    });
-                    for (DocumentType documentType : documentTypes) {
-                        if (documentType != null && documentType.getDocumentPurposeId().equals(DocumentPurposeReferenceData.RENEWAL_LICENSE_ID)) {
 
-                            org.springframework.data.mongodb.core.query.Query queryPreviousDocuments = new org.springframework.data.mongodb.core.query.Query();
-                            queryPreviousDocuments.addCriteria(Criteria.where("institutionId").is(license.getInstitutionId()));
-                            queryPreviousDocuments.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
-                            queryPreviousDocuments.addCriteria(Criteria.where("documentTypeId").is(documentType.getId()));
-                            Document previousDocument = (Document) mongoRepositoryReactive.find(queryPreviousDocuments, Document.class).block();
-                            if(previousDocument.isArchive()==false){
-                                previousDocument.setArchive(true);
+            if (licenseStatuses.get(0).equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)) {
+                for (License license : licenses) {
+                    license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
+                    license.setRenewalStatus("true");
+                    mongoRepositoryReactive.saveOrUpdate(license);
+                    Query queryRenewalDocuments = new Query();
+                    queryRenewalDocuments.addCriteria(Criteria.where("institutionId").is(license.getInstitutionId()));
+                    queryRenewalDocuments.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
+                    List<Document> documents = (List<Document>) mongoRepositoryReactive.findAll(queryRenewalDocuments, Document.class).toStream().collect(Collectors.toList());
+                    if (documents.size() != 0) {
+                        List<DocumentType> documentTypes = new ArrayList<>();
+                        documents.stream().forEach(document -> {
+                            documentTypes.add(document.getDocumentType());
+                        });
+                        for (DocumentType documentType : documentTypes) {
+                            if (documentType != null && documentType.getDocumentPurposeId().equals(DocumentPurposeReferenceData.RENEWAL_LICENSE_ID)) {
+
+                                org.springframework.data.mongodb.core.query.Query queryPreviousDocuments = new org.springframework.data.mongodb.core.query.Query();
+                                queryPreviousDocuments.addCriteria(Criteria.where("institutionId").is(license.getInstitutionId()));
+                                queryPreviousDocuments.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
+                                queryPreviousDocuments.addCriteria(Criteria.where("documentTypeId").is(documentType.getId()));
+                                Document previousDocument = (Document) mongoRepositoryReactive.find(queryPreviousDocuments, Document.class).block();
+                                if (previousDocument.isArchive() == false) {
+                                    previousDocument.setArchive(true);
+                                }
+                                mongoRepositoryReactive.saveOrUpdate(previousDocument);
+
                             }
-                            mongoRepositoryReactive.saveOrUpdate(previousDocument);
-
                         }
                     }
+
+                }
+            } else {
+                for (License license : licenses) {
+                    license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_RUNNING);
+                    mongoRepositoryReactive.saveOrUpdate(license);
                 }
 
             }
-        }else{
-            for(License license: licenses) {
-                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_RUNNING);
-                mongoRepositoryReactive.saveOrUpdate(license);
-            }
 
-        }
-
-        Query queryExpiredLicence= new Query();
-        queryExpiredLicence.addCriteria(Criteria.where("expiryDate").lte(dateTime));
-        queryExpiredLicence.addCriteria(Criteria.where("licenseStatusId").in(licenseStatuses));
-        List<License> expiredLicenses= (List<License>) mongoRepositoryReactive.findAll(queryExpiredLicence,License.class).toStream().collect(Collectors.toList());
+            Query queryExpiredLicence = new Query();
+            queryExpiredLicence.addCriteria(Criteria.where("expiryDate").lte(dateTime));
+            queryExpiredLicence.addCriteria(Criteria.where("licenseStatusId").in(licenseStatuses));
+            List<License> expiredLicenses = (List<License>) mongoRepositoryReactive.findAll(queryExpiredLicence, License.class).toStream().collect(Collectors.toList());
             return expiredLicenses;
+        } catch (Throwable ex) {
+            logger.info(ex.getMessage());
+
         }
+        return null;
     }
+    }
+

@@ -385,6 +385,7 @@ public class Scheduler {
                 Query queryPayment= new Query();
                 queryPayment.addCriteria(Criteria.where("agentId").is(agent.getId()));
                 queryPayment.addCriteria(Criteria.where("paymentStatusId").is(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID));
+               try{
                 List<PaymentRecord> agentPaymentRecord=(List<PaymentRecord>)mongoRepositoryReactive.findAll(queryPayment,PaymentRecord.class).toStream().collect(Collectors.toList());
                 if(agentPaymentRecord.size()==0){
                     agent.setInactive(false);
@@ -397,6 +398,9 @@ public class Scheduler {
                     notificationDto.setAgentEmailAddress(agent.getEmailAddress());
                     sendEmail.sendEmailDeactivationNotification(notificationDto);
                 }
+            }catch (Exception ex){
+                   logger.info(ex.getMessage());
+               }
             }
 
 
@@ -405,7 +409,7 @@ public class Scheduler {
 
     }
     //@TODO fix pending document approval email
-   @Scheduled(fixedRate = 1000)
+   @Scheduled(fixedRate = 5*60*1000)
     public void sendReminderEmail(){
 //        Aggregation documentAgg = Aggregation.newAggregation(
 //                Aggregation.match(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID)),
@@ -415,7 +419,11 @@ public class Scheduler {
 
        Query query= new Query();
        query.addCriteria(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID));
-       List<Document>documents= (List<Document>)mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
+       query.fields().include("approvalRequestStatusId");
+       //query.fields().include("domain");
+       //query.fields().include("count");
+       try{
+       ArrayList<Document> documents = (ArrayList<Document>)mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
 
        // List<DocumentSummaryDto> results = mongoTemplate.aggregate(documentAgg, Document.class, DocumentSummaryDto.class).getMappedResults();
 
@@ -441,7 +449,9 @@ public class Scheduler {
             }
             }
 
-        }
+        }}catch(Exception ex){
+           logger.info(ex.getMessage());
+       }
 
 
     }
