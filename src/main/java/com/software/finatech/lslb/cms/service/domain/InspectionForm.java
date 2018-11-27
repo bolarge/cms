@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.InspectionFormCommentDto;
 import com.software.finatech.lslb.cms.service.dto.InspectionFormDto;
+import com.software.finatech.lslb.cms.service.referencedata.InspectionStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
@@ -29,12 +30,22 @@ public class InspectionForm extends AbstractFact {
     protected String gamingMachineId;
     protected String subject;
     protected String body;
+    protected String status;
 
     @Transient
     protected String ownerName;
 
     @Transient
     protected String reporter;
+
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public String getAgentBusinessAddress() {
         return agentBusinessAddress;
@@ -144,6 +155,7 @@ public class InspectionForm extends AbstractFact {
         inspectionFormDto.setSubject(getSubject());
         inspectionFormDto.setOwnerName(getOwnerName());
         inspectionFormDto.setBody(getBody());
+        inspectionFormDto.setStatus(getStatus());
         inspectionFormDto.setAgentBusinessAddress(getAgentBusinessAddress()==null?null:getAgentBusinessAddress());
         Agent agent =(Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
         if(agent!=null){
