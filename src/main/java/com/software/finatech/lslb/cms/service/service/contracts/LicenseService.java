@@ -45,7 +45,7 @@ public interface LicenseService {
 
     Mono<ResponseEntity> getAllLicenseTypes();
 
-    Mono<ResponseEntity> getInstitutionAIPs(String institutionId);
+    Mono<ResponseEntity> getInstitutionAIPs(String institutionId, int page, int pageSize, String sortType, String sortParam, HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getInstitutionCloseToExpirationLicenses(String institutionId);
 
@@ -55,7 +55,7 @@ public interface LicenseService {
 
     Mono<ResponseEntity> updateRenewalLicenseToReview(String paymentRecordId);
 
-    Mono<ResponseEntity> getInstitutionAIPUploaded(String institutionId);
+    Mono<ResponseEntity> getInstitutionAIPUploaded(String institutionId, int page, int pageSize, String sortType, String sortParam, HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getLicensesInRenewalInReview(String institutionId);
 
