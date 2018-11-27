@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.domain.InstitutionCategoryDetails;
 import org.springframework.data.annotation.Transient;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -23,6 +24,15 @@ public class InstitutionDto {
     protected String vatFormulaId;
     protected String settlementCycleId;
     private List<InstitutionCategoryDetailsDto> institutionCategoryDetails = new ArrayList<>();
+    private Set<String> directorsNames = new HashSet<>();
+
+    public Set<String> getDirectorsNames() {
+        return directorsNames;
+    }
+
+    public void setDirectorsNames(Set<String> directorsNames) {
+        this.directorsNames = directorsNames;
+    }
 
     protected String tenantId;
     protected Boolean status;

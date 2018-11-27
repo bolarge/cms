@@ -25,9 +25,18 @@ public class MachineDto {
     private String licenseStartDate;
     private String licenseEndDate;
     private String licenseStatus;
+    private String agentNumber;
 
     public String getLicenseNumber() {
         return licenseNumber;
+    }
+
+    public String getAgentNumber() {
+        return agentNumber;
+    }
+
+    public void setAgentNumber(String agentNumber) {
+        this.agentNumber = agentNumber;
     }
 
     public void setLicenseNumber(String licenseNumber) {

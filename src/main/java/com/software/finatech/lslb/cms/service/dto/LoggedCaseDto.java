@@ -33,9 +33,46 @@ public class LoggedCaseDto {
     private String outcomeId;
     private String outcomeName;
     private String outcomeReason;
+    private String caseOriginId;
+    private String caseOriginName;
+    private String customerComplaintId;
+    private String loggedReportId;
+
 
     public String getGameTypeId() {
         return gameTypeId;
+    }
+
+    public String getCaseOriginId() {
+        return caseOriginId;
+    }
+
+    public void setCaseOriginId(String caseOriginId) {
+        this.caseOriginId = caseOriginId;
+    }
+
+    public String getCaseOriginName() {
+        return caseOriginName;
+    }
+
+    public void setCaseOriginName(String caseOriginName) {
+        this.caseOriginName = caseOriginName;
+    }
+
+    public String getCustomerComplaintId() {
+        return customerComplaintId;
+    }
+
+    public void setCustomerComplaintId(String customerComplaintId) {
+        this.customerComplaintId = customerComplaintId;
+    }
+
+    public String getLoggedReportId() {
+        return loggedReportId;
+    }
+
+    public void setLoggedReportId(String loggedReportId) {
+        this.loggedReportId = loggedReportId;
     }
 
     public String getOutcomeReason() {

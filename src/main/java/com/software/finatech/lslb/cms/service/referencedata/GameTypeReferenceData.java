@@ -27,7 +27,7 @@ public class GameTypeReferenceData {
         gameType.setAipDurationMonths(3);
         gameType.setAllowsGamingTerminal(true);
         gameType.setAllowsGamingMachine(false);
-        gameType.setInstitutionLicenseDurationMonths(12);
+        gameType.setInstitutionLicenseDurationMonths(60);
         gameType.setGamingMachineLicenseDurationMonths(12);
         gameType.setAgentLicenseDurationMonths(12);
         mongoRepositoryReactive.saveOrUpdate(gameType);
@@ -91,7 +91,7 @@ public class GameTypeReferenceData {
         gameType.setShortCode("PB");
         gameType.setAipDurationMonths(3);
         gameType.setAllowsGamingMachine(false);
-        gameType.setAllowsGamingTerminal(false);
+        gameType.setAllowsGamingTerminal(true);
         gameType.setInstitutionLicenseDurationMonths(12);
         gameType.setGamingMachineLicenseDurationMonths(12);
         gameType.setAgentLicenseDurationMonths(12);
@@ -111,7 +111,7 @@ public class GameTypeReferenceData {
         gameType.setAllowsGamingTerminal(false);
         gameType.setInstitutionLicenseDurationMonths(12);
         gameType.setGamingMachineLicenseDurationMonths(12);
-        gameType.setAgentLicenseDurationMonths(12);
+        gameType.setAgentLicenseDurationMonths(0);
         mongoRepositoryReactive.saveOrUpdate(gameType);
 
         gameType = (GameType) mongoRepositoryReactive.findById(OTHER_LICENSE_ID, GameType.class).block();
@@ -124,11 +124,10 @@ public class GameTypeReferenceData {
         gameType.setShortCode("O-L");
         gameType.setAipDurationMonths(3);
         gameType.setAllowsGamingMachine(false);
-        gameType.setAllowsGamingTerminal(false);
+        gameType.setAllowsGamingTerminal(true);
         gameType.setInstitutionLicenseDurationMonths(12);
         gameType.setGamingMachineLicenseDurationMonths(12);
-        gameType.setAgentLicenseDurationMonths(12);
+        gameType.setAgentLicenseDurationMonths(0);
         mongoRepositoryReactive.saveOrUpdate(gameType);
-
-    }
+        }
 }
