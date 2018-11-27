@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.dto.AuthRoleDto;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.*;
@@ -91,6 +92,7 @@ public class AuthRole extends EnumeratedFact {
         return authRoleDto;
     }
 
+    @Transient
     private Comparator<AuthPermissionDto> permissionDtoComparator = new Comparator<AuthPermissionDto>() {
         @Override
         public int compare(AuthPermissionDto o1, AuthPermissionDto o2) {
