@@ -171,16 +171,23 @@ public class LicenseController extends BaseController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/get-institution-aips", params = {"institutionId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/get-institution-aips", params = {"page", "pageSize", "sortType", "sortProperty",
+            "institutionId"})
     @ApiOperation(value = "Get all Institution AIPs", response = AIPCheckDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getAllAIPStatus(@RequestParam("institutionId") String institutionId) {
+    public Mono<ResponseEntity> getAllAIPStatus(@RequestParam("institutionId") String institutionId,
+                                                @RequestParam("page") int page,
+                                                @RequestParam("pageSize") int pageSize,
+                                                @RequestParam("sortType") String sortType,
+                                                @RequestParam("sortProperty") String sortParam,
+                                                HttpServletResponse httpServletResponse
+                                                ) {
         try {
-            return licenseService.getInstitutionAIPs(institutionId);
+            return licenseService.getInstitutionAIPs(institutionId, page,pageSize,sortType,sortParam, httpServletResponse);
         } catch (Exception ex) {
             return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
@@ -203,16 +210,21 @@ public class LicenseController extends BaseController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/get-institution-uploaded-aips", params = {"institutionId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/get-institution-uploaded-aips", params = {"page", "pageSize", "sortType", "sortProperty", "institutionId"})
     @ApiOperation(value = "Get all Institution Uploaded Document AIPs", response = AIPCheckDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getAllAIPUploaded(@RequestParam("institutionId") String institutionId) {
+    public Mono<ResponseEntity> getAllAIPUploaded(@RequestParam("institutionId") String institutionId,
+                                                  @RequestParam("page") int page,
+                                                  @RequestParam("pageSize") int pageSize,
+                                                  @RequestParam("sortType") String sortType,
+                                                  @RequestParam("sortProperty") String sortParam,
+                                                  HttpServletResponse httpServletResponse) {
         try {
-            return licenseService.getInstitutionAIPUploaded(institutionId);
+            return licenseService.getInstitutionAIPUploaded(institutionId, page,pageSize,sortType,sortParam, httpServletResponse);
         } catch (Exception ex) {
             return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
