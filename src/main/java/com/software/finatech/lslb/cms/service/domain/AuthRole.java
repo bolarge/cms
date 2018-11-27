@@ -93,12 +93,7 @@ public class AuthRole extends EnumeratedFact {
     }
 
     @Transient
-    private Comparator<AuthPermissionDto> permissionDtoComparator = new Comparator<AuthPermissionDto>() {
-        @Override
-        public int compare(AuthPermissionDto o1, AuthPermissionDto o2) {
-            return StringUtils.compare(o1.getName(), o2.getName());
-        }
-    };
+    private Comparator<AuthPermissionDto> permissionDtoComparator = (o1, o2) -> StringUtils.compare(o1.getName(), o2.getName());
 
     public boolean isSSOClientAdmin() {
         return StringUtils.equals(LSLBAuthRoleReferenceData.SSO_CLIENT_ADMIN, this.ssoRoleMapping);

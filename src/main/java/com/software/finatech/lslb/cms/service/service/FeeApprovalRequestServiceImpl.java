@@ -264,12 +264,16 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             } else {
                 fee.setActive(false);
             }
+            LocalDate today = LocalDate.now();
             fee.setGameTypeId(pendingFee.getGameTypeId());
             fee.setFeePaymentTypeId(pendingFee.getFeePaymentTypeId());
             fee.setLicenseTypeId(pendingFee.getLicenseTypeId());
             fee.setEffectiveDate(pendingFee.getEffectiveDate());
             fee.setAmount(pendingFee.getAmount());
             fee.setEndDate(pendingFee.getEndDate());
+            if (fee.getEndDate().isBefore(today) || fee.getEndDate().isEqual(today)){
+                fee.setActive(false);
+            }
             mongoRepositoryReactive.saveOrUpdate(fee);
             mongoRepositoryReactive.saveOrUpdate(pendingFee);
         }
