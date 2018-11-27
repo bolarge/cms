@@ -438,6 +438,7 @@ public class Scheduler {
             if(sentEmail==true) {
                 DocumentType documentType=(DocumentType)mongoRepositoryReactive.findById(document.getDocumentTypeId(), DocumentType.class).block();
                if(documentType!=null){
+                   try{
                 AuthInfo approverAuthInfo = documentType.getApprover();
                 NotificationDto notificationDto = new NotificationDto();
                 notificationDto.setDescription("You have " + documentType.getName() + " documents pending your approval ");
@@ -445,6 +446,9 @@ public class Scheduler {
                 sendEmail.sendPendingDocumentEmailNotification(notificationDto, "Pending Document Approval");
                 document.setNextReminderDate(LocalDate.now().plusDays(3));
                 mongoRepositoryReactive.saveOrUpdate(document);
+                   }catch (Throwable Ex){
+                       logger.info(Ex.getMessage());
+                   }
             }
             }
 
