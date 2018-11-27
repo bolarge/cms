@@ -802,6 +802,16 @@ public class LSLBAuthPermissionReferenceData {
         permission.setDescription("EFFECT OUTCOME ON LOGGED CASES");
         permission.setUsedBySystem(false);
         mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("87", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("87");
+        }
+        permission.setName("VIEW AGENT BVN");
+        permission.setDescription("CAN VIEW AGENT BVN");
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
     }
 
 
@@ -1002,6 +1012,9 @@ public class LSLBAuthPermissionReferenceData {
         codePermissions.add(RECEIVE_PAYMENT_NOTIFICATION_ID);
         codePermissions.add(RECEIVE_AGENT_APPROVAL_AGENT_REQUEST_ID);
         codePermissions.add(RECEIVE_CASE_NOTIFICATION_ID);
+        codePermissions.add(RECEIVE_MACHINE_APPLICATION_NOTIFICATION_ID);
+        codePermissions.add(RECEIVE_FEE_EXPIRIY_NOTIFICATION_ID);
+        codePermissions.add(RECEIVE_LICENSE_TRANSFER_NOTIFICATION_ID);
         return codePermissions;
     }
 }

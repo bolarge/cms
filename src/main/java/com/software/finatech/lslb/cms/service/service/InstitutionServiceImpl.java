@@ -1,11 +1,10 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.domain.GameType;
-import com.software.finatech.lslb.cms.service.domain.Institution;
-import com.software.finatech.lslb.cms.service.domain.License;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.model.applicantMembers.ManagementDetail;
+import com.software.finatech.lslb.cms.service.model.applicantMembers.Shareholder;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
@@ -29,6 +28,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
@@ -36,10 +36,7 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -381,6 +378,53 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
     }
 
+    @Override
+    public Mono<ResponseEntity> getInstitutionFullDetailById(String id) {
+        try {
+            Institution institution = findByInstitutionId(id);
+            if (institution == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Operator with id %s not found", id), HttpStatus.BAD_REQUEST));
+            }
+            return Mono.just(new ResponseEntity<>(institution.convertToFullDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while getting institution full detail by id", e);
+        }
+    }
+
+
+    /**
+     * @param applicationForm saves the
+     *                        director and shareholder details on the
+     *                        application form to the operator and his category details
+     */
+    @Override
+    @Async
+    public void saveOperatorMembersDetailsToOperator(ApplicationForm applicationForm) {
+        Set<String> directorNames = new HashSet<>();
+        Set<String> shareHolderNames = new HashSet<>();
+        Institution institution = applicationForm.getInstitution();
+        InstitutionCategoryDetails institutionCategoryDetails = findInstitutionCategoryDetailsByInstitutionIdAndGameTypeId(applicationForm.getInstitutionId(), applicationForm.getGameTypeId());
+        if (institutionCategoryDetails == null) {
+            institutionCategoryDetails = new InstitutionCategoryDetails();
+            institutionCategoryDetails.setId(UUID.randomUUID().toString());
+            institutionCategoryDetails.setInstitutionId(applicationForm.getInstitutionId());
+            institutionCategoryDetails.setGameTypeId(applicationForm.getGameTypeId());
+        }
+        for (ManagementDetail managementDetail : applicationForm.getApplicantMemberDetails().getManagementDetailList()) {
+            directorNames.add(String.format("%s %s", managementDetail.getFirstName(), managementDetail.getSurname()));
+        }
+        for (Shareholder shareholder : applicationForm.getApplicantMemberDetails().getShareholderList()) {
+            shareHolderNames.add(String.format("%s %s", shareholder.getFirstName(), shareholder.getSurname()));
+        }
+        institution.getShareHolderNames().addAll(shareHolderNames);
+        institutionCategoryDetails.getShareHolderNames().addAll(shareHolderNames);
+        institution.getDirectorsNames().addAll(directorNames);
+        institutionCategoryDetails.getDirectorsNames().addAll(directorNames);
+        institution.getInstitutionCategoryDetailIds().add(institutionCategoryDetails.getId());
+        mongoRepositoryReactive.saveOrUpdate(institution);
+        mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
+    }
+
     private UploadTransactionResponse saveInstitutionUploads(List<InstitutionUpload> institutionUploadList) {
         List<FailedLine> failedLineList = new ArrayList<>();
         UploadTransactionResponse uploadTransactionResponse = new UploadTransactionResponse();
@@ -465,5 +509,13 @@ public class InstitutionServiceImpl implements InstitutionService {
         institution.setAddress(institutionCreateDto.getAddress());
         institution.setActive(true);
         return institution;
+    }
+
+    @Override
+    public InstitutionCategoryDetails findInstitutionCategoryDetailsByInstitutionIdAndGameTypeId(String institutionId, String gameTypeId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(institutionId));
+        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        return (InstitutionCategoryDetails) mongoRepositoryReactive.find(query, InstitutionCategoryDetails.class).block();
     }
 }

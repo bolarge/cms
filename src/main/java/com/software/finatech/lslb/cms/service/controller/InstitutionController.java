@@ -143,4 +143,15 @@ public class InstitutionController extends BaseController {
     public Mono<ResponseEntity> getInstitutionOnboardinWorkflow(@RequestParam("institutionId") String institutionId) {
         return institutionOnboardingWorkflowService.getWorkflowByInstitutionId(institutionId);
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}")
+    @ApiOperation(value = "Get institution full detail by id", response = InstitutionDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getById(@PathVariable("id") String id) {
+        return institutionService.getInstitutionFullDetailById(id);
+    }
 }

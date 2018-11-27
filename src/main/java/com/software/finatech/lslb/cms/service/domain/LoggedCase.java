@@ -38,6 +38,25 @@ public class LoggedCase extends AbstractFact {
     private String gameTypeId;
     private String loggedCaseOutcomeId;
     private String outcomeReason;
+    private String loggedReportId;
+    private String customerComplaintId;
+
+
+    public String getLoggedReportId() {
+        return loggedReportId;
+    }
+
+    public void setLoggedReportId(String loggedReportId) {
+        this.loggedReportId = loggedReportId;
+    }
+
+    public String getCustomerComplaintId() {
+        return customerComplaintId;
+    }
+
+    public void setCustomerComplaintId(String customerComplaintId) {
+        this.customerComplaintId = customerComplaintId;
+    }
 
     public String getOutcomeReason() {
         return outcomeReason;
@@ -301,6 +320,8 @@ public class LoggedCase extends AbstractFact {
             dto.setMachineSerialNumber(machine.getSerialNumber());
         }
         dto.setOutcomeReason(getOutcomeReason());
+        dto.setCustomerComplaintId(getCustomerComplaintId());
+        dto.setLoggedReportId(getLoggedReportId());
         return dto;
     }
 

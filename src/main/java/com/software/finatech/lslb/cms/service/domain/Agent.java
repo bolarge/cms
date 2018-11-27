@@ -294,6 +294,7 @@ public class Agent extends AbstractFact {
             agentDto.setAgentStatusId(this.agentStatusId);
             agentDto.setAgentStatusName(String.valueOf(agentStatus));
         }
+        agentDto.setBusinessAddresses(getBusinessAddresses());
         return agentDto;
     }
 

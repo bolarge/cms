@@ -7,7 +7,9 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("serial")
 @Document(collection = "InstitutionCategoryDetails")
@@ -16,6 +18,24 @@ public class InstitutionCategoryDetails extends AbstractFact {
     private String gameTypeId;
     private String tradeName;
     private LocalDate firstCommencementDate;
+    private Set<String> directorsNames = new HashSet<>();
+    private Set<String> shareHolderNames = new HashSet<>();
+
+    public Set<String> getShareHolderNames() {
+        return shareHolderNames;
+    }
+
+    public void setShareHolderNames(Set<String> shareHolderNames) {
+        this.shareHolderNames = shareHolderNames;
+    }
+
+    public Set<String> getDirectorsNames() {
+        return directorsNames;
+    }
+
+    public void setDirectorsNames(Set<String> directorsNames) {
+        this.directorsNames = directorsNames;
+    }
 
     public String getInstitutionId() {
         return institutionId;
@@ -67,6 +87,7 @@ public class InstitutionCategoryDetails extends AbstractFact {
             dto.setFirstCommencementDate(date.toString("dd-MM-yyyy"));
         }
         dto.setTradeName(getTradeName());
+        dto.setDirectorsNames(getDirectorsNames());
         return dto;
     }
 

@@ -22,6 +22,34 @@ public class LoggedCaseCreateDto {
     private String otherCategoryName;
     private String otherTypeName;
     private String gameTypeId;
+    private String caseOriginId;
+    private String loggedReportId;
+    private String customerComplaintId;
+
+
+    public String getLoggedReportId() {
+        return loggedReportId;
+    }
+
+    public void setLoggedReportId(String loggedReportId) {
+        this.loggedReportId = loggedReportId;
+    }
+
+    public String getCustomerComplaintId() {
+        return customerComplaintId;
+    }
+
+    public void setCustomerComplaintId(String customerComplaintId) {
+        this.customerComplaintId = customerComplaintId;
+    }
+
+    public String getCaseOriginId() {
+        return caseOriginId;
+    }
+
+    public void setCaseOriginId(String caseOriginId) {
+        this.caseOriginId = caseOriginId;
+    }
 
     public String getGameTypeId() {
         return gameTypeId;

@@ -144,7 +144,6 @@ public class AgentServiceImpl implements AgentService {
                 AgentDto dto = new AgentDto();
                 dto.setId(agent.getId());
                 dto.setFullName(agent.getFullName());
-                dto.setBusinessAddresses(agent.getBusinessAddresses());
                 agentDtos.add(dto);
             });
             return Mono.just(new ResponseEntity<>(agentDtos, HttpStatus.OK));

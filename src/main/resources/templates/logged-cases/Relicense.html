@@ -556,18 +556,22 @@
                                                                                 -->
                                                                             <h3 mc:edit="header"
                                                                                 style="color:#5F5F5F;line-height:125%;font-family:Helvetica,Arial,sans-serif;font-size:20px;font-weight:normal;margin-top:0;margin-bottom:3px;text-align:left;;margin-bottom:10px;">
-                                                                                Dear Petitioner,
+                                                                                Dear
+                                                                                Sir/Madam,
                                                                             </h3>
                                                                             <div mc:edit="body"
                                                                                  style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
-                                                                                Thank you for contacting the Lagos State
-                                                                                Lotteries Board (LSLB) , please be
-                                                                                assured that we will look into this.
+                                                                                This is to inform you that your licence
+                                                                                in <span th:text="${gameType}"></span>
+                                                                                with licence number <span
+                                                                                    th:text="${licenseNumber}"></span>
+                                                                                status has been changed from <span
+                                                                                    th:text="${oldStatus}"></span> to
+                                                                                <span th:text="${newStatus}"></span>.
                                                                                 <br/>
-                                                                                Kindly note that LSLB’s dispute
-                                                                                resolution process takes a minimum of
-                                                                                fourteen of 14 (Fourteen) working days.
-                                                                                <br>
+                                                                                You can now proceed to operations.
+                                                                                <br/>
+                                                                                Regards.
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -593,9 +597,6 @@
                                                                         <td style="padding-top:0;" align="center"
                                                                             valign="top" width="500"
                                                                             class="flexibleContainerCell">
-
-                                                                            <!-- CONTENT TABLE // -->
-                                                                            <!-- // CONTENT TABLE -->
 
                                                                         </td>
                                                                     </tr>
