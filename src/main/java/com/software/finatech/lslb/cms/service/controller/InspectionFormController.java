@@ -159,7 +159,27 @@ public class InspectionFormController extends BaseController {
 
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/get-by-id", params = {"id"})
+    @ApiOperation(value = "Get Inspection Form By Id", response = InspectionFormDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getInspectionForm(@RequestParam("id") String id) {
+        try {
+            InspectionForm inspectionForm = (InspectionForm) mongoRepositoryReactive.findById(id, InspectionForm.class).block();
 
+            if(inspectionForm==null){
+                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+            }
+            return Mono.just(new ResponseEntity<>(inspectionForm.convertToDto(), HttpStatus.OK));
+
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
+
+        }
+    }
     @RequestMapping(method = RequestMethod.POST, value = "/add-comment")
     @ApiOperation(value = "Add comment to Inspection Form", response = InspectionForm.class, consumes = "application/json")
     @ApiResponses(value = {

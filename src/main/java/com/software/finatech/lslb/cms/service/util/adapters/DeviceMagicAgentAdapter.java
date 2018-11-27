@@ -147,8 +147,11 @@ public class DeviceMagicAgentAdapter {
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
             document.setAgentId(agent.getId());
             try {
-                document.setFile(new Binary(BsonBinarySubType.BINARY, Files.toByteArray(file)));
-            } catch (IOException e) {
+                DocumentBinary documentBinary= new DocumentBinary();
+                documentBinary.setFile(new Binary(BsonBinarySubType.BINARY, Files.toByteArray(file)));
+                documentBinary.setDocumentId(document.getId());
+                mongoRepositoryReactive.saveOrUpdate(documentBinary);
+               } catch (IOException e) {
                 logger.error("An error occurred while setting bytes of document");
             }
             mongoRepositoryReactive.saveOrUpdate(document);

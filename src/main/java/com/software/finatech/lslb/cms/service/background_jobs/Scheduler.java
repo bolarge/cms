@@ -409,28 +409,24 @@ public class Scheduler {
 
     }
     //@TODO fix pending document approval email
-   @Scheduled(fixedRate = 1000)
+    @Scheduled(cron = "0 0 13 * * *")
     public void sendReminderEmail(){
-        Aggregation documentAgg = Aggregation.newAggregation(
-                Aggregation.match(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID)),
-             Aggregation.project()
-                     .and("documentTypeId").as("documentTypeId")
-                     .and("nextReminderDate").as("nextReminderDate")
-                     .and("id").as("id").and("approvalRequestStatusId").as("approvalRequestStatusId")
-                //Aggregation.group("id")
-        );
+//        Aggregation documentAgg = Aggregation.newAggregation(
+//                Aggregation.match(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID)),
+//             Aggregation.project()
+//                     .and("documentTypeId").as("documentTypeId")
+//                     .and("nextReminderDate").as("nextReminderDate")
+//                     .and("id").as("id").and("approvalRequestStatusId").as("approvalRequestStatusId")
+//                //Aggregation.group("id")
+//        );
 
        Query query= new Query();
-       query.addCriteria(Criteria.where("isCurrent").is(true));
-       query.fields().include("approvalRequestStatusId");
-       //query.fields().include("domain");
-       //query.fields().include("count");
+       query.addCriteria(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID));
+
        try{
-       //ArrayList<Document> documents = (ArrayList<Document>)mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
+           ArrayList<Document> documents = (ArrayList<Document>)mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
 
-       List<DocumentSummaryDto> results = mongoTemplate.aggregate(documentAgg, Document.class, DocumentSummaryDto.class).getMappedResults();
-
-        for (DocumentSummaryDto document: results) {
+        for (Document document: documents) {
             boolean sentEmail=false;
             if(document.getNextReminderDate()==null){
                 sentEmail=true;
@@ -447,8 +443,8 @@ public class Scheduler {
                 notificationDto.setDescription("You have " + documentType.getName() + " documents pending your approval ");
                 notificationDto.setLslbApprovalEmailAddress(approverAuthInfo.getEmailAddress());
                 sendEmail.sendPendingDocumentEmailNotification(notificationDto, "Pending Document Approval");
-              document.setNextReminderDate(LocalDate.now().plusDays(3));
-             // mongoRepositoryReactive.saveOrUpdate(document);
+                document.setNextReminderDate(LocalDate.now().plusDays(3));
+                mongoRepositoryReactive.saveOrUpdate(document);
             }
             }
 
