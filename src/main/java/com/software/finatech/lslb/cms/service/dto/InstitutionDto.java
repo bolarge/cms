@@ -25,6 +25,15 @@ public class InstitutionDto {
     protected String settlementCycleId;
     private List<InstitutionCategoryDetailsDto> institutionCategoryDetails = new ArrayList<>();
     private Set<String> directorsNames = new HashSet<>();
+    private Set<String> shareHolderNames = new HashSet<>();
+
+    public Set<String> getShareHolderNames() {
+        return shareHolderNames;
+    }
+
+    public void setShareHolderNames(Set<String> shareHolderNames) {
+        this.shareHolderNames = shareHolderNames;
+    }
 
     public Set<String> getDirectorsNames() {
         return directorsNames;

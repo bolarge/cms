@@ -167,6 +167,7 @@ public class Institution extends AbstractFact {
         InstitutionDto dto = convertToDto();
         dto.setInstitutionCategoryDetails(getInstitutionCategoryDetailsList());
         dto.setDirectorsNames(getDirectorsNames());
+        dto.setShareHolderNames(getShareHolderNames());
         return dto;
     }
 
