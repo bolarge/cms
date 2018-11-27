@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -65,22 +66,22 @@ public class FeeUpdater {
     }
 
 
-    //TODO:: fix thisss to 15 min
-    @Scheduled(fixedRate =5* 60 * 1000)
+    @Transactional
+    @Scheduled(fixedRate = 15 * 60 * 1000)
     @SchedulerLock(name = "Activate Fees For Today", lockAtMostFor = 60 * 1000, lockAtLeastFor = 60 * 1000)
     public void startNewFees() {
         try {
             ArrayList<Fee> feeForStarting = getFeesForActivation();
             for (Fee fee : feeForStarting) {
                 try {
-                    fee.setActive(true);
-                    mongoRepositoryReactive.saveOrUpdate(fee);
-
                     Fee feeForExpiry = feeService.findActiveFeeByLicenseTypeGameTypeAndFeePaymentType(fee.getLicenseTypeId(), fee.getGameTypeId(), fee.getFeePaymentTypeId());
                     if (feeForExpiry != null) {
                         feeForExpiry.setActive(false);
                         mongoRepositoryReactive.saveOrUpdate(feeForExpiry);
                     }
+
+                    fee.setActive(true);
+                    mongoRepositoryReactive.saveOrUpdate(fee);
                 } catch (Exception e) {
                     logger.error("An error occurred while updating fee ", e);
                 }
@@ -89,6 +90,7 @@ public class FeeUpdater {
             logger.error("Error occurred ", e);
         }
     }
+
 
     private ArrayList<Fee> getPendingFeesForNotification() {
         Query query = new Query();
@@ -107,7 +109,7 @@ public class FeeUpdater {
     private ArrayList<Fee> getFeesForActivation() {
         Query query = new Query();
         query.addCriteria(Criteria.where("effectiveDate").lte(LocalDate.now()));
-          query.addCriteria(Criteria.where("endDate").gte(LocalDate.now()));
+        query.addCriteria(Criteria.where("endDate").gte(LocalDate.now()));
         query.addCriteria(Criteria.where("active").is(false));
         return (ArrayList<Fee>) mongoRepositoryReactive.findAll(query, Fee.class).toStream().collect(Collectors.toList());
     }

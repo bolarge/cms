@@ -3,7 +3,7 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.ApplicationFormDto;
 import com.software.finatech.lslb.cms.service.dto.CommentDetail;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
-import com.software.finatech.lslb.cms.service.model.applicantMembers.ApplicantMemberDetails;
+import com.software.finatech.lslb.cms.service.model.applicantMembers.OperatorMemberDetails;
 import com.software.finatech.lslb.cms.service.model.contactDetails.ApplicantContactDetails;
 import com.software.finatech.lslb.cms.service.model.criminalityDetails.ApplicantCriminalityDetails;
 import com.software.finatech.lslb.cms.service.model.declaration.ApplicantDeclarationDetails;
@@ -28,7 +28,7 @@ public class ApplicationForm extends AbstractFact {
     protected String formName;
     protected String rejectorId;
     protected ApplicantDetails applicantDetails;
-    protected ApplicantMemberDetails applicantMemberDetails;
+    protected OperatorMemberDetails applicantMemberDetails;
     protected ApplicantCriminalityDetails applicantCriminalityDetails;
     protected ApplicantDeclarationDetails applicantDeclarationDetails;
     protected ApplicantOutletInformation applicantOutletInformation;
@@ -125,11 +125,11 @@ public class ApplicationForm extends AbstractFact {
         this.applicantDetails = applicantDetails;
     }
 
-    public ApplicantMemberDetails getApplicantMemberDetails() {
+    public OperatorMemberDetails getApplicantMemberDetails() {
         return applicantMemberDetails;
     }
 
-    public void setApplicantMemberDetails(ApplicantMemberDetails applicantMemberDetails) {
+    public void setApplicantMemberDetails(OperatorMemberDetails applicantMemberDetails) {
         this.applicantMemberDetails = applicantMemberDetails;
     }
 

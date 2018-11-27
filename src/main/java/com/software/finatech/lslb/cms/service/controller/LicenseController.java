@@ -101,7 +101,7 @@ public class LicenseController  extends BaseController{
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAllLicenseTypes() {
-        return Mono.just(new ResponseEntity<>(licenseService.getAllLicenseTypes(), HttpStatus.OK));
+        return licenseService.getAllLicenseTypes();
 
     }
 

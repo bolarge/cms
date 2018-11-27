@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 
+import com.software.finatech.lslb.cms.service.dto.CommentDetail;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainActionDto;
 import com.software.finatech.lslb.cms.service.dto.CustomerComplainDto;
 import com.software.finatech.lslb.cms.service.referencedata.CustomerComplainStatusReferenceData;
@@ -36,9 +37,19 @@ public class CustomerComplain extends AbstractFact {
     private String caseAndComplainTypeId;
     private String otherCategoryName;
     private String otherTypeName;
+    private List<CommentDetail> comments = new ArrayList<>();
+
 
     public String getOtherCategoryName() {
         return otherCategoryName;
+    }
+
+    public List<CommentDetail> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<CommentDetail> comments) {
+        this.comments = comments;
     }
 
     public void setOtherCategoryName(String otherCategoryName) {
@@ -250,6 +261,7 @@ public class CustomerComplain extends AbstractFact {
         dto.setDateOfIncident(getDateOfIncident());
         dto.setStateOfResidence(getStateOfResidence());
         dto.setAddress(getAddress());
+        dto.setComments(getComments());
         return dto;
     }
 
@@ -320,6 +332,10 @@ public class CustomerComplain extends AbstractFact {
 
     public boolean isPending() {
         return StringUtils.equals(CustomerComplainStatusReferenceData.PENDING_ID, this.customerComplainStatusId);
+    }
+
+    public boolean isClosed() {
+        return StringUtils.equals(CustomerComplainStatusReferenceData.CLOSED_ID, this.customerComplainStatusId);
     }
 
     @Override
