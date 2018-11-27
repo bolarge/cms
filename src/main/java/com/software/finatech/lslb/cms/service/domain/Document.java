@@ -23,7 +23,6 @@ public class Document extends AbstractFact {
     protected String description;
     protected String filename;
     protected String mimeType;
-    protected Binary file;
     protected LocalDateTime entryDate;
     protected LocalDate validFrom;
     protected LocalDate validTo;
@@ -134,14 +133,6 @@ public class Document extends AbstractFact {
 
     public void setPreviousDocumentId(String previousDocumentId) {
         this.previousDocumentId = previousDocumentId;
-    }
-
-    public Binary getFile() {
-        return file;
-    }
-
-    public void setFile(Binary file) {
-        this.file = file;
     }
 
     @Override
