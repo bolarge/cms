@@ -140,6 +140,7 @@ public class DocumentController extends BaseController {
                         //document.setValidFrom(new LocalDate(documentDto.getValidFrom()));
                         //document.setValidTo(new LocalDate(documentDto.getValidTo()));
                         DocumentBinary documentBinary= new DocumentBinary();
+                        documentBinary.setId(UUID.randomUUID().toString());
                         documentBinary.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
                         documentBinary.setDocumentId(document.getId());
                         mongoRepositoryReactive.saveOrUpdate(documentBinary);
@@ -283,6 +284,7 @@ public class DocumentController extends BaseController {
             }
             try {
                  DocumentBinary documentBinary= new DocumentBinary();
+                documentBinary.setId(UUID.randomUUID().toString());
                 documentBinary.setFile(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
                 documentBinary.setDocumentId(document.getId());
                 mongoRepositoryReactive.saveOrUpdate(documentBinary);
@@ -657,6 +659,7 @@ public class DocumentController extends BaseController {
                         document.setAgentId(documentDto.getAgentId());
                         document.setPreviousDocumentId(documentDto.getPreviousDocumentId());
                         DocumentBinary documentBinary= new DocumentBinary();
+                        documentBinary.setId(UUID.randomUUID().toString());
                         documentBinary.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
                         documentBinary.setDocumentId(document.getId());
                         mongoRepositoryReactive.saveOrUpdate(documentBinary);
