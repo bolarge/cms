@@ -4,9 +4,12 @@ package com.software.finatech.lslb.cms.service.controller;
 import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.domain.InspectionForm;
 import com.software.finatech.lslb.cms.service.domain.InspectionFormComments;
+import com.software.finatech.lslb.cms.service.domain.InspectionStatus;
+import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.InspectionCommentCreateDto;
 import com.software.finatech.lslb.cms.service.dto.InspectionFormCreateDto;
 import com.software.finatech.lslb.cms.service.dto.InspectionFormDto;
+import com.software.finatech.lslb.cms.service.referencedata.InspectionStatusReferenceData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -35,7 +38,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/inspectionForm")
 public class InspectionFormController extends BaseController {
 
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "gameTypeIds","institutionId","agentId","gamingMachineId","dateProperty"})
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "gameTypeIds","institutionId","agentId","gamingMachineId","dateProperty","status"})
     @ApiOperation(value = "Get all Inspections", response = InspectionForm.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -50,6 +53,7 @@ public class InspectionFormController extends BaseController {
                                                    @RequestParam("sortProperty") String sortParam,
                                                    @RequestParam("institutionId") String institutionId,
                                                    @RequestParam("agentId") String agentId,
+                                                   @RequestParam("status") String status,
                                                    @RequestParam("dateProperty") String dateProperty,
                                                    @RequestParam("fromDate") String fromDate,
                                                    @RequestParam("toDate") String toDate,
@@ -67,7 +71,11 @@ public class InspectionFormController extends BaseController {
                 }
           if (!StringUtils.isEmpty(agentId)) {
               query.addCriteria(Criteria.where("agentId").in(agentId));
-          }if (!StringUtils.isEmpty(gamingMachineId)) {
+          }
+          if (!StringUtils.isEmpty(status)) {
+              query.addCriteria(Criteria.where("status").in(status));
+          }
+          if (!StringUtils.isEmpty(gamingMachineId)) {
               query.addCriteria(Criteria.where("gamingMachineId").in(gamingMachineId));
           }
                 if (page == 0) {
@@ -147,6 +155,7 @@ public class InspectionFormController extends BaseController {
             inspectionForm.setSubject(inspectionFormCreateDto.getSubject());
             inspectionForm.setInspectionDate(fromDate);
             inspectionForm.setAgentBusinessAddress(inspectionFormCreateDto.getAgentBusinessAddress());
+            inspectionForm.setStatus(InspectionStatusReferenceData.NEW);
             //inspectionForm.setUserRoleId(inspectionFormCreateDto.getUserRoleId());
             inspectionForm.setInstitutionId(inspectionFormCreateDto.getInstitutionId());
             mongoRepositoryReactive.saveOrUpdate(inspectionForm);
@@ -172,6 +181,61 @@ public class InspectionFormController extends BaseController {
 
             if(inspectionForm==null){
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+            }
+            return Mono.just(new ResponseEntity<>(inspectionForm.convertToDto(), HttpStatus.OK));
+
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
+
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/update-to-in-progress", params = {"id"})
+    @ApiOperation(value = "Update New Inspection form from New to In-progress", response = InspectionFormDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> updateInspectionForm(@RequestParam("id") String id) {
+        try {
+            InspectionForm inspectionForm = (InspectionForm) mongoRepositoryReactive.findById(id, InspectionForm.class).block();
+
+            if(inspectionForm==null){
+                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+            }
+            if(inspectionForm.getStatus().equals(InspectionStatusReferenceData.NEW)){
+                inspectionForm.setStatus(InspectionStatusReferenceData.IN_PROGRESS);
+                mongoRepositoryReactive.saveOrUpdate(inspectionForm);
+            }
+            return Mono.just(new ResponseEntity<>(inspectionForm.convertToDto(), HttpStatus.OK));
+
+        } catch (Exception ex) {
+            return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
+
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/update-to-closed", params = {"id"})
+    @ApiOperation(value = "Update New Inspection form from New to In-progress", response = InspectionFormDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> updateInspectionFormToClosed(@RequestParam("id") String id) {
+        try {
+            InspectionForm inspectionForm = (InspectionForm) mongoRepositoryReactive.findById(id, InspectionForm.class).block();
+
+            if(inspectionForm==null){
+                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+            }
+            if(inspectionForm.getStatus().equals(InspectionStatusReferenceData.IN_PROGRESS)){
+                inspectionForm.setStatus(InspectionStatusReferenceData.CLOSED);
+                mongoRepositoryReactive.saveOrUpdate(inspectionForm);
+            }else{
+                return Mono.just(new ResponseEntity<>("Inspection status is not In Progress", HttpStatus.BAD_REQUEST));
+
             }
             return Mono.just(new ResponseEntity<>(inspectionForm.convertToDto(), HttpStatus.OK));
 
@@ -236,6 +300,47 @@ public class InspectionFormController extends BaseController {
         }
 
     }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/inspection-status")
+    @ApiOperation(value = "Get Agent Addresses", response = ArrayList.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")
+    }
+    )
+    public Mono<ResponseEntity> getAllStatuses() {
+
+        try {
+            Query query = new Query();
+            List<InspectionStatus> inspectionStatuses =(List<InspectionStatus>) mongoRepositoryReactive.findAll(query,InspectionStatus.class).toStream().collect(Collectors.toList());
+            if(inspectionStatuses.size()==0){
+                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
+            }
+            ArrayList<EnumeratedFactDto> enumeratedFactDtos = new ArrayList<>();
+            inspectionStatuses.stream().forEach(inspectionStatus -> {
+                enumeratedFactDtos.add(inspectionStatus.convertToDto());
+            });
+
+            return Mono.just(new ResponseEntity<>( enumeratedFactDtos, HttpStatus.OK));
+        }catch (Exception ex){
+            return Mono.just(new ResponseEntity<>("Error! Please Contact Admin", HttpStatus.BAD_REQUEST));
+
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
 
 
 }

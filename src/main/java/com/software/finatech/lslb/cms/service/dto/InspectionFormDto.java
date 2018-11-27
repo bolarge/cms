@@ -20,6 +20,7 @@ public class InspectionFormDto {
     protected String subject;
     protected String ownerName;
     protected String agentBusinessAddress;
+    protected String status;
 
     public String getAgentBusinessAddress() {
         return agentBusinessAddress;
@@ -128,5 +129,13 @@ public class InspectionFormDto {
 
     public void setInspectionDate(String inspectionDate) {
         this.inspectionDate = inspectionDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

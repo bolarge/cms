@@ -32,6 +32,7 @@ public class Document extends AbstractFact {
     protected DocumentType documentType;
     protected String entity;
     protected String entityId;
+    protected Binary file;
     protected String unLinkedEntityId;
     protected String unLinkedInstitutionId;
     protected String previousDocumentId;
@@ -44,6 +45,13 @@ public class Document extends AbstractFact {
     protected LocalDate nextReminderDate;
     protected List<CommentDetail> comments = new ArrayList<>();
 
+    public Binary getFile() {
+        return file;
+    }
+
+    public void setFile(Binary file) {
+        this.file = file;
+    }
 
     public List<CommentDetail> getComments() {
         return comments;

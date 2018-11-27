@@ -7,11 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -91,6 +91,18 @@ public class DatabaseLoaderUtils {
 
     public void generateAuthTestData() {
         TestData.generateAuthTestData(mongoRepositoryReactive);
+        List<Document> documentList= (List<Document>)mongoRepositoryReactive.findAll(new Query(), Document.class ).toStream().collect(Collectors.toList());
+        documentList.parallelStream().forEach(document -> {
+            DocumentBinary documentCheck=(DocumentBinary)mongoRepositoryReactive.find(new Query(Criteria.where("documentId").is(document.getId())), DocumentBinary.class).block();
+            if(documentCheck==null){
+                DocumentBinary documentBinary = new DocumentBinary();
+                documentBinary.setDocumentId(document.getId());
+                documentBinary.setId(UUID.randomUUID().toString());
+                documentBinary.setFile(document.getFile());
+                mongoRepositoryReactive.saveOrUpdate(documentBinary);
+            }
+        });
+
     }
 
     // @PostConstruct
