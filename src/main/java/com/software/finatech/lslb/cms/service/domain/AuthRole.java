@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.dto.AuthRoleDto;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.*;
@@ -90,7 +91,15 @@ public class AuthRole extends EnumeratedFact {
         authRoleDto.setId(getId());
         return authRoleDto;
     }
-    
+
+    @Transient
+    private Comparator<AuthPermissionDto> permissionDtoComparator = new Comparator<AuthPermissionDto>() {
+        @Override
+        public int compare(AuthPermissionDto o1, AuthPermissionDto o2) {
+            return StringUtils.compare(o1.getName(), o2.getName());
+        }
+    };
+
     public boolean isSSOClientAdmin() {
         return StringUtils.equals(LSLBAuthRoleReferenceData.SSO_CLIENT_ADMIN, this.ssoRoleMapping);
     }
