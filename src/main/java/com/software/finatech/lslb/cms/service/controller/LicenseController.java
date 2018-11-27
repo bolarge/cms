@@ -5,19 +5,18 @@ import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.dto.AIPCheckDto;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
+import com.software.finatech.lslb.cms.service.dto.LicenseRequestDto;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletResponse;
@@ -25,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 @Api(value = "License", description = "For everything related to gaming operators licenses", tags = "Licence Controller")
 @RestController
 @RequestMapping("/api/v1/license")
-public class LicenseController  extends BaseController{
+public class LicenseController extends BaseController {
     @Autowired
     private LicenseService licenseService;
 
@@ -126,6 +125,19 @@ public class LicenseController  extends BaseController{
     public Mono<ResponseEntity> getAllExpiringAIPStatus() {
         return licenseService.getExpiringAIPs();
     }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/license-licence")
+    @ApiOperation(value = "Licence License", response = LicenseDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> licenseLicense(@RequestBody LicenseRequestDto licenseRequestDto, HttpServletRequest request) {
+        return licenseService.licenseLicense(licenseRequestDto, request);
+    }
+
 
     @RequestMapping(method = RequestMethod.GET, value = "/all-expired-licenses")
     @ApiOperation(value = "Get all Expired license", response = License.class, responseContainer = "List", consumes = "application/json")

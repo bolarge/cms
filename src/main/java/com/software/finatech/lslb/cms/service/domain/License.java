@@ -255,6 +255,7 @@ public class License extends AbstractFact {
         if (agent != null) {
             licenseDto.setAgentId(getAgentId());
             ownerName = agent.getFullName();
+            licenseDto.setAgentNumber(agent.getAgentId());
         }
         Institution institution = getInstitution();
         if (institution != null) {
@@ -337,20 +338,32 @@ public class License extends AbstractFact {
         return (LicenseTransfer) mongoRepositoryReactive.findById(this.licenseTransferId, LicenseTransfer.class).block();
     }
 
-    public boolean isSuspendedLicence(){
+    public boolean isSuspendedLicence() {
         return StringUtils.equals(LicenseStatusReferenceData.LICENSE_SUSPENDED_ID, this.licenseStatusId);
     }
 
-    public boolean isTerminatedLicence(){
+    public boolean isTerminatedLicence() {
         return StringUtils.equals(LicenseStatusReferenceData.LICENSE_TERMINATED_ID, this.licenseStatusId);
     }
 
-    public boolean isRevokedLicence(){
+    public boolean isRevokedLicence() {
         return StringUtils.equals(LicenseStatusReferenceData.LICENSE_REVOKED_ID, this.licenseStatusId);
     }
 
-    public boolean isExpiredLicence(){
+    public boolean isExpiredLicence() {
         return StringUtils.equals(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID, this.licenseStatusId);
+    }
+
+    public String getOwnerName() {
+        Institution institution = getInstitution();
+        if (institution != null) {
+            return institution.getInstitutionName();
+        }
+        Agent agent = getAgent();
+        if (agent != null) {
+            return agent.getFullName();
+        }
+        return null;
     }
 
     @Override

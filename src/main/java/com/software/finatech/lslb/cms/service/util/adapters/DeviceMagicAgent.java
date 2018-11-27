@@ -8,6 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class DeviceMagicAgent {
@@ -47,7 +49,15 @@ public class DeviceMagicAgent {
     private String imageBase64;
     private String imageFileName;
     private String gender;
+    private Set<String> operatorIds = new HashSet<>();
 
+    public Set<String> getOperatorIds() {
+        return operatorIds;
+    }
+
+    public void setOperatorIds(Set<String> operatorIds) {
+        this.operatorIds = operatorIds;
+    }
 
     public String getTitle() {
         return title;

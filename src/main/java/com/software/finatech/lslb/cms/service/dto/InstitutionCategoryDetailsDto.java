@@ -1,9 +1,21 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-public class   InstitutionCategoryDetailsDto {
+import java.util.HashSet;
+import java.util.Set;
+
+public class InstitutionCategoryDetailsDto {
     private String firstCommencementDate;
     private String gameTypeName;
     private String tradeName;
+    private Set<String> directorsNames = new HashSet<>();
+
+    public Set<String> getDirectorsNames() {
+        return directorsNames;
+    }
+
+    public void setDirectorsNames(Set<String> directorsNames) {
+        this.directorsNames = directorsNames;
+    }
 
     public String getFirstCommencementDate() {
         return firstCommencementDate;

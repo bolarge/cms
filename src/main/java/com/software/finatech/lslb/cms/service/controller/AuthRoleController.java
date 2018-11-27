@@ -1,14 +1,12 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.domain.AuthPermission;
-import com.software.finatech.lslb.cms.service.domain.AuthRole;
-import com.software.finatech.lslb.cms.service.domain.FactObject;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthRoleService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
@@ -199,12 +197,29 @@ public class AuthRoleController extends BaseController {
             //@TODO validate request params
             List<FactObject> authRoles = Mapstore.STORE.get("AuthRole").values().stream().collect(Collectors.toList());
             //ArrayList<FactObject> authRoles = (ArrayList<FactObject>) mongoRepositoryReactive.findAll(AuthRole.class).toStream().collect(Collectors.toList());
+
             ArrayList<AuthRoleDto> authRoleDtos = authRoleDtoListFromAuthRoleList(authRoles);
             if (authRoleDtos.size() == 0) {
                 return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
             }
 
-            return Mono.just(new ResponseEntity(authRoleDtos, HttpStatus.OK));
+            Comparator<EnumeratedFact> enumeratedFactComparator = new Comparator<EnumeratedFact>() {
+                @Override
+                public int compare(EnumeratedFact o1, EnumeratedFact o2) {
+                    return StringUtils.compare(o1.toString(), o2.toString());
+                }
+            };
+
+            List<AuthRole> roles = new ArrayList<>();
+            for (FactObject factObject : authRoles) {
+                roles.add((AuthRole) factObject);
+            }
+            roles.sort(enumeratedFactComparator);
+            for (AuthRole authrole : roles) {
+                authRoleDtos.add(authrole.convertToDto());
+            }
+            return Mono.just(new ResponseEntity<>(authRoleDtos, HttpStatus.OK));
+//            return ReferenceDataUtil.getAllEnumeratedEntity("AuthRole");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -238,8 +253,9 @@ public class AuthRoleController extends BaseController {
                 return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
             }
 
-            return Mono.just(new ResponseEntity(authPermissionDtos, HttpStatus.OK));
+            // return Mono.just(new ResponseEntity(authPermissionDtos, HttpStatus.OK));
 
+            return ReferenceDataUtil.getAllEnumeratedEntity("AuthPermission");
         } catch (Exception e) {
             e.printStackTrace();
         }

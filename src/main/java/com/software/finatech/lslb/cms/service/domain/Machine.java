@@ -180,11 +180,13 @@ public class Machine extends AbstractFact {
         Institution institution = getInstitution();
         if (institution != null) {
             dto.setInstitutionName(institution.getInstitutionName());
+            dto.setInstitutionId(this.institutionId);
         }
         Agent agent = getAgent();
         if (agent != null) {
             dto.setAgentFullName(agent.getFullName());
             dto.setAgentId(this.agentId);
+            dto.setAgentNumber(agent.getAgentId());
         }
         MachineType machineType = getMachineType();
         if (machineType != null) {
@@ -212,7 +214,7 @@ public class Machine extends AbstractFact {
             dto.setLicenseEndDate(license.getEndDateString());
             dto.setLicenseStartDate(license.getStartDateString());
             dto.setLicenseNumber(license.getLicenseNumber());
-            dto.setLicenseStatus(license.getLicenseStatusName() );
+            dto.setLicenseStatus(license.getLicenseStatusName());
         }
         return dto;
     }
@@ -230,11 +232,11 @@ public class Machine extends AbstractFact {
         query.addCriteria(Criteria.where("machineId").is(this.id));
         ArrayList<MachineGame> machineGames = (ArrayList<MachineGame>) mongoRepositoryReactive.findAll(query, MachineGame.class).toStream().collect(Collectors.toList());
         for (MachineGame machineGame : machineGames) {
-         MachineGameDetails gameDetails = new MachineGameDetails();
-         gameDetails.setId(machineGame.getId());
-         gameDetails.setActive(machineGame.getActive());
-         gameDetails.setGameVersion(machineGame.getGameVersion());
-         gameDetails.setGameName(machineGame.getGameName());
+            MachineGameDetails gameDetails = new MachineGameDetails();
+            gameDetails.setId(machineGame.getId());
+            gameDetails.setActive(machineGame.getActive());
+            gameDetails.setGameVersion(machineGame.getGameVersion());
+            gameDetails.setGameName(machineGame.getGameName());
             machineGameDetails.add(gameDetails);
         }
         return machineGameDetails;

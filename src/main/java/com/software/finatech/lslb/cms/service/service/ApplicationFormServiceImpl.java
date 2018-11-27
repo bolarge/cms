@@ -54,6 +54,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
     private ScheduledMeetingService scheduledMeetingService;
     private InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService;
     private LicenseServiceImpl licenseService;
+    private InstitutionService institutionService;
 
     private static final String applicationAuditActionId = AuditActionReferenceData.APPLICATION_ID;
 
@@ -66,7 +67,8 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                                       AuditLogHelper auditLogHelper,
                                       ScheduledMeetingService scheduledMeetingService,
                                       InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService,
-                                      LicenseServiceImpl licenseService) {
+                                      LicenseServiceImpl licenseService,
+                                      InstitutionService institutionService) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.authInfoService = authInfoService;
         this.paymentRecordService = paymentRecordService;
@@ -76,6 +78,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         this.scheduledMeetingService = scheduledMeetingService;
         this.institutionOnboardingWorkflowService = institutionOnboardingWorkflowService;
         this.licenseService = licenseService;
+        this.institutionService = institutionService;
     }
 
     @Override
@@ -250,12 +253,6 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-
-            //save opeators shareholders and management details
-            Institution institution = applicationForm.getInstitution();
-            institution.setOperatorMemberDetails(applicantMemberDetails);
-            mongoRepositoryReactive.saveOrUpdate(institution);
-
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant members details", e);
@@ -526,8 +523,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             institutionOnboardingWorkflowService.updateWorkflowForApprovedApplicationForm(applicationForm);
             //send notifications
             applicationFormNotificationHelperAsync.sendApprovedMailToInstitutionAdmins(applicationForm);
-            //update institution memebrs to gamingOperatorRole
+            //update institution members to gamingOperatorRole
             authInfoService.updateInstitutionMembersToGamingOperatorRole(applicationForm.getInstitutionId());
+            institutionService.saveOperatorMembersDetailsToOperator(applicationForm);
             return Mono.just(new ResponseEntity<>("Application form approved successfully", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving application form", e);

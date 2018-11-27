@@ -345,7 +345,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             if (loggedCase.isOutcomeLicenseRevoked()) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_REVOKED_ID);
                 license.setLicenseChangeReason(reason);
-                loggedCaseMailSenderAsync.sendOutcomeMailToOffender(loggedCase);
+                loggedCaseMailSenderAsync.sendOutcomeNotificationToOffender(loggedCase);
             }
             if (loggedCase.isOutcomeLicenseSuspended()) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_SUSPENDED_ID);
@@ -355,7 +355,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             if (loggedCase.isOutcomeLicenseTerminated()) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_TERMINATED_ID);
                 license.setLicenseChangeReason(reason);
-                loggedCaseMailSenderAsync.sendOutcomeMailToOffender(loggedCase);
+                loggedCaseMailSenderAsync.sendOutcomeNotificationToOffender(loggedCase);
             }
             mongoRepositoryReactive.saveOrUpdate(license);
         }
@@ -383,6 +383,8 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
         newCase.setGamingTerminalId(caseCreateDto.getGamingTerminalId());
         newCase.setOtherCategoryName(caseCreateDto.getOtherCategoryName());
         newCase.setOtherTypeName(caseCreateDto.getOtherTypeName());
+        newCase.setCustomerComplaintId(caseCreateDto.getCustomerComplaintId());
+        newCase.setLoggedReportId(caseCreateDto.getLoggedReportId());
         return newCase;
     }
 

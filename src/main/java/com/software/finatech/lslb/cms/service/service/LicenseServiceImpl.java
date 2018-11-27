@@ -4,14 +4,17 @@ import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.AIPCheckDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
+import com.software.finatech.lslb.cms.service.dto.LicenseRequestDto;
 import com.software.finatech.lslb.cms.service.dto.NotificationDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
+import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.*;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.AIPMailSenderAsync;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.LoggedCaseMailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
@@ -63,7 +66,14 @@ public class LicenseServiceImpl implements LicenseService {
     private AuthInfoServiceImpl authInfoService;
 
     @Autowired
+    private InstitutionService institutionService;
+
+
+    @Autowired
     private FrontEndPropertyHelper frontEndPropertyHelper;
+
+    @Autowired
+    private LoggedCaseMailSenderAsync loggedCaseMailSenderAsync;
 
     @Override
     public Mono<ResponseEntity> findAllLicense(int page,
@@ -844,14 +854,17 @@ public class LicenseServiceImpl implements LicenseService {
             mongoRepositoryReactive.saveOrUpdate(license);
             String tradeName = applicationFormService.getApprovedApplicationTradeNameForOperator(paymentRecord.getInstitutionId(), paymentRecord.getGameTypeId());
             if (tradeName != null) {
-                InstitutionCategoryDetails institutionCategoryDetails = new InstitutionCategoryDetails();
-                institutionCategoryDetails.setId(UUID.randomUUID().toString());
-                institutionCategoryDetails.setInstitutionId(paymentRecord.getInstitutionId());
-                institutionCategoryDetails.setGameTypeId(gameType.getId());
+                InstitutionCategoryDetails institutionCategoryDetails = institutionService.findInstitutionCategoryDetailsByInstitutionIdAndGameTypeId(paymentRecord.getInstitutionId(), paymentRecord.getGameTypeId());
+                if (institutionCategoryDetails == null) {
+                    institutionCategoryDetails = new InstitutionCategoryDetails();
+                    institutionCategoryDetails.setId(UUID.randomUUID().toString());
+                    institutionCategoryDetails.setInstitutionId(paymentRecord.getInstitutionId());
+                    institutionCategoryDetails.setGameTypeId(gameType.getId());
+                    paymentInitiatingInstitution.getInstitutionCategoryDetailIds().add(institutionCategoryDetails.getId());
+                }
                 institutionCategoryDetails.setTradeName(tradeName);
                 institutionCategoryDetails.setFirstCommencementDate(LocalDate.now());
                 mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
-                paymentInitiatingInstitution.getInstitutionCategoryDetailIds().add(institutionCategoryDetails.getId());
                 mongoRepositoryReactive.saveOrUpdate(paymentInitiatingInstitution);
             }
 //           String verbiage = "Moved : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status to AIP";
@@ -1067,6 +1080,33 @@ public class LicenseServiceImpl implements LicenseService {
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
         queryForLicensedInstitutionInGameType.addCriteria(new Criteria().andOperator(Criteria.where("effectiveDate").lte(today), (Criteria.where("expiryDate").gte(today))));
         return (License) mongoRepositoryReactive.find(queryForLicensedInstitutionInGameType, License.class).block();
+    }
+
+    @Override
+    public Mono<ResponseEntity> licenseLicense(LicenseRequestDto licenseRequestDto, HttpServletRequest request) {
+        String licenseId = licenseRequestDto.getLicenseId();
+        try {
+            License license = findLicenseById(licenseId);
+            if (license == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Licence with id %s not found", licenseId), HttpStatus.BAD_REQUEST));
+            }
+
+            LicenseStatus oldLicenseStatus = license.getLicenseStatus();
+            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+            mongoRepositoryReactive.saveOrUpdate(license);
+
+            String licenseOwner = license.getOwnerName();
+            String verbiage = String.format("Re licenced , Owner -> %s,license Number -> %s , Category -> %s, Old Status  -> %s, New Status -> LICENSED",
+                    licenseOwner, license.getLicenseNumber(), license.getGameType(), oldLicenseStatus);
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LICENCE_ID, "System Admin",
+                    String.valueOf(license.getOwnerName()), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            //send email to owner
+            loggedCaseMailSenderAsync.sendRelicenseMailToLicense(license, oldLicenseStatus);
+            return Mono.just(new ResponseEntity<>(license.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while licencing license", e);
+        }
     }
 
     private LocalDate getNewLicenseEndDate(License latestLicense, GameType gameType) throws Exception {

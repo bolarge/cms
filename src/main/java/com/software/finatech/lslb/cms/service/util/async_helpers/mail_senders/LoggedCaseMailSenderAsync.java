@@ -1,9 +1,7 @@
 package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 
-import com.software.finatech.lslb.cms.service.domain.Agent;
-import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.domain.LoggedCase;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -89,6 +87,27 @@ public class LoggedCaseMailSenderAsync extends AbstractMailSender {
         }
     }
 
+    @Async
+    public void sendRelicenseMailToLicense(License license, LicenseStatus oldStatus) {
+        String content = buildRelicensedMailContent(license, oldStatus);
+        String mailSubject = String.format("Notification on your %s licence", license.getGameType());
+        if (license.isGamingTerminalLicense() || license.isAgentLicense()) {
+            Agent agent = license.getAgent();
+            emailService.sendEmail(content, mailSubject, agent.getEmailAddress());
+        }
+
+        if (license.isGamingMachineLicense() || license.isInstitutionLicense()) {
+            ArrayList<AuthInfo> operatorAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(license.getInstitutionId());
+            for (AuthInfo operatorAdmin : operatorAdmins) {
+                String email = operatorAdmin.getEmailAddress();
+                try {
+                    emailService.sendEmail(content, mailSubject, email);
+                } catch (Exception e) {
+                    logger.error("Error occurred while sending mail to {}", email, e);
+                }
+            }
+        }
+    }
 
     private String buildPenaltyMailContent(LoggedCase loggedCase) {
         String presentDateString = DateTime.now().toString("dd-MM-yyyy");
@@ -108,5 +127,58 @@ public class LoggedCaseMailSenderAsync extends AbstractMailSender {
         model.put("gameType", String.valueOf(loggedCase.getGameType()));
         model.put("outcome", outcome);
         return mailContentBuilderService.build(model, "logged-cases/CaseLicenseOutcome");
+    }
+
+    private String buildRelicensedMailContent(License license, LicenseStatus oldStatus) {
+        String presentDateString = DateTime.now().toString("dd-MM-yyyy");
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("date", presentDateString);
+        model.put("gameType", String.valueOf(license.getGameType()));
+        model.put("licenseNumber", license.getLicenseNumber());
+        model.put("oldStatus", String.valueOf(oldStatus));
+        model.put("newStatus", String.valueOf(license.getLicenseStatus()));
+        return mailContentBuilderService.build(model, "logged-cases/Relicense");
+    }
+
+    @Async
+    public void sendOutcomeNotificationToOffender(LoggedCase loggedCase) {
+        String mailSubject = String.format("Notification on your %s licence", loggedCase.getGameType());
+        String mailContent;
+        if (loggedCase.isOutcomeLicenseSuspended()) {
+            mailContent = buildLicenseOutcomeMailContent(loggedCase, "logged-cases/CaseLicenseOutcomeSuspension");
+        } else if (loggedCase.isOutcomeLicenseTerminated()) {
+            mailContent = buildLicenseOutcomeMailContent(loggedCase, "logged-cases/CaseLicenseOutcomeTermination");
+        } else if (loggedCase.isOutcomePenalty()) {
+            mailContent = buildLicenseOutcomeMailContent(loggedCase, "logged-cases/CaseLicensePenalty");
+        } else {
+            mailContent = buildLicenseOutcomeMailContent(loggedCase, "logged-cases/CaseLicenseOutcome");
+        }
+
+        if (loggedCase.isLoggedAgainstGamingTerminal() || loggedCase.isLoggedAgainstAgent()) {
+            Agent agent = loggedCase.getAgent();
+            emailService.sendEmail(mailContent, mailSubject, agent.getEmailAddress());
+        }
+
+        if (loggedCase.isLoggedAgainstGamingMachine() || loggedCase.isLoggedAgainstInstitution()) {
+            ArrayList<AuthInfo> operatorAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(loggedCase.getInstitutionId());
+            for (AuthInfo operatorAdmin : operatorAdmins) {
+                String email = operatorAdmin.getEmailAddress();
+                try {
+                    emailService.sendEmail(mailContent, mailSubject, email);
+                } catch (Exception e) {
+                    logger.error("Error occurred while sending mail to {}", email, e);
+                }
+            }
+        }
+    }
+
+    private String buildLicenseOutcomeMailContent(LoggedCase loggedCase, String templateName) {
+        String presentDateString = DateTime.now().toString("dd-MM-yyyy");
+        String outcomeString = String.valueOf(loggedCase.getLoggedCaseOutcome(loggedCase.getLoggedCaseOutcomeId())).replaceAll("LICENCE", "");
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("date", presentDateString);
+        model.put("gameType", String.valueOf(loggedCase.getGameType()));
+        model.put("outcome", outcomeString);
+        return mailContentBuilderService.build(model, templateName);
     }
 }

@@ -4,7 +4,6 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionCategoryDetailsDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
-import com.software.finatech.lslb.cms.service.model.applicantMembers.OperatorMemberDetails;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.Transient;
@@ -25,28 +24,36 @@ public class Institution extends AbstractFact {
     protected String vgPayCustomerCode;
     protected String website;
     private String tradeName;
-    private List<String> institutionCategoryDetailIds = new ArrayList<>();
+    private Set<String> institutionCategoryDetailIds = new HashSet<>();
     protected Set<String> gameTypeIds = new HashSet<>();
-    private OperatorMemberDetails operatorMemberDetails;
+    private Set<String> directorsNames = new HashSet<>();
+    private Set<String> shareHolderNames = new HashSet<>();
 
+    public Set<String> getShareHolderNames() {
+        return shareHolderNames;
+    }
 
-    public List<String> getInstitutionCategoryDetailIds() {
+    public void setShareHolderNames(Set<String> shareHolderNames) {
+        this.shareHolderNames = shareHolderNames;
+    }
+
+    public Set<String> getDirectorsNames() {
+        return directorsNames;
+    }
+
+    public void setDirectorsNames(Set<String> directorsNames) {
+        this.directorsNames = directorsNames;
+    }
+
+    public Set<String> getInstitutionCategoryDetailIds() {
         return institutionCategoryDetailIds;
     }
 
-    public OperatorMemberDetails getOperatorMemberDetails() {
-        return operatorMemberDetails;
-    }
-
-    public void setOperatorMemberDetails(OperatorMemberDetails operatorMemberDetails) {
-        this.operatorMemberDetails = operatorMemberDetails;
-    }
-
-    public void setInstitutionCategoryDetailIds(List<String> institutionCategoryDetailIds) {
+    public void setInstitutionCategoryDetailIds(Set<String> institutionCategoryDetailIds) {
         this.institutionCategoryDetailIds = institutionCategoryDetailIds;
     }
 
-    public String getTradeName() {
+    String getTradeName() {
         return tradeName;
     }
 
@@ -149,13 +156,19 @@ public class Institution extends AbstractFact {
         institutionDto.setId(getId());
         institutionDto.setEmailAddress(getEmailAddress());
         institutionDto.setPhoneNumber(getPhoneNumber());
-        institutionDto.setTenantId(getTenantId());
         institutionDto.setInstitutionName(getInstitutionName());
         institutionDto.setDescription(getDescription());
         institutionDto.setActive(getActive());
-        institutionDto.setInstitutionCategoryDetails(getInstitutionCategoryDetailsList());
         institutionDto.setGameTypes(getGameTypeDtos());
         return institutionDto;
+    }
+
+    public InstitutionDto convertToFullDto() {
+        InstitutionDto dto = convertToDto();
+        dto.setInstitutionCategoryDetails(getInstitutionCategoryDetailsList());
+        dto.setDirectorsNames(getDirectorsNames());
+        dto.setShareHolderNames(getShareHolderNames());
+        return dto;
     }
 
 

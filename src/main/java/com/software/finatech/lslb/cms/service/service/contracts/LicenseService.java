@@ -3,9 +3,11 @@ package com.software.finatech.lslb.cms.service.service.contracts;
 import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
+import com.software.finatech.lslb.cms.service.dto.LicenseRequestDto;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
@@ -75,4 +77,6 @@ public interface LicenseService {
     License findLicenseById(String id);
 
     License findInstitutionActiveLicenseInGameType(String institutionId, String gameTypeId);
+
+    Mono<ResponseEntity> licenseLicense(LicenseRequestDto licenseRequestDto, HttpServletRequest request);
 }
