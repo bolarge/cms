@@ -126,13 +126,18 @@ public class DashboardController extends BaseController {
 
             if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.OPEN_ID)){
                 casesDashboardStatusCountDto.setOpenedCount(result==null?0:result.getLoggedStatusCount());
+                casesDashboardStatusCountDto.setOpenedStatusId(LoggedCaseStatusReferenceData.OPEN_ID);
             }
             if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.CLOSED_ID)){
                 casesDashboardStatusCountDto.setClosedCount(result==null?0:result.getLoggedStatusCount());
+                casesDashboardStatusCountDto.setClosedStatusId(LoggedCaseStatusReferenceData.CLOSED_ID);
+
             }
 
             if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.PENDING_ID)){
                 casesDashboardStatusCountDto.setPendingCount(result==null?0:result.getLoggedStatusCount());
+                casesDashboardStatusCountDto.setPendingStatusId(LoggedCaseStatusReferenceData.PENDING_ID);
+
             }
 
         });
@@ -639,15 +644,19 @@ public class DashboardController extends BaseController {
 
         dashboardLoggedCaseStatusDtos.stream().forEach(result->{
 
+
             if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.OPEN_ID)){
                 casesDashboardStatusCountDto.setOpenedCount(result==null?0:result.getLoggedStatusCount());
+                casesDashboardStatusCountDto.setOpenedStatusId(LoggedCaseStatusReferenceData.OPEN_ID);
             }
             if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.CLOSED_ID)){
                 casesDashboardStatusCountDto.setClosedCount(result==null?0:result.getLoggedStatusCount());
+                casesDashboardStatusCountDto.setClosedStatusId(LoggedCaseStatusReferenceData.CLOSED_ID);
             }
 
-            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.OPEN_ID)){
+            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.PENDING_ID)){
                 casesDashboardStatusCountDto.setPendingCount(result==null?0:result.getLoggedStatusCount());
+                casesDashboardStatusCountDto.setPendingStatusId(LoggedCaseStatusReferenceData.PENDING_ID);
             }
 
         });
