@@ -18,6 +18,34 @@ public class GameTypeUpdateDto {
     protected int agentLicenseDurationMonths;
     @Min(value = 0, message = "Please enter Gaming Machine License Duration in months")
     protected int gamingMachineLicenseDurationMonths;
+    private Boolean allowsGamingTerminal;
+    private Boolean allowsGamingMachine;
+    @Min(value = 0, message = "Please enter Gaming Machine License Duration in months")
+    private int gamingTerminalLicenseDurationMonths;
+
+    public int getGamingTerminalLicenseDurationMonths() {
+        return gamingTerminalLicenseDurationMonths;
+    }
+
+    public void setGamingTerminalLicenseDurationMonths(int gamingTerminalLicenseDurationMonths) {
+        this.gamingTerminalLicenseDurationMonths = gamingTerminalLicenseDurationMonths;
+    }
+
+    public Boolean getAllowsGamingMachine() {
+        return allowsGamingMachine;
+    }
+
+    public void setAllowsGamingMachine(Boolean allowsGamingMachine) {
+        this.allowsGamingMachine = allowsGamingMachine;
+    }
+
+    public Boolean getAllowsGamingTerminal() {
+        return allowsGamingTerminal;
+    }
+
+    public void setAllowsGamingTerminal(Boolean allowsGamingTerminal) {
+        this.allowsGamingTerminal = allowsGamingTerminal;
+    }
 
     public String getId() {
         return id;

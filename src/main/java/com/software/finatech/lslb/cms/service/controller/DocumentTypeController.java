@@ -209,4 +209,37 @@ public class DocumentTypeController extends BaseController {
             return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while setting document approver id", e);
         }
     }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/remove-approver/{id}")
+    @ApiOperation(value = "Remove Approver From Document Type", response = DocumentApprovalRequestDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> removeApprover(@RequestBody RemoveDocumentTypeApproverRequest removeDocumentTypeApproverRequest) {
+        try {
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
+            String documentTypeId = removeDocumentTypeApproverRequest.getDocumentTypeId();
+            DocumentType documentType = (DocumentType) mongoRepositoryReactive.findById(documentTypeId, DocumentType.class).block();
+            if (documentType == null) {
+                return Mono.just(new ResponseEntity<>("Document Type does not exist", HttpStatus.BAD_REQUEST));
+            }
+            DocumentApprovalRequest approvalRequest = new DocumentApprovalRequest();
+            approvalRequest.setId(UUID.randomUUID().toString());
+            approvalRequest.setDocumentApprovalRequestTypeId(DocumentApprovalRequestTypeReferenceData.REMOVE_APPROVER_ID);
+            approvalRequest.setDocumentTypeId(documentType.getId());
+            approvalRequest.setInitiatorId(loggedInUser.getId());
+            approvalRequest.setInitiatorAuthRoleId(loggedInUser.getAuthRoleId());
+            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+            approvalRequestNotifierAsync.sendNewDocumentApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, approvalRequest);
+            return Mono.just(new ResponseEntity<>(approvalRequest.convertToHalfDto(), HttpStatus.OK));
+
+        } catch (Exception e) {
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while setting document approver id", e);
+        }
+    }
 }

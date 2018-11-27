@@ -166,4 +166,8 @@ public class DocumentApprovalRequest extends AbstractApprovalRequest {
     public boolean isSetApprover() {
         return StringUtils.equals(DocumentApprovalRequestTypeReferenceData.SET_APPROVER_ID, this.documentApprovalRequestTypeId);
     }
+
+    public boolean isRemoveApprover() {
+        return StringUtils.equals(DocumentApprovalRequestTypeReferenceData.REMOVE_APPROVER_ID, this.documentApprovalRequestTypeId);
+    }
 }

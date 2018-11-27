@@ -9,6 +9,15 @@ public class GameTypeDto extends EnumeratedFactDto {
     protected String shortCode;
     protected Boolean allowsGamingMachine;
     protected Boolean allowsGamingTerminal;
+    private String gamingTerminalLicenseDuration;
+
+    public String getGamingTerminalLicenseDuration() {
+        return gamingTerminalLicenseDuration;
+    }
+
+    public void setGamingTerminalLicenseDuration(String gamingTerminalLicenseDuration) {
+        this.gamingTerminalLicenseDuration = gamingTerminalLicenseDuration;
+    }
 
     public Boolean getAllowsGamingTerminal() {
         return allowsGamingTerminal;

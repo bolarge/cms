@@ -168,6 +168,8 @@ public class GameTypeServiceImpl implements GameTypeService {
         gameType.setName(gameTypeCreateDto.getName());
         gameType.setDescription(gameTypeCreateDto.getDescription());
         gameType.setAllowsGamingMachine(gameTypeCreateDto.getAllowsGamingMachine());
+        gameType.setAllowsGamingTerminal(gameTypeCreateDto.getAllowsGamingTerminal());
+        gameType.setGamingTerminalLicenseDurationMonths(gameTypeCreateDto.getGamingTerminalLicenseDurationMonths());
         return gameType;
     }
 
@@ -178,8 +180,11 @@ public class GameTypeServiceImpl implements GameTypeService {
         if (gameTypeWithName != null) {
             return Mono.just(new ResponseEntity<>(String.format("Category with name %s already exist", name), HttpStatus.BAD_REQUEST));
         }
-        if (gameTypeCreateDto.getAllowsGamingMachine() && (gameTypeCreateDto.getGamingMachineLicenseDurationMonths() == null || gameTypeCreateDto.getGamingMachineLicenseDurationMonths() <= 0)) {
+        if (gameTypeCreateDto.getAllowsGamingMachine() && (gameTypeCreateDto.getGamingMachineLicenseDurationMonths() <= 0)) {
             return Mono.just(new ResponseEntity<>("Gaming Machine licence duration should be at least one month", HttpStatus.BAD_REQUEST));
+        }
+        if (gameTypeCreateDto.getAllowsGamingTerminal() && (gameTypeCreateDto.getGamingTerminalLicenseDurationMonths() <= 0)) {
+            return Mono.just(new ResponseEntity<>("Gaming Terminal licence duration should be at least one month", HttpStatus.BAD_REQUEST));
         }
         return null;
     }

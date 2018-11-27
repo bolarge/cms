@@ -7,10 +7,12 @@ public class DocumentApprovalRequestTypeReferenceData {
 
     public static final String CREATE_DOCUMENT_TYPE_ID = "1";
     public static final String SET_APPROVER_ID = "2";
+    public static final String REMOVE_APPROVER_ID = "3";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         loadForIdNameAndDesc(CREATE_DOCUMENT_TYPE_ID, mongoRepositoryReactive, "CREATE DOCUMENT TYPE", "Create a new document type , with an approver set");
         loadForIdNameAndDesc(SET_APPROVER_ID, mongoRepositoryReactive, "SET APPROVER", null);
+        loadForIdNameAndDesc(REMOVE_APPROVER_ID, mongoRepositoryReactive, "REMOVE APPROVER", null);
     }
 
     private static void loadForIdNameAndDesc(String id, MongoRepositoryReactiveImpl mongoRepositoryReactive, String name, String description) {

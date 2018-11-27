@@ -11,9 +11,34 @@ public class GameType extends EnumeratedFact {
     protected int institutionLicenseDurationMonths;
     protected int agentLicenseDurationMonths;
     protected int gamingMachineLicenseDurationMonths;
+    protected int gamingTerminalLicenseDurationMonths;
     protected String shortCode;
     protected boolean allowsGamingTerminal;
     protected boolean allowsGamingMachine;
+
+    public int getGamingTerminalLicenseDurationMonths() {
+        return gamingTerminalLicenseDurationMonths;
+    }
+
+    public void setGamingTerminalLicenseDurationMonths(int gamingTerminalLicenseDurationMonths) {
+        this.gamingTerminalLicenseDurationMonths = gamingTerminalLicenseDurationMonths;
+    }
+
+    public boolean isAllowsGamingTerminal() {
+        return allowsGamingTerminal;
+    }
+
+    public void setAllowsGamingTerminal(boolean allowsGamingTerminal) {
+        this.allowsGamingTerminal = allowsGamingTerminal;
+    }
+
+    public boolean isAllowsGamingMachine() {
+        return allowsGamingMachine;
+    }
+
+    public void setAllowsGamingMachine(boolean allowsGamingMachine) {
+        this.allowsGamingMachine = allowsGamingMachine;
+    }
 
     public Boolean getAllowsGamingTerminal() {
         return allowsGamingTerminal;
@@ -83,6 +108,7 @@ public class GameType extends EnumeratedFact {
         gameType.setShortCode(getShortCode());
         gameType.setAllowsGamingMachine(getAllowsGamingMachine());
         gameType.setAllowsGamingTerminal(getAllowsGamingTerminal());
+        gameType.setGamingTerminalLicenseDuration(String.valueOf(getGamingTerminalLicenseDurationMonths()));
         return gameType;
     }
 

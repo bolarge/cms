@@ -17,17 +17,18 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 public class ExistingOperatorLoader {
+    private static final Logger logger = LoggerFactory.getLogger(ExistingOperatorLoader.class);
     @Autowired
     private GameTypeService gameTypeService;
     @Autowired
@@ -47,44 +48,46 @@ public class ExistingOperatorLoader {
             for (int i = 2; i < rows.length; i++) {
                 // String[] columns = rows[i].split(",");
                 String[] columns = rows[i].split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
-                if (columns.length < 11) {
+                if (columns.length < 15) {
                     throw new LicenseServiceException("File is less than 11 columns");
                 } else {
                     try {
-                        String institutionName = columns[1];
+                        String institutionName = columns[3];
                         if (!StringUtils.isEmpty(institutionName)) {
                             InstitutionUpload institutionUpload = institutionUploadMap.get(institutionName);
                             if (institutionUpload == null) {
                                 institutionUpload = new InstitutionUpload();
                                 institutionUpload.setLine(rows[i]);
                                 institutionUpload.setInstitutionName(institutionName);
-                                institutionUpload.setDescription(columns[3]);
-                                institutionUpload.setEmailAddress(columns[5]);
-                                institutionUpload.setPhoneNumber(columns[6]);
-                                String address = columns[7].replace("\"", "").replace("?", "");
+                                institutionUpload.setDescription(columns[5]);
+                                institutionUpload.setEmailAddress(columns[8]);
+                                institutionUpload.setPhoneNumber(columns[9]);
+                                String address = columns[10].replace("\"", "").replace("?", "");
                                 institutionUpload.setAddress(address);
                             }
-                            String gameTypeSearchKey = columns[4];
+                            String gameTypeSearchKey = columns[6];
                             GameType gameType = gameTypeService.findGameTypeBySearchKey(gameTypeSearchKey);
                             if (gameType == null) {
                                 throw new LicenseServiceException(String.format("Game type with search key %s not found", gameTypeSearchKey));
                             }
                             InstitutionLoadDetails loadDetails = new InstitutionLoadDetails();
 
-                            if (!StringUtils.isEmpty(columns[8])) {
-                                LocalDate licenseStartDate = dateTimeFormat.parseLocalDate(columns[8]);
+                            if (!StringUtils.isEmpty(columns[11])) {
+                                LocalDate licenseStartDate = dateTimeFormat.parseLocalDate(columns[11]);
                                 loadDetails.setLicenseStartDate(licenseStartDate);
                             }
-                            if (!StringUtils.isEmpty(columns[9])) {
-                                LocalDate licenseEndDate = dateTimeFormat.parseLocalDate(columns[9]);
+                            if (!StringUtils.isEmpty(columns[12])) {
+                                LocalDate licenseEndDate = dateTimeFormat.parseLocalDate(columns[12]);
                                 loadDetails.setLicenseEndDate(licenseEndDate);
                             }
-                            if (!StringUtils.isEmpty(columns[10])) {
-                                LocalDate licenseFirstDate = dateTimeFormat.parseLocalDate(columns[10]);
+                            if (!StringUtils.isEmpty(columns[13])) {
+                                LocalDate licenseFirstDate = dateTimeFormat.parseLocalDate(columns[13]);
                                 loadDetails.setFirstCommencementDate(licenseFirstDate);
                             }
                             loadDetails.setGameTypeId(gameType.getId());
-                            loadDetails.setTradeName(columns[2]);
+                            loadDetails.setTradeName(columns[4]);
+                            loadDetails.setDirector(columns[7]);
+                            loadDetails.setStatus(columns[14]);
                             institutionUpload.getInstitutionLoadDetails().add(loadDetails);
                             institutionUploadMap.put(institutionName, institutionUpload);
                         }
@@ -117,6 +120,9 @@ public class ExistingOperatorLoader {
                 institutionCategoryDetails.setFirstCommencementDate(institutionLoadDetails.getFirstCommencementDate());
                 institutionCategoryDetails.setGameTypeId(institutionLoadDetails.getGameTypeId());
                 institutionCategoryDetails.setTradeName(institutionLoadDetails.getTradeName());
+                Set<String> directorNames = directorNamesFromString(institutionLoadDetails.getDirector());
+                institutionCategoryDetails.getDirectorsNames().addAll(directorNames);
+                pendingInstitution.getDirectorsNames().addAll(directorNames);
                 institutionCategoryDetails.setInstitutionId(pendingInstitution.getId());
                 pendingInstitution.getGameTypeIds().add(institutionLoadDetails.getGameTypeId());
                 mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
@@ -129,12 +135,49 @@ public class ExistingOperatorLoader {
                 pendingLicense.setExpiryDate(institutionLoadDetails.getLicenseEndDate());
                 pendingLicense.setGameTypeId(institutionLoadDetails.getGameTypeId());
                 pendingLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
-                pendingLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+                String licenseStatusId = findLicenseStatusIdByKey(institutionLoadDetails.getStatus());
+                if (licenseStatusId == null) {
+                    logger.info("{} has no license status ", pendingInstitution);
+                }
+                pendingLicense.setLicenseStatusId(licenseStatusId);
+                //    pendingLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
                 pendingLicense.setLicenseNumber(generateLicenseNumber(institutionLoadDetails.getGameTypeId()));
                 mongoRepositoryReactive.saveOrUpdate(pendingLicense);
             }
             mongoRepositoryReactive.saveOrUpdate(pendingInstitution);
         }
+    }
+
+    private Set<String> directorNamesFromString(String director) {
+        Set<String> directorNames = new HashSet<>();
+        String[] names = director.split(" {3}");
+        for (String name : names) {
+            if (!StringUtils.isEmpty(name)) {
+                directorNames.add(name.trim());
+            }
+        }
+        return directorNames;
+    }
+
+
+    private String findLicenseStatusIdByKey(String key) {
+
+        if (StringUtils.equalsIgnoreCase("Licenced", key)) {
+            return LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID;
+        }
+        if (StringUtils.equalsIgnoreCase("AIP", key)) {
+            return LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID;
+        }
+        if (StringUtils.equalsIgnoreCase("Voluntary Suspension", key)) {
+            return LicenseStatusReferenceData.LICENSE_SUSPENDED_ID;
+        }
+        if (StringUtils.equalsIgnoreCase("Suspension", key)) {
+            return LicenseStatusReferenceData.LICENSE_SUSPENDED_ID;
+        }
+        if (StringUtils.equalsIgnoreCase("Licence Expired", key)) {
+            return LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID;
+        }
+        return null;
     }
 
     private String generateLicenseNumber(String gameTypeId) {
