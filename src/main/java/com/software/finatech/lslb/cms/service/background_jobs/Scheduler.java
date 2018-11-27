@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.background_jobs;
 
 import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.dto.DocumentSummaryDto;
 import com.software.finatech.lslb.cms.service.dto.NotificationDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
@@ -18,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -43,7 +46,8 @@ public class Scheduler {
     @Autowired
     SendEmail sendEmail;
 
-
+    @Autowired
+    protected MongoTemplate mongoTemplate;
     @Autowired
     private AuthInfoServiceImpl authInfoService;
 
@@ -381,6 +385,7 @@ public class Scheduler {
                 Query queryPayment= new Query();
                 queryPayment.addCriteria(Criteria.where("agentId").is(agent.getId()));
                 queryPayment.addCriteria(Criteria.where("paymentStatusId").is(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID));
+               try{
                 List<PaymentRecord> agentPaymentRecord=(List<PaymentRecord>)mongoRepositoryReactive.findAll(queryPayment,PaymentRecord.class).toStream().collect(Collectors.toList());
                 if(agentPaymentRecord.size()==0){
                     agent.setInactive(false);
@@ -393,6 +398,9 @@ public class Scheduler {
                     notificationDto.setAgentEmailAddress(agent.getEmailAddress());
                     sendEmail.sendEmailDeactivationNotification(notificationDto);
                 }
+            }catch (Exception ex){
+                   logger.info(ex.getMessage());
+               }
             }
 
 
@@ -400,11 +408,25 @@ public class Scheduler {
         });
 
     }
-    @Scheduled(cron = "0 0 6 * * *")
+    //@TODO fix pending document approval email
+   @Scheduled(fixedRate = 5*60*1000)
     public void sendReminderEmail(){
-        Query queryDoc= new Query();
-        queryDoc.addCriteria(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID));
-        List<Document>documents = (List<Document>) mongoRepositoryReactive.findAll(queryDoc, Document.class).toStream().collect(Collectors.toList());
+//        Aggregation documentAgg = Aggregation.newAggregation(
+//                Aggregation.match(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID)),
+//             Aggregation.project("id","documentTypeId","nextReminderDate","approvalRequestStatusId"),
+//                Aggregation.group("documentTypeId")
+//        );
+
+       Query query= new Query();
+       query.addCriteria(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID));
+       query.fields().include("approvalRequestStatusId");
+       //query.fields().include("domain");
+       //query.fields().include("count");
+       try{
+       ArrayList<Document> documents = (ArrayList<Document>)mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
+
+       // List<DocumentSummaryDto> results = mongoTemplate.aggregate(documentAgg, Document.class, DocumentSummaryDto.class).getMappedResults();
+
         for (Document document: documents) {
             boolean sentEmail=false;
             if(document.getNextReminderDate()==null){
@@ -415,16 +437,21 @@ public class Scheduler {
                 }
             }
             if(sentEmail==true) {
-                AuthInfo approverAuthInfo = document.getDocumentType().getApprover();
+                DocumentType documentType=(DocumentType)mongoRepositoryReactive.findById(document.getDocumentTypeId(), DocumentType.class).block();
+               if(documentType!=null){
+                AuthInfo approverAuthInfo = documentType.getApprover();
                 NotificationDto notificationDto = new NotificationDto();
-                notificationDto.setDescription("You have " + document.getDocumentType().getName() + " documents pending your approval ");
+                notificationDto.setDescription("You have " + documentType.getName() + " documents pending your approval ");
                 notificationDto.setLslbApprovalEmailAddress(approverAuthInfo.getEmailAddress());
                 sendEmail.sendPendingDocumentEmailNotification(notificationDto, "Pending Document Approval");
               document.setNextReminderDate(LocalDate.now().plusDays(3));
-              mongoRepositoryReactive.saveOrUpdate(document);
+             // mongoRepositoryReactive.saveOrUpdate(document);
+            }
             }
 
-        }
+        }}catch(Exception ex){
+           logger.info(ex.getMessage());
+       }
 
 
     }

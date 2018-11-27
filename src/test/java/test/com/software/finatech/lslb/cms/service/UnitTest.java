@@ -1,37 +1,37 @@
-//package test.com.software.finatech.lslb.cms.service;
-//
-//import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-//import com.software.finatech.lslb.cms.service.domain.FactObject;
-//import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-//import com.software.finatech.lslb.cms.service.util.DatabaseLoaderUtils;
-//import com.software.finatech.lslb.cms.service.util.GlobalApplicationContext;
-//import io.advantageous.boon.json.JsonFactory;
-//import io.advantageous.boon.json.ObjectMapper;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.web.client.TestRestTemplate;
-//import org.springframework.boot.web.server.LocalServerPort;
-//import org.springframework.context.ApplicationContext;
-//import org.springframework.data.mongodb.core.MongoTemplate;
-//import org.springframework.data.mongodb.core.query.Criteria;
-//import org.springframework.data.mongodb.core.query.Query;
-//import org.springframework.http.*;
-//import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-//import org.testng.annotations.*;
-//
-//import java.util.ArrayList;
-//import java.util.stream.Collectors;
-//
-//import static org.hamcrest.MatcherAssert.assertThat;
-//import static org.hamcrest.Matchers.hasSize;
-//import static org.testng.Assert.assertNotNull;
-//import static org.testng.AssertJUnit.assertNull;
-//
-////@ComponentScan("com.software.finatech.lslb")
-////@Configuration
-////@EnableAutoConfiguration
-////@ActiveProfiles("unittest")
-////@Test(suiteName="IntegrationTestConfigurations",priority=1,dependsOnGroups = {})
-////@SpringBootTest(classes = {MongoRepositoryReactiveImpl.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+package test.com.software.finatech.lslb.cms.service;
+
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.FactObject;
+import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.util.DatabaseLoaderUtils;
+import com.software.finatech.lslb.cms.service.util.GlobalApplicationContext;
+import io.advantageous.boon.json.JsonFactory;
+import io.advantageous.boon.json.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.context.ApplicationContext;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.http.*;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.*;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertNull;
+
+//@ComponentScan("com.software.finatech.lslb")
+//@Configuration
+//@EnableAutoConfiguration
+//@ActiveProfiles("unittest")
+//@Test(suiteName="IntegrationTestConfigurations",priority=1,dependsOnGroups = {})
+//@SpringBootTest(classes = {MongoRepositoryReactiveImpl.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 //public class UnitTest  extends AbstractTestNGSpringContextTests {
 //    protected ObjectMapper mapper;
 //    protected com.fasterxml.jackson.databind.ObjectMapper mapperJackson;

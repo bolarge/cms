@@ -3,7 +3,7 @@
 <suite name="UnitSuite" parallel="false">
     <test name="UnitTest">
         <classes>
-            <class name="test.com.software.finatech.lslb.cms.service.UnitTest" />
+           <!-- <class name="test.com.software.finatech.lslb.cms.service.UnitTest" />-->
         </classes>
     </test>
 </suite>

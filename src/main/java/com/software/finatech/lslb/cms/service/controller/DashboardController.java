@@ -163,6 +163,7 @@ public class DashboardController extends BaseController {
             queryMachine.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
             queryTerminal.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
             queryAgentTotalCount.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
+            queryCasesTotalCount.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
         }if(!StringUtils.isEmpty(institutionId)){
             query.addCriteria(Criteria.where("id").is(institutionId));
             queryMachine.addCriteria(Criteria.where("institutionId").is(institutionId));
@@ -375,15 +376,20 @@ public class DashboardController extends BaseController {
                     statusCountValue.stream().forEach(statusCount->{
                         if(statusCount.getMachineStatusId().equals(MachineStatusReferenceData.ACTIVE_ID)){
                             dashboardMachineStatusCountDto.setActiveCount(statusCount.getMachineStatusCount());
+                            dashboardMachineStatusCountDto.setActiveStatusId(MachineStatusReferenceData.ACTIVE_ID);
 
                         }if(statusCount.getMachineStatusId().equals(MachineStatusReferenceData.IN_ACTIVE_ID)){
                             dashboardMachineStatusCountDto.setInactiveCount(statusCount.getMachineStatusCount());
+                            dashboardMachineStatusCountDto.setInactiveStatusId(MachineStatusReferenceData.IN_ACTIVE_ID);
 
                         }if(statusCount.getMachineStatusId().equals(MachineStatusReferenceData.FAULTY_ID)){
-                            dashboardMachineStatusCountDto.setStolenCount(statusCount.getMachineStatusCount());
+                            dashboardMachineStatusCountDto.setFaultyCount(statusCount.getMachineStatusCount());
+                            dashboardMachineStatusCountDto.setFaultyStatusId(MachineStatusReferenceData.FAULTY_ID);
 
                         }if(statusCount.getMachineStatusId().equals(MachineStatusReferenceData.STOLEN_ID)){
-                            dashboardMachineStatusCountDto.setFaultyCount(statusCount.getMachineStatusCount());
+                            dashboardMachineStatusCountDto.setStolenCount(statusCount.getMachineStatusCount());
+                            dashboardMachineStatusCountDto.setStolenStatusId(MachineStatusReferenceData.STOLEN_ID);
+
                         }
                     });
 
@@ -428,11 +434,15 @@ public class DashboardController extends BaseController {
               statusCountValue.stream().forEach(statusCount->{
                   if(statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.ACTIVE_ID)){
                       dashboardAgentStatusCountDto.setActiveCount(statusCount.getAgentStatusCount());
+                      dashboardAgentStatusCountDto.setActiveStatusId(AgentStatusReferenceData.ACTIVE_ID);
                   } if(statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.IN_ACTIVE_ID)){
                       dashboardAgentStatusCountDto.setInactiveCount(statusCount.getAgentStatusCount());
+                      dashboardAgentStatusCountDto.setInactiveStatusId(AgentStatusReferenceData.IN_ACTIVE_ID);
 
                   } if(statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.BLACK_LISTED_ID)){
                       dashboardAgentStatusCountDto.setBlackListCount(statusCount.getAgentStatusCount());
+                      dashboardAgentStatusCountDto.setBlackListStatusId(AgentStatusReferenceData.BLACK_LISTED_ID);
+
                   }
 
               });
@@ -574,13 +584,16 @@ public class DashboardController extends BaseController {
 
             if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.OPEN_ID)){
                 casesDashboardStatusCountDto.setOpenedCount(result==null?0:result.getLoggedStatusCount());
+                casesDashboardStatusCountDto.setOpenedStatusId(LoggedCaseStatusReferenceData.OPEN_ID);
             }
             if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.CLOSED_ID)){
                 casesDashboardStatusCountDto.setClosedCount(result==null?0:result.getLoggedStatusCount());
+                casesDashboardStatusCountDto.setClosedStatusId(LoggedCaseStatusReferenceData.CLOSED_ID);
             }
 
-            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.OPEN_ID)){
+            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.PENDING_ID)){
                 casesDashboardStatusCountDto.setPendingCount(result==null?0:result.getLoggedStatusCount());
+                casesDashboardStatusCountDto.setPendingStatusId(LoggedCaseStatusReferenceData.PENDING_ID);
             }
 
         });
