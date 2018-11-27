@@ -86,12 +86,9 @@ public class GameTypeController extends BaseController {
     }
     )
     public Mono<ResponseEntity> updateGameType(@RequestBody @Valid GameTypeUpdateDto gameTypeUpdateDto) {
-
         GameType gameType = (GameType) mongoRepositoryReactive.findById(gameTypeUpdateDto.getId(), GameType.class).block();
         if (gameType == null) {
-
             return Mono.just(new ResponseEntity<>("Invalid GameType Selected", HttpStatus.BAD_REQUEST));
-
         }
         gameType.setAipDurationMonths(gameTypeUpdateDto.getAipDurationMonths());
         gameType.setInstitutionLicenseDurationMonths(gameTypeUpdateDto.getLicenseDuration());
@@ -99,6 +96,9 @@ public class GameTypeController extends BaseController {
         gameType.setDescription(gameTypeUpdateDto.getDescription());
         gameType.setAgentLicenseDurationMonths(gameTypeUpdateDto.getAgentLicenseDurationMonths());
         gameType.setGamingMachineLicenseDurationMonths(gameTypeUpdateDto.getGamingMachineLicenseDurationMonths());
+        gameType.setAllowsGamingTerminal(gameTypeUpdateDto.getAllowsGamingTerminal());
+        gameType.setAllowsGamingMachine(gameTypeUpdateDto.getAllowsGamingMachine());
+        gameType.setGamingTerminalLicenseDurationMonths(gameTypeUpdateDto.getGamingTerminalLicenseDurationMonths());
         mongoRepositoryReactive.saveOrUpdate(gameType);
         return Mono.just(new ResponseEntity<>(gameType.convertToDto(), HttpStatus.OK));
     }

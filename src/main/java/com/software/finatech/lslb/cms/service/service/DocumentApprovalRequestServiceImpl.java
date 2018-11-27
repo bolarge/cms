@@ -155,6 +155,8 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
                 approverCreateDocumentType(documentApprovalRequest);
             } else if (documentApprovalRequest.isSetApprover()) {
                 approveSetApprover(documentApprovalRequest);
+            } else if (documentApprovalRequest.isRemoveApprover()) {
+                approveRemoveApprover(documentApprovalRequest);
             } else {
                 return Mono.just(new ResponseEntity<>("Invallid Request supplied", HttpStatus.BAD_REQUEST));
             }
@@ -260,6 +262,14 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
         DocumentType documentType = documentApprovalRequest.getDocumentType();
         if (documentType != null) {
             documentType.setApproverId(documentApprovalRequest.getNewApproverId());
+            mongoRepositoryReactive.saveOrUpdate(documentType);
+        }
+    }
+
+    private void approveRemoveApprover(DocumentApprovalRequest documentApprovalRequest) {
+        DocumentType documentType = documentApprovalRequest.getDocumentType();
+        if (documentType != null) {
+            documentType.setApproverId(null);
             mongoRepositoryReactive.saveOrUpdate(documentType);
         }
     }

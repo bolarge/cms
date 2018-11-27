@@ -29,6 +29,7 @@ public class GameTypeReferenceData {
         gameType.setAllowsGamingMachine(false);
         gameType.setInstitutionLicenseDurationMonths(60);
         gameType.setGamingMachineLicenseDurationMonths(12);
+        gameType.setGamingTerminalLicenseDurationMonths(12);
         gameType.setAgentLicenseDurationMonths(12);
         mongoRepositoryReactive.saveOrUpdate(gameType);
 
@@ -46,6 +47,7 @@ public class GameTypeReferenceData {
         gameType.setAipDurationMonths(3);
         gameType.setInstitutionLicenseDurationMonths(12);
         gameType.setGamingMachineLicenseDurationMonths(12);
+        gameType.setGamingTerminalLicenseDurationMonths(12);
         gameType.setAgentLicenseDurationMonths(12);
         mongoRepositoryReactive.saveOrUpdate(gameType);
 
@@ -62,6 +64,7 @@ public class GameTypeReferenceData {
         gameType.setAllowsGamingTerminal(false);
         gameType.setInstitutionLicenseDurationMonths(12);
         gameType.setGamingMachineLicenseDurationMonths(12);
+        gameType.setGamingTerminalLicenseDurationMonths(12);
         gameType.setAgentLicenseDurationMonths(12);
         mongoRepositoryReactive.saveOrUpdate(gameType);
 
@@ -78,6 +81,7 @@ public class GameTypeReferenceData {
         gameType.setAllowsGamingTerminal(false);
         gameType.setInstitutionLicenseDurationMonths(12);
         gameType.setGamingMachineLicenseDurationMonths(12);
+        gameType.setGamingTerminalLicenseDurationMonths(12);
         gameType.setAgentLicenseDurationMonths(12);
         mongoRepositoryReactive.saveOrUpdate(gameType);
 
@@ -94,6 +98,7 @@ public class GameTypeReferenceData {
         gameType.setAllowsGamingTerminal(true);
         gameType.setInstitutionLicenseDurationMonths(12);
         gameType.setGamingMachineLicenseDurationMonths(12);
+        gameType.setGamingTerminalLicenseDurationMonths(12);
         gameType.setAgentLicenseDurationMonths(12);
         mongoRepositoryReactive.saveOrUpdate(gameType);
 
@@ -111,6 +116,7 @@ public class GameTypeReferenceData {
         gameType.setAllowsGamingTerminal(false);
         gameType.setInstitutionLicenseDurationMonths(12);
         gameType.setGamingMachineLicenseDurationMonths(12);
+        gameType.setGamingTerminalLicenseDurationMonths(12);
         gameType.setAgentLicenseDurationMonths(0);
         mongoRepositoryReactive.saveOrUpdate(gameType);
 
@@ -127,6 +133,7 @@ public class GameTypeReferenceData {
         gameType.setAllowsGamingTerminal(true);
         gameType.setInstitutionLicenseDurationMonths(12);
         gameType.setGamingMachineLicenseDurationMonths(12);
+        gameType.setGamingTerminalLicenseDurationMonths(12);
         gameType.setAgentLicenseDurationMonths(0);
         mongoRepositoryReactive.saveOrUpdate(gameType);
         }

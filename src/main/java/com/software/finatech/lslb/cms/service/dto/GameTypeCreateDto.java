@@ -1,26 +1,33 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 public class GameTypeCreateDto {
-    @Min(value = 1, message = "AIP licence duration should be at least one month")
     protected int aipDurationMonths;
-    @Min(value = 1, message = "Institution licence duration should be at least one month")
     protected int licenseDurationMonths;
     @NotEmpty(message = "Please enter GameType Name")
     protected String name;
-    @Min(value = 1, message = "Agent license duration should be at least one month")
     protected int agentLicenseDurationMonths;
-    protected Integer gamingMachineLicenseDurationMonths;
+    protected int gamingMachineLicenseDurationMonths;
     @NotNull(message = "Please enter if category allows gaming machine")
     protected Boolean allowsGamingMachine;
+    @NotNull(message = "Please enter if category allows gaming terminal")
+    protected Boolean allowsGamingTerminal;
     protected String shortCode;
     protected String description;
+    protected int gamingTerminalLicenseDurationMonths;
 
     public Boolean getAllowsGamingMachine() {
         return allowsGamingMachine;
+    }
+
+    public Boolean getAllowsGamingTerminal() {
+        return allowsGamingTerminal;
+    }
+
+    public void setAllowsGamingTerminal(Boolean allowsGamingTerminal) {
+        this.allowsGamingTerminal = allowsGamingTerminal;
     }
 
     public void setAllowsGamingMachine(Boolean allowsGamingMachine) {
@@ -75,11 +82,19 @@ public class GameTypeCreateDto {
         this.agentLicenseDurationMonths = agentLicenseDurationMonths;
     }
 
-    public Integer getGamingMachineLicenseDurationMonths() {
+    public int getGamingMachineLicenseDurationMonths() {
         return gamingMachineLicenseDurationMonths;
     }
 
-    public void setGamingMachineLicenseDurationMonths(Integer gamingMachineLicenseDurationMonths) {
+    public void setGamingMachineLicenseDurationMonths(int gamingMachineLicenseDurationMonths) {
         this.gamingMachineLicenseDurationMonths = gamingMachineLicenseDurationMonths;
+    }
+
+    public int getGamingTerminalLicenseDurationMonths() {
+        return gamingTerminalLicenseDurationMonths;
+    }
+
+    public void setGamingTerminalLicenseDurationMonths(int gamingTerminalLicenseDurationMonths) {
+        this.gamingTerminalLicenseDurationMonths = gamingTerminalLicenseDurationMonths;
     }
 }
