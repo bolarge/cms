@@ -12,6 +12,7 @@ public class InspectionFormDto {
     protected String reporter;
     //protected AuthRoleDto userRole;
     protected String inspectionDate;
+    protected String createdAt;
     protected AgentDto agent;
     protected String body;
     protected MachineDto gamingMachine;
@@ -87,6 +88,14 @@ public class InspectionFormDto {
 
     public GameTypeDto getGameType() {
         return gameType;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
     }
 
     public void setGameType(GameTypeDto gameType) {

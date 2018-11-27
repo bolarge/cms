@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/inspectionForm")
 public class InspectionFormController extends BaseController {
 
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "gameTypeIds","institutionId","agentId","gamingMachineId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "gameTypeIds","institutionId","agentId","gamingMachineId","dateProperty"})
     @ApiOperation(value = "Get all Inspections", response = InspectionForm.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -50,6 +50,9 @@ public class InspectionFormController extends BaseController {
                                                    @RequestParam("sortProperty") String sortParam,
                                                    @RequestParam("institutionId") String institutionId,
                                                    @RequestParam("agentId") String agentId,
+                                                   @RequestParam("dateProperty") String dateProperty,
+                                                   @RequestParam("fromDate") String fromDate,
+                                                   @RequestParam("toDate") String toDate,
                                                    @RequestParam("gamingMachineId") String gamingMachineId,
                                                    @RequestParam("gameTypeIds") String gameTypeIds,
                                                    HttpServletResponse httpServletResponse) {
@@ -76,11 +79,21 @@ public class InspectionFormController extends BaseController {
                 sort = new Sort((sortType.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC),
                         sortParam);
             } else {
-                sort = new Sort(Sort.Direction.DESC, "id");
+                sort = new Sort(Sort.Direction.DESC, "createdAt");
             }
            query.with(PageRequest.of(page, pageSize, sort));
             query.with(sort);
             ArrayList<InspectionFormDto> inspectionFormDtos = new ArrayList<>();
+
+          if (!StringUtils.isEmpty(fromDate)&&!StringUtils.isEmpty(toDate)) {
+              LocalDate startDate = new LocalDate(fromDate);
+              LocalDate endDate = new LocalDate(toDate);
+
+              if(StringUtils.isEmpty(dateProperty)){
+                  dateProperty="createdAt";
+              }
+              query.addCriteria(Criteria.where(dateProperty).gte(startDate).lte(endDate));
+          }
             List<InspectionForm> inspectionForms = ( List<InspectionForm>) mongoRepositoryReactive.findAll(query, InspectionForm.class).toStream().collect(Collectors.toList());
 
              if(inspectionForms.size()==0){

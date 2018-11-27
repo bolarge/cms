@@ -409,25 +409,28 @@ public class Scheduler {
 
     }
     //@TODO fix pending document approval email
-   @Scheduled(fixedRate = 5*60*1000)
+   @Scheduled(fixedRate = 1000)
     public void sendReminderEmail(){
-//        Aggregation documentAgg = Aggregation.newAggregation(
-//                Aggregation.match(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID)),
-//             Aggregation.project("id","documentTypeId","nextReminderDate","approvalRequestStatusId"),
-//                Aggregation.group("documentTypeId")
-//        );
+        Aggregation documentAgg = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID)),
+             Aggregation.project()
+                     .and("documentTypeId").as("documentTypeId")
+                     .and("nextReminderDate").as("nextReminderDate")
+                     .and("id").as("id").and("approvalRequestStatusId").as("approvalRequestStatusId")
+                //Aggregation.group("id")
+        );
 
        Query query= new Query();
-       query.addCriteria(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID));
+       query.addCriteria(Criteria.where("isCurrent").is(true));
        query.fields().include("approvalRequestStatusId");
        //query.fields().include("domain");
        //query.fields().include("count");
        try{
-       ArrayList<Document> documents = (ArrayList<Document>)mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
+       //ArrayList<Document> documents = (ArrayList<Document>)mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
 
-       // List<DocumentSummaryDto> results = mongoTemplate.aggregate(documentAgg, Document.class, DocumentSummaryDto.class).getMappedResults();
+       List<DocumentSummaryDto> results = mongoTemplate.aggregate(documentAgg, Document.class, DocumentSummaryDto.class).getMappedResults();
 
-        for (Document document: documents) {
+        for (DocumentSummaryDto document: results) {
             boolean sentEmail=false;
             if(document.getNextReminderDate()==null){
                 sentEmail=true;

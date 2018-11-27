@@ -194,6 +194,8 @@ public class InspectionForm extends AbstractFact {
         }
 
         inspectionFormDto.setInspectionDate(getInspectionDate().toString("dd/MM/yyyy"));
+        inspectionFormDto.setCreatedAt(getCreatedAt().toString("dd/MM/yyyy"));
+
         return inspectionFormDto;
 
     }
