@@ -14,8 +14,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,8 +54,12 @@ public class DeviceMagicAgentAdapter {
         agent.setLastName(deviceMagicAgent.getLastName());
         agent.setEmailAddress(deviceMagicAgent.getEmail());
         agent.setPhoneNumber(deviceMagicAgent.getPhoneNumber1());
-        agent.getPhoneNumbers().add(deviceMagicAgent.getPhoneNumber1());
-        agent.getPhoneNumbers().add(deviceMagicAgent.getPhoneNumber2());
+        if (!StringUtils.isEmpty(deviceMagicAgent.getPhoneNumber1())) {
+            agent.getPhoneNumbers().add(deviceMagicAgent.getPhoneNumber1());
+        }
+        if (!StringUtils.isEmpty(deviceMagicAgent.getPhoneNumber2())) {
+            agent.getPhoneNumbers().add(deviceMagicAgent.getPhoneNumber2());
+        }
         agent.setMeansOfId(deviceMagicAgent.getMeansOfId());
         agent.setTitle(deviceMagicAgent.getTitle());
         agent.setBvn(deviceMagicAgent.getBvn());
@@ -68,6 +70,7 @@ public class DeviceMagicAgentAdapter {
         String residentialAddress = buildAddress(deviceMagicAgent.getResidentialAddressStreet(),
                 deviceMagicAgent.getResidentialAddressCity(), deviceMagicAgent.getResidentialAddressState());
         if (!StringUtils.isEmpty(residentialAddress)) {
+            residentialAddress = residentialAddress.replace("\"", "");
             agent.setResidentialAddress(residentialAddress);
         }
         for (DeviceMagicAgentInstitutionCategoryDetails institutionCategoryDetails : deviceMagicAgent.getInstitutionCategoryDetailsList()) {
@@ -75,24 +78,28 @@ public class DeviceMagicAgentAdapter {
             String address = buildAddress(institutionCategoryDetails.getBusinessAddressStreet1(),
                     institutionCategoryDetails.getBusinessAddressCity1(), institutionCategoryDetails.getBusinessAddressState1());
             if (!StringUtils.isEmpty(address)) {
+                address = address.replace("\"", "");
                 agentInstitution.getBusinessAddressList().add(address);
                 agent.getBusinessAddresses().add(address);
             }
             address = buildAddress(institutionCategoryDetails.getBusinessAddressStreet2(),
                     institutionCategoryDetails.getBusinessAddressCity2(), institutionCategoryDetails.getBusinessAddressState2());
             if (!StringUtils.isEmpty(address)) {
+                address = address.replace("\"", "");
                 agentInstitution.getBusinessAddressList().add(address);
                 agent.getBusinessAddresses().add(address);
             }
             address = buildAddress(institutionCategoryDetails.getBusinessAddressStreet3(),
                     institutionCategoryDetails.getBusinessAddressCity3(), institutionCategoryDetails.getBusinessAddressState3());
             if (!StringUtils.isEmpty(address)) {
+                address = address.replace("\"", "");
                 agentInstitution.getBusinessAddressList().add(address);
                 agent.getBusinessAddresses().add(address);
             }
             address = buildAddress(institutionCategoryDetails.getBusinessAddressStreet4(),
                     institutionCategoryDetails.getBusinessAddressCity4(), institutionCategoryDetails.getBusinessAddressState4());
             if (!StringUtils.isEmpty(address)) {
+                address = address.replace("\"", "");
                 agentInstitution.getBusinessAddressList().add(address);
                 agent.getBusinessAddresses().add(address);
             }

@@ -328,7 +328,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             action.setUserId(loggedInUser.getId());
             action.setLslbCaseOutcomeId(caseActionRequest.getCaseOutcomeId());
             loggedCase.getCaseActions().add(action);
-            makeOutComeEffectOnOperatorLicense(loggedCase, caseActionRequest.getReason());
+            makeOutComeEffectOnOperatorLicense(loggedCase, caseActionRequest);
             mongoRepositoryReactive.saveOrUpdate(loggedCase);
 
             String verbiage = String.format("Made Outcome on Logged Case, Ticket id: -> %s, Outcome -> %s",
@@ -342,28 +342,28 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
         }
     }
 
-    private void makeOutComeEffectOnOperatorLicense(LoggedCase loggedCase, String reason) {
+    private void makeOutComeEffectOnOperatorLicense(LoggedCase loggedCase, CaseOutcomeRequest caseOutcomeRequest) {
         License license = licenseService.findInstitutionActiveLicenseInGameType(loggedCase.getInstitutionId(), loggedCase.getGameTypeId());
         if (license != null) {
             if (loggedCase.isOutcomeLicenseRevoked()) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_REVOKED_ID);
-                license.setLicenseChangeReason(reason);
+                license.setLicenseChangeReason(caseOutcomeRequest.getReason());
                 loggedCaseMailSenderAsync.sendOutcomeNotificationToOffender(loggedCase);
             }
             if (loggedCase.isOutcomeLicenseSuspended()) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_SUSPENDED_ID);
-                license.setLicenseChangeReason(reason);
+                license.setLicenseChangeReason(caseOutcomeRequest.getReason());
                 loggedCaseMailSenderAsync.sendOutcomeMailToOffender(loggedCase);
             }
             if (loggedCase.isOutcomeLicenseTerminated()) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_TERMINATED_ID);
-                license.setLicenseChangeReason(reason);
+                license.setLicenseChangeReason(caseOutcomeRequest.getReason());
                 loggedCaseMailSenderAsync.sendOutcomeNotificationToOffender(loggedCase);
             }
             mongoRepositoryReactive.saveOrUpdate(license);
         }
         if (loggedCase.isOutcomePenalty()) {
-            loggedCaseMailSenderAsync.sendPenaltyMailToOffender(loggedCase);
+            loggedCaseMailSenderAsync.sendPenaltyMailToOffender(loggedCase, caseOutcomeRequest.getCasePenaltyParams());
         }
     }
 
