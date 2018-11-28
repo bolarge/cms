@@ -71,7 +71,8 @@ public class ExistingAgentLoader {
             String completeData = new String(multipartFile.getBytes());
             String[] rows = completeData.split("\\r?\\n");
             for (int i = 2; i < rows.length; i++) {
-                String[] columns = rows[i].split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+                // String[] columns = rows[i].split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+                String[] columns = rows[i].split(",");
                 ///length of columns
                 if (columns.length < 36) {
                     throw new LicenseServiceException("File is less than 36 columns");
