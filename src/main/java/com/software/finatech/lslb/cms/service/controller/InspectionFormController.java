@@ -78,6 +78,15 @@ public class InspectionFormController extends BaseController {
           if (!StringUtils.isEmpty(gamingMachineId)) {
               query.addCriteria(Criteria.where("gamingMachineId").in(gamingMachineId));
           }
+          if (!StringUtils.isEmpty(fromDate)&&!StringUtils.isEmpty(toDate)) {
+              LocalDate startDate = new LocalDate(fromDate);
+              LocalDate endDate = new LocalDate(toDate);
+
+              if(StringUtils.isEmpty(dateProperty)){
+                  dateProperty="createdAt";
+              }
+              query.addCriteria(Criteria.where(dateProperty).gte(startDate).lte(endDate));
+          }
                 if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, InspectionForm.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
@@ -93,15 +102,7 @@ public class InspectionFormController extends BaseController {
             query.with(sort);
             ArrayList<InspectionFormDto> inspectionFormDtos = new ArrayList<>();
 
-          if (!StringUtils.isEmpty(fromDate)&&!StringUtils.isEmpty(toDate)) {
-              LocalDate startDate = new LocalDate(fromDate);
-              LocalDate endDate = new LocalDate(toDate);
 
-              if(StringUtils.isEmpty(dateProperty)){
-                  dateProperty="createdAt";
-              }
-              query.addCriteria(Criteria.where(dateProperty).gte(startDate).lte(endDate));
-          }
             List<InspectionForm> inspectionForms = ( List<InspectionForm>) mongoRepositoryReactive.findAll(query, InspectionForm.class).toStream().collect(Collectors.toList());
 
              if(inspectionForms.size()==0){
