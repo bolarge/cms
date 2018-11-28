@@ -28,9 +28,20 @@ public class Institution extends AbstractFact {
     protected Set<String> gameTypeIds = new HashSet<>();
     private Set<String> directorsNames = new HashSet<>();
     private Set<String> shareHolderNames = new HashSet<>();
+    private boolean fromLiveData;
+
+
 
     public Set<String> getShareHolderNames() {
         return shareHolderNames;
+    }
+
+    public boolean isFromLiveData() {
+        return fromLiveData;
+    }
+
+    public void setFromLiveData(boolean fromLiveData) {
+        this.fromLiveData = fromLiveData;
     }
 
     public void setShareHolderNames(Set<String> shareHolderNames) {

@@ -203,12 +203,7 @@ public class AuthRoleController extends BaseController {
                 return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
             }
 
-            Comparator<EnumeratedFact> enumeratedFactComparator = new Comparator<EnumeratedFact>() {
-                @Override
-                public int compare(EnumeratedFact o1, EnumeratedFact o2) {
-                    return StringUtils.compare(o1.toString(), o2.toString());
-                }
-            };
+            Comparator<EnumeratedFact> enumeratedFactComparator = (o1, o2) -> StringUtils.compare(o1.toString(), o2.toString());
 
             List<AuthRole> roles = new ArrayList<>();
             for (FactObject factObject : authRoles) {
@@ -218,7 +213,8 @@ public class AuthRoleController extends BaseController {
             for (AuthRole authrole : roles) {
                 authRoleDtos.add(authrole.convertToDto());
             }
-            return Mono.just(new ResponseEntity<>(authRoleDtos, HttpStatus.OK));
+            //      return Mono.just(new ResponseEntity<>(authRoleDtos, HttpStatus.OK));
+            return ReferenceDataUtil.getAllEnumeratedEntity("AuthRole");
 //            return ReferenceDataUtil.getAllEnumeratedEntity("AuthRole");
 
         } catch (Exception e) {

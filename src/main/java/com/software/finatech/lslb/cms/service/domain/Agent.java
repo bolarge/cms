@@ -43,8 +43,17 @@ public class Agent extends AbstractFact {
     private String genderId;
     private String submissionId;
     private boolean skipVigipay;
-    private boolean fromDeviceMagic;
+    private boolean fromLiveData;
+
     private LocalDate dob;
+
+    public boolean isFromLiveData() {
+        return fromLiveData;
+    }
+
+    public void setFromLiveData(boolean fromLiveData) {
+        this.fromLiveData = fromLiveData;
+    }
 
     public LocalDate getDob() {
         return dob;
@@ -52,14 +61,6 @@ public class Agent extends AbstractFact {
 
     public void setDob(LocalDate dob) {
         this.dob = dob;
-    }
-
-    public boolean isFromDeviceMagic() {
-        return fromDeviceMagic;
-    }
-
-    public void setFromDeviceMagic(boolean fromDeviceMagic) {
-        this.fromDeviceMagic = fromDeviceMagic;
     }
 
     public boolean isSkipVigipay() {
