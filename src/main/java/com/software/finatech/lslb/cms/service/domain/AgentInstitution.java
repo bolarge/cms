@@ -1,14 +1,12 @@
 package com.software.finatech.lslb.cms.service.domain;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class AgentInstitution {
     private String institutionId;
     private Set<String> gameTypeIds = new HashSet<>();
-    private List<String> businessAddressList = new ArrayList<>();
+    private Set<String> businessAddressList = new HashSet<>();
 
 
     public Set<String> getGameTypeIds() {
@@ -19,11 +17,11 @@ public class AgentInstitution {
         this.gameTypeIds = gameTypeIds;
     }
 
-    public List<String> getBusinessAddressList() {
+    public Set<String> getBusinessAddressList() {
         return businessAddressList;
     }
 
-    public void setBusinessAddressList(List<String> businessAddressList) {
+    public void setBusinessAddressList(Set<String> businessAddressList) {
         this.businessAddressList = businessAddressList;
     }
 

@@ -29,6 +29,15 @@ public class CustomerComplainDto {
     private String otherCategoryName;
     private String otherTypeName;
     private List<CommentDetail> comments = new ArrayList<>();
+    private String loggedCaseId;
+
+    public String getLoggedCaseId() {
+        return loggedCaseId;
+    }
+
+    public void setLoggedCaseId(String loggedCaseId) {
+        this.loggedCaseId = loggedCaseId;
+    }
 
     public List<CommentDetail> getComments() {
         return comments;

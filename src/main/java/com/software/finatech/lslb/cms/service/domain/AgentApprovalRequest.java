@@ -2,16 +2,15 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.AgentApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.referencedata.AgentApprovalRequestTypeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.adapters.AgentInstitutionAdapter;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 
 @SuppressWarnings("serial")
@@ -20,7 +19,7 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
     private String agentId;
     private String agentApprovalRequestTypeId;
     private String gameTypeId;
-    private List<String> businessAddressList = new ArrayList<>();
+    private Set<String> businessAddressList = new HashSet<>();
     private String pendingAgentId;
 
     public String getPendingAgentId() {
@@ -31,12 +30,12 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
         this.pendingAgentId = pendingAgentId;
     }
 
-    public void setBusinessAddressList(List<String> businessAddressList) {
-        this.businessAddressList = businessAddressList;
+    public Set<String> getBusinessAddressList() {
+        return businessAddressList;
     }
 
-    public List<String> getBusinessAddressList() {
-        return businessAddressList;
+    public void setBusinessAddressList(Set<String> businessAddressList) {
+        this.businessAddressList = businessAddressList;
     }
 
     public String getAgentId() {
@@ -116,12 +115,14 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
             return gameType.getName();
         }
     }
+
     public Agent getAgent() {
         if (StringUtils.isEmpty(this.agentId)) {
             return null;
         }
         return (Agent) mongoRepositoryReactive.findById(this.agentId, Agent.class).block();
     }
+
     private PendingAgent getPendingAgent() {
         if (StringUtils.isEmpty(this.pendingAgentId)) {
             return null;
@@ -152,7 +153,7 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
             agentApprovalRequestDto.setAgentName(agent.getFullName());
         }
         PendingAgent pendingAgent = getPendingAgent();
-        if (pendingAgent != null){
+        if (pendingAgent != null) {
             agentApprovalRequestDto.setAgentName(pendingAgent.getFullName());
         }
         GameType gameType = getGameType();
@@ -194,7 +195,7 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
             agentApprovalRequestDto.setAgent(agent.convertToFullDetailDto());
         }
         PendingAgent pendingAgent = getPendingAgent();
-        if (pendingAgent != null){
+        if (pendingAgent != null) {
             agentApprovalRequestDto.setAgent(pendingAgent.convertToFullDetailDto());
             agentApprovalRequestDto.setAgentName(pendingAgent.getFullName());
         }

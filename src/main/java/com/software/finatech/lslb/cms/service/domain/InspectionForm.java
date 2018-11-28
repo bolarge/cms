@@ -31,6 +31,16 @@ public class InspectionForm extends AbstractFact {
     protected String subject;
     protected String body;
     protected String status;
+    protected String loggedCaseId;
+
+
+    public String getLoggedCaseId() {
+        return loggedCaseId;
+    }
+
+    public void setLoggedCaseId(String loggedCaseId) {
+        this.loggedCaseId = loggedCaseId;
+    }
 
     @Transient
     protected String ownerName;
@@ -210,6 +220,7 @@ public class InspectionForm extends AbstractFact {
 
         inspectionFormDto.setInspectionDate(getInspectionDate().toString("dd/MM/yyyy"));
         inspectionFormDto.setCreatedAt(getCreatedAt().toString("dd/MM/yyyy"));
+        inspectionFormDto.setLoggedCaseId(getLoggedCaseId());
 
         return inspectionFormDto;
 

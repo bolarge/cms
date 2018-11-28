@@ -27,7 +27,7 @@ public class Agent extends AbstractFact {
     protected List<AgentInstitution> agentInstitutions = new ArrayList<>();
     protected String dateOfBirth;
     protected String residentialAddress;
-    protected List<String> businessAddresses = new ArrayList<>();
+    protected Set<String> businessAddresses = new HashSet<>();
     protected String meansOfId;
     protected String idNumber;
     protected String bvn;
@@ -272,11 +272,12 @@ public class Agent extends AbstractFact {
         this.agentInstitutions = agentInstitutions;
     }
 
-    public List<String> getBusinessAddresses() {
+
+    public Set<String> getBusinessAddresses() {
         return businessAddresses;
     }
 
-    public void setBusinessAddresses(List<String> businessAddresses) {
+    public void setBusinessAddresses(Set<String> businessAddresses) {
         this.businessAddresses = businessAddresses;
     }
 

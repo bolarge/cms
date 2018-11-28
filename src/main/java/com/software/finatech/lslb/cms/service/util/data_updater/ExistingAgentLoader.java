@@ -1,8 +1,9 @@
 package com.software.finatech.lslb.cms.service.util.data_updater;
 
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
-import com.software.finatech.lslb.cms.service.util.adapters.DeviceMagicAgent;
 import com.software.finatech.lslb.cms.service.util.adapters.DeviceMagicAgentAdapter;
+import com.software.finatech.lslb.cms.service.util.adapters.model.DeviceMagicAgent;
+import com.software.finatech.lslb.cms.service.util.adapters.model.DeviceMagicAgentInstitutionCategoryDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -19,6 +20,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 public class ExistingAgentLoader {
@@ -30,7 +32,7 @@ public class ExistingAgentLoader {
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(new FileReader(file));
         if (jsonObject != null) {
-            return deviceMagicAgentAdapter.fromJsonObject(jsonObject);
+            //return deviceMagicAgentAdapter.fromJsonObject(jsonObject);
         }
         return null;
     }
@@ -71,8 +73,8 @@ public class ExistingAgentLoader {
             String completeData = new String(multipartFile.getBytes());
             String[] rows = completeData.split("\\r?\\n");
             for (int i = 2; i < rows.length; i++) {
-                // String[] columns = rows[i].split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
-                String[] columns = rows[i].split(",");
+                String[] columns = rows[i].split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+                //   String[] columns = rows[i].split(",");
                 ///length of columns
                 if (columns.length < 36) {
                     throw new LicenseServiceException("File is less than 36 columns");
@@ -90,9 +92,6 @@ public class ExistingAgentLoader {
                         deviceMagicAgent = new DeviceMagicAgent();
                         deviceMagicAgent.setBvn(bvn);
                         deviceMagicAgent.setSubmissionId(submissionId);
-                        deviceMagicAgent.setOperatorId(columns[6]);
-                        //     deviceMagicAgent.getOperatorIds().add(columns[6]);
-                        deviceMagicAgent.setGamingCategopry(columns[7]);
                         deviceMagicAgent.setGender(columns[8]);
                         deviceMagicAgent.setTitle(columns[9]);
                         deviceMagicAgent.setFirstName(columns[10]);
@@ -101,29 +100,30 @@ public class ExistingAgentLoader {
                         deviceMagicAgent.setPhoneNumber1(columns[13]);
                         deviceMagicAgent.setPhoneNumber2(columns[14]);
                         deviceMagicAgent.setResidentialAddressStreet(columns[15]);
-                        deviceMagicAgent.setResindetialAddressCity(columns[16]);
+                        deviceMagicAgent.setResidentialAddressCity(columns[16]);
                         deviceMagicAgent.setResidentialAddressState(columns[17]);
-                        deviceMagicAgent.setBusinessAddressStreet1(columns[18]);
-                        deviceMagicAgent.setBusinessAddressCity1(columns[19]);
-                        deviceMagicAgent.setBusinessAddressState1(columns[20]);
-                        deviceMagicAgent.setBusinessAddressStreet2(columns[21]);
-                        deviceMagicAgent.setBusinessAddressCity2(columns[22]);
-                        deviceMagicAgent.setBusinessAddressState2(columns[23]);
-                        deviceMagicAgent.setBusinessAddressStreet3(columns[24]);
-                        deviceMagicAgent.setBusinessAddressCity3(columns[25]);
-                        deviceMagicAgent.setBusinessAddressState3(columns[26]);
-                        deviceMagicAgent.setBusinessAddressStreet4(columns[27]);
-                        deviceMagicAgent.setBusinessAddressCity4(columns[28]);
-                        deviceMagicAgent.setBusinessAddressState4(columns[29]);
                         deviceMagicAgent.setEmail(email);
                         deviceMagicAgent.setBvn(bvn);
                         deviceMagicAgent.setMeansOfId(columns[32]);
                         deviceMagicAgent.setIdNumber(columns[33]);
                     }
-                    deviceMagicAgent.getOperatorIds().add(columns[6]);
-                    if (deviceMagicAgent.getOperatorIds().size() > 1) {
-                        logger.info("Agent {} has more than one operator id", columns[4]);
-                    }
+
+                    DeviceMagicAgentInstitutionCategoryDetails institutionCategoryDetails = new DeviceMagicAgentInstitutionCategoryDetails();
+                    institutionCategoryDetails.setOperatorId(columns[6]);
+                    institutionCategoryDetails.setGamingCategory(columns[7]);
+                    institutionCategoryDetails.setBusinessAddressStreet1(columns[18]);
+                    institutionCategoryDetails.setBusinessAddressCity1(columns[19]);
+                    institutionCategoryDetails.setBusinessAddressState1(columns[20]);
+                    institutionCategoryDetails.setBusinessAddressStreet2(columns[21]);
+                    institutionCategoryDetails.setBusinessAddressCity2(columns[22]);
+                    institutionCategoryDetails.setBusinessAddressState2(columns[23]);
+                    institutionCategoryDetails.setBusinessAddressStreet3(columns[24]);
+                    institutionCategoryDetails.setBusinessAddressCity3(columns[25]);
+                    institutionCategoryDetails.setBusinessAddressState3(columns[26]);
+                    institutionCategoryDetails.setBusinessAddressStreet4(columns[27]);
+                    institutionCategoryDetails.setBusinessAddressCity4(columns[28]);
+                    institutionCategoryDetails.setBusinessAddressState4(columns[29]);
+                    deviceMagicAgent.getInstitutionCategoryDetailsList().add(institutionCategoryDetails);
                     deviceMagicAgentMap.put(bvn, deviceMagicAgent);
                 }
             }

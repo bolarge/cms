@@ -14,10 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class AgentCreationNotifierAsync extends AbstractMailSender {
@@ -88,7 +85,7 @@ public class AgentCreationNotifierAsync extends AbstractMailSender {
         try {
             Agent agent = agentApprovalRequest.getAgent();
             String frontEndUrl = String.format("%s/agent-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), agentApprovalRequest.getAgentId());
-            List<String> businessAddressList = agentApprovalRequest.getBusinessAddressList();
+            Set<String> businessAddressList = agentApprovalRequest.getBusinessAddressList();
             String presentDateString = LocalDate.now().toString("dd-MM-YYYY");
             HashMap<String, Object> model = new HashMap<>();
             model.put("institutionName", agentApprovalRequest.getInstitutionName());
@@ -113,7 +110,7 @@ public class AgentCreationNotifierAsync extends AbstractMailSender {
         String presentDateString = LocalDate.now().toString("dd-MM-YYYY");
         String agentName = agent.getFullName();
         String agentEmail = agent.getEmailAddress();
-        List<String> businessAddresses = new ArrayList<>();
+        Set<String> businessAddresses = new HashSet<>();
         if (agentApprovalRequest.isAgentCreationRequest()) {
 
             AgentInstitution agentInstitution = agent.getAgentInstitutions().get(0);

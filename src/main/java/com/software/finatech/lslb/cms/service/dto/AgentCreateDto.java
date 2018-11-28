@@ -5,7 +5,9 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class AgentCreateDto {
     @NotEmpty(message = "please provide agent first name")
@@ -31,23 +33,22 @@ public class AgentCreateDto {
     private String bvn;
     private String passportId;
     @NotEmpty(message = "please provide agent business addresses")
-    private List<String> businessAddressList = new ArrayList<>();
+    private Set<String> businessAddressList = new HashSet<>();
     @NotEmpty(message = "please provide institutionId")
     private String institutionId;
     @NotEmpty(message = "please provide gameTypeId")
     private String gameTypeId;
 
+    public String getInstitutionId() {
+        return institutionId;
+    }
 
-    public List<String> getBusinessAddressList() {
+    public Set<String> getBusinessAddressList() {
         return businessAddressList;
     }
 
-    public void setBusinessAddressList(List<String> businessAddressList) {
+    public void setBusinessAddressList(Set<String> businessAddressList) {
         this.businessAddressList = businessAddressList;
-    }
-
-    public String getInstitutionId() {
-        return institutionId;
     }
 
     public void setInstitutionId(String institutionId) {
