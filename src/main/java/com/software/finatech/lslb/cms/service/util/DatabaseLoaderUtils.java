@@ -85,6 +85,7 @@ public class DatabaseLoaderUtils {
         CaseAndComplainTypeReferenceData.load(mongoRepositoryReactive);
         LoggedCaseOutcomeReferenceData.load(mongoRepositoryReactive);
         GenderReferenceData.load(mongoRepositoryReactive);
+        InspectionStatusReferenceData.load(mongoRepositoryReactive);
     }
 
     // @Profile("test")
@@ -139,6 +140,7 @@ public class DatabaseLoaderUtils {
         factEnums.put("CaseAndComplainType", CaseAndComplainType.class);
         factEnums.put("CaseAndComplainCategory", CaseAndComplainCategory.class);
         factEnums.put("LoggedCaseOutcome", LoggedCaseOutcome.class);
+        factEnums.put("InspectionStatus", InspectionStatus.class);
         factEnums.put("Gender", Gender.class);
 
         for (Map.Entry<String, Class> entry : factEnums.entrySet()) {
