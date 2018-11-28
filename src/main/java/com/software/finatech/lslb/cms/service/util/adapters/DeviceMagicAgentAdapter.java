@@ -106,10 +106,14 @@ public class DeviceMagicAgentAdapter {
             }
         }
         agent.getAgentInstitutions().add(agentInstitution);
-        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("dd/MM/yyyy");
-        String dob = deviceMagicAgent.getDateOfBirth();
-        if (!StringUtils.isEmpty(dob)) {
-            agent.setDob(dateTimeFormatter.parseLocalDate(dob));
+        try {
+            DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("dd/MM/yyyy");
+            String dob = deviceMagicAgent.getDateOfBirth();
+            if (!StringUtils.isEmpty(dob)) {
+                agent.setDob(dateTimeFormatter.parseLocalDate(dob));
+            }
+        } catch (Exception e) {
+            logger.error("Illegal argument exception for agent ", e);
         }
         Gender gender = getGenderFromDeviceMagicName(deviceMagicAgent.getGender());
         if (gender != null) {

@@ -1,10 +1,11 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import org.bson.types.Binary;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 
 @SuppressWarnings("serial")
-@org.springframework.data.mongodb.core.mapping.Document(collection = "DocumentBinary")
+@Document(collection = "DocumentBinary")
 public class DocumentBinary extends AbstractFact {
 
 
