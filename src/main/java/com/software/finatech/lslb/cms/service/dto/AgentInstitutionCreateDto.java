@@ -2,7 +2,9 @@ package com.software.finatech.lslb.cms.service.dto;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class AgentInstitutionCreateDto {
     @Email
@@ -13,7 +15,7 @@ public class AgentInstitutionCreateDto {
     @NotEmpty(message = "Please provide game type id")
     private String gameTypeId;
     @NotEmpty(message = "Please provide business address list")
-    private List<String> businessAddressList;
+    private Set<String> businessAddressList = new HashSet<>();
 
     public String getAgentEmailAddress() {
         return agentEmailAddress;
@@ -39,11 +41,11 @@ public class AgentInstitutionCreateDto {
         this.gameTypeId = gameTypeId;
     }
 
-    public List<String> getBusinessAddressList() {
+    public Set<String> getBusinessAddressList() {
         return businessAddressList;
     }
 
-    public void setBusinessAddressList(List<String> businessAddressList) {
+    public void setBusinessAddressList(Set<String> businessAddressList) {
         this.businessAddressList = businessAddressList;
     }
 }

@@ -167,6 +167,9 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             loggedCaseMailSenderAsync.sendNewCaseNotificationToLslbUsersThatCanReceive(loggedCase);
+
+            //close attached entities(Report or customer complaint) attached to case
+            closeAttachedEntities(loggedCase);
             return Mono.just(new ResponseEntity<>(loggedCase.convertToFullDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while creating case", e);
@@ -418,5 +421,21 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
         List<String> validRolesIds = LSLBAuthRoleReferenceData.getLslbRoles();
         validRolesIds.add(AuthRoleReferenceData.SUPER_ADMIN_ID);
         return validRolesIds;
+    }
+
+    private void closeAttachedEntities(LoggedCase loggedCase) {
+        InspectionForm inspectionForm = loggedCase.getInspectionForm();
+        if (inspectionForm != null) {
+            inspectionForm.setStatus(InspectionStatusReferenceData.CLOSED);
+            inspectionForm.setLoggedCaseId(loggedCase.getId());
+            mongoRepositoryReactive.saveOrUpdate(inspectionForm);
+        }
+
+        CustomerComplain customerComplain = loggedCase.getCustomerComplaint();
+        if (customerComplain != null) {
+            customerComplain.setLoggedCaseId(loggedCase.getId());
+            customerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.CLOSED_ID);
+            mongoRepositoryReactive.saveOrUpdate(customerComplain);
+        }
     }
 }

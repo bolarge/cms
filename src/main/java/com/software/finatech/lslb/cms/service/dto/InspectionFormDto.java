@@ -21,6 +21,15 @@ public class InspectionFormDto {
     protected String ownerName;
     protected String agentBusinessAddress;
     protected String status;
+    private String loggedCaseId;
+
+    public String getLoggedCaseId() {
+        return loggedCaseId;
+    }
+
+    public void setLoggedCaseId(String loggedCaseId) {
+        this.loggedCaseId = loggedCaseId;
+    }
 
     public String getAgentBusinessAddress() {
         return agentBusinessAddress;

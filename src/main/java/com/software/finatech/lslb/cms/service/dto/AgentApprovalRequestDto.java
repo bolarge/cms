@@ -1,7 +1,7 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class AgentApprovalRequestDto extends AbstractApprovalRequestDto {
     private String agentName;
@@ -11,7 +11,7 @@ public class AgentApprovalRequestDto extends AbstractApprovalRequestDto {
     private String creationDate;
     private AgentInstitutionDto pendingAgentInstitution;
     private AgentDto agent;
-    private List<String> businessAddressList = new ArrayList<>();
+    private Set<String> businessAddressList = new HashSet<>();
 
     public AgentInstitutionDto getPendingAgentInstitution() {
         return pendingAgentInstitution;
@@ -29,11 +29,11 @@ public class AgentApprovalRequestDto extends AbstractApprovalRequestDto {
         this.agent = agent;
     }
 
-    public List<String> getBusinessAddressList() {
+    public Set<String> getBusinessAddressList() {
         return businessAddressList;
     }
 
-    public void setBusinessAddressList(List<String> businessAddressList) {
+    public void setBusinessAddressList(Set<String> businessAddressList) {
         this.businessAddressList = businessAddressList;
     }
 
