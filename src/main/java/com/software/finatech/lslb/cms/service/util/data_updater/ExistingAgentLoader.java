@@ -124,6 +124,9 @@ public class ExistingAgentLoader {
                     institutionCategoryDetails.setBusinessAddressCity4(columns[28]);
                     institutionCategoryDetails.setBusinessAddressState4(columns[29]);
                     deviceMagicAgent.getInstitutionCategoryDetailsList().add(institutionCategoryDetails);
+                    if (deviceMagicAgent.getInstitutionCategoryDetailsList().size() > 1){
+                        logger.info("AGENT WITH BVN {} has more than one operator", bvn);
+                    }
                     deviceMagicAgentMap.put(bvn, deviceMagicAgent);
                 }
             }

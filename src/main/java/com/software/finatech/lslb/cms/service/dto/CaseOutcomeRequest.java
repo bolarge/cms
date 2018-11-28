@@ -10,6 +10,16 @@ public class CaseOutcomeRequest {
     @NotEmpty
     private String reason;
 
+    private CasePenaltyParams casePenaltyParams;
+
+    public CasePenaltyParams getCasePenaltyParams() {
+        return casePenaltyParams;
+    }
+
+    public void setCasePenaltyParams(CasePenaltyParams casePenaltyParams) {
+        this.casePenaltyParams = casePenaltyParams;
+    }
+
     public String getReason() {
         return reason;
     }

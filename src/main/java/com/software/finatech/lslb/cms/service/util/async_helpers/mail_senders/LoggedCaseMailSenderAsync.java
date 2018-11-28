@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 
 import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.dto.CasePenaltyParams;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -56,8 +57,8 @@ public class LoggedCaseMailSenderAsync extends AbstractMailSender {
     }
 
     @Async
-    public void sendPenaltyMailToOffender(LoggedCase loggedCase) {
-        String mailContent = buildPenaltyMailContent(loggedCase);
+    public void sendPenaltyMailToOffender(LoggedCase loggedCase, CasePenaltyParams casePenaltyParams) {
+        String mailContent = buildPenaltyMailContent(loggedCase, casePenaltyParams);
         String subject = "Penalty Notification";
         sendEmailToOffender(mailContent, subject, loggedCase);
     }
@@ -109,12 +110,14 @@ public class LoggedCaseMailSenderAsync extends AbstractMailSender {
         }
     }
 
-    private String buildPenaltyMailContent(LoggedCase loggedCase) {
+    private String buildPenaltyMailContent(LoggedCase loggedCase, CasePenaltyParams casePenaltyParams) {
         String presentDateString = DateTime.now().toString("dd-MM-yyyy");
         HashMap<String, Object> model = new HashMap<>();
         model.put("date", presentDateString);
         model.put("gameType", String.valueOf(loggedCase.getGameType()));
-        model.put("outcome", String.valueOf(loggedCase.getLoggedCaseOutcome(loggedCase.getLoggedCaseOutcomeId())));
+        model.put("clause", casePenaltyParams.getClause());
+        model.put("relevantSection", casePenaltyParams.getRelevantSection());
+        model.put("amount", String.format("NGN%s", casePenaltyParams.getAmount()));
         return mailContentBuilderService.build(model, "logged-cases/CaseLicensePenalty");
     }
 

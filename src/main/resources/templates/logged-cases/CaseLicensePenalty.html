@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:mc="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:mc="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -561,12 +561,50 @@
                                                                             </h3>
                                                                             <div mc:edit="body"
                                                                                  style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:#5F5F5F;line-height:135%;">
-                                                                                This is to inform you that you have been
-                                                                                penalized because of a case logged
-                                                                                against you on our platform.
-                                                                                Kindly contact us for the penalty details.
+                                                                                <p><u><b>NON-COMPLIANCE WITH TERMS AND
+                                                                                    CONDITIONS OF LICENCE</b></u></p>
+
+                                                                                The above subject refers.
                                                                                 <br/>
-                                                                                Regards.
+                                                                                Please take this as notice of your
+                                                                                organization's failure to comply with
+                                                                                clause
+                                                                                "<span
+                                                                                    th:text="${clause}"></span>"
+                                                                                Terms and conditions of your <span
+                                                                                    th:text="${gameType}"></span>
+                                                                                licence.
+                                                                                <br/>
+                                                                                Kindly refer to the clause "<span
+                                                                                    th:text="${clause}"></span>"
+                                                                                which states that:
+                                                                                <br/>
+                                                                                "<span th:text="${relevantSection}">RELEVANT SECTION</span>".
+                                                                                <br/>
+                                                                                In light of the above, your organisation
+                                                                                is in clear breach of Clause "<span
+                                                                                    th:text="${clause}"></span>"
+                                                                                of Terms and Conditions of your licence.
+                                                                                <br/>
+                                                                                As such, you are hereby fined the sum of
+                                                                                <span th:text="${amount}"></span>.
+                                                                                <br/>
+
+                                                                                <br/>
+                                                                                We expect to receive the above stated
+                                                                                sum within 7 (Seven) days.
+                                                                                <br/>
+                                                                                Failure to comply with this directive
+                                                                                will attract an additional fine of N50,
+                                                                                000.00 (Fifty Thousand Naira) per day of
+                                                                                default.
+                                                                                <br/>
+                                                                                Best regards,
+                                                                                <br/>
+                                                                                O. A. Anibaba
+                                                                                <br/>
+                                                                                Chief Executive Officer.
+                                                                                <br/>
                                                                             </div>
                                                                         </td>
                                                                     </tr>
