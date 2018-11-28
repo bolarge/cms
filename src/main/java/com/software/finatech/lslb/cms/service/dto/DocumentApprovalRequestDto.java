@@ -6,6 +6,15 @@ public class DocumentApprovalRequestDto extends AbstractApprovalRequestDto {
     private String newApproverName;
     private String newApproverId;
     private String documentTypeName;
+    private String documentPurposeName;
+
+    public String getDocumentPurposeName() {
+        return documentPurposeName;
+    }
+
+    public void setDocumentPurposeName(String documentPurposeName) {
+        this.documentPurposeName = documentPurposeName;
+    }
 
     public String getDocumentTypeName() {
         return documentTypeName;

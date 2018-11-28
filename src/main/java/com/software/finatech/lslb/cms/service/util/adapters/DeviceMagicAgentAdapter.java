@@ -106,7 +106,7 @@ public class DeviceMagicAgentAdapter {
             }
         }
         agent.getAgentInstitutions().add(agentInstitution);
-        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("dd/MM/yyyy");
         String dob = deviceMagicAgent.getDateOfBirth();
         if (!StringUtils.isEmpty(dob)) {
             agent.setDob(dateTimeFormatter.parseLocalDate(dob));
@@ -117,12 +117,12 @@ public class DeviceMagicAgentAdapter {
         }
         agent.setTitle(deviceMagicAgent.getTitle());
         agent.setSkipVigipay(true);
-        agent.setFromDeviceMagic(true);
+        agent.setFromLiveData(true);
         mongoRepositoryReactive.saveOrUpdate(agent);
         if (isNewAgent) {
             saveDocumentForAgent(deviceMagicAgent, agent);
             logger.info("Saved Agent for submission {} , Agent Id {}", deviceMagicAgent.getSubmissionId(), agent.getId());
-        }else {
+        } else {
             logger.info("Updated Agent for submission {} , Agent Id {}", deviceMagicAgent.getSubmissionId(), agent.getId());
         }
     }
@@ -147,11 +147,11 @@ public class DeviceMagicAgentAdapter {
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
             document.setAgentId(agent.getId());
             try {
-                DocumentBinary documentBinary= new DocumentBinary();
+                DocumentBinary documentBinary = new DocumentBinary();
                 documentBinary.setFile(new Binary(BsonBinarySubType.BINARY, Files.toByteArray(file)));
                 documentBinary.setDocumentId(document.getId());
                 mongoRepositoryReactive.saveOrUpdate(documentBinary);
-               } catch (IOException e) {
+            } catch (IOException e) {
                 logger.error("An error occurred while setting bytes of document");
             }
             mongoRepositoryReactive.saveOrUpdate(document);

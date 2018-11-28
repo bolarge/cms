@@ -90,6 +90,7 @@ public class DocumentApprovalRequest extends AbstractApprovalRequest {
         DocumentType pendingDoc = getSubjectDocumentType();
         if (pendingDoc != null) {
             dto.setDocumentTypeName(pendingDoc.toString());
+            dto.setDocumentPurposeName(String.valueOf(pendingDoc.getDocumentPurpose()));
         }
         AuthInfo initiator = getInitiator();
         if (initiator != null) {
