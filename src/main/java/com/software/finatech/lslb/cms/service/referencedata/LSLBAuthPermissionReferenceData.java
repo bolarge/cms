@@ -812,6 +812,26 @@ public class LSLBAuthPermissionReferenceData {
         permission.setDescription("CAN VIEW AGENT BVN");
         permission.setUsedBySystem(false);
         mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("88", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("88");
+        }
+        permission.setName("VIEW CATEGORIES");
+        permission.setDescription("VIEW CATEGORIES");
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("89", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("89");
+        }
+        permission.setName("CREATE/UPDATE  CATEGORIES");
+        permission.setDescription("CREATE/UPDATE CATEGORIES");
+        permission.setUsedBySystem(false);
+        mongoRepositoryReactive.saveOrUpdate(permission);
     }
 
 

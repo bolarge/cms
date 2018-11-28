@@ -8,7 +8,25 @@ public class InstitutionLoadDetails {
     private LocalDate firstCommencementDate;
     private LocalDate licenseStartDate;
     private LocalDate licenseEndDate;
+    private String director;
+    private String status;
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+
+    public String getDirector() {
+        return director;
+    }
+
+    public void setDirector(String director) {
+        this.director = director;
+    }
     public LocalDate getLicenseStartDate() {
         return licenseStartDate;
     }

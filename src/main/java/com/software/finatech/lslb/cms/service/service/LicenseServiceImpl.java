@@ -976,8 +976,9 @@ public class LicenseServiceImpl implements LicenseService {
                 return;
             }
 
+            GameType gameType = paymentRecord.getGameType();
             LocalDate effectiveDate = LocalDate.now().dayOfYear().withMinimumValue();
-            LocalDate expiryDate = LocalDate.now().dayOfYear().withMaximumValue();
+            LocalDate expiryDate = effectiveDate.plusMonths(gameType.getGamingMachineLicenseDurationMonths());
             license = new License();
             license.setId(UUID.randomUUID().toString());
             License mostRecentLicense = findMostRecentGamingMachineLicense(paymentRecord);
@@ -1021,8 +1022,10 @@ public class LicenseServiceImpl implements LicenseService {
                 return;
             }
 
+            GameType gameType = paymentRecord.getGameType();
             LocalDate effectiveDate = LocalDate.now().dayOfYear().withMinimumValue();
-            LocalDate expiryDate = LocalDate.now().dayOfYear().withMaximumValue();
+            //LocalDate expiryDate = LocalDate.now().dayOfYear().withMaximumValue();
+            LocalDate expiryDate = effectiveDate.plusMonths(gameType.getGamingTerminalLicenseDurationMonths());
             license = new License();
             license.setId(UUID.randomUUID().toString());
             License mostRecentLicense = findMostRecentGamingTerminalLicense(paymentRecord);
