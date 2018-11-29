@@ -85,7 +85,7 @@ public class InspectionFormController extends BaseController {
               if(StringUtils.isEmpty(dateProperty)){
                   dateProperty="createdAt";
               }
-              query.addCriteria(Criteria.where(dateProperty).gte(startDate).lte(endDate));
+              query.addCriteria(Criteria.where(dateProperty).gte(startDate).lte(endDate.plusDays(1)));
           }
                 if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, InspectionForm.class).block();
