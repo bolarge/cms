@@ -64,8 +64,8 @@ public class Scheduler {
     LocalDateTime dateTime = new LocalDateTime();
 
 
-  //  @Scheduled(cron = "0 0 6 * * *", initialDelay = 600000)
-  //  @SchedulerLock(name = "Check For Licenses Close To Expirations", lockAtMostFor = ONE_HOUR, lockAtLeastFor = ONE_HOUR)
+    //  @Scheduled(cron = "0 0 6 * * *", initialDelay = 600000)
+    //  @SchedulerLock(name = "Check For Licenses Close To Expirations", lockAtMostFor = ONE_HOUR, lockAtLeastFor = ONE_HOUR)
     protected void checkForLicensesCloseToExpirations() {
         logger.info(" checkForLicensesCloseToExpirations");
         ArrayList<String> licenseStatuses = new ArrayList<>();
@@ -135,7 +135,7 @@ public class Scheduler {
     }
 
     //@Scheduled(cron = "0 0 6 * * *", initialDelay = 600000)
-   // @SchedulerLock(name = "Check For AIP Close To Expiration", lockAtMostFor = ONE_HOUR, lockAtLeastFor = ONE_HOUR)
+    // @SchedulerLock(name = "Check For AIP Close To Expiration", lockAtMostFor = ONE_HOUR, lockAtLeastFor = ONE_HOUR)
     protected void checkForAIPCloseToExpirations() {
 
         logger.info("checkForAIPCloseToExpirations");
@@ -248,7 +248,7 @@ public class Scheduler {
         }
     }
 
-   @Scheduled(cron = "0 0 6 * * *")
+    @Scheduled(cron = "0 0 6 * * *")
     @SchedulerLock(name = "Check For Expired Licenses", lockAtMostFor = ONE_HOUR, lockAtLeastFor = ONE_HOUR)
     protected void InstitutionsWithExpiredLicense() {
         ArrayList<String> licenseStatuses = new ArrayList<>();
@@ -321,7 +321,7 @@ public class Scheduler {
 
     }
 
-   @Scheduled(cron = "0 0 6 * * *")
+    @Scheduled(cron = "0 0 6 * * *")
     @SchedulerLock(name = "Send Email With Expired AIP", lockAtMostFor = ONE_HOUR, lockAtLeastFor = ONE_HOUR)
     protected void WithExpiredAIP() {
         ArrayList<String> licenseStatuses = new ArrayList<>();
@@ -361,7 +361,7 @@ public class Scheduler {
         }
     }
 
-   @Scheduled(cron = "0 0 20 * * *")
+    @Scheduled(cron = "0 0 20 * * *")
     @SchedulerLock(name = "Deactivate Agent With No Payment", lockAtMostFor = ONE_HOUR, lockAtLeastFor = ONE_HOUR)
     public void deactivateAgentWithNoPayment() {
         Query queryAgent = new Query();
@@ -412,7 +412,7 @@ public class Scheduler {
     }
 
     //@TODO fix pending document approval email
-      @Scheduled(cron = "0 0 13 * * *")
+    @Scheduled(cron = "0 0 13 * * *")
     public void sendReminderEmail() {
 //        Aggregation documentAgg = Aggregation.newAggregation(
 //                Aggregation.match(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID)),
@@ -463,19 +463,21 @@ public class Scheduler {
     }
 
 
-   // @Scheduled(fixedDelay = 34500000, initialDelay = 600000)
+    // @Scheduled(fixedDelay = 34500000, initialDelay = 600000)
     @Async
     public void load() {
         List<Document> documentList = (List<Document>) mongoRepositoryReactive.findAll(new Query(), Document.class).toStream().collect(Collectors.toList());
         documentList.parallelStream().
                 forEach(document -> {
                     try {
-                        DocumentBinary documentBinary = new DocumentBinary();
-                        documentBinary.setFile(document.getFile());
-                        documentBinary.setDocumentId(document.getId());
-                        mongoRepositoryReactive.saveOrUpdate(documentBinary);
-                        document.setFile(null);
-                        mongoRepositoryReactive.saveOrUpdate(document);
+                        if (document.getFile() != null) {
+                            DocumentBinary documentBinary = new DocumentBinary();
+                            documentBinary.setFile(document.getFile());
+                            documentBinary.setDocumentId(document.getId());
+                            mongoRepositoryReactive.saveOrUpdate(documentBinary);
+                            document.setFile(null);
+                            mongoRepositoryReactive.saveOrUpdate(document);
+                        }
                     } catch (Exception e) {
 
                     }

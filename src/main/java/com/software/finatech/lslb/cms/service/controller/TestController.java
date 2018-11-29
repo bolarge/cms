@@ -113,7 +113,7 @@ public class TestController extends BaseController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/delete-operators")
+    @RequestMapping(method = RequestMethod.POST, value = "/move-docs")
     public Mono<ResponseEntity> moviedocus() {
         try {
             scheduler.load();
