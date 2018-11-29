@@ -42,7 +42,7 @@ public class ExistingOperatorLoader {
 
 
 
-   // @PostConstruct
+//    @PostConstruct
     public void init(){
         Query query = new Query();
         query.addCriteria(Criteria.where("fromLiveData").is(true));

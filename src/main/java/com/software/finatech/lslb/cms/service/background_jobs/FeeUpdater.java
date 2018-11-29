@@ -32,7 +32,7 @@ public class FeeUpdater {
     private static final int FIFTEEN_MIN = 15 * 60 * 1000;
 
 
-    @Scheduled(fixedRate = 15 * 60 * 1000)
+    @Scheduled(fixedRate = 15 * 60 * 1000, initialDelay = 600000)
     @SchedulerLock(name = "Send Fee Expiry Notifications", lockAtMostFor = FIFTEEN_MIN, lockAtLeastFor = FIFTEEN_MIN)
     public void sendFeeExpiryNotifications() {
         try {
@@ -47,7 +47,7 @@ public class FeeUpdater {
         }
     }
 
-    @Scheduled(fixedRate = 15 * 60 * 1000)
+    @Scheduled(fixedRate = 15 * 60 * 1000, initialDelay = 600000)
     @SchedulerLock(name = "Expire End Date Fees", lockAtMostFor = FIFTEEN_MIN, lockAtLeastFor = FIFTEEN_MIN)
     public void expireDueExpiryFees() {
         try {
@@ -67,7 +67,7 @@ public class FeeUpdater {
 
 
     @Transactional
-    @Scheduled(fixedRate = 15 * 60 * 1000)
+    @Scheduled(fixedRate = 15 * 60 * 1000, initialDelay = 600000)
     @SchedulerLock(name = "Activate Fees For Today", lockAtMostFor = 60 * 1000, lockAtLeastFor = 60 * 1000)
     public void startNewFees() {
         try {

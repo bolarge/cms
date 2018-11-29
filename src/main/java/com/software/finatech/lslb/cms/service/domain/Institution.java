@@ -179,6 +179,7 @@ public class Institution extends AbstractFact {
         dto.setInstitutionCategoryDetails(getInstitutionCategoryDetailsList());
         dto.setDirectorsNames(getDirectorsNames());
         dto.setShareHolderNames(getShareHolderNames());
+        dto.setAddress(getAddress());
         return dto;
     }
 
