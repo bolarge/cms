@@ -171,7 +171,8 @@ public class LicenseController extends BaseController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/get-institution-aips", params = {"page", "pageSize", "sortType", "sortProperty",
+    @RequestMapping(method = RequestMethod.GET, value = "/get-institution-aips", params = {
+            //"page", "pageSize", "sortType", "sortProperty",
             "institutionId"})
     @ApiOperation(value = "Get all Institution AIPs", response = AIPCheckDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
