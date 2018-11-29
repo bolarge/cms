@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import org.bson.types.Binary;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
@@ -10,6 +11,7 @@ public class DocumentBinary extends AbstractFact {
 
 
     protected Binary file;
+    @Indexed
     protected String documentId;
 
     public Binary getFile() {
