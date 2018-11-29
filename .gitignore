@@ -9,3 +9,4 @@ lslb-cms-user-service.iml
 lslb-cms.iml
 application-test.yml
 src/main/resources/agent-data/
+src/main/resources/application-adedev.yml
