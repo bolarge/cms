@@ -3,11 +3,11 @@ package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.background_jobs.Scheduler;
 import com.software.finatech.lslb.cms.service.domain.Agent;
-import com.software.finatech.lslb.cms.service.domain.Document;
 import com.software.finatech.lslb.cms.service.domain.Institution;
+import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
-import com.software.finatech.lslb.cms.service.referencedata.DocumentTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordDetailService;
 import com.software.finatech.lslb.cms.service.service.contracts.VigipayService;
 import com.software.finatech.lslb.cms.service.util.DatabaseLoaderUtils;
@@ -25,9 +25,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
-
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/test")
@@ -96,7 +93,7 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/load-referenceData")
     public Mono<ResponseEntity> loadReferenceData() {
         try {
-         databaseLoaderUtils.runLoadData();
+            databaseLoaderUtils.runLoadData();
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
@@ -113,10 +110,30 @@ public class TestController extends BaseController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/move-docs")
+    @RequestMapping(method = RequestMethod.POST, value = "/backdate-licence")
     public Mono<ResponseEntity> moviedocus() {
         try {
-           // scheduler.load();
+            String[] agentNumbers = new String[]{"LAGOS-AG-592316", "LAGOS-AG-942830"};
+            for (String agentNumber : agentNumbers) {
+                Query query = new Query();
+                query.addCriteria(Criteria.where("agentId").is(agentNumber));
+                Agent agent = (Agent) mongoRepositoryReactive.find(query, Agent.class).block();
+                if (agent != null) {
+                    query = new Query();
+                    query.addCriteria(Criteria.where("agentId").is(agent.getId()));
+                    query.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.GAMING_TERMINAL_ID));
+                    License license = (License) mongoRepositoryReactive.find(query, License.class).block();
+                    if (license != null) {
+                        LocalDate lastJan = LocalDate.now().withDayOfYear(1).minusYears(1);
+                        license.setEffectiveDate(lastJan);
+                        LocalDate expiryDate = lastJan.plusMonths(12);
+                        expiryDate = expiryDate.minusDays(1);
+                        license.setExpiryDate(expiryDate);
+                        mongoRepositoryReactive.saveOrUpdate(license);
+                    }
+                }
+            }
+            // scheduler.load();
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));

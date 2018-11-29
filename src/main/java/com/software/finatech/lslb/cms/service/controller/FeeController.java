@@ -24,11 +24,6 @@ public class FeeController extends BaseController {
     @Autowired
     public FeeService feeService;
 
-    @Autowired
-    public FeeService setFeeService() {
-        return feeService;
-    }
-
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"feePaymentTypeId", "gameTypeId", "licenseTypeId", "page", "pageSize"})
     @ApiOperation(value = "Get all Fees", response = FeeDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
