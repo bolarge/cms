@@ -464,23 +464,23 @@ public class Scheduler {
 
 
     // @Scheduled(fixedDelay = 34500000, initialDelay = 600000)
-    @Async
-    public void load() {
-        List<Document> documentList = (List<Document>) mongoRepositoryReactive.findAll(new Query(), Document.class).toStream().collect(Collectors.toList());
-        documentList.parallelStream().
-                forEach(document -> {
-                    try {
-                        if (document.getFile() != null) {
-                            DocumentBinary documentBinary = new DocumentBinary();
-                            documentBinary.setFile(document.getFile());
-                            documentBinary.setDocumentId(document.getId());
-                            mongoRepositoryReactive.saveOrUpdate(documentBinary);
-                            document.setFile(null);
-                            mongoRepositoryReactive.saveOrUpdate(document);
-                        }
-                    } catch (Exception e) {
-
-                    }
-                });
-    }
+ //  @Async
+//    public void load() {
+//        List<Document> documentList = (List<Document>) mongoRepositoryReactive.findAll(new Query(), Document.class).toStream().collect(Collectors.toList());
+//        documentList.parallelStream().
+//                forEach(document -> {
+//                    try {
+//                        if (document.getFile() != null) {
+//                            DocumentBinary documentBinary = new DocumentBinary();
+//                            documentBinary.setFile(document.getFile());
+//                            documentBinary.setDocumentId(document.getId());
+//                            mongoRepositoryReactive.saveOrUpdate(documentBinary);
+//                            document.setFile(null);
+//                            mongoRepositoryReactive.saveOrUpdate(document);
+//                        }
+//                    } catch (Exception e) {
+//
+//                    }
+//                });
+//    }
 }

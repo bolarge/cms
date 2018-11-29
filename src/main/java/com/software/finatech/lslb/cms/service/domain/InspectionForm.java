@@ -197,6 +197,14 @@ public class InspectionForm extends AbstractFact {
 
             }
           }
+        if(!StringUtils.isEmpty(gamingMachineId)){
+            try{
+                inspectionFormDto.setOwnerName(gamingMachine.getSerialNumber());
+
+            }catch (Exception ex){
+
+            }
+        }
         Map gameTypeMap = Mapstore.STORE.get("GameType");
 
         GameType gameType = null;

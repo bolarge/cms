@@ -3,11 +3,14 @@ package com.software.finatech.lslb.cms.service.util.adapters;
 import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
 import com.software.finatech.lslb.cms.service.domain.GameType;
 import com.software.finatech.lslb.cms.service.domain.Institution;
+import com.software.finatech.lslb.cms.service.domain.InstitutionCategoryDetails;
 import com.software.finatech.lslb.cms.service.dto.AgentInstitutionDto;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,5 +64,15 @@ public class AgentInstitutionAdapter {
             return null;
         }
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+    }
+
+    public static InstitutionCategoryDetails getInstitutionCategoryDetails(String institutionId, String gameTypeId, MongoRepositoryReactiveImpl mongoRepositoryReactive) {
+        if (StringUtils.isEmpty(institutionId) || StringUtils.isEmpty(gameTypeId)) {
+            return null;
+        }
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(institutionId));
+        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        return (InstitutionCategoryDetails) mongoRepositoryReactive.find(query, InstitutionCategoryDetails.class).block();
     }
 }
