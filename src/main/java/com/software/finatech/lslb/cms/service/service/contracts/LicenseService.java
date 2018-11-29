@@ -45,7 +45,8 @@ public interface LicenseService {
 
     Mono<ResponseEntity> getAllLicenseTypes();
 
-    Mono<ResponseEntity> getInstitutionAIPs(String institutionId, int page, int pageSize, String sortType, String sortParam, HttpServletResponse httpServletResponse);
+    Mono<ResponseEntity> getInstitutionAIPs(String institutionId);
+            //, int page, int pageSize, String sortType, String sortParam, HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getInstitutionCloseToExpirationLicenses(String institutionId);
 

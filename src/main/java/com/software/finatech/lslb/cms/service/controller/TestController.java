@@ -116,7 +116,7 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/move-docs")
     public Mono<ResponseEntity> moviedocus() {
         try {
-            scheduler.load();
+           // scheduler.load();
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
