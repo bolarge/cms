@@ -241,6 +241,7 @@ public class DeviceMagicAgentAdapter {
     }
 
     private GameType getGameTypeFromDeviceMagicName(String gameTypeString) {
+        gameTypeString = gameTypeString.replace("\"", "");
         Map<String, FactObject> gameTypeMap = Mapstore.STORE.get("GameType");
         if (gameTypeMap != null) {
             if (StringUtils.equals("Sports Bet", gameTypeString)) {
