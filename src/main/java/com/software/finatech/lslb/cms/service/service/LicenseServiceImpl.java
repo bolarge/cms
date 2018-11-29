@@ -416,7 +416,7 @@ public class LicenseServiceImpl implements LicenseService {
 //                .orOperator(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSE_RUNNING)));
         Criteria criteria = new Criteria();
         criteria.orOperator(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSE_RUNNING),
-                Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_DOCUMENT_STATUS_ID));
+                Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID));
         queryForInstitutionAIP.addCriteria(criteria);
         queryForInstitutionAIP.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
 
