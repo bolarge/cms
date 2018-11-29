@@ -174,7 +174,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 String feeName = feeDto.getFeePaymentTypeName();
                 String gameTypeName = feeDto.getGameTypeName();
                 String revenueName = feeDto.getRevenueName();
-                feeDescription = String.format("%s for %ss for category : %s ", feeName, revenueName, gameTypeName);
+                feeDescription = String.format("%s for %ss for %s ", feeName, revenueName, gameTypeName);
                 feeDescription = StringCapitalizer.convertToTitleCaseIteratingChars(feeDescription);
                 if (paymentRecordDetailCreateDto.getAmount() < fee.getAmount()) {
                     feeDescription = String.format("%s (Part Payment)", feeDescription);
@@ -252,7 +252,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 if (paymentRecordDetailCreateDto.isInstitutionPayment() || paymentRecordDetailCreateDto.isAgentPayment()) {
                     paymentRecord = newPaymentFromFee(fee, paymentRecordDetailCreateDto);
                 }
-                if (paymentRecordDetailCreateDto.isGamingMachinePayment() || paymentRecordDetailCreateDto.isGamingMachinePayment()) {
+                if (paymentRecordDetailCreateDto.isGamingMachinePayment() || paymentRecordDetailCreateDto.isGamingTerminalPayment()) {
                     paymentRecord = newPaymentForMachine(paymentRecordDetailCreateDto, machineMultiplePayment);
                 }
             }
@@ -270,7 +270,6 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             paymentRecordDetailIdList.add(paymentRecordDetail.getId());
             paymentRecord.setPaymentRecordDetailIds(paymentRecordDetailIdList);
             paymentRecordService.savePaymentRecord(paymentRecord);
-
 
             String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
             String verbiage = "";

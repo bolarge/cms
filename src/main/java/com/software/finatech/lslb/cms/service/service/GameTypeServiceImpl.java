@@ -1,11 +1,15 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.Agent;
+import com.software.finatech.lslb.cms.service.domain.EnumeratedFact;
+import com.software.finatech.lslb.cms.service.domain.GameType;
+import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.dto.GameTypeCreateDto;
 import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.MachineTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
@@ -155,6 +159,53 @@ public class GameTypeServiceImpl implements GameTypeService {
             return Mono.just(new ResponseEntity<>(gameType.convertToDto(), HttpStatus.OK));
         } catch (Exception ex) {
             return logAndReturnError(logger, String.format("An error occurred while creating game type %s", gameTypeCreateDto.getName()), ex);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> findGameTypesForMachineCreation(String agentId, String institutionId, String machineTypeId) {
+        try {
+            if ((StringUtils.isEmpty(agentId) && StringUtils.isEmpty(institutionId))
+                    || (!StringUtils.isEmpty(agentId) && !StringUtils.isEmpty(institutionId))) {
+                return Mono.just(new ResponseEntity<>("Bad request", HttpStatus.BAD_REQUEST));
+            }
+            Set<String> gameTypeIds = new HashSet<>();
+            Set<GameTypeDto> gameTypeDtos = new HashSet<>();
+            if (!StringUtils.isEmpty(agentId)) {
+                Agent agent = getAgent(agentId);
+                if (agent == null) {
+                    return Mono.just(new ResponseEntity<>(String.format("Agent with id %s not found", agentId), HttpStatus.BAD_REQUEST));
+                }
+                gameTypeIds = agent.getGameTypeIds();
+            }
+
+            if (!StringUtils.isEmpty(institutionId)) {
+                Institution institution = getInstitution(institutionId);
+                if (institution == null) {
+                    return Mono.just(new ResponseEntity<>(String.format("Operator with id %s not found", institutionId), HttpStatus.BAD_REQUEST));
+                }
+                gameTypeIds = institution.getGameTypeIds();
+            }
+
+            if (gameTypeIds.isEmpty()) {
+                return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
+            }
+            for (String gameTypeId : gameTypeIds) {
+                GameType gameType = findById(gameTypeId);
+                if (gameType != null) {
+                    if (StringUtils.equals(MachineTypeReferenceData.GAMING_TERMINAL_ID, machineTypeId)
+                            && gameType.getAllowsGamingTerminal()) {
+                        gameTypeDtos.add(gameType.convertToDto());
+                    }
+                    if (StringUtils.equals(MachineTypeReferenceData.GAMING_MACHINE_ID, machineTypeId)
+                            && gameType.getAllowsGamingMachine()) {
+                        gameTypeDtos.add(gameType.convertToDto());
+                    }
+                }
+            }
+            return Mono.just(new ResponseEntity<>(gameTypeDtos, HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while getting game tyoes for machine creation", e);
         }
     }
 
