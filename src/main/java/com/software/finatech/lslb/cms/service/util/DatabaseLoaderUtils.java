@@ -94,14 +94,8 @@ public class DatabaseLoaderUtils {
         TestData.generateAuthTestData(mongoRepositoryReactive);
         List<Document> documentList= (List<Document>)mongoRepositoryReactive.findAll(new Query(), Document.class ).toStream().collect(Collectors.toList());
         documentList.parallelStream().forEach(document -> {
-            DocumentBinary documentCheck=(DocumentBinary)mongoRepositoryReactive.find(new Query(Criteria.where("documentId").is(document.getId())), DocumentBinary.class).block();
-            if(documentCheck==null){
-                DocumentBinary documentBinary = new DocumentBinary();
-                documentBinary.setDocumentId(document.getId());
-                documentBinary.setId(UUID.randomUUID().toString());
-                documentBinary.setFile(document.getFile());
-                mongoRepositoryReactive.saveOrUpdate(documentBinary);
-            }
+                document.setFile(null);
+                mongoRepositoryReactive.saveOrUpdate(document);
         });
 
     }
