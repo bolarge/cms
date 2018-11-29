@@ -99,5 +99,15 @@ public class TestController extends BaseController {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/delete-operators")
+    public Mono<ResponseEntity> delete() {
+        try {
+            existingOperatorLoader.init();
+            return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
+        } catch (Exception e) {
+            return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
 }
 

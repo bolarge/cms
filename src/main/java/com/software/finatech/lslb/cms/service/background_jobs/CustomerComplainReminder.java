@@ -32,7 +32,7 @@ public class CustomerComplainReminder {
     private static final int FIFTEEN_MIN = 15 * 60 * 1000;
     private static final int MAX_DAYS_BEFORE_COMPLAIN_REMINDER = 7;
 
-    @Scheduled(fixedRate = 5 * 50 * 1000)
+    @Scheduled(fixedRate = 5 * 50 * 1000, initialDelay = 600000)
     @SchedulerLock(name = "Remind Pending Customer Complains", lockAtMostFor = FIFTEEN_MIN, lockAtLeastFor = FIFTEEN_MIN)
     public void sendReminderEmails() {
         ArrayList<AuthInfo> validLslbUsersForNotification = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_CUSTOMER_COMPLAIN_ID);
