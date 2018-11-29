@@ -193,7 +193,7 @@ public class DocumentTypeReferenceData {
             documentType23.setId("23");
         }
         documentType23.setName("INSPECTION FORM");
-        documentType23.setDocumentPurposeId(DocumentPurposeReferenceData.INSPECTION_ID);
+        documentType23.setDocumentPurposeId(INSPECTION_ID);
         documentType23.setGameTypeIds(getOSbAndPolGameTypeIdSet());
         documentType23.setActive(true);
         documentType23.setRequired(true);
@@ -227,7 +227,7 @@ public class DocumentTypeReferenceData {
         documentType26.setDocumentPurposeId(AIPReportDocumentPurposeId);
         documentType26.setGameTypeIds(getOSbAndPolGameTypeIdSet());
         documentType26.setActive(true);
-        documentType26.setRequired(false);
+        documentType26.setRequired(true);
 
 
         mongoRepositoryReactive.saveOrUpdate(documentType1);
