@@ -49,57 +49,63 @@ public class ExistingOperatorLoader {
                 // String[] columns = rows[i].split(",");
                 String[] columns = rows[i].split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
                 if (columns.length < 15) {
-                    throw new LicenseServiceException("File is less than 11 columns");
-                } else {
-                    try {
-                        String institutionName = columns[3];
-                        if (!StringUtils.isEmpty(institutionName)) {
-                            InstitutionUpload institutionUpload = institutionUploadMap.get(institutionName);
-                            if (institutionUpload == null) {
-                                institutionUpload = new InstitutionUpload();
-                                institutionUpload.setLine(rows[i]);
-                                institutionUpload.setInstitutionName(institutionName);
-                                institutionUpload.setDescription(columns[5]);
-                                institutionUpload.setEmailAddress(columns[8]);
-                                institutionUpload.setPhoneNumber(columns[9]);
-                                String address = columns[10].replace("\"", "").replace("?", "");
-                                institutionUpload.setAddress(address);
-                            }
-                            String gameTypeSearchKey = columns[6];
-                            GameType gameType = gameTypeService.findGameTypeBySearchKey(gameTypeSearchKey);
-                            if (gameType == null) {
-                                throw new LicenseServiceException(String.format("Game type with search key %s not found", gameTypeSearchKey));
-                            }
-                            InstitutionLoadDetails loadDetails = new InstitutionLoadDetails();
-
-                            if (!StringUtils.isEmpty(columns[11])) {
-                                LocalDate licenseStartDate = dateTimeFormat.parseLocalDate(columns[11]);
-                                loadDetails.setLicenseStartDate(licenseStartDate);
-                            }
-                            if (!StringUtils.isEmpty(columns[12])) {
-                                LocalDate licenseEndDate = dateTimeFormat.parseLocalDate(columns[12]);
-                                loadDetails.setLicenseEndDate(licenseEndDate);
-                            }
-                            if (!StringUtils.isEmpty(columns[13])) {
-                                LocalDate licenseFirstDate = dateTimeFormat.parseLocalDate(columns[13]);
-                                loadDetails.setFirstCommencementDate(licenseFirstDate);
-                            }
-                            loadDetails.setGameTypeId(gameType.getId());
-                            loadDetails.setTradeName(columns[4]);
-                            loadDetails.setDirector(columns[7]);
-                            loadDetails.setStatus(columns[14]);
-                            institutionUpload.getInstitutionLoadDetails().add(loadDetails);
-                            institutionUploadMap.put(institutionName, institutionUpload);
+                    throw new LicenseServiceException("File is less than 15 columns");
+                }
+                try {
+                    String institutionName = columns[3];
+                    if (!StringUtils.isEmpty(institutionName)) {
+                        InstitutionUpload institutionUpload = institutionUploadMap.get(institutionName);
+                        if (institutionUpload == null) {
+                            institutionUpload = new InstitutionUpload();
+                            institutionUpload.setLine(rows[i]);
+                            institutionUpload.setInstitutionName(institutionName);
+                            institutionUpload.setDescription(columns[5]);
+                            institutionUpload.setEmailAddress(columns[8]);
+                            institutionUpload.setPhoneNumber(columns[9]);
+                            String address = columns[10].replace("\"", "").replace("?", "");
+                            institutionUpload.setAddress(address);
                         }
-                    } catch (IllegalArgumentException e) {
-                        throw new LicenseServiceException("Error occurred while parsing date ");
+                        String gameTypeSearchKey = columns[6];
+                        GameType gameType = gameTypeService.findGameTypeBySearchKey(gameTypeSearchKey);
+                        if (gameType == null) {
+                            throw new LicenseServiceException(String.format("Game type with search key %s not found", gameTypeSearchKey));
+                        }
+                        InstitutionLoadDetails loadDetails = new InstitutionLoadDetails();
+
+                        if (!StringUtils.isEmpty(columns[11])) {
+                            LocalDate licenseStartDate = dateTimeFormat.parseLocalDate(columns[11]);
+                            loadDetails.setLicenseStartDate(licenseStartDate);
+                        }
+                        if (!StringUtils.isEmpty(columns[12])) {
+                            LocalDate licenseEndDate = dateTimeFormat.parseLocalDate(columns[12]);
+                            loadDetails.setLicenseEndDate(licenseEndDate);
+                        }
+                        if (!StringUtils.isEmpty(columns[13])) {
+                            LocalDate licenseFirstDate = dateTimeFormat.parseLocalDate(columns[13]);
+                            loadDetails.setFirstCommencementDate(licenseFirstDate);
+                        }
+                        loadDetails.setGameTypeId(gameType.getId());
+                        loadDetails.setTradeName(columns[4]);
+                        loadDetails.setDirector(columns[7]);
+                        loadDetails.setStatus(columns[14]);
+                        String status = columns[14];
+                        if (StringUtils.isEmpty(status)) {
+                            logger.info("{} has no licence status for category {}, Skipping", institutionName, gameTypeSearchKey);
+                            continue;
+                        }
+                        institutionUpload.getInstitutionLoadDetails().add(loadDetails);
+                        institutionUploadMap.put(institutionName, institutionUpload);
                     }
+                } catch (IllegalArgumentException e) {
+                    throw new LicenseServiceException("Error occurred while parsing date ");
                 }
             }
             loadInstitutionsFromMap(institutionUploadMap);
         } catch (IOException e) {
+            logger.error("IO Exception ", e);
             throw new LicenseServiceException("An error occurred while parsing the file");
         } catch (Exception e) {
+            logger.error("An error occurred ", e);
             throw new LicenseServiceException("An error occurred while parsing file");
         }
     }
@@ -113,6 +119,7 @@ public class ExistingOperatorLoader {
             pendingInstitution.setDescription(institutionUpload.getDescription());
             pendingInstitution.setEmailAddress(institutionUpload.getEmailAddress());
             pendingInstitution.setPhoneNumber(String.format("0%s", institutionUpload.getPhoneNumber()));
+            pendingInstitution.setFromLiveData(true);
             pendingInstitution.setAddress(institutionUpload.getAddress());
             for (InstitutionLoadDetails institutionLoadDetails : institutionUpload.getInstitutionLoadDetails()) {
                 InstitutionCategoryDetails institutionCategoryDetails = new InstitutionCategoryDetails();
@@ -125,7 +132,6 @@ public class ExistingOperatorLoader {
                 pendingInstitution.getDirectorsNames().addAll(directorNames);
                 institutionCategoryDetails.setInstitutionId(pendingInstitution.getId());
                 pendingInstitution.getGameTypeIds().add(institutionLoadDetails.getGameTypeId());
-                mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
                 pendingInstitution.getInstitutionCategoryDetailIds().add(institutionCategoryDetails.getId());
 
                 License pendingLicense = new License();
@@ -138,13 +144,16 @@ public class ExistingOperatorLoader {
                 String licenseStatusId = findLicenseStatusIdByKey(institutionLoadDetails.getStatus());
                 if (licenseStatusId == null) {
                     logger.info("{} has no license status ", pendingInstitution);
+                    continue;
                 }
                 pendingLicense.setLicenseStatusId(licenseStatusId);
                 //    pendingLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
                 pendingLicense.setLicenseNumber(generateLicenseNumber(institutionLoadDetails.getGameTypeId()));
                 mongoRepositoryReactive.saveOrUpdate(pendingLicense);
+                mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
             }
             mongoRepositoryReactive.saveOrUpdate(pendingInstitution);
+
         }
     }
 
@@ -153,7 +162,11 @@ public class ExistingOperatorLoader {
         String[] names = director.split(" {3}");
         for (String name : names) {
             if (!StringUtils.isEmpty(name)) {
-                directorNames.add(name.trim());
+                name = name.trim();
+                if (!StringUtils.isEmpty(name)) {
+                    name = name.replace("\"", "");
+                    directorNames.add(name);
+                }
             }
         }
         return directorNames;
@@ -161,6 +174,9 @@ public class ExistingOperatorLoader {
 
 
     private String findLicenseStatusIdByKey(String key) {
+        if (StringUtils.isEmpty(key)) {
+            return null;
+        }
 
         if (StringUtils.equalsIgnoreCase("Licenced", key)) {
             return LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID;

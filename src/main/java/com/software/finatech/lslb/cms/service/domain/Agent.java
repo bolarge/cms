@@ -27,7 +27,7 @@ public class Agent extends AbstractFact {
     protected List<AgentInstitution> agentInstitutions = new ArrayList<>();
     protected String dateOfBirth;
     protected String residentialAddress;
-    protected List<String> businessAddresses = new ArrayList<>();
+    protected Set<String> businessAddresses = new HashSet<>();
     protected String meansOfId;
     protected String idNumber;
     protected String bvn;
@@ -43,8 +43,17 @@ public class Agent extends AbstractFact {
     private String genderId;
     private String submissionId;
     private boolean skipVigipay;
-    private boolean fromDeviceMagic;
+    private boolean fromLiveData;
+
     private LocalDate dob;
+
+    public boolean isFromLiveData() {
+        return fromLiveData;
+    }
+
+    public void setFromLiveData(boolean fromLiveData) {
+        this.fromLiveData = fromLiveData;
+    }
 
     public LocalDate getDob() {
         return dob;
@@ -52,14 +61,6 @@ public class Agent extends AbstractFact {
 
     public void setDob(LocalDate dob) {
         this.dob = dob;
-    }
-
-    public boolean isFromDeviceMagic() {
-        return fromDeviceMagic;
-    }
-
-    public void setFromDeviceMagic(boolean fromDeviceMagic) {
-        this.fromDeviceMagic = fromDeviceMagic;
     }
 
     public boolean isSkipVigipay() {
@@ -271,11 +272,12 @@ public class Agent extends AbstractFact {
         this.agentInstitutions = agentInstitutions;
     }
 
-    public List<String> getBusinessAddresses() {
+
+    public Set<String> getBusinessAddresses() {
         return businessAddresses;
     }
 
-    public void setBusinessAddresses(List<String> businessAddresses) {
+    public void setBusinessAddresses(Set<String> businessAddresses) {
         this.businessAddresses = businessAddresses;
     }
 

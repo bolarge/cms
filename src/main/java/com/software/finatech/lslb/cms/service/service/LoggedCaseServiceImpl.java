@@ -167,6 +167,9 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             loggedCaseMailSenderAsync.sendNewCaseNotificationToLslbUsersThatCanReceive(loggedCase);
+
+            //close attached entities(Report or customer complaint) attached to case
+            closeAttachedEntities(loggedCase);
             return Mono.just(new ResponseEntity<>(loggedCase.convertToFullDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while creating case", e);
@@ -325,7 +328,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             action.setUserId(loggedInUser.getId());
             action.setLslbCaseOutcomeId(caseActionRequest.getCaseOutcomeId());
             loggedCase.getCaseActions().add(action);
-            makeOutComeEffectOnOperatorLicense(loggedCase, caseActionRequest.getReason());
+            makeOutComeEffectOnOperatorLicense(loggedCase, caseActionRequest);
             mongoRepositoryReactive.saveOrUpdate(loggedCase);
 
             String verbiage = String.format("Made Outcome on Logged Case, Ticket id: -> %s, Outcome -> %s",
@@ -339,28 +342,28 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
         }
     }
 
-    private void makeOutComeEffectOnOperatorLicense(LoggedCase loggedCase, String reason) {
+    private void makeOutComeEffectOnOperatorLicense(LoggedCase loggedCase, CaseOutcomeRequest caseOutcomeRequest) {
         License license = licenseService.findInstitutionActiveLicenseInGameType(loggedCase.getInstitutionId(), loggedCase.getGameTypeId());
         if (license != null) {
             if (loggedCase.isOutcomeLicenseRevoked()) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_REVOKED_ID);
-                license.setLicenseChangeReason(reason);
+                license.setLicenseChangeReason(caseOutcomeRequest.getReason());
                 loggedCaseMailSenderAsync.sendOutcomeNotificationToOffender(loggedCase);
             }
             if (loggedCase.isOutcomeLicenseSuspended()) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_SUSPENDED_ID);
-                license.setLicenseChangeReason(reason);
+                license.setLicenseChangeReason(caseOutcomeRequest.getReason());
                 loggedCaseMailSenderAsync.sendOutcomeMailToOffender(loggedCase);
             }
             if (loggedCase.isOutcomeLicenseTerminated()) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_TERMINATED_ID);
-                license.setLicenseChangeReason(reason);
+                license.setLicenseChangeReason(caseOutcomeRequest.getReason());
                 loggedCaseMailSenderAsync.sendOutcomeNotificationToOffender(loggedCase);
             }
             mongoRepositoryReactive.saveOrUpdate(license);
         }
         if (loggedCase.isOutcomePenalty()) {
-            loggedCaseMailSenderAsync.sendPenaltyMailToOffender(loggedCase);
+            loggedCaseMailSenderAsync.sendPenaltyMailToOffender(loggedCase, caseOutcomeRequest.getCasePenaltyParams());
         }
     }
 
@@ -418,5 +421,21 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
         List<String> validRolesIds = LSLBAuthRoleReferenceData.getLslbRoles();
         validRolesIds.add(AuthRoleReferenceData.SUPER_ADMIN_ID);
         return validRolesIds;
+    }
+
+    private void closeAttachedEntities(LoggedCase loggedCase) {
+        InspectionForm inspectionForm = loggedCase.getInspectionForm();
+        if (inspectionForm != null) {
+            inspectionForm.setStatus(InspectionStatusReferenceData.CLOSED);
+            inspectionForm.setLoggedCaseId(loggedCase.getId());
+            mongoRepositoryReactive.saveOrUpdate(inspectionForm);
+        }
+
+        CustomerComplain customerComplain = loggedCase.getCustomerComplaint();
+        if (customerComplain != null) {
+            customerComplain.setLoggedCaseId(loggedCase.getId());
+            customerComplain.setCustomerComplainStatusId(CustomerComplainStatusReferenceData.CLOSED_ID);
+            mongoRepositoryReactive.saveOrUpdate(customerComplain);
+        }
     }
 }

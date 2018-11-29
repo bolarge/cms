@@ -4,7 +4,6 @@ import com.software.finatech.lslb.cms.service.dto.DocumentTypeDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.HashSet;
@@ -17,8 +16,6 @@ public class DocumentType extends EnumeratedFact {
 
     protected Set<String> gameTypeIds = new HashSet<>();
     protected String documentPurposeId;
-    @Transient
-    protected DocumentPurpose documentPurpose;
     protected boolean active;
     protected boolean required;
     protected String approverId;
@@ -53,14 +50,6 @@ public class DocumentType extends EnumeratedFact {
 
     public void setDocumentPurposeId(String documentPurposeId) {
         this.documentPurposeId = documentPurposeId;
-    }
-
-    public DocumentPurpose getDocumentPurpose() {
-        return documentPurpose;
-    }
-
-    public void setDocumentPurpose(DocumentPurpose documentPurpose) {
-        this.documentPurpose = documentPurpose;
     }
 
     public String getApproverId() {
@@ -108,22 +97,6 @@ public class DocumentType extends EnumeratedFact {
         return gameTypeNames;
     }
 
-
-    public void setAssociatedProperties() throws FactNotFoundException {
-        if (documentPurposeId != null) {
-            DocumentPurpose DocumentPurpose = (DocumentPurpose) Mapstore.STORE.get("DocumentPurpose").get(documentPurposeId);
-            if (DocumentPurpose == null) {
-                DocumentPurpose = (DocumentPurpose) mongoRepositoryReactive.findById(documentPurposeId, DocumentPurpose.class).block();
-                if (DocumentPurpose == null) {
-                    throw new FactNotFoundException("DocumentPurpose", documentPurposeId);
-                } else {
-                    Mapstore.STORE.get("DocumentPurpose").put(DocumentPurpose.getId(), DocumentPurpose);
-                }
-            }
-            setDocumentPurpose(DocumentPurpose);
-        }
-    }
-
     public AuthInfo getApprover() {
         if (StringUtils.isEmpty(this.approverId)) {
             return null;
@@ -147,5 +120,20 @@ public class DocumentType extends EnumeratedFact {
             dto.setApproverId(this.approverId);
         }
         return dto;
+    }
+
+    public DocumentPurpose getDocumentPurpose() {
+        DocumentPurpose documentPurpose = null;
+        Map<String, FactObject> documentPurposeMap = Mapstore.STORE.get("DocumentPurpose");
+        if (documentPurposeMap != null) {
+            documentPurpose = (DocumentPurpose) documentPurposeMap.get(documentPurposeId);
+        }
+        if (documentPurpose == null) {
+            documentPurpose = (DocumentPurpose) mongoRepositoryReactive.findById(documentPurposeId, DocumentPurpose.class).block();
+            if (documentPurpose != null && documentPurposeMap != null) {
+                documentPurposeMap.put(documentPurposeId, documentPurpose);
+            }
+        }
+        return documentPurpose;
     }
 }

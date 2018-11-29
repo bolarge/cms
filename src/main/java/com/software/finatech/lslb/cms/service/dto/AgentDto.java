@@ -1,7 +1,9 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class AgentDto {
     private List<AgentInstitutionDto> agentInstitutions = new ArrayList<>();
@@ -23,7 +25,7 @@ public class AgentDto {
     private String bvn;
     private String agentId;
     private List<MachineDto> gamingTerminals = new ArrayList<>();
-    private List<String> businessAddresses = new ArrayList<>();
+    private Set<String> businessAddresses = new HashSet<>();
     private String agentStatusId;
     private String agentStatusName;
     private String genderId;
@@ -213,11 +215,11 @@ public class AgentDto {
         this.agentId = agentId;
     }
 
-    public List<String> getBusinessAddresses() {
+    public Set<String> getBusinessAddresses() {
         return businessAddresses;
     }
 
-    public void setBusinessAddresses(List<String> businessAddresses) {
+    public void setBusinessAddresses(Set<String> businessAddresses) {
         this.businessAddresses = businessAddresses;
     }
 }

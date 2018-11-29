@@ -566,4 +566,18 @@ public class LoggedCase extends AbstractFact {
     public boolean hasOutcome() {
         return !StringUtils.isEmpty(this.loggedCaseOutcomeId);
     }
+
+    public InspectionForm getInspectionForm(){
+        if (StringUtils.isEmpty(this.loggedReportId)){
+            return null;
+        }
+        return (InspectionForm)mongoRepositoryReactive.findById(this.loggedReportId, InspectionForm.class).block();
+    }
+
+    public CustomerComplain getCustomerComplaint(){
+        if (StringUtils.isEmpty(this.customerComplaintId)){
+            return null;
+        }
+        return (CustomerComplain)mongoRepositoryReactive.findById(this.customerComplaintId, CustomerComplain.class).block();
+    }
 }

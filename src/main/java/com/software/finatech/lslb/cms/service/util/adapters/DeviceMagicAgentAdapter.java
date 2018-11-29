@@ -5,14 +5,15 @@ import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import com.software.finatech.lslb.cms.service.util.adapters.model.DeviceMagicAgent;
+import com.software.finatech.lslb.cms.service.util.adapters.model.DeviceMagicAgentInstitutionCategoryDetails;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.BsonBinarySubType;
 import org.bson.types.Binary;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
@@ -52,8 +54,12 @@ public class DeviceMagicAgentAdapter {
         agent.setLastName(deviceMagicAgent.getLastName());
         agent.setEmailAddress(deviceMagicAgent.getEmail());
         agent.setPhoneNumber(deviceMagicAgent.getPhoneNumber1());
-        agent.getPhoneNumbers().add(deviceMagicAgent.getPhoneNumber1());
-        agent.getPhoneNumbers().add(deviceMagicAgent.getPhoneNumber2());
+        if (!StringUtils.isEmpty(deviceMagicAgent.getPhoneNumber1())) {
+            agent.getPhoneNumbers().add(deviceMagicAgent.getPhoneNumber1());
+        }
+        if (!StringUtils.isEmpty(deviceMagicAgent.getPhoneNumber2())) {
+            agent.getPhoneNumbers().add(deviceMagicAgent.getPhoneNumber2());
+        }
         agent.setMeansOfId(deviceMagicAgent.getMeansOfId());
         agent.setTitle(deviceMagicAgent.getTitle());
         agent.setBvn(deviceMagicAgent.getBvn());
@@ -61,55 +67,76 @@ public class DeviceMagicAgentAdapter {
         agent.setAgentStatusId(AgentStatusReferenceData.ACTIVE_ID);
         agent.setEnabled(true);
         agent.setIdNumber(deviceMagicAgent.getIdNumber());
-        String address = buildAddress(deviceMagicAgent.getResidentialAddressStreet(),
-                deviceMagicAgent.getResindetialAddressCity(), deviceMagicAgent.getResidentialAddressState());
-        if (!StringUtils.isEmpty(address)) {
-            agent.setResidentialAddress(address);
+        String residentialAddress = buildAddress(deviceMagicAgent.getResidentialAddressStreet(),
+                deviceMagicAgent.getResidentialAddressCity(), deviceMagicAgent.getResidentialAddressState());
+        if (!StringUtils.isEmpty(residentialAddress)) {
+            residentialAddress = residentialAddress.replace("\"", "");
+            agent.setResidentialAddress(residentialAddress);
         }
-        address = buildAddress(deviceMagicAgent.getBusinessAddressStreet1(),
-                deviceMagicAgent.getBusinessAddressCity1(), deviceMagicAgent.getBusinessAddressState1());
-        if (!StringUtils.isEmpty(address)) {
-            agent.getBusinessAddresses().add(address);
-        }
-        address = buildAddress(deviceMagicAgent.getBusinessAddressStreet2(),
-                deviceMagicAgent.getBusinessAddressCity2(), deviceMagicAgent.getBusinessAddressState2());
-        if (!StringUtils.isEmpty(address)) {
-            agent.getBusinessAddresses().add(address);
-        }
-        address = buildAddress(deviceMagicAgent.getBusinessAddressStreet3(),
-                deviceMagicAgent.getBusinessAddressCity3(), deviceMagicAgent.getBusinessAddressState3());
-        if (!StringUtils.isEmpty(address)) {
-            agent.getBusinessAddresses().add(address);
-        }
-        address = buildAddress(deviceMagicAgent.getBusinessAddressStreet4(),
-                deviceMagicAgent.getBusinessAddressCity4(), deviceMagicAgent.getBusinessAddressState4());
-        if (!StringUtils.isEmpty(address)) {
-            agent.getBusinessAddresses().add(address);
-        }
-        String institutionId = findInstitutionIdByOperatorId(deviceMagicAgent.getOperatorId());
-        if (StringUtils.isEmpty(institutionId)) {
-            logger.info("No Institution found for operator id {} for submission id {}, Skipping agent creation ", deviceMagicAgent.getOperatorId(), deviceMagicAgent.getSubmissionId());
-            return;
-        }
-        agent.getInstitutionIds().add(institutionId);
-        String[] gameTypeStrings = deviceMagicAgent.getGamingCategopry().split(",");
-        AgentInstitution agentInstitution = new AgentInstitution();
-        for (String gameTypeString : gameTypeStrings) {
-            GameType gameType = getGameTypeFromDeviceMagicName(gameTypeString);
-            if (gameType != null) {
-                agent.getGameTypeIds().add(gameType.getId());
-                agentInstitution.getGameTypeIds().add(gameType.getId());
-                agentInstitution.setBusinessAddressList(agent.getBusinessAddresses());
-                agentInstitution.setInstitutionId(institutionId);
-            } else {
-                logger.info("GameType with name /String {} not found", gameTypeString);
+        for (DeviceMagicAgentInstitutionCategoryDetails institutionCategoryDetails : deviceMagicAgent.getInstitutionCategoryDetailsList()) {
+            AgentInstitution agentInstitution = new AgentInstitution();
+            String address = buildAddress(institutionCategoryDetails.getBusinessAddressStreet1(),
+                    institutionCategoryDetails.getBusinessAddressCity1(), institutionCategoryDetails.getBusinessAddressState1());
+            if (!StringUtils.isEmpty(address)) {
+                address = address.replace("\"", "");
+                agentInstitution.getBusinessAddressList().add(address);
+                agent.getBusinessAddresses().add(address);
             }
+            address = buildAddress(institutionCategoryDetails.getBusinessAddressStreet2(),
+                    institutionCategoryDetails.getBusinessAddressCity2(), institutionCategoryDetails.getBusinessAddressState2());
+            if (!StringUtils.isEmpty(address)) {
+                address = address.replace("\"", "");
+                agentInstitution.getBusinessAddressList().add(address);
+                agent.getBusinessAddresses().add(address);
+            }
+            address = buildAddress(institutionCategoryDetails.getBusinessAddressStreet3(),
+                    institutionCategoryDetails.getBusinessAddressCity3(), institutionCategoryDetails.getBusinessAddressState3());
+            if (!StringUtils.isEmpty(address)) {
+                address = address.replace("\"", "");
+                agentInstitution.getBusinessAddressList().add(address);
+                agent.getBusinessAddresses().add(address);
+            }
+            address = buildAddress(institutionCategoryDetails.getBusinessAddressStreet4(),
+                    institutionCategoryDetails.getBusinessAddressCity4(), institutionCategoryDetails.getBusinessAddressState4());
+            if (!StringUtils.isEmpty(address)) {
+                address = address.replace("\"", "");
+                agentInstitution.getBusinessAddressList().add(address);
+                agent.getBusinessAddresses().add(address);
+            }
+            String institutionId = findInstitutionIdByOperatorId(institutionCategoryDetails.getOperatorId());
+            if (StringUtils.isEmpty(institutionId)) {
+                logger.info("No Institution found for operator id {} for submission id {}, Skipping agent creation ", institutionCategoryDetails.getOperatorId(), deviceMagicAgent.getSubmissionId());
+                return;
+            }
+            agent.getInstitutionIds().add(institutionId);
+            agentInstitution.setInstitutionId(institutionId);
+            String[] gameTypeStrings = institutionCategoryDetails.getGamingCategory().split(",");
+            for (String gameTypeString : gameTypeStrings) {
+                GameType gameType = getGameTypeFromDeviceMagicName(gameTypeString);
+                if (gameType != null) {
+                    agent.getGameTypeIds().add(gameType.getId());
+                    agentInstitution.getGameTypeIds().add(gameType.getId());
+                } else {
+                    logger.info("GameType with name /String {} not found", gameTypeString);
+                }
+            }
+            agent.getAgentInstitutions().add(agentInstitution);
         }
-        agent.getAgentInstitutions().add(agentInstitution);
-        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("dd/MM/YYYY");
         String dob = deviceMagicAgent.getDateOfBirth();
-        if (!StringUtils.isEmpty(dob)) {
-            agent.setDob(dateTimeFormatter.parseLocalDate(dob));
+        try {
+
+            if (!StringUtils.isEmpty(dob)) {
+                agent.setDob(dateTimeFormatter.parseLocalDate(dob));
+            }
+        } catch (Exception e) {
+            try {
+                dateTimeFormatter = DateTimeFormat.forPattern("YYYY-MM-dd");
+                LocalDate dateOfBirth = dateTimeFormatter.parseLocalDate(deviceMagicAgent.getDateOfBirth());
+                agent.setDob(dateOfBirth);
+            } catch (Exception ex) {
+                logger.error("An error occurred while parsing agent date ", ex);
+            }
         }
         Gender gender = getGenderFromDeviceMagicName(deviceMagicAgent.getGender());
         if (gender != null) {
@@ -117,12 +144,12 @@ public class DeviceMagicAgentAdapter {
         }
         agent.setTitle(deviceMagicAgent.getTitle());
         agent.setSkipVigipay(true);
-        agent.setFromDeviceMagic(true);
+        agent.setFromLiveData(true);
         mongoRepositoryReactive.saveOrUpdate(agent);
         if (isNewAgent) {
             saveDocumentForAgent(deviceMagicAgent, agent);
             logger.info("Saved Agent for submission {} , Agent Id {}", deviceMagicAgent.getSubmissionId(), agent.getId());
-        }else {
+        } else {
             logger.info("Updated Agent for submission {} , Agent Id {}", deviceMagicAgent.getSubmissionId(), agent.getId());
         }
     }
@@ -147,15 +174,17 @@ public class DeviceMagicAgentAdapter {
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
             document.setAgentId(agent.getId());
             try {
-                DocumentBinary documentBinary= new DocumentBinary();
+                DocumentBinary documentBinary = new DocumentBinary();
                 documentBinary.setFile(new Binary(BsonBinarySubType.BINARY, Files.toByteArray(file)));
                 documentBinary.setDocumentId(document.getId());
                 mongoRepositoryReactive.saveOrUpdate(documentBinary);
-               } catch (IOException e) {
+            } catch (IOException e) {
                 logger.error("An error occurred while setting bytes of document");
             }
             mongoRepositoryReactive.saveOrUpdate(document);
             logger.info("Saved passport for agent with submission {}", submissionId);
+        } catch (FileNotFoundException e) {
+            logger.error("No Passport found for agent {}", agent.getFullName());
         } catch (Exception e) {
             logger.error(String.format("An error occurred while saving agent passport for agent %s", submissionId), e);
         }
@@ -238,242 +267,242 @@ public class DeviceMagicAgentAdapter {
         }
         return null;
     }
-
-    public DeviceMagicAgent fromJsonObject(JSONObject jsonObject) {
-        String VALUE = "value";
-        String STREET_ADDRESS = "Street_Address";
-        String STATE = "State";
-        String CITY = "City";
-        DeviceMagicAgent agent = new DeviceMagicAgent();
-        try {
-            JSONObject answerJsonObject = (JSONObject) jsonObject.get("answers");
-            try {
-                JSONObject operatorIdJsonObject = (JSONObject) answerJsonObject.get("Operator_ID");
-                if (operatorIdJsonObject != null) {
-                    String operatorId = (String) operatorIdJsonObject.get(VALUE);
-                    agent.setOperatorId(operatorId);
-                }
-            } catch (Exception e) {
-            }
-            try {
-                JSONObject gamingCategoryJsonObject = (JSONObject) answerJsonObject.get("Gaming_Category");
-                if (gamingCategoryJsonObject != null) {
-                    agent.setGamingCategopry((String) gamingCategoryJsonObject.get(VALUE));
-                }
-            } catch (Exception e) {
-            }
-            try {
-                JSONObject firstNameJsonObject = (JSONObject) answerJsonObject.get("First_Name");
-                if (firstNameJsonObject != null) {
-                    agent.setFirstName((String) firstNameJsonObject.get(VALUE));
-                }
-            } catch (Exception e) {
-            }
-            try {
-                JSONObject lastNameJsonObject = (JSONObject) answerJsonObject.get("Last_Name");
-                if (lastNameJsonObject != null) {
-                    agent.setLastName((String) lastNameJsonObject.get(VALUE));
-                }
-            } catch (Exception e) {
-            }
-            try {
-                JSONObject titleJsonObject = (JSONObject) answerJsonObject.get("Title");
-                if (titleJsonObject != null) {
-                    agent.setTitle((String) titleJsonObject.get(VALUE));
-                }
-            } catch (Exception e) {
-            }
-
-            try {
-                JSONObject dateOfBirthJsonObject = (JSONObject) answerJsonObject.get("Date_Of_Birth");
-                if (dateOfBirthJsonObject != null) {
-                    agent.setDateOfBirth((String) dateOfBirthJsonObject.get(VALUE));
-                }
-            } catch (Exception e) {
-            }
-
-            try {
-                JSONObject phoneNumber1JsonObject = (JSONObject) answerJsonObject.get("Phone_No__1");
-                if (phoneNumber1JsonObject != null) {
-                    agent.setPhoneNumber1((String) phoneNumber1JsonObject.get(VALUE));
-                }
-            } catch (Exception e) {
-
-            }
-
-            try {
-                JSONObject phoneNumber2JsonObject = (JSONObject) answerJsonObject.get("Phone_No__2");
-                if (phoneNumber2JsonObject != null) {
-                    agent.setPhoneNumber2((String) phoneNumber2JsonObject.get(VALUE));
-                }
-            } catch (Exception e) {
-
-            }
-
-            try {
-                JSONObject residentialAddressJsonObject = (JSONObject) answerJsonObject.get("Residential_Address");
-                if (residentialAddressJsonObject != null) {
-                    JSONArray addressArray = (JSONArray) residentialAddressJsonObject.get("values");
-                    JSONObject addressObject = (JSONObject) addressArray.get(0);
-                    JSONObject streetAddressObject = (JSONObject) addressObject.get(STREET_ADDRESS);
-                    if (streetAddressObject != null) {
-                        agent.setResidentialAddressStreet((String) streetAddressObject.get(VALUE));
-                    }
-
-                    JSONObject stateObject = (JSONObject) addressObject.get(STATE);
-                    if (stateObject != null) {
-                        agent.setResidentialAddressState((String) stateObject.get(VALUE));
-                    }
-
-                    JSONObject cityObject = (JSONObject) addressObject.get(CITY);
-                    if (cityObject != null) {
-                        agent.setResindetialAddressCity((String) cityObject.get(VALUE));
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("Error reading business address", e);
-            }
-
-            try {
-                JSONObject businessAddress1JsonObject = (JSONObject) answerJsonObject.get("Business_Address_1");
-                if (businessAddress1JsonObject != null) {
-                    JSONArray businessAddressArray = (JSONArray) businessAddress1JsonObject.get("values");
-                    JSONObject addressObject = (JSONObject) businessAddressArray.get(0);
-                    JSONObject streetAddressObject = (JSONObject) addressObject.get(STREET_ADDRESS);
-                    if (streetAddressObject != null) {
-                        agent.setBusinessAddressStreet1((String) streetAddressObject.get(VALUE));
-                    }
-
-                    JSONObject stateObject = (JSONObject) addressObject.get(STATE);
-                    if (stateObject != null) {
-                        agent.setBusinessAddressState1((String) stateObject.get(VALUE));
-                    }
-
-                    JSONObject cityObject = (JSONObject) addressObject.get(CITY);
-                    if (cityObject != null) {
-                        agent.setBusinessAddressCity1((String) cityObject.get(VALUE));
-                    }
-                }
-            } catch (Exception e) {
-            }
-
-            try {
-                JSONObject businessAddress2JsonObject = (JSONObject) answerJsonObject.get("Business_Address_2");
-                if (businessAddress2JsonObject != null) {
-                    JSONArray businessAddressArray = (JSONArray) businessAddress2JsonObject.get("value");
-                    JSONObject addressObject = (JSONObject) businessAddressArray.get(0);
-                    JSONObject streetAddressObject = (JSONObject) addressObject.get(STREET_ADDRESS);
-                    if (streetAddressObject != null) {
-                        agent.setBusinessAddressStreet2((String) streetAddressObject.get(VALUE));
-                    }
-
-                    JSONObject stateObject = (JSONObject) addressObject.get(STATE);
-                    if (stateObject != null) {
-                        agent.setBusinessAddressState2((String) stateObject.get(VALUE));
-                    }
-
-                    JSONObject cityObject = (JSONObject) addressObject.get(CITY);
-                    if (cityObject != null) {
-                        agent.setBusinessAddressCity2((String) cityObject.get(VALUE));
-                    }
-                }
-            } catch (Exception e) {
-            }
-
-            try {
-                JSONObject businessAddress3JsonObject = (JSONObject) answerJsonObject.get("Business_Address_3");
-                if (businessAddress3JsonObject != null) {
-                    JSONArray businessAddressArray = (JSONArray) businessAddress3JsonObject.get("values");
-                    JSONObject addressObject = (JSONObject) businessAddressArray.get(0);
-                    JSONObject streetAddressObject = (JSONObject) addressObject.get(STREET_ADDRESS);
-                    if (streetAddressObject != null) {
-                        agent.setBusinessAddressStreet3((String) streetAddressObject.get(VALUE));
-                    }
-
-                    JSONObject stateObject = (JSONObject) addressObject.get(STATE);
-                    if (stateObject != null) {
-                        agent.setBusinessAddressState3((String) stateObject.get(VALUE));
-                    }
-
-                    JSONObject cityObject = (JSONObject) addressObject.get(CITY);
-                    if (cityObject != null) {
-                        agent.setBusinessAddressCity3((String) cityObject.get(VALUE));
-                    }
-                }
-            } catch (Exception e) {
-            }
-
-            try {
-                JSONObject businessAddress4JsonObject = (JSONObject) answerJsonObject.get("Business_Address_4");
-                if (businessAddress4JsonObject != null) {
-                    JSONArray businessAddressArray = (JSONArray) businessAddress4JsonObject.get("values");
-                    JSONObject addressObject = (JSONObject) businessAddressArray.get(0);
-                    JSONObject streetAddressObject = (JSONObject) addressObject.get(STREET_ADDRESS);
-                    if (streetAddressObject != null) {
-                        agent.setBusinessAddressStreet4((String) streetAddressObject.get(VALUE));
-                    }
-
-                    JSONObject stateObject = (JSONObject) addressObject.get(STATE);
-                    if (stateObject != null) {
-                        agent.setBusinessAddressState4((String) stateObject.get(VALUE));
-                    }
-
-                    JSONObject cityObject = (JSONObject) addressObject.get(CITY);
-                    if (cityObject != null) {
-                        agent.setBusinessAddressCity4((String) cityObject.get(VALUE));
-                    }
-                }
-            } catch (Exception e) {
-            }
-
-            try {
-                JSONObject emailJsonObject = (JSONObject) answerJsonObject.get("Email");
-                if (emailJsonObject != null) {
-                    agent.setEmail((String) emailJsonObject.get(VALUE));
-                }
-            } catch (Exception e) {
-            }
-
-            try {
-                JSONObject genderJsonObject = (JSONObject) answerJsonObject.get("Gender");
-                if (genderJsonObject != null) {
-                    agent.setGender((String) genderJsonObject.get(VALUE));
-                }
-            } catch (Exception e) {
-            }
-
-            try {
-                JSONObject bvnJsonObject = (JSONObject) answerJsonObject.get("BVN");
-                if (bvnJsonObject != null) {
-                    Long bvn = (Long) bvnJsonObject.get(VALUE);
-                    if (bvn != null) {
-                        agent.setBvn(String.valueOf(bvn));
-                    }
-                }
-            } catch (Exception e) {
-            }
-
-            try {
-                JSONObject meansOfIdJsonObject = (JSONObject) answerJsonObject.get("Means_of_ID");
-                if (meansOfIdJsonObject != null) {
-                    agent.setMeansOfId((String) meansOfIdJsonObject.get(VALUE));
-                }
-            } catch (Exception e) {
-            }
-
-            try {
-                JSONObject idNumberJsonObject = (JSONObject) answerJsonObject.get("ID_Number");
-                if (idNumberJsonObject != null) {
-                    agent.setIdNumber((String) idNumberJsonObject.get(VALUE));
-                }
-            } catch (Exception e) {
-            }
-
-        } catch (Exception e) {
-            logger.error("Json Object \"answer\" does not exist ");
-        }
-        return agent;
-    }
+//
+//    public DeviceMagicAgent fromJsonObject(JSONObject jsonObject) {
+//        String VALUE = "value";
+//        String STREET_ADDRESS = "Street_Address";
+//        String STATE = "State";
+//        String CITY = "City";
+//        DeviceMagicAgent agent = new DeviceMagicAgent();
+//        try {
+//            JSONObject answerJsonObject = (JSONObject) jsonObject.get("answers");
+//            try {
+//                JSONObject operatorIdJsonObject = (JSONObject) answerJsonObject.get("Operator_ID");
+//                if (operatorIdJsonObject != null) {
+//                    String operatorId = (String) operatorIdJsonObject.get(VALUE);
+//                    agent.setOperatorId(operatorId);
+//                }
+//            } catch (Exception e) {
+//            }
+//            try {
+//                JSONObject gamingCategoryJsonObject = (JSONObject) answerJsonObject.get("Gaming_Category");
+//                if (gamingCategoryJsonObject != null) {
+//                    agent.setGamingCategopry((String) gamingCategoryJsonObject.get(VALUE));
+//                }
+//            } catch (Exception e) {
+//            }
+//            try {
+//                JSONObject firstNameJsonObject = (JSONObject) answerJsonObject.get("First_Name");
+//                if (firstNameJsonObject != null) {
+//                    agent.setFirstName((String) firstNameJsonObject.get(VALUE));
+//                }
+//            } catch (Exception e) {
+//            }
+//            try {
+//                JSONObject lastNameJsonObject = (JSONObject) answerJsonObject.get("Last_Name");
+//                if (lastNameJsonObject != null) {
+//                    agent.setLastName((String) lastNameJsonObject.get(VALUE));
+//                }
+//            } catch (Exception e) {
+//            }
+//            try {
+//                JSONObject titleJsonObject = (JSONObject) answerJsonObject.get("Title");
+//                if (titleJsonObject != null) {
+//                    agent.setTitle((String) titleJsonObject.get(VALUE));
+//                }
+//            } catch (Exception e) {
+//            }
+//
+//            try {
+//                JSONObject dateOfBirthJsonObject = (JSONObject) answerJsonObject.get("Date_Of_Birth");
+//                if (dateOfBirthJsonObject != null) {
+//                    agent.setDateOfBirth((String) dateOfBirthJsonObject.get(VALUE));
+//                }
+//            } catch (Exception e) {
+//            }
+//
+//            try {
+//                JSONObject phoneNumber1JsonObject = (JSONObject) answerJsonObject.get("Phone_No__1");
+//                if (phoneNumber1JsonObject != null) {
+//                    agent.setPhoneNumber1((String) phoneNumber1JsonObject.get(VALUE));
+//                }
+//            } catch (Exception e) {
+//
+//            }
+//
+//            try {
+//                JSONObject phoneNumber2JsonObject = (JSONObject) answerJsonObject.get("Phone_No__2");
+//                if (phoneNumber2JsonObject != null) {
+//                    agent.setPhoneNumber2((String) phoneNumber2JsonObject.get(VALUE));
+//                }
+//            } catch (Exception e) {
+//
+//            }
+//
+//            try {
+//                JSONObject residentialAddressJsonObject = (JSONObject) answerJsonObject.get("Residential_Address");
+//                if (residentialAddressJsonObject != null) {
+//                    JSONArray addressArray = (JSONArray) residentialAddressJsonObject.get("values");
+//                    JSONObject addressObject = (JSONObject) addressArray.get(0);
+//                    JSONObject streetAddressObject = (JSONObject) addressObject.get(STREET_ADDRESS);
+//                    if (streetAddressObject != null) {
+//                        agent.setResidentialAddressStreet((String) streetAddressObject.get(VALUE));
+//                    }
+//
+//                    JSONObject stateObject = (JSONObject) addressObject.get(STATE);
+//                    if (stateObject != null) {
+//                        agent.setResidentialAddressState((String) stateObject.get(VALUE));
+//                    }
+//
+//                    JSONObject cityObject = (JSONObject) addressObject.get(CITY);
+//                    if (cityObject != null) {
+//                        agent.setResindetialAddressCity((String) cityObject.get(VALUE));
+//                    }
+//                }
+//            } catch (Exception e) {
+//                logger.error("Error reading business address", e);
+//            }
+//
+//            try {
+//                JSONObject businessAddress1JsonObject = (JSONObject) answerJsonObject.get("Business_Address_1");
+//                if (businessAddress1JsonObject != null) {
+//                    JSONArray businessAddressArray = (JSONArray) businessAddress1JsonObject.get("values");
+//                    JSONObject addressObject = (JSONObject) businessAddressArray.get(0);
+//                    JSONObject streetAddressObject = (JSONObject) addressObject.get(STREET_ADDRESS);
+//                    if (streetAddressObject != null) {
+//                        agent.setBusinessAddressStreet1((String) streetAddressObject.get(VALUE));
+//                    }
+//
+//                    JSONObject stateObject = (JSONObject) addressObject.get(STATE);
+//                    if (stateObject != null) {
+//                        agent.setBusinessAddressState1((String) stateObject.get(VALUE));
+//                    }
+//
+//                    JSONObject cityObject = (JSONObject) addressObject.get(CITY);
+//                    if (cityObject != null) {
+//                        agent.setBusinessAddressCity1((String) cityObject.get(VALUE));
+//                    }
+//                }
+//            } catch (Exception e) {
+//            }
+//
+//            try {
+//                JSONObject businessAddress2JsonObject = (JSONObject) answerJsonObject.get("Business_Address_2");
+//                if (businessAddress2JsonObject != null) {
+//                    JSONArray businessAddressArray = (JSONArray) businessAddress2JsonObject.get("value");
+//                    JSONObject addressObject = (JSONObject) businessAddressArray.get(0);
+//                    JSONObject streetAddressObject = (JSONObject) addressObject.get(STREET_ADDRESS);
+//                    if (streetAddressObject != null) {
+//                        agent.setBusinessAddressStreet2((String) streetAddressObject.get(VALUE));
+//                    }
+//
+//                    JSONObject stateObject = (JSONObject) addressObject.get(STATE);
+//                    if (stateObject != null) {
+//                        agent.setBusinessAddressState2((String) stateObject.get(VALUE));
+//                    }
+//
+//                    JSONObject cityObject = (JSONObject) addressObject.get(CITY);
+//                    if (cityObject != null) {
+//                        agent.setBusinessAddressCity2((String) cityObject.get(VALUE));
+//                    }
+//                }
+//            } catch (Exception e) {
+//            }
+//
+//            try {
+//                JSONObject businessAddress3JsonObject = (JSONObject) answerJsonObject.get("Business_Address_3");
+//                if (businessAddress3JsonObject != null) {
+//                    JSONArray businessAddressArray = (JSONArray) businessAddress3JsonObject.get("values");
+//                    JSONObject addressObject = (JSONObject) businessAddressArray.get(0);
+//                    JSONObject streetAddressObject = (JSONObject) addressObject.get(STREET_ADDRESS);
+//                    if (streetAddressObject != null) {
+//                        agent.setBusinessAddressStreet3((String) streetAddressObject.get(VALUE));
+//                    }
+//
+//                    JSONObject stateObject = (JSONObject) addressObject.get(STATE);
+//                    if (stateObject != null) {
+//                        agent.setBusinessAddressState3((String) stateObject.get(VALUE));
+//                    }
+//
+//                    JSONObject cityObject = (JSONObject) addressObject.get(CITY);
+//                    if (cityObject != null) {
+//                        agent.setBusinessAddressCity3((String) cityObject.get(VALUE));
+//                    }
+//                }
+//            } catch (Exception e) {
+//            }
+//
+//            try {
+//                JSONObject businessAddress4JsonObject = (JSONObject) answerJsonObject.get("Business_Address_4");
+//                if (businessAddress4JsonObject != null) {
+//                    JSONArray businessAddressArray = (JSONArray) businessAddress4JsonObject.get("values");
+//                    JSONObject addressObject = (JSONObject) businessAddressArray.get(0);
+//                    JSONObject streetAddressObject = (JSONObject) addressObject.get(STREET_ADDRESS);
+//                    if (streetAddressObject != null) {
+//                        agent.setBusinessAddressStreet4((String) streetAddressObject.get(VALUE));
+//                    }
+//
+//                    JSONObject stateObject = (JSONObject) addressObject.get(STATE);
+//                    if (stateObject != null) {
+//                        agent.setBusinessAddressState4((String) stateObject.get(VALUE));
+//                    }
+//
+//                    JSONObject cityObject = (JSONObject) addressObject.get(CITY);
+//                    if (cityObject != null) {
+//                        agent.setBusinessAddressCity4((String) cityObject.get(VALUE));
+//                    }
+//                }
+//            } catch (Exception e) {
+//            }
+//
+//            try {
+//                JSONObject emailJsonObject = (JSONObject) answerJsonObject.get("Email");
+//                if (emailJsonObject != null) {
+//                    agent.setEmail((String) emailJsonObject.get(VALUE));
+//                }
+//            } catch (Exception e) {
+//            }
+//
+//            try {
+//                JSONObject genderJsonObject = (JSONObject) answerJsonObject.get("Gender");
+//                if (genderJsonObject != null) {
+//                    agent.setGender((String) genderJsonObject.get(VALUE));
+//                }
+//            } catch (Exception e) {
+//            }
+//
+//            try {
+//                JSONObject bvnJsonObject = (JSONObject) answerJsonObject.get("BVN");
+//                if (bvnJsonObject != null) {
+//                    Long bvn = (Long) bvnJsonObject.get(VALUE);
+//                    if (bvn != null) {
+//                        agent.setBvn(String.valueOf(bvn));
+//                    }
+//                }
+//            } catch (Exception e) {
+//            }
+//
+//            try {
+//                JSONObject meansOfIdJsonObject = (JSONObject) answerJsonObject.get("Means_of_ID");
+//                if (meansOfIdJsonObject != null) {
+//                    agent.setMeansOfId((String) meansOfIdJsonObject.get(VALUE));
+//                }
+//            } catch (Exception e) {
+//            }
+//
+//            try {
+//                JSONObject idNumberJsonObject = (JSONObject) answerJsonObject.get("ID_Number");
+//                if (idNumberJsonObject != null) {
+//                    agent.setIdNumber((String) idNumberJsonObject.get(VALUE));
+//                }
+//            } catch (Exception e) {
+//            }
+//
+//        } catch (Exception e) {
+//            logger.error("Json Object \"answer\" does not exist ");
+//        }
+//        return agent;
+//    }
 
     private Agent findAgentBySubmissionId(String submissionId) {
         Query query = new Query();
