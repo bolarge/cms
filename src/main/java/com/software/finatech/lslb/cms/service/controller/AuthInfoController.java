@@ -26,6 +26,7 @@ import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -259,7 +260,6 @@ public class AuthInfoController extends BaseController {
         try {
 
 
-
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.find(new Query(Criteria.where("emailAddress").is(loginDto.getUserName())), AuthInfo.class).block();
 
 
@@ -276,7 +276,6 @@ public class AuthInfoController extends BaseController {
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User Deactivated"));
                 return Mono.just(new ResponseEntity("User Deactivated", HttpStatus.UNAUTHORIZED));
             }
-
 
 
             return authInfoService.loginToken(loginDto.getUserName(), loginDto.getPassword(), authInfo, request);
@@ -598,13 +597,13 @@ public class AuthInfoController extends BaseController {
                 query.addCriteria(Criteria.where("institutionId").is(institutionId));
             }
 
-            if (!StringUtils.isEmpty(roleId)) {
+            if (StringUtils.isEmpty(roleId)) {
+                List<String> notAllowedRoleIds = AuthRoleReferenceData.getNotAllowedRoleIds();
+                if (!notAllowedRoleIds.contains(loggedInUser.getAuthRoleId())) {
+                    query.addCriteria(Criteria.where("authRoleId").nin(notAllowedRoleIds));
+                }
+            } else {
                 query.addCriteria(Criteria.where("authRoleId").is(roleId));
-            }
-
-            List<String> notAllowedRoleIds = getNotAllowedRoleIds();
-            if (!notAllowedRoleIds.contains(loggedInUser.getAuthRoleId())) {
-                query.addCriteria(Criteria.where("authRoleId").nin(notAllowedRoleIds));
             }
 
             if (page == 0) {
@@ -612,67 +611,75 @@ public class AuthInfoController extends BaseController {
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
             }
 
-            if (sorting != null && !sorting.isEmpty() && sortProperty != null && !sortProperty.isEmpty()) {
-                query.with(new Sort((sorting.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC), sortProperty));
+//            if (sorting != null && !sorting.isEmpty() && sortProperty != null && !sortProperty.isEmpty()) {
+//                query.with(new Sort((sorting.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC), sortProperty));
+//            }
+//
+//            query.with(new Pageable() {
+//                @Override
+//                public int getPageNumber() {
+//                    return page;
+//                }
+//
+//                @Override
+//                public int getPageSize() {
+//                    return size;
+//                }
+//
+//                @Override
+//                public long getOffset() {
+//                    return 0;
+//                }
+//
+//                @Override
+//                public Sort getSort() {
+//                    if (sorting != null && !sorting.isEmpty() && sortProperty != null && !sortProperty.isEmpty()) {
+//                        return new Sort((sorting.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC), sortProperty);
+//                    } else {
+//                        return new Sort(Sort.Direction.DESC, "createdAt");
+//                    }
+//                }
+//
+//                @Override
+//                public Pageable next() {
+//                    return null;
+//                }
+//
+//                @Override
+//                public Pageable previousOrFirst() {
+//                    return null;
+//                }
+//
+//                @Override
+//                public Pageable first() {
+//                    return null;
+//                }
+//
+//                @Override
+//                public boolean hasPrevious() {
+//                    return false;
+//                }
+//            });
+
+
+            Sort sort;
+            if (!StringUtils.isEmpty(sorting) && !StringUtils.isEmpty(sortProperty)) {
+                sort = new Sort((sorting.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC),
+                        sortProperty);
+            } else {
+                sort = new Sort(Sort.Direction.DESC, "createdAt");
             }
-
-            query.with(new Pageable() {
-                @Override
-                public int getPageNumber() {
-                    return page;
-                }
-
-                @Override
-                public int getPageSize() {
-                    return size;
-                }
-
-                @Override
-                public long getOffset() {
-                    return 0;
-                }
-
-                @Override
-                public Sort getSort() {
-                    if (sorting != null && !sorting.isEmpty() && sortProperty != null && !sortProperty.isEmpty()) {
-                        return new Sort((sorting.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC), sortProperty);
-                    } else {
-                        return new Sort(Sort.Direction.ASC, "id");
-                    }
-                }
-
-                @Override
-                public Pageable next() {
-                    return null;
-                }
-
-                @Override
-                public Pageable previousOrFirst() {
-                    return null;
-                }
-
-                @Override
-                public Pageable first() {
-                    return null;
-                }
-
-                @Override
-                public boolean hasPrevious() {
-                    return false;
-                }
-            });
-
+            query.with(PageRequest.of(page, size, sort));
+            query.with(sort);
 
             ArrayList<AuthInfo> authInfos = (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
-
+            if (authInfos.size() == 0) {
+                return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
+            }
             ArrayList<AuthInfoDto> authInfoDto = new ArrayList<>();
             authInfos.forEach(entry -> {
                 authInfoDto.add(entry.convertToDto());
             });
-
-            if (authInfos.size() == 0) {
-                return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
-            }
 
             return Mono.just(new ResponseEntity(authInfoDto, HttpStatus.OK));
 
@@ -889,13 +896,5 @@ public class AuthInfoController extends BaseController {
         } catch (Exception e) {
             return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while getting permissions for roles", e);
         }
-    }
-
-    private List<String> getNotAllowedRoleIds() {
-        List<String> notAllowedRoleIds = new ArrayList<>();
-        notAllowedRoleIds.add(AuthRoleReferenceData.VGG_ADMIN_ID);
-        notAllowedRoleIds.add(AuthRoleReferenceData.VGG_USER_ID);
-        notAllowedRoleIds.add(AuthRoleReferenceData.SUPER_ADMIN_ID);
-        return notAllowedRoleIds;
     }
 }

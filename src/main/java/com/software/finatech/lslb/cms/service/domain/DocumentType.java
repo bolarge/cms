@@ -1,7 +1,6 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.DocumentTypeDto;
-import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -123,6 +122,9 @@ public class DocumentType extends EnumeratedFact {
     }
 
     public DocumentPurpose getDocumentPurpose() {
+        if (StringUtils.isEmpty(this.documentPurposeId)) {
+            return null;
+        }
         DocumentPurpose documentPurpose = null;
         Map<String, FactObject> documentPurposeMap = Mapstore.STORE.get("DocumentPurpose");
         if (documentPurposeMap != null) {
