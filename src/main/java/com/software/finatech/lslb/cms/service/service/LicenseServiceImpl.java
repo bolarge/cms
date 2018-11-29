@@ -406,7 +406,8 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
     @Override
-    public Mono<ResponseEntity> getInstitutionAIPs(String institutionId, int page, int pageSize, String sortType, String sortParam, HttpServletResponse httpServletResponse) {
+    public Mono<ResponseEntity> getInstitutionAIPs(String institutionId){
+    //        , int page, int pageSize, String sortType, String sortParam, HttpServletResponse httpServletResponse) {
         Query queryForInstitutionAIP = new Query();
         if (!StringUtils.isEmpty(institutionId)) {
             queryForInstitutionAIP.addCriteria(Criteria.where("institutionId").is(institutionId));
@@ -419,22 +420,22 @@ public class LicenseServiceImpl implements LicenseService {
         queryForInstitutionAIP.addCriteria(criteria);
         queryForInstitutionAIP.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
 
-        if (page == 0) {
-            if (httpServletResponse != null) {
-                long count = mongoRepositoryReactive.count(queryForInstitutionAIP, License.class).block();
-                httpServletResponse.setHeader("TotalCount", String.valueOf(count));
-            }
-        }
-
-        Sort sort;
-        if (!StringUtils.isEmpty(sortType) && !StringUtils.isEmpty(sortParam)) {
-            sort = new Sort((sortType.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC),
-                    sortParam);
-        } else {
-            sort = new Sort(Sort.Direction.DESC, "createdAt");
-        }
-        queryForInstitutionAIP.with(PageRequest.of(page, pageSize, sort));
-        queryForInstitutionAIP.with(sort);
+//        if (page == 0) {
+//            if (httpServletResponse != null) {
+//                long count = mongoRepositoryReactive.count(queryForInstitutionAIP, License.class).block();
+//                httpServletResponse.setHeader("TotalCount", String.valueOf(count));
+//            }
+//        }
+//
+//        Sort sort;
+//        if (!StringUtils.isEmpty(sortType) && !StringUtils.isEmpty(sortParam)) {
+//            sort = new Sort((sortType.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC),
+//                    sortParam);
+//        } else {
+//            sort = new Sort(Sort.Direction.DESC, "createdAt");
+//        }
+//        queryForInstitutionAIP.with(PageRequest.of(page, pageSize, sort));
+//        queryForInstitutionAIP.with(sort);
 
 
         List<License> aipsForInstitution = (List<License>) mongoRepositoryReactive.findAll(queryForInstitutionAIP, License.class).toStream().collect(Collectors.toList());
