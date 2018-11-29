@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
+import com.software.finatech.lslb.cms.service.background_jobs.Scheduler;
 import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.domain.Document;
 import com.software.finatech.lslb.cms.service.domain.Institution;
@@ -41,6 +42,8 @@ public class TestController extends BaseController {
     private ExistingAgentLoader existingAgentLoader;
     @Autowired
     private DatabaseLoaderUtils databaseLoaderUtils;
+    @Autowired
+    private Scheduler scheduler;
 
     private Logger logger = LoggerFactory.getLogger(TestController.class);
 
@@ -99,5 +102,26 @@ public class TestController extends BaseController {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/delete-operators")
+    public Mono<ResponseEntity> delete() {
+        try {
+            existingOperatorLoader.init();
+            return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
+        } catch (Exception e) {
+            return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/move-docs")
+    public Mono<ResponseEntity> moviedocus() {
+        try {
+            scheduler.load();
+            return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
+        } catch (Exception e) {
+            return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
+
 }
 

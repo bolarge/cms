@@ -92,12 +92,6 @@ public class DatabaseLoaderUtils {
 
     public void generateAuthTestData() {
         TestData.generateAuthTestData(mongoRepositoryReactive);
-        List<Document> documentList= (List<Document>)mongoRepositoryReactive.findAll(new Query(), Document.class ).toStream().collect(Collectors.toList());
-        documentList.parallelStream().forEach(document -> {
-                document.setFile(null);
-                mongoRepositoryReactive.saveOrUpdate(document);
-        });
-
     }
 
     // @PostConstruct

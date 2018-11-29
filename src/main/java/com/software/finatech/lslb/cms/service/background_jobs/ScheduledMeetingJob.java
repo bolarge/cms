@@ -37,7 +37,7 @@ public class ScheduledMeetingJob {
     }
 
 
-    @Scheduled(fixedRate = 5 * 50 * 1000)
+    @Scheduled(fixedRate = 5 * 50 * 1000, initialDelay = 600000)
     @SchedulerLock(name = "Remind Meeting Invites After Meeting", lockAtMostFor = FIFTEEN_MIN, lockAtLeastFor = FIFTEEN_MIN)
     public void postMeetingReminderForMeetingInvites() {
         ArrayList<ScheduledMeeting> pendingScheduledMeetings = getAllScheduledMeetingsForMeetingPostMeetingReminder();
@@ -52,7 +52,7 @@ public class ScheduledMeetingJob {
         }
     }
 
-    @Scheduled(fixedRate = 5 * 50 * 1000)
+    @Scheduled(fixedRate = 5 * 50 * 1000, initialDelay = 600000)
     @SchedulerLock(name = "Remind Meeting Invites", lockAtMostFor = FIFTEEN_MIN, lockAtLeastFor = FIFTEEN_MIN)
     public void remindMeetingForMeetingInvitees() {
         ArrayList<ScheduledMeeting> pendingScheduledMeetings = getAllScheduledMeetingsForMeetingReminder();
@@ -68,7 +68,7 @@ public class ScheduledMeetingJob {
         }
     }
 
-    @Scheduled(fixedRate = 5 * 50 * 1000)
+    @Scheduled(fixedRate = 5 * 50 * 1000, initialDelay = 600000)
     @SchedulerLock(name = "Expire unattended meetings", lockAtMostFor = FIFTEEN_MIN, lockAtLeastFor = FIFTEEN_MIN)
     public void expireUnattendedMeetings() {
         ArrayList<ScheduledMeeting> scheduleMeetingForExpiration = getAllScheduledMeetingsForMeetingExpiration();

@@ -26,6 +26,16 @@ public class InstitutionDto {
     private List<InstitutionCategoryDetailsDto> institutionCategoryDetails = new ArrayList<>();
     private Set<String> directorsNames = new HashSet<>();
     private Set<String> shareHolderNames = new HashSet<>();
+    private String address;
+
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
     public Set<String> getShareHolderNames() {
         return shareHolderNames;
