@@ -194,33 +194,31 @@ public class AuthRoleController extends BaseController {
     )
     public Mono<ResponseEntity> authRoles() {
         try {
-            //@TODO validate request params
-            List<FactObject> authRoles = Mapstore.STORE.get("AuthRole").values().stream().collect(Collectors.toList());
-            //ArrayList<FactObject> authRoles = (ArrayList<FactObject>) mongoRepositoryReactive.findAll(AuthRole.class).toStream().collect(Collectors.toList());
-
-            ArrayList<AuthRoleDto> authRoleDtos = authRoleDtoListFromAuthRoleList(authRoles);
-            if (authRoleDtos.size() == 0) {
-                return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
-            }
-
-            Comparator<EnumeratedFact> enumeratedFactComparator = (o1, o2) -> StringUtils.compare(o1.toString(), o2.toString());
-
             List<AuthRole> roles = new ArrayList<>();
-            for (FactObject factObject : authRoles) {
-                roles.add((AuthRole) factObject);
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
             }
-            roles.sort(enumeratedFactComparator);
-            for (AuthRole authrole : roles) {
-                authRoleDtos.add(authrole.convertToDto());
+            List<String> notAllowedRoleIds = AuthRoleReferenceData.getNotAllowedRoleIds();
+            Map<String, FactObject> roleMap = Mapstore.STORE.get("AuthRole");
+            Collection<FactObject> factObjectCollection = roleMap.values();
+            for (FactObject factObject : factObjectCollection) {
+                AuthRole authRole = (AuthRole) factObject;
+                if (!notAllowedRoleIds.contains(loggedInUser.getAuthRoleId())
+                        && notAllowedRoleIds.contains(authRole.getId())) {
+                    continue;
+                }
+                roles.add(authRole);
             }
-            //      return Mono.just(new ResponseEntity<>(authRoleDtos, HttpStatus.OK));
-            return ReferenceDataUtil.getAllEnumeratedEntity("AuthRole");
-//            return ReferenceDataUtil.getAllEnumeratedEntity("AuthRole");
-
+            List<AuthRoleDto> roleDtos = new ArrayList<>();
+            roles.sort(ReferenceDataUtil.enumeratedFactComparator);
+            for (AuthRole role : roles) {
+                roleDtos.add(role.convertToDto());
+            }
+            return Mono.just(new ResponseEntity<>(roleDtos, HttpStatus.OK));
         } catch (Exception e) {
-            e.printStackTrace();
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while fetching roles", e);
         }
-        return null;
     }
 
     /**

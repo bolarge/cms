@@ -3,6 +3,8 @@ package com.software.finatech.lslb.cms.service.referencedata;
 import com.software.finatech.lslb.cms.service.domain.AuthRole;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class AuthRoleReferenceData {
@@ -49,5 +51,19 @@ public class AuthRoleReferenceData {
         mongoRepositoryReactive.saveOrUpdate(role1);
         mongoRepositoryReactive.saveOrUpdate(role2);
         mongoRepositoryReactive.saveOrUpdate(role3);
+    }
+
+
+    /**
+     * Not allowed role ids for LSLB ROLES
+     * (Lslb is not meant to see VGG ROLES AND VGG USERS)
+     * @return
+     */
+    public static List<String> getNotAllowedRoleIds() {
+        List<String> notAllowedRoleIds = new ArrayList<>();
+        notAllowedRoleIds.add(AuthRoleReferenceData.VGG_ADMIN_ID);
+        notAllowedRoleIds.add(AuthRoleReferenceData.VGG_USER_ID);
+        notAllowedRoleIds.add(AuthRoleReferenceData.SUPER_ADMIN_ID);
+        return notAllowedRoleIds;
     }
 }

@@ -4,6 +4,7 @@ import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
 import com.software.finatech.lslb.cms.service.dto.AuthPermissionDto;
 import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -11,9 +12,7 @@ import org.joda.time.LocalDate;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("serial")
 @Document(collection = "AuthInfo")
@@ -410,14 +409,15 @@ public class AuthInfo extends AbstractFact {
     }
 
     private Set<AuthPermissionDto> getPermissionDtos(Set<String> permissionsIds) {
-        Set<AuthPermissionDto> dtos = new HashSet<>();
+        List<AuthPermissionDto> dtos = new ArrayList<>();
         for (String id : permissionsIds) {
             AuthPermission permission = getAuthPermission(id);
             if (permission != null) {
                 dtos.add(permission.convertToDto());
             }
         }
-        return dtos;
+        dtos.sort(ReferenceDataUtil.objectComparator);
+        return new HashSet<>(dtos);
     }
 
     public boolean isAgent() {

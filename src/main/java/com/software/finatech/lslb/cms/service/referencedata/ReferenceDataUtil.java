@@ -18,12 +18,10 @@ import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logA
 public class ReferenceDataUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ReferenceDataUtil.class);
-    private static Comparator<EnumeratedFact> enumeratedFactComparator = new Comparator<EnumeratedFact>() {
-        @Override
-        public int compare(EnumeratedFact o1, EnumeratedFact o2) {
-            return StringUtils.compare(o1.toString(), o2.toString());
-        }
-    };
+    public static Comparator<EnumeratedFact> enumeratedFactComparator = (o1, o2) -> StringUtils.compare(o1.toString(), o2.toString());
+
+    public static Comparator<Object> objectComparator = (o1, o2) -> StringUtils.compare(o1.toString(), o2.toString());
+
 
     public static Mono<ResponseEntity> getAllEnumeratedEntity(String entityMapName) {
         try {
