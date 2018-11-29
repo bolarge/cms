@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
 import com.software.finatech.lslb.cms.service.referencedata.DocumentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordDetailService;
 import com.software.finatech.lslb.cms.service.service.contracts.VigipayService;
+import com.software.finatech.lslb.cms.service.util.DatabaseLoaderUtils;
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingAgentLoader;
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingOperatorLoader;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
@@ -38,6 +39,8 @@ public class TestController extends BaseController {
     private ExistingOperatorLoader existingOperatorLoader;
     @Autowired
     private ExistingAgentLoader existingAgentLoader;
+    @Autowired
+    private DatabaseLoaderUtils databaseLoaderUtils;
 
     private Logger logger = LoggerFactory.getLogger(TestController.class);
 
@@ -81,6 +84,16 @@ public class TestController extends BaseController {
     public Mono<ResponseEntity> createAgentFromCSV(@RequestParam("file") MultipartFile multipartFile) {
         try {
             existingAgentLoader.loadAgentsFromCSV(multipartFile);
+            return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
+        } catch (Exception e) {
+            return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/load-referenceData")
+    public Mono<ResponseEntity> loadReferenceData() {
+        try {
+         databaseLoaderUtils.runLoadData();
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));

@@ -390,7 +390,7 @@ public class AuthRoleController extends BaseController {
                 }
 
                 if (loggedInUser.isVGGAdmin()) {
-                    notAllowedIds = Arrays.asList(AuthRoleReferenceData.SUPER_ADMIN_ID);
+                    notAllowedIds = Collections.singletonList(AuthRoleReferenceData.SUPER_ADMIN_ID);
                     for (String authRoleId : authRoleIds) {
                         if (!notAllowedIds.contains(authRoleId)) {
                             eligibleRoleIds.add(authRoleId);
