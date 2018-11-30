@@ -406,8 +406,8 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
     @Override
-    public Mono<ResponseEntity> getInstitutionAIPs(String institutionId){
-    //        , int page, int pageSize, String sortType, String sortParam, HttpServletResponse httpServletResponse) {
+    public Mono<ResponseEntity> getInstitutionAIPs(String institutionId) {
+        //        , int page, int pageSize, String sortType, String sortParam, HttpServletResponse httpServletResponse) {
         Query queryForInstitutionAIP = new Query();
         if (!StringUtils.isEmpty(institutionId)) {
             queryForInstitutionAIP.addCriteria(Criteria.where("institutionId").is(institutionId));
@@ -461,8 +461,7 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
     @Override
-    public Mono<ResponseEntity> getInstitutionAIPUploaded(String institutionId, int page, int pageSize, String sortType, String sortParam, HttpServletResponse httpServletResponse)
-    {
+    public Mono<ResponseEntity> getInstitutionAIPUploaded(String institutionId, int page, int pageSize, String sortType, String sortParam, HttpServletResponse httpServletResponse) {
         Query queryForInstitutionAIP = new Query();
         if (!StringUtils.isEmpty(institutionId)) {
             queryForInstitutionAIP.addCriteria(Criteria.where("institutionId").is(institutionId));
@@ -1124,6 +1123,41 @@ public class LicenseServiceImpl implements LicenseService {
         queryForLicensedInstitutionInGameType.addCriteria(new Criteria().andOperator(Criteria.where("effectiveDate").lte(today), (Criteria.where("expiryDate").gte(today))));
         return (License) mongoRepositoryReactive.find(queryForLicensedInstitutionInGameType, License.class).block();
     }
+
+    @Override
+    public void changeLicenseStatusForCaseOutcome(License license, String newLicenseStatusId) {
+        license.setOldLicenseStatusId(license.getLicenseStatusId());
+        license.setLicenseStatusId(newLicenseStatusId);
+        mongoRepositoryReactive.saveOrUpdate(license);
+        ArrayList<License> otherOwnerLicensesInCategory = findAllFutureLicensesAfterLicense(license);
+        for (License futureLicense : otherOwnerLicensesInCategory) {
+            futureLicense.setOldLicenseStatusId(futureLicense.getLicenseStatusId());
+            futureLicense.setLicenseStatusId(newLicenseStatusId);
+            mongoRepositoryReactive.saveOrUpdate(futureLicense);
+        }
+    }
+
+    @Override
+    public License findPresentLicenseForCase(LoggedCase loggedCase) {
+        Query query = new Query();
+        LocalDate today = LocalDate.now();
+        query.addCriteria(Criteria.where("InstitutionId").is(loggedCase.getInstitutionId()));
+        query.addCriteria(Criteria.where("agentId").is(loggedCase.getAgentId()));
+        query.addCriteria(Criteria.where("gameTypeId").is(loggedCase.getGameTypeId()));
+        query.addCriteria(Criteria.where("effectiveDate").lte(today));
+        query.addCriteria(Criteria.where("expiryDate").gte(today));
+        return (License) mongoRepositoryReactive.find(query, License.class).block();
+    }
+
+    private ArrayList<License> findAllFutureLicensesAfterLicense(License license) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("effectiveDate").gt(license.getEffectiveDate()));
+        query.addCriteria(Criteria.where("InstitutionId").is(license.getInstitutionId()));
+        query.addCriteria(Criteria.where("agentId").is(license.getAgentId()));
+        query.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
+        return (ArrayList<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
+    }
+
 
     @Override
     public Mono<ResponseEntity> licenseLicense(LicenseRequestDto licenseRequestDto, HttpServletRequest request) {
