@@ -8,7 +8,6 @@ public class AgentValidationDto {
     @Email
     @NotEmpty(message = "Please provide agent email")
     private String email;
-    @NotEmpty(message = "Please provide agent id")
     private String agentId;
     @NotEmpty
     private String gameTypeId;

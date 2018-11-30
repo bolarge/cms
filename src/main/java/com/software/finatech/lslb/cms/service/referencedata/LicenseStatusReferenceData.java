@@ -3,7 +3,7 @@ package com.software.finatech.lslb.cms.service.referencedata;
 import com.software.finatech.lslb.cms.service.domain.LicenseStatus;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class LicenseStatusReferenceData {
@@ -48,10 +48,10 @@ public class LicenseStatusReferenceData {
     }
 
     public static List<String> getAllowedLicensedStatusIds() {
-        List<String> allowedLicenseStatusIds = new ArrayList<>();
-        allowedLicenseStatusIds.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
-        allowedLicenseStatusIds.add(LicenseStatusReferenceData.AIP_COMPLETED);
-        allowedLicenseStatusIds.add(LicenseStatusReferenceData.RENEWED_ID);
-        return allowedLicenseStatusIds;
+        return Arrays.asList(LICENSED_LICENSE_STATUS_ID, AIP_COMPLETED, RENEWED_ID);
+    }
+
+    public static List<String> getAIPLicenseStatues() {
+        return Arrays.asList(AIP_COMPLETED, AIP_DOCUMENT_STATUS_ID, AIP_LICENSE_STATUS_ID);
     }
 }

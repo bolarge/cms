@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.service;
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
@@ -319,6 +320,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
                         caseActionRequest.getCaseOutcomeId()), HttpStatus.BAD_REQUEST));
             }
 
+            makeOutComeEffectOnOperatorLicense(loggedCase, caseActionRequest);
             loggedCase.setLoggedCaseOutcomeId(caseActionRequest.getCaseOutcomeId());
             loggedCase.setLoggedCaseStatusId(LoggedCaseStatusReferenceData.CLOSED_ID);
             loggedCase.setOutcomeReason(caseActionRequest.getReason());
@@ -328,7 +330,6 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             action.setUserId(loggedInUser.getId());
             action.setLslbCaseOutcomeId(caseActionRequest.getCaseOutcomeId());
             loggedCase.getCaseActions().add(action);
-            makeOutComeEffectOnOperatorLicense(loggedCase, caseActionRequest);
             mongoRepositoryReactive.saveOrUpdate(loggedCase);
 
             String verbiage = String.format("Made Outcome on Logged Case, Ticket id: -> %s, Outcome -> %s",
@@ -337,30 +338,34 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), loggedCase.getReportedEntityName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
             return Mono.just(new ResponseEntity<>(loggedCase.convertToDto(), HttpStatus.OK));
+        } catch (LicenseServiceException e) {
+            return Mono.just(new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while taking action on case", e);
         }
     }
 
-    private void makeOutComeEffectOnOperatorLicense(LoggedCase loggedCase, CaseOutcomeRequest caseOutcomeRequest) {
-        License license = licenseService.findInstitutionActiveLicenseInGameType(loggedCase.getInstitutionId(), loggedCase.getGameTypeId());
-        if (license != null) {
-            if (loggedCase.isOutcomeLicenseRevoked()) {
-                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_REVOKED_ID);
-                license.setLicenseChangeReason(caseOutcomeRequest.getReason());
-                loggedCaseMailSenderAsync.sendOutcomeNotificationToOffender(loggedCase);
+    private void makeOutComeEffectOnOperatorLicense(LoggedCase loggedCase, CaseOutcomeRequest caseOutcomeRequest) throws LicenseServiceException {
+        License license = new License();
+        if (loggedCase.isOutcomeLicenseTerminated() ||
+                loggedCase.isOutcomeLicenseSuspended() ||
+                loggedCase.isOutcomeLicenseRevoked()) {
+            license = licenseService.findPresentLicenseForCase(loggedCase);
+            if (license == null) {
+                throw new LicenseServiceException("Offender does not have license in category, Kindly close the case");
             }
-            if (loggedCase.isOutcomeLicenseSuspended()) {
-                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_SUSPENDED_ID);
-                license.setLicenseChangeReason(caseOutcomeRequest.getReason());
-                loggedCaseMailSenderAsync.sendOutcomeMailToOffender(loggedCase);
-            }
-            if (loggedCase.isOutcomeLicenseTerminated()) {
-                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_TERMINATED_ID);
-                license.setLicenseChangeReason(caseOutcomeRequest.getReason());
-                loggedCaseMailSenderAsync.sendOutcomeNotificationToOffender(loggedCase);
-            }
-            mongoRepositoryReactive.saveOrUpdate(license);
+        }
+        if (loggedCase.isOutcomeLicenseRevoked()) {
+            licenseService.changeLicenseStatusForCaseOutcome(license,LicenseStatusReferenceData.LICENSE_REVOKED_ID);
+            loggedCaseMailSenderAsync.sendOutcomeNotificationToOffender(loggedCase);
+        }
+        if (loggedCase.isOutcomeLicenseSuspended()) {
+            licenseService.changeLicenseStatusForCaseOutcome(license,LicenseStatusReferenceData.LICENSE_SUSPENDED_ID);
+            loggedCaseMailSenderAsync.sendOutcomeNotificationToOffender(loggedCase);
+        }
+        if (loggedCase.isOutcomeLicenseTerminated()) {
+            licenseService.changeLicenseStatusForCaseOutcome(license,LicenseStatusReferenceData.LICENSE_TERMINATED_ID);
+            loggedCaseMailSenderAsync.sendOutcomeNotificationToOffender(loggedCase);
         }
         if (loggedCase.isOutcomePenalty()) {
             loggedCaseMailSenderAsync.sendPenaltyMailToOffender(loggedCase, caseOutcomeRequest.getCasePenaltyParams());
