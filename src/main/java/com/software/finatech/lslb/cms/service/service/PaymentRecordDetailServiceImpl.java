@@ -396,6 +396,11 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     @Override
     public Mono<ResponseEntity> findAllPaymentRecordDetailForPaymentRecord(String paymentRecordId) {
         try {
+            PaymentRecord paymentRecord = paymentRecordService.findById(paymentRecordId);
+            if (paymentRecord == null){
+                return Mono.just(new ResponseEntity<>(String.format("Payment record with id %s not found", paymentRecordId), HttpStatus.BAD_REQUEST));
+            }
+            PaymentRecordDto paymentRecordDto = paymentRecord.convertToFullDto();
             Query query = new Query();
             query.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));
             query.with(new Sort(Sort.Direction.DESC, "paymentDate"));
@@ -407,7 +412,8 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             for (PaymentRecordDetail paymentRecordDetail : paymentRecordDetails) {
                 paymentRecordDetailDtos.add(paymentRecordDetail.convertToDto());
             }
-            return Mono.just(new ResponseEntity<>(paymentRecordDetailDtos, HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(new PaymentDetailResponse(paymentRecordDetailDtos, paymentRecordDto),
+                    HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while getting payment record details", e);
         }
