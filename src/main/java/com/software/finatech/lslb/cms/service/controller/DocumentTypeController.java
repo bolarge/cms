@@ -210,7 +210,7 @@ public class DocumentTypeController extends BaseController {
         }
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/remove-approver/{id}")
+    @RequestMapping(method = RequestMethod.POST, value = "/remove-approver")
     @ApiOperation(value = "Remove Approver From Document Type", response = DocumentApprovalRequestDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
