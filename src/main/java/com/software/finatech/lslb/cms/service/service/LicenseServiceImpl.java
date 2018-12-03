@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.dto.AIPCheckDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseRequestDto;
 import com.software.finatech.lslb.cms.service.dto.NotificationDto;
+import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
@@ -59,8 +60,6 @@ public class LicenseServiceImpl implements LicenseService {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     @Autowired
     private AIPMailSenderAsync aipMailSenderAsync;
-    @Autowired
-    private ApplicationFormService applicationFormService;
 
     @Autowired
     private AuthInfoServiceImpl authInfoService;
@@ -889,7 +888,7 @@ public class LicenseServiceImpl implements LicenseService {
             license.setPaymentRecordId(paymentRecord.getId());
             //     license.setLicenseNumber(generateLicenseNumberForPaymentRecord(paymentRecord));
             mongoRepositoryReactive.saveOrUpdate(license);
-            String tradeName = applicationFormService.getApprovedApplicationTradeNameForOperator(paymentRecord.getInstitutionId(), paymentRecord.getGameTypeId());
+            String tradeName = getApprovedApplicationTradeNameForOperator(paymentRecord.getInstitutionId(), paymentRecord.getGameTypeId());
             if (tradeName != null) {
                 InstitutionCategoryDetails institutionCategoryDetails = institutionService.findInstitutionCategoryDetailsByInstitutionIdAndGameTypeId(paymentRecord.getInstitutionId(), paymentRecord.getGameTypeId());
                 if (institutionCategoryDetails == null) {
@@ -1306,5 +1305,25 @@ public class LicenseServiceImpl implements LicenseService {
         Sort sort = new Sort(Sort.Direction.DESC, "expiryDate");
         query.with(sort);
         return (License) mongoRepositoryReactive.find(query, License.class).block();
+    }
+
+
+    public String getApprovedApplicationTradeNameForOperator(String institutionId, String gameTypeId) {
+        ApplicationForm applicationForm = getApprovedApplicationFormForInstitution(institutionId, gameTypeId);
+        if (applicationForm != null) {
+            ApplicantDetails applicantDetails = applicationForm.getApplicantDetails();
+            if (applicantDetails != null) {
+                return applicantDetails.getTradingName();
+            }
+        }
+        return null;
+    }
+
+    private ApplicationForm getApprovedApplicationFormForInstitution(String institutionId, String gameTypeId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(institutionId));
+        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        query.addCriteria(Criteria.where("applicationFormStatusId").is(ApplicationFormStatusReferenceData.APPROVED_STATUS_ID));
+        return (ApplicationForm) mongoRepositoryReactive.find(query, ApplicationForm.class).block();
     }
 }
