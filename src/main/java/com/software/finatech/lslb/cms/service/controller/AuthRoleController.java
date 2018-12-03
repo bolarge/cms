@@ -268,8 +268,7 @@ public class AuthRoleController extends BaseController {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request")
-    }
-    )
+    })
     public Mono<ResponseEntity> createAuthPermission(@Valid @RequestBody AuthPermissionCreateDto authPermissionCreateDto, HttpServletRequest request) {
         try {
             // Lookup AuthIRole in database by name

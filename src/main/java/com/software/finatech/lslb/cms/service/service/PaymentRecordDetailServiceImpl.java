@@ -155,7 +155,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             Fee fee = null;
             String feeDescription = "";
             MachineMultiplePayment machineMultiplePayment = new MachineMultiplePayment();
-            if (paymentRecordDetailCreateDto.isAgentPayment() || paymentRecordDetailCreateDto.isInstitutionPayment()) {
+            if (paymentRecordDetailCreateDto.isFirstPayment() && (paymentRecordDetailCreateDto.isAgentPayment() || paymentRecordDetailCreateDto.isInstitutionPayment())) {
                 fee = feeService.findFeeById(feeId);
                 if (fee == null) {
                     return Mono.just(new ResponseEntity<>(String.format("Fee with id %s not found", feeId), HttpStatus.BAD_REQUEST));
@@ -187,6 +187,14 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 paymentRecord = paymentRecordService.findById(paymentRecordId);
                 if (paymentRecord == null) {
                     return Mono.just(new ResponseEntity<>(String.format("Payment record with id %s does not exist", paymentRecordDetailCreateDto.getPaymentRecordId()), HttpStatus.BAD_REQUEST));
+                }
+                String feeName = paymentRecord.getFeePaymentTypeName();
+                String gameTypeName = paymentRecord.getGameTypeName();
+                String revenueName = paymentRecord.getLicenseTypeName();
+                feeDescription = String.format("%s for %ss for %s ", feeName, revenueName, gameTypeName);
+                feeDescription = StringCapitalizer.convertToTitleCaseIteratingChars(feeDescription);
+                if (paymentRecordDetailCreateDto.getAmount() < paymentRecord.getAmount()) {
+                    feeDescription = String.format("%s (Part Payment)", feeDescription);
                 }
             }
 
