@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactive;
 import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +29,12 @@ public class ExpirationList {
         LocalDateTime dateTime = new LocalDateTime();
         dateTime=dateTime.plusDays(duration);
         Query queryLicence= new Query();
+        ArrayList<String>licenceTypes= new ArrayList<>();
+        licenceTypes.add(LicenseTypeReferenceData.AGENT_ID);
+        licenceTypes.add(LicenseTypeReferenceData.INSTITUTION_ID);
         queryLicence.addCriteria(Criteria.where("expiryDate").lt(dateTime));
         queryLicence.addCriteria(Criteria.where("licenseStatusId").in(licenseStatusIds));
+        queryLicence.addCriteria(Criteria.where("licenceTypeId").in(licenceTypes));
         try {
             List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicence, License.class).toStream().collect(Collectors.toList());
             if (licenses.size() == 0) {
@@ -52,31 +57,35 @@ public class ExpirationList {
     public List<License> getExpiredLicences( ArrayList<String> licenseStatuses) {
         LocalDateTime dateTime = new LocalDateTime();
         Query queryLicence = new Query();
+        ArrayList<String>licenceTypes= new ArrayList<>();
+        licenceTypes.add(LicenseTypeReferenceData.AGENT_ID);
+        licenceTypes.add(LicenseTypeReferenceData.INSTITUTION_ID);
         queryLicence.addCriteria(Criteria.where("expiryDate").lte(dateTime));
         queryLicence.addCriteria(Criteria.where("licenseStatusId").in(licenseStatuses));//orOperator(Criteria.where("licenseStatusId").is("03")));
+        queryLicence.addCriteria(Criteria.where("licenseTypeId").in(licenceTypes));//orOperator(Criteria.where("licenseStatusId").is("03")));
 
         try {
             List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicence, License.class).toStream().collect(Collectors.toList());
 
-
-            if (licenseStatuses.get(0).equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)) {
+            if (licenseStatuses.get(0).equals(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)||
+                    licenseStatuses.get(1).equals(LicenseStatusReferenceData.RENEWED_ID)) {
                 for (License license : licenses) {
                     license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
                     license.setRenewalStatus("true");
                     mongoRepositoryReactive.saveOrUpdate(license);
-                    Query queryRenewalDocuments = new Query();
-                    queryRenewalDocuments.addCriteria(Criteria.where("institutionId").is(license.getInstitutionId()));
-                    queryRenewalDocuments.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
-                    List<Document> documents = (List<Document>) mongoRepositoryReactive.findAll(queryRenewalDocuments, Document.class).toStream().collect(Collectors.toList());
-                    if (documents.size() != 0) {
+                    if(license.getLicenseTypeId().equalsIgnoreCase(LicenseTypeReferenceData.INSTITUTION_ID)){
+                        Query queryRenewalDocuments = new Query();
+                        queryRenewalDocuments.addCriteria(Criteria.where("institutionId").is(license.getInstitutionId()));
+                        queryRenewalDocuments.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
+                        List<Document> documents = (List<Document>) mongoRepositoryReactive.findAll(queryRenewalDocuments, Document.class).toStream().collect(Collectors.toList());
+                        if (documents.size() != 0) {
                         List<DocumentType> documentTypes = new ArrayList<>();
                         documents.stream().forEach(document -> {
                             documentTypes.add(document.getDocumentType());
                         });
                         for (DocumentType documentType : documentTypes) {
                             if (documentType != null && documentType.getDocumentPurposeId().equals(DocumentPurposeReferenceData.RENEWAL_LICENSE_ID)) {
-
-                                org.springframework.data.mongodb.core.query.Query queryPreviousDocuments = new org.springframework.data.mongodb.core.query.Query();
+                                Query queryPreviousDocuments = new Query();
                                 queryPreviousDocuments.addCriteria(Criteria.where("institutionId").is(license.getInstitutionId()));
                                 queryPreviousDocuments.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
                                 queryPreviousDocuments.addCriteria(Criteria.where("documentTypeId").is(documentType.getId()));
@@ -87,6 +96,7 @@ public class ExpirationList {
                                 mongoRepositoryReactive.saveOrUpdate(previousDocument);
 
                             }
+                        }
                         }
                     }
 
@@ -100,8 +110,7 @@ public class ExpirationList {
             }
 
             Query queryExpiredLicence = new Query();
-            queryExpiredLicence.addCriteria(Criteria.where("expiryDate").lte(dateTime));
-            queryExpiredLicence.addCriteria(Criteria.where("licenseStatusId").in(licenseStatuses));
+            queryExpiredLicence.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID));
             List<License> expiredLicenses = (List<License>) mongoRepositoryReactive.findAll(queryExpiredLicence, License.class).toStream().collect(Collectors.toList());
             return expiredLicenses;
         } catch (Throwable ex) {
