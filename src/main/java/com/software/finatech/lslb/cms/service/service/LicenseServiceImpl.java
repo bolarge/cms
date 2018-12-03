@@ -1141,11 +1141,14 @@ public class LicenseServiceImpl implements LicenseService {
     public License findPresentLicenseForCase(LoggedCase loggedCase) {
         Query query = new Query();
         LocalDate today = LocalDate.now();
-        query.addCriteria(Criteria.where("InstitutionId").is(loggedCase.getInstitutionId()));
-        query.addCriteria(Criteria.where("agentId").is(loggedCase.getAgentId()));
+        if (!StringUtils.isEmpty(loggedCase.getInstitutionId())) {
+            query.addCriteria(Criteria.where("InstitutionId").is(loggedCase.getInstitutionId()));
+        }
+        if (!StringUtils.isEmpty(loggedCase.getAgentId())) {
+            query.addCriteria(Criteria.where("agentId").is(loggedCase.getAgentId()));
+        }
         query.addCriteria(Criteria.where("gameTypeId").is(loggedCase.getGameTypeId()));
-        query.addCriteria(Criteria.where("effectiveDate").lte(today));
-        query.addCriteria(Criteria.where("expiryDate").gte(today));
+        query.addCriteria(new Criteria().andOperator(Criteria.where("effectiveDate").lte(today), (Criteria.where("expiryDate").gte(today))));
         return (License) mongoRepositoryReactive.find(query, License.class).block();
     }
 

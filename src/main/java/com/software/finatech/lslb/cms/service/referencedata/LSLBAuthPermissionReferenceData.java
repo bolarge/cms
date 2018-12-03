@@ -832,6 +832,17 @@ public class LSLBAuthPermissionReferenceData {
         permission.setDescription("CREATE/UPDATE CATEGORIES");
         permission.setUsedBySystem(false);
         mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("90", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("90");
+        }
+        permission.setName("REVERSE SUSPENDED/TERMINATED/REVOKED LICENCE");
+        permission.setDescription("Reverse suspended/terminated/revoked licence");
+        permission.setUsedBySystem(false);
+        permission.setAuthRoleId(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID);
+        mongoRepositoryReactive.saveOrUpdate(permission);
     }
 
 
