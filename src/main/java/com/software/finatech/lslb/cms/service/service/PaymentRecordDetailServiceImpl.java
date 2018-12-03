@@ -174,7 +174,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 String feeName = feeDto.getFeePaymentTypeName();
                 String gameTypeName = feeDto.getGameTypeName();
                 String revenueName = feeDto.getRevenueName();
-                feeDescription = String.format("%s for %ss for category : %s ", feeName, revenueName, gameTypeName);
+                feeDescription = String.format("%s for %ss for %s ", feeName, revenueName, gameTypeName);
                 feeDescription = StringCapitalizer.convertToTitleCaseIteratingChars(feeDescription);
                 if (paymentRecordDetailCreateDto.getAmount() < fee.getAmount()) {
                     feeDescription = String.format("%s (Part Payment)", feeDescription);
@@ -252,7 +252,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 if (paymentRecordDetailCreateDto.isInstitutionPayment() || paymentRecordDetailCreateDto.isAgentPayment()) {
                     paymentRecord = newPaymentFromFee(fee, paymentRecordDetailCreateDto);
                 }
-                if (paymentRecordDetailCreateDto.isGamingMachinePayment() || paymentRecordDetailCreateDto.isGamingMachinePayment()) {
+                if (paymentRecordDetailCreateDto.isGamingMachinePayment() || paymentRecordDetailCreateDto.isGamingTerminalPayment()) {
                     paymentRecord = newPaymentForMachine(paymentRecordDetailCreateDto, machineMultiplePayment);
                 }
             }
@@ -270,7 +270,6 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             paymentRecordDetailIdList.add(paymentRecordDetail.getId());
             paymentRecord.setPaymentRecordDetailIds(paymentRecordDetailIdList);
             paymentRecordService.savePaymentRecord(paymentRecord);
-
 
             String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
             String verbiage = "";
@@ -397,6 +396,11 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     @Override
     public Mono<ResponseEntity> findAllPaymentRecordDetailForPaymentRecord(String paymentRecordId) {
         try {
+            PaymentRecord paymentRecord = paymentRecordService.findById(paymentRecordId);
+            if (paymentRecord == null){
+                return Mono.just(new ResponseEntity<>(String.format("Payment record with id %s not found", paymentRecordId), HttpStatus.BAD_REQUEST));
+            }
+            PaymentRecordDto paymentRecordDto = paymentRecord.convertToFullDto();
             Query query = new Query();
             query.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));
             query.with(new Sort(Sort.Direction.DESC, "paymentDate"));
@@ -408,7 +412,8 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             for (PaymentRecordDetail paymentRecordDetail : paymentRecordDetails) {
                 paymentRecordDetailDtos.add(paymentRecordDetail.convertToDto());
             }
-            return Mono.just(new ResponseEntity<>(paymentRecordDetailDtos, HttpStatus.OK));
+            return Mono.just(new ResponseEntity<>(new PaymentDetailResponse(paymentRecordDetailDtos, paymentRecordDto),
+                    HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while getting payment record details", e);
         }

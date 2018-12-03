@@ -144,4 +144,19 @@ public class GameTypeController extends BaseController {
         }
         return Mono.just(new ResponseEntity<>("Please supply one of agent id or institution Id", HttpStatus.BAD_REQUEST));
     }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/for-machine-creation", params = {"institutionId", "agentId", "machineTypeId"})
+    @ApiOperation(value = "Get GameTypes for machine creation", response = GameTypeDto.class, responseContainer = "List", consumes = "application/json",
+            notes = "it finds all the game types registered for the person, and filters if they allow gaming terminal or gaming machine")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getGameTypesForMachineCreation(@RequestParam("agentId") String agentId,
+                                                               @RequestParam("institutionId") String institutionId,
+                                                               @RequestParam("machineTypeId") String machineTypeId) {
+        return gameTypeService.findGameTypesForMachineCreation(agentId, institutionId, machineTypeId);
+    }
 }

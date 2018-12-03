@@ -683,6 +683,11 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             int responseCode = response.getStatusLine().getStatusCode();
             String stringResponse = EntityUtils.toString(response.getEntity());
 
+            if (responseCode == 400 && StringUtils.equalsIgnoreCase("{\"error\":\"invalid_grant\"}", stringResponse)) {
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> Response From SSO : \n" + stringResponse));
+                return Mono.just(new ResponseEntity<>("Invalid Credentials", HttpStatus.UNAUTHORIZED));
+            }
+
             if (responseCode == 200) {
                 // everything is fine, handle the response
                 SSOToken token = mapper.readValue(stringResponse, SSOToken.class);

@@ -33,6 +33,18 @@ public class PaymentRecordDto {
     private String completionDate;
 
 
+    public void setGamingMachines(List<MachineDto> gamingMachines) {
+        this.gamingMachines = gamingMachines;
+    }
+
+    public List<MachineDto> getGamingTerminals() {
+        return gamingTerminals;
+    }
+
+    public void setGamingTerminals(List<MachineDto> gamingTerminals) {
+        this.gamingTerminals = gamingTerminals;
+    }
+
     public String getCreationDate() {
         return creationDate;
     }
@@ -65,17 +77,6 @@ public class PaymentRecordDto {
         return gamingMachines;
     }
 
-    public void setGamingMachines(List<MachineDto> gamingMachines) {
-        this.gamingMachines = gamingMachines;
-    }
-
-    public List<MachineDto> getGamingTerminals() {
-        return gamingTerminals;
-    }
-
-    public void setGamingTerminals(List<MachineDto> gamingTerminals) {
-        this.gamingTerminals = gamingTerminals;
-    }
 
     public void setPaymentReference(String paymentReference) {
         this.paymentReference = paymentReference;

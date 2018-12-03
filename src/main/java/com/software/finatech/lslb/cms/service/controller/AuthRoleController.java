@@ -358,7 +358,7 @@ public class AuthRoleController extends BaseController {
         try {
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser != null) {
-                List<String> notAllowedIds = new ArrayList<>();
+                List<String> notAllowedIds;
                 Set<String> eligibleRoleIds = new HashSet<>();
                 Map authRoleMap = Mapstore.STORE.get("AuthRole");
                 Set<String> authRoleIds = (Set<String>) authRoleMap.keySet();
@@ -370,7 +370,8 @@ public class AuthRoleController extends BaseController {
                     notAllowedIds = Arrays.asList(AuthRoleReferenceData.VGG_ADMIN_ID,
                             AuthRoleReferenceData.VGG_USER_ID,
                             AuthRoleReferenceData.SUPER_ADMIN_ID,
-                            LSLBAuthRoleReferenceData.LSLB_ADMIN_ID);
+                            LSLBAuthRoleReferenceData.LSLB_ADMIN_ID,
+                            LSLBAuthRoleReferenceData.AGENT_ROLE_ID);
                     for (String authRoleId : authRoleIds) {
                         if (!notAllowedIds.contains(authRoleId)) {
                             eligibleRoleIds.add(authRoleId);
@@ -381,7 +382,8 @@ public class AuthRoleController extends BaseController {
                 if (loggedInUser.isLSLBAdmin()) {
                     notAllowedIds = Arrays.asList(AuthRoleReferenceData.VGG_ADMIN_ID,
                             AuthRoleReferenceData.VGG_USER_ID,
-                            AuthRoleReferenceData.SUPER_ADMIN_ID);
+                            AuthRoleReferenceData.SUPER_ADMIN_ID,
+                            LSLBAuthRoleReferenceData.AGENT_ROLE_ID);
                     for (String authRoleId : authRoleIds) {
                         if (!notAllowedIds.contains(authRoleId)) {
                             eligibleRoleIds.add(authRoleId);
@@ -390,7 +392,7 @@ public class AuthRoleController extends BaseController {
                 }
 
                 if (loggedInUser.isVGGAdmin()) {
-                    notAllowedIds = Collections.singletonList(AuthRoleReferenceData.SUPER_ADMIN_ID);
+                    notAllowedIds = Arrays.asList(AuthRoleReferenceData.SUPER_ADMIN_ID, LSLBAuthRoleReferenceData.AGENT_ROLE_ID);
                     for (String authRoleId : authRoleIds) {
                         if (!notAllowedIds.contains(authRoleId)) {
                             eligibleRoleIds.add(authRoleId);
@@ -400,7 +402,7 @@ public class AuthRoleController extends BaseController {
 
                 if (loggedInUser.isVGGUser()) {
                     notAllowedIds = Arrays.asList(AuthRoleReferenceData.VGG_ADMIN_ID,
-                            AuthRoleReferenceData.SUPER_ADMIN_ID);
+                            AuthRoleReferenceData.SUPER_ADMIN_ID,LSLBAuthRoleReferenceData.AGENT_ROLE_ID);
                     for (String authRoleId : authRoleIds) {
                         if (!notAllowedIds.contains(authRoleId)) {
                             eligibleRoleIds.add(authRoleId);

@@ -18,4 +18,6 @@ public interface GameTypeService {
     Mono<ResponseEntity> getAllGameTypesForAgent(String agentId);
 
     Mono<ResponseEntity> createGameType(GameTypeCreateDto gameTypeCreateDto, HttpServletRequest request);
+
+    Mono<ResponseEntity> findGameTypesForMachineCreation(String agentId, String institutionId, String machineTypeId);
 }

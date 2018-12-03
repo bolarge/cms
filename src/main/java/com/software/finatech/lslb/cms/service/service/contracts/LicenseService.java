@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
 import com.software.finatech.lslb.cms.service.domain.License;
+import com.software.finatech.lslb.cms.service.domain.LoggedCase;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseRequestDto;
@@ -78,6 +79,10 @@ public interface LicenseService {
     License findLicenseById(String id);
 
     License findInstitutionActiveLicenseInGameType(String institutionId, String gameTypeId);
+
+    void changeLicenseStatusForCaseOutcome(License license, String newLicenseStatusId);
+
+    License findPresentLicenseForCase(LoggedCase loggedCase);
 
     Mono<ResponseEntity> licenseLicense(LicenseRequestDto licenseRequestDto, HttpServletRequest request);
 }

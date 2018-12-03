@@ -22,7 +22,7 @@ management:
   shutdown:
     enabled: true
 server:
-  port: ${APPLICATIONPORT:2001}
+  port: ${APPLICATION_PORT:2001}
 security:
   enable-csrf: false
   ignored: /resources/**
@@ -30,10 +30,14 @@ security:
     enabled: false
 
 mongodb:
-  hosts: db2.mlnx.test.vggdev.com:27017 #172.31.31.29:27017,172.31.22.131:27017
-  username: useradmin
-  password: f1nat3ch
-  database: LslbCMSDb
+#  hosts: db2.mlnx.test.vggdev.com:27017 #172.31.31.29:27017,172.31.22.131:27017
+#  username: useradmin
+#  password: f1nat3ch
+#  database: LslbCMSDb
+  hosts: ${MONGO_HOSTS}
+  username: ${MONGO_USERNAME}
+  password: ${MONGO_PASSWORD}
+  database: ${MONGO_DATABASE_NAME}
   authDb:
   replicaSet:
 
@@ -52,9 +56,9 @@ sso:
   baseIdentityURL: https://sso.test.vggdev.com/identity
   baseAPIURL: http://ssoapi.test.vggdev.com
   apiUsername: lslb-cms-api
-  apiPassword: fhhsnns___===i1omnsnaa
+  apiPassword: ${SSO_API_PASSWORD}
   clientId: lslb-cms
-  clientSecret:  fhhsnns___===i1omnsnaa
+  clientSecret:  ${SSO_CLIENT_SECRET}
   baseLogoutURL: https://sso.test.vggdev.com
   publicKeyURL: https://sso.test.vggdev.com/identity/.well-known/jwks
   applicationName: lslb-cms
@@ -65,15 +69,15 @@ jwt:
 
 racs:
   ui:
-    host: lslbcms.test.vggdev.com
+    host: ${UI_HOST}
     port:
 
 
 vigipay:
-  client-id: LAGOS_STATE_LOTTERIES_BOARD_TEST_API1DH9V9PLSI4W
-  client-secret: vgPsvZAUJMLmHHhe
-  username: adeboludeyi@gmail.com
-  password: vigipayP@ssw0rd
+  client-id: ${VIGIPAY_CLIENT_ID}
+  client-secret: ${VIGIPAY_CLIENT_SECRET}
+  username: ${VIGIPAY_USERNAME}
+  password: ${VIGIPAY_PASSWORD}
   scope: ebipsgatewayapi offline_access roles profile
   grant-type: password
   token-url: https://ebipssso.test.vggdev.com/core/connect/token
@@ -83,7 +87,7 @@ vigipay:
   currency-code: NGN
   corporate-revenue-code: 1234
 
-email-host: smtp.gmail.com
-email-username: lslbcms@gmail.com
-email-password: password@123456
-email-port: 587
+email-host: ${EMAIL_HOST}
+email-username: ${EMAIL_USERNAME}
+email-password: ${EMAIL_PASSWORD}
+email-port: ${EMAIL_PORT}

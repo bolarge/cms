@@ -55,12 +55,11 @@ public class DatabaseConfiguration {
     private String password;
 
     @Bean
-    public MongoClientOptions mongoOptions()
-    {
+    public MongoClientOptions mongoOptions() {
         return MongoClientOptions.builder()
-            .threadsAllowedToBlockForConnectionMultiplier(2)
-            .maxConnectionIdleTime(1).connectionsPerHost(1)
-            .minConnectionsPerHost(1).socketTimeout(2000).build();
+                .threadsAllowedToBlockForConnectionMultiplier(2)
+                .maxConnectionIdleTime(1).connectionsPerHost(1)
+                .minConnectionsPerHost(1).socketTimeout(2000).build();
     }
 
     @Bean("mongoClient")
@@ -77,12 +76,15 @@ public class DatabaseConfiguration {
 
         uri.append(mongoHosts);
         uri.append("/");
-        //uri.append(mongoDatabase);
-        if(replicaSet != null && !replicaSet.isEmpty()){
+
+        if (getActiveProfiles().contains("adedev")) {
+            uri.append(mongoDatabase);
+        }
+        if (replicaSet != null && !replicaSet.isEmpty()) {
             uri.append("?replicaSet=");
             uri.append(replicaSet);
             uri.append("&connectTimeoutMS=300000");
-        }else {
+        } else {
             uri.append("?connectTimeoutMS=300000");
         }
         uri.append("&maxPoolSize=10000");
@@ -129,12 +131,14 @@ public class DatabaseConfiguration {
 
         uri.append(mongoHosts);
         uri.append("/");
-        //uri.append(mongoDatabase);
-        if(replicaSet != null && !replicaSet.isEmpty()){
+        if (getActiveProfiles().contains("adedev")) {
+            uri.append(mongoDatabase);
+        }
+        if (replicaSet != null && !replicaSet.isEmpty()) {
             uri.append("?replicaSet=");
             uri.append(replicaSet);
             uri.append("&connectTimeoutMS=300000");
-        }else {
+        } else {
             uri.append("?connectTimeoutMS=300000");
         }
         uri.append("&maxPoolSize=10000");

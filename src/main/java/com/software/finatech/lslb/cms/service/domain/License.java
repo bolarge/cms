@@ -33,9 +33,19 @@ public class License extends AbstractFact {
     protected LocalDate lastSentExpiryEmailDate;
     protected String licenseTransferId;
     protected String licenseChangeReason;
+    protected String oldLicenseStatusId;
+
 
     public String getLicenseChangeReason() {
         return licenseChangeReason;
+    }
+
+    public String getOldLicenseStatusId() {
+        return oldLicenseStatusId;
+    }
+
+    public void setOldLicenseStatusId(String oldLicenseStatusId) {
+        this.oldLicenseStatusId = oldLicenseStatusId;
     }
 
     public void setLicenseChangeReason(String licenseChangeReason) {
@@ -364,6 +374,11 @@ public class License extends AbstractFact {
             return agent.getFullName();
         }
         return null;
+    }
+
+
+    public boolean isAIPRelatedLicense() {
+        return LicenseStatusReferenceData.getAIPLicenseStatues().contains(this.licenseStatusId);
     }
 
     @Override
