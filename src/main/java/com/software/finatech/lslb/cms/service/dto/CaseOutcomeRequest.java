@@ -1,5 +1,8 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import com.software.finatech.lslb.cms.service.referencedata.LoggedCaseOutcomeReferenceData;
+import org.apache.commons.lang3.StringUtils;
+
 import javax.validation.constraints.NotEmpty;
 
 public class CaseOutcomeRequest {
@@ -42,5 +45,21 @@ public class CaseOutcomeRequest {
 
     public void setLoggedCaseId(String loggedCaseId) {
         this.loggedCaseId = loggedCaseId;
+    }
+
+    public boolean isOutcomeLicenseRevoked() {
+        return StringUtils.equals(LoggedCaseOutcomeReferenceData.LICENSE_REVOKED_ID, this.caseOutcomeId);
+    }
+
+    public boolean isOutcomeLicenseSuspended() {
+        return StringUtils.equals(LoggedCaseOutcomeReferenceData.LICENSE_SUSPENDED_ID, this.caseOutcomeId);
+    }
+
+    public boolean isOutcomeLicenseTerminated() {
+        return StringUtils.equals(LoggedCaseOutcomeReferenceData.LICENSE_TERMINATED_ID, this.caseOutcomeId);
+    }
+
+    public boolean isOutcomePenalty() {
+        return StringUtils.equals(LoggedCaseOutcomeReferenceData.PENALTY_ID, this.caseOutcomeId);
     }
 }

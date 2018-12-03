@@ -334,7 +334,7 @@ public class Scheduler {
 
     }
 
-    @Scheduled(cron = "0 0 6 * * *")
+    @Scheduled(cron = "0 0 7 1 1 ?")
     @SchedulerLock(name = "Send email for expired Expired Gaming machine License", lockAtMostFor = ONE_HOUR, lockAtLeastFor = ONE_HOUR)
     protected void expiredGamingMachineLicense() {
        Query machineLicenseQuery= new Query();
