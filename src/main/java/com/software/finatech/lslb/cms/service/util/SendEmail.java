@@ -71,5 +71,14 @@ public class SendEmail {
         emailService.sendEmail(content, "AGENT DEACTIVATION NOTIFICATION", notificationDto.getAgentEmailAddress());
         return "success";
     }
+    public String sendEmailExpiredMachineLicenses(NotificationDto notificationDto) {
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("description", notificationDto.getDescription());
+        model.put("date", LocalDate.now().toString("dd-MM-YYYY"));
+        String content = mailContentBuilderService.build(model, notificationDto.getTemplate());
+        content = content.replaceAll("CallbackUrl", notificationDto.getCallBackUrl());
+        emailService.sendEmail(content, "Gaming Machine/Terminal Licence Expiration Notification", notificationDto.getInstitutionEmail());
+        return "success";
+    }
 
 }

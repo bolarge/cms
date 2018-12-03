@@ -7,6 +7,7 @@ public class NotificationDto {
     protected String gameType;
     protected String endDate;
     protected int daysToExpiration;
+    protected String licenceType;
     protected String institutionEmail;
     protected String agentId;
     protected String gamingMachineId;
@@ -17,6 +18,14 @@ public class NotificationDto {
     protected String template;
     protected String callBackUrl;
     protected String lslbApprovalEmailAddress;
+
+    public String getLicenceType() {
+        return licenceType;
+    }
+
+    public void setLicenceType(String licenceType) {
+        this.licenceType = licenceType;
+    }
 
     public String getLslbApprovalEmailAddress() {
         return lslbApprovalEmailAddress;
