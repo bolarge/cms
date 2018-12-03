@@ -284,6 +284,15 @@ public class PaymentRecord extends AbstractFact {
         return licenseType;
     }
 
+
+    public String getLicenseTypeName(){
+        LicenseType licenseType = getLicenseType();
+        if (licenseType != null){
+            return licenseType.getName();
+        }
+    return null;
+    }
+
     public String getFeePaymentTypeName() {
         FeePaymentType feePaymentType = getFeePaymentType();
         if (feePaymentType != null) {
