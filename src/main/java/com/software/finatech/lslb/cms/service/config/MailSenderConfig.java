@@ -17,13 +17,13 @@ public class MailSenderConfig {
     @Value("${email-password}")
     private String emailPassword;
     @Value("${email-port}")
-    private int emailPort;
+    private String emailPort;
 
     @Bean
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost(emailHost);
-        mailSender.setPort(emailPort);
+        mailSender.setPort(Integer.valueOf(emailPort));
         mailSender.setUsername(emailUsername);
         mailSender.setPassword(emailPassword);
 
