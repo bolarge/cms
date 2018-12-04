@@ -439,7 +439,7 @@ public class AuthRoleController extends BaseController {
         try {
             Map<String, FactObject> factObjectMap = Mapstore.STORE.get("AuthPermission");
             Collection<FactObject> factObjects = factObjectMap.values();
-            Set<AuthPermission> permissions = new HashSet<>();
+            List<AuthPermission> permissions = new ArrayList<>();
             for (FactObject factObject : factObjects) {
                 AuthPermission permission = (AuthPermission) factObject;
                 //check if permission does not belong to any role and is not used by system
@@ -450,6 +450,7 @@ public class AuthRoleController extends BaseController {
             if (permissions.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
             }
+            permissions.sort(ReferenceDataUtil.enumeratedFactComparator);
             ArrayList<AuthPermissionDto> dtos = new ArrayList<>();
             for (AuthPermission permission : permissions) {
                 dtos.add(permission.convertToDto());
