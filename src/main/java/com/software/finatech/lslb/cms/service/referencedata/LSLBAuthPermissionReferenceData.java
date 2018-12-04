@@ -77,14 +77,14 @@ public class LSLBAuthPermissionReferenceData {
         mongoRepositoryReactive.saveOrUpdate(permission);
 
 
-        permission = (AuthPermission) mongoRepositoryReactive.findById("7", AuthPermission.class).block();
-        if (permission == null) {
-            permission = new AuthPermission();
-            permission.setId("7");
-        }
-        permission.setName("APPROVE APPLICATION");
-        permission.setDescription("Approve and reject application forms");
-        mongoRepositoryReactive.saveOrUpdate(permission);
+//        permission = (AuthPermission) mongoRepositoryReactive.findById("7", AuthPermission.class).block();
+//        if (permission == null) {
+//            permission = new AuthPermission();
+//            permission.setId("7");
+//        }
+//        permission.setName("APPROVE APPLICATION");
+//        permission.setDescription("Approve and reject application forms");
+//        mongoRepositoryReactive.saveOrUpdate(permission);
 
         permission = (AuthPermission) mongoRepositoryReactive.findById("8", AuthPermission.class).block();
         if (permission == null) {
@@ -842,6 +842,17 @@ public class LSLBAuthPermissionReferenceData {
         permission.setDescription("Reverse suspended/terminated/revoked licence");
         permission.setUsedBySystem(false);
         permission.setAuthRoleId(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("91", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("91");
+        }
+        permission.setName("CREATE ROLE");
+        permission.setDescription("can create roles");
+        permission.setUsedBySystem(false);
         mongoRepositoryReactive.saveOrUpdate(permission);
     }
 
