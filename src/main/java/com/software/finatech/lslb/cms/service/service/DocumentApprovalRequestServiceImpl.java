@@ -13,6 +13,7 @@ import com.software.finatech.lslb.cms.service.referencedata.AuditActionReference
 import com.software.finatech.lslb.cms.service.service.contracts.DocumentApprovalRequestService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApprovalRequestNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -46,11 +47,16 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
+    private ApprovalRequestNotifierAsync approvalRequestNotifierAsync;
 
-    public DocumentApprovalRequestServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive, SpringSecurityAuditorAware springSecurityAuditorAware, AuditLogHelper auditLogHelper) {
+    public DocumentApprovalRequestServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
+                                              SpringSecurityAuditorAware springSecurityAuditorAware,
+                                              AuditLogHelper auditLogHelper,
+                                              ApprovalRequestNotifierAsync approvalRequestNotifierAsync) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.auditLogHelper = auditLogHelper;
+        this.approvalRequestNotifierAsync = approvalRequestNotifierAsync;
     }
 
     @Override
@@ -202,9 +208,12 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
             documentApprovalRequest.setRejectionReason(requestOperationtDto.getReason());
             mongoRepositoryReactive.saveOrUpdate(documentApprovalRequest);
             String verbiage = String.format("Rejected Document approval request ->  Type -> %s, Id -> %s", documentApprovalRequest.getDocumentApprovalRequestType(), documentApprovalRequest.getId());
+
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(configAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), String.valueOf(documentApprovalRequest.getSubjectDocumentType()),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            approvalRequestNotifierAsync.sendRejectedDocumentApprovalRequestEmailToInitiator(documentApprovalRequest);
             return Mono.just(new ResponseEntity<>(documentApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while rejecting approval request ", e);

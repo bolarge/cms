@@ -4,7 +4,7 @@ import javax.validation.constraints.NotEmpty;
 
 public class UserRoleUpdateDto {
 
-    @NotEmpty(message = "Please provide l user id ")
+    @NotEmpty(message = "Please provide the user id ")
     private String userId;
     @NotEmpty(message = "Please provide new role id ")
     private String newRoleId;

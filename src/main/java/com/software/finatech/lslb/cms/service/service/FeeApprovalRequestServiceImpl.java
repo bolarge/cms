@@ -14,6 +14,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.FeeApprovalReque
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApprovalRequestNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -48,15 +49,19 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private FeeService feeService;
     private AuditLogHelper auditLogHelper;
+    private ApprovalRequestNotifierAsync approvalRequestNotifierAsync;
 
     @Autowired
     public FeeApprovalRequestServiceImpl(SpringSecurityAuditorAware springSecurityAuditorAware,
                                          MongoRepositoryReactiveImpl mongoRepositoryReactive,
-                                         FeeService feeService, AuditLogHelper auditLogHelper) {
+                                         FeeService feeService,
+                                         AuditLogHelper auditLogHelper,
+                                         ApprovalRequestNotifierAsync approvalRequestNotifierAsync) {
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.feeService = feeService;
         this.auditLogHelper = auditLogHelper;
+        this.approvalRequestNotifierAsync = approvalRequestNotifierAsync;
     }
 
     @Override
@@ -206,6 +211,8 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), loggedInUser.getFullName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
+
+            approvalRequestNotifierAsync.sendRejectedFeeApprovalRequestEmailToInitiator(feeApprovalRequest);
             return Mono.just(new ResponseEntity<>(feeApprovalRequest.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {

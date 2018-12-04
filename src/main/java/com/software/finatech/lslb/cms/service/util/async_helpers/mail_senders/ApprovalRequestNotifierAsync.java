@@ -1,9 +1,7 @@
 package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
-import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.domain.DocumentApprovalRequest;
-import com.software.finatech.lslb.cms.service.domain.FeeApprovalRequest;
-import com.software.finatech.lslb.cms.service.domain.UserApprovalRequest;
+import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +64,32 @@ public class ApprovalRequestNotifierAsync extends AbstractMailSender {
         }
     }
 
+    @Async
+    public void sendRejectedFeeApprovalRequestEmailToInitiator(FeeApprovalRequest feeApprovalRequest) {
+        AuthInfo initiator = feeApprovalRequest.getInitiator();
+        String mailContent = buildRejectedFeeApprovalRequestEmailContent(feeApprovalRequest);
+        String userEmail = initiator.getEmailAddress();
+        logger.info("Sending rejected fee email to {}", userEmail);
+        emailService.sendEmail(mailContent, "Update on your Fee Approval Request on LSLB CMS", userEmail);
+    }
+
+    @Async
+    public void sendRejectedDocumentApprovalRequestEmailToInitiator(DocumentApprovalRequest documentApprovalRequest) {
+        AuthInfo initiator = documentApprovalRequest.getInitiator();
+        String mailContent = buildRejectedDocumentApprovalRequestEmailContent(documentApprovalRequest);
+        String userEmail = initiator.getEmailAddress();
+        logger.info("Sending rejected document email to {}", userEmail);
+        emailService.sendEmail(mailContent, "Update on your Document Approval Request on LSLB CMS", userEmail);
+    }
+
+    @Async
+    public void sendRejectedUserApprovalRequestEmailToInitiator(UserApprovalRequest userApprovalRequest) {
+        AuthInfo initiator = userApprovalRequest.getInitiator();
+        String mailContent = buildRejectedUserApprovalRequestEmailContent(userApprovalRequest);
+        String userEmail = initiator.getEmailAddress();
+        logger.info("Sending rejected user email to {}", userEmail);
+        emailService.sendEmail(mailContent, "Update on your User Approval Request on LSLB CMS", userEmail);
+    }
 
     private String buildNewUserApprovalRequestEmailContent(UserApprovalRequest userApprovalRequest) {
         String frontEndUrl = String.format("%s/user-approvals/%s", frontEndPropertyHelper.getFrontEndUrl(), userApprovalRequest.getId());
@@ -116,5 +140,45 @@ public class ApprovalRequestNotifierAsync extends AbstractMailSender {
         model.put("approvalType", approvalRequestType);
         model.put("frontEndUrl", frontEndUrl);
         return mailContentBuilderService.build(model, "approval-request/NewDocumentApprovalRequest");
+    }
+
+    private String buildRejectedDocumentApprovalRequestEmailContent(DocumentApprovalRequest documentApprovalRequest) {
+        String frontEndUrl = String.format("%s/document-approvals-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), documentApprovalRequest.getId());
+        String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
+        String approvalRequestType = String.valueOf(documentApprovalRequest.getDocumentApprovalRequestType());
+        DocumentType documentType = documentApprovalRequest.getSubjectDocumentType();
+        String documentTypeName = String.valueOf(documentType);
+        documentTypeName = StringCapitalizer.convertToTitleCaseIteratingChars(documentTypeName);
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("date", presentDateString);
+        model.put("approvalType", approvalRequestType);
+        model.put("documentName", documentTypeName);
+        model.put("frontEndUrl", frontEndUrl);
+        return mailContentBuilderService.build(model, "approval-request/RejectedDocumentApprovalRequest");
+    }
+
+
+    private String buildRejectedFeeApprovalRequestEmailContent(FeeApprovalRequest feeApprovalRequest) {
+        String frontEndUrl = String.format("%s/fee-configurations-details/%s", frontEndPropertyHelper.getFrontEndUrl(), feeApprovalRequest.getId());
+        String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
+        String approvalRequestType = String.valueOf(feeApprovalRequest.getFeeApprovalRequestType());
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("date", presentDateString);
+        model.put("approvalType", approvalRequestType);
+        model.put("frontEndUrl", frontEndUrl);
+        return mailContentBuilderService.build(model, "approval-request/RejectedFeeApprovalRequest");
+    }
+
+    private String buildRejectedUserApprovalRequestEmailContent(UserApprovalRequest userApprovalRequest) {
+        String frontEndUrl = String.format("%s/user-approvals/%s", frontEndPropertyHelper.getFrontEndUrl(), userApprovalRequest.getId());
+        String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
+        String subjectUserName = userApprovalRequest.getSubjectUserName();
+        String approvalRequestType = String.valueOf(userApprovalRequest.getUserApprovalRequestType());
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("userName", subjectUserName);
+        model.put("date", presentDateString);
+        model.put("approvalType", approvalRequestType);
+        model.put("frontEndUrl", frontEndUrl);
+        return mailContentBuilderService.build(model, "approval-request/RejectedUserApprovalRequest");
     }
 }
