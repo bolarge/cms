@@ -1,7 +1,10 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.AuthPermission;
+import com.software.finatech.lslb.cms.service.domain.AuthRole;
+import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
@@ -148,7 +151,7 @@ public class AuthRoleController extends BaseController {
     )
     public Mono<ResponseEntity> updateAuthRole(@Valid @RequestBody AuthRoleUpdateDto authRoleUpdateDto, HttpServletRequest request) {
         try {
-            AuthRole authRole = (AuthRole) Mapstore.STORE.get("AuthRole").get(authRoleUpdateDto.getId());
+            AuthRole authRole = (AuthRole)mongoRepositoryReactive.findById(authRoleUpdateDto.getId(), AuthRole.class).block();
             if (authRole == null) {
                 return Mono.just(new ResponseEntity("Role does not exist", HttpStatus.BAD_REQUEST));
             }
@@ -156,22 +159,18 @@ public class AuthRoleController extends BaseController {
 
             authRole.setDescription(authRoleUpdateDto.getDescription());
             authRole.setName(authRoleUpdateDto.getName());
-            authRole.getAuthPermissionIds().addAll(authRoleUpdateDto.getAuthPermissionIds());
+            authRole.setAuthPermissionIds(authRoleUpdateDto.getAuthPermissionIds());
             authRole.setSsoRoleMapping(authRoleUpdateDto.getSsoRoleMapping());
 
             mongoRepositoryReactive.saveOrUpdate(authRole);
             Mapstore.STORE.get("AuthRole").put(authRole.getId(), authRole);
-
 
             String verbiage = String.format("Updated Role, Role Name: %s ", authRole.getName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(roleAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
-
             return Mono.just(new ResponseEntity(authRole.convertToDto(), HttpStatus.OK));
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -189,9 +188,7 @@ public class AuthRoleController extends BaseController {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 404, message = "Not Found")
-    }
-    )
+            @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> authRoles() {
         try {
             List<AuthRole> roles = new ArrayList<>();
@@ -200,10 +197,8 @@ public class AuthRoleController extends BaseController {
                 return Mono.just(new ResponseEntity<>("Could not find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
             }
             List<String> notAllowedRoleIds = AuthRoleReferenceData.getNotAllowedRoleIds();
-            Map<String, FactObject> roleMap = Mapstore.STORE.get("AuthRole");
-            Collection<FactObject> factObjectCollection = roleMap.values();
-            for (FactObject factObject : factObjectCollection) {
-                AuthRole authRole = (AuthRole) factObject;
+            ArrayList<AuthRole> authRoles = (ArrayList<AuthRole>) mongoRepositoryReactive.findAll(new Query(), AuthRole.class).toStream().collect(Collectors.toList());
+            for (AuthRole authRole : authRoles) {
                 if (!notAllowedRoleIds.contains(loggedInUser.getAuthRoleId())
                         && notAllowedRoleIds.contains(authRole.getId())) {
                     continue;
@@ -401,7 +396,7 @@ public class AuthRoleController extends BaseController {
 
                 if (loggedInUser.isVGGUser()) {
                     notAllowedIds = Arrays.asList(AuthRoleReferenceData.VGG_ADMIN_ID,
-                            AuthRoleReferenceData.SUPER_ADMIN_ID,LSLBAuthRoleReferenceData.AGENT_ROLE_ID);
+                            AuthRoleReferenceData.SUPER_ADMIN_ID, LSLBAuthRoleReferenceData.AGENT_ROLE_ID);
                     for (String authRoleId : authRoleIds) {
                         if (!notAllowedIds.contains(authRoleId)) {
                             eligibleRoleIds.add(authRoleId);
