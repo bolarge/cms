@@ -268,8 +268,7 @@ public class AuthRoleController extends BaseController {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request")
-    }
-    )
+    })
     public Mono<ResponseEntity> createAuthPermission(@Valid @RequestBody AuthPermissionCreateDto authPermissionCreateDto, HttpServletRequest request) {
         try {
             // Lookup AuthIRole in database by name
@@ -440,7 +439,7 @@ public class AuthRoleController extends BaseController {
         try {
             Map<String, FactObject> factObjectMap = Mapstore.STORE.get("AuthPermission");
             Collection<FactObject> factObjects = factObjectMap.values();
-            Set<AuthPermission> permissions = new HashSet<>();
+            List<AuthPermission> permissions = new ArrayList<>();
             for (FactObject factObject : factObjects) {
                 AuthPermission permission = (AuthPermission) factObject;
                 //check if permission does not belong to any role and is not used by system
@@ -451,6 +450,7 @@ public class AuthRoleController extends BaseController {
             if (permissions.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
             }
+            permissions.sort(ReferenceDataUtil.enumeratedFactComparator);
             ArrayList<AuthPermissionDto> dtos = new ArrayList<>();
             for (AuthPermission permission : permissions) {
                 dtos.add(permission.convertToDto());
