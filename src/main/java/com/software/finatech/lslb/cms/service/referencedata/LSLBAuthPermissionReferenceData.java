@@ -854,6 +854,15 @@ public class LSLBAuthPermissionReferenceData {
         permission.setDescription("can create roles");
         permission.setUsedBySystem(false);
         mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("92", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("92");
+        }
+        permission.setName("UPDATE USER ROLE");
+        permission.setDescription("update user role");
+        mongoRepositoryReactive.saveOrUpdate(permission);
     }
 
 
