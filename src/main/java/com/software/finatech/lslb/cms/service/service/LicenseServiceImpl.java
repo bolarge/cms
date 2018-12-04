@@ -1170,6 +1170,10 @@ public class LicenseServiceImpl implements LicenseService {
                 return Mono.just(new ResponseEntity<>(String.format("Licence with id %s not found", licenseId), HttpStatus.BAD_REQUEST));
             }
 
+            if (license.isTerminatedLicence()){
+                return Mono.just(new ResponseEntity<>("License already terminated", HttpStatus.BAD_REQUEST));
+            }
+
             LicenseStatus oldLicenseStatus = license.getLicenseStatus();
             license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
             mongoRepositoryReactive.saveOrUpdate(license);

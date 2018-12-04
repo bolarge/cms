@@ -62,13 +62,6 @@ public class LoggedCaseMailSenderAsync extends AbstractMailSender {
         String subject = "Penalty Notification";
         sendEmailToOffender(mailContent, subject, loggedCase);
     }
-//
-//    @Async
-//    public void sendOutcomeMailToOffender(LoggedCase loggedCase) {
-//        String mailContent = buildOutcomeMailContent(loggedCase);
-//        String subject = String.format("Notification on your %s licence", loggedCase.getGameType());
-//        sendEmailToOffender(mailContent, subject, loggedCase);
-//    }
 
     private void sendEmailToOffender(String mailContent, String subject, LoggedCase loggedCase) {
         if (loggedCase.isLoggedAgainstGamingTerminal() || loggedCase.isLoggedAgainstAgent()) {
