@@ -266,11 +266,11 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             }
             Fee fee = new Fee();
             fee.setId(UUID.randomUUID().toString());
-            if (pendingFee.getEffectiveDate().isBefore(LocalDate.now()) || pendingFee.getEffectiveDate().isEqual(LocalDate.now())) {
-                fee.setActive(true);
-            } else {
-                fee.setActive(false);
-            }
+            //  if (pendingFee.getEffectiveDate().isBefore(LocalDate.now()) || pendingFee.getEffectiveDate().isEqual(LocalDate.now())) {
+            fee.setActive(true);
+            //  } else {
+            //      fee.setActive(false);
+            //  }
             LocalDate today = LocalDate.now();
             fee.setGameTypeId(pendingFee.getGameTypeId());
             fee.setFeePaymentTypeId(pendingFee.getFeePaymentTypeId());
@@ -278,8 +278,11 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             fee.setEffectiveDate(pendingFee.getEffectiveDate());
             fee.setAmount(pendingFee.getAmount());
             fee.setEndDate(pendingFee.getEndDate());
-            if (fee.getEndDate().isBefore(today) || fee.getEndDate().isEqual(today)){
-                fee.setActive(false);
+            if (fee.getEndDate() != null) {
+                fee.setNextNotificationDate(fee.getNextNotificationDate().minusDays(7));
+//                if (fee.getEndDate().isBefore(today) || fee.getEndDate().isEqual(today)) {
+//                    fee.setActive(false);
+//                }}
             }
             mongoRepositoryReactive.saveOrUpdate(fee);
             mongoRepositoryReactive.saveOrUpdate(pendingFee);
@@ -292,4 +295,5 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
         }
         return (FeeApprovalRequest) mongoRepositoryReactive.findById(id, FeeApprovalRequest.class).block();
     }
+}
 }
