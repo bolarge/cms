@@ -40,8 +40,5 @@ public class LSLBCMSApplication {
         }
 
         databaseLoaderUtils.runLoadData();
-
-        //set timezone because of mongodb date
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 }
