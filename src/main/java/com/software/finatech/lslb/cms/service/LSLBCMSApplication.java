@@ -14,6 +14,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.Arrays;
+import java.util.TimeZone;
 
 @EnableScheduling
 @SpringBootApplication(exclude = {MongoAutoConfiguration.class,SecurityAutoConfiguration.class})
@@ -39,5 +40,8 @@ public class LSLBCMSApplication {
         }
 
         databaseLoaderUtils.runLoadData();
+
+        //set timezone because of mongodb date
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 }
