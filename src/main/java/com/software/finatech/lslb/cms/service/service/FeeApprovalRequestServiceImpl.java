@@ -242,7 +242,7 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
         Fee fee = feeApprovalRequest.getFee();
         if (fee != null) {
             fee.setEndDate(feeApprovalRequest.getEndDate());
-            if (fee.getEndDate().isBefore(LocalDate.now())) {
+            if (fee.getEndDate().isEqual(LocalDate.now()) ||  fee.getEndDate().isBefore(LocalDate.now())) {
                 fee.setActive(false);
             }
             fee.setNextNotificationDate(fee.getEndDate().minusDays(7));

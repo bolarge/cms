@@ -11,6 +11,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.TimeZone;
 
 @Repository("mongoRepositoryReactive")
 public class MongoRepositoryReactiveImpl implements MongoRepositoryReactive<FactObject> {
@@ -36,6 +37,8 @@ public class MongoRepositoryReactiveImpl implements MongoRepositoryReactive<Fact
 			//.getConverter().write(fact, dbObject);
 		//reactiveMongoTemplate.upsert(new Query(Criteria.where("_id").is(fact.getId())), Update.fromDocument(dbObject, "_id"), PERSON_COLLECTION);
 
+		//set timezone because of mongodb date
+		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 		reactiveMongoTemplate.save(fact).block();//.subscribe();
 		return null;
 	}
