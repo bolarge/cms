@@ -316,6 +316,7 @@ public class DashboardController extends BaseController {
                 institutionDashboardSummaryDto.setEffectiveDate(license.getEffectiveDate().toString("dd-MM-yyyy"));
                 institutionDashboardSummaryDto.setExpiryDate(license.getExpiryDate().toString("dd-MM-yyyy"));
                 institutionDashboardSummaryDto.setGameType(getGameType(license.getGameTypeId()).getName());
+                institutionDashboardSummaryDto.setGameTypeId(license.getGameTypeId());
                 institutionDashboardSummaryDto.setNumberOfAgents(getAgentCountForInstitution(institutionId));
                 institutionDashboardSummaryDto.setNumberOfGamingMachines(getGamingMachineCountForInstitution(institutionId));
                 institutionDashboardSummaryDto.setNumberOfGamingTerminals(getGamingTerminalCountForInstitution(institutionId));
