@@ -9,12 +9,21 @@ public class InstitutionDashboardSummaryDto {
     protected long numberOfGamingMachines;
     protected long numberOfGamingTerminals;
     protected String licenseStatusId;
+    protected String renewalStatus;
     protected String licenseStatus;
     protected String effectiveDate;
     protected String expiryDate;
     protected String gameType;
     protected boolean allowsGamingTerminal;
     protected boolean allowsGamingMachine;
+
+    public String getRenewalStatus() {
+        return renewalStatus;
+    }
+
+    public void setRenewalStatus(String renewalStatus) {
+        this.renewalStatus = renewalStatus;
+    }
 
     public boolean isAllowsGamingTerminal() {
         return allowsGamingTerminal;

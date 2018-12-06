@@ -305,6 +305,9 @@ public class DashboardController extends BaseController {
                 InstitutionDashboardSummaryDto institutionDashboardSummaryDto = new InstitutionDashboardSummaryDto();
 
                 institutionDashboardSummaryDto.setInstitutionId(institutionId);
+                if(!license.getRenewalStatus().isEmpty()){
+                    institutionDashboardSummaryDto.setRenewalStatus(license.getRenewalStatus());
+                }
                 institutionDashboardSummaryDto.setLicenseId(license.getId());
                 institutionDashboardSummaryDto.setLicenseNumber(license.getLicenseNumber());
                 institutionDashboardSummaryDto.setInstitutionName(getInstitution(institutionId).getInstitutionName());
