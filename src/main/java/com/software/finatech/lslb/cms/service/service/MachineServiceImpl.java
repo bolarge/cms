@@ -454,7 +454,7 @@ public class MachineServiceImpl implements MachineService {
 
     //TODO: validate if its multiple or not
     @Override
-    public Mono<ResponseEntity> uploadMultipleMachinesForInstitution(String institutionId, String gameTypeId, MultipartFile multipartFile, HttpServletRequest request) {
+    public Mono<ResponseEntity> uploadMultipleMachinesForInstitution(String institutionId, String gameTypeId, String machineTypeId, MultipartFile multipartFile, HttpServletRequest request) {
         Institution institution = institutionService.findByInstitutionId(institutionId);
         if (institution == null) {
             return Mono.just(new ResponseEntity<>(String.format("Institution with id %s does not exist", institutionId), HttpStatus.BAD_REQUEST));
@@ -462,6 +462,11 @@ public class MachineServiceImpl implements MachineService {
         Mono<ResponseEntity> validateGamingMachineLicenseResponse = licenseValidatorUtil.validateInstitutionLicenseForGameType(institutionId, gameTypeId);
         if (validateGamingMachineLicenseResponse != null) {
             return validateGamingMachineLicenseResponse;
+        }
+
+        MachineType machineType = getMachineType(machineTypeId);
+        if (machineType == null){
+            return Mono.just(new ResponseEntity<>(String.format("Machine type with id %s not found", machineTypeId), HttpStatus.BAD_REQUEST));
         }
 
         List<FailedLine> failedLines = new ArrayList<>();
@@ -474,29 +479,27 @@ public class MachineServiceImpl implements MachineService {
                 Map<String, PendingMachine> pendingMachineMap = new HashMap<>();
                 for (int i = 1; i < rows.length; i++) {
                     String[] columns = rows[i].split(",");
-                    if (columns.length < 7) {
-                        failedLines.add(FailedLine.fromLineAndReason(rows[i], "Line has less than 6 fields"));
+                    if (StringUtils.equals(MachineTypeReferenceData.GAMING_MACHINE_ID, machineTypeId) && columns.length < 5) {
+                        failedLines.add(FailedLine.fromLineAndReason(rows[i], "Line has less than required(5) fields"));
+                    } else if (StringUtils.equals(MachineTypeReferenceData.GAMING_TERMINAL_ID, machineTypeId) && columns.length < 3) {
+                        failedLines.add(FailedLine.fromLineAndReason(rows[i], "Line has less than required(3) fields"));
                     } else {
                         try {
-                            //   Machine machine = getGamingMachineBySerialNumberFromMap(columns[0], gamingMachineMap);
                             PendingMachine machine = pendingMachineMap.get(columns[0]);
                             if (machine == null) {
                                 machine = new PendingMachine();
                                 machine.setId(UUID.randomUUID().toString());
                                 machine.setSerialNumber(columns[0]);
                                 machine.setManufacturer(columns[1]);
-                                machine.setMachineAddress(columns[3]);
-                                String machineTypeId = columns[4];
-                                MachineType machineType = getMachineType(machineTypeId);
-                                if (machineType == null) {
-                                    failedLines.add(FailedLine.fromLineAndReason(rows[i], String.format("Machine type with id %s not found", machineTypeId)));
-                                    continue;
-                                }
-                                machine.setMachineTypeId(machineTypeId);
+                                machine.setMachineAddress(columns[2]);
                             }
                             machine.setGameTypeId(gameTypeId);
-                            machine.getGameDetailsList().add(MachineGameDetails.fromGameNameAndVersion(columns[5], columns[6]));
+                            machine.setMachineTypeId(machineTypeId);
+                            if (columns.length > 3 && StringUtils.isEmpty(columns[3]) && StringUtils.isEmpty(columns[4]) ) {
+                                machine.getGameDetailsList().add(MachineGameDetails.fromGameNameAndVersion(columns[3], columns[4]));
+                            }
                             machine.setInstitutionId(institutionId);
+                            machine.setMachineStatusId(MachineStatusReferenceData.ACTIVE_ID);
                             pendingMachineMap.put(machine.getSerialNumber(), machine);
                         } catch (Exception e) {
                             logger.error(String.format("Error parsing line %s", rows[i]), e);
@@ -857,7 +860,7 @@ public class MachineServiceImpl implements MachineService {
         Query query = new Query();
         List<String> statuses = Arrays.asList(ApprovalRequestStatusReferenceData.APPROVED_ID, ApprovalRequestStatusReferenceData.PENDING_ID);
         query.addCriteria(Criteria.where("serialNumber").is(serialNumber));
-        query.addCriteria(Criteria.where("approvalRequestStatusId").in(serialNumber));
+        query.addCriteria(Criteria.where("approvalRequestStatusId").in(statuses));
         return (PendingMachine) mongoRepositoryReactive.find(query, PendingMachine.class).block();
     }
 }
