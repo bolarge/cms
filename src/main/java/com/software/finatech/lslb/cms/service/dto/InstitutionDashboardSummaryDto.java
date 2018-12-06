@@ -14,8 +14,18 @@ public class InstitutionDashboardSummaryDto {
     protected String effectiveDate;
     protected String expiryDate;
     protected String gameType;
+    protected String gameTypeId;
     protected boolean allowsGamingTerminal;
     protected boolean allowsGamingMachine;
+
+
+    public String getGameTypeId() {
+        return gameTypeId;
+    }
+
+    public void setGameTypeId(String gameTypeId) {
+        this.gameTypeId = gameTypeId;
+    }
 
     public String getRenewalStatus() {
         return renewalStatus;
