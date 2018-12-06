@@ -139,7 +139,7 @@ public class DocumentController extends BaseController {
                         document.setPreviousDocumentId(documentDto.getPreviousDocumentId());
                         //document.setValidFrom(new LocalDate(documentDto.getValidFrom()));
                         //document.setValidTo(new LocalDate(documentDto.getValidTo()));
-                        DocumentBinary documentBinary= new DocumentBinary();
+                        DocumentBinary documentBinary = new DocumentBinary();
                         documentBinary.setId(UUID.randomUUID().toString());
                         documentBinary.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
                         documentBinary.setDocumentId(document.getId());
@@ -280,10 +280,10 @@ public class DocumentController extends BaseController {
             document.setAgentId(documentCreateDto.getAgentId());
             document.setPreviousDocumentId(documentCreateDto.getPreviousDocumentId());
             if (document.requiresApproval()) {
-                document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID );
+                document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
             }
             try {
-                 DocumentBinary documentBinary= new DocumentBinary();
+                DocumentBinary documentBinary = new DocumentBinary();
                 documentBinary.setId(UUID.randomUUID().toString());
                 documentBinary.setFile(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
                 documentBinary.setDocumentId(document.getId());
@@ -419,7 +419,7 @@ public class DocumentController extends BaseController {
     public void downloadById(@PathVariable("id") String id, HttpServletResponse httpServletResponse) throws FactNotFoundException {
 
         Document document = (Document) mongoRepositoryReactive.findById((id), Document.class).block();
-        DocumentBinary documentBinary=(DocumentBinary)mongoRepositoryReactive.find(new Query(Criteria.where("documentId").is(document.getId())), DocumentBinary.class).block();
+        DocumentBinary documentBinary = (DocumentBinary) mongoRepositoryReactive.find(new Query(Criteria.where("documentId").is(document.getId())), DocumentBinary.class).block();
 
         if (document == null) {
             throw new FactNotFoundException("document", id);
@@ -672,7 +672,7 @@ public class DocumentController extends BaseController {
                         document.setInstitutionId(documentDto.getInstitutionId());
                         document.setAgentId(documentDto.getAgentId());
                         document.setPreviousDocumentId(documentDto.getPreviousDocumentId());
-                        DocumentBinary documentBinary= new DocumentBinary();
+                        DocumentBinary documentBinary = new DocumentBinary();
                         documentBinary.setId(UUID.randomUUID().toString());
                         documentBinary.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
                         documentBinary.setDocumentId(document.getId());

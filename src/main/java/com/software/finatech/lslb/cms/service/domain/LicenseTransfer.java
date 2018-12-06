@@ -161,6 +161,16 @@ public class LicenseTransfer extends AbstractFact {
         return gameType;
     }
 
+
+    public String getGameTypeName() {
+        GameType gameType = getGameType();
+        if (gameType == null) {
+            return null;
+        } else {
+            return gameType.getName();
+        }
+    }
+
     public boolean isPendingNewInstitutionAddition() {
         return StringUtils.equals(LicenseTransferStatusReferenceData.PENDING_NEW_INSTITUTION_ADDITION_ID, this.licenseTransferStatusId);
     }
