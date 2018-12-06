@@ -286,12 +286,12 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
 
     @Override
     public Mono<ResponseEntity> getAllCaseAndComplainType() {
-        return ReferenceDataUtil.getAllEnumeratedEntity("CaseAndComplainType");
+        return ReferenceDataUtil.getAllIntSortedEnumeratedEntity("CaseAndComplainType");
     }
 
     @Override
     public Mono<ResponseEntity> getAllCaseAndComplainCategory() {
-        return ReferenceDataUtil.getAllEnumeratedEntity("CaseAndComplainCategory");
+        return ReferenceDataUtil.getAllIntSortedEnumeratedEntity("CaseAndComplainCategory");
     }
 
     @Override
