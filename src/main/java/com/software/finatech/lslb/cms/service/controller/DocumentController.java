@@ -530,7 +530,21 @@ public class DocumentController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getEntityDocuments(@RequestParam("entityId") String entityId, @RequestParam("purposeId") String purposeId, HttpServletResponse httpServletResponse) {
-        ArrayList<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(new Query(Criteria.where("entityId").is(entityId).and("isCurrent").is(true)), Document.class).toStream().collect(Collectors.toList());
+
+        Query queryDocumentType = new Query();
+        queryDocumentType.addCriteria(Criteria.where("documentPurposeId").is(purposeId));
+        List<DocumentType> documentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
+        List<String> documentTypeIds = new ArrayList<>();
+        documentTypes.stream().forEach(documentType -> {
+            documentTypeIds.add(documentType.getId());
+        });
+
+        Query queryDocument = new Query();
+        queryDocument.addCriteria(Criteria.where("documentTypeId").in(documentTypeIds));
+        queryDocument.addCriteria(Criteria.where("entityId").is(entityId));
+        queryDocument.addCriteria(Criteria.where("isCurrent").is(true));
+
+        ArrayList<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(queryDocument, Document.class).toStream().collect(Collectors.toList());
 
         //We use this to temporarily store so that we can merge
         HashMap<String, EntityDocumentDto> entityDocuments = new HashMap<>();
@@ -559,7 +573,7 @@ public class DocumentController extends BaseController {
             documentsDto.add(dto);
         });
 
-        ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(new Query(Criteria.where("documentPurposeId").is(purposeId)), DocumentType.class).toStream().collect(Collectors.toList());
+        //ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(new Query(Criteria.where("documentPurposeId").is(purposeId)), DocumentType.class).toStream().collect(Collectors.toList());
         documentTypes.forEach(entry -> {
             if (entityDocuments.get(entry.getId()) == null) {
                 EntityDocumentDto dto = new EntityDocumentDto();
