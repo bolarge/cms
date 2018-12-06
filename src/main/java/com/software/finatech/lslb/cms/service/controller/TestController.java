@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.background_jobs.Scheduler;
 import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.domain.License;
+import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
@@ -25,6 +26,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/test")
@@ -134,6 +138,21 @@ public class TestController extends BaseController {
                 }
             }
             // scheduler.load();
+            return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
+        } catch (Exception e) {
+            return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/delete-payment")
+    public Mono<ResponseEntity> deletePayment() {
+        try {
+          Query query = Query.query(Criteria.where("paymentStatusId").is(null));
+          ArrayList<PaymentRecord>  paymentRecords = (ArrayList<PaymentRecord>)mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList()); // scheduler.load();
+            for (PaymentRecord paymentRecord: paymentRecords) {
+                mongoRepositoryReactive.delete(paymentRecord);
+            }
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
