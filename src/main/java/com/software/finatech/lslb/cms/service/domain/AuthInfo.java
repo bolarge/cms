@@ -307,9 +307,9 @@ public class AuthInfo extends AbstractFact {
         }
         Map authRoleMap = Mapstore.STORE.get("AuthRole");
         AuthRole authRole = null;
-        if (authRoleMap != null) {
-            authRole = (AuthRole) authRoleMap.get(this.authRoleId);
-        }
+//        if (authRoleMap != null) {
+//            authRole = (AuthRole) authRoleMap.get(this.authRoleId);
+//        }
         if (authRole == null) {
             authRole = (AuthRole) mongoRepositoryReactive.findById(this.authRoleId, AuthRole.class).block();
             if (authRole != null && authRoleMap != null) {

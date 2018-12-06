@@ -314,6 +314,9 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             if (loggedCase.isClosed()) {
                 return Mono.just(new ResponseEntity<>("The case is already closed", HttpStatus.BAD_REQUEST));
             }
+            if (!canUpdateCase(loggedInUser)) {
+                return Mono.just(new ResponseEntity<>("User cannot make outcome on logged case,please check user role and user status", HttpStatus.BAD_REQUEST));
+            }
             LoggedCaseOutcome loggedCaseOutcome = findLoggedCaseOutcome(caseActionRequest.getCaseOutcomeId());
             if (loggedCaseOutcome == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Logged case outcome with id %s not found",
@@ -347,27 +350,30 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
 
     private void makeOutComeEffectOnOperatorLicense(LoggedCase loggedCase, CaseOutcomeRequest caseOutcomeRequest) throws LicenseServiceException {
         License license = new License();
-        if (loggedCase.isOutcomeLicenseTerminated() ||
-                loggedCase.isOutcomeLicenseSuspended() ||
-                loggedCase.isOutcomeLicenseRevoked()) {
+        if (caseOutcomeRequest.isOutcomeLicenseTerminated() ||
+                caseOutcomeRequest.isOutcomeLicenseSuspended() ||
+                caseOutcomeRequest.isOutcomeLicenseRevoked()) {
             license = licenseService.findPresentLicenseForCase(loggedCase);
             if (license == null) {
                 throw new LicenseServiceException("Offender does not have license in category, Kindly close the case");
             }
         }
-        if (loggedCase.isOutcomeLicenseRevoked()) {
+        if (caseOutcomeRequest.isOutcomeLicenseRevoked()) {
             licenseService.changeLicenseStatusForCaseOutcome(license,LicenseStatusReferenceData.LICENSE_REVOKED_ID);
             loggedCaseMailSenderAsync.sendOutcomeNotificationToOffender(loggedCase);
         }
-        if (loggedCase.isOutcomeLicenseSuspended()) {
+        if (caseOutcomeRequest.isOutcomeLicenseSuspended()) {
             licenseService.changeLicenseStatusForCaseOutcome(license,LicenseStatusReferenceData.LICENSE_SUSPENDED_ID);
             loggedCaseMailSenderAsync.sendOutcomeNotificationToOffender(loggedCase);
         }
-        if (loggedCase.isOutcomeLicenseTerminated()) {
+        if (caseOutcomeRequest.isOutcomeLicenseTerminated()) {
             licenseService.changeLicenseStatusForCaseOutcome(license,LicenseStatusReferenceData.LICENSE_TERMINATED_ID);
             loggedCaseMailSenderAsync.sendOutcomeNotificationToOffender(loggedCase);
         }
-        if (loggedCase.isOutcomePenalty()) {
+        if (caseOutcomeRequest.isOutcomePenalty()) {
+            if(caseOutcomeRequest.getCasePenaltyParams() == null){
+                throw new LicenseServiceException("Please Supply details for case penalty");
+            }
             loggedCaseMailSenderAsync.sendPenaltyMailToOffender(loggedCase, caseOutcomeRequest.getCasePenaltyParams());
         }
     }

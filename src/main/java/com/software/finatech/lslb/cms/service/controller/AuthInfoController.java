@@ -708,9 +708,6 @@ public class AuthInfoController extends BaseController {
             if (authInfo == null) {
                 return Mono.just(new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST));
             }
-//            if (authInfoUpdateDto.getAuthRoleId() != null && !authInfoUpdateDto.getAuthRoleId().isEmpty()) {
-//                authInfo.setAuthRoleId(authInfoUpdateDto.getAuthRoleId());
-//            } else
 
             if (authInfoUpdateDto.getFirstName() != null && !authInfoUpdateDto.getFirstName().isEmpty()) {
                 authInfo.setFirstName(authInfoUpdateDto.getFirstName());

@@ -19,6 +19,7 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
@@ -44,7 +45,7 @@ public class TestController extends BaseController {
     @Autowired
     private DatabaseLoaderUtils databaseLoaderUtils;
     @Autowired
-    private Scheduler scheduler;
+    private Environment environment;
 
     private Logger logger = LoggerFactory.getLogger(TestController.class);
 
@@ -97,6 +98,7 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/load-referenceData")
     public Mono<ResponseEntity> loadReferenceData() {
         try {
+            databaseLoaderUtils.runSeedData(environment);
             databaseLoaderUtils.runLoadData();
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {

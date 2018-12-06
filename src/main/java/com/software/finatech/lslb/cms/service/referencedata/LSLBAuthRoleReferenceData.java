@@ -19,7 +19,6 @@ public class LSLBAuthRoleReferenceData {
 
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
-
         AuthRole role4 = (AuthRole) mongoRepositoryReactive.findById(LSLB_ADMIN_ID, AuthRole.class).block();
         if (role4 == null) {
             role4 = new AuthRole();

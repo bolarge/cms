@@ -22,14 +22,20 @@ import java.util.stream.Collectors;
 @Component
 public class FeeUpdater {
     private static final Logger logger = LoggerFactory.getLogger(FeeUpdater.class);
-    @Autowired
-    private MongoRepositoryReactiveImpl mongoRepositoryReactive;
-    @Autowired
-    private FeeService feeService;
-    @Autowired
-    private FeeMailSenderAsync feeMailSenderAsync;
+    private final MongoRepositoryReactiveImpl mongoRepositoryReactive;
+    private final FeeService feeService;
+    private final FeeMailSenderAsync feeMailSenderAsync;
 
     private static final int FIFTEEN_MIN = 15 * 60 * 1000;
+
+    @Autowired
+    public FeeUpdater(MongoRepositoryReactiveImpl mongoRepositoryReactive,
+                      FeeService feeService,
+                      FeeMailSenderAsync feeMailSenderAsync) {
+        this.mongoRepositoryReactive = mongoRepositoryReactive;
+        this.feeService = feeService;
+        this.feeMailSenderAsync = feeMailSenderAsync;
+    }
 
 
     @Scheduled(fixedRate = 15 * 60 * 1000, initialDelay = 600000)

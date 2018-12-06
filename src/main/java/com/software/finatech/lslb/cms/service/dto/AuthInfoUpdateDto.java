@@ -14,8 +14,6 @@ public class AuthInfoUpdateDto {
     @NotNull(message = "Phone Number field can not be empty")
     @Size(min = 9, message = "Phone number should not be less than 9 characters")
     protected String phoneNumber ;
-    @NotNull(message = "Role Id field can not be empty")
-    protected String authRoleId;
     protected String attachmentId;
     public String getAttachmentId() {
         return attachmentId;
@@ -55,13 +53,5 @@ public class AuthInfoUpdateDto {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
-    }
-
-    public String getAuthRoleId() {
-        return authRoleId;
-    }
-
-    public void setAuthRoleId(String authRoleId) {
-        this.authRoleId = authRoleId;
     }
 }

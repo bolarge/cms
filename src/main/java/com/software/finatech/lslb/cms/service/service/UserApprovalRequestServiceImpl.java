@@ -16,6 +16,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.UserApprovalRequ
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApprovalRequestNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -51,18 +52,21 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
     private AuthInfoService authInfoService;
     private AuditLogHelper auditLogHelper;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
+    private ApprovalRequestNotifierAsync approvalRequestNotifierAsync;
 
     @Autowired
     public UserApprovalRequestServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                                           FrontEndPropertyHelper frontEndPropertyHelper,
                                           AuthInfoService authInfoService,
                                           AuditLogHelper auditLogHelper,
-                                          SpringSecurityAuditorAware springSecurityAuditorAware) {
+                                          SpringSecurityAuditorAware springSecurityAuditorAware,
+                                          ApprovalRequestNotifierAsync approvalRequestNotifierAsync) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.frontEndPropertyHelper = frontEndPropertyHelper;
         this.authInfoService = authInfoService;
         this.auditLogHelper = auditLogHelper;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
+        this.approvalRequestNotifierAsync = approvalRequestNotifierAsync;
     }
 
 
@@ -237,6 +241,8 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), userApprovalRequest.getSubjectUserName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            approvalRequestNotifierAsync.sendRejectedUserApprovalRequestEmailToInitiator(userApprovalRequest);
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while rejecting approval request ", e);

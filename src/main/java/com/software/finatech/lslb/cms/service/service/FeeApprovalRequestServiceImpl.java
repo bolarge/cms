@@ -14,6 +14,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.FeeApprovalReque
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApprovalRequestNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -48,15 +49,19 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private FeeService feeService;
     private AuditLogHelper auditLogHelper;
+    private ApprovalRequestNotifierAsync approvalRequestNotifierAsync;
 
     @Autowired
     public FeeApprovalRequestServiceImpl(SpringSecurityAuditorAware springSecurityAuditorAware,
                                          MongoRepositoryReactiveImpl mongoRepositoryReactive,
-                                         FeeService feeService, AuditLogHelper auditLogHelper) {
+                                         FeeService feeService,
+                                         AuditLogHelper auditLogHelper,
+                                         ApprovalRequestNotifierAsync approvalRequestNotifierAsync) {
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.feeService = feeService;
         this.auditLogHelper = auditLogHelper;
+        this.approvalRequestNotifierAsync = approvalRequestNotifierAsync;
     }
 
     @Override
@@ -206,6 +211,8 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), loggedInUser.getFullName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
+
+            approvalRequestNotifierAsync.sendRejectedFeeApprovalRequestEmailToInitiator(feeApprovalRequest);
             return Mono.just(new ResponseEntity<>(feeApprovalRequest.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {
@@ -235,7 +242,7 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
         Fee fee = feeApprovalRequest.getFee();
         if (fee != null) {
             fee.setEndDate(feeApprovalRequest.getEndDate());
-            if (fee.getEndDate().isBefore(LocalDate.now())) {
+            if (fee.getEndDate().isEqual(LocalDate.now()) ||  fee.getEndDate().isBefore(LocalDate.now())) {
                 fee.setActive(false);
             }
             fee.setNextNotificationDate(fee.getEndDate().minusDays(7));
@@ -259,11 +266,11 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             }
             Fee fee = new Fee();
             fee.setId(UUID.randomUUID().toString());
-            if (pendingFee.getEffectiveDate().isBefore(LocalDate.now()) || pendingFee.getEffectiveDate().isEqual(LocalDate.now())) {
-                fee.setActive(true);
-            } else {
-                fee.setActive(false);
-            }
+            //  if (pendingFee.getEffectiveDate().isBefore(LocalDate.now()) || pendingFee.getEffectiveDate().isEqual(LocalDate.now())) {
+            fee.setActive(true);
+            //  } else {
+            //      fee.setActive(false);
+            //  }
             LocalDate today = LocalDate.now();
             fee.setGameTypeId(pendingFee.getGameTypeId());
             fee.setFeePaymentTypeId(pendingFee.getFeePaymentTypeId());
@@ -271,8 +278,11 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             fee.setEffectiveDate(pendingFee.getEffectiveDate());
             fee.setAmount(pendingFee.getAmount());
             fee.setEndDate(pendingFee.getEndDate());
-            if (fee.getEndDate().isBefore(today) || fee.getEndDate().isEqual(today)){
-                fee.setActive(false);
+            if (fee.getEndDate() != null) {
+                fee.setNextNotificationDate(fee.getNextNotificationDate().minusDays(7));
+//                if (fee.getEndDate().isBefore(today) || fee.getEndDate().isEqual(today)) {
+//                    fee.setActive(false);
+//                }}
             }
             mongoRepositoryReactive.saveOrUpdate(fee);
             mongoRepositoryReactive.saveOrUpdate(pendingFee);

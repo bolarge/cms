@@ -5,7 +5,6 @@ import com.software.finatech.lslb.cms.service.dto.DocumentDto;
 import com.software.finatech.lslb.cms.service.exception.FactNotFoundException;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
-import org.bson.types.Binary;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.springframework.data.annotation.Transient;
@@ -319,18 +318,7 @@ public class Document extends AbstractFact {
         if (StringUtils.isEmpty(this.documentTypeId)) {
             return null;
         }
-        DocumentType documentType = null;
-        Map documentTypeMap = Mapstore.STORE.get("DocumentType");
-        if (documentTypeMap != null) {
-            documentType = (DocumentType) documentTypeMap.get(this.documentTypeId);
-        }
-        if (documentType == null) {
-            documentType = (DocumentType) mongoRepositoryReactive.findById(this.documentTypeId, DocumentType.class).block();
-            if (documentType != null && documentTypeMap != null) {
-                documentTypeMap.put(documentType.getId(), documentType);
-            }
-        }
-        return documentType;
+        return (DocumentType) mongoRepositoryReactive.findById(this.documentTypeId, DocumentType.class).block();
     }
 
     public ApplicationForm getApplicationForm() {
