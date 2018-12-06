@@ -29,7 +29,7 @@ public interface MachineService {
 
     Mono<ResponseEntity> removeGamesFromMachine(MachineGameUpdateDto machineGameUpdateDto, HttpServletRequest request);
 
-    Mono<ResponseEntity> uploadMultipleMachinesForInstitution(String institutionId, String gameTypeId, MultipartFile multipartFile, HttpServletRequest request);
+    Mono<ResponseEntity> uploadMultipleMachinesForInstitution(String institutionId, String gameTypeId,String machineTypeId, MultipartFile multipartFile, HttpServletRequest request);
 
     Machine findMachineById(String machineId);
 
