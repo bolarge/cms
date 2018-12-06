@@ -593,6 +593,7 @@ public class LicenseServiceImpl implements LicenseService {
                 return "No License Record";
             }
             license.setLicenseStatusId(LicenseStatusReferenceData.RENEWED_ID);
+            license.setRenewalStatus("false");
             mongoRepositoryReactive.saveOrUpdate(license);
             List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(license.getInstitutionId());
             institutionAdmins.stream().forEach(institutionAdmin -> {
