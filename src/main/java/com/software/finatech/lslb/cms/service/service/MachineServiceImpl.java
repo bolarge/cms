@@ -150,6 +150,10 @@ public class MachineServiceImpl implements MachineService {
             if (!(machineCreateDto.isCreateGamingMachine() || machineCreateDto.isCreateGamingTerminal())) {
                 return Mono.just(new ResponseEntity<>(String.format("Machine type with id %s does not exist on the system", machineCreateDto.getMachineTypeId()), HttpStatus.BAD_REQUEST));
             }
+            PendingMachine pendingMachine = findPendingMachineBySerialNumber(machineCreateDto.getSerialNumber());
+            if (pendingMachine != null) {
+                return Mono.just(new ResponseEntity<>("A machine already exist with the same serial number", HttpStatus.BAD_REQUEST));
+            }
             PendingMachine pendingGamingMachine = fromGamingMachineCreateDto(machineCreateDto);
             mongoRepositoryReactive.saveOrUpdate(pendingGamingMachine);
             MachineApprovalRequest approvalRequest = new MachineApprovalRequest();
@@ -847,5 +851,13 @@ public class MachineServiceImpl implements MachineService {
         approvalRequest.setInitiatedByInstitution(true);
         approvalRequest.setInstitutionId(pendingMachine.getInstitutionId());
         return approvalRequest;
+    }
+
+    private PendingMachine findPendingMachineBySerialNumber(String serialNumber) {
+        Query query = new Query();
+        List<String> statuses = Arrays.asList(ApprovalRequestStatusReferenceData.APPROVED_ID, ApprovalRequestStatusReferenceData.PENDING_ID);
+        query.addCriteria(Criteria.where("serialNumber").is(serialNumber));
+        query.addCriteria(Criteria.where("approvalRequestStatusId").in(serialNumber));
+        return (PendingMachine) mongoRepositoryReactive.find(query, PendingMachine.class).block();
     }
 }
