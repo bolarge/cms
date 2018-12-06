@@ -495,7 +495,7 @@ public class MachineServiceImpl implements MachineService {
                             }
                             machine.setGameTypeId(gameTypeId);
                             machine.setMachineTypeId(machineTypeId);
-                            if (columns.length > 3 && StringUtils.isEmpty(columns[3]) && StringUtils.isEmpty(columns[4]) ) {
+                            if (columns.length > 3 && !StringUtils.isEmpty(columns[3]) && !StringUtils.isEmpty(columns[4]) ) {
                                 machine.getGameDetailsList().add(MachineGameDetails.fromGameNameAndVersion(columns[3], columns[4]));
                             }
                             machine.setInstitutionId(institutionId);
