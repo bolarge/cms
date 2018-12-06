@@ -582,6 +582,34 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         }
     }
 
+    public void sendNotificationForFinalDocumentApprovalMailToFinalApproval(ApplicationForm applicationForm) {
+        ArrayList<AuthInfo> finalApprovers = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_APPLICATION_ID);
+        if (finalApprovers.isEmpty()) {
+            logger.info("No final approvers for application form");
+            return;
+        }
+        String mailContent = buildApplicationFormDocumentFinalSubmissionApprovalEmailContent(applicationForm);
+        for (AuthInfo authInfo : finalApprovers) {
+            String emailAddress = authInfo.getEmailAddress();
+            logger.info("Sending final approver email to {}", emailAddress);
+            emailService.sendEmail(mailContent, "New Application Submission on LSLB Customer Management System", emailAddress);
+        }
+    }
+
+    public void sendNotificationForMeetingCompletionForApplication(ApplicationForm applicationForm) {
+        ArrayList<AuthInfo> finalApprovers = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.APPROVE_APPLICATION_FORM_ID);
+        if (finalApprovers.isEmpty()) {
+            logger.info("No final approvers for application form");
+            return;
+        }
+        String mailContent = buildApplicationFormSubmissionEmailContentPostMeeting(applicationForm);
+        for (AuthInfo authInfo : finalApprovers) {
+            String emailAddress = authInfo.getEmailAddress();
+            logger.info("Sending final approver email to {}", emailAddress);
+            emailService.sendEmail(mailContent, "New Application Submission on LSLB Customer Management System", emailAddress);
+        }
+    }
+
     public void sendApproverMailToFinalApproval(AIPDocumentApproval aipDocumentApproval) {
         ArrayList<AuthInfo> finalApprovers = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.APPROVE_APPLICATION_FORM_ID);
         if (finalApprovers.isEmpty()) {
@@ -635,8 +663,6 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         }
     }
 
-
-
     private String buildApplicationFormSubmissionApprovalEmailContent(ApplicationForm applicationForm) {
         String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId());
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
@@ -648,6 +674,16 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         return mailContentBuilderService.build(model, "application-form/ApplicationFormSubmissionApprovalLSLB");
     }
 
+    private String buildApplicationFormDocumentFinalSubmissionApprovalEmailContent(ApplicationForm applicationForm) {
+        String callbackUrl = String.format("%s/applications/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId());
+        String presentDate = DateTime.now().toString("dd-MM-yyyy ");
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("date", presentDate);
+        model.put("gameType", applicationForm.getGameTypeName());
+        model.put("applicantName", applicationForm.getInstitutionName());
+        model.put("frontEndUrl", callbackUrl);
+        return mailContentBuilderService.build(model, "application-form/ApplicationFormDocumentFinalSubmissionApprovalLSLB");
+    }
 
     @Async
     public void sendDocumentReturnMailToInstitutionMembers(ApplicationForm applicationForm, Document document, String latestComment) {
@@ -820,5 +856,16 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
             }
         }
         return gameType;
+    }
+
+    private String buildApplicationFormSubmissionEmailContentPostMeeting(ApplicationForm applicationForm) {
+        String callbackUrl = String.format("%s/application-view/%s", frontEndPropertyHelper.getFrontEndUrl(), applicationForm.getId());
+        String presentDate = DateTime.now().toString("dd-MM-yyyy ");
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("date", presentDate);
+        model.put("gameType", applicationForm.getGameTypeName());
+        model.put("applicantName", applicationForm.getInstitutionName());
+        model.put("frontEndUrl", callbackUrl);
+        return mailContentBuilderService.build(model, "application-form/ApplicationFormSubmissionApprovalPostMeetingLSLB");
     }
 }

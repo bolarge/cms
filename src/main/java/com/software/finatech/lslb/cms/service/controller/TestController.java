@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.background_jobs.Scheduler;
 import com.software.finatech.lslb.cms.service.domain.Agent;
+import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
@@ -130,27 +131,13 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/backdate-licence")
     public Mono<ResponseEntity> moviedocus() {
         try {
-            String[] agentNumbers = new String[]{"LAGOS-AG-592316", "LAGOS-AG-942830"};
-            for (String agentNumber : agentNumbers) {
-                Query query = new Query();
-                query.addCriteria(Criteria.where("agentId").is(agentNumber));
-                Agent agent = (Agent) mongoRepositoryReactive.find(query, Agent.class).block();
-                if (agent != null) {
-                    query = new Query();
-                    query.addCriteria(Criteria.where("agentId").is(agent.getId()));
-                    query.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.GAMING_TERMINAL_ID));
-                    License license = (License) mongoRepositoryReactive.find(query, License.class).block();
-                    if (license != null) {
-                        LocalDate lastJan = LocalDate.now().withDayOfYear(1).minusYears(1);
-                        license.setEffectiveDate(lastJan);
-                        LocalDate expiryDate = lastJan.plusMonths(12);
-                        expiryDate = expiryDate.minusDays(1);
-                        license.setExpiryDate(expiryDate);
-                        mongoRepositoryReactive.saveOrUpdate(license);
-                    }
-                }
+         Query query = new Query();
+         query.addCriteria(Criteria.where("effectiveDate").is(null));
+            ArrayList<Fee> fees = (ArrayList<Fee>)mongoRepositoryReactive.findAll(query, Fee.class).toStream().collect(Collectors.toList());
+            for (Fee fee: fees) {
+                fee.setEffectiveDate(LocalDate.now().withDayOfYear(1));
+                mongoRepositoryReactive.saveOrUpdate(fee);
             }
-            // scheduler.load();
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));

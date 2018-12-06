@@ -19,7 +19,7 @@ import javax.validation.Valid;
 @Api(value = "Machines", description = "For everything related to Machines (Gaming terminals and Gaming Machines)", tags = "Machine Controller(Gaming Machines and Terminals)")
 @RestController
 @RequestMapping("/api/v1/machines")
-public class MachineController  extends BaseController{
+public class MachineController extends BaseController {
 
     private MachineService machineService;
 
@@ -90,8 +90,9 @@ public class MachineController  extends BaseController{
             @ApiResponse(code = 500, message = "Internal Server error(error occurred while parsing file)")})
     public Mono<ResponseEntity> uploadMachinesFromCsv(@RequestParam("institutionId") String institutionId,
                                                       @RequestParam("gameTypeId") String gameTypeId,
+                                                      @RequestParam("machineTypeId") String machineTypeId,
                                                       @RequestParam("file") MultipartFile multipartFile, HttpServletRequest request) {
-        return machineService.uploadMultipleMachinesForInstitution(institutionId, gameTypeId, multipartFile, request);
+        return machineService.uploadMultipleMachinesForInstitution(institutionId, gameTypeId, machineTypeId, multipartFile, request);
     }
 
 

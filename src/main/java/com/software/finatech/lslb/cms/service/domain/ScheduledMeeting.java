@@ -312,7 +312,7 @@ public class ScheduledMeeting extends AbstractFact {
     public String getMeetingTimeString() {
         LocalDateTime meetingDateTime = getMeetingDate();
         if (meetingDateTime != null) {
-            return meetingDateTime.toString("HH:mm a");
+            return meetingDateTime.toString("hh:mm a");
         }
         return null;
     }

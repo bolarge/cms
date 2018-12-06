@@ -61,7 +61,7 @@ public class ScheduledMeetingJob {
         }
         for (ScheduledMeeting scheduledMeeting : pendingScheduledMeetings) {
             scheduledMeetingMailSenderAsync.sendEmailToMeetingCreator("scheduled-meetings/ScheduledMeetingReminderNotificationForLslbAdmin", String.format("Reminder: Meeting with %s", scheduledMeeting.getInstitutionName()), scheduledMeeting);
-            scheduledMeetingMailSenderAsync.sendEmailToMeetingInvitedOperators("scheduled-meetings/ScheduledMeetingReminderNotificationForGamingOperator", "Reminder: Meeting With Lagos State Lotteries Board", scheduledMeeting, null);
+            scheduledMeetingMailSenderAsync.sendEmailToMeetingInvitedOperators("scheduled-meetings/ScheduledMeetingReminderNotificationForGamingOperator", "Reminder: Meeting With Lagos State Lotteries Board", scheduledMeeting);
             scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeetingReminderNotificationForLslbAdmin", String.format("Reminder: Meeting with %s", scheduledMeeting.getInstitutionName()), scheduledMeeting, scheduledMeeting.getRecipients());
             scheduledMeeting.setReminderSent(true);
             mongoRepositoryReactive.saveOrUpdate(scheduledMeeting);
