@@ -497,6 +497,7 @@ public class MachineServiceImpl implements MachineService {
                             machine.setGameTypeId(gameTypeId);
                             machine.getGameDetailsList().add(MachineGameDetails.fromGameNameAndVersion(columns[5], columns[6]));
                             machine.setInstitutionId(institutionId);
+                            machine.setMachineStatusId(MachineStatusReferenceData.ACTIVE_ID);
                             pendingMachineMap.put(machine.getSerialNumber(), machine);
                         } catch (Exception e) {
                             logger.error(String.format("Error parsing line %s", rows[i]), e);
