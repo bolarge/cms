@@ -1,8 +1,6 @@
 package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
-import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.domain.Institution;
-import com.software.finatech.lslb.cms.service.domain.ScheduledMeeting;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -61,15 +59,35 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
         return mailContentBuilderService.build(model, templateName);
     }
 
-    private String buildOperatorMeetingMailContent(ScheduledMeeting scheduledMeeting, String templateName, Institution transferor) {
+    private String buildOperatorMeetingMailContent(ScheduledMeeting scheduledMeeting, String templateName) {
         Institution institution = institutionService.findByInstitutionId(scheduledMeeting.getInstitutionId());
         String meetingUrl = String.format("%s/schedule-presentation-view/%s", frontEndPropertyHelper.getFrontEndUrl(), scheduledMeeting.getId());
         String institutionName = institution.getInstitutionName();
-        String transferorName = transferor == null ? null : transferor.getInstitutionName();
+        String transferorName = "";
+        if (scheduledMeeting.isForLicenseTransferee() || scheduledMeeting.isForLicenseTransferror()) {
+            LicenseTransfer licenseTransfer = scheduledMeeting.getLicenseTransfer();
+            Institution transferror = licenseTransfer.getFromInstitution();
+            if (transferror != null) {
+                transferorName = transferror.getInstitutionName();
+            }
+        }
         HashMap<String, Object> model = new HashMap<>();
         String meetingDateString = scheduledMeeting.getMeetingDateString();
         String meetingTimeString = scheduledMeeting.getMeetingTimeString();
         String presentDateString = DateTime.now().toString("dd-MM-yyyy");
+        String gameTypeName = "";
+        if (scheduledMeeting.isForLicenseApplicant()) {
+            ApplicationForm applicationForm = scheduledMeeting.getApplicationForm();
+            if (applicationForm != null) {
+                gameTypeName = applicationForm.getGameTypeName();
+            }
+        }
+        if (scheduledMeeting.isForLicenseTransferee() || scheduledMeeting.isForLicenseTransferee()) {
+            LicenseTransfer licenseTransfer = scheduledMeeting.getLicenseTransfer();
+            if (licenseTransfer != null) {
+                gameTypeName = licenseTransfer.getGameTypeName();
+            }
+        }
         model.put("institutionName", institutionName);
         model.put("meetingDate", meetingDateString);
         model.put("meetingTime", meetingTimeString);
@@ -79,6 +97,7 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
         model.put("date", presentDateString);
         model.put("transferor", transferorName);
         model.put("frontEndUrl", meetingUrl);
+        model.put("gameType", gameTypeName);
         return mailContentBuilderService.build(model, templateName);
     }
 
@@ -95,10 +114,10 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
     }
 
     @Async
-    public void sendEmailToMeetingInvitedOperators(String templateName, String mailSubject, ScheduledMeeting scheduledMeeting, Institution transferor) {
+    public void sendEmailToMeetingInvitedOperators(String templateName, String mailSubject, ScheduledMeeting scheduledMeeting) {
         try {
             ArrayList<AuthInfo> operatorAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(scheduledMeeting.getInstitutionId());
-            String mailContent = buildOperatorMeetingMailContent(scheduledMeeting, templateName, transferor);
+            String mailContent = buildOperatorMeetingMailContent(scheduledMeeting, templateName);
             for (AuthInfo authInfo : operatorAdmins) {
                 logger.info("Sending meeting email to {}", authInfo.getEmailAddress());
                 emailService.sendEmail(mailContent, mailSubject, authInfo.getEmailAddress());
