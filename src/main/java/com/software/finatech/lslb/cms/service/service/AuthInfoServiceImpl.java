@@ -542,7 +542,10 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         ssoUser.getClaims().add(roleClaim2);
         ssoUser.setConfirmEmail(true);
         ssoUser.setEmail(authInfo.getEmailAddress());
-        ssoUser.setFirstName(authInfo.getFirstName());
+        String firstName = authInfo.getFirstName();
+        String[] names = firstName.split(" ");
+        ssoUser.setFirstName(names[0]);
+     //   ssoUser.setFirstName(authInfo.getFirstName());
         ssoUser.setLastName(authInfo.getLastName());
         ssoUser.setPassword(authInfoCompleteDto.getPassword());
         ssoUser.setPhoneNumber(authInfo.getPhoneNumber());
