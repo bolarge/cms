@@ -38,7 +38,7 @@ public class MongoRepositoryReactiveImpl implements MongoRepositoryReactive<Fact
 		//reactiveMongoTemplate.upsert(new Query(Criteria.where("_id").is(fact.getId())), Update.fromDocument(dbObject, "_id"), PERSON_COLLECTION);
 
 		//set timezone because of mongodb date
-		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+		//TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 		reactiveMongoTemplate.save(fact).block();//.subscribe();
 		return null;
 	}

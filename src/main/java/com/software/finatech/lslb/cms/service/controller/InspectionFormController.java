@@ -16,6 +16,9 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -79,14 +82,26 @@ public class InspectionFormController extends BaseController {
               query.addCriteria(Criteria.where("gamingMachineId").in(gamingMachineId));
           }
           if (!StringUtils.isEmpty(fromDate)&&!StringUtils.isEmpty(toDate)) {
-              LocalDate startDate = new LocalDate(fromDate);
-              LocalDate endDate = new LocalDate(toDate);
-
               if(StringUtils.isEmpty(dateProperty)){
                   dateProperty="createdAt";
               }
-              query.addCriteria(Criteria.where(dateProperty).gte(startDate).lte(endDate));
-          }
+                if(dateProperty.equalsIgnoreCase("createdAt")){
+
+                    fromDate=fromDate+" 00:00:00";
+                    toDate=toDate+" 23:59:59";
+                    DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+                    LocalDateTime startDate = new LocalDateTime(formatter.parseLocalDateTime(fromDate));
+                    LocalDateTime endDate = new LocalDateTime(formatter.parseLocalDateTime(toDate));
+                    query.addCriteria(Criteria.where(dateProperty).gte(startDate).lte(endDate));
+
+                }else{
+                    LocalDate startDate = new LocalDate(fromDate);
+                    LocalDate endDate = new LocalDate(toDate);
+                    query.addCriteria(Criteria.where(dateProperty).gte(startDate).lte(endDate));
+                }
+
+
+              }
                 if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, InspectionForm.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
