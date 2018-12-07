@@ -108,7 +108,7 @@ public class AgentServiceImpl implements AgentService {
             query.with(sort);
 
             ArrayList<Agent> agents = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
-            if (agents == null || agents.isEmpty()) {
+            if (agents.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
             }
             ArrayList<AgentDto> agentDtos = new ArrayList<>();
@@ -368,6 +368,7 @@ public class AgentServiceImpl implements AgentService {
         agent.setBusinessAddresses(agentInstitution.getBusinessAddressList());
         agent.setAgentId(generateAgentId());
         agent.setAgentStatusId(AgentStatusReferenceData.IN_ACTIVE_ID);
+        agent.setMiddleName(agentCreateDto.getMiddleName());
         return agent;
     }
 
