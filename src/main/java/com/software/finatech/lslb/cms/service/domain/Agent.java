@@ -22,6 +22,7 @@ public class Agent extends AbstractFact {
     protected String firstName;
     protected String lastName;
     protected String fullName;
+    private String middleName;
     protected String emailAddress;
     protected String phoneNumber;
     protected List<AgentInstitution> agentInstitutions = new ArrayList<>();
@@ -46,6 +47,15 @@ public class Agent extends AbstractFact {
     private boolean fromLiveData;
 
     private LocalDate dob;
+
+
+    public String getMiddleName() {
+        return middleName;
+    }
+
+    public void setMiddleName(String middleName) {
+        this.middleName = middleName;
+    }
 
     public boolean isFromLiveData() {
         return fromLiveData;
@@ -291,6 +301,7 @@ public class Agent extends AbstractFact {
         agentDto.setTitle(getTitle());
         agentDto.setAgentId(getAgentId());
         agentDto.setId(getId());
+        agentDto.setMiddleName(getMiddleName());
         AgentStatus agentStatus = getAgentStatus();
         if (agentStatus != null) {
             agentDto.setAgentStatusId(this.agentStatusId);

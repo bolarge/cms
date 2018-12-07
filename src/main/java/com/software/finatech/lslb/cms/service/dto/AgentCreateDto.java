@@ -38,6 +38,15 @@ public class AgentCreateDto {
     private String institutionId;
     @NotEmpty(message = "please provide gameTypeId")
     private String gameTypeId;
+    private String middleName;
+
+    public String getMiddleName() {
+        return middleName;
+    }
+
+    public void setMiddleName(String middleName) {
+        this.middleName = middleName;
+    }
 
     public String getInstitutionId() {
         return institutionId;
