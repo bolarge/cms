@@ -7,6 +7,7 @@ import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatu
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.SendEmail;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -289,7 +290,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     private String buildRejectionEmailContent(ApplicationForm applicationForm) {
         String gameTypeName = applicationForm.getGameTypeName();
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
-        LocalDateTime submissionDate = applicationForm.getSubmissionDate();
+        LocalDate submissionDate = applicationForm.getSubmissionDate();
         String submissionDateString = "";
         if (submissionDate != null) {
             submissionDateString = submissionDate.toString("dd-MM-yyyy");
@@ -583,6 +584,10 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     }
 
     public void sendNotificationForFinalDocumentApprovalMailToFinalApproval(ApplicationForm applicationForm) {
+       ScheduledMeeting scheduledMeeting = findScheduledMeetingByEntityId(applicationForm.getId());
+       if (scheduledMeeting != null){
+           return;
+       }
         ArrayList<AuthInfo> finalApprovers = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_APPLICATION_ID);
         if (finalApprovers.isEmpty()) {
             logger.info("No final approvers for application form");
@@ -867,5 +872,12 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         model.put("applicantName", applicationForm.getInstitutionName());
         model.put("frontEndUrl", callbackUrl);
         return mailContentBuilderService.build(model, "application-form/ApplicationFormSubmissionApprovalPostMeetingLSLB");
+    }
+
+    public ScheduledMeeting findScheduledMeetingByEntityId(String entityId) {
+        if (StringUtils.isEmpty(entityId)) {
+            return null;
+        }
+        return (ScheduledMeeting) mongoRepositoryReactive.find(Query.query(Criteria.where("entityId").is(entityId)), ScheduledMeeting.class).block();
     }
 }

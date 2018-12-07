@@ -544,7 +544,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     private void updatePaymentRecord(PaymentRecord paymentRecord) {
         if (paymentRecord.getAmountOutstanding() <= 0) {
             paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
-            paymentRecord.setCompletionDate(LocalDateTime.now());
+            paymentRecord.setCompletionDate(LocalDate.now());
 
             if (paymentRecord.isInstitutionPayment() && (paymentRecord.isLicensePayment() || paymentRecord.isLicenseTransferPayment())) {
                 licenseService.createAIPLicenseForCompletedPayment(paymentRecord);
@@ -758,7 +758,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             paymentRecord.setLicenseTransferId(createDto.getLicenseTransferId());
             paymentRecord.setPaymentReference(NumberUtil.generateTransactionReferenceForPaymentRecord());
             paymentRecord.setAgentId(createDto.getAgentId());
-            paymentRecord.setCreationDate(LocalDateTime.now());
+            paymentRecord.setCreationDate(LocalDate.now());
             paymentRecord.setInstitutionId(createDto.getInstitutionId());
         }
         return paymentRecord;
@@ -780,7 +780,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         paymentRecord.setAgentId(createDto.getAgentId());
         paymentRecord.setMachineMultiplePayment(machineMultiplePayment);
         paymentRecord.setInstitutionId(createDto.getInstitutionId());
-        paymentRecord.setCreationDate(LocalDateTime.now());
+        paymentRecord.setCreationDate(LocalDate.now());
         if (createDto.isGamingMachinePayment()) {
             paymentRecord.setLicenseTypeId(LicenseTypeReferenceData.GAMING_MACHINE_ID);
         }

@@ -4,5 +4,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @SuppressWarnings("serial")
 @Document(collection = "CaseAndComplainType")
-public class CaseAndComplainType extends EnumeratedFact {
+public class CaseAndComplainType extends IntSortedEnumeratedFact {
+
 }
