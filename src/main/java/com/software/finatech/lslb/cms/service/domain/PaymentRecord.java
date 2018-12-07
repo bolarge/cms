@@ -8,6 +8,7 @@ import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReference
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -35,22 +36,22 @@ public class PaymentRecord extends AbstractFact {
     private String licenseTransferId;
     private MachineMultiplePayment machineMultiplePayment;
     private String licenseId;
-    private LocalDateTime creationDate;
-    private LocalDateTime completionDate;
+    private LocalDate creationDate;
+    private LocalDate completionDate;
 
-    public LocalDateTime getCreationDate() {
+    public LocalDate getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(LocalDateTime creationDate) {
+    public void setCreationDate(LocalDate creationDate) {
         this.creationDate = creationDate;
     }
 
-    public LocalDateTime getCompletionDate() {
+    public LocalDate getCompletionDate() {
         return completionDate;
     }
 
-    public void setCompletionDate(LocalDateTime completionDate) {
+    public void setCompletionDate(LocalDate completionDate) {
         this.completionDate = completionDate;
     }
 
@@ -375,7 +376,7 @@ public class PaymentRecord extends AbstractFact {
     }
 
     private String getCreationDateString() {
-        LocalDateTime localDateTime = getCreationDate();
+        LocalDate localDateTime = getCreationDate();
         if (localDateTime != null) {
             return localDateTime.toString("dd-MM-yyyy HH:mm a");
         }
@@ -383,7 +384,7 @@ public class PaymentRecord extends AbstractFact {
     }
 
     private String getCompletionDateString() {
-        LocalDateTime localDateTime = getCompletionDate();
+        LocalDate localDateTime = getCompletionDate();
         if (localDateTime != null) {
             return localDateTime.toString("dd-MM-yyyy HH:mm a");
         }

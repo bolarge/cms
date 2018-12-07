@@ -55,5 +55,5 @@ public interface MachineService {
 
     Mono<ResponseEntity> getMachinesByAgentNumber(String agentNumber);
 
-    Mono<ResponseEntity> getMachineFullDetailBySerialNumber(String serialNumber);
+    Mono<ResponseEntity> getMachineFullDetailBySerialNumber(String serialNumber, String machineTypeId);
 }

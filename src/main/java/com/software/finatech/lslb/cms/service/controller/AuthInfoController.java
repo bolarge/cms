@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -324,6 +323,13 @@ public class AuthInfoController extends BaseController {
                             request.getContextPath();*/
 
             } else {
+                if (!StringUtils.isEmpty(authInfoCreateDto.getInstitutionId()) && !authInfoCreateDto.isCreateGamingOperatorUser()) {
+                    return Mono.just(new ResponseEntity<>("You can only create a gaming operator user for an operator", HttpStatus.BAD_REQUEST));
+                }
+                if (StringUtils.isEmpty(authInfoCreateDto.getInstitutionId()) && authInfoCreateDto.isCreateGamingOperatorUser()) {
+                    return Mono.just(new ResponseEntity<>("Please provide operator attached to the gaming operator", HttpStatus.BAD_REQUEST));
+                }
+
                 PendingAuthInfo pendingAuthInfo = new PendingAuthInfo();
                 pendingAuthInfo.setId(UUID.randomUUID().toString());
                 pendingAuthInfo.setFirstName(authInfoCreateDto.getFirstName());

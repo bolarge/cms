@@ -235,14 +235,15 @@ public class MachineController extends BaseController {
         return machineService.getMachinesByAgentNumber(agentNumber);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/get-full-detail-by-serial-number", params = {"serialNumber"})
+    @RequestMapping(method = RequestMethod.GET, value = "/get-full-detail-by-serial-number", params = {"serialNumber", "machineTypeId"})
     @ApiOperation(value = "Get Full Detail From Serial Number", response = MachineDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getMachineFullDetailBySerialNumber(@RequestParam("serialNumber") String serialNumber) {
-        return machineService.getMachineFullDetailBySerialNumber(serialNumber);
+    public Mono<ResponseEntity> getMachineFullDetailBySerialNumber(@RequestParam("serialNumber") String serialNumber,
+                                                                   @RequestParam("machineTypeId")String machineTypeId) {
+        return machineService.getMachineFullDetailBySerialNumber(serialNumber, machineTypeId);
     }
 }

@@ -1,10 +1,7 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.domain.Institution;
-import com.software.finatech.lslb.cms.service.domain.LicenseTransfer;
-import com.software.finatech.lslb.cms.service.domain.ScheduledMeeting;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
@@ -258,6 +255,19 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             ScheduledMeeting scheduledMeeting = findScheduledMeetingById(scheduledMeetingId);
             if (scheduledMeeting == null) {
                 return Mono.just(new ResponseEntity<>("Scheduled meeting does not exist", HttpStatus.BAD_REQUEST));
+            }
+            if (scheduledMeeting.isForLicenseApplicant()) {
+                //validate if all documents for the applicant has been approved
+                ApplicationForm applicationForm = scheduledMeeting.getApplicationForm();
+                if (applicationForm != null) {
+                    FormDocumentApproval documentApproval = applicationForm.getDocumentApproval();
+                    if (documentApproval != null) {
+                        if (!documentApproval.isComplete()) {
+                            //TODO:: change the message
+                            return Mono.just(new ResponseEntity<>("All documents for the application have not been approved", HttpStatus.BAD_REQUEST));
+                        }
+                    }
+                }
             }
             String completedMeetingStatusId = ScheduledMeetingStatusReferenceData.COMPLETED_STATUS_ID;
             scheduledMeeting.setScheduledMeetingStatusId(completedMeetingStatusId);

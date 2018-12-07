@@ -1,5 +1,8 @@
 package com.software.finatech.lslb.cms.service.dto;
 
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
+import org.apache.commons.lang3.StringUtils;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -82,5 +85,9 @@ public class AuthInfoCreateDto {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public boolean isCreateGamingOperatorUser(){
+        return StringUtils.equals(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID, this.authRoleId);
     }
 }

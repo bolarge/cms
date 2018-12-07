@@ -11,6 +11,7 @@ import com.software.finatech.lslb.cms.service.model.otherInformation.ApplicantOt
 import com.software.finatech.lslb.cms.service.model.outletInformation.ApplicantOutletInformation;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -41,22 +42,22 @@ public class ApplicationForm extends AbstractFact {
     protected FormDocumentApproval documentApproval;
     protected Boolean readyForApproval;
     protected List<FormComment> formComments = new ArrayList<>();
-    protected LocalDateTime creationDate;
-    protected LocalDateTime submissionDate;
+    protected LocalDate creationDate;
+    protected LocalDate submissionDate;
 
-    public LocalDateTime getCreationDate() {
+    public LocalDate getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(LocalDateTime creationDate) {
+    public void setCreationDate(LocalDate creationDate) {
         this.creationDate = creationDate;
     }
 
-    public LocalDateTime getSubmissionDate() {
+    public LocalDate getSubmissionDate() {
         return submissionDate;
     }
 
-    public void setSubmissionDate(LocalDateTime submissionDate) {
+    public void setSubmissionDate(LocalDate submissionDate) {
         this.submissionDate = submissionDate;
     }
 
@@ -365,9 +366,9 @@ public class ApplicationForm extends AbstractFact {
     }
 
 
-    private String getDateString(LocalDateTime localDateTime) {
-        if (localDateTime != null) {
-            return localDateTime.toString("dd-MM-yyyy");
+    private String getDateString(LocalDate localDate) {
+        if (localDate != null) {
+            return localDate.toString("dd-MM-yyyy");
         }
         return null;
     }
