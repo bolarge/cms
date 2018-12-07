@@ -9,6 +9,7 @@ public class AgentDto {
     private List<AgentInstitutionDto> agentInstitutions = new ArrayList<>();
     private String firstName;
     private String lastName;
+    private String middleName;
     private String residentialAddress;
     private String fullName;
     private String emailAddress;
@@ -30,6 +31,15 @@ public class AgentDto {
     private String agentStatusName;
     private String genderId;
     private String genderName;
+
+
+    public String getMiddleName() {
+        return middleName;
+    }
+
+    public void setMiddleName(String middleName) {
+        this.middleName = middleName;
+    }
 
     public String getGenderId() {
         return genderId;
