@@ -150,7 +150,7 @@ public class MachineServiceImpl implements MachineService {
             if (!(machineCreateDto.isCreateGamingMachine() || machineCreateDto.isCreateGamingTerminal())) {
                 return Mono.just(new ResponseEntity<>(String.format("Machine type with id %s does not exist on the system", machineCreateDto.getMachineTypeId()), HttpStatus.BAD_REQUEST));
             }
-            PendingMachine pendingMachine = findPendingMachineBySerialNumber(machineCreateDto.getSerialNumber());
+            PendingMachine pendingMachine = findPendingMachineBySerialNumberAndMachineType(machineCreateDto.getSerialNumber(), machineCreateDto.getMachineTypeId());
             if (pendingMachine != null) {
                 return Mono.just(new ResponseEntity<>("A machine already exist with the same serial number", HttpStatus.BAD_REQUEST));
             }
@@ -465,7 +465,7 @@ public class MachineServiceImpl implements MachineService {
         }
 
         MachineType machineType = getMachineType(machineTypeId);
-        if (machineType == null){
+        if (machineType == null) {
             return Mono.just(new ResponseEntity<>(String.format("Machine type with id %s not found", machineTypeId), HttpStatus.BAD_REQUEST));
         }
 
@@ -495,7 +495,7 @@ public class MachineServiceImpl implements MachineService {
                             }
                             machine.setGameTypeId(gameTypeId);
                             machine.setMachineTypeId(machineTypeId);
-                            if (columns.length > 3 && !StringUtils.isEmpty(columns[3]) && !StringUtils.isEmpty(columns[4]) ) {
+                            if (columns.length > 3 && !StringUtils.isEmpty(columns[3]) && !StringUtils.isEmpty(columns[4])) {
                                 machine.getGameDetailsList().add(MachineGameDetails.fromGameNameAndVersion(columns[3], columns[4]));
                             }
                             machine.setInstitutionId(institutionId);
@@ -556,6 +556,13 @@ public class MachineServiceImpl implements MachineService {
     private Machine findBySerialNumber(String serialNumber) {
         Query query = new Query();
         query.addCriteria(Criteria.where("serialNumber").is(serialNumber));
+        return (Machine) mongoRepositoryReactive.find(query, Machine.class).block();
+    }
+
+    private Machine findBySerialNumberAndMachineType(String serialNumber, String machineTypeId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("serialNumber").is(serialNumber));
+        query.addCriteria(Criteria.where("machineTypeId").is(machineTypeId));
         return (Machine) mongoRepositoryReactive.find(query, Machine.class).block();
     }
 
@@ -767,9 +774,9 @@ public class MachineServiceImpl implements MachineService {
     }
 
     @Override
-    public Mono<ResponseEntity> getMachineFullDetailBySerialNumber(String serialNumber) {
+    public Mono<ResponseEntity> getMachineFullDetailBySerialNumber(String serialNumber, String machineTypeId) {
         try {
-            Machine machine = findBySerialNumber(serialNumber);
+            Machine machine = findBySerialNumberAndMachineType(serialNumber, machineTypeId);
             if (machine == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Machine with serial number %s not found", serialNumber), HttpStatus.NOT_FOUND));
             }
@@ -856,11 +863,12 @@ public class MachineServiceImpl implements MachineService {
         return approvalRequest;
     }
 
-    private PendingMachine findPendingMachineBySerialNumber(String serialNumber) {
+    private PendingMachine findPendingMachineBySerialNumberAndMachineType(String serialNumber, String machineTypeId) {
         Query query = new Query();
         List<String> statuses = Arrays.asList(ApprovalRequestStatusReferenceData.APPROVED_ID, ApprovalRequestStatusReferenceData.PENDING_ID);
         query.addCriteria(Criteria.where("serialNumber").is(serialNumber));
         query.addCriteria(Criteria.where("approvalRequestStatusId").in(statuses));
+        query.addCriteria(Criteria.where("machineTypeId").is(machineTypeId));
         return (PendingMachine) mongoRepositoryReactive.find(query, PendingMachine.class).block();
     }
 }

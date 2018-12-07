@@ -591,7 +591,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             }
             String inReviewApplicationFormStatusId = ApplicationFormStatusReferenceData.IN_REVIEW_STATUS_ID;
             applicationForm.setApplicationFormStatusId(inReviewApplicationFormStatusId);
-            applicationForm.setSubmissionDate(LocalDateTime.now());
+            applicationForm.setSubmissionDate(LocalDate.now());
             saveApplicationForm(applicationForm);
 
             String verbiage = String.format("Submitted application form : %s ->  ", applicationForm.getApplicationFormId());
@@ -1235,7 +1235,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         LocalDateTime presentTime = LocalDateTime.now();
         String applicationFormId = String.format("LSLB-APP%s-%s%s%s", gameTypePref, NumberUtil.getRandomNumberInRange(10, 100), presentTime.getSecondOfMinute(), presentTime.getMinuteOfHour());
         applicationForm.setApplicationFormId(applicationFormId);
-        applicationForm.setCreationDate(LocalDateTime.now());
+        applicationForm.setCreationDate(LocalDate.now());
         return applicationForm;
     }
 
