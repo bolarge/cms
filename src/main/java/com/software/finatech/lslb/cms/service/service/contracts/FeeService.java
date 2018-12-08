@@ -33,7 +33,7 @@ public interface FeeService {
 
     Mono<ResponseEntity> findAllFeePaymentTypeForLicenseType(String licenseTypeId);
 
-    Mono<ResponseEntity> findLicenseTypeByParams(String institutionId, String agentId);
+    Mono<ResponseEntity> findLicenseTypeByParams(String institutionId, String agentId,String gameTypeId);
 
     Fee findActiveFeeByLicenseTypeGameTypeAndFeePaymentType(String licenseTypeId, String gameTypeId, String feePaymentTypeId);
 

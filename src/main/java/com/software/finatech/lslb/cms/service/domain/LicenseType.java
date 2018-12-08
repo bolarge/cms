@@ -13,13 +13,29 @@ public class LicenseType extends EnumeratedFact {
         return "LicenseType";
     }
 
-    public boolean appliesToInstitution(){
+    public boolean appliesToInstitution() {
         return StringUtils.equals(LicenseTypeReferenceData.INSTITUTION_ID, this.id)
                 || StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, this.id);
     }
 
-    public boolean appliesToAgent(){
+    public boolean appliesToAgent() {
         return StringUtils.equals(LicenseTypeReferenceData.AGENT_ID, this.id)
                 || StringUtils.equals(LicenseTypeReferenceData.GAMING_TERMINAL_ID, this.id);
+    }
+
+    public boolean isAgent() {
+        return StringUtils.equals(LicenseTypeReferenceData.AGENT_ID, this.id);
+    }
+
+    public boolean isInstitution() {
+        return StringUtils.equals(LicenseTypeReferenceData.INSTITUTION_ID, this.id);
+    }
+
+    public boolean isGamingTerminal() {
+        return StringUtils.equals(LicenseTypeReferenceData.GAMING_TERMINAL_ID, this.id);
+    }
+
+    public boolean isGamingMachine() {
+        return StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, this.id);
     }
 }

@@ -1,10 +1,7 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.Agent;
-import com.software.finatech.lslb.cms.service.domain.EnumeratedFact;
-import com.software.finatech.lslb.cms.service.domain.GameType;
-import com.software.finatech.lslb.cms.service.domain.Institution;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.GameTypeCreateDto;
 import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
@@ -63,7 +60,7 @@ public class GameTypeServiceImpl implements GameTypeService {
         if (StringUtils.isEmpty(gameTypeId)) {
             return null;
         }
-        Map gameTypeMap = Mapstore.STORE.get("GameType");
+        Map<String, FactObject> gameTypeMap = Mapstore.STORE.get("GameType");
         GameType gameType = null;
         if (gameTypeMap != null) {
             gameType = (GameType) gameTypeMap.get(gameTypeId);
