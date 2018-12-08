@@ -378,7 +378,7 @@ public class PaymentRecord extends AbstractFact {
     private String getCreationDateString() {
         LocalDate localDateTime = getCreationDate();
         if (localDateTime != null) {
-            return localDateTime.toString("dd-MM-yyyy HH:mm a");
+            return localDateTime.toString("dd-MM-yyyy");
         }
         return null;
     }
@@ -386,7 +386,7 @@ public class PaymentRecord extends AbstractFact {
     private String getCompletionDateString() {
         LocalDate localDateTime = getCompletionDate();
         if (localDateTime != null) {
-            return localDateTime.toString("dd-MM-yyyy HH:mm a");
+            return localDateTime.toString("dd-MM-yyyy");
         }
         return null;
     }
