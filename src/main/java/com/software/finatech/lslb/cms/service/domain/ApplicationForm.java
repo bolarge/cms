@@ -380,7 +380,7 @@ public class ApplicationForm extends AbstractFact {
             dto.setComment(comment.getComment());
             dto.setUserFullName(comment.getUserFullName());
             dto.setCommentDate(comment.getTimeCreated().toString("dd-MM-yyyy"));
-            dto.setCommentTime(comment.getTimeCreated().toString("HH:mm a"));
+            dto.setCommentTime(comment.getTimeCreated().toString("hh:mm a"));
             comments.add(dto);
         }
         return comments;
