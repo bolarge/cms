@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
+import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.MapValues;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
@@ -44,16 +45,19 @@ public class FeeServiceImpl implements FeeService {
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
     private ApprovalRequestNotifierAsync approvalRequestNotifierAsync;
+    private GameTypeService gameTypeService;
 
     @Autowired
     public FeeServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                           SpringSecurityAuditorAware springSecurityAuditorAware,
                           AuditLogHelper auditLogHelper,
-                          ApprovalRequestNotifierAsync approvalRequestNotifierAsync) {
+                          ApprovalRequestNotifierAsync approvalRequestNotifierAsync,
+                          GameTypeService gameTypeService) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.auditLogHelper = auditLogHelper;
         this.approvalRequestNotifierAsync = approvalRequestNotifierAsync;
+        this.gameTypeService = gameTypeService;
     }
 
     @Autowired
@@ -350,7 +354,11 @@ public class FeeServiceImpl implements FeeService {
     }
 
     @Override
-    public Mono<ResponseEntity> findLicenseTypeByParams(String institutionId, String agentId) {
+    public Mono<ResponseEntity> findLicenseTypeByParams(String institutionId, String agentId, String gameTypeId) {
+        GameType gameType = gameTypeService.findById(gameTypeId);
+        if (gameType == null) {
+            return Mono.just(new ResponseEntity<>(String.format("Category with id %s not found", gameTypeId), HttpStatus.BAD_REQUEST));
+        }
         LicenseTypeSearch search = new LicenseTypeSearch(institutionId, agentId);
         try {
             Collection<EnumeratedFact> enumeratedFacts = ReferenceDataUtil.getAllEnumeratedFacts("LicenseType");
@@ -358,9 +366,18 @@ public class FeeServiceImpl implements FeeService {
             for (EnumeratedFact enumeratedFact : enumeratedFacts) {
                 LicenseType licenseType = (LicenseType) enumeratedFact;
                 if (search.isAgentSearch() && licenseType.appliesToAgent()) {
+                    if (gameType.getAgentLicenseDurationMonths() == 0 && licenseType.isAgent()) {
+                        continue;
+                    }
+                    if (!gameType.getAllowsGamingTerminal() && licenseType.isGamingTerminal()){
+                        continue;
+                    }
                     dtos.add(licenseType.convertToDto());
                 }
                 if (search.isInstitutionSearch() && licenseType.appliesToInstitution()) {
+                    if (!gameType.getAllowsGamingMachine() && licenseType.isGamingMachine()) {
+                        continue;
+                    }
                     dtos.add(licenseType.convertToDto());
                 }
             }

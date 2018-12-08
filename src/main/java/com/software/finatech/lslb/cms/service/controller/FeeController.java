@@ -85,7 +85,7 @@ public class FeeController extends BaseController {
         return feeService.createFeePaymentType(feeCreateDto, request);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/all-revenue-names")
+    @RequestMapping(method = RequestMethod.GET,  value = "/all-revenue-names")
     @ApiOperation(value = "Get all Revenue Names", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -132,15 +132,17 @@ public class FeeController extends BaseController {
         return feeService.findAllFeePaymentTypeForLicenseType(revenueNameId);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/revenue-names/by-params", params = {"institutionId", "agentId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/revenue-names/by-params", params = {"institutionId", "agentId", "gameTypeId"})
     @ApiOperation(value = "Get all Revenue Names", response = EnumeratedFactDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> findRevenueNamesByParam(@RequestParam("institutionId") String institutionId, @RequestParam("agentId") String agentId) {
-        return feeService.findLicenseTypeByParams(institutionId, agentId);
+    public Mono<ResponseEntity> findRevenueNamesByParam(@RequestParam("institutionId") String institutionId,
+                                                        @RequestParam("agentId") String agentId,
+                                                        @RequestParam("gameTypeId")String gameTypeId) {
+        return feeService.findLicenseTypeByParams(institutionId, agentId, gameTypeId);
     }
 
 
