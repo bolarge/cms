@@ -140,7 +140,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             String gameTypeId = license.getGameTypeId();
             Mono<ResponseEntity> validateResponse = validateLicenseTransfer(institutionId, license);
             if (validateResponse != null) {
-                //   return validateResponse;
+                   return validateResponse;
             }
 
             LicenseTransfer licenseTransfer = new LicenseTransfer();
