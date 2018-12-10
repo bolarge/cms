@@ -21,6 +21,15 @@ public class AIPDocumentApproval extends AbstractFact {
     protected FormDocumentApproval documentApproval;
     protected LocalDate submissionDate;
     protected Boolean readyForApproval;
+    private boolean finalNotificationSent;
+
+    public boolean isFinalNotificationSent() {
+        return finalNotificationSent;
+    }
+
+    public void setFinalNotificationSent(boolean finalNotificationSent) {
+        this.finalNotificationSent = finalNotificationSent;
+    }
 
     public Boolean getReadyForApproval() {
         return readyForApproval;

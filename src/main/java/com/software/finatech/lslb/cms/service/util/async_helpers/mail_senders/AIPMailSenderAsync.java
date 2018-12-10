@@ -1,8 +1,10 @@
 package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.lowagie.text.DocumentException;
+import com.software.finatech.lslb.cms.service.domain.AIPDocumentApproval;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
@@ -16,12 +18,13 @@ import org.xhtmlrenderer.pdf.ITextRenderer;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 
 @Component
-public class AIPMailSenderAsync  extends  AbstractMailSender{
+public class AIPMailSenderAsync extends AbstractMailSender {
 
     private static Logger logger = LoggerFactory.getLogger(AIPMailSenderAsync.class);
     @Autowired
@@ -78,5 +81,34 @@ public class AIPMailSenderAsync  extends  AbstractMailSender{
             logger.error("IO Exception occurred while building AIP attachment", e);
             return null;
         }
+    }
+
+
+    public void sendFinalAIPApprovalMailTOFianlApprovers(AIPDocumentApproval aipDocumentApproval) {
+        ArrayList<AuthInfo> finalApprovers = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.APPROVE_APPLICATION_FORM_ID);
+        if (finalApprovers.isEmpty()) {
+            return;
+        }
+        String content = buildFinalAIPSubmissionApproverMailContent(aipDocumentApproval);
+        for (AuthInfo finalApprover : finalApprovers) {
+            String email = finalApprover.getEmailAddress();
+            try {
+                emailService.sendEmail(content, "AIP Approval Reminder", email);
+            } catch (Exception e) {
+                logger.error("An error occurred while sending mail to {}", email, e);
+            }
+        }
+    }
+
+    private String buildFinalAIPSubmissionApproverMailContent(AIPDocumentApproval aipDocumentApproval) {
+        String presentDateString = DateTime.now().toString("dd-MM-yyyy");
+        String gameTypeName = aipDocumentApproval.getGameTypeName();
+        String institutionName = aipDocumentApproval.getInstitutionName();
+        String frontEndUrl = String.format("%s/aip-documents/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId());
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("gameType", gameTypeName);
+        model.put("date", presentDateString);
+        model.put("institutionName", institutionName);
+        return mailContentBuilderService.build(model, "aip-form/AIPFormDocumentSubmissionLSLBFinalApprovalNotification");
     }
 }

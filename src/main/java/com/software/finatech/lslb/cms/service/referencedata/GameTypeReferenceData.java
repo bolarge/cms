@@ -129,12 +129,12 @@ public class GameTypeReferenceData {
         gameType.setName("Other Licence");
         gameType.setShortCode("O-L");
         gameType.setAipDurationMonths(3);
+        gameType.setAgentLicenseDurationMonths(0);
         gameType.setAllowsGamingMachine(false);
         gameType.setAllowsGamingTerminal(true);
         gameType.setInstitutionLicenseDurationMonths(12);
         gameType.setGamingMachineLicenseDurationMonths(12);
         gameType.setGamingTerminalLicenseDurationMonths(0);
-        gameType.setAgentLicenseDurationMonths(0);
         mongoRepositoryReactive.saveOrUpdate(gameType);
         }
 }
