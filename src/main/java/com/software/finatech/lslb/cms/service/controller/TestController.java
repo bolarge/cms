@@ -1,15 +1,12 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
-import com.software.finatech.lslb.cms.service.background_jobs.Scheduler;
-import com.software.finatech.lslb.cms.service.domain.Agent;
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.domain.Institution;
-import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordDetailService;
 import com.software.finatech.lslb.cms.service.service.contracts.VigipayService;
 import com.software.finatech.lslb.cms.service.util.DatabaseLoaderUtils;
@@ -131,10 +128,10 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/backdate-licence")
     public Mono<ResponseEntity> moviedocus() {
         try {
-         Query query = new Query();
-         query.addCriteria(Criteria.where("effectiveDate").is(null));
-            ArrayList<Fee> fees = (ArrayList<Fee>)mongoRepositoryReactive.findAll(query, Fee.class).toStream().collect(Collectors.toList());
-            for (Fee fee: fees) {
+            Query query = new Query();
+            query.addCriteria(Criteria.where("effectiveDate").is(null));
+            ArrayList<Fee> fees = (ArrayList<Fee>) mongoRepositoryReactive.findAll(query, Fee.class).toStream().collect(Collectors.toList());
+            for (Fee fee : fees) {
                 fee.setEffectiveDate(LocalDate.now().withDayOfYear(1));
                 mongoRepositoryReactive.saveOrUpdate(fee);
             }
@@ -148,10 +145,10 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/delete-payment")
     public Mono<ResponseEntity> deletePayment() {
         try {
-          Query query = Query.query(Criteria.where("paymentStatusId").is(null));
-          ArrayList<PaymentRecord>  paymentRecords = (ArrayList<PaymentRecord>)mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList()); // scheduler.load();
-            for (PaymentRecord paymentRecord: paymentRecords) {
-                mongoRepositoryReactive.delete(paymentRecord);
+            AuthInfo authInfo = (AuthInfo)mongoRepositoryReactive.findById("5596936a-eb26-4614-a013-49742cd8037b", AuthInfo.class).block();
+            if (authInfo !=  null){
+                authInfo.setInstitutionId(null);
+                mongoRepositoryReactive.saveOrUpdate(authInfo);
             }
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {

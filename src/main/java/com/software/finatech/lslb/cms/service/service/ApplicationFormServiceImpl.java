@@ -901,7 +901,6 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             }
         }
         mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
-
     }
 
     @Override
