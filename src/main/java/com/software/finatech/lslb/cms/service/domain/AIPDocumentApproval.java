@@ -5,8 +5,12 @@ import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 @Document(collection = "AIPDocumentApprovals")
@@ -94,6 +98,7 @@ public class AIPDocumentApproval extends AbstractFact {
         }
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
+
     public String getInstitutionName() {
         Institution institution = getInstitution();
         if (institution != null) {
@@ -128,7 +133,7 @@ public class AIPDocumentApproval extends AbstractFact {
     }
 
 
-        public AuthInfo getAuthInfo(String authInfoId) {
+    public AuthInfo getAuthInfo(String authInfoId) {
         if (StringUtils.isEmpty(authInfoId)) {
             return null;
         }
@@ -152,6 +157,7 @@ public class AIPDocumentApproval extends AbstractFact {
         }
         return gameType;
     }
+
     public String getGameTypeName() {
         GameType gameType = getGameType();
         if (gameType == null) {
@@ -160,6 +166,7 @@ public class AIPDocumentApproval extends AbstractFact {
             return gameType.getName();
         }
     }
+
     private ApplicationFormStatus getStatus() {
         if (StringUtils.isEmpty(this.formStatusId)) {
             return null;
@@ -177,7 +184,8 @@ public class AIPDocumentApproval extends AbstractFact {
         }
         return applicationFormStatus;
     }
-    public AIPDocumentApprovalDto convertToDto(){
+
+    public AIPDocumentApprovalDto convertToDto() {
         AIPDocumentApprovalDto aipDocumentApprovalDto = new AIPDocumentApprovalDto();
         aipDocumentApprovalDto.setAipFormId(getId());
         aipDocumentApprovalDto.setRejectionReason(getReasonForRejection());
@@ -211,6 +219,14 @@ public class AIPDocumentApproval extends AbstractFact {
 
         return aipDocumentApprovalDto;
 
+    }
+
+    public boolean hasInspectionForm() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(this.institutionId));
+        query.addCriteria(Criteria.where("gameTypeId").is(this.gameTypeId));
+        ArrayList<InspectionForm> inspectionForms = (ArrayList<InspectionForm>) mongoRepositoryReactive.findAll(query, InspectionForm.class).toStream().collect(Collectors.toList());
+        return inspectionForms.size() > 0;
     }
 
     @Override

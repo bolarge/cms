@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
@@ -144,10 +145,10 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/delete-payment")
     public Mono<ResponseEntity> deletePayment() {
         try {
-            Query query = Query.query(Criteria.where("paymentStatusId").is(null));
-            ArrayList<PaymentRecord> paymentRecords = (ArrayList<PaymentRecord>) mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList()); // scheduler.load();
-            for (PaymentRecord paymentRecord : paymentRecords) {
-                mongoRepositoryReactive.delete(paymentRecord);
+            AuthInfo authInfo = (AuthInfo)mongoRepositoryReactive.findById("5596936a-eb26-4614-a013-49742cd8037b", AuthInfo.class).block();
+            if (authInfo !=  null){
+                authInfo.setInstitutionId(null);
+                mongoRepositoryReactive.saveOrUpdate(authInfo);
             }
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
