@@ -191,6 +191,10 @@ public class LicenseTransfer extends AbstractFact {
         return StringUtils.equals(LicenseTransferStatusReferenceData.APPROVED_ID, this.licenseTransferStatusId);
     }
 
+    public boolean isRejected(){
+        return StringUtils.equals(LicenseTransferStatusReferenceData.REJECTED_ID, this.licenseTransferStatusId);
+    }
+
     private Institution getInstitution(String institutionId) {
         if (StringUtils.isEmpty(institutionId)) {
             return null;
