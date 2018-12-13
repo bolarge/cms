@@ -146,7 +146,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
 
     @Override
     public Mono<ResponseEntity> getAllMeetingPurposes() {
-        return getAllEnumeratedEntity("MeetingPurpose");
+        return getAllEnumeratedEntity("MeetingPurpose", ScheduledMeetingPurpose.class);
     }
 
     @Override

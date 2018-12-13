@@ -170,7 +170,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
     @Override
     public Mono<ResponseEntity> getAllApplicationFormStatus() {
-        return ReferenceDataUtil.getAllEnumeratedEntity("ApplicationFormStatus");
+        return ReferenceDataUtil.getAllEnumeratedEntity("ApplicationFormStatus", ApplicationFormStatus.class);
     }
 
     @Override

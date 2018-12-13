@@ -424,12 +424,12 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     public Mono<ResponseEntity> getAllAgentStatus() {
-        return getAllEnumeratedEntity("AgentStatus");
+        return getAllEnumeratedEntity("AgentStatus",AgentStatus.class);
     }
 
     @Override
     public Mono<ResponseEntity> getAllAgentGender() {
-        return getAllEnumeratedEntity("Gender");
+        return getAllEnumeratedEntity("Gender", Gender.class);
     }
 
     @Override

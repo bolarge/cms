@@ -143,12 +143,13 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
 
     @Override
     public Mono<ResponseEntity> getAllAgentApprovalRequestType() {
-        return getAllEnumeratedEntity("AgentApprovalRequestType");
+        return getAllEnumeratedEntity("AgentApprovalRequestType", AgentApprovalRequestType.class);
     }
 
     @Override
     public Mono<ResponseEntity> getAllApprovalRequestStatus() {
-        return getAllEnumeratedEntity("ApprovalRequestStatus");
+        return
+                getAllEnumeratedEntity("ApprovalRequestStatus", ApprovalRequestStatus.class);
     }
 
     @Override

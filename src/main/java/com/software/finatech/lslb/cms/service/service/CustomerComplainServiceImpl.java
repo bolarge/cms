@@ -4,6 +4,7 @@ import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.CustomerComplain;
 import com.software.finatech.lslb.cms.service.domain.CustomerComplainAction;
+import com.software.finatech.lslb.cms.service.domain.CustomerComplainStatus;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
@@ -259,7 +260,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
 
     @Override
     public Mono<ResponseEntity> getAllCustomerComplainStatus() {
-        return ReferenceDataUtil.getAllEnumeratedEntity("CustomerComplainStatus");
+        return ReferenceDataUtil.getAllEnumeratedEntity("CustomerComplainStatus", CustomerComplainStatus.class);
     }
 
     @Override
