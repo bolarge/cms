@@ -533,6 +533,7 @@ public class DocumentController extends BaseController {
 
         Query queryDocumentType = new Query();
         queryDocumentType.addCriteria(Criteria.where("documentPurposeId").is(purposeId));
+        queryDocumentType.addCriteria(Criteria.where("active").is(true));
         List<DocumentType> documentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
         List<String> documentTypeIds = new ArrayList<>();
         documentTypes.stream().forEach(documentType -> {
