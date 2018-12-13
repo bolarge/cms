@@ -364,7 +364,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
         ArrayList<LicenseTransfer> transfers = (ArrayList<LicenseTransfer>) mongoRepositoryReactive.findAll(query, LicenseTransfer.class).toStream().collect(Collectors.toList());
         if (!transfers.isEmpty()) {
             for (LicenseTransfer licenseTransfer : transfers) {
-                if (!licenseTransfer.isFinallyApproved()) {
+                if (!licenseTransfer.isFinallyApproved() && !licenseTransfer.isRejected()) {
                     return Mono.just(new ResponseEntity<>("You Currently have a licence Transfer in the category pending", HttpStatus.BAD_REQUEST));
                 }
             }
