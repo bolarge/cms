@@ -354,7 +354,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
         Query query = new Query();
         query.addCriteria(Criteria.where("licenseId").is(license.getId()));
         LicenseTransfer transfer = (LicenseTransfer) mongoRepositoryReactive.find(query, LicenseTransfer.class).block();
-        if (transfer != null) {
+        if (transfer != null && !transfer.isRejected()) {
             return Mono.just(new ResponseEntity<>("A license Transfer already exists for the Licence", HttpStatus.BAD_REQUEST));
         }
 
