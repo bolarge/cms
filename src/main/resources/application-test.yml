@@ -53,14 +53,14 @@ logging:
 
 
 sso:
-  baseIdentityURL: https://sso.test.vggdev.com/identity
-  baseAPIURL: http://ssoapi.test.vggdev.com
+  baseIdentityURL: https://sso.staging.vggdev.com/identity
+  baseAPIURL: http://ssoapi.staging.vggdev.com
   apiUsername: lslb-cms-api
   apiPassword: ${SSO_API_PASSWORD}
   clientId: lslb-cms
   clientSecret:  ${SSO_CLIENT_SECRET}
-  baseLogoutURL: https://sso.test.vggdev.com
-  publicKeyURL: https://sso.test.vggdev.com/identity/.well-known/jwks
+  baseLogoutURL: https://sso.staging.vggdev.com
+  publicKeyURL: https://sso.staging.vggdev.com/identity/.well-known/jwks
   applicationName: lslb-cms
 
 jwt:
