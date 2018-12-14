@@ -20,8 +20,24 @@ public class LicenseDto {
     private String ownerName;
     private String licenseChangeReason;
     private String agentNumber;
+    private String renewalFormId;
+    private boolean renewalInProgress;
 
+    public boolean isRenewalInProgress() {
+        return renewalInProgress;
+    }
 
+    public void setRenewalInProgress(boolean renewalInProgress) {
+        this.renewalInProgress = renewalInProgress;
+    }
+
+    public String getRenewalFormId() {
+        return renewalFormId;
+    }
+
+    public void setRenewalFormId(String renewalFormId) {
+        this.renewalFormId = renewalFormId;
+    }
 
     public String getLicenseChangeReason() {
         return licenseChangeReason;

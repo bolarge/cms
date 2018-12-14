@@ -385,6 +385,11 @@ public class RenewalForm extends AbstractFact {
         return comments;
     }
 
+
+    public License getLicense(){
+      return   (License) mongoRepositoryReactive.find(Query.query(Criteria.where("renewalFormId").is(this.id)), License.class).block();
+    }
+
     @Override
     public String getFactName() {
         return "RenewalForm";
