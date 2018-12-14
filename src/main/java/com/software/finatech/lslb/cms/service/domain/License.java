@@ -288,6 +288,7 @@ public class License extends AbstractFact {
             licenseDto.setAmountPaid(paymentRecord.getAmountPaid());
         }
         licenseDto.setOwnerName(ownerName);
+        licenseDto.setRenewalStatus(getRenewalStatus());
         return licenseDto;
     }
 

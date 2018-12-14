@@ -1,10 +1,7 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.domain.Fee;
-import com.software.finatech.lslb.cms.service.domain.FeeApprovalRequest;
-import com.software.finatech.lslb.cms.service.domain.PendingFee;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.FeeApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.exception.ApprovalRequestProcessException;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
@@ -235,7 +232,7 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
 
     @Override
     public Mono<ResponseEntity> getFeeApprovalRequestTypes() {
-        return getAllEnumeratedEntity("FeeApprovalRequestType");
+        return getAllEnumeratedEntity("FeeApprovalRequestType", FeeApprovalRequestType.class);
     }
 
     private void approveSetFeeEndDateRequest(FeeApprovalRequest feeApprovalRequest) {

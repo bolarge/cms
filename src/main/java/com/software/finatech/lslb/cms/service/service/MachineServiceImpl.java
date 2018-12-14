@@ -431,12 +431,12 @@ public class MachineServiceImpl implements MachineService {
 
     @Override
     public Mono<ResponseEntity> getAllMachineTypes() {
-        return getAllEnumeratedEntity("MachineType");
+        return getAllEnumeratedEntity("MachineType", MachineType.class);
     }
 
     @Override
     public Mono<ResponseEntity> getAllMachineStatus() {
-        return getAllEnumeratedEntity("MachineStatus");
+        return getAllEnumeratedEntity("MachineStatus", MachineStatus.class);
     }
 
     @Override

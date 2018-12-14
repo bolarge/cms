@@ -260,7 +260,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
 
     @Override
     public Mono<ResponseEntity> getAllLoggedCaseStatus() {
-        return ReferenceDataUtil.getAllEnumeratedEntity("LoggedCaseStatus");
+        return ReferenceDataUtil.getAllEnumeratedEntity("LoggedCaseStatus", LoggedCaseStatus.class);
     }
 
     @Override
@@ -286,17 +286,17 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
 
     @Override
     public Mono<ResponseEntity> getAllCaseAndComplainType() {
-        return ReferenceDataUtil.getAllIntSortedEnumeratedEntity("CaseAndComplainType");
+        return ReferenceDataUtil.getAllIntSortedEnumeratedEntity("CaseAndComplainType", CaseAndComplainType.class);
     }
 
     @Override
     public Mono<ResponseEntity> getAllCaseAndComplainCategory() {
-        return ReferenceDataUtil.getAllIntSortedEnumeratedEntity("CaseAndComplainCategory");
+        return ReferenceDataUtil.getAllIntSortedEnumeratedEntity("CaseAndComplainCategory",CaseAndComplainCategory.class);
     }
 
     @Override
     public Mono<ResponseEntity> getAllCaseOutcomes() {
-        return ReferenceDataUtil.getAllEnumeratedEntity("LoggedCaseOutcome");
+        return ReferenceDataUtil.getAllEnumeratedEntity("LoggedCaseOutcome", LoggedCaseOutcome.class);
     }
 
     @Override

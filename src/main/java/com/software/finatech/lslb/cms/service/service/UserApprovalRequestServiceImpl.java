@@ -1,10 +1,7 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.domain.AuthPermission;
-import com.software.finatech.lslb.cms.service.domain.PendingAuthInfo;
-import com.software.finatech.lslb.cms.service.domain.UserApprovalRequest;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.ApprovalRequestOperationtDto;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
 import com.software.finatech.lslb.cms.service.dto.UserApprovalRequestDto;
@@ -152,7 +149,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
 
     @Override
     public Mono<ResponseEntity> getAllUserApprovalRequestType() {
-        return getAllEnumeratedEntity("UserApprovalRequestType");
+        return getAllEnumeratedEntity("UserApprovalRequestType", UserApprovalRequestType.class);
     }
 
     @Override

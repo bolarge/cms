@@ -4,15 +4,19 @@ import com.software.finatech.lslb.cms.service.domain.EnumeratedFact;
 import com.software.finatech.lslb.cms.service.domain.FactObject;
 import com.software.finatech.lslb.cms.service.domain.IntSortedEnumeratedFact;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
+import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.util.GlobalApplicationContext;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
@@ -21,15 +25,19 @@ public class ReferenceDataUtil {
     private static final Logger logger = LoggerFactory.getLogger(ReferenceDataUtil.class);
     public static Comparator<EnumeratedFact> enumeratedFactComparator = (o1, o2) -> StringUtils.compare(o1.toString(), o2.toString());
     public static Comparator<Object> objectComparator = (o1, o2) -> StringUtils.compare(o1.toString(), o2.toString());
-    public static Comparator<IntSortedEnumeratedFact> intSortedEnumeratedFactComparator = (o1, o2) -> o1.getSortInt() - o2.getSortInt();
+    private static Comparator<IntSortedEnumeratedFact> intSortedEnumeratedFactComparator = (o1, o2) -> o1.getSortInt() - o2.getSortInt();
 
-    public static Mono<ResponseEntity> getAllEnumeratedEntity(String entityMapName) {
+    private static MongoRepositoryReactiveImpl mongoRepositoryReactive = GlobalApplicationContext.ctx.getBean(MongoRepositoryReactiveImpl.class);
+
+    public static Mono<ResponseEntity> getAllEnumeratedEntity(String entityMapName, Class clazz) {
         try {
             Map<String, FactObject> entityMap = Mapstore.STORE.get(entityMapName);
+            Collection<FactObject> factObjects;
             if (entityMap == null) {
-                return Mono.just(new ResponseEntity<>("Entity Map does not exist", HttpStatus.BAD_REQUEST));
+                factObjects = (Collection<FactObject>) mongoRepositoryReactive.findAll(new Query(), clazz).toStream().collect(Collectors.toList());
+            } else {
+                factObjects = entityMap.values();
             }
-            Collection<FactObject> factObjects = entityMap.values();
             if (factObjects.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
             }
@@ -44,13 +52,16 @@ public class ReferenceDataUtil {
         }
     }
 
-    public static Mono<ResponseEntity> getAllIntSortedEnumeratedEntity(String entityMapName) {
+    public static Mono<ResponseEntity> getAllIntSortedEnumeratedEntity(String entityMapName, Class clazz) {
         try {
             Map<String, FactObject> entityMap = Mapstore.STORE.get(entityMapName);
+            Collection<FactObject> factObjects;
             if (entityMap == null) {
-                return Mono.just(new ResponseEntity<>("Entity Map does not exist", HttpStatus.BAD_REQUEST));
+                factObjects = (Collection<FactObject>) mongoRepositoryReactive.findAll(new Query(), clazz).toStream().collect(Collectors.toList());
+            } else {
+                factObjects = entityMap.values();
             }
-            Collection<FactObject> factObjects = entityMap.values();
+
             if (factObjects.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
             }

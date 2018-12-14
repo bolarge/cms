@@ -173,7 +173,6 @@ public class DocumentTypeReferenceData {
             documentType13.setActive(true);
             documentType13.setRequired(true);
             mongoRepositoryReactive.saveOrUpdate(documentType13);
-
         }
         DocumentType documentType22 = (DocumentType) mongoRepositoryReactive.findById("22", DocumentType.class).block();
         if (documentType22 == null) {

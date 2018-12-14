@@ -1,10 +1,7 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.domain.DocumentApprovalRequest;
-import com.software.finatech.lslb.cms.service.domain.DocumentType;
-import com.software.finatech.lslb.cms.service.domain.PendingDocumentType;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.ApprovalRequestOperationtDto;
 import com.software.finatech.lslb.cms.service.dto.DocumentApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
@@ -136,7 +133,7 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
 
     @Override
     public Mono<ResponseEntity> getAllDocumentApprovalRequestType() {
-        return getAllEnumeratedEntity("DocumentApprovalRequestType");
+        return getAllEnumeratedEntity("DocumentApprovalRequestType", DocumentApprovalRequestType.class);
     }
 
     @Override

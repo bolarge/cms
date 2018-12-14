@@ -28,7 +28,10 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -86,20 +89,20 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             if (!StringUtils.equals(RenewalFormStatusReferenceData.SUBMITTED, renewalForm.getFormStatusId())) {
                 return Mono.just(new ResponseEntity<>("Form has not be submitted", HttpStatus.BAD_REQUEST));
             }
-            if (renewalForm.getReadyForApproval()==false) {
+            if (renewalForm.getReadyForApproval() == false) {
                 return Mono.just(new ResponseEntity<>("Not all documents on this application are approved", HttpStatus.BAD_REQUEST));
             }
             renewalForm.setApproverId(approverId);
             String approvedRenewalFormStatusId = RenewalFormStatusReferenceData.APPROVED;
             renewalForm.setFormStatusId(approvedRenewalFormStatusId);
-            String status= licenseService.updateInReviewToLicense(renewalForm.getPaymentRecordId());
-            if(status=="No License Record"){
+            String status = licenseService.updateInReviewToLicense(renewalForm.getPaymentRecordId());
+            if (status == "No License Record") {
                 return Mono.just(new ResponseEntity<>("No License Record", HttpStatus.BAD_REQUEST));
 
-            }else if(status=="Error! Please contact admin"){
+            } else if (status == "Error! Please contact admin") {
                 return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
-            }else if(status=="OK"){
+            } else if (status == "OK") {
                 saveRenewalForm(renewalForm);
             }
 
@@ -115,8 +118,9 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             return logAndReturnError(logger, "An error occurred while approving application form", e);
         }
     }
+
     @Override
-    public  Mono<ResponseEntity> rejectRenewalForm(String renewalFormId, RenewalFormRejectDto renewalFormRejectDto, HttpServletRequest request) {
+    public Mono<ResponseEntity> rejectRenewalForm(String renewalFormId, RenewalFormRejectDto renewalFormRejectDto, HttpServletRequest request) {
         try {
             String rejectorId = renewalFormRejectDto.getUserId();
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(rejectorId, AuthInfo.class).block();
@@ -332,11 +336,11 @@ public class RenewalFormServiceImpl implements RenewalFormService {
     @Override
     public Mono<ResponseEntity> getRenewalFormStatus() {
         try {
-            List<RenewalFormStatus> renewalFormStatuses = (List<RenewalFormStatus>)mongoRepositoryReactive.findAll(new Query(), RenewalFormStatus.class).toStream().collect(Collectors.toList());
+            List<RenewalFormStatus> renewalFormStatuses = (List<RenewalFormStatus>) mongoRepositoryReactive.findAll(new Query(), RenewalFormStatus.class).toStream().collect(Collectors.toList());
             List<RenewalFormStatusDto> renewalFormStatusDtos = new ArrayList<>();
-            renewalFormStatuses.stream().forEach(renewalFormStatus ->{
+            renewalFormStatuses.stream().forEach(renewalFormStatus -> {
                 renewalFormStatusDtos.add(renewalFormStatus.convertToDto());
-            } );
+            });
 
             return Mono.just(new ResponseEntity<>(renewalFormStatusDtos, HttpStatus.OK));
         } catch (Exception e) {
@@ -400,52 +404,54 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             return logAndReturnError(logger, "An error occurred while adding comment", e);
         }
     }
+
     public RenewalForm getRenewalFormById(String renewalFormId) {
         return (RenewalForm) mongoRepositoryReactive.findById(renewalFormId, RenewalForm.class).block();
     }
+
     @Override
     public void approveRenewalFormDocument(Document document) {
         RenewalForm renewalForm = document.getRenewalForm();
         Query query = new Query();
         query.addCriteria(Criteria.where("entityId").is(renewalForm.getId()));
         query.addCriteria(Criteria.where("isCurrent").is(true));
-        List<Document> documents= (List<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
-        int countDocumentWithApproval=0;
-        int countApprovedDocument=0;
+        List<Document> documents = (List<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
+        int countDocumentWithApproval = 0;
+        int countApprovedDocument = 0;
 
         for (Document doc : documents) {
-            if(doc.getApprovalRequestStatusId()!=null){
-                countDocumentWithApproval=+1;
-                if(doc.getApprovalRequestStatusId().equals(ApprovalRequestStatusReferenceData.APPROVED_ID)){
-                    countApprovedDocument=+1;
+            if (doc.getApprovalRequestStatusId() != null) {
+                countDocumentWithApproval = +1;
+                if (doc.getApprovalRequestStatusId().equals(ApprovalRequestStatusReferenceData.APPROVED_ID)) {
+                    countApprovedDocument = +1;
                 }
             }
         }
 
         if (countDocumentWithApproval == countApprovedDocument) {
-            if(renewalForm.getFormStatusId().equals(RenewalFormStatusReferenceData.SUBMITTED)){
+            if (renewalForm.getFormStatusId().equals(RenewalFormStatusReferenceData.SUBMITTED)) {
                 renewalForm.setReadyForApproval(true);
             }
 
             renewalFormNotificationHelperAsync.sendApproverMailToFinalApproval(renewalForm);
         }
 
-            mongoRepositoryReactive.saveOrUpdate(renewalForm);
+        mongoRepositoryReactive.saveOrUpdate(renewalForm);
 
     }
-    
+
     public void rejectRenewalFormDocument(Document document, String comment) {
         RenewalForm renewalForm = document.getRenewalForm();
-         if (renewalForm != null) {
+        if (renewalForm != null) {
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
             mongoRepositoryReactive.saveOrUpdate(document);
             renewalFormNotificationHelperAsync.sendDocumentReturnMailToInstitutionMembers(renewalForm, document, comment);
         }
     }
-    
+
     public void doDocumentReuploadNotification(Document document) {
         RenewalForm renewalForm = document.getRenewalForm();
-         if (renewalForm != null) {
+        if (renewalForm != null) {
             renewalFormNotificationHelperAsync.sendResubmissionNotificationForRenewalForm(renewalForm, document);
         }
     }

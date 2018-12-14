@@ -152,7 +152,7 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
 
     @Override
     public Mono<ResponseEntity> getAllMachineApprovalRequestType() {
-        return getAllEnumeratedEntity("MachineApprovalRequestType");
+        return getAllEnumeratedEntity("MachineApprovalRequestType", MachineApprovalRequestType.class);
 
     }
 

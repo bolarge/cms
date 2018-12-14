@@ -297,12 +297,12 @@ public class FeeServiceImpl implements FeeService {
 
     @Override
     public Mono<ResponseEntity> getLicenseTypes() {
-        return getAllEnumeratedEntity("LicenseType");
+        return getAllEnumeratedEntity("LicenseType", LicenseType.class);
     }
 
     @Override
     public Mono<ResponseEntity> getAllFeePaymentType() {
-        return getAllEnumeratedEntity("FeePaymentType");
+        return getAllEnumeratedEntity("FeePaymentType", FeePaymentType.class);
     }
 
     @Override

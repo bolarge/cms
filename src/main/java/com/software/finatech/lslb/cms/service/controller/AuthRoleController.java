@@ -244,7 +244,7 @@ public class AuthRoleController extends BaseController {
 
             // return Mono.just(new ResponseEntity(authPermissionDtos, HttpStatus.OK));
 
-            return ReferenceDataUtil.getAllEnumeratedEntity("AuthPermission");
+            return ReferenceDataUtil.getAllEnumeratedEntity("AuthPermission", AuthPermission.class);
         } catch (Exception e) {
             e.printStackTrace();
         }

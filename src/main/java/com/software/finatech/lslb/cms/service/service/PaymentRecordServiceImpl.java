@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.service;
 import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecordDetail;
+import com.software.finatech.lslb.cms.service.domain.PaymentStatus;
 import com.software.finatech.lslb.cms.service.dto.PaymentReceiptResponse;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
@@ -127,7 +128,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
 
     @Override
     public Mono<ResponseEntity> getAllPaymentStatus() {
-        return ReferenceDataUtil.getAllEnumeratedEntity("PaymentStatus");
+        return ReferenceDataUtil.getAllEnumeratedEntity("PaymentStatus", PaymentStatus.class);
     }
 
     @Override

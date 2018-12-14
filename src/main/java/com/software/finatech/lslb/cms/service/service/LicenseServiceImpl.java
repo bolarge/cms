@@ -242,12 +242,12 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Override
     public Mono<ResponseEntity> getAllLicenseTypes() {
-        return ReferenceDataUtil.getAllEnumeratedEntity("LicenseTypes");
+        return ReferenceDataUtil.getAllEnumeratedEntity("LicenseTypes", LicenseType.class);
     }
 
     @Override
     public Mono<ResponseEntity> getAllLicenseStatus() {
-        return ReferenceDataUtil.getAllEnumeratedEntity("LicenseStatus");
+        return ReferenceDataUtil.getAllEnumeratedEntity("LicenseStatus", LicenseStatus.class);
     }
 
     @Override

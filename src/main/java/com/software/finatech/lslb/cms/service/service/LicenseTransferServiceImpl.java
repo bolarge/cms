@@ -310,7 +310,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
 
     @Override
     public Mono<ResponseEntity> getAllLicenseTransferStatus() {
-        return getAllEnumeratedEntity("LicenseTransferStatus");
+        return getAllEnumeratedEntity("LicenseTransferStatus", LicenseTransferStatus.class);
     }
 
 
