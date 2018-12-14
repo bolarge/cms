@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.domain;
 import com.software.finatech.lslb.cms.service.dto.LicenseDto;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.RenewalFormStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
@@ -11,6 +12,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.beans.Transient;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 
@@ -34,7 +37,25 @@ public class License extends AbstractFact {
     protected String licenseTransferId;
     protected String licenseChangeReason;
     protected String oldLicenseStatusId;
+    private String renewalFormId;
+    private boolean renewalInProgress;
 
+
+    public boolean isRenewalInProgress() {
+        return renewalInProgress;
+    }
+
+    public void setRenewalInProgress(boolean renewalInProgress) {
+        this.renewalInProgress = renewalInProgress;
+    }
+
+    public String getRenewalFormId() {
+        return renewalFormId;
+    }
+
+    public void setRenewalFormId(String renewalFormId) {
+        this.renewalFormId = renewalFormId;
+    }
 
     public String getLicenseChangeReason() {
         return licenseChangeReason;
@@ -289,6 +310,8 @@ public class License extends AbstractFact {
         }
         licenseDto.setOwnerName(ownerName);
         licenseDto.setRenewalStatus(getRenewalStatus());
+        licenseDto.setRenewalFormId(getRenewalFormId());
+        licenseDto.setRenewalInProgress(isRenewalInProgress());
         return licenseDto;
     }
 

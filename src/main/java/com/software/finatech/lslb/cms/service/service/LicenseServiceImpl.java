@@ -9,7 +9,6 @@ import com.software.finatech.lslb.cms.service.dto.NotificationDto;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
-import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.*;
@@ -1171,7 +1170,7 @@ public class LicenseServiceImpl implements LicenseService {
                 return Mono.just(new ResponseEntity<>(String.format("Licence with id %s not found", licenseId), HttpStatus.BAD_REQUEST));
             }
 
-            if (license.isTerminatedLicence()){
+            if (license.isTerminatedLicence()) {
                 return Mono.just(new ResponseEntity<>("License already terminated", HttpStatus.BAD_REQUEST));
             }
 

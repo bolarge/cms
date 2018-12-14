@@ -113,6 +113,13 @@ public class RenewalFormServiceImpl implements RenewalFormService {
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             renewalFormNotificationHelperAsync.sendApprovedMailToInstitutionAdmins(renewalForm);
+
+            //changed renewal status of license after the payment
+            License license = renewalForm.getLicense();
+            if (license != null) {
+                license.setRenewalStatus("false");
+                mongoRepositoryReactive.saveOrUpdate(license);
+            }
             return Mono.just(new ResponseEntity<>("Renewal form approved successfully", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving application form", e);
@@ -240,6 +247,11 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
                     springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            //save the renewalForm to the license
+            license.setRenewalFormId(renewalForm.getId());
+            license.setRenewalInProgress(true);
+            mongoRepositoryReactive.saveOrUpdate(license);
 
             return Mono.just(new ResponseEntity<>(renewalForm.convertToDto(), HttpStatus.OK));
         } catch (Exception ex) {
@@ -474,6 +486,13 @@ public class RenewalFormServiceImpl implements RenewalFormService {
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             renewalFormNotificationHelperAsync.sendRenewalFormSubmissionMailToLSLBAdmins(renewalForm);
+
+            //set renewal license to false renewal in progress
+            License license = renewalForm.getLicense();
+            if (license != null){
+                    license.setRenewalInProgress(false);
+                    mongoRepositoryReactive.saveOrUpdate(license);
+            }
             return Mono.just(new ResponseEntity<>("Renewal Application completed successfully and now in review", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while completing application form", e);
