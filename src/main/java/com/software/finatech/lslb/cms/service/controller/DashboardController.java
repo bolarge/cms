@@ -9,7 +9,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,10 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
@@ -36,7 +38,7 @@ public class DashboardController extends BaseController {
     private static Logger logger = LoggerFactory.getLogger(DocumentController.class);
 
 
-    @RequestMapping(method = RequestMethod.GET, value = "/license-status-count-summary", params = {"licenseTypeId","gameTypeId","institutionId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/license-status-count-summary", params = {"licenseTypeId", "gameTypeId", "institutionId"})
     @ApiOperation(value = "Get all license summary count", response = LicenseStatusSummaryDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -47,54 +49,54 @@ public class DashboardController extends BaseController {
                                                   @RequestParam("gameTypeId") String gameTypeId,
                                                   @RequestParam("institutionId") String institutionId) {
 
-             Criteria criteria = new Criteria();
-            List<Criteria> filterCriteria = new ArrayList<>();
-            if (gameTypeId != null && !gameTypeId.isEmpty()) {
-                filterCriteria.add(Criteria.where("gameTypeId").is(gameTypeId));
-            }
-
-            if (institutionId != null && !institutionId.isEmpty()) {
-                filterCriteria.add(Criteria.where("institutionId").is(institutionId));
-            }
-            if (licenseTypeId != null && !licenseTypeId.isEmpty()) {
-                    filterCriteria.add(Criteria.where("licenseTypeId").is(licenseTypeId));
-            }
-
-            if (filterCriteria.size() > 0) {
-                criteria.andOperator(filterCriteria.toArray(new Criteria[filterCriteria.size()]));
-            }
-
-            Aggregation agg = Aggregation.newAggregation(
-                    Aggregation.match(criteria),
-                    Aggregation.group("licenseStatusId").count().as("licenseStatusCount"),
-                    Aggregation.project("licenseStatusCount").and("licenseStatusId").previousOperation()
-            );
-            List<LicenseStatusSummaryDto> licenseSummaryValueDtoAggregationResults = mongoTemplate.aggregate(agg, License.class, LicenseStatusSummaryDto.class).getMappedResults();
-             List<LicenseStatusSummaryDto> licenseStatusSummaryDtos = new ArrayList<>();
-
-            licenseSummaryValueDtoAggregationResults.stream().forEach(result -> {
-
-                LicenseStatusSummaryDto licenseStatusSummaryDto = new LicenseStatusSummaryDto();
-                LicenseStatus licenseStatus=getLicenseStatus(result.getLicenseStatusId());
-                licenseStatusSummaryDto.setLicenseStatus(licenseStatus.getName());
-                licenseStatusSummaryDto.setLicenseStatusId(result.getLicenseStatusId());
-                licenseStatusSummaryDto.setLicenseStatusCount(result.getLicenseStatusCount());
-                licenseStatusSummaryDtos.add(licenseStatusSummaryDto);
-            });
-            return Mono.just(new ResponseEntity<>(licenseStatusSummaryDtos, HttpStatus.OK));
-
+        Criteria criteria = new Criteria();
+        List<Criteria> filterCriteria = new ArrayList<>();
+        if (gameTypeId != null && !gameTypeId.isEmpty()) {
+            filterCriteria.add(Criteria.where("gameTypeId").is(gameTypeId));
         }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/loggedcases-summary", params={"institutionId","gameTypeId","licenseTypeId"})
+        if (institutionId != null && !institutionId.isEmpty()) {
+            filterCriteria.add(Criteria.where("institutionId").is(institutionId));
+        }
+        if (licenseTypeId != null && !licenseTypeId.isEmpty()) {
+            filterCriteria.add(Criteria.where("licenseTypeId").is(licenseTypeId));
+        }
+
+        if (filterCriteria.size() > 0) {
+            criteria.andOperator(filterCriteria.toArray(new Criteria[filterCriteria.size()]));
+        }
+
+        Aggregation agg = Aggregation.newAggregation(
+                Aggregation.match(criteria),
+                Aggregation.group("licenseStatusId").count().as("licenseStatusCount"),
+                Aggregation.project("licenseStatusCount").and("licenseStatusId").previousOperation()
+        );
+        List<LicenseStatusSummaryDto> licenseSummaryValueDtoAggregationResults = mongoTemplate.aggregate(agg, License.class, LicenseStatusSummaryDto.class).getMappedResults();
+        List<LicenseStatusSummaryDto> licenseStatusSummaryDtos = new ArrayList<>();
+
+        licenseSummaryValueDtoAggregationResults.stream().forEach(result -> {
+
+            LicenseStatusSummaryDto licenseStatusSummaryDto = new LicenseStatusSummaryDto();
+            LicenseStatus licenseStatus = getLicenseStatus(result.getLicenseStatusId());
+            licenseStatusSummaryDto.setLicenseStatus(licenseStatus.getName());
+            licenseStatusSummaryDto.setLicenseStatusId(result.getLicenseStatusId());
+            licenseStatusSummaryDto.setLicenseStatusCount(result.getLicenseStatusCount());
+            licenseStatusSummaryDtos.add(licenseStatusSummaryDto);
+        });
+        return Mono.just(new ResponseEntity<>(licenseStatusSummaryDtos, HttpStatus.OK));
+
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/loggedcases-summary", params = {"institutionId", "gameTypeId", "licenseTypeId"})
     @ApiOperation(value = "Get dashboard Logged Cases summary ", response = CasesDashboardStatusCountDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getAllCasesSummary(@RequestParam("institutionId")String institutionId,
-                                                   @RequestParam("gameTypeId")String gameTypeId,
-                                                   @RequestParam("licenseTypeId")String licenseTypeId) {
+    public Mono<ResponseEntity> getAllCasesSummary(@RequestParam("institutionId") String institutionId,
+                                                   @RequestParam("gameTypeId") String gameTypeId,
+                                                   @RequestParam("licenseTypeId") String licenseTypeId) {
 
         Criteria criteria = new Criteria();
         List<Criteria> filterCriteria = new ArrayList<>();
@@ -115,27 +117,27 @@ public class DashboardController extends BaseController {
 
         Aggregation agg = Aggregation.newAggregation(
                 Aggregation.match(criteria),
-                 Aggregation.group("loggedCaseStatusId").count().as("loggedStatusCount"),
+                Aggregation.group("loggedCaseStatusId").count().as("loggedStatusCount"),
                 Aggregation.project("loggedStatusCount").and("loggedCaseStatusId").previousOperation()
 
         );
         List<DashboardLoggedCaseStatusDto> dashboardLoggedCaseStatusDtos = mongoTemplate.aggregate(agg, LoggedCase.class, DashboardLoggedCaseStatusDto.class).getMappedResults();
         CasesDashboardStatusCountDto casesDashboardStatusCountDto = new CasesDashboardStatusCountDto();
 
-        dashboardLoggedCaseStatusDtos.stream().forEach(result->{
+        dashboardLoggedCaseStatusDtos.stream().forEach(result -> {
 
-            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.OPEN_ID)){
-                casesDashboardStatusCountDto.setOpenedCount(result==null?0:result.getLoggedStatusCount());
+            if (result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.OPEN_ID)) {
+                casesDashboardStatusCountDto.setOpenedCount(result == null ? 0 : result.getLoggedStatusCount());
                 casesDashboardStatusCountDto.setOpenedStatusId(LoggedCaseStatusReferenceData.OPEN_ID);
             }
-            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.CLOSED_ID)){
-                casesDashboardStatusCountDto.setClosedCount(result==null?0:result.getLoggedStatusCount());
+            if (result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.CLOSED_ID)) {
+                casesDashboardStatusCountDto.setClosedCount(result == null ? 0 : result.getLoggedStatusCount());
                 casesDashboardStatusCountDto.setClosedStatusId(LoggedCaseStatusReferenceData.CLOSED_ID);
 
             }
 
-            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.PENDING_ID)){
-                casesDashboardStatusCountDto.setPendingCount(result==null?0:result.getLoggedStatusCount());
+            if (result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.PENDING_ID)) {
+                casesDashboardStatusCountDto.setPendingCount(result == null ? 0 : result.getLoggedStatusCount());
                 casesDashboardStatusCountDto.setPendingStatusId(LoggedCaseStatusReferenceData.PENDING_ID);
 
             }
@@ -143,13 +145,14 @@ public class DashboardController extends BaseController {
         });
         Query query = new Query();
         query.addCriteria(criteria);
-        long totalCount=mongoRepositoryReactive.count(query, LoggedCase.class).block();
+        long totalCount = mongoRepositoryReactive.count(query, LoggedCase.class).block();
         casesDashboardStatusCountDto.setTotalCount(totalCount);
 
         return Mono.just(new ResponseEntity<>(casesDashboardStatusCountDto, HttpStatus.OK));
 
     }
-    @RequestMapping(method = RequestMethod.GET, value = "/dashboard-summary", params = {"institutionId","gameTypeId"})
+
+    @RequestMapping(method = RequestMethod.GET, value = "/dashboard-summary", params = {"institutionId", "gameTypeId"})
     @ApiOperation(value = "Get all dashboard summary count", response = DashboardSummaryDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -157,19 +160,20 @@ public class DashboardController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getDashBoardSummary(@RequestParam("institutionId") String institutionId,
-                                                  @RequestParam("gameTypeId") String gameTypeId) {
+                                                    @RequestParam("gameTypeId") String gameTypeId) {
         Query query = new Query();
         Query queryTerminal = new Query();
         Query queryMachine = new Query();
         Query queryCasesTotalCount = new Query();
         Query queryAgentTotalCount = new Query();
-        if(!StringUtils.isEmpty(gameTypeId)){
+        if (!StringUtils.isEmpty(gameTypeId)) {
             query.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
-            queryMachine.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
-            queryTerminal.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
+            queryMachine.addCriteria(Criteria.where("gameTypeIds").in(Collections.singletonList(gameTypeId)));
+            queryTerminal.addCriteria(Criteria.where("gameTypeIds").in(Collections.singletonList(gameTypeId)));
             queryAgentTotalCount.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
             queryCasesTotalCount.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
-        }if(!StringUtils.isEmpty(institutionId)){
+        }
+        if (!StringUtils.isEmpty(institutionId)) {
             query.addCriteria(Criteria.where("id").is(institutionId));
             queryMachine.addCriteria(Criteria.where("institutionId").is(institutionId));
             queryTerminal.addCriteria(Criteria.where("institutionId").is(institutionId));
@@ -178,13 +182,13 @@ public class DashboardController extends BaseController {
         }
         queryMachine.addCriteria(Criteria.where("machineTypeId").is(MachineTypeReferenceData.GAMING_MACHINE_ID));
         queryTerminal.addCriteria(Criteria.where("machineTypeId").is(MachineTypeReferenceData.GAMING_TERMINAL_ID));
-        long institutionTotalCount=mongoRepositoryReactive.count(query, Institution.class).block();
+        long institutionTotalCount = mongoRepositoryReactive.count(query, Institution.class).block();
 
-        long gamingMachineTotalCount=mongoRepositoryReactive.count(queryMachine, Machine.class).block();
-        long gamingTerminalTotalCount=mongoRepositoryReactive.count(queryTerminal, Machine.class).block();
+        long gamingMachineTotalCount = mongoRepositoryReactive.count(queryMachine, Machine.class).block();
+        long gamingTerminalTotalCount = mongoRepositoryReactive.count(queryTerminal, Machine.class).block();
 
-        long agentTotalCount=mongoRepositoryReactive.count(queryAgentTotalCount, Agent.class).block();
-        long casesTotalCount=mongoRepositoryReactive.count(queryCasesTotalCount, LoggedCase.class).block();
+        long agentTotalCount = mongoRepositoryReactive.count(queryAgentTotalCount, Agent.class).block();
+        long casesTotalCount = mongoRepositoryReactive.count(queryCasesTotalCount, LoggedCase.class).block();
 
         // long gamingTerminalTotalCount=mongoRepositoryReactive.count(query, GamingTerminal.class).block();
         DashboardSummaryDto dashboardSummaryDto = new DashboardSummaryDto();
@@ -198,6 +202,7 @@ public class DashboardController extends BaseController {
         return Mono.just(new ResponseEntity<>(dashboardSummaryDto, HttpStatus.OK));
 
     }
+
     public LicenseStatus getLicenseStatus(String licenseStatusId) {
 
         Map licenseStatusMap = Mapstore.STORE.get("LicenseStatus");
@@ -214,7 +219,7 @@ public class DashboardController extends BaseController {
         return licenseStatus;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/payment-summary", params = {"institutionId","licenseTypeId","gameTypeId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/payment-summary", params = {"institutionId", "licenseTypeId", "gameTypeId"})
     @ApiOperation(value = "Get dashboard payment summary ", response = PaymentRecordDashboardSummaryStatusDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -225,7 +230,7 @@ public class DashboardController extends BaseController {
                                                   @RequestParam("gameTypeId") String gameTypeId,
                                                   @RequestParam("institutionId") String institutionId) {
 
-       Criteria criteria = new Criteria();
+        Criteria criteria = new Criteria();
         List<Criteria> filterCriteria = new ArrayList<>();
         if (gameTypeId != null && !gameTypeId.isEmpty()) {
             filterCriteria.add(Criteria.where("gameTypeId").is(gameTypeId));
@@ -245,34 +250,34 @@ public class DashboardController extends BaseController {
         Aggregation agg = Aggregation.newAggregation(
                 Aggregation.match(criteria),
                 Aggregation.group("paymentStatusId").count().as("paymentStatusCount")
-                .sum("amountPaid").as("paymentTotalSum")
-                .sum("amountOutstanding").as("paymentOutstandingTotalSum"),
-                Aggregation.project("paymentStatusCount","paymentTotalSum","paymentOutstandingTotalSum").and("paymentStatusId").previousOperation()
+                        .sum("amountPaid").as("paymentTotalSum")
+                        .sum("amountOutstanding").as("paymentOutstandingTotalSum"),
+                Aggregation.project("paymentStatusCount", "paymentTotalSum", "paymentOutstandingTotalSum").and("paymentStatusId").previousOperation()
 
         );
         List<PaymentRecordStatusDto> paymentRecordStatusDtoAggregationResults = mongoTemplate.aggregate(agg, PaymentRecord.class, PaymentRecordStatusDto.class).getMappedResults();
         PaymentRecordDashboardSummaryStatusDto paymentRecordDashboardSummaryStatusDto = new PaymentRecordDashboardSummaryStatusDto();
 
-        paymentRecordStatusDtoAggregationResults.stream().forEach(result->{
+        paymentRecordStatusDtoAggregationResults.stream().forEach(result -> {
 
-            if(result.getPaymentStatusId().equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID)){
+            if (result.getPaymentStatusId().equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID)) {
                 paymentRecordDashboardSummaryStatusDto.setFullPaymentTotalAmount(
-                        result==null?0.00: result.getPaymentTotalSum());
+                        result == null ? 0.00 : result.getPaymentTotalSum());
                 paymentRecordDashboardSummaryStatusDto.setFullPaymentTotalCount(
-                        result==null?0: result.getPaymentStatusCount());
+                        result == null ? 0 : result.getPaymentStatusCount());
             }
-            if(result.getPaymentStatusId().equals(PaymentStatusReferenceData.PARTIALLY_PAID_STATUS_ID)){
+            if (result.getPaymentStatusId().equals(PaymentStatusReferenceData.PARTIALLY_PAID_STATUS_ID)) {
                 paymentRecordDashboardSummaryStatusDto.setPartPaymentTotalAmount(
-                        result==null?0.00: result.getPaymentTotalSum());
+                        result == null ? 0.00 : result.getPaymentTotalSum());
                 paymentRecordDashboardSummaryStatusDto.setPartPaymentTotalCount(
-                        result==null?0:result.getPaymentStatusCount());
+                        result == null ? 0 : result.getPaymentStatusCount());
             }
 
-            if(result.getPaymentStatusId().equals(PaymentStatusReferenceData.UNPAID_STATUS_ID)){
+            if (result.getPaymentStatusId().equals(PaymentStatusReferenceData.UNPAID_STATUS_ID)) {
                 paymentRecordDashboardSummaryStatusDto.setUnPaidTotalAmount(
-                        result==null?0.00: result.getPaymentOutstandingTotalSum());
+                        result == null ? 0.00 : result.getPaymentOutstandingTotalSum());
                 paymentRecordDashboardSummaryStatusDto.setUnPaidTotalCount(
-                        result==null?0:result.getPaymentStatusCount());
+                        result == null ? 0 : result.getPaymentStatusCount());
             }
         });
 
@@ -281,22 +286,23 @@ public class DashboardController extends BaseController {
         return Mono.just(new ResponseEntity<>(paymentRecordDashboardSummaryStatusDto, HttpStatus.OK));
 
     }
-    @RequestMapping(method = RequestMethod.GET, value = "/institution-summary", params={"institutionId"})
+
+    @RequestMapping(method = RequestMethod.GET, value = "/institution-summary", params = {"institutionId"})
     @ApiOperation(value = "Get operator summary ", response = InstitutionDashboardSummaryDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getInstitutionSummary(@RequestParam ("institutionId") String institutionId) {
-       Query queryLicense= new Query();
-       queryLicense.addCriteria(Criteria.where("institutionId").is(institutionId));
-        Sort sort = new Sort(Sort.Direction.DESC,"expiryDate");
+    public Mono<ResponseEntity> getInstitutionSummary(@RequestParam("institutionId") String institutionId) {
+        Query queryLicense = new Query();
+        queryLicense.addCriteria(Criteria.where("institutionId").is(institutionId));
+        Sort sort = new Sort(Sort.Direction.DESC, "expiryDate");
         queryLicense.with(sort);
-        Map<String, InstitutionDashboardSummaryDto> institutionDashboardSummaryDtoHashMap= new HashMap<>();
+        Map<String, InstitutionDashboardSummaryDto> institutionDashboardSummaryDtoHashMap = new HashMap<>();
 
         List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicense, License.class).toStream().collect(Collectors.toList());
-         if (licenses.size() == 0) {
+        if (licenses.size() == 0) {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
 
         }
@@ -305,7 +311,7 @@ public class DashboardController extends BaseController {
                 InstitutionDashboardSummaryDto institutionDashboardSummaryDto = new InstitutionDashboardSummaryDto();
 
                 institutionDashboardSummaryDto.setInstitutionId(institutionId);
-                if(!StringUtils.isEmpty(license.getRenewalStatus())){
+                if (!StringUtils.isEmpty(license.getRenewalStatus())) {
                     institutionDashboardSummaryDto.setRenewalStatus(license.getRenewalStatus());
                 }
                 institutionDashboardSummaryDto.setLicenseId(license.getId());
@@ -327,7 +333,7 @@ public class DashboardController extends BaseController {
 
             }
         }
-        if(institutionDashboardSummaryDtoHashMap.values().size()==0){
+        if (institutionDashboardSummaryDtoHashMap.values().size() == 0) {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
         }
 
@@ -335,8 +341,7 @@ public class DashboardController extends BaseController {
     }
 
 
-
-    @RequestMapping(method = RequestMethod.GET, value = "/machine-summary", params={"institutionId","type","gameTypeId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/machine-summary", params = {"institutionId", "type", "gameTypeId"})
     @ApiOperation(value = "Get operator Machine summary ", response = DashboardMachineStatusCountDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -344,9 +349,9 @@ public class DashboardController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getGamingMachineSummary(
-            @RequestParam ("institutionId") String institutionId,
-            @RequestParam ("type") String type,
-            @RequestParam ("gameTypeId") String gameTypeId) {
+            @RequestParam("institutionId") String institutionId,
+            @RequestParam("type") String type,
+            @RequestParam("gameTypeId") String gameTypeId) {
 
         try {
                /*  statusList.addAll(Arrays.asList(
@@ -354,62 +359,69 @@ public class DashboardController extends BaseController {
                         MachineStatusReferenceData.IN_ACTIVE_ID,
                         MachineStatusReferenceData.FAULTY_ID,
                         MachineStatusReferenceData.STOLEN_ID));*/
-                DashboardMachineStatusCountDto dashboardMachineStatusCountDto= new DashboardMachineStatusCountDto();
-               // Map<String,Long> statusCountMap= new HashMap<>();
-                     Criteria criteria = new Criteria();
-                    List<Criteria> filterCriteria = new ArrayList<>();
+            DashboardMachineStatusCountDto dashboardMachineStatusCountDto = new DashboardMachineStatusCountDto();
+            // Map<String,Long> statusCountMap= new HashMap<>();
+            Criteria criteria = new Criteria();
+            List<Criteria> filterCriteria = new ArrayList<>();
 
 
-                    if (!StringUtils.isEmpty(institutionId)) {
-                        filterCriteria.add(Criteria.where("institutionId").is(institutionId));
-                    }
-                    if (!StringUtils.isEmpty(gameTypeId)) {
-                        filterCriteria.add(Criteria.where("gameTypeId").is(gameTypeId));
-                    }
-
-                    if (type.equalsIgnoreCase("machine")) {
-                        filterCriteria.add(Criteria.where("machineTypeId").is(MachineTypeReferenceData.GAMING_MACHINE_ID));
-                    }else if (type.equalsIgnoreCase("terminal")) {
-                        filterCriteria.add(Criteria.where("machineTypeId").is(MachineTypeReferenceData.GAMING_TERMINAL_ID));
-                    }
-            if (filterCriteria.size() > 0) {
-                criteria.andOperator(filterCriteria.toArray(new Criteria[filterCriteria.size()]));
+            if (!StringUtils.isEmpty(institutionId)) {
+                criteria = criteria.and("institutionId").is(institutionId);
+                // filterCriteria.add(Criteria.where("institutionId").is(institutionId));
             }
-                    Aggregation sumStatusCount = Aggregation.newAggregation(
-                            Aggregation.match(criteria),
-                            Aggregation.group("machineStatusId").count().as("machineStatusCount"),
-                            Aggregation.project("machineStatusCount").and("machineStatusId").previousOperation()
-                    );
+            if (!StringUtils.isEmpty(gameTypeId)) {
+                criteria = criteria.and("gameTypeId").is(gameTypeId);
+                //                  filterCriteria.add(Criteria.where("gameTypeId").is(gameTypeId));
+            }
 
-                    List<DashboardMachineStatusDto> statusCountValue = mongoTemplate.aggregate(sumStatusCount, Machine.class, DashboardMachineStatusDto.class).getMappedResults();
-                    statusCountValue.stream().forEach(statusCount->{
-                        if(statusCount.getMachineStatusId().equals(MachineStatusReferenceData.ACTIVE_ID)){
-                            dashboardMachineStatusCountDto.setActiveCount(statusCount.getMachineStatusCount());
-                            dashboardMachineStatusCountDto.setActiveStatusId(MachineStatusReferenceData.ACTIVE_ID);
+            if (type.equalsIgnoreCase("machine")) {
+                criteria = criteria.and("machineTypeId").is(MachineTypeReferenceData.GAMING_MACHINE_ID);
+                //  filterCriteria.add(Criteria.where("machineTypeId").is(MachineTypeReferenceData.GAMING_MACHINE_ID));
+            } else if (type.equalsIgnoreCase("terminal")) {
+                criteria = criteria.and("machineTypeId").is(MachineTypeReferenceData.GAMING_TERMINAL_ID);
+                // filterCriteria.add(Criteria.where("machineTypeId").is(MachineTypeReferenceData.GAMING_TERMINAL_ID));
+            }
+            if (filterCriteria.size() > 0) {
+                // criteria.andOperator(filterCriteria.toArray(new Criteria[filterCriteria.size()]));
+            }
+            Aggregation sumStatusCount = Aggregation.newAggregation(
+                    Aggregation.match(criteria),
+                    Aggregation.group("machineStatusId").count().as("machineStatusCount"),
+                    Aggregation.project("machineStatusCount").and("machineStatusId").previousOperation()
+            );
 
-                        }if(statusCount.getMachineStatusId().equals(MachineStatusReferenceData.IN_ACTIVE_ID)){
-                            dashboardMachineStatusCountDto.setInactiveCount(statusCount.getMachineStatusCount());
-                            dashboardMachineStatusCountDto.setInactiveStatusId(MachineStatusReferenceData.IN_ACTIVE_ID);
+            List<DashboardMachineStatusDto> statusCountValue = mongoTemplate.aggregate(sumStatusCount, Machine.class, DashboardMachineStatusDto.class).getMappedResults();
+            statusCountValue.forEach(statusCount -> {
+                if (statusCount.getMachineStatusId().equals(MachineStatusReferenceData.ACTIVE_ID)) {
+                    dashboardMachineStatusCountDto.setActiveCount(statusCount.getMachineStatusCount());
+                    dashboardMachineStatusCountDto.setActiveStatusId(MachineStatusReferenceData.ACTIVE_ID);
 
-                        }if(statusCount.getMachineStatusId().equals(MachineStatusReferenceData.FAULTY_ID)){
-                            dashboardMachineStatusCountDto.setFaultyCount(statusCount.getMachineStatusCount());
-                            dashboardMachineStatusCountDto.setFaultyStatusId(MachineStatusReferenceData.FAULTY_ID);
+                }
+                if (statusCount.getMachineStatusId().equals(MachineStatusReferenceData.IN_ACTIVE_ID)) {
+                    dashboardMachineStatusCountDto.setInactiveCount(statusCount.getMachineStatusCount());
+                    dashboardMachineStatusCountDto.setInactiveStatusId(MachineStatusReferenceData.IN_ACTIVE_ID);
 
-                        }if(statusCount.getMachineStatusId().equals(MachineStatusReferenceData.STOLEN_ID)){
-                            dashboardMachineStatusCountDto.setStolenCount(statusCount.getMachineStatusCount());
-                            dashboardMachineStatusCountDto.setStolenStatusId(MachineStatusReferenceData.STOLEN_ID);
+                }
+                if (statusCount.getMachineStatusId().equals(MachineStatusReferenceData.FAULTY_ID)) {
+                    dashboardMachineStatusCountDto.setFaultyCount(statusCount.getMachineStatusCount());
+                    dashboardMachineStatusCountDto.setFaultyStatusId(MachineStatusReferenceData.FAULTY_ID);
 
-                        }
-                    });
+                }
+                if (statusCount.getMachineStatusId().equals(MachineStatusReferenceData.STOLEN_ID)) {
+                    dashboardMachineStatusCountDto.setStolenCount(statusCount.getMachineStatusCount());
+                    dashboardMachineStatusCountDto.setStolenStatusId(MachineStatusReferenceData.STOLEN_ID);
 
-                return Mono.just(new ResponseEntity(dashboardMachineStatusCountDto, HttpStatus.OK));
-        }catch (Exception e) {
+                }
+            });
+
+            return Mono.just(new ResponseEntity(dashboardMachineStatusCountDto, HttpStatus.OK));
+        } catch (Exception e) {
             e.printStackTrace();
-            return  null;
+            return null;
         }
-        }
+    }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/institution-agents-status-summary", params={"institutionId","gameTypeId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/institution-agents-status-summary", params = {"institutionId", "gameTypeId"})
     @ApiOperation(value = "Get operator Agent status summary ", response = DashboardAgentStatusCountDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -417,51 +429,53 @@ public class DashboardController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getInstitutionAgentSummary(
-            @RequestParam ("institutionId") String institutionId,@RequestParam ("gameTypeId") String gameTypeId) {
+            @RequestParam("institutionId") String institutionId, @RequestParam("gameTypeId") String gameTypeId) {
 
         try {
-             DashboardAgentStatusCountDto dashboardAgentStatusCountDto= new DashboardAgentStatusCountDto();
-                 Criteria criteria = new Criteria();
-                List<Criteria> filterCriteria = new ArrayList<>();
+            DashboardAgentStatusCountDto dashboardAgentStatusCountDto = new DashboardAgentStatusCountDto();
+            Criteria criteria = new Criteria();
+            List<Criteria> filterCriteria = new ArrayList<>();
 
-                if (!StringUtils.isEmpty(institutionId)) {
-                    filterCriteria.add(Criteria.where("institutionId").in(institutionId));
-                }
+            if (!StringUtils.isEmpty(institutionId)) {
+                filterCriteria.add(Criteria.where("institutionId").in(institutionId));
+            }
             if (!StringUtils.isEmpty(gameTypeId)) {
                 filterCriteria.add(Criteria.where("gameTypeId").in(gameTypeId));
             }
             if (filterCriteria.size() > 0) {
                 criteria.andOperator(filterCriteria.toArray(new Criteria[filterCriteria.size()]));
             }
-                Aggregation sumStatusCount = Aggregation.newAggregation(
-                        Aggregation.match(criteria),
-                        Aggregation.group("agentStatusId").count().as("agentStatusCount"),
-                        Aggregation.project("agentStatusCount").and("agentStatusId").previousOperation()
-                );
+            Aggregation sumStatusCount = Aggregation.newAggregation(
+                    Aggregation.match(criteria),
+                    Aggregation.group("agentStatusId").count().as("agentStatusCount"),
+                    Aggregation.project("agentStatusCount").and("agentStatusId").previousOperation()
+            );
 
             List<DashboardAgentStatusDto> statusCountValue = mongoTemplate.aggregate(sumStatusCount, Agent.class, DashboardAgentStatusDto.class).getMappedResults();
-              statusCountValue.stream().forEach(statusCount->{
-                  if(statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.ACTIVE_ID)){
-                      dashboardAgentStatusCountDto.setActiveCount(statusCount.getAgentStatusCount());
-                      dashboardAgentStatusCountDto.setActiveStatusId(AgentStatusReferenceData.ACTIVE_ID);
-                  } if(statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.IN_ACTIVE_ID)){
-                      dashboardAgentStatusCountDto.setInactiveCount(statusCount.getAgentStatusCount());
-                      dashboardAgentStatusCountDto.setInactiveStatusId(AgentStatusReferenceData.IN_ACTIVE_ID);
+            statusCountValue.stream().forEach(statusCount -> {
+                if (statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.ACTIVE_ID)) {
+                    dashboardAgentStatusCountDto.setActiveCount(statusCount.getAgentStatusCount());
+                    dashboardAgentStatusCountDto.setActiveStatusId(AgentStatusReferenceData.ACTIVE_ID);
+                }
+                if (statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.IN_ACTIVE_ID)) {
+                    dashboardAgentStatusCountDto.setInactiveCount(statusCount.getAgentStatusCount());
+                    dashboardAgentStatusCountDto.setInactiveStatusId(AgentStatusReferenceData.IN_ACTIVE_ID);
 
-                  } if(statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.BLACK_LISTED_ID)){
-                      dashboardAgentStatusCountDto.setBlackListCount(statusCount.getAgentStatusCount());
-                      dashboardAgentStatusCountDto.setBlackListStatusId(AgentStatusReferenceData.BLACK_LISTED_ID);
+                }
+                if (statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.BLACK_LISTED_ID)) {
+                    dashboardAgentStatusCountDto.setBlackListCount(statusCount.getAgentStatusCount());
+                    dashboardAgentStatusCountDto.setBlackListStatusId(AgentStatusReferenceData.BLACK_LISTED_ID);
 
-                  }
+                }
 
-              });
+            });
 
-           //  dashboardMachineStatusCountDto.setStolenCount(statusCountMap.get(MachineStatusReferenceData.STOLEN_ID));
+            //  dashboardMachineStatusCountDto.setStolenCount(statusCountMap.get(MachineStatusReferenceData.STOLEN_ID));
 
             return Mono.just(new ResponseEntity(dashboardAgentStatusCountDto, HttpStatus.OK));
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            return  null;
+            return null;
         }
     }
 
@@ -481,23 +495,26 @@ public class DashboardController extends BaseController {
         }
         return gameType;
     }
+
     public Institution getInstitution(String institutionId) {
 
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
-    public long getAgentCountForInstitution(String institutionId){
+
+    public long getAgentCountForInstitution(String institutionId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionIds").in(institutionId));
         return mongoRepositoryReactive.count(query, Agent.class).block();
     }
-    public long getGamingMachineCountForInstitution(String institutionId){
+
+    public long getGamingMachineCountForInstitution(String institutionId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").in(institutionId));
         query.addCriteria(Criteria.where("machineTypeId").in(MachineTypeReferenceData.GAMING_MACHINE_ID));
         return mongoRepositoryReactive.count(query, Machine.class).block();
     }
 
-    public long getGamingTerminalCountForInstitution(String institutionId){
+    public long getGamingTerminalCountForInstitution(String institutionId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").in(institutionId));
         query.addCriteria(Criteria.where("machineTypeId").in(MachineTypeReferenceData.GAMING_TERMINAL_ID));
@@ -533,26 +550,26 @@ public class DashboardController extends BaseController {
         List<PaymentRecordStatusDto> paymentRecordStatusDtoAggregationResults = mongoTemplate.aggregate(agg, PaymentRecord.class, PaymentRecordStatusDto.class).getMappedResults();
         PaymentRecordDashboardStatusCountDto paymentRecordDashboardStatusCountDto = new PaymentRecordDashboardStatusCountDto();
 
-        paymentRecordStatusDtoAggregationResults.stream().forEach(result->{
+        paymentRecordStatusDtoAggregationResults.stream().forEach(result -> {
 
-            if(result.getPaymentStatusId().equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID)){
+            if (result.getPaymentStatusId().equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID)) {
                 paymentRecordDashboardStatusCountDto.setFullPaymentTotalCount(
-                        result==null?0: result.getPaymentStatusCount());
+                        result == null ? 0 : result.getPaymentStatusCount());
             }
-            if(result.getPaymentStatusId().equals(PaymentStatusReferenceData.PARTIALLY_PAID_STATUS_ID)){
+            if (result.getPaymentStatusId().equals(PaymentStatusReferenceData.PARTIALLY_PAID_STATUS_ID)) {
                 paymentRecordDashboardStatusCountDto.setPartPaymentTotalCount(
-                        result==null?0:result.getPaymentStatusCount());
+                        result == null ? 0 : result.getPaymentStatusCount());
             }
 
-            if(result.getPaymentStatusId().equals(PaymentStatusReferenceData.UNPAID_STATUS_ID)){
+            if (result.getPaymentStatusId().equals(PaymentStatusReferenceData.UNPAID_STATUS_ID)) {
                 paymentRecordDashboardStatusCountDto.setUnPaidTotalCount(
-                        result==null?0:result.getPaymentStatusCount());
+                        result == null ? 0 : result.getPaymentStatusCount());
             }
 
         });
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
-        long totalCount=mongoRepositoryReactive.count(query, PaymentRecord.class).block();
+        long totalCount = mongoRepositoryReactive.count(query, PaymentRecord.class).block();
         paymentRecordDashboardStatusCountDto.setTotalInvoices(totalCount);
 
         return Mono.just(new ResponseEntity<>(paymentRecordDashboardStatusCountDto, HttpStatus.OK));
@@ -589,26 +606,26 @@ public class DashboardController extends BaseController {
         List<DashboardLoggedCaseStatusDto> dashboardLoggedCaseStatusDtos = mongoTemplate.aggregate(agg, LoggedCase.class, DashboardLoggedCaseStatusDto.class).getMappedResults();
         CasesDashboardStatusCountDto casesDashboardStatusCountDto = new CasesDashboardStatusCountDto();
 
-        dashboardLoggedCaseStatusDtos.stream().forEach(result->{
+        dashboardLoggedCaseStatusDtos.stream().forEach(result -> {
 
-            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.OPEN_ID)){
-                casesDashboardStatusCountDto.setOpenedCount(result==null?0:result.getLoggedStatusCount());
+            if (result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.OPEN_ID)) {
+                casesDashboardStatusCountDto.setOpenedCount(result == null ? 0 : result.getLoggedStatusCount());
                 casesDashboardStatusCountDto.setOpenedStatusId(LoggedCaseStatusReferenceData.OPEN_ID);
             }
-            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.CLOSED_ID)){
-                casesDashboardStatusCountDto.setClosedCount(result==null?0:result.getLoggedStatusCount());
+            if (result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.CLOSED_ID)) {
+                casesDashboardStatusCountDto.setClosedCount(result == null ? 0 : result.getLoggedStatusCount());
                 casesDashboardStatusCountDto.setClosedStatusId(LoggedCaseStatusReferenceData.CLOSED_ID);
             }
 
-            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.PENDING_ID)){
-                casesDashboardStatusCountDto.setPendingCount(result==null?0:result.getLoggedStatusCount());
+            if (result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.PENDING_ID)) {
+                casesDashboardStatusCountDto.setPendingCount(result == null ? 0 : result.getLoggedStatusCount());
                 casesDashboardStatusCountDto.setPendingStatusId(LoggedCaseStatusReferenceData.PENDING_ID);
             }
 
         });
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
-        long totalCount=mongoRepositoryReactive.count(query, LoggedCase.class).block();
+        long totalCount = mongoRepositoryReactive.count(query, LoggedCase.class).block();
         casesDashboardStatusCountDto.setTotalCount(totalCount);
 
         return Mono.just(new ResponseEntity<>(casesDashboardStatusCountDto, HttpStatus.OK));
@@ -646,27 +663,27 @@ public class DashboardController extends BaseController {
         List<DashboardLoggedCaseStatusDto> dashboardLoggedCaseStatusDtos = mongoTemplate.aggregate(agg, LoggedCase.class, DashboardLoggedCaseStatusDto.class).getMappedResults();
         CasesDashboardStatusCountDto casesDashboardStatusCountDto = new CasesDashboardStatusCountDto();
 
-        dashboardLoggedCaseStatusDtos.stream().forEach(result->{
+        dashboardLoggedCaseStatusDtos.stream().forEach(result -> {
 
 
-            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.OPEN_ID)){
-                casesDashboardStatusCountDto.setOpenedCount(result==null?0:result.getLoggedStatusCount());
+            if (result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.OPEN_ID)) {
+                casesDashboardStatusCountDto.setOpenedCount(result == null ? 0 : result.getLoggedStatusCount());
                 casesDashboardStatusCountDto.setOpenedStatusId(LoggedCaseStatusReferenceData.OPEN_ID);
             }
-            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.CLOSED_ID)){
-                casesDashboardStatusCountDto.setClosedCount(result==null?0:result.getLoggedStatusCount());
+            if (result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.CLOSED_ID)) {
+                casesDashboardStatusCountDto.setClosedCount(result == null ? 0 : result.getLoggedStatusCount());
                 casesDashboardStatusCountDto.setClosedStatusId(LoggedCaseStatusReferenceData.CLOSED_ID);
             }
 
-            if(result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.PENDING_ID)){
-                casesDashboardStatusCountDto.setPendingCount(result==null?0:result.getLoggedStatusCount());
+            if (result.getLoggedCaseStatusId().equals(LoggedCaseStatusReferenceData.PENDING_ID)) {
+                casesDashboardStatusCountDto.setPendingCount(result == null ? 0 : result.getLoggedStatusCount());
                 casesDashboardStatusCountDto.setPendingStatusId(LoggedCaseStatusReferenceData.PENDING_ID);
             }
 
         });
         Query query = new Query();
         query.addCriteria(Criteria.where("agentId").is(agentId));
-        long totalCount=mongoRepositoryReactive.count(query, LoggedCase.class).block();
+        long totalCount = mongoRepositoryReactive.count(query, LoggedCase.class).block();
         casesDashboardStatusCountDto.setTotalCount(totalCount);
 
         return Mono.just(new ResponseEntity<>(casesDashboardStatusCountDto, HttpStatus.OK));
@@ -702,45 +719,45 @@ public class DashboardController extends BaseController {
         List<PaymentRecordStatusDto> paymentRecordStatusDtoAggregationResults = mongoTemplate.aggregate(agg, PaymentRecord.class, PaymentRecordStatusDto.class).getMappedResults();
         PaymentRecordDashboardStatusCountDto paymentRecordDashboardStatusCountDto = new PaymentRecordDashboardStatusCountDto();
 
-        paymentRecordStatusDtoAggregationResults.stream().forEach(result->{
+        paymentRecordStatusDtoAggregationResults.stream().forEach(result -> {
 
-            if(result.getPaymentStatusId().equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID)){
+            if (result.getPaymentStatusId().equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID)) {
                 paymentRecordDashboardStatusCountDto.setFullPaymentTotalCount(
-                        result==null?0: result.getPaymentStatusCount());
+                        result == null ? 0 : result.getPaymentStatusCount());
             }
-            if(result.getPaymentStatusId().equals(PaymentStatusReferenceData.PARTIALLY_PAID_STATUS_ID)){
+            if (result.getPaymentStatusId().equals(PaymentStatusReferenceData.PARTIALLY_PAID_STATUS_ID)) {
                 paymentRecordDashboardStatusCountDto.setPartPaymentTotalCount(
-                        result==null?0:result.getPaymentStatusCount());
+                        result == null ? 0 : result.getPaymentStatusCount());
             }
 
-            if(result.getPaymentStatusId().equals(PaymentStatusReferenceData.UNPAID_STATUS_ID)){
+            if (result.getPaymentStatusId().equals(PaymentStatusReferenceData.UNPAID_STATUS_ID)) {
                 paymentRecordDashboardStatusCountDto.setUnPaidTotalCount(
-                        result==null?0:result.getPaymentStatusCount());
+                        result == null ? 0 : result.getPaymentStatusCount());
             }
 
         });
         Query query = new Query();
         query.addCriteria(Criteria.where("agentId").is(agentId));
-        long totalCount=mongoRepositoryReactive.count(query, PaymentRecord.class).block();
+        long totalCount = mongoRepositoryReactive.count(query, PaymentRecord.class).block();
         paymentRecordDashboardStatusCountDto.setTotalInvoices(totalCount);
 
         return Mono.just(new ResponseEntity<>(paymentRecordDashboardStatusCountDto, HttpStatus.OK));
 
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/agent-summary", params={"agentId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/agent-summary", params = {"agentId"})
     @ApiOperation(value = "Get operator summary ", response = AgentDashboardSummaryDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getAgentSummary(@RequestParam ("agentId") String agentId) {
-        Query queryLicense= new Query();
+    public Mono<ResponseEntity> getAgentSummary(@RequestParam("agentId") String agentId) {
+        Query queryLicense = new Query();
         queryLicense.addCriteria(Criteria.where("agentId").is(agentId));
-        Sort sort = new Sort(Sort.Direction.DESC,"expiryDate");
+        Sort sort = new Sort(Sort.Direction.DESC, "expiryDate");
         queryLicense.with(sort);
-        Map<String, AgentDashboardSummaryDto> agentDashboardSummaryDtoHashMap= new HashMap<>();
+        Map<String, AgentDashboardSummaryDto> agentDashboardSummaryDtoHashMap = new HashMap<>();
         List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicense, License.class).toStream().collect(Collectors.toList());
         if (licenses.size() == 0) {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
@@ -748,7 +765,7 @@ public class DashboardController extends BaseController {
         }
 
         for (License license : licenses) {
-            if(agentDashboardSummaryDtoHashMap.get(license.getGameTypeId())==null){
+            if (agentDashboardSummaryDtoHashMap.get(license.getGameTypeId()) == null) {
                 AgentDashboardSummaryDto agentDashboardSummaryDto = new AgentDashboardSummaryDto();
                 agentDashboardSummaryDto.setAgentId(agentId);
                 agentDashboardSummaryDto.setLicenseNumber(license.getLicenseNumber());
@@ -764,25 +781,25 @@ public class DashboardController extends BaseController {
             }
 
         }
-        if(agentDashboardSummaryDtoHashMap.values().size()==0){
+        if (agentDashboardSummaryDtoHashMap.values().size() == 0) {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
         }
 
 
-
         return Mono.just(new ResponseEntity<>(agentDashboardSummaryDtoHashMap.values(), HttpStatus.OK));
     }
+
     public Agent getAgent(String agentId) {
 
         return (Agent) mongoRepositoryReactive.findById(agentId, Agent.class).block();
     }
-    public long getInstitutionCountForAgent(String agentId){
 
-        Agent agent= (Agent) mongoRepositoryReactive.findById(agentId, Agent.class).block();
+    public long getInstitutionCountForAgent(String agentId) {
+
+        Agent agent = (Agent) mongoRepositoryReactive.findById(agentId, Agent.class).block();
 
         return agent.getInstitutionIds().size();
     }
-
 
 
 }
