@@ -168,8 +168,8 @@ public class DashboardController extends BaseController {
         Query queryAgentTotalCount = new Query();
         if (!StringUtils.isEmpty(gameTypeId)) {
             query.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
-            queryMachine.addCriteria(Criteria.where("gameTypeIds").in(Collections.singletonList(gameTypeId)));
-            queryTerminal.addCriteria(Criteria.where("gameTypeIds").in(Collections.singletonList(gameTypeId)));
+            queryMachine.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+            queryTerminal.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             queryAgentTotalCount.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
             queryCasesTotalCount.addCriteria(Criteria.where("gameTypeIds").in(gameTypeId));
         }
