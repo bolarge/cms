@@ -2,9 +2,8 @@ package com.software.finatech.lslb.cms.service.controller;
 
 
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.domain.Institution;
-import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
+import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordDetailService;
@@ -18,16 +17,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
-
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/test")
@@ -128,12 +122,11 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/backdate-licence")
     public Mono<ResponseEntity> moviedocus() {
         try {
-            Query query = new Query();
-            query.addCriteria(Criteria.where("effectiveDate").is(null));
-            ArrayList<Fee> fees = (ArrayList<Fee>) mongoRepositoryReactive.findAll(query, Fee.class).toStream().collect(Collectors.toList());
-            for (Fee fee : fees) {
-                fee.setEffectiveDate(LocalDate.now().withDayOfYear(1));
-                mongoRepositoryReactive.saveOrUpdate(fee);
+            License license = (License) mongoRepositoryReactive.findById("50238ce5-fe31-4f1b-8cbc-b37a885bf203", License.class).block();
+            if (license != null) {
+                license.setExpiryDate(LocalDate.now().withDayOfYear(365));
+                license.setEffectiveDate(LocalDate.now().withDayOfYear(1));
+                mongoRepositoryReactive.saveOrUpdate(license);
             }
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
@@ -145,8 +138,8 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/delete-payment")
     public Mono<ResponseEntity> deletePayment() {
         try {
-            AuthInfo authInfo = (AuthInfo)mongoRepositoryReactive.findById("5596936a-eb26-4614-a013-49742cd8037b", AuthInfo.class).block();
-            if (authInfo !=  null){
+            AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById("5596936a-eb26-4614-a013-49742cd8037b", AuthInfo.class).block();
+            if (authInfo != null) {
                 authInfo.setInstitutionId(null);
                 mongoRepositoryReactive.saveOrUpdate(authInfo);
             }
