@@ -48,7 +48,7 @@ public class CustomerComplaintEmailSenderAsync extends AbstractMailSender {
             model.put("ticketId", ticketId);
             String mailContent = mailContentBuilderService.build(model, "customer-complaint/NewCustomerComplainCustomer");
             logger.info("Sending new customer complain notification to customer with email address {}", customerComplain.getCustomerEmailAddress());
-            emailService.sendEmail(mailContent, "We have received your complain", customerComplain.getCustomerEmailAddress());
+            emailService.sendEmail(mailContent, "We have received your complaint", customerComplain.getCustomerEmailAddress());
         } catch (Exception e) {
             logger.error(String.format("An error occurred while sending customer complain acknowledgement to customer with email %s", customerComplain.getCustomerEmailAddress()), e);
         }
