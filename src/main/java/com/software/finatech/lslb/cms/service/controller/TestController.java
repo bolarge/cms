@@ -122,12 +122,27 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/backdate-licence")
     public Mono<ResponseEntity> moviedocus() {
         try {
-            License license = (License) mongoRepositoryReactive.findById("50238ce5-fe31-4f1b-8cbc-b37a885bf203", License.class).block();
-            if (license != null) {
-                license.setExpiryDate(LocalDate.now().withDayOfYear(365));
-                license.setEffectiveDate(LocalDate.now().withDayOfYear(1));
-                mongoRepositoryReactive.saveOrUpdate(license);
+
+            String[] ids = new String[]{"aad201a7-747d-4d74-adef-bce17e1ff18a", "346cdfb6-1384-4ca7-ba21-52d33a5863f2", "d95fb4f6-e015-4661-b1e9-059dc7cc01c0"};
+            for (String id : ids) {
+                License license = (License) mongoRepositoryReactive.findById(id, License.class).block();
+                if (license != null) {
+                    if (license.isInstitutionLicense()) {
+                        license.setExpiryDate(LocalDate.now().withDayOfYear(365));
+                        license.setEffectiveDate(LocalDate.now().withDayOfYear(1));
+                    }
+                    if (license.isGamingMachineLicense()) {
+                        LocalDate effectiveDate = license.getEffectiveDate();
+                        effectiveDate = effectiveDate.minusDays(365);
+                        LocalDate expiryDate = license.getExpiryDate();
+                        expiryDate = expiryDate.minusDays(365);
+                        license.setExpiryDate(expiryDate);
+                        license.setEffectiveDate(effectiveDate);
+                    }
+                    mongoRepositoryReactive.saveOrUpdate(license);
+                }
             }
+
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
