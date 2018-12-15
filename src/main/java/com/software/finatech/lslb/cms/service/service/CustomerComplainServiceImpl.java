@@ -135,6 +135,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
         try {
             CustomerComplain customerComplain = fromCreateCustomerComplain(customerComplainCreateDto);
             saveCustomerComplain(customerComplain);
+
             customerComplaintEmailSenderAsync.sendInitialNotificationsForCustomerComplain(customerComplain);
 
             String verbiage = String.format("Created customer complain -> Ticket Id : %s ", customerComplain.getTicketId());
