@@ -324,8 +324,8 @@ public class DashboardController extends BaseController {
                 institutionDashboardSummaryDto.setGameType(getGameType(license.getGameTypeId()).getName());
                 institutionDashboardSummaryDto.setGameTypeId(license.getGameTypeId());
                 institutionDashboardSummaryDto.setNumberOfAgents(getAgentCountForInstitution(institutionId));
-                institutionDashboardSummaryDto.setNumberOfGamingMachines(getGamingMachineCountForInstitution(institutionId));
-                institutionDashboardSummaryDto.setNumberOfGamingTerminals(getGamingTerminalCountForInstitution(institutionId));
+                institutionDashboardSummaryDto.setNumberOfGamingMachines(getGamingMachineCountForInstitutionAndGameType(institutionId, license.getGameTypeId()));
+                institutionDashboardSummaryDto.setNumberOfGamingTerminals(getGamingTerminalCountForInstitutionAndGameType(institutionId, license.getGameTypeId()));
                 institutionDashboardSummaryDto.setAllowsGamingMachine(getGameType(license.getGameTypeId()).getAllowsGamingMachine());
                 institutionDashboardSummaryDto.setAllowsGamingTerminal(getGameType(license.getGameTypeId()).getAllowsGamingTerminal());
                 institutionDashboardSummaryDtoHashMap.put(license.getGameTypeId(), institutionDashboardSummaryDto);
@@ -514,12 +514,30 @@ public class DashboardController extends BaseController {
         return mongoRepositoryReactive.count(query, Machine.class).block();
     }
 
+
+    public long getGamingMachineCountForInstitutionAndGameType(String institutionId, String gameTypeId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").in(institutionId));
+        query.addCriteria(Criteria.where("gameTypeId").in(gameTypeId));
+        query.addCriteria(Criteria.where("machineTypeId").in(MachineTypeReferenceData.GAMING_MACHINE_ID));
+        return mongoRepositoryReactive.count(query, Machine.class).block();
+    }
+
     public long getGamingTerminalCountForInstitution(String institutionId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").in(institutionId));
         query.addCriteria(Criteria.where("machineTypeId").in(MachineTypeReferenceData.GAMING_TERMINAL_ID));
         return mongoRepositoryReactive.count(query, Machine.class).block();
     }
+
+    public long getGamingTerminalCountForInstitutionAndGameType(String institutionId, String gameTypeId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").in(institutionId));
+        query.addCriteria(Criteria.where("gameTypeId").in(gameTypeId));
+        query.addCriteria(Criteria.where("machineTypeId").in(MachineTypeReferenceData.GAMING_TERMINAL_ID));
+        return mongoRepositoryReactive.count(query, Machine.class).block();
+    }
+
 
     @RequestMapping(method = RequestMethod.GET, value = "/institution-invoice-summary", params = {"institutionId"})
     @ApiOperation(value = "Get dashboard invoice summary ", response = PaymentRecordDashboardStatusCountDto.class, responseContainer = "List", consumes = "application/json")
