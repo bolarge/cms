@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @Component
@@ -52,7 +53,8 @@ public class CustomerComplainReminder {
 
     private ArrayList<CustomerComplain> getAllValidCustomerComplainsForReminder() {
         Query query = new Query();
-        query.addCriteria(Criteria.where("customerComplainStatusId").is(CustomerComplainStatusReferenceData.IN_REVIEW_ID));
+        query.addCriteria(Criteria.where("customerComplainStatusId").in(Arrays.asList(CustomerComplainStatusReferenceData.IN_REVIEW_ID,
+                CustomerComplainStatusReferenceData.PENDING_ID)));
         query.addCriteria(Criteria.where("nextNotificationDateTime").lte(LocalDateTime.now()));
         return (ArrayList<CustomerComplain>) mongoRepositoryReactive.findAll(query, CustomerComplain.class).toStream().collect(Collectors.toList());
     }

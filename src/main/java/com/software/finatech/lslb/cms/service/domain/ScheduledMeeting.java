@@ -377,6 +377,10 @@ public class ScheduledMeeting extends AbstractFact {
         return StringUtils.equals(ScheduledMeetingStatusReferenceData.COMPLETED_STATUS_ID, this.scheduledMeetingStatusId);
     }
 
+    public boolean isCanceled() {
+        return StringUtils.equals(ScheduledMeetingStatusReferenceData.CANCELED_STATUS_ID, this.scheduledMeetingStatusId);
+    }
+
     @Override
     public String getFactName() {
         return "ScheduledMeetings";

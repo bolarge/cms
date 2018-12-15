@@ -497,7 +497,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
             return true;
         }
         for (ScheduledMeeting meeting : meetings) {
-            if (!meeting.isCompleted()) {
+            if (!meeting.isCompleted() && !meeting.isCanceled()) {
                 return false;
             }
         }
