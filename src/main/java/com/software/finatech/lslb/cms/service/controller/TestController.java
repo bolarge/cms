@@ -1,11 +1,15 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
-import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.Fee;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.domain.License;
+import com.software.finatech.lslb.cms.service.domain.LicenseTransfer;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
+import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseTransferStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordDetailService;
 import com.software.finatech.lslb.cms.service.service.contracts.VigipayService;
 import com.software.finatech.lslb.cms.service.util.DatabaseLoaderUtils;
@@ -22,6 +26,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
+
+import java.util.Collections;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/test")
@@ -129,6 +136,7 @@ public class TestController extends BaseController {
                     if (license.isInstitutionLicense()) {
                         license.setExpiryDate(LocalDate.now().withDayOfYear(365));
                         license.setEffectiveDate(LocalDate.now().withDayOfYear(1));
+                        license.setRenewalStatus("true");
                     }
                     if (license.isGamingMachineLicense()) {
                         LocalDate effectiveDate = license.getEffectiveDate();
@@ -152,11 +160,47 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/delete-payment")
     public Mono<ResponseEntity> deletePayment() {
         try {
-            AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById("5596936a-eb26-4614-a013-49742cd8037b", AuthInfo.class).block();
-            if (authInfo != null) {
-                authInfo.setInstitutionId(null);
-                mongoRepositoryReactive.saveOrUpdate(authInfo);
-            }
+            License license = new License();
+            license.setId(UUID.randomUUID().toString());
+            license.setEffectiveDate(LocalDate.now().withDayOfYear(1));
+            license.setExpiryDate(LocalDate.now().withDayOfYear(365));
+            license.setInstitutionId("1234");
+            license.setGameTypeId("01");
+            license.setLicenseNumber("LSLB_LIC_123");
+            mongoRepositoryReactive.saveOrUpdate(license);
+
+            Institution institution1 = new Institution();
+            institution1.setId("1234");
+            institution1.setInstitutionName("Bet Naija");
+            institution1.setGameTypeIds(Collections.singleton("01"));
+            mongoRepositoryReactive.saveOrUpdate(institution1);
+
+            Institution institution2 = new Institution();
+            institution2.setId("123");
+            institution2.setInstitutionName("Billonaire bet");
+            institution2.setGameTypeIds(Collections.singleton("01"));
+            mongoRepositoryReactive.saveOrUpdate(institution2);
+
+
+            LicenseTransfer licenseTransfer = new LicenseTransfer();
+            licenseTransfer.setId("12345");
+            licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.APPROVED_ID);
+            licenseTransfer.setFromInstitutionId("1234");
+            licenseTransfer.setLicenseId(license.getId());
+            licenseTransfer.setToInstitutionId("123");
+            licenseTransfer.setGameTypeId("01");
+            mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
+
+
+            Fee fee = new Fee();
+            fee.setId("12");
+            fee.setGameTypeId("01");
+            fee.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
+            fee.setActive(true);
+            fee.setAmount(2000);
+            fee.setFeePaymentTypeId(FeePaymentTypeReferenceData.LICENSE_TRANSFER_FEE_TYPE_ID);
+            mongoRepositoryReactive.saveOrUpdate(fee);
+
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
