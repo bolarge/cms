@@ -77,14 +77,14 @@ public class LSLBAuthPermissionReferenceData {
         mongoRepositoryReactive.saveOrUpdate(permission);
 
 
-//        permission = (AuthPermission) mongoRepositoryReactive.findById("7", AuthPermission.class).block();
-//        if (permission == null) {
-//            permission = new AuthPermission();
-//            permission.setId("7");
-//        }
-//        permission.setName("APPROVE APPLICATION");
-//        permission.setDescription("Approve and reject application forms");
-//        mongoRepositoryReactive.saveOrUpdate(permission);
+        permission = (AuthPermission) mongoRepositoryReactive.findById("7", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("7");
+        }
+        permission.setName("APPROVE APPLICATION");
+        permission.setDescription("Approve and reject application forms");
+        mongoRepositoryReactive.delete(permission);
 
         permission = (AuthPermission) mongoRepositoryReactive.findById("8", AuthPermission.class).block();
         if (permission == null) {
