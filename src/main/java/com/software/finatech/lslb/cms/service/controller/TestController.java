@@ -135,6 +135,7 @@ public class TestController extends BaseController {
                         license.setExpiryDate(LocalDate.now().withDayOfYear(365));
                         license.setEffectiveDate(LocalDate.now().withDayOfYear(1));
                         license.setRenewalStatus("true");
+                        license.setRenewalInProgress(false);
                     }
                     if (license.isGamingMachineLicense()) {
                         LocalDate effectiveDate = license.getEffectiveDate();
