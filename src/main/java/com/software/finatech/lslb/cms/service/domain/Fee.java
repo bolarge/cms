@@ -45,16 +45,6 @@ public class Fee extends AbstractFact {
         this.endDate = endDate;
     }
 
-    private String revenueNameId;
-
-    public String getRevenueNameId() {
-        return revenueNameId;
-    }
-
-    public void setRevenueNameId(String revenueNameId) {
-        this.revenueNameId = revenueNameId;
-    }
-
     public boolean isActive() {
         return active;
     }

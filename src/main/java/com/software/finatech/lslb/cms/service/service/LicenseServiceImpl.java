@@ -728,23 +728,24 @@ public class LicenseServiceImpl implements LicenseService {
                 license.setLicenseStatusId(LicenseStatusReferenceData.AIP_COMPLETED);
                 mongoRepositoryReactive.saveOrUpdate(license);
                 return Mono.just(new ResponseEntity<>("Updated Successfully", HttpStatus.OK));
-//                License transferorLicense = licenseTransfer.getLicense();
-//                transferorLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_TRANSFERED);
-//                mongoRepositoryReactive.saveOrUpdate(transferorLicense);
-//
-//                createLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
-//                licenseNumber = transferorLicense.getLicenseNumber();
-//                createLicense.setLicenseNumber(licenseNumber);
-//                createLicense.setExpiryDate(transferorLicense.getExpiryDate());
-//                createLicense.setEffectiveDate(LocalDate.now());
-//                createLicense.setPaymentRecordId(license.getPaymentRecordId());
-//                createLicense.setRenewalStatus("false");
-//                createLicense.setInstitutionId(license.getInstitutionId());
-//                createLicense.setGameTypeId(license.getGameTypeId());
-//                createLicense.setParentLicenseId(license.getId());
-//                createLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
+  /**
+                License transferorLicense = licenseTransfer.getLicense();
+                transferorLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_TRANSFERED);
+                mongoRepositoryReactive.saveOrUpdate(transferorLicense);
 
+                createLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+                licenseNumber = transferorLicense.getLicenseNumber();
+                createLicense.setLicenseNumber(licenseNumber);
+                createLicense.setExpiryDate(transferorLicense.getExpiryDate());
+                createLicense.setEffectiveDate(LocalDate.now());
+                createLicense.setPaymentRecordId(license.getPaymentRecordId());
+                createLicense.setRenewalStatus("false");
+                createLicense.setInstitutionId(license.getInstitutionId());
+                createLicense.setGameTypeId(license.getGameTypeId());
+                createLicense.setParentLicenseId(license.getId());
+                createLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
 
+*/
             } else {
 
                 license.setLicenseStatusId(LicenseStatusReferenceData.AIP_COMPLETED);
@@ -806,7 +807,6 @@ public class LicenseServiceImpl implements LicenseService {
 
         } catch (Throwable ex) {
             return Mono.just(new ResponseEntity<>("Error occurred. Please contact admin", HttpStatus.BAD_REQUEST));
-
         }
     }
 
