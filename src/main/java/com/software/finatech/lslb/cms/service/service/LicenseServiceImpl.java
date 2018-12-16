@@ -778,7 +778,6 @@ public class LicenseServiceImpl implements LicenseService {
                 createLicense.setGameTypeId(license.getGameTypeId());
                 createLicense.setParentLicenseId(license.getId());
                 createLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
-                createLicense.setPaymentRecordId(license.getPaymentRecordId());
             }
             mongoRepositoryReactive.saveOrUpdate(license);
             verbiage = "UPDATED : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from AIP DOC UPLOADED to AIP COMPLETED";
