@@ -1,24 +1,42 @@
 package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.service.EmailService;
+import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
+import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
+import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
 import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 @Component
-public class ApprovalRequestNotifierAsync extends AbstractMailSender {
+public class ApprovalRequestNotifierAsync  {
 
     private static final Logger logger = LoggerFactory.getLogger(ApprovalRequestNotifierAsync.class);
 
+    @Autowired
+    protected MailContentBuilderService mailContentBuilderService;
+    @Autowired
+    protected EmailService emailService;
+    @Autowired
+    protected FrontEndPropertyHelper frontEndPropertyHelper;
+    @Autowired
+    protected MongoRepositoryReactiveImpl mongoRepositoryReactive;
+
     @Async
     public void sendNewUserApprovalRequestEmailToAllOtherUsersInRole(AuthInfo initiator, UserApprovalRequest userApprovalRequest) {
-        ArrayList<AuthInfo> otherUserWithRole = authInfoService.findAllOtherActiveUsersForApproval(initiator);
+        ArrayList<AuthInfo> otherUserWithRole = findAllOtherActiveUsersForApproval(initiator);
         if (otherUserWithRole == null || otherUserWithRole.isEmpty()) {
             logger.info("There are no other enabled users with user role");
             return;
@@ -34,7 +52,7 @@ public class ApprovalRequestNotifierAsync extends AbstractMailSender {
 
     @Async
     public void sendNewDocumentApprovalRequestEmailToAllOtherUsersInRole(AuthInfo initiator, DocumentApprovalRequest documentApprovalRequest) {
-        ArrayList<AuthInfo> otherUserWithRole = authInfoService.findAllOtherActiveUsersForApproval(initiator);
+        ArrayList<AuthInfo> otherUserWithRole = findAllOtherActiveUsersForApproval(initiator);
         if (otherUserWithRole == null || otherUserWithRole.isEmpty()) {
             logger.info("There are no other enabled users with user role");
             return;
@@ -50,7 +68,7 @@ public class ApprovalRequestNotifierAsync extends AbstractMailSender {
 
     @Async
     public void sendNewFeeApprovalRequestEmailToAllOtherUsersInRole(AuthInfo initiator, FeeApprovalRequest feeApprovalRequest) {
-        ArrayList<AuthInfo> otherUserWithRole = authInfoService.findAllOtherActiveUsersForApproval(initiator);
+        ArrayList<AuthInfo> otherUserWithRole = findAllOtherActiveUsersForApproval(initiator);
         if (otherUserWithRole == null || otherUserWithRole.isEmpty()) {
             logger.info("There are no other enabled users with user role");
             return;
@@ -180,5 +198,14 @@ public class ApprovalRequestNotifierAsync extends AbstractMailSender {
         model.put("approvalType", approvalRequestType);
         model.put("frontEndUrl", frontEndUrl);
         return mailContentBuilderService.build(model, "approval-request/RejectedUserApprovalRequest");
+    }
+
+    private ArrayList<AuthInfo> findAllOtherActiveUsersForApproval(AuthInfo initiator) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("enabled").is(true));
+        query.addCriteria(Criteria.where("authRoleId").is(initiator.getAuthRoleId()));
+        query.addCriteria(Criteria.where("id").ne(initiator.getId()));
+        return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
+
     }
 }
