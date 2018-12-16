@@ -861,6 +861,7 @@ public class LicenseServiceImpl implements LicenseService {
             Institution paymentInitiatingInstitution = paymentRecord.getInstitution();
             if (paymentRecord.isLicenseTransferPayment()) {
                 LicenseTransfer licenseTransfer = paymentRecord.getLicenseTransfer();
+                licenseTransfer.setPaymentRecordId(paymentRecord.getId());
                 License transferredLicense = licenseTransfer.getLicense();
                 transferredLicense.setLicenseTransferId(licenseTransfer.getId());
                 transferredLicense.setInstitutionId(paymentRecord.getInstitutionId());
