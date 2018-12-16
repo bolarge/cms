@@ -122,7 +122,7 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/backdate-licence")
     public Mono<ResponseEntity> moviedocus() {
         try {
-            String[] ids = new String[]{"aad201a7-747d-4d74-adef-bce17e1ff18a", "346cdfb6-1384-4ca7-ba21-52d33a5863f2", "d95fb4f6-e015-4661-b1e9-059dc7cc01c0"};
+            String[] ids = new String[]{"8dfa3c88-8f56-4946-89b3-6f2904a35656"};
             for (String id : ids) {
                 License license = (License) mongoRepositoryReactive.findById(id, License.class).block();
                 if (license != null) {

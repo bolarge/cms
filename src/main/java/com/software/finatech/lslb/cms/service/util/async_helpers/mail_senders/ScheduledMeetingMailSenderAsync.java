@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,8 +133,10 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
         try {
             String mailContent = buildMeetingRecipientMailContent(meeting, templateName);
             for (AuthInfo invitee : invitees) {
-                logger.info("Sending meeting email to {}", invitee.getEmailAddress());
-                emailService.sendEmail(mailContent, mailSubject, invitee.getEmailAddress());
+                if (!StringUtils.equals(invitee.getId(), meeting.getCreatorId())) {
+                    logger.info("Sending meeting email to {}", invitee.getEmailAddress());
+                    emailService.sendEmail(mailContent, mailSubject, invitee.getEmailAddress());
+                }
             }
         } catch (Exception e) {
             logger.error("An error occurred when sending email to invitee", e);
