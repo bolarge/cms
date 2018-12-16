@@ -286,7 +286,7 @@ public class AuthInfo extends AbstractFact {
     public AuthInfoDto convertToFullDto() {
         AuthInfoDto dto = convertToDto();
         AuthRole authRole = getAuthRole();
-        dto.setUserPermissions(getPermissionDtos(this.authPermissionIds));
+        dto.setUserPermissions(getPermissionDtos(getAuthPermissionIds()));
         dto.setRolePermissions(getPermissionDtos(authRole.authPermissionIds));
         return dto;
     }
@@ -305,18 +305,7 @@ public class AuthInfo extends AbstractFact {
         if (StringUtils.isEmpty(this.authRoleId)) {
             return null;
         }
-        Map authRoleMap = Mapstore.STORE.get("AuthRole");
-        AuthRole authRole = null;
-//        if (authRoleMap != null) {
-//            authRole = (AuthRole) authRoleMap.get(this.authRoleId);
-//        }
-        if (authRole == null) {
-            authRole = (AuthRole) mongoRepositoryReactive.findById(this.authRoleId, AuthRole.class).block();
-            if (authRole != null && authRoleMap != null) {
-                authRoleMap.put(authRole.getId(), authRole);
-            }
-        }
-        return authRole;
+        return (AuthRole) mongoRepositoryReactive.findById(this.authRoleId, AuthRole.class).block();
     }
 
     private Institution getInstitution() {

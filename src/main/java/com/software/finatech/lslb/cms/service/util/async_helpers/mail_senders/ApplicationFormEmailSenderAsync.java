@@ -601,6 +601,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         }
     }
 
+    @Async
     public void sendNotificationForMeetingCompletionForApplication(ApplicationForm applicationForm) {
         ArrayList<AuthInfo> finalApprovers = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.APPROVE_APPLICATION_FORM_ID);
         if (finalApprovers.isEmpty()) {
@@ -611,7 +612,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         for (AuthInfo authInfo : finalApprovers) {
             String emailAddress = authInfo.getEmailAddress();
             logger.info("Sending final approver email to {}", emailAddress);
-            emailService.sendEmail(mailContent, "New Application Submission on LSLB Customer Management System", emailAddress);
+            emailService.sendEmail(mailContent, "Pending Application Approval on LSLB Customer Management System", emailAddress);
         }
     }
 
