@@ -333,7 +333,7 @@ public class AuthInfo extends AbstractFact {
     }
 
     public Set<String> getAllUserPermissionIdsForUser() {
-        Set<String> authPermissions = this.authPermissionIds;
+        Set<String> authPermissions =getAuthPermissionIds();
         AuthRole userRole = getAuthRole();
         if (userRole != null) {
             authPermissions.addAll(userRole.getAuthPermissionIds());
