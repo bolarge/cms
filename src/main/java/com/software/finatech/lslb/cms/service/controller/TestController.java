@@ -1,12 +1,10 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
-import com.software.finatech.lslb.cms.service.domain.Fee;
-import com.software.finatech.lslb.cms.service.domain.Institution;
-import com.software.finatech.lslb.cms.service.domain.License;
-import com.software.finatech.lslb.cms.service.domain.LicenseTransfer;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
+import com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTransferStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
@@ -167,19 +165,19 @@ public class TestController extends BaseController {
             license.setInstitutionId("1234");
             license.setGameTypeId("01");
             license.setLicenseNumber("LSLB_LIC_123");
-            mongoRepositoryReactive.saveOrUpdate(license);
+            //mongoRepositoryReactive.saveOrUpdate(license);
 
             Institution institution1 = new Institution();
             institution1.setId("1234");
             institution1.setInstitutionName("Bet Naija");
             institution1.setGameTypeIds(Collections.singleton("01"));
-            mongoRepositoryReactive.saveOrUpdate(institution1);
+            //mongoRepositoryReactive.saveOrUpdate(institution1);
 
             Institution institution2 = new Institution();
             institution2.setId("123");
             institution2.setInstitutionName("Billonaire bet");
             institution2.setGameTypeIds(Collections.singleton("01"));
-            mongoRepositoryReactive.saveOrUpdate(institution2);
+           // mongoRepositoryReactive.saveOrUpdate(institution2);
 
 
             LicenseTransfer licenseTransfer = new LicenseTransfer();
@@ -189,7 +187,7 @@ public class TestController extends BaseController {
             licenseTransfer.setLicenseId(license.getId());
             licenseTransfer.setToInstitutionId("123");
             licenseTransfer.setGameTypeId("01");
-            mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
+           // mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
 
 
             Fee fee = new Fee();
@@ -199,8 +197,12 @@ public class TestController extends BaseController {
             fee.setActive(true);
             fee.setAmount(2000);
             fee.setFeePaymentTypeId(FeePaymentTypeReferenceData.LICENSE_TRANSFER_FEE_TYPE_ID);
-            mongoRepositoryReactive.saveOrUpdate(fee);
+            //mongoRepositoryReactive.saveOrUpdate(fee);
 
+
+            AIPDocumentApproval aipDocumentApproval = new AIPDocumentApproval();
+            aipDocumentApproval.setReadyForApproval(true);
+            aipDocumentApproval.setFormStatusId(ApplicationFormStatusReferenceData.APPROVED_STATUS_ID);
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
