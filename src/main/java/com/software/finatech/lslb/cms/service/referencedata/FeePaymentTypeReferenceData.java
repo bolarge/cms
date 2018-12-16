@@ -39,14 +39,6 @@ public class FeePaymentTypeReferenceData {
         }
         feePaymentType4.setName("Tax Fees");
 
-        FeePaymentType feePaymentType5 = (FeePaymentType) mongoRepositoryReactive.findById(TAX_RENEWAL_FEE_TYPE_ID, FeePaymentType.class).block();
-        if (feePaymentType5 == null) {
-            feePaymentType5 = new FeePaymentType();
-            feePaymentType5.setId(TAX_RENEWAL_FEE_TYPE_ID);
-        }
-        feePaymentType5.setName("Tax Renewal Fees");
-        mongoRepositoryReactive.delete(feePaymentType5);
-
         FeePaymentType feePaymentType6 = (FeePaymentType) mongoRepositoryReactive.findById(LICENSE_TRANSFER_FEE_TYPE_ID, FeePaymentType.class).block();
         if (feePaymentType6 == null) {
             feePaymentType6 = new FeePaymentType();
@@ -58,7 +50,6 @@ public class FeePaymentTypeReferenceData {
         mongoRepositoryReactive.saveOrUpdate(feePaymentType2);
         mongoRepositoryReactive.saveOrUpdate(feePaymentType3);
         mongoRepositoryReactive.saveOrUpdate(feePaymentType4);
-        mongoRepositoryReactive.delete(feePaymentType5);
         mongoRepositoryReactive.saveOrUpdate(feePaymentType6);
     }
 }
