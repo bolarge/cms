@@ -32,7 +32,16 @@ public class RenewalFormCreateDto {
     protected String changeInGamingMachines;
     @NotEmpty(message = "Please enter checkNewInvestors")
     protected String checkNewInvestors;
+    protected String licenseId;
     protected String newInvestors;
+
+    public String getLicenseId() {
+        return licenseId;
+    }
+
+    public void setLicenseId(String licenseId) {
+        this.licenseId = licenseId;
+    }
 
     public String getInstitutionId() {
         return institutionId;
