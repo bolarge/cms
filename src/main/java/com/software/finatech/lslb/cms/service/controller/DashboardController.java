@@ -317,7 +317,7 @@ public class DashboardController extends BaseController {
                 institutionDashboardSummaryDto.setLicenseId(license.getId());
                 institutionDashboardSummaryDto.setLicenseNumber(license.getLicenseNumber());
                 institutionDashboardSummaryDto.setInstitutionName(getInstitution(institutionId).getInstitutionName());
-                institutionDashboardSummaryDto.setLicenseStatus(license.getLicenseStatusId());
+                institutionDashboardSummaryDto.setLicenseStatusId(license.getLicenseStatusId());
                 institutionDashboardSummaryDto.setLicenseStatus(getLicenseStatus(license.getLicenseStatusId()).getName());
                 institutionDashboardSummaryDto.setEffectiveDate(license.getEffectiveDate().toString("dd-MM-yyyy"));
                 institutionDashboardSummaryDto.setExpiryDate(license.getExpiryDate().toString("dd-MM-yyyy"));
