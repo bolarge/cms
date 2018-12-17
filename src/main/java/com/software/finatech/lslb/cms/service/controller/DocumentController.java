@@ -777,6 +777,100 @@ public class DocumentController extends BaseController {
         }
     }
 
+
+    @RequestMapping(method = RequestMethod.POST, value = "/archive-multiple", produces = "application/json")
+    @ApiOperation(value = "Archive Multiple Documents", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> archiveDocuments(@RequestBody @Valid DocumentArchiveRequest documentArchiveRequest, HttpServletRequest request) {
+        try {
+            StringBuilder builder = new StringBuilder();
+            for (String documentId : documentArchiveRequest.getDocumentIds()) {
+                builder.append(documentId);
+                builder.append(",");
+                Document document = findDocumentById(documentId);
+                if (document != null) {
+                    document.setArchive(true);
+                    mongoRepositoryReactive.saveOrUpdate(document);
+                }
+            }
+
+            String verbiage = String.format("Archived Multiple Documents  -> Document Ids -> %s ", builder.toString());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            return Mono.just(new ResponseEntity<>("Document Archived", HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while archiving documents", e);
+        }
+    }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/restore-multiple", produces = "application/json")
+    @ApiOperation(value = "Restore Multiple Documents", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> unArchiveDocuments(@RequestBody @Valid DocumentArchiveRequest documentArchiveRequest, HttpServletRequest request) {
+        try {
+            StringBuilder builder = new StringBuilder();
+            for (String documentId : documentArchiveRequest.getDocumentIds()) {
+                builder.append(documentId);
+                builder.append(",");
+                Document document = findDocumentById(documentId);
+                if (document != null) {
+                    document.setArchive(false);
+                    mongoRepositoryReactive.saveOrUpdate(document);
+                }
+            }
+
+            String verbiage = String.format("Restored Multiple Documents  -> Document Ids -> %s ", builder.toString());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            return Mono.just(new ResponseEntity<>("Document Archived", HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while un archiving documents", e);
+        }
+    }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/toggle-multiple-document-archive-status", produces = "application/json")
+    @ApiOperation(value = "Toggle Multiple Documents Archive Status", response = String.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> toggleArchiveDocumentsStatus(@RequestBody @Valid DocumentArchiveRequest documentArchiveRequest, HttpServletRequest request) {
+        try {
+            StringBuilder builder = new StringBuilder();
+            for (String documentId : documentArchiveRequest.getDocumentIds()) {
+                builder.append(documentId);
+                builder.append(",");
+                Document document = findDocumentById(documentId);
+                if (document != null) {
+                    boolean newArchiveStatus = !document.isArchive();
+                    document.setArchive(newArchiveStatus);
+                    mongoRepositoryReactive.saveOrUpdate(document);
+                }
+            }
+
+            String verbiage = String.format("Toggled Multiple Documents Archive Status -> Document Ids -> %s ", builder.toString());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
+                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+            return Mono.just(new ResponseEntity<>("Document Archive Status Toggled", HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while toggling documents", e);
+        }
+    }
+
     @RequestMapping(method = RequestMethod.POST, value = "/reject", produces = "application/json", params = {"entityName"})
     @ApiOperation(value = "Reject Document", response = DocumentDto.class, consumes = "application/json")
     @ApiResponses(value = {
