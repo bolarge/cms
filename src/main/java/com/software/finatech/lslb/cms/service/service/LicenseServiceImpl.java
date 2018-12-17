@@ -863,10 +863,29 @@ public class LicenseServiceImpl implements LicenseService {
                 licenseTransfer.setPaymentRecordId(paymentRecord.getId());
                 License transferredLicense = licenseTransfer.getLicense();
                 transferredLicense.setLicenseTransferId(licenseTransfer.getId());
-                transferredLicense.setInstitutionId(paymentRecord.getInstitutionId());
-                transferredLicense.setPaymentRecordId(paymentRecord.getId());
+
+                License newLicenseForTransferee = new License();
+
+                newLicenseForTransferee.setId(UUID.randomUUID().toString());
+                newLicenseForTransferee.setLicenseStatusId(transferredLicense.getLicenseStatusId());
+                newLicenseForTransferee.setRenewalStatus(transferredLicense.getRenewalStatus());
+                newLicenseForTransferee.setGameTypeId(transferredLicense.getGameTypeId());
+                newLicenseForTransferee.setLicenseNumber(transferredLicense.getLicenseNumber());
+                newLicenseForTransferee.setInstitutionId(paymentRecord.getInstitutionId());
+                newLicenseForTransferee.setExpiryDate(transferredLicense.getExpiryDate());
+                newLicenseForTransferee.setEffectiveDate(transferredLicense.getEffectiveDate());
+                newLicenseForTransferee.setLicenseTypeId(transferredLicense.getLicenseTypeId());
+                newLicenseForTransferee.setPaymentRecordId(paymentRecord.getId());
+                newLicenseForTransferee.setParentLicenseId(transferredLicense.getId());
+                newLicenseForTransferee.setLicenseStatusId(transferredLicense.getLicenseStatusId());
+
+                transferredLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_TRANSFERRED);
+
+//                transferredLicense.setInstitutionId(paymentRecord.getInstitutionId());
+                //             transferredLicense.setPaymentRecordId(paymentRecord.getId());
                 mongoRepositoryReactive.saveOrUpdate(transferredLicense);
                 mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
+                mongoRepositoryReactive.saveOrUpdate(newLicenseForTransferee);
                 String verbiage = String.format("Transferred License Number -> %s , Category ->%s, Transferor -> %s, Transfereree -> %s",
                         transferredLicense.getLicenseNumber(), transferredLicense.getGameType(), licenseTransfer.getFromInstitution(), licenseTransfer.getToInstitution());
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LICENCE_ID, "System Admin",
