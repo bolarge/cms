@@ -486,9 +486,12 @@ public class DocumentController extends BaseController {
         if (!StringUtils.isEmpty(id)) {
             query.addCriteria(Criteria.where("id").is(id));
         }
-        query.addCriteria(Criteria.where("isCurrent").is(isCurrent));
-        query.addCriteria(Criteria.where("archive").is(archive));
 
+        if (archive) {
+            query.addCriteria(Criteria.where("archive").is(archive));
+        } else {
+            query.addCriteria(Criteria.where("isCurrent").is(isCurrent));
+        }
 
         if (page == 0) {
             long count = mongoRepositoryReactive.count(query, Document.class).block();
