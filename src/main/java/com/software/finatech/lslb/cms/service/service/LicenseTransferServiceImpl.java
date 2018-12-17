@@ -355,6 +355,9 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
     }
 
     private Mono<ResponseEntity> validateLicenseTransfer(String institutionId, License license) {
+        if (!license.isValidForTransfer()) {
+            return Mono.just(new ResponseEntity<>("License is not in valid status for transfer", HttpStatus.BAD_REQUEST));
+        }
         Query query = new Query();
         query.addCriteria(Criteria.where("licenseId").is(license.getId()));
         LicenseTransfer transfer = (LicenseTransfer) mongoRepositoryReactive.find(query, LicenseTransfer.class).block();

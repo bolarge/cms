@@ -175,5 +175,4 @@ public abstract class AbstractFact implements PropertyChangeListener, FactObject
 	public void setVersion(Long version) {
 		this.version = version;
 	}
-
 }

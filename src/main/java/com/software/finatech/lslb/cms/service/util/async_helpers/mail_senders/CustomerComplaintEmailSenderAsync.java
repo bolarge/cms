@@ -56,7 +56,7 @@ public class CustomerComplaintEmailSenderAsync extends AbstractMailSender {
 
     private String buildNewCustomerComplaintLSLSBAdminEmailContent(CustomerComplain customerComplain) {
         String customerNameEmail = String.format("%s(%s)", customerComplain.getCustomerFullName(), customerComplain.getCustomerEmailAddress());
-        String frontEndUrl = String.format("%s/customer-complains/%s", frontEndPropertyHelper.getFrontEndUrl(), customerComplain.getId());
+        String frontEndUrl = String.format("%s/complaint-details/%s", frontEndPropertyHelper.getFrontEndUrl(), customerComplain.getId());
         String presentDateString = DateTime.now().toString("dd-MM-yyyy");
 
         HashMap<String, Object> model = new HashMap<>();
@@ -70,7 +70,7 @@ public class CustomerComplaintEmailSenderAsync extends AbstractMailSender {
     private void sendNewCustomerComplainEmailToLSLBAdmin(String lslbAdminEmailAddress, String mailContent) {
         try {
             logger.info("Sending new customer complain to -> {}", lslbAdminEmailAddress);
-            String mailSubject = "New Customer Complain on LSLB CMS";
+            String mailSubject = "New Customer Complaint on LSLB CMS";
             emailService.sendEmail(mailContent, mailSubject, lslbAdminEmailAddress);
         } catch (Exception e) {
             logger.error(String.format("An error occurred while sending new customer complaint email to LSLB Admin -> %s", lslbAdminEmailAddress), e);
@@ -86,7 +86,7 @@ public class CustomerComplaintEmailSenderAsync extends AbstractMailSender {
             model.put("ticketId", customerComplain.getTicketId());
             String content = mailContentBuilderService.build(model, "ResolvedCustomerComplain");
             logger.info("Sending resolved customer complain to customer with email {}", customerComplain.getCustomerEmailAddress());
-            emailService.sendEmail(content, "Notification on your Complain to LSLB", customerComplain.getCustomerEmailAddress());
+            emailService.sendEmail(content, "Notification on your Complaint to LSLB", customerComplain.getCustomerEmailAddress());
         } catch (Exception e) {
             logger.error(String.format("An error occurred while sending resolved customer complain email to customer %s", customerComplain.getCustomerEmailAddress()), e);
         }
@@ -108,7 +108,7 @@ public class CustomerComplaintEmailSenderAsync extends AbstractMailSender {
     }
 
     private String buildPendingCustomerComplainContent(CustomerComplain customerComplain) {
-        String frontEndUrl = String.format("%s/customer-complains/%s", frontEndPropertyHelper.getFrontEndUrl(), customerComplain.getId());
+        String frontEndUrl = String.format("%s/complaint-details/%s", frontEndPropertyHelper.getFrontEndUrl(), customerComplain.getId());
         String presentDateString = DateTime.now().toString("dd-MM-yyyy");
 
         HashMap<String, Object> model = new HashMap<>();
