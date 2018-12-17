@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTransferStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ScheduledMeetingPurposeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.*;
@@ -140,7 +141,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             String gameTypeId = license.getGameTypeId();
             Mono<ResponseEntity> validateResponse = validateLicenseTransfer(institutionId, license);
             if (validateResponse != null) {
-                   return validateResponse;
+                return validateResponse;
             }
 
             LicenseTransfer licenseTransfer = new LicenseTransfer();
@@ -227,6 +228,9 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
                 ScheduledMeeting scheduledMeeting = scheduledMeetingService.findCompletedMeetingForEntity(licenseTransferId, ScheduledMeetingPurposeReferenceData.TRANSFEREE_ID);
                 if (scheduledMeeting == null) {
                     return Mono.just(new ResponseEntity<>("There is no completed presentation scheduled for Transferee", HttpStatus.BAD_REQUEST));
+                }
+                if (!loggedInUser.getAllUserPermissionIdsForUser().contains(LSLBAuthPermissionReferenceData.FINAL_LICENSE_TRANSFER_APPROVER_ID)) {
+                    return Mono.just(new ResponseEntity<>("User does not have permission to approve license transfer", HttpStatus.BAD_REQUEST));
                 }
                 licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.APPROVED_ID);
                 licenseTransferMailSenderAsync.sendLicenseTransferApprovalMailToTransferorAndTransferee(licenseTransfer);

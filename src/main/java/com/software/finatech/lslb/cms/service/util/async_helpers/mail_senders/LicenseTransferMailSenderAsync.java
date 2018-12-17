@@ -4,7 +4,6 @@ import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.domain.LicenseTransfer;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +73,7 @@ public class LicenseTransferMailSenderAsync extends AbstractMailSender {
             sendLicenseTransferMail(transferorAdmin.getEmailAddress(), transferorMailContent, "Update On your Licence Transfer From LSLB");
         }
 
-        //send maiil to transferee
+        //send mail to transferee
         List<AuthInfo> transfereeAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(licenseTransfer.getToInstitutionId());
         String transfereeMailContent = buildLicenceTransferEmailContent(licenseTransfer, "license-transfer/LicenseTransferFinalApprovalNotificationTransferee");
         for (AuthInfo transfereeAdmin : transfereeAdmins) {
@@ -96,7 +95,7 @@ public class LicenseTransferMailSenderAsync extends AbstractMailSender {
     }
 
     @Async
-    public void sendRejectionNotificationToTransferee(LicenseTransfer licenseTransfer){
+    public void sendRejectionNotificationToTransferee(LicenseTransfer licenseTransfer) {
         List<AuthInfo> transfereeAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(licenseTransfer.getToInstitutionId());
         String transfereeMailContent = buildLicenceTransferEmailContent(licenseTransfer, "license-transfer/LicenseTransferRejectionNotificationTransferee");
         for (AuthInfo transfereeAdmin : transfereeAdmins) {
@@ -109,19 +108,23 @@ public class LicenseTransferMailSenderAsync extends AbstractMailSender {
         String paymentPageUrl = String.format("%s/payment-page", frontEndPropertyHelper.getFrontEndUrl());
         String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
         HashMap<String, Object> model = new HashMap<>();
-        Institution transferee = null;
-        if (!StringUtils.isEmpty(licenseTransfer.getToInstitutionId())) {
-            transferee = licenseTransfer.getToInstitution();
+        String transferor = "";
+        Institution fromInstitution = licenseTransfer.getFromInstitution();
+        if (fromInstitution != null) {
+            transferor = String.valueOf(fromInstitution);
+        }
+        String transferee = "";
+        Institution toInstitution = licenseTransfer.getToInstitution();
+        if (toInstitution != null) {
+            transferee = String.valueOf(toInstitution);
         }
         model.put("date", presentDateString);
         model.put("gameType", String.valueOf(licenseTransfer.getGameType()));
-        model.put("transferor", String.valueOf(licenseTransfer.getFromInstitution()));
+        model.put("transferor", transferor);
         model.put("rejectReason", licenseTransfer.getRejectionReason());
+        model.put("transferee", transferee);
         model.put("frontEndUrl", url);
         model.put("frontEndUrlPayment", paymentPageUrl);
-        if (transferee != null) {
-            model.put("transferee", String.valueOf(transferee));
-        }
         return mailContentBuilderService.build(model, templateName);
     }
 
