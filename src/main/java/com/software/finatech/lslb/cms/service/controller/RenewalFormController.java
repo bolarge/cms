@@ -170,8 +170,18 @@ public class RenewalFormController extends BaseController {
     public Mono<ResponseEntity> getRenewalForms(@RequestParam("institutionId") String institutionId) {
 
         return renewalFormService.getAllRenewalForms(institutionId);
-
     }
 
-
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}")
+    @ApiOperation(value = "Get Renewal form by id", response = RenewalFormDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")
+    }
+    )
+    public Mono<ResponseEntity> getById(@PathVariable ("id") String renewalFormId) {
+        return renewalFormService.getRenewalFormFullDetailById(renewalFormId);
+    }
 }
