@@ -206,6 +206,5 @@ public class ApprovalRequestNotifierAsync  {
         query.addCriteria(Criteria.where("authRoleId").is(initiator.getAuthRoleId()));
         query.addCriteria(Criteria.where("id").ne(initiator.getId()));
         return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
-
     }
 }
