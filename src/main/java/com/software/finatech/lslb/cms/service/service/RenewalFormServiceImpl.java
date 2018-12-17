@@ -489,13 +489,27 @@ public class RenewalFormServiceImpl implements RenewalFormService {
 
             //set renewal license to false renewal in progress
             License license = renewalForm.getLicense();
-            if (license != null){
-                    license.setRenewalInProgress(false);
-                    mongoRepositoryReactive.saveOrUpdate(license);
+            if (license != null) {
+                license.setRenewalInProgress(false);
+                mongoRepositoryReactive.saveOrUpdate(license);
             }
             return Mono.just(new ResponseEntity<>("Renewal Application completed successfully and now in review", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while completing application form", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> getRenewalFormFullDetailById(String renewalFormId) {
+        try {
+            RenewalForm renewalForm = getRenewalFormById(renewalFormId);
+            if (renewalForm == null) {
+                return Mono.just(new ResponseEntity<>(String.format("renewal form with id %s not found", renewalFormId), HttpStatus.BAD_REQUEST));
+            }
+            return Mono.just(new ResponseEntity<>(renewalForm.convertToDto(), HttpStatus.OK));
+
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while getting renewalform by id", e);
         }
     }
 
@@ -506,5 +520,4 @@ public class RenewalFormServiceImpl implements RenewalFormService {
     public Institution getInstitution(String institutionId) {
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
-
 }

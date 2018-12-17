@@ -21,4 +21,6 @@ public interface RenewalFormService {
     Mono<ResponseEntity> updateRenewalForm(RenewalFormUpdateDto renewalFormUpdateDto);
     Mono<ResponseEntity> getRenewalFormStatus();
     Mono<ResponseEntity> getAllRenewalForms(String institutionId);
+
+    Mono<ResponseEntity> getRenewalFormFullDetailById(String renewalFormId);
 }
