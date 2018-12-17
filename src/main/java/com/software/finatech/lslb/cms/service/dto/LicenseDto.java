@@ -22,6 +22,24 @@ public class LicenseDto {
     private String agentNumber;
     private String renewalFormId;
     private boolean renewalInProgress;
+    private String renewalPaymentRecordId;
+    private boolean renewalPaymentMade;
+
+    public String getRenewalPaymentRecordId() {
+        return renewalPaymentRecordId;
+    }
+
+    public void setRenewalPaymentRecordId(String renewalPaymentRecordId) {
+        this.renewalPaymentRecordId = renewalPaymentRecordId;
+    }
+
+    public boolean isRenewalPaymentMade() {
+        return renewalPaymentMade;
+    }
+
+    public void setRenewalPaymentMade(boolean renewalPaymentMade) {
+        this.renewalPaymentMade = renewalPaymentMade;
+    }
 
     public boolean isRenewalInProgress() {
         return renewalInProgress;
