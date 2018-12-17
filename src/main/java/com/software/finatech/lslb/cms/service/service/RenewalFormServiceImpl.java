@@ -216,7 +216,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             }
             Query queryLicense = new Query();
             queryLicense.addCriteria(Criteria.where("paymentRecordId").is(renewalFormCreateDto.getPaymentRecordId()));
-            License license = (License) mongoRepositoryReactive.find(queryLicense, License.class).block();
+            License license = (License) mongoRepositoryReactive.findById(renewalFormCreateDto.getLicenseId(), License.class).block();
 
             RenewalForm renewalForm = new RenewalForm();
             renewalForm.setId(UUID.randomUUID().toString());

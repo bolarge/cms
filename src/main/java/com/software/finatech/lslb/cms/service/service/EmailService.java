@@ -36,7 +36,7 @@ public class EmailService {
     @Async("threadPoolTaskExecutor")
     public void sendEmailWithAttachment(String content, String subject, String to, File file) {
         MimeMessagePreparator messagePreparator = mimeMessage -> {
-            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true);
             messageHelper.setFrom("noreply@lslbcms.com");
             messageHelper.setTo(to);
             messageHelper.setSubject(subject);
