@@ -49,6 +49,7 @@ public class EmailService {
             e.printStackTrace();
         }
     }
+
    /* @Async("threadPoolTaskExecutor")
     public void sendEmail(SimpleMailMessage email) {
         mailSender.send(email);
