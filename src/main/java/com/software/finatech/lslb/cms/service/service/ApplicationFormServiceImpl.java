@@ -1221,6 +1221,19 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         return null;
     }
 
+    @Override
+    public Mono<ResponseEntity> getApplicationFormFullDetailById(String applicationFormId) {
+        try {
+            ApplicationForm applicationForm = findApplicationFormById(applicationFormId);
+            if (applicationForm == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Application form with id %s does not exist", applicationFormId), HttpStatus.BAD_REQUEST));
+            }
+            return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while getting application form full detail by id", e);
+        }
+    }
+
     private ApplicationForm fromCreateDto(ApplicationFormCreateDto applicationFormCreateDto) {
         ApplicationForm applicationForm = new ApplicationForm();
         applicationForm.setId(UUID.randomUUID().toString());
