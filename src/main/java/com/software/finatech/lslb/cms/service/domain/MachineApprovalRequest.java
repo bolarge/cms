@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.dto.MachineApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.dto.MachineDto;
 import com.software.finatech.lslb.cms.service.model.MachineGameDetails;
 import com.software.finatech.lslb.cms.service.referencedata.MachineApprovalRequestTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.MachineTypeReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
@@ -346,5 +347,14 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
             return machine.getSerialNumber();
         }
         return null;
+    }
+
+    public boolean isGamingMachineRequest() {
+        return StringUtils.equals(MachineTypeReferenceData.GAMING_MACHINE_ID, this.machineTypeId);
+    }
+
+
+    public boolean isGamingTerminalRequest() {
+        return StringUtils.equals(MachineTypeReferenceData.GAMING_TERMINAL_ID, this.machineTypeId);
     }
 }

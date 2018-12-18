@@ -1,6 +1,9 @@
 package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.Agent;
+import com.software.finatech.lslb.cms.service.domain.AuthInfo;
+import com.software.finatech.lslb.cms.service.domain.Machine;
+import com.software.finatech.lslb.cms.service.domain.MachineApprovalRequest;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -42,11 +45,18 @@ public class MachineApprovalRequestMailSenderAsync extends AbstractMailSender {
             return;
         }
         String content = buildNewMachineApprovalRequestNotificationMailContent(approvalRequest);
+        String mailSubject = "";
+        if (approvalRequest.isGamingTerminalRequest()) {
+            mailSubject = "New Terminal Approval Request on LSLB Customer Management System";
+        }
+        if (approvalRequest.isGamingMachineRequest()) {
+            mailSubject = "New Machine Approval Request on LSLB Customer Management System";
+        }
         for (AuthInfo authInfo : lslbAdmins) {
             String email = authInfo.getEmailAddress();
             try {
                 logger.info("Sending initial machine request email to {}", email);
-                emailService.sendEmail(content, "New Machine Approval Request on LSLB Customer Management System", email);
+                emailService.sendEmail(content, mailSubject, email);
             } catch (Exception e) {
                 logger.error("An error occurred while sending initial machine approval notification to {}", email, e);
             }
