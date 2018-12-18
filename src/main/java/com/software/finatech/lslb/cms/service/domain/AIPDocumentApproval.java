@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.AIPDocumentApprovalDto;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
@@ -216,7 +217,20 @@ public class AIPDocumentApproval extends AbstractFact {
             aipDocumentApprovalDto.setRejectorId(rejectorId);
             aipDocumentApprovalDto.setRejectorName(rejector.getFullName());
         }
-
+        GameType gameType = getGameType();
+        if (gameType != null) {
+            aipDocumentApprovalDto.setGameTypeId(getGameTypeId());
+            aipDocumentApprovalDto.setGameTypeName(gameType.getName());
+        }
+        Institution institution = getInstitution();
+        if (institution != null) {
+            aipDocumentApprovalDto.setInstitutionId(getInstitutionId());
+            aipDocumentApprovalDto.setInstitutionName(institution.getInstitutionName());
+        }
+        License license = getLicense();
+        if (license != null) {
+            aipDocumentApprovalDto.setLicenseId(license.getId());
+        }
         return aipDocumentApprovalDto;
 
     }
@@ -227,6 +241,14 @@ public class AIPDocumentApproval extends AbstractFact {
         query.addCriteria(Criteria.where("gameTypeId").is(this.gameTypeId));
         ArrayList<InspectionForm> inspectionForms = (ArrayList<InspectionForm>) mongoRepositoryReactive.findAll(query, InspectionForm.class).toStream().collect(Collectors.toList());
         return inspectionForms.size() > 0;
+    }
+
+    private License getLicense() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(this.institutionId));
+        query.addCriteria(Criteria.where("gameTypeId").is(this.gameTypeId));
+        query.addCriteria(Criteria.where("licenseStatusId").in(LicenseStatusReferenceData.getAIPLicenseStatues()));
+        return (License) mongoRepositoryReactive.find(query, License.class).block();
     }
 
     @Override
