@@ -759,7 +759,7 @@ public class LicenseServiceImpl implements LicenseService {
                 createLicense.setId(UUID.randomUUID().toString());
                 createLicense.setEffectiveDate(license.getExpiryDate().plusDays(1));
                 createLicense.setExpiryDate(licenseEndDate);
-                createLicense.setRenewalStatus("true");
+                createLicense.setRenewalStatus("false");
                 createLicense.setInstitutionId(license.getInstitutionId());
                 createLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
                 createLicense.setGameTypeId(license.getGameTypeId());
