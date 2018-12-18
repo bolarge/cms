@@ -545,7 +545,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
                 String mailContent = buildDocumentSubmissionMailContentLSLB(aipDocumentApproval, document);
                 emailService.sendEmail(mailContent, mailSubject, email);
                 try {
-                    String callbackUrl = String.format("%s/applications/aip/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId());
+                    String callbackUrl = String.format("%s/aip-document-download/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId());
                     NotificationDto notificationDto= new NotificationDto();
                     notificationDto.setInstitutionEmail(email);
                     notificationDto.setGameType(getGameType(aipDocumentApproval.getGameTypeId()).getName());
@@ -625,12 +625,12 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         for (AuthInfo authInfo : finalApprovers) {
             String emailAddress = authInfo.getEmailAddress();
             try {
-                String callbackUrl = String.format("%s/applications/aip/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId());
+                String callbackUrl = String.format("%s/aip-document-download/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId());
                 NotificationDto notificationDto= new NotificationDto();
                 notificationDto.setInstitutionEmail(emailAddress);
                 notificationDto.setGameType(getGameType(aipDocumentApproval.getGameTypeId()).getName());
                 notificationDto.setCallBackUrl(callbackUrl);
-                notificationDto.setDescription("A new AIP application that requires your approval has been submitted on LSLB Customer Management System by for category "+notificationDto.getGameType() );
+                notificationDto.setDescription("A new AIP application that requires your approval has been submitted on LSLB Customer Management System by " + aipDocumentApproval.getInstitutionName() + " for category "+notificationDto.getGameType() );
                 notificationDto.setTemplate("AIPUpdate");
                 sendEmail.sendEmailNotification(notificationDto, "New AIP Application Submission on LSLB Customer Management System");
 
