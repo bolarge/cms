@@ -476,7 +476,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
             if (documentNotifications.isEmpty()) {
                 applicationForm.setReadyForApproval(true);
                 mongoRepositoryReactive.saveOrUpdate(applicationForm);
-                sendApproverMailToFinalApproval(applicationForm);
+        //        sendApproverMailToFinalApproval(applicationForm);
                 return;
             }
             FormDocumentApproval documentApproval = new FormDocumentApproval();
