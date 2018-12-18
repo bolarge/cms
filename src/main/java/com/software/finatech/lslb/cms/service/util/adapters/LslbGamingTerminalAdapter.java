@@ -1,6 +1,8 @@
 package com.software.finatech.lslb.cms.service.util.adapters;
 
 import com.software.finatech.lslb.cms.service.domain.Agent;
+import com.software.finatech.lslb.cms.service.domain.GameType;
+import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.domain.Machine;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.MachineStatusReferenceData;
@@ -24,10 +26,15 @@ public class LslbGamingTerminalAdapter {
     public void saveLslbGamingTerminalToDb(LslbGamingTerminal lslbGamingTerminal) {
         Machine machine = new Machine();
         Agent agent = lslbGamingTerminal.getAgent();
+        GameType gameType = lslbGamingTerminal.getGameType();
+        Institution institution = lslbGamingTerminal.getInstitution();
         machine.setId(UUID.randomUUID().toString());
-        machine.setGameTypeId(lslbGamingTerminal.getGameTypeId());
-        machine.setMachineAddress(lslbGamingTerminal.getAgentAddress());
-        machine.setInstitutionId(lslbGamingTerminal.getInstitutionId());
+        machine.setGameTypeId(gameType.getId());
+        String address = lslbGamingTerminal.getAgentAddress().replace("\"", "").trim();
+        //address = address.replace("\"", "");
+       // address = address.trim();
+        machine.setMachineAddress(address);
+        machine.setInstitutionId(institution.getId());
         machine.setMachineStatusId(MachineStatusReferenceData.ACTIVE_ID);
         machine.setMachineTypeId(MachineTypeReferenceData.GAMING_TERMINAL_ID);
         machine.setAgentId(agent.getId());

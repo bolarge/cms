@@ -116,4 +116,6 @@ public interface ApplicationFormService {
     String getApprovedApplicationTradeNameForOperator(String institutionId, String gameTypeId);
 
     Mono<ResponseEntity> getApplicationFormFullDetailById(String applicationFormId);
+
+    Mono<ResponseEntity> getAIPFormDetailById(String aipFormId);
 }

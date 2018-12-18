@@ -89,7 +89,7 @@ public class LicenseTransferMailSenderAsync extends AbstractMailSender {
         }
         String mailContent = buildLicenceTransferEmailContent(licenseTransfer, "license-transfer/LicenseTransferAddOperatorNotificationLSLBAdmin");
         for (AuthInfo lslbMember : lslbMembers) {
-            String subject = String.format("%s has applied to acquire a licence Transfer", licenseTransfer.getToInstitution());
+            String subject = String.format("%s has applied to acquire a licence", licenseTransfer.getToInstitution());
             sendLicenseTransferMail(lslbMember.getEmailAddress(), mailContent, subject);
         }
     }

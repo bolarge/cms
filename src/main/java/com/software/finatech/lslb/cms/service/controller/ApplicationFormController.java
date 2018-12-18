@@ -440,4 +440,16 @@ public class ApplicationFormController extends BaseController {
     public Mono<ResponseEntity> getApplicationFormFullDetailById(@RequestParam("id") String applicationFormId) {
         return applicationFormService.getApplicationFormFullDetailById(applicationFormId);
     }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/get-aip-form-by-id", params = {"id"})
+    @ApiOperation(value = "Get AiP Document Approval By Id", response =AIPDocumentApprovalDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getAIPFormDetailById(@RequestParam("id") String aipFormId) {
+        return applicationFormService.getAIPFormDetailById(aipFormId);
+    }
 }
