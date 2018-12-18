@@ -1,6 +1,8 @@
 package com.software.finatech.lslb.cms.service.util.adapters.model;
 
 import com.software.finatech.lslb.cms.service.domain.Agent;
+import com.software.finatech.lslb.cms.service.domain.GameType;
+import com.software.finatech.lslb.cms.service.domain.Institution;
 
 public class LslbGamingTerminal {
     private String agentTelephone;
@@ -12,9 +14,25 @@ public class LslbGamingTerminal {
     private String machineCount;
     private String machineId;
     private Agent agent;
-    private String gameTypeId;
-    private String institutionId;
     private String failReason;
+    private Institution institution;
+    private GameType gameType;
+
+    public GameType getGameType() {
+        return gameType;
+    }
+
+    public void setGameType(GameType gameType) {
+        this.gameType = gameType;
+    }
+
+    public Institution getInstitution() {
+        return institution;
+    }
+
+    public void setInstitution(Institution institution) {
+        this.institution = institution;
+    }
 
     public String getFailReason() {
         return failReason;
@@ -22,22 +40,6 @@ public class LslbGamingTerminal {
 
     public void setFailReason(String failReason) {
         this.failReason = failReason;
-    }
-
-    public String getInstitutionId() {
-        return institutionId;
-    }
-
-    public void setInstitutionId(String institutionId) {
-        this.institutionId = institutionId;
-    }
-
-    public String getGameTypeId() {
-        return gameTypeId;
-    }
-
-    public void setGameTypeId(String gameTypeId) {
-        this.gameTypeId = gameTypeId;
     }
 
     public Agent getAgent() {

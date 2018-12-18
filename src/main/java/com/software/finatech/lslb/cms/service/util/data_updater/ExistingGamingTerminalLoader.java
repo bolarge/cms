@@ -66,9 +66,10 @@ public class ExistingGamingTerminalLoader {
                     gamingTerminal.setAgentAddress(columns[5].trim());
                     gamingTerminal.setMachineCount(columns[6].trim());
                     gamingTerminal.setMachineId(columns[7].trim());
-                    gamingTerminal.setInstitutionId(institutionId);
                     if (agent != null) {
                         gamingTerminal.setAgent(agent);
+                        gamingTerminal.setInstitution(institution);
+                        gamingTerminal.setGameType(gameType);
                         toBeSavedTerminals.add(gamingTerminal);
                     } else {
                         gamingTerminal.setFailReason(String.format("Agent with bvn %s is not not found", bvn));
@@ -109,7 +110,6 @@ public class ExistingGamingTerminalLoader {
             for (String email : emails) {
                 emailService.sendEmailWithAttachment(mailContent, "Gaming Terminal Upload Notification", email, file);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

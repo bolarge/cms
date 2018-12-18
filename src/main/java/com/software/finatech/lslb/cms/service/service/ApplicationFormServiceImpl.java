@@ -1234,6 +1234,19 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
         }
     }
 
+    @Override
+    public Mono<ResponseEntity> getAIPFormDetailById(String aipFormId) {
+        try {
+            AIPDocumentApproval aipDocumentApproval = (AIPDocumentApproval) mongoRepositoryReactive.findById(aipFormId, AIPDocumentApproval.class).block();
+            if (aipDocumentApproval == null) {
+                return Mono.just(new ResponseEntity<>("AIp Form does not exist", HttpStatus.BAD_REQUEST));
+            }
+            return Mono.just(new ResponseEntity<>(aipDocumentApproval.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while getting aip document approval by id ", e);
+        }
+    }
+
     private ApplicationForm fromCreateDto(ApplicationFormCreateDto applicationFormCreateDto) {
         ApplicationForm applicationForm = new ApplicationForm();
         applicationForm.setId(UUID.randomUUID().toString());
