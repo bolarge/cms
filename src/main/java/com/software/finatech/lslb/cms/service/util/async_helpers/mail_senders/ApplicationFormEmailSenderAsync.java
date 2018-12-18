@@ -656,7 +656,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
                 notificationDto.setInstitutionEmail(emailAddress);
                 notificationDto.setGameType(getGameType(renewalForm.getGameTypeId()).getName());
                 notificationDto.setCallBackUrl(callbackUrl);
-                notificationDto.setDescription("A new renewal application that requires your approval has been submitted on LSLB Customer Management System by for category " + notificationDto.getGameType());
+                notificationDto.setDescription("A new renewal application that requires your approval has been submitted on LSLB Customer Management System by for " + notificationDto.getGameType());
                 notificationDto.setTemplate("AIPUpdate");
                 sendEmail.sendEmailNotification(notificationDto, "New Renewal Application Submission on LSLB Customer Management System");
 
