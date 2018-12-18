@@ -759,7 +759,7 @@ public class LicenseServiceImpl implements LicenseService {
                 createLicense.setId(UUID.randomUUID().toString());
                 createLicense.setEffectiveDate(license.getExpiryDate().plusDays(1));
                 createLicense.setExpiryDate(licenseEndDate);
-                createLicense.setRenewalStatus("false");
+                createLicense.setRenewalStatus("true");
                 createLicense.setInstitutionId(license.getInstitutionId());
                 createLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
                 createLicense.setGameTypeId(license.getGameTypeId());
@@ -1095,6 +1095,7 @@ public class LicenseServiceImpl implements LicenseService {
             newPendingApprovalRenewedLicense.setLicenseTypeId(paymentRecord.getLicenseTypeId());
             newPendingApprovalRenewedLicense.setGameTypeId(paymentRecord.getGameTypeId());
             newPendingApprovalRenewedLicense.setParentLicenseId(latestLicense.getId());
+            newPendingApprovalRenewedLicense.setRenewalStatus("true");
             newPendingApprovalRenewedLicense.setLicenseNumber(latestLicense.getLicenseNumber());
             mongoRepositoryReactive.saveOrUpdate(newPendingApprovalRenewedLicense);
             paymentRecord.setLicenseId(newPendingApprovalRenewedLicense.getId());
