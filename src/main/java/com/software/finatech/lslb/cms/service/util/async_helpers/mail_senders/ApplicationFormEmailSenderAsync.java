@@ -629,7 +629,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
                 notificationDto.setInstitutionEmail(emailAddress);
                 notificationDto.setGameType(getGameType(aipDocumentApproval.getGameTypeId()).getName());
                 notificationDto.setCallBackUrl(callbackUrl);
-                notificationDto.setDescription("A new AIP application that requires your approval has been submitted on LSLB Customer Management System by " + aipDocumentApproval.getInstitutionName() + " for category " + notificationDto.getGameType());
+                notificationDto.setDescription("A new AIP application that requires your approval has been submitted on LSLB Customer Management System by " + aipDocumentApproval.getInstitutionName() + " for " + notificationDto.getGameType());
                 notificationDto.setTemplate("AIPUpdate");
                 sendEmail.sendEmailNotification(notificationDto, "New AIP Application Submission on LSLB Customer Management System");
 
