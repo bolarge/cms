@@ -58,7 +58,7 @@ public class SendEmail {
         model.put("CallbackUrl", notificationDto.getCallBackUrl());
         String content = mailContentBuilderService.build(model, notificationDto.getTemplate());
         content = content.replaceAll("CallbackUrl", notificationDto.getCallBackUrl());
-        emailService.sendEmail(content, "Licence Update Notification", notificationDto.getInstitutionEmail());
+        emailService.sendEmail(content, "Renewal Update Notification", notificationDto.getInstitutionEmail());
         return "success";
     }
     public String sendEmailDeactivationNotification(NotificationDto notificationDto) {
