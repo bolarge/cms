@@ -12,6 +12,7 @@ import com.software.finatech.lslb.cms.service.util.DatabaseLoaderUtils;
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingAgentLoader;
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingGamingTerminalLoader;
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingOperatorLoader;
+import com.software.finatech.lslb.cms.service.util.httpclient.MyFileManager;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -46,6 +47,8 @@ public class TestController extends BaseController {
     private ExistingGamingTerminalLoader existingGamingTerminalLoader;
     @Autowired
     private Environment environment;
+    @Autowired
+    private MyFileManager myFileManager;
 
     private Logger logger = LoggerFactory.getLogger(TestController.class);
 
@@ -184,6 +187,27 @@ public class TestController extends BaseController {
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/save-image")
+    public ResponseEntity saveImage(@RequestParam("file") MultipartFile multipartFile) {
+        try {
+            myFileManager.writeImageToFile(multipartFile);
+            return new ResponseEntity<>("Done", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/read-image")
+    public ResponseEntity readImage(@RequestParam("fileName") String fileName) {
+        String fileBase64 = myFileManager.readImage(fileName);
+        if (fileBase64 == null) {
+            return new ResponseEntity<>("Error occurred while reading", HttpStatus.INTERNAL_SERVER_ERROR);
+        } else {
+            return new ResponseEntity<>(fileBase64, HttpStatus.OK);
         }
     }
 }

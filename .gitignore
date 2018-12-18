@@ -10,3 +10,5 @@ lslb-cms.iml
 application-test.yml
 src/main/resources/agent-data/
 src/main/resources/application-adedev.yml
+Failed-Machines.csv
+smile-networks.jpg
