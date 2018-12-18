@@ -353,7 +353,6 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
         return StringUtils.equals(MachineTypeReferenceData.GAMING_MACHINE_ID, this.machineTypeId);
     }
 
-
     public boolean isGamingTerminalRequest() {
         return StringUtils.equals(MachineTypeReferenceData.GAMING_TERMINAL_ID, this.machineTypeId);
     }
