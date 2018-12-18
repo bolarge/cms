@@ -112,7 +112,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), renewalForm.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
-            renewalFormNotificationHelperAsync.sendApprovedMailToInstitutionAdmins(renewalForm);
+        //    renewalFormNotificationHelperAsync.sendApprovedMailToInstitutionAdmins(renewalForm);
 
             //changed renewal status of license after the payment
             License license = renewalForm.getLicense();

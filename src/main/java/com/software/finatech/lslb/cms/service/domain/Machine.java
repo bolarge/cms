@@ -26,6 +26,15 @@ public class Machine extends AbstractFact {
     private String machineTypeId;
     private String machineStatusId;
     private String licenseId;
+    private boolean fromLiveData;
+
+    public boolean isFromLiveData() {
+        return fromLiveData;
+    }
+
+    public void setFromLiveData(boolean fromLiveData) {
+        this.fromLiveData = fromLiveData;
+    }
 
     public String getLicenseId() {
         return licenseId;
