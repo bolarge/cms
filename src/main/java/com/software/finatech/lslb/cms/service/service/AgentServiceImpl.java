@@ -9,7 +9,6 @@ import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.LicenseValidatorUtil;
-import com.software.finatech.lslb.cms.service.util.NumberUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AgentCreationNotifierAsync;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -357,7 +356,7 @@ public class AgentServiceImpl implements AgentService {
         gameTypeIds.add(gameTypeId);
         institutionIds.add(institutionId);
         agentInstitution.setBusinessAddressList(agentCreateDto.getBusinessAddressList());
-         agentInstitution.getGameTypeIds().add(gameTypeId);
+        agentInstitution.getGameTypeIds().add(gameTypeId);
         agentInstitution.setInstitutionId(institutionId);
         List<AgentInstitution> agentInstitutions = new ArrayList<>();
         agentInstitutions.add(agentInstitution);
@@ -424,7 +423,7 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     public Mono<ResponseEntity> getAllAgentStatus() {
-        return getAllEnumeratedEntity("AgentStatus",AgentStatus.class);
+        return getAllEnumeratedEntity("AgentStatus", AgentStatus.class);
     }
 
     @Override
@@ -435,6 +434,11 @@ public class AgentServiceImpl implements AgentService {
     @Override
     public Agent findAgentByAgentNumber(String agentNumber) {
         return (Agent) mongoRepositoryReactive.find(Query.query(Criteria.where("agentId").is(agentNumber)), Agent.class).block();
+    }
+
+    @Override
+    public Agent findAgentByBvn(String bvn) {
+        return (Agent) mongoRepositoryReactive.find(Query.query(Criteria.where("bvn").is(bvn)), Agent.class).block();
     }
 
     private PendingAgent findPendingApprovalAgentWithEmail(String email) {

@@ -630,7 +630,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             queryAIP.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
 
             License license = (License) mongoRepositoryReactive.find(queryAIP, License.class).block();
-            licenseService.updateToDocumentAIP(license.getId());
+            licenseService.updateToDocumentAIP(license);
 
             String verbiage = String.format("Submitted AIP form : %s ->  ", aipDocumentApproval.getFormStatusId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,

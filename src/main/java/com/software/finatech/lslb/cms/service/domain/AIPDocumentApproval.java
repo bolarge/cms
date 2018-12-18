@@ -93,10 +93,10 @@ public class AIPDocumentApproval extends AbstractFact {
     }
 
     public Institution getInstitution() {
-        if (StringUtils.isEmpty(institutionId)) {
+        if (StringUtils.isEmpty(this.institutionId)) {
             return null;
         }
-        return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+        return (Institution) mongoRepositoryReactive.findById(this.institutionId, Institution.class).block();
     }
 
     public String getInstitutionName() {

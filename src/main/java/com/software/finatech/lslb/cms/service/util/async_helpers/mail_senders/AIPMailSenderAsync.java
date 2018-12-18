@@ -104,7 +104,7 @@ public class AIPMailSenderAsync extends AbstractMailSender {
         String presentDateString = DateTime.now().toString("dd-MM-yyyy");
         String gameTypeName = aipDocumentApproval.getGameTypeName();
         String institutionName = aipDocumentApproval.getInstitutionName();
-        String frontEndUrl = String.format("%s/aip-documents/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId());
+        String frontEndUrl = String.format("%s/aip-document-download/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId());
         HashMap<String, Object> model = new HashMap<>();
         model.put("gameType", gameTypeName);
         model.put("date", presentDateString);

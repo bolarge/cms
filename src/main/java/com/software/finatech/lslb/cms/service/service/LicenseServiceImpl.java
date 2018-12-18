@@ -515,15 +515,8 @@ public class LicenseServiceImpl implements LicenseService {
 
     }
 
-    public Mono<ResponseEntity> updateToDocumentAIP(String licenseId) {
+    public Mono<ResponseEntity> updateToDocumentAIP(License license) {
         try {
-
-            //TODO: get all lslb admins that can recieve notification
-
-            Query queryLicence = new Query();
-            queryLicence.addCriteria(Criteria.where("id").is(licenseId));
-            License license = (License) mongoRepositoryReactive.find(queryLicence, License.class).block();
-
             if (license == null) {
                 return Mono.just(new ResponseEntity<>("No Record Record", HttpStatus.BAD_REQUEST));
             }
@@ -531,7 +524,7 @@ public class LicenseServiceImpl implements LicenseService {
             mongoRepositoryReactive.saveOrUpdate(license);
             List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_AIP_ID);
             if (lslbAdmins.size() != 0) {
-                lslbAdmins.stream().forEach(lslbAdmin -> {
+                lslbAdmins.forEach(lslbAdmin -> {
                     NotificationDto notificationDto = new NotificationDto();
                     notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
                     notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
@@ -541,13 +534,9 @@ public class LicenseServiceImpl implements LicenseService {
                     notificationDto.setCallBackUrl(frontEndPropertyHelper.getFrontEndUrl() + "/all-aips");
                     notificationDto.setInstitutionEmail(lslbAdmin.getEmailAddress());
                     sendEmail.sendEmailLicenseApplicationNotification(notificationDto);
-
                 });
-
             }
-
             return Mono.just(new ResponseEntity<>("OK", HttpStatus.OK));
-
         } catch (Throwable ex) {
             return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
@@ -560,8 +549,6 @@ public class LicenseServiceImpl implements LicenseService {
 
             //TODO: get all lslb admins that can recieve notification
             ArrayList<AuthInfo> lslbAdmins = new ArrayList<>();
-
-
             Query queryLicence = new Query();
             queryLicence.addCriteria(Criteria.where("institutionId").is(institutionId));
             queryLicence.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
