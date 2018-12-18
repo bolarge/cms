@@ -115,14 +115,14 @@ public class CustomerComplaintEmailSenderAsync extends AbstractMailSender {
         model.put("date", presentDateString);
         model.put("frontEndUrl", frontEndUrl);
         model.put("ticketId", customerComplain.getTicketId());
-        String content = mailContentBuilderService.build(model, "PendingCustomerComplainReminder");
+        String content = mailContentBuilderService.build(model, "customer-complaint/PendingCustomerComplainReminder");
         return content;
     }
 
     private void sendPendingCustomerComplaintToLSLBAdmin(String lslbAdminEmail, String mailContent) {
         try {
             logger.info("Sending customer complain reminder email to {}", lslbAdminEmail);
-            emailService.sendEmail(mailContent, "LSLB Customer Complain Reminder", lslbAdminEmail);
+            emailService.sendEmail(mailContent, "LSLB Customer Complaint Reminder", lslbAdminEmail);
         } catch (Exception e) {
             logger.error(String.format("An error occurred while sending customer complain reminder email to %s", lslbAdminEmail), e);
         }

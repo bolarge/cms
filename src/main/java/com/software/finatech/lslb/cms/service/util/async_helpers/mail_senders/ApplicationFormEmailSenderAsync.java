@@ -794,7 +794,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     }
 
     private String buildResubmissionNotificationForAIPForm(AIPDocumentApproval aipDocumentApproval, Document document) {
-        String callbackUrl = String.format("%s/application-view/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId());
+        String callbackUrl = String.format("%s/aip-document-download/%s", frontEndPropertyHelper.getFrontEndUrl(), aipDocumentApproval.getId());
         String presentDate = DateTime.now().toString("dd-MM-yyyy ");
         HashMap<String, Object> model = new HashMap<>();
         model.put("date", presentDate);

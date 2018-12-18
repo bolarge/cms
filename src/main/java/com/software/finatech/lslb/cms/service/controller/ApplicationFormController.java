@@ -27,7 +27,7 @@ import javax.validation.Valid;
         tags = "Application Form Controller")
 @RestController
 @RequestMapping("/api/v1/application-form")
-public class ApplicationFormController  extends BaseController{
+public class ApplicationFormController extends BaseController {
 
 
     private ApplicationFormService applicationFormService;
@@ -428,5 +428,16 @@ public class ApplicationFormController  extends BaseController{
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> addCommentToApplicationForm(@PathVariable("applicationFormId") String applicationFormId, @RequestBody AddCommentDto addCommentDto, HttpServletRequest request) {
         return applicationFormService.addCommentsToForm(applicationFormId, addCommentDto, request);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/get-detail-by-id", params = {"id"})
+    @ApiOperation(value = "Get application form detail by id ", response = ApplicationFormDto.class, consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> getApplicationFormFullDetailById(@RequestParam("id") String applicationFormId) {
+        return applicationFormService.getApplicationFormFullDetailById(applicationFormId);
     }
 }
