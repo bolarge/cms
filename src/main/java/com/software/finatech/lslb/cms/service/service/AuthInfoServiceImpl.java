@@ -247,6 +247,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 url = appUrl + "/authInfo/confirm?token=" + verificationToken.getConfirmationToken();
                 model.put("CallbackUrl", url);
                 model.put("isApplicant", false);
+                model.put("isAgent", authInfo.isAgent());
                 String content = mailContentBuilderService.build(model, "continueRegistration-new");
                 content = content.replaceAll("CallbackUrl", url);
                 emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
@@ -545,7 +546,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         String firstName = authInfo.getFirstName();
         String[] names = firstName.split(" ");
         ssoUser.setFirstName(names[0]);
-     //   ssoUser.setFirstName(authInfo.getFirstName());
+        //   ssoUser.setFirstName(authInfo.getFirstName());
         ssoUser.setLastName(authInfo.getLastName());
         ssoUser.setPassword(authInfoCompleteDto.getPassword());
         ssoUser.setPhoneNumber(authInfo.getPhoneNumber());
