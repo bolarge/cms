@@ -512,7 +512,9 @@ public class Scheduler {
      * sends mail to GM for all PENDING AIP forms
      * that have approved documents
      */
-    @Scheduled(cron = "0 0 9 * * *")
+    // @Scheduled(cron = "0 0 9 * * *")
+    @Scheduled(fixedRate = 1 * 60 * 1000, initialDelay = 600)
+    @SchedulerLock(name = "Send Email for all AIP Ready for approval", lockAtMostFor = 1 * 60 * 1000, lockAtLeastFor = 1 * 60 * 1000)
     public void sendMailForAIPForms() {
         try {
             Query query = new Query();
@@ -525,10 +527,11 @@ public class Scheduler {
             for (AIPDocumentApproval aipDocumentApproval : aipDocumentApprovals) {
                 if (aipDocumentApproval.getReadyForApproval() != null
                         && aipDocumentApproval.getReadyForApproval()
-                        && aipDocumentApproval.hasInspectionForm()
+                        && aipDocumentApproval.hasCompleteAssessmentReport()
                         && !aipDocumentApproval.isFinalNotificationSent()) {
                     aipMailSenderAsync.sendFinalAIPApprovalMailTOFianlApprovers(aipDocumentApproval);
                     aipDocumentApproval.setFinalNotificationSent(true);
+                    aipDocumentApproval.setReadyForFinalApproval(true);
                     mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
                 }
             }

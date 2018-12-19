@@ -174,7 +174,7 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
         }
         LocalDateTime dateCreated = getDateCreated();
         if (dateCreated != null) {
-            agentApprovalRequestDto.setDateCreated(dateCreated.toString("dd-MM-yyyy HH:mm:ss a"));
+            agentApprovalRequestDto.setDateCreated(dateCreated.toString("dd-MM-yyyy hh:mm a"));
         }
         return agentApprovalRequestDto;
     }

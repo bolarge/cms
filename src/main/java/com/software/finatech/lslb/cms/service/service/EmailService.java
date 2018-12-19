@@ -1,5 +1,9 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.software.finatech.lslb.cms.service.domain.FailedEmailNotification;
+import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -9,11 +13,15 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.util.UUID;
 
 @Component("emailService")
 public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
+    @Autowired
+    private MongoRepositoryReactiveImpl mongoRepositoryReactive;
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
     @Async("threadPoolTaskExecutor")
     public void sendEmail(String content, String subject, String to) {
@@ -27,8 +35,40 @@ public class EmailService {
         };
         try {
             mailSender.send(messagePreparator);
-        } catch (MailException e) {
-            e.printStackTrace();
+        } catch (Throwable e) {
+            FailedEmailNotification failedEmailNotification = new FailedEmailNotification();
+            failedEmailNotification.setId(UUID.randomUUID().toString());
+            failedEmailNotification.setExceptionMessage(e.getMessage());
+            failedEmailNotification.setContent(content);
+            failedEmailNotification.setFromEmailAddress("noreply@lslbcms.com");
+            failedEmailNotification.setSent(false);
+            failedEmailNotification.setToEmailAddress(to);
+            failedEmailNotification.setSubject(subject);
+            mongoRepositoryReactive.saveOrUpdate(failedEmailNotification);
+            logger.error("An error occurred while sending mail", e);
+        }
+    }
+
+    public void sendFailedEmail(FailedEmailNotification failedEmailNotification) {
+        failedEmailNotification.setProcessing(true);
+        mongoRepositoryReactive.saveOrUpdate(failedEmailNotification);
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom("noreply@lslbcms.com");
+            messageHelper.setTo(failedEmailNotification.getToEmailAddress());
+            messageHelper.setSubject(failedEmailNotification.getSubject());
+            messageHelper.setText(failedEmailNotification.getContent(), true);
+        };
+        try {
+            mailSender.send(messagePreparator);
+            failedEmailNotification.setProcessing(false);
+            failedEmailNotification.setSent(true);
+        } catch (Throwable e) {
+            failedEmailNotification.setSent(false);
+            failedEmailNotification.setProcessing(false);
+            failedEmailNotification.setExceptionMessage(e.getMessage());
+            mongoRepositoryReactive.saveOrUpdate(failedEmailNotification);
+            logger.error("An error occurred while sending mail", e);
         }
     }
 

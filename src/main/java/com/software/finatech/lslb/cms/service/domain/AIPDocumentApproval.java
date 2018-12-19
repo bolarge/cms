@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.AIPDocumentApprovalDto;
+import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
@@ -10,6 +11,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -25,8 +27,19 @@ public class AIPDocumentApproval extends AbstractFact {
     protected String reasonForRejection;
     protected FormDocumentApproval documentApproval;
     protected LocalDate submissionDate;
+    //signifies if all the documents on the form have been uploaded
     protected Boolean readyForApproval;
     private boolean finalNotificationSent;
+    //specifies if it is ready for final approval
+    private boolean readyForFinalApproval;
+
+    public boolean isReadyForFinalApproval() {
+        return readyForFinalApproval;
+    }
+
+    public void setReadyForFinalApproval(boolean readyForFinalApproval) {
+        this.readyForFinalApproval = readyForFinalApproval;
+    }
 
     public boolean isFinalNotificationSent() {
         return finalNotificationSent;
@@ -231,8 +244,8 @@ public class AIPDocumentApproval extends AbstractFact {
         if (license != null) {
             aipDocumentApprovalDto.setLicenseId(license.getId());
         }
+        aipDocumentApprovalDto.setReadyForFinalApproval(isReadyForFinalApproval());
         return aipDocumentApprovalDto;
-
     }
 
     public boolean hasInspectionForm() {
@@ -241,6 +254,34 @@ public class AIPDocumentApproval extends AbstractFact {
         query.addCriteria(Criteria.where("gameTypeId").is(this.gameTypeId));
         ArrayList<InspectionForm> inspectionForms = (ArrayList<InspectionForm>) mongoRepositoryReactive.findAll(query, InspectionForm.class).toStream().collect(Collectors.toList());
         return inspectionForms.size() > 0;
+    }
+
+
+    public boolean hasCompleteAssessmentReport() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("documentPurposeId").is(DocumentPurposeReferenceData.AIP_REPORT_ID));
+        query.addCriteria(Criteria.where("active").is(true));
+        Map<String, com.software.finatech.lslb.cms.service.domain.Document> reportDocumentsMap = new HashMap<>();
+        ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(query, DocumentType.class).toStream().collect(Collectors.toList());
+        for (DocumentType documentType : documentTypes) {
+            query = new Query();
+            query.addCriteria(Criteria.where("documentTypeId").is(documentType.getId()));
+            query.addCriteria(Criteria.where("entityId").is(this.id));
+            query.addCriteria(Criteria.where("isCurrent").is(true));
+            com.software.finatech.lslb.cms.service.domain.Document document = (com.software.finatech.lslb.cms.service.domain.Document) mongoRepositoryReactive.find(query, com.software.finatech.lslb.cms.service.domain.Document.class).block();
+            reportDocumentsMap.put(documentType.getId(), document);
+        }
+        if (reportDocumentsMap.values().isEmpty()) {
+            return false;
+        }
+        for (DocumentType documentType : documentTypes) {
+            if (documentType.isRequired()) {
+                if (reportDocumentsMap.get(documentType.getId()) == null) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private License getLicense() {

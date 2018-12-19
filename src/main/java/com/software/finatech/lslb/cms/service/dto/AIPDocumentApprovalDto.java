@@ -18,6 +18,15 @@ public class AIPDocumentApprovalDto {
     private String gameTypeName;
     private String institutionName;
     private String licenseId;
+    private Boolean readyForFinalApproval;
+
+    public Boolean getReadyForFinalApproval() {
+        return readyForFinalApproval;
+    }
+
+    public void setReadyForFinalApproval(Boolean readyForFinalApproval) {
+        this.readyForFinalApproval = readyForFinalApproval;
+    }
 
     public String getInstitutionId() {
         return institutionId;

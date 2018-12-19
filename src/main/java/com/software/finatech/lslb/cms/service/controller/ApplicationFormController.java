@@ -28,10 +28,7 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/v1/application-form")
 public class ApplicationFormController extends BaseController {
-
-
     private ApplicationFormService applicationFormService;
-
     @Autowired
     public void setApplicationFormService(ApplicationFormService applicationFormService) {
         this.applicationFormService = applicationFormService;

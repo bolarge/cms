@@ -949,6 +949,16 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 return Mono.just(new ResponseEntity<>(String.format("Role with id %s not found", newRoleId), HttpStatus.BAD_REQUEST));
             }
 
+            if (StringUtils.equals(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID, oldRole.getId())
+                    || StringUtils.equals(LSLBAuthRoleReferenceData.AGENT_ROLE_ID, oldRole.getId())
+                    || StringUtils.equals(LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID, oldRole.getId())) {
+                return Mono.just(new ResponseEntity<>("User role cannot be changed", HttpStatus.BAD_REQUEST));
+            }
+
+            if ((StringUtils.equals(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID, newRole.getId()))) {
+                return Mono.just(new ResponseEntity<>("User role cannot be changed to Gaming operator Role", HttpStatus.BAD_REQUEST));
+            }
+
             UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
             userApprovalRequest.setId(UUID.randomUUID().toString());
             userApprovalRequest.setAuthInfoId(subjectUserId);
