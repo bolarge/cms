@@ -62,7 +62,7 @@ public class ExpirationList {
         licenceTypes.add(LicenseTypeReferenceData.INSTITUTION_ID);
         queryLicence.addCriteria(Criteria.where("expiryDate").lte(dateTime));
         queryLicence.addCriteria(Criteria.where("licenseStatusId").in(licenseStatuses));//orOperator(Criteria.where("licenseStatusId").is("03")));
-        queryLicence.addCriteria(Criteria.where("licenseTypeId").in(licenceTypes));//orOperator(Criteria.where("licenseStatusId").is("03")));
+     //   queryLicence.addCriteria(Criteria.where("licenseTypeId").in(licenceTypes));//orOperator(Criteria.where("licenseStatusId").is("03")));
 
         try {
             List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicence, License.class).toStream().collect(Collectors.toList());
