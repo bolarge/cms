@@ -595,6 +595,7 @@ public class AuthInfoController extends BaseController {
                                           @Param("sortProperty") String sortProperty,
                                           @Param("sorting") String sorting,
                                           @Param("roleId") String roleId,
+                                          @RequestParam(value = "keyword", required = false) String keyword,
                                           HttpServletResponse httpServletResponse) {
         try {
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
@@ -611,7 +612,11 @@ public class AuthInfoController extends BaseController {
             } else {
                 query.addCriteria(Criteria.where("authRoleId").is(roleId));
             }
-
+            if (!StringUtils.isEmpty(keyword)) {
+                query.addCriteria(new Criteria().orOperator(Criteria.where("fullName").regex(keyword, "i"),
+                        Criteria.where("emailAddress").regex(keyword, "i"),
+                        Criteria.where("phoneNumber").regex(keyword, "i")));
+            }
             if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, AuthInfo.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
