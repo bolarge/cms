@@ -8,6 +8,7 @@ public class MachineStatusReferenceData {
     public static final String IN_ACTIVE_ID = "2";
     public static final String STOLEN_ID = "3";
     public static final String FAULTY_ID = "4";
+    public static final String EXPIRED_ID = "5";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         MachineStatus status = (MachineStatus) mongoRepositoryReactive.findById(ACTIVE_ID, MachineStatus.class).block();
@@ -40,6 +41,14 @@ public class MachineStatusReferenceData {
             status.setId(FAULTY_ID);
         }
         status.setName("FAULTY");
+        mongoRepositoryReactive.saveOrUpdate(status);
+
+        status = (MachineStatus) mongoRepositoryReactive.findById(EXPIRED_ID, MachineStatus.class).block();
+        if (status == null) {
+            status = new MachineStatus();
+            status.setId(EXPIRED_ID);
+        }
+        status.setName("EXPIRED");
         mongoRepositoryReactive.saveOrUpdate(status);
     }
 }

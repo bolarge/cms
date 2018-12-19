@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.MachineStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionOnboardingWorkflowService;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
@@ -517,5 +518,26 @@ public class InstitutionServiceImpl implements InstitutionService {
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         return (InstitutionCategoryDetails) mongoRepositoryReactive.find(query, InstitutionCategoryDetails.class).block();
+    }
+
+
+    /**
+     * makes all machines belonging to institution become expired after license transfer
+     *
+     * @param licenseTransfer
+     */
+    @Override
+    public void expireAllOperatorTerminalsAndMachines(LicenseTransfer licenseTransfer) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(licenseTransfer.getFromInstitutionId()));
+        query.addCriteria(Criteria.where("gameTypeId").is(licenseTransfer.getGameTypeId()));
+        ArrayList<Machine> machines = (ArrayList<Machine>) mongoRepositoryReactive.findAll(query, Machine.class).toStream().collect(Collectors.toList());
+        for (Machine machine : machines) {
+            logger.info("Expiring Machine {}", machine.getSerialNumber());
+            machine.setOldSerialNumber(machine.getSerialNumber());
+            machine.setSerialNumber(null);
+            machine.setMachineStatusId(MachineStatusReferenceData.EXPIRED_ID);
+            mongoRepositoryReactive.saveOrUpdate(machine);
+        }
     }
 }

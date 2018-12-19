@@ -873,6 +873,10 @@ public class LicenseServiceImpl implements LicenseService {
                 mongoRepositoryReactive.saveOrUpdate(transferredLicense);
                 mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
                 mongoRepositoryReactive.saveOrUpdate(newLicenseForTransferee);
+
+
+                //expire all operators terminals and machines
+                institutionService.expireAllOperatorTerminalsAndMachines(licenseTransfer);
                 String verbiage = String.format("Transferred License Number -> %s , Category ->%s, Transferor -> %s, Transfereree -> %s",
                         transferredLicense.getLicenseNumber(), transferredLicense.getGameType(), licenseTransfer.getFromInstitution(), licenseTransfer.getToInstitution());
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LICENCE_ID, "System Admin",
@@ -1220,6 +1224,7 @@ public class LicenseServiceImpl implements LicenseService {
 
     /**
      * Gets previous confirmed license for renewal payment
+     *
      * @param institutionId
      * @param agentId
      * @param gameTypeId
@@ -1228,9 +1233,9 @@ public class LicenseServiceImpl implements LicenseService {
      */
     @Override
     public License getPreviousConfirmedLicense(String institutionId,
-                                                String agentId,
-                                                String gameTypeId,
-                                                String licenseTypeId) {
+                                               String agentId,
+                                               String gameTypeId,
+                                               String licenseTypeId) {
         Query query = new Query();
         if (!StringUtils.isEmpty(institutionId)) {
             query.addCriteria(Criteria.where("institutionId").is(institutionId));

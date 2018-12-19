@@ -26,7 +26,16 @@ public class Machine extends AbstractFact {
     private String machineTypeId;
     private String machineStatusId;
     private String licenseId;
+    private String oldSerialNumber;
     private boolean fromLiveData;
+
+    public String getOldSerialNumber() {
+        return oldSerialNumber;
+    }
+
+    public void setOldSerialNumber(String oldSerialNumber) {
+        this.oldSerialNumber = oldSerialNumber;
+    }
 
     public boolean isFromLiveData() {
         return fromLiveData;
