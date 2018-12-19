@@ -797,6 +797,7 @@ public class DocumentController extends BaseController {
                 Document document = findDocumentById(documentId);
                 if (document != null) {
                     document.setArchive(true);
+                    document.setCurrent(false);
                     mongoRepositoryReactive.saveOrUpdate(document);
                 }
             }
