@@ -86,6 +86,7 @@ public class MachineServiceImpl implements MachineService {
                                                 String agentId,
                                                 String machineTypeId,
                                                 String machineStatusId,
+                                                boolean forAgentAssignment,
                                                 HttpServletResponse httpServletResponse) {
 
         try {
@@ -123,10 +124,12 @@ public class MachineServiceImpl implements MachineService {
             }
             ArrayList<MachineDto> gamingMachineDtos = new ArrayList<>();
 
-            gamingMachines.forEach(gamingMachine -> {
-                gamingMachineDtos.add(gamingMachine.convertToDto());
-            });
-
+            for (Machine machine : gamingMachines) {
+                if (forAgentAssignment && !StringUtils.isEmpty(machine.getAgentId())) {
+                    continue;
+                }
+                gamingMachineDtos.add(machine.convertToDto());
+            }
             return Mono.just(new ResponseEntity<>(gamingMachineDtos, HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while trying to get all gaming machines";

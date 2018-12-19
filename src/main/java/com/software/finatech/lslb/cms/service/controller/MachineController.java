@@ -43,8 +43,9 @@ public class MachineController extends BaseController {
                                                      @RequestParam("agentId") String agentId,
                                                      @RequestParam("machineTypeId") String machineTypeId,
                                                      @RequestParam("machineStatusId") String machineStatusId,
+                                                     @RequestParam("forAgentAssignment") boolean forAgentAssignment,
                                                      HttpServletResponse httpServletResponse) {
-        return machineService.findAllMachines(page, pageSize, sortType, sortParam, institutionId, agentId, machineTypeId, machineStatusId, httpServletResponse);
+        return machineService.findAllMachines(page, pageSize, sortType, sortParam, institutionId, agentId, machineTypeId, machineStatusId,forAgentAssignment, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create")
