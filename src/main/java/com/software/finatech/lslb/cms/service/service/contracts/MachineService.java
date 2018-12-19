@@ -19,6 +19,7 @@ public interface MachineService {
                                          String agentId,
                                          String machineTypeId,
                                          String machineStatusId,
+                                         boolean forAgentAssignment,
                                          HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> createMachine(MachineCreateDto gamingMachineCreateDto, HttpServletRequest request);
@@ -29,7 +30,7 @@ public interface MachineService {
 
     Mono<ResponseEntity> removeGamesFromMachine(MachineGameUpdateDto machineGameUpdateDto, HttpServletRequest request);
 
-    Mono<ResponseEntity> uploadMultipleMachinesForInstitution(String institutionId, String gameTypeId,String machineTypeId, MultipartFile multipartFile, HttpServletRequest request);
+    Mono<ResponseEntity> uploadMultipleMachinesForInstitution(String institutionId, String gameTypeId, String machineTypeId, MultipartFile multipartFile, HttpServletRequest request);
 
     Machine findMachineById(String machineId);
 
