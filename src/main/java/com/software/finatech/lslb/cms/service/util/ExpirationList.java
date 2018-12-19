@@ -7,6 +7,7 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,8 @@ public class ExpirationList {
                 return null;
             }
             for (License license : licenses) {
-                if (license.getLicenseStatusId().equalsIgnoreCase(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID)) {
+                if (license.getLicenseStatusId().equalsIgnoreCase(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID) ||
+                        StringUtils.equalsIgnoreCase(LicenseStatusReferenceData.RENEWED_ID, license.getLicenseStatusId())) {
                     license.setRenewalStatus("true");
                     mongoRepositoryReactive.saveOrUpdate(license);
                 }

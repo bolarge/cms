@@ -216,7 +216,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             }
             LicenseTransferStatus oldStatus = licenseTransfer.getLicenseTransferStatus();
             if (licenseTransfer.isPendingInitialApproval()) {
-                ScheduledMeeting scheduledMeeting = scheduledMeetingService.findCompletedMeetingForEntity(licenseTransferId, ScheduledMeetingPurposeReferenceData.TRANSFEROR_ID);
+                ScheduledMeeting scheduledMeeting = scheduledMeetingService.findCompletedMeetingForEntityAndPurpose(licenseTransferId, ScheduledMeetingPurposeReferenceData.TRANSFEROR_ID);
                 if (scheduledMeeting == null) {
                     return Mono.just(new ResponseEntity<>("There is no completed exit meeting scheduled for Transferor", HttpStatus.BAD_REQUEST));
                 }
@@ -225,9 +225,9 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
             } else if (licenseTransfer.isPendingAddInstitutionApproval()) {
                 licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.PENDING_FINAL_APPROVAL_ID);
             } else if (licenseTransfer.isPendingFinalApproval()) {
-                ScheduledMeeting scheduledMeeting = scheduledMeetingService.findCompletedMeetingForEntity(licenseTransferId, ScheduledMeetingPurposeReferenceData.TRANSFEREE_ID);
+                ScheduledMeeting scheduledMeeting = scheduledMeetingService.findCompletedMeetingForEntityAndPurpose(licenseTransferId, ScheduledMeetingPurposeReferenceData.TRANSFEREE_ID);
                 if (scheduledMeeting == null) {
-                    return Mono.just(new ResponseEntity<>("There is no completed presentation scheduled for Transferee", HttpStatus.BAD_REQUEST));
+                    //       return Mono.just(new ResponseEntity<>("There is no completed presentation scheduled for Transferee", HttpStatus.BAD_REQUEST));
                 }
                 if (!loggedInUser.getAllUserPermissionIdsForUser().contains(LSLBAuthPermissionReferenceData.FINAL_LICENSE_TRANSFER_APPROVER_ID)) {
                     return Mono.just(new ResponseEntity<>("User does not have permission to approve license transfer", HttpStatus.BAD_REQUEST));

@@ -782,7 +782,7 @@ public class LicenseServiceImpl implements LicenseService {
             notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
             notificationDto.setTemplate("LicenseUpdate");
             notificationDto.setDescription(getInstitution(license.getInstitutionId()).getInstitutionName() + ",  License for " +
-                    notificationDto.getGameType() + " has been approved.\n License Number is: " + licenseNumber + ". \nKindly pick up the original hard copy of this license at LSLB Office.");
+                    notificationDto.getGameType() + " has been approved.\n License Number is: " + licenseNumber + ". \nKin pick up the original hard copy of this license at LSLB Office.");
 
             ArrayList<AuthInfo> authInfos = authInfoService.getAllActiveGamingOperatorUsersForInstitution(license.getInstitutionId());
             for (AuthInfo authInfo : authInfos) {
@@ -1017,7 +1017,6 @@ public class LicenseServiceImpl implements LicenseService {
                 return;
             }
 
-
             //add licence to payment record
             Set<Machine> gamingTerminals = paymentRecord.getGamingTerminals();
             License license = findExistingGamingTerminalLicenseInPresentYear(paymentRecord);
@@ -1095,7 +1094,7 @@ public class LicenseServiceImpl implements LicenseService {
             newPendingApprovalRenewedLicense.setLicenseTypeId(paymentRecord.getLicenseTypeId());
             newPendingApprovalRenewedLicense.setGameTypeId(paymentRecord.getGameTypeId());
             newPendingApprovalRenewedLicense.setParentLicenseId(latestLicense.getId());
-            newPendingApprovalRenewedLicense.setRenewalStatus("true");
+            newPendingApprovalRenewedLicense.setRenewalStatus("false");
             newPendingApprovalRenewedLicense.setLicenseNumber(latestLicense.getLicenseNumber());
             mongoRepositoryReactive.saveOrUpdate(newPendingApprovalRenewedLicense);
             paymentRecord.setLicenseId(newPendingApprovalRenewedLicense.getId());

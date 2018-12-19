@@ -282,6 +282,18 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                 institutionOnboardingWorkflowService.updateWorkflowForCompletedMeeting(scheduledMeeting);
                 applicationFormEmailSenderAsync.sendNotificationForMeetingCompletionForApplication(scheduledMeeting.getApplicationForm());
             }
+            if (scheduledMeeting.isForLicenseTransferror() || scheduledMeeting.isForLicenseTransferee()) {
+                LicenseTransfer licenseTransfer = scheduledMeeting.getLicenseTransfer();
+                if (licenseTransfer != null) {
+                    if (scheduledMeeting.isForLicenseTransferee()) {
+                        licenseTransfer.setTransfereeMeetingCompleted(true);
+                    }
+                    if (scheduledMeeting.isForLicenseTransferror()) {
+                        licenseTransfer.setTransferorMeetingCompleted(true);
+                    }
+                    mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
+                }
+            }
             return Mono.just(new ResponseEntity<>(scheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while completing the scheduled meeting", e);
@@ -407,7 +419,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
     }
 
     @Override
-    public ScheduledMeeting findCompletedMeetingForEntity(String entityId, String meetingPurposeId) {
+    public ScheduledMeeting findCompletedMeetingForEntityAndPurpose(String entityId, String meetingPurposeId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("entityId").is(entityId));
         query.addCriteria(Criteria.where("scheduledMeetingStatusId").is(ScheduledMeetingStatusReferenceData.COMPLETED_STATUS_ID));
