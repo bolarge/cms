@@ -829,6 +829,7 @@ public class DocumentController extends BaseController {
                 Document document = findDocumentById(documentId);
                 if (document != null) {
                     document.setArchive(false);
+                    document.setCurrent(true);
                     mongoRepositoryReactive.saveOrUpdate(document);
                 }
             }
@@ -860,7 +861,9 @@ public class DocumentController extends BaseController {
                 Document document = findDocumentById(documentId);
                 if (document != null) {
                     boolean newArchiveStatus = !document.isArchive();
+                    boolean newCurrentStatus = !document.getCurrent();
                     document.setArchive(newArchiveStatus);
+                    document.setCurrent(newCurrentStatus);
                     mongoRepositoryReactive.saveOrUpdate(document);
                 }
             }
