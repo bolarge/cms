@@ -1,9 +1,6 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
-import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
-import com.software.finatech.lslb.cms.service.domain.AuthInfo;
-import com.software.finatech.lslb.cms.service.domain.Institution;
-import com.software.finatech.lslb.cms.service.domain.InstitutionCategoryDetails;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.InstitutionCreateDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionDto;
 import com.software.finatech.lslb.cms.service.dto.InstitutionUpdateDto;
@@ -46,4 +43,5 @@ public interface InstitutionService {
     void saveOperatorMembersDetailsToOperator(ApplicationForm applicationForm);
 
     InstitutionCategoryDetails findInstitutionCategoryDetailsByInstitutionIdAndGameTypeId(String institutionId, String gameTypeId);
+    void expireAllOperatorTerminalsAndMachines(LicenseTransfer licenseTransfer);
 }
