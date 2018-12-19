@@ -1218,7 +1218,17 @@ public class LicenseServiceImpl implements LicenseService {
         throw new Exception();
     }
 
-    private License getPreviousConfirmedLicense(String institutionId,
+
+    /**
+     * Gets previous confirmed license for renewal payment
+     * @param institutionId
+     * @param agentId
+     * @param gameTypeId
+     * @param licenseTypeId
+     * @return
+     */
+    @Override
+    public License getPreviousConfirmedLicense(String institutionId,
                                                 String agentId,
                                                 String gameTypeId,
                                                 String licenseTypeId) {
@@ -1240,6 +1250,8 @@ public class LicenseServiceImpl implements LicenseService {
         licenseStatusIds.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
         licenseStatusIds.add(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
         licenseStatusIds.add(LicenseStatusReferenceData.RENEWED_ID);
+        licenseStatusIds.add(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
+
         query.addCriteria(Criteria.where("licenseStatusId").in(licenseStatusIds));
         Sort sort = new Sort(Sort.Direction.DESC, "effectiveDate");
 

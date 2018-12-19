@@ -85,4 +85,9 @@ public interface LicenseService {
     License findPresentLicenseForCase(LoggedCase loggedCase);
 
     Mono<ResponseEntity> licenseLicense(LicenseRequestDto licenseRequestDto, HttpServletRequest request);
+
+    License getPreviousConfirmedLicense(String institutionId,
+                                        String agentId,
+                                        String gameTypeId,
+                                        String licenseTypeId);
 }
