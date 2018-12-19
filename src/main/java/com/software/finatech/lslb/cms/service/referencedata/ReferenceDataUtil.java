@@ -25,7 +25,7 @@ public class ReferenceDataUtil {
     private static final Logger logger = LoggerFactory.getLogger(ReferenceDataUtil.class);
     public static Comparator<EnumeratedFact> enumeratedFactComparator = (o1, o2) -> StringUtils.compare(o1.toString(), o2.toString());
     public static Comparator<Object> objectComparator = (o1, o2) -> StringUtils.compare(o1.toString(), o2.toString());
-    private static Comparator<IntSortedEnumeratedFact> intSortedEnumeratedFactComparator = (o1, o2) -> o1.getSortInt() - o2.getSortInt();
+    private static Comparator<IntSortedEnumeratedFact> intSortedEnumeratedFactComparator = Comparator.comparingInt(IntSortedEnumeratedFact::getSortInt);
 
     private static MongoRepositoryReactiveImpl mongoRepositoryReactive = GlobalApplicationContext.ctx.getBean(MongoRepositoryReactiveImpl.class);
 

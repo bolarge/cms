@@ -181,7 +181,7 @@ public class UserApprovalRequest extends AbstractApprovalRequest {
         }
         LocalDateTime dateCreated = getDateCreated();
         if (dateCreated != null) {
-            dto.setDateCreated(dateCreated.toString("dd-MM-yyyy HH:mm:ss a"));
+            dto.setDateCreated(dateCreated.toString("dd-MM-yyyy hh:mm a"));
         }
         return dto;
     }

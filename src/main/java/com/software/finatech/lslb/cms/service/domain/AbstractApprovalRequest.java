@@ -109,7 +109,7 @@ public abstract class AbstractApprovalRequest extends AbstractFact {
     public String getDateCreatedString() {
         LocalDateTime dateTime = getDateCreated();
         if (dateTime != null) {
-            return dateTime.toString("dd-MM-yyyy HH:mm:ss a");
+            return dateTime.toString("dd-MM-yyyy hh:mm a");
         }
         return null;
     }

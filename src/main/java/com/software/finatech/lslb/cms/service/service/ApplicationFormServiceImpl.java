@@ -563,6 +563,10 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 return Mono.just(new ResponseEntity<>("Not all documents on this application are approved", HttpStatus.BAD_REQUEST));
             }
 
+            if (!aipDocumentApproval.hasCompleteAssessmentReport())) {
+                return Mono.just(new ResponseEntity<>("There is no assessment report uploaded for the operator", HttpStatus.BAD_REQUEST));
+            }
+
             aipDocumentApproval.setApproverId(approverId);
             String approvedAIPFormStatusId = ApplicationFormStatusReferenceData.APPROVED_STATUS_ID;
             aipDocumentApproval.setFormStatusId(approvedAIPFormStatusId);
@@ -897,7 +901,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
             if (countDocumentWithApproval == countApprovedDocument) {
                 aipDocumentApproval.setReadyForApproval(true);
-                applicationFormNotificationHelperAsync.sendApproverMailToFinalApproval(aipDocumentApproval);
+                //      applicationFormNotificationHelperAsync.sendApproverMailToFinalApproval(aipDocumentApproval);
             }
         }
         mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
