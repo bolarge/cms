@@ -66,7 +66,7 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
                     paymentInitiator = institution.getInstitutionName();
                 }
             }
-            if (paymentRecord.isAgentPayment()) {
+            if (paymentRecord.isAgentPayment() || paymentRecord.isGamingTerminalPayment()) {
                 Agent agent = paymentRecord.getAgent();
                 if (agent != null) {
                     paymentInitiator = agent.getFullName();

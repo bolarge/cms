@@ -505,7 +505,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             if (!applicationForm.getReadyForApproval()) {
                 return Mono.just(new ResponseEntity<>("Not all documents on this application are approved", HttpStatus.BAD_REQUEST));
             }
-            ScheduledMeeting scheduledMeeting = scheduledMeetingService.findCompletedMeetingForEntity(applicationFormId, ScheduledMeetingPurposeReferenceData.APPLICANT_ID);
+            ScheduledMeeting scheduledMeeting = scheduledMeetingService.findCompletedMeetingForEntityAndPurpose(applicationFormId, ScheduledMeetingPurposeReferenceData.APPLICANT_ID);
             if (scheduledMeeting == null) {
                 return Mono.just(new ResponseEntity<>("There is no completed presentation scheduled for the applicant", HttpStatus.BAD_REQUEST));
             }

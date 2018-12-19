@@ -23,6 +23,24 @@ public class LicenseTransfer extends AbstractFact {
     private String rejectionReason;
     private List<LicenseTransferDecision> transferDecisions = new ArrayList<>();
     private String paymentRecordId;
+    private boolean transferorMeetingCompleted;
+    private boolean transfereeMeetingCompleted;
+
+    public boolean isTransferorMeetingCompleted() {
+        return transferorMeetingCompleted;
+    }
+
+    public void setTransferorMeetingCompleted(boolean transferorMeetingCompleted) {
+        this.transferorMeetingCompleted = transferorMeetingCompleted;
+    }
+
+    public boolean isTransfereeMeetingCompleted() {
+        return transfereeMeetingCompleted;
+    }
+
+    public void setTransfereeMeetingCompleted(boolean transfereeMeetingCompleted) {
+        this.transfereeMeetingCompleted = transfereeMeetingCompleted;
+    }
 
     public String getPaymentRecordId() {
         return paymentRecordId;
@@ -140,6 +158,8 @@ public class LicenseTransfer extends AbstractFact {
             dto.setLicenseNumber(license.getLicenseNumber());
         }
         dto.setTransferDecisions(getTransferDecisions());
+        dto.setTransfereeMeetingCompleted(isTransfereeMeetingCompleted());
+        dto.setTransferorMeetingCompleted(isTransferorMeetingCompleted());
         return dto;
     }
 

@@ -41,6 +41,6 @@ public interface ScheduledMeetingService {
 
     ScheduledMeeting findScheduledMeetingByEntityId(String entityId);
 
-    ScheduledMeeting findCompletedMeetingForEntity(String entityId, String meetingPurposeId);
+    ScheduledMeeting findCompletedMeetingForEntityAndPurpose(String entityId, String meetingPurposeId);
 }
 

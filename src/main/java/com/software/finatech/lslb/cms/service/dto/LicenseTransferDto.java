@@ -15,7 +15,24 @@ public class LicenseTransferDto {
     private String licenseNumber;
     private String id;
     private List<LicenseTransferDecision> transferDecisions = new ArrayList<>();
+    private Boolean transferorMeetingCompleted;
+    private Boolean transfereeMeetingCompleted;
 
+    public Boolean getTransferorMeetingCompleted() {
+        return transferorMeetingCompleted;
+    }
+
+    public void setTransferorMeetingCompleted(Boolean transferorMeetingCompleted) {
+        this.transferorMeetingCompleted = transferorMeetingCompleted;
+    }
+
+    public Boolean getTransfereeMeetingCompleted() {
+        return transfereeMeetingCompleted;
+    }
+
+    public void setTransfereeMeetingCompleted(Boolean transfereeMeetingCompleted) {
+        this.transfereeMeetingCompleted = transfereeMeetingCompleted;
+    }
 
     public String getId() {
         return id;
