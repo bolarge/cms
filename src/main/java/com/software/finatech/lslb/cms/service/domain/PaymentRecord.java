@@ -223,21 +223,10 @@ public class PaymentRecord extends AbstractFact {
     }
 
     public GameType getGameType() {
-        if (gameTypeId == null) {
+        if (StringUtils.isEmpty(this.gameTypeId)) {
             return null;
         }
-        Map gameTypeMap = Mapstore.STORE.get("GameType");
-        GameType gameType = null;
-        if (gameTypeMap != null) {
-            gameType = (GameType) gameTypeMap.get(gameTypeId);
-        }
-        if (gameType == null) {
-            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
-            if (gameType != null && gameTypeMap != null) {
-                gameTypeMap.put(gameTypeId, gameType);
-            }
-        }
-        return gameType;
+        return (GameType) mongoRepositoryReactive.findById(this.gameTypeId, GameType.class).block();
     }
 
 

@@ -94,12 +94,13 @@ public class RenewalForm extends AbstractFact {
         this.approverId = approverId;
     }
 
-     public Institution getInstitution() {
+    public Institution getInstitution() {
         if (StringUtils.isEmpty(institutionId)) {
             return null;
         }
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
     }
+
     public String getInstitutionName() {
         Institution institution = getInstitution();
         if (institution != null) {
@@ -275,6 +276,7 @@ public class RenewalForm extends AbstractFact {
     public void setNewInvestors(String newInvestors) {
         this.newInvestors = newInvestors;
     }
+
     public AuthInfo getAuthInfo(String authInfoId) {
         if (StringUtils.isEmpty(authInfoId)) {
             return null;
@@ -286,19 +288,9 @@ public class RenewalForm extends AbstractFact {
         if (StringUtils.isEmpty(this.gameTypeId)) {
             return null;
         }
-        Map gameTypeMap = Mapstore.STORE.get("GameType");
-        GameType gameType = null;
-        if (gameTypeMap != null) {
-            gameType = (GameType) gameTypeMap.get(gameTypeId);
-        }
-        if (gameType == null) {
-            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
-            if (gameType != null && gameTypeMap != null) {
-                gameTypeMap.put(gameTypeId, gameType);
-            }
-        }
-        return gameType;
+        return (GameType) mongoRepositoryReactive.findById(this.gameTypeId, GameType.class).block();
     }
+
     public String getGameTypeName() {
         GameType gameType = getGameType();
         if (gameType == null) {
@@ -307,7 +299,8 @@ public class RenewalForm extends AbstractFact {
             return gameType.getName();
         }
     }
-    public RenewalFormDto convertToDto(){
+
+    public RenewalFormDto convertToDto() {
         RenewalFormDto renewalFormDto = new RenewalFormDto();
         renewalFormDto.setRenewalFormId(getId());
         renewalFormDto.setCheckChangeInGamingMachines(getCheckChangeInGamingMachines());
@@ -331,10 +324,10 @@ public class RenewalForm extends AbstractFact {
         List<CommentDetail> comments = getComments();
         Collections.reverse(comments);
         renewalFormDto.setComments(comments);
-        Query query=new Query();
+        Query query = new Query();
         query.addCriteria(Criteria.where("paymentRecordId").is(paymentRecordId));
-        License license= (License) mongoRepositoryReactive.find(query,License.class).block();
-        if(license!=null){
+        License license = (License) mongoRepositoryReactive.find(query, License.class).block();
+        if (license != null) {
             renewalFormDto.setLicenseStatus(license.getLicenseStatus().convertToDto());
 
         }
@@ -348,15 +341,16 @@ public class RenewalForm extends AbstractFact {
             renewalFormDto.setRejectorId(rejectorId);
             renewalFormDto.setRejectorName(rejector.getFullName());
         }
-        PaymentRecord paymentRecord= (PaymentRecord) mongoRepositoryReactive.findById(getPaymentRecordId(),PaymentRecord.class).block();
+        PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById(getPaymentRecordId(), PaymentRecord.class).block();
         renewalFormDto.setPaymentRecord(paymentRecord.convertToDto());
-        if(!StringUtils.isEmpty(formStatusId)){
+        if (!StringUtils.isEmpty(formStatusId)) {
             Map renewalFormStatusMap = Mapstore.STORE.get("RenewalFormStatus");
 
-            RenewalFormStatus renewalFormStatus= null;
+            RenewalFormStatus renewalFormStatus = null;
             if (renewalFormStatusMap != null) {
 
-                renewalFormStatus = (RenewalFormStatus) renewalFormStatusMap.get(formStatusId); }
+                renewalFormStatus = (RenewalFormStatus) renewalFormStatusMap.get(formStatusId);
+            }
             if (renewalFormStatus == null) {
                 renewalFormStatus = (RenewalFormStatus) mongoRepositoryReactive.findById(formStatusId, RenewalFormStatus.class).block();
                 if (renewalFormStatus != null && renewalFormStatus != null) {
@@ -372,6 +366,7 @@ public class RenewalForm extends AbstractFact {
         return renewalFormDto;
 
     }
+
     private List<CommentDetail> getComments() {
         List<CommentDetail> comments = new ArrayList<>();
         for (FormComment comment : this.formComments) {
@@ -386,8 +381,8 @@ public class RenewalForm extends AbstractFact {
     }
 
 
-    public License getLicense(){
-      return   (License) mongoRepositoryReactive.find(Query.query(Criteria.where("renewalFormId").is(this.id)), License.class).block();
+    public License getLicense() {
+        return (License) mongoRepositoryReactive.find(Query.query(Criteria.where("renewalFormId").is(this.id)), License.class).block();
     }
 
     @Override
