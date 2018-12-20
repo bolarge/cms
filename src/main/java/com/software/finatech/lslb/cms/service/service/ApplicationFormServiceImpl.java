@@ -892,9 +892,9 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 
             for (Document doc : documents) {
                 if (doc.getApprovalRequestStatusId() != null) {
-                    countDocumentWithApproval = +1;
+                    countDocumentWithApproval = countDocumentWithApproval + 1;
                     if (doc.getApprovalRequestStatusId().equals(ApprovalRequestStatusReferenceData.APPROVED_ID)) {
-                        countApprovedDocument = +1;
+                        countApprovedDocument = countApprovedDocument + 1;
                     }
                 }
             }
