@@ -56,7 +56,7 @@ public class UserApprovalRequestController  extends BaseController{
 
 
     @RequestMapping(method = RequestMethod.POST, value = "/approve")
-    @ApiOperation(value = "Approve an user approval request", response = UserApprovalRequestDto.class, consumes = "application/json")
+    @ApiOperation(value = "Approve a user approval request", response = UserApprovalRequestDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),

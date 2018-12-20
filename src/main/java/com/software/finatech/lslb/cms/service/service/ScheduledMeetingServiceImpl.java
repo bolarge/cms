@@ -161,7 +161,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                 return Mono.just(new ResponseEntity<>("Invalid Meeting Purpose supplied", HttpStatus.BAD_REQUEST));
             }
 
-            if (!isValidMeetingForEntity(scheduledMeetingCreateDto.getEntityId())) {
+            if (!isValidMeetingForEntityAndPurpose(scheduledMeetingCreateDto.getEntityId(), scheduledMeetingCreateDto.getMeetingPurposeId())) {
                 return Mono.just(new ResponseEntity<>("Please complete your previous meeting for the purpose", HttpStatus.BAD_REQUEST));
             }
 
@@ -509,9 +509,10 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
         scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-InitialNotification-Recipient", String.format("Meeting with %s", invitedInstitution.getInstitutionName()), existingScheduledMeeting, authInfoService.getUsersFromUserIds(recipientsForNewInviteMail));
     }
 
-    private boolean isValidMeetingForEntity(String entityId) {
+    private boolean isValidMeetingForEntityAndPurpose(String entityId, String meetingPurposeId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("entityId").is(entityId));
+        query.addCriteria(Criteria.where("meetingPurposeId").is(meetingPurposeId));
         ArrayList<ScheduledMeeting> meetings = (ArrayList<ScheduledMeeting>) mongoRepositoryReactive.
                 findAll(query, ScheduledMeeting.class).toStream().collect(Collectors.toList());
         if (meetings.isEmpty()) {

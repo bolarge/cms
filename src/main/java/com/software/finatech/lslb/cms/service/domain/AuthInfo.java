@@ -294,7 +294,7 @@ public class AuthInfo extends AbstractFact {
     public AuthInfoDto convertToLoginDto() {
         AuthInfoDto dto = convertToDto();
         AuthRole authRole = getAuthRole();
-        Set<AuthPermissionDto> authPermissionDtos = new HashSet<>();
+        List<AuthPermissionDto> authPermissionDtos = new ArrayList<>();
         authPermissionDtos.addAll(getPermissionDtos(this.authPermissionIds));
         authPermissionDtos.addAll(getPermissionDtos(authRole.authPermissionIds));
         dto.setAuthPermissions(authPermissionDtos);
@@ -397,17 +397,22 @@ public class AuthInfo extends AbstractFact {
         return StringUtils.equals(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID, this.authRoleId);
     }
 
-    private Set<AuthPermissionDto> getPermissionDtos(Set<String> permissionsIds) {
+    private List<AuthPermissionDto> getPermissionDtos(Set<String> permissionsIds) {
         List<AuthPermissionDto> dtos = new ArrayList<>();
+        List<AuthPermission> permissions = new ArrayList<>();
         for (String id : permissionsIds) {
             AuthPermission permission = getAuthPermission(id);
             if (permission != null) {
-                dtos.add(permission.convertToDto());
+                permissions.add(permission);
             }
         }
-        dtos.sort(ReferenceDataUtil.objectComparator);
-        return new HashSet<>(dtos);
+        permissions.sort(ReferenceDataUtil.enumeratedFactComparator);
+        for (AuthPermission permission : permissions) {
+            dtos.add(permission.convertToDto());
+        }
+        return dtos;
     }
+
 
     public boolean isAgent() {
         return StringUtils.equals(LSLBAuthRoleReferenceData.AGENT_ROLE_ID, this.authRoleId);

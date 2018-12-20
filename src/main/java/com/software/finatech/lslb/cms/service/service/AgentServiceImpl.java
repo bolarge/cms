@@ -52,7 +52,6 @@ public class AgentServiceImpl implements AgentService {
     private static final Logger logger = LoggerFactory.getLogger(AgentServiceImpl.class);
     private static final String agentAuditActionId = AuditActionReferenceData.AGENT_ID;
 
-
     @Autowired
     public AgentServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                             LicenseValidatorUtil licenseValidatorUtil,

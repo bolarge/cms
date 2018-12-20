@@ -1,7 +1,7 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AuthInfoDto {
     protected String id;
@@ -21,32 +21,32 @@ public class AuthInfoDto {
     protected String gameTypeName;
     protected String institutionName;
     protected String agentId;
-    private Set<AuthPermissionDto> rolePermissions = new HashSet<>();
-    private Set<AuthPermissionDto> userPermissions = new HashSet<>();
-    private Set<AuthPermissionDto> authPermissions = new HashSet<>();
+    private List<AuthPermissionDto> rolePermissions = new ArrayList<>();
+    private List<AuthPermissionDto> userPermissions = new ArrayList<>();
+    private List<AuthPermissionDto> authPermissions = new ArrayList<>();
 
-    public Set<AuthPermissionDto> getAuthPermissions() {
-        return authPermissions;
-    }
-
-    public void setAuthPermissions(Set<AuthPermissionDto> authPermissions) {
-        this.authPermissions = authPermissions;
-    }
-
-    public Set<AuthPermissionDto> getRolePermissions() {
+    public List<AuthPermissionDto> getRolePermissions() {
         return rolePermissions;
     }
 
-    public void setRolePermissions(Set<AuthPermissionDto> rolePermissions) {
+    public void setRolePermissions(List<AuthPermissionDto> rolePermissions) {
         this.rolePermissions = rolePermissions;
     }
 
-    public Set<AuthPermissionDto> getUserPermissions() {
+    public List<AuthPermissionDto> getUserPermissions() {
         return userPermissions;
     }
 
-    public void setUserPermissions(Set<AuthPermissionDto> userPermissions) {
+    public void setUserPermissions(List<AuthPermissionDto> userPermissions) {
         this.userPermissions = userPermissions;
+    }
+
+    public List<AuthPermissionDto> getAuthPermissions() {
+        return authPermissions;
+    }
+
+    public void setAuthPermissions(List<AuthPermissionDto> authPermissions) {
+        this.authPermissions = authPermissions;
     }
 
     public String getAgentId() {
