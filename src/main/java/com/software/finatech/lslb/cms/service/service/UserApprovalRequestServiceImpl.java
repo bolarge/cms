@@ -299,7 +299,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
         Set<String> userPermissions = user.getAuthPermissionIds();
         if (user != null) {
             userPermissions.addAll(newPermissionIds);
-            user.setAuthPermissionIds(newPermissionIds);
+            user.setAuthPermissionIds(userPermissions);
             mongoRepositoryReactive.saveOrUpdate(user);
         }
     }
