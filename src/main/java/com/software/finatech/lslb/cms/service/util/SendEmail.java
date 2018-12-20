@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+
 @Component
 public class SendEmail {
     @Autowired
@@ -21,6 +22,7 @@ public class SendEmail {
     public void setMongoRepositoryReactive(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
     }
+
     public String sendEmailNotification(NotificationDto notificationDto, String subject) {
         HashMap<String, Object> model = new HashMap<>();
         model.put("description", notificationDto.getDescription());
@@ -58,9 +60,10 @@ public class SendEmail {
         model.put("CallbackUrl", notificationDto.getCallBackUrl());
         String content = mailContentBuilderService.build(model, notificationDto.getTemplate());
         content = content.replaceAll("CallbackUrl", notificationDto.getCallBackUrl());
-        emailService.sendEmail(content, "Renewal Update Notification", notificationDto.getInstitutionEmail());
+        emailService.sendEmail(content, "Licence Notification", notificationDto.getInstitutionEmail());
         return "success";
     }
+
     public String sendEmailDeactivationNotification(NotificationDto notificationDto) {
         HashMap<String, Object> model = new HashMap<>();
         model.put("description", notificationDto.getDescription());
@@ -71,6 +74,7 @@ public class SendEmail {
         emailService.sendEmail(content, "AGENT DEACTIVATION NOTIFICATION", notificationDto.getAgentEmailAddress());
         return "success";
     }
+
     public String sendEmailExpiredMachineLicenses(NotificationDto notificationDto) {
         HashMap<String, Object> model = new HashMap<>();
         model.put("description", notificationDto.getDescription());

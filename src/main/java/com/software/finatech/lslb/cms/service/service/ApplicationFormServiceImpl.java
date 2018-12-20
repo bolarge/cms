@@ -579,7 +579,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), aipDocumentApproval.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
-            applicationFormNotificationHelperAsync.sendApprovedMailToInstitutionAdmins(aipDocumentApproval);
+         //   applicationFormNotificationHelperAsync.sendApprovedMailToInstitutionAdmins(aipDocumentApproval);
             return Mono.just(new ResponseEntity<>("Application form approved successfully", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving application form", e);
