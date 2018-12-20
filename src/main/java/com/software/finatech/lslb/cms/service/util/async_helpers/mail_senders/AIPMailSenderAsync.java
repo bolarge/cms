@@ -93,7 +93,7 @@ public class AIPMailSenderAsync extends AbstractMailSender {
         for (AuthInfo finalApprover : finalApprovers) {
             String email = finalApprover.getEmailAddress();
             try {
-                emailService.sendEmail(content, "AIP Approval Reminder", email);
+                emailService.sendEmail(content, "Licence Issuance Notification", email);
             } catch (Exception e) {
                 logger.error("An error occurred while sending mail to {}", email, e);
             }
