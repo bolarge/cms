@@ -177,7 +177,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
         }
 
         if (StringUtils.isEmpty(renewalFormCreateDto.getCheckChangeInGamingMachines())) {
-            return Mono.just(new ResponseEntity<>("Enter CheckChangeInGamingMachines", HttpStatus.BAD_REQUEST));
+//            return Mono.just(new ResponseEntity<>("Enter CheckChangeInGamingMachines", HttpStatus.BAD_REQUEST));
 
         }
         if (StringUtils.isEmpty(renewalFormCreateDto.getCheckConvictedCrime())) {
