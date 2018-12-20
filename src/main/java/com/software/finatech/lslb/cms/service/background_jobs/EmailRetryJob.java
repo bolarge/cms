@@ -20,9 +20,10 @@ public class EmailRetryJob {
     @Autowired
     private EmailService emailService;
     private static final int FIFTEEN_MIN = 15 * 60 * 1000;
+    private static final int THREE_MIN = 3 * 60 * 1000;
 
     @Scheduled(fixedRate = 3 * 60 * 1000, initialDelay = 6000)
-    @SchedulerLock(name = "Send Pending Emails", lockAtMostFor = FIFTEEN_MIN, lockAtLeastFor = FIFTEEN_MIN)
+    @SchedulerLock(name = "Send Pending Emails", lockAtMostFor = THREE_MIN, lockAtLeastFor = THREE_MIN)
     public void sendPendingEmails() {
         ArrayList<FailedEmailNotification> failedEmailNotifications = getPendingFailedEmails();
         for (FailedEmailNotification failedEmailNotification : failedEmailNotifications) {
