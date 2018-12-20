@@ -62,22 +62,11 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
         this.gameTypeId = gameTypeId;
     }
 
-    private GameType getGameType() {
+    public GameType getGameType() {
         if (StringUtils.isEmpty(this.gameTypeId)) {
             return null;
         }
-        Map gameTypeMap = Mapstore.STORE.get("GameType");
-        GameType gameType = null;
-        if (gameTypeMap != null) {
-            gameType = (GameType) gameTypeMap.get(gameTypeId);
-        }
-        if (gameType == null) {
-            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
-            if (gameType != null && gameTypeMap != null) {
-                gameTypeMap.put(gameTypeId, gameType);
-            }
-        }
-        return gameType;
+        return (GameType) mongoRepositoryReactive.findById(this.gameTypeId, GameType.class).block();
     }
 
 

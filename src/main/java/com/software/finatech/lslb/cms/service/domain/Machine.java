@@ -136,20 +136,8 @@ public class Machine extends AbstractFact {
         if (StringUtils.isEmpty(this.gameTypeId)) {
             return null;
         }
-        Map gameTypeMap = Mapstore.STORE.get("GameType");
-        GameType gameType = null;
-        if (gameTypeMap != null) {
-            gameType = (GameType) gameTypeMap.get(this.gameTypeId);
-        }
-        if (gameType == null) {
-            gameType = (GameType) mongoRepositoryReactive.findById(this.gameTypeId, GameType.class).block();
-            if (gameType != null && gameTypeMap != null) {
-                gameTypeMap.put(this.gameTypeId, gameType);
-            }
-        }
-        return gameType;
+        return (GameType) mongoRepositoryReactive.findById(this.gameTypeId, GameType.class).block();
     }
-
 
     public MachineType getMachineType() {
         if (StringUtils.isEmpty(this.machineTypeId)) {

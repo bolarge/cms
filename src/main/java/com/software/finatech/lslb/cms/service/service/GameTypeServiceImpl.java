@@ -1,7 +1,10 @@
 package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.Agent;
+import com.software.finatech.lslb.cms.service.domain.EnumeratedFact;
+import com.software.finatech.lslb.cms.service.domain.GameType;
+import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.dto.GameTypeCreateDto;
 import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
@@ -10,7 +13,6 @@ import com.software.finatech.lslb.cms.service.referencedata.MachineTypeReference
 import com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
-import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
@@ -57,21 +59,7 @@ public class GameTypeServiceImpl implements GameTypeService {
 
     @Override
     public GameType findById(String gameTypeId) {
-        if (StringUtils.isEmpty(gameTypeId)) {
-            return null;
-        }
-        Map<String, FactObject> gameTypeMap = Mapstore.STORE.get("GameType");
-        GameType gameType = null;
-        if (gameTypeMap != null) {
-            gameType = (GameType) gameTypeMap.get(gameTypeId);
-        }
-        if (gameType == null) {
-            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
-            if (gameType != null && gameTypeMap != null) {
-                gameTypeMap.put(gameTypeId, gameType);
-            }
-        }
-        return gameType;
+        return (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
     }
 
     @Override
