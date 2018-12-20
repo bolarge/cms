@@ -20,6 +20,7 @@ public interface MachineService {
                                          String machineTypeId,
                                          String machineStatusId,
                                          boolean forAgentAssignment,
+                                         String licenseNumber,
                                          HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> createMachine(MachineCreateDto gamingMachineCreateDto, HttpServletRequest request);

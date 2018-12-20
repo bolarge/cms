@@ -28,7 +28,7 @@ public class MachineController extends BaseController {
         this.machineService = machineService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "institutionId", "agentId", "machineTypeId", "machineStatusId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "institutionId", "agentId", "machineTypeId", "machineStatusId", "licenseNumber"})
     @ApiOperation(value = "Get all gaming machines", response = MachineDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -44,8 +44,8 @@ public class MachineController extends BaseController {
                                                      @RequestParam("machineTypeId") String machineTypeId,
                                                      @RequestParam("machineStatusId") String machineStatusId,
                                                      @RequestParam(value = "forAgentAssignment", required = false) boolean forAgentAssignment,
-                                                     HttpServletResponse httpServletResponse) {
-        return machineService.findAllMachines(page, pageSize, sortType, sortParam, institutionId, agentId, machineTypeId, machineStatusId,forAgentAssignment, httpServletResponse);
+                                                     @RequestParam("licenseNumber") String licenseNumber, HttpServletResponse httpServletResponse) {
+        return machineService.findAllMachines(page, pageSize, sortType, sortParam, institutionId, agentId, machineTypeId, machineStatusId, forAgentAssignment, licenseNumber, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create")
@@ -244,7 +244,7 @@ public class MachineController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getMachineFullDetailBySerialNumber(@RequestParam("serialNumber") String serialNumber,
-                                                                   @RequestParam("machineTypeId")String machineTypeId) {
+                                                                   @RequestParam("machineTypeId") String machineTypeId) {
         return machineService.getMachineFullDetailBySerialNumber(serialNumber, machineTypeId);
     }
 }

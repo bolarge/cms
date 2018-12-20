@@ -221,12 +221,6 @@ public class Machine extends AbstractFact {
             dto.setGameTypeId(getGameTypeId());
             dto.setGameTypeName(gameType.getName());
         }
-        return dto;
-    }
-
-    public MachineDto convertToFullDto() {
-        MachineDto dto = convertToDto();
-        dto.setMachineGames(getMachineGames());
         License license = getLicense();
         if (license != null) {
             dto.setLicenseEndDate(license.getEndDateString());
@@ -234,6 +228,12 @@ public class Machine extends AbstractFact {
             dto.setLicenseNumber(license.getLicenseNumber());
             dto.setLicenseStatus(license.getLicenseStatusName());
         }
+        return dto;
+    }
+
+    public MachineDto convertToFullDto() {
+        MachineDto dto = convertToDto();
+        dto.setMachineGames(getMachineGames());
         return dto;
     }
 
