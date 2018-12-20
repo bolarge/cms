@@ -155,7 +155,7 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
             }
 
             if (documentApprovalRequest.isCreateDocumentType()) {
-                approverCreateDocumentType(documentApprovalRequest);
+                approveCreateDocumentType(documentApprovalRequest);
             } else if (documentApprovalRequest.isSetApprover()) {
                 approveSetApprover(documentApprovalRequest);
             } else if (documentApprovalRequest.isRemoveApprover()) {
@@ -246,7 +246,7 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
         }
     }
 
-    private void approverCreateDocumentType(DocumentApprovalRequest documentApprovalRequest) {
+    private void approveCreateDocumentType(DocumentApprovalRequest documentApprovalRequest) {
         PendingDocumentType pendingDocumentType = documentApprovalRequest.getPendingDocumentType();
         if (pendingDocumentType != null) {
             DocumentType documentType = new DocumentType();
@@ -258,6 +258,7 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
             documentType.setRequired(pendingDocumentType.isRequired());
             documentType.setName(pendingDocumentType.getName());
             documentType.setDescription(pendingDocumentType.getDescription());
+            documentType.setGameTypeIds(pendingDocumentType.getGameTypeIds());
             mongoRepositoryReactive.saveOrUpdate(documentType);
             pendingDocumentType.setApprovalRequestStatusIds(ApprovalRequestStatusReferenceData.APPROVED_ID);
             mongoRepositoryReactive.saveOrUpdate(pendingDocumentType);

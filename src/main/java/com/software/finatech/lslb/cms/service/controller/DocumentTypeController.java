@@ -74,9 +74,10 @@ public class DocumentTypeController extends BaseController {
             query.addCriteria(Criteria.where("active").is(active));
         }
         if (!StringUtils.isEmpty(gameTypeIds)) {
-            List<String> gameTypeIdList = Arrays.asList(gameTypeIds.split("-"));
+            List<String> gameTypeIdList = Arrays.asList(gameTypeIds.split("\\s*,\\s*"));
             query.addCriteria(Criteria.where("gameTypeIds").in(gameTypeIdList));
         }
+
         if (!StringUtils.isEmpty(approverId)) {
             query.addCriteria(Criteria.where("approverId").is(approverId));
         }
@@ -119,6 +120,7 @@ public class DocumentTypeController extends BaseController {
             documentType.setRequired(documentTypeCreateDto.isRequired());
             documentType.setName(documentTypeCreateDto.getName());
             documentType.setDescription(documentTypeCreateDto.getDescription());
+            documentType.setGameTypeIds(documentTypeCreateDto.getGameTypeIds());
             mongoRepositoryReactive.saveOrUpdate(documentType);
 
             String verbiage = String.format("Created document type -> Ticket Name: -> %s, Id -> %s ", documentType, documentType.getId());
@@ -137,6 +139,7 @@ public class DocumentTypeController extends BaseController {
         pendingDocumentType.setDocumentPurposeId(documentTypeCreateDto.getDocumentPurposeId());
         pendingDocumentType.setActive(documentTypeCreateDto.isActive());
         pendingDocumentType.setRequired(true);
+        pendingDocumentType.setGameTypeIds(documentTypeCreateDto.getGameTypeIds());
         pendingDocumentType.setName(documentTypeCreateDto.getName());
         pendingDocumentType.setDescription(documentTypeCreateDto.getDescription());
         pendingDocumentType.setApproverId(documentTypeCreateDto.getApproverId());
@@ -168,6 +171,7 @@ public class DocumentTypeController extends BaseController {
         documentType.setRequired(documentTypeUpdateDto.isRequired());
         documentType.setDescription(documentTypeUpdateDto.getDescription());
         documentType.setName(documentTypeUpdateDto.getName());
+        documentType.setGameTypeIds(documentTypeUpdateDto.getGameTypeIds());
         documentTypeUpdateDto.setDescription(documentTypeUpdateDto.getDescription());
         mongoRepositoryReactive.saveOrUpdate(documentType);
         return Mono.just(new ResponseEntity(documentType.convertToDto(), HttpStatus.OK));
