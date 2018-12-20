@@ -63,12 +63,13 @@ public class EmailService {
             mailSender.send(messagePreparator);
             failedEmailNotification.setProcessing(false);
             failedEmailNotification.setSent(true);
+            mongoRepositoryReactive.delete(failedEmailNotification);
         } catch (Throwable e) {
             failedEmailNotification.setSent(false);
             failedEmailNotification.setProcessing(false);
             failedEmailNotification.setExceptionMessage(e.getMessage());
-            mongoRepositoryReactive.saveOrUpdate(failedEmailNotification);
             logger.error("An error occurred while sending mail", e);
+            mongoRepositoryReactive.saveOrUpdate(failedEmailNotification);
         }
     }
 
