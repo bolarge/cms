@@ -87,6 +87,7 @@ public class MachineServiceImpl implements MachineService {
                                                 String machineTypeId,
                                                 String machineStatusId,
                                                 boolean forAgentAssignment,
+                                                String licenseNumber,
                                                 HttpServletResponse httpServletResponse) {
 
         try {
@@ -102,6 +103,12 @@ public class MachineServiceImpl implements MachineService {
             }
             if (!StringUtils.isEmpty(machineStatusId)) {
                 query.addCriteria(Criteria.where("machineStatusId").is(machineStatusId));
+            }
+            if (!StringUtils.isEmpty(licenseNumber)) {
+                License license = (License) mongoRepositoryReactive.find(Query.query(Criteria.where("licenseNumber").is(licenseNumber)), License.class).block();
+                if (license != null) {
+                    query.addCriteria(Criteria.where("licenseId").is(license.getId()));
+                }
             }
             if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, Machine.class).block();

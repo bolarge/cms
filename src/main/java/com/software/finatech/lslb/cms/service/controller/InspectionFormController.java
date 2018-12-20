@@ -156,14 +156,13 @@ public class InspectionFormController extends BaseController {
             String startDate = inspectionFormCreateDto.getInspectionDate();
             if ((startDate != "" && !startDate.isEmpty())) {
                 if (!startDate.matches("([0-9]{4})-([0-9]{2})-([0-9]{2})")) {
-                    return Mono.just(new ResponseEntity("Invalid Date format. " +
+                    return Mono.just(new ResponseEntity<>("Invalid Date format. " +
                             "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
                 }
                 fromDate = new LocalDate(startDate);
 
             } else {
-
-                return Mono.just(new ResponseEntity("Invalid Date format. " +
+                return Mono.just(new ResponseEntity<>("Invalid Date format. " +
                         "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));
 
             }
