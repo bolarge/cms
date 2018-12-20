@@ -525,7 +525,7 @@ public class DocumentController extends BaseController {
         return Mono.just(new ResponseEntity<>(documentDtos, HttpStatus.OK));
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/getEntityDocuments", params = {"entityId", "purposeId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/getEntityDocuments")
     @ApiOperation(value = "Get uploaded and new documents", response = DocumentDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),

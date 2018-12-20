@@ -28,7 +28,7 @@ public class MachineController extends BaseController {
         this.machineService = machineService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "institutionId", "agentId", "machineTypeId", "machineStatusId", "licenseNumber"})
+    @RequestMapping(method = RequestMethod.GET, value = "/all")
     @ApiOperation(value = "Get all gaming machines", response = MachineDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -44,7 +44,7 @@ public class MachineController extends BaseController {
                                                      @RequestParam("machineTypeId") String machineTypeId,
                                                      @RequestParam("machineStatusId") String machineStatusId,
                                                      @RequestParam(value = "forAgentAssignment", required = false) boolean forAgentAssignment,
-                                                     @RequestParam("licenseNumber") String licenseNumber, HttpServletResponse httpServletResponse) {
+                                                     @RequestParam(value = "licenseNumber", required = false) String licenseNumber, HttpServletResponse httpServletResponse) {
         return machineService.findAllMachines(page, pageSize, sortType, sortParam, institutionId, agentId, machineTypeId, machineStatusId, forAgentAssignment, licenseNumber, httpServletResponse);
     }
 
