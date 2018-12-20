@@ -167,7 +167,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             if (userApprovalRequest.isApprovedRequest() ||
                     userApprovalRequest.isRejectedRequest() ||
                     !userApprovalRequest.canBeApprovedByUser(user.getId())
-                    ) {
+            ) {
                 return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
             }
 
@@ -222,8 +222,8 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
                 return Mono.just(new ResponseEntity<>(String.format("User approval request with id %s not found", approvalRequestId), HttpStatus.BAD_REQUEST));
             }
             if (userApprovalRequest.isApprovedRequest() ||
-                    userApprovalRequest.isRejectedRequest()||
-                   !userApprovalRequest.canBeApprovedByUser(user.getId())) {
+                    userApprovalRequest.isRejectedRequest() ||
+                    !userApprovalRequest.canBeApprovedByUser(user.getId())) {
                 return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
             }
             if (userApprovalRequest.isCreateUser()) {
@@ -296,14 +296,10 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
     private void approveAddPermissionsToUser(UserApprovalRequest userApprovalRequest) {
         Set<String> newPermissionIds = userApprovalRequest.getNewPermissionIds();
         AuthInfo user = userApprovalRequest.getAuthInfo(userApprovalRequest.getAuthInfoId());
+        Set<String> userPermissions = user.getAuthPermissionIds();
         if (user != null) {
-            Set<String> allUserPermissionIdsForUser = user.getAllUserPermissionIdsForUser();
-            for (String newPermissionId : newPermissionIds) {
-                AuthPermission authPermission = userApprovalRequest.getAuthPermission(newPermissionId);
-                if (authPermission != null && !allUserPermissionIdsForUser.contains(newPermissionId)) {
-                    user.getAuthPermissionIds().add(newPermissionId);
-                }
-            }
+            userPermissions.addAll(newPermissionIds);
+            user.setAuthPermissionIds(newPermissionIds);
             mongoRepositoryReactive.saveOrUpdate(user);
         }
     }
