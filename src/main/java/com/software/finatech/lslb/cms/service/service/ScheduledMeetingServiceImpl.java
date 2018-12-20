@@ -474,9 +474,18 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
         if (scheduledMeeting.isForLicenseTransferror()) {
             operatorTemplateName = "scheduled-meetings/ScheduledMeeting-InitialNotification-TransferorOperator";
         }
+
+        String recipientMailSubject = creatorMailSubject;
+
+        String recipientTemplateName = "scheduled-meetings/ScheduledMeeting-InitialNotification-Recipient";
+        if (scheduledMeeting.isForLicenseTransferror()) {
+            recipientMailSubject = "Invitation to an exit meeting ";
+            recipientTemplateName = "scheduled-meetings/ScheduledMeeting-InitialNotification-Recipient-Transferor.html";
+        }
+
         scheduledMeetingMailSenderAsync.sendEmailToMeetingCreator("scheduled-meetings/ScheduledMeeting-InitialNotification-Creator", creatorMailSubject, scheduledMeeting);
         scheduledMeetingMailSenderAsync.sendEmailToMeetingInvitedOperators(operatorTemplateName, "Meeting Invite With Lagos State Lotteries Board", scheduledMeeting);
-        scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients("scheduled-meetings/ScheduledMeeting-InitialNotification-Recipient", creatorMailSubject, scheduledMeeting, recipients);
+        scheduledMeetingMailSenderAsync.sendEmailToMeetingRecipients(recipientTemplateName, recipientMailSubject, scheduledMeeting, recipients);
     }
 
     private void sendUpdatedMeetingNotifications(ScheduledMeeting existingScheduledMeeting, Institution invitedInstitution, Set<String> recipientsForUpdateMail, Set<String> recipientsForRemoveMail,
