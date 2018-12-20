@@ -522,7 +522,7 @@ public class DocumentController extends BaseController {
             documentDtos.add(document.convertToDto());
         });
 
-        return Mono.just(new ResponseEntity(documentDtos, HttpStatus.OK));
+        return Mono.just(new ResponseEntity<>(documentDtos, HttpStatus.OK));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/getEntityDocuments", params = {"entityId", "purposeId"})
@@ -532,11 +532,18 @@ public class DocumentController extends BaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getEntityDocuments(@RequestParam("entityId") String entityId, @RequestParam("purposeId") String purposeId, HttpServletResponse httpServletResponse) {
+    public Mono<ResponseEntity> getEntityDocuments(@RequestParam("entityId") String entityId,
+                                                   @RequestParam("purposeId") String purposeId,
+                                                   @RequestParam(value = "gameTypeIds", required = false) String gameTypeIds,
+                                                   HttpServletResponse httpServletResponse) {
 
         Query queryDocumentType = new Query();
         queryDocumentType.addCriteria(Criteria.where("documentPurposeId").is(purposeId));
         queryDocumentType.addCriteria(Criteria.where("active").is(true));
+        if (!StringUtils.isEmpty(gameTypeIds)){
+            List<String> gameTypeIdList = Arrays.asList(gameTypeIds.split("\\s*,\\s*"));
+            queryDocumentType.addCriteria(Criteria.where("gameTypeIds").in(gameTypeIdList));
+        }
         List<DocumentType> documentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
         List<String> documentTypeIds = new ArrayList<>();
         documentTypes.stream().forEach(documentType -> {

@@ -12,7 +12,6 @@ import java.util.Set;
 
 @Document(collection = "DocumentTypes")
 public class DocumentType extends EnumeratedFact {
-
     protected Set<String> gameTypeIds = new HashSet<>();
     protected String documentPurposeId;
     protected boolean active;
