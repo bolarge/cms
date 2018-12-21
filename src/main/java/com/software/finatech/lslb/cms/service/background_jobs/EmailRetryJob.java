@@ -28,7 +28,7 @@ public class EmailRetryJob {
     private static final int FIFTEEN_MIN = 15 * 60 * 1000;
     private static final int THREE_MIN = 3 * 60 * 1000;
 
-    @Scheduled(fixedRate = 60 * 1000, initialDelay = 6000)
+    @Scheduled(fixedRate = 60 * 1000, initialDelay = 60)
     @SchedulerLock(name = "Send Pending Emails", lockAtMostFor = 60 * 1000, lockAtLeastFor = 60 * 1000)
     public void sendPendingEmails() {
         try {
