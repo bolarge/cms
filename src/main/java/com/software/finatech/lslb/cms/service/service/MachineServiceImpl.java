@@ -491,7 +491,7 @@ public class MachineServiceImpl implements MachineService {
                     String[] columns = rows[i].split(",");
                     if (StringUtils.equals(MachineTypeReferenceData.GAMING_MACHINE_ID, machineTypeId) && columns.length < 5) {
                         failedLines.add(FailedLine.fromLineAndReason(rows[i], "Line has less than required(5) fields"));
-                    } else if (StringUtils.equals(MachineTypeReferenceData.GAMING_TERMINAL_ID, machineTypeId) && columns.length < 3) {
+                    } else if (StringUtils.equals(MachineTypeReferenceData.GAMING_TERMINAL_ID, machineTypeId) && columns.length < 2) {
                         failedLines.add(FailedLine.fromLineAndReason(rows[i], "Line has less than required(3) fields"));
                     } else {
                         try {
@@ -501,11 +501,12 @@ public class MachineServiceImpl implements MachineService {
                                 machine.setId(UUID.randomUUID().toString());
                                 machine.setSerialNumber(columns[0]);
                                 machine.setManufacturer(columns[1]);
-                                machine.setMachineAddress(columns[2]);
+
                             }
                             machine.setGameTypeId(gameTypeId);
                             machine.setMachineTypeId(machineTypeId);
-                            if (columns.length > 3 && !StringUtils.isEmpty(columns[3]) && !StringUtils.isEmpty(columns[4])) {
+                            if (columns.length > 2) {
+                                machine.setMachineAddress(columns[2]);
                                 machine.getGameDetailsList().add(MachineGameDetails.fromGameNameAndVersion(columns[3], columns[4]));
                             }
                             machine.setInstitutionId(institutionId);
@@ -754,6 +755,7 @@ public class MachineServiceImpl implements MachineService {
             approvalRequest.setMachineIds(machineIds);
             approvalRequest.setInstitutionId(loggedInUser.getInstitutionId());
             mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+            machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while assigning multiple machines to agent", e);

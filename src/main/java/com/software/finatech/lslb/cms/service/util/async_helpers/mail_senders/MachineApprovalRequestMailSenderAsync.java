@@ -99,12 +99,31 @@ public class MachineApprovalRequestMailSenderAsync extends AbstractMailSender {
                     logger.error("An error occurred while sending  machine approval notification to {}", adminEmail, e);
                 }
             }
+
+            if (approvalRequest.isAssignMultipleTerminalsToAgent() || approvalRequest.isAssignTerminalToAgent()) {
+                Agent agent = approvalRequest.getAgent();
+//                String mailContentForAgent = buildAssignTerminalsForAgent(approvalRequest);
+
+            }
+
         } else {
             AuthInfo initiator = approvalRequest.getInitiator();
             String mailSubject = String.format("Update on your approval request for terminal with serial number %s", machineSerialNumber);
             logger.info("Sending machine approval notification to {}", initiator.getEmailAddress());
             emailService.sendEmail(content, mailSubject, initiator.getEmailAddress());
         }
+    }
+
+    private String buildAssignTerminalsApprovalForAgent(MachineApprovalRequest approvalRequest) {
+        Agent agent = approvalRequest.getAgent();
+        HashMap<String, Object> model = new HashMap<>();
+        String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
+        model.put("agentName", agent.getFullName());
+        model.put("date", presentDateString);
+        model.put("approvalType", convertToTitleCaseIteratingChars(String.valueOf(approvalRequest.getMachineApprovalRequestTypeId())));
+     //   model.put("serialNumber", gamingTerminal.getSerialNumber());
+       // model.put("frontEndUrl", frontEndUrl);
+        return mailContentBuilderService.build(model, "machine-approvals/Agent-MachineApproval-Operator-Notification");
     }
 
     private String buildInitialMachineApprovalRequestOperatorNotificationContent(MachineApprovalRequest machineApprovalRequest) {
@@ -124,6 +143,13 @@ public class MachineApprovalRequestMailSenderAsync extends AbstractMailSender {
     private String buildNewMachineApprovalRequestNotificationMailContent(MachineApprovalRequest machineApprovalRequest) {
         String frontEndUrl = String.format("%s/machine-approvals-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), machineApprovalRequest.getId());
         String initiatorName = machineApprovalRequest.getRequestInitiatorName();
+        String machineType = "";
+        if (machineApprovalRequest.isGamingMachineRequest()) {
+            machineType = "machine";
+        }
+        if (machineApprovalRequest.isGamingTerminalRequest()) {
+            machineType = "terminal";
+        }
         String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
         HashMap<String, Object> model = new HashMap<>();
         model.put("date", presentDateString);
@@ -131,6 +157,7 @@ public class MachineApprovalRequestMailSenderAsync extends AbstractMailSender {
         model.put("serialNumber", machineApprovalRequest.getMachineRequestSerialNumber());
         model.put("frontEndUrl", frontEndUrl);
         model.put("initiatorName", initiatorName);
+        model.put("machineType", machineType);
         return mailContentBuilderService.build(model, "machine-approvals/NewMachineApprovalRequest");
     }
 

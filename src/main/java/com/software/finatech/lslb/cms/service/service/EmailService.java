@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.sendgrid.*;
 import com.software.finatech.lslb.cms.service.domain.FailedEmailNotification;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import org.slf4j.Logger;
@@ -17,6 +18,10 @@ import java.util.UUID;
 
 @Component("emailService")
 public class EmailService {
+
+
+    @Autowired
+    private SendGrid sendGrid;
     @Autowired
     private JavaMailSender mailSender;
     @Autowired
@@ -26,6 +31,10 @@ public class EmailService {
     @Async("threadPoolTaskExecutor")
     public void sendEmail(String content, String subject, String to) {
         //mailSender.send(email);
+
+
+
+      /**
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
             messageHelper.setFrom("noreply@lslbcms.com");
@@ -33,8 +42,10 @@ public class EmailService {
             messageHelper.setSubject(subject);
             messageHelper.setText(content, true);
         };
+        */
         try {
-            mailSender.send(messagePreparator);
+            sendSendGridEmail(content,subject, to);
+          //  mailSender.send(messagePreparator);
         } catch (Throwable e) {
             FailedEmailNotification failedEmailNotification = new FailedEmailNotification();
             failedEmailNotification.setId(UUID.randomUUID().toString());
@@ -88,6 +99,25 @@ public class EmailService {
             mailSender.send(messagePreparator);
         } catch (MailException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void sendSendGridEmail(String contentString, String subject, String toEmailAddress) {
+        Email fromEmail = new Email("noreply@lslbcms.com");
+        Email toEmail = new Email(toEmailAddress);
+        Content content = new Content("text/html", contentString);
+
+        Mail mail = new Mail(fromEmail, subject, toEmail, content);
+        Request request = new Request();
+        try {
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sendGrid.api(request);
+            logger.info(response.getBody());
+            logger.info("{}",response.getStatusCode());
+        } catch (Exception e) {
+            logger.error("An error occurred while sending send grid email", e);
         }
     }
 
