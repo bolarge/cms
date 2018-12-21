@@ -1,15 +1,16 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 
+import java.util.HashSet;
 import java.util.Set;
 
-public class DocumentTypeDto extends EnumeratedFactDto{
+public class DocumentTypeDto extends EnumeratedFactDto {
 
     protected String documentPurposeId;
     protected DocumentPurposeDto documentPurpose;
     protected boolean active;
     protected boolean required;
-    protected Set<String> gameTypeNames;
+    protected Set<GameTypeDto> gameTypeDtos = new HashSet<>();
     private String approverName;
     private String approverId;
 
@@ -29,12 +30,12 @@ public class DocumentTypeDto extends EnumeratedFactDto{
         this.approverId = approverId;
     }
 
-    public Set<String> getGameTypeNames() {
-        return gameTypeNames;
+    public Set<GameTypeDto> getGameTypeDtos() {
+        return gameTypeDtos;
     }
 
-    public void setGameTypeNames(Set<String> gameTypeNames) {
-        this.gameTypeNames = gameTypeNames;
+    public void setGameTypeDtos(Set<GameTypeDto> gameTypeDtos) {
+        this.gameTypeDtos = gameTypeDtos;
     }
 
     public boolean isActive() {
@@ -52,6 +53,7 @@ public class DocumentTypeDto extends EnumeratedFactDto{
     public void setRequired(boolean required) {
         this.required = required;
     }
+
     public String getDocumentPurposeId() {
         return documentPurposeId;
     }
