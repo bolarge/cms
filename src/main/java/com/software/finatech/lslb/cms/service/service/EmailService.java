@@ -33,19 +33,18 @@ public class EmailService {
         //mailSender.send(email);
 
 
-
-      /**
-        MimeMessagePreparator messagePreparator = mimeMessage -> {
-            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom("noreply@lslbcms.com");
-            messageHelper.setTo(to);
-            messageHelper.setSubject(subject);
-            messageHelper.setText(content, true);
-        };
-        */
+        /**
+         MimeMessagePreparator messagePreparator = mimeMessage -> {
+         MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+         messageHelper.setFrom("noreply@lslbcms.com");
+         messageHelper.setTo(to);
+         messageHelper.setSubject(subject);
+         messageHelper.setText(content, true);
+         };
+         */
         try {
-            sendSendGridEmail(content,subject, to);
-          //  mailSender.send(messagePreparator);
+            sendSendGridEmail(content, subject, to);
+            //  mailSender.send(messagePreparator);
         } catch (Throwable e) {
             FailedEmailNotification failedEmailNotification = new FailedEmailNotification();
             failedEmailNotification.setId(UUID.randomUUID().toString());
@@ -102,22 +101,22 @@ public class EmailService {
         }
     }
 
-    private void sendSendGridEmail(String contentString, String subject, String toEmailAddress) {
-        Email fromEmail = new Email("noreply@lslbcms.com");
-        Email toEmail = new Email(toEmailAddress);
-        Content content = new Content("text/html", contentString);
-
-        Mail mail = new Mail(fromEmail, subject, toEmail, content);
-        Request request = new Request();
+    private void sendSendGridEmail(String contentString, String subject, String toEmailAddress) throws Exception {
         try {
+            Email fromEmail = new Email("noreply@lslbcms.com");
+            Email toEmail = new Email(toEmailAddress);
+            Content content = new Content("text/html", contentString);
+
+            Mail mail = new Mail(fromEmail, subject, toEmail, content);
+            Request request = new Request();
             request.setMethod(Method.POST);
             request.setEndpoint("mail/send");
             request.setBody(mail.build());
             Response response = sendGrid.api(request);
             logger.info(response.getBody());
-            logger.info("{}",response.getStatusCode());
+            logger.info("{}", response.getStatusCode());
         } catch (Exception e) {
-            logger.error("An error occurred while sending send grid email", e);
+            throw new Exception(e.getMessage(), e);
         }
     }
 
