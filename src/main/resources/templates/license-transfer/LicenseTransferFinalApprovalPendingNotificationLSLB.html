@@ -564,10 +564,11 @@
                                                                                  style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:rgb(0, 0, 0);line-height:135%;">
                                                                                 This is to inform you that
                                                                                 <span
-                                                                                        th:text="${transferor}"></span>
-                                                                                has completed its exit meeting and
-                                                                                requires your approval to proceed with
-                                                                                the licence transfer.
+                                                                                        th:text="${transferor}"></span>&apos;s
+                                                                                <span th:text="${gameType}"></span>
+                                                                                licence transfer to <span
+                                                                                    th:text="${transferee}"></span>
+                                                                                is ready for final approval.
                                                                                 <br/>
                                                                                 Kindly click the link below to approve.
                                                                             </div>
@@ -608,8 +609,7 @@
                                                                                         style="padding-top:15px;padding-bottom:15px;padding-right:15px;padding-left:15px;">
                                                                                         <a style="color:#FFFFFF;text-decoration:none;font-family:Helvetica,Arial,sans-serif;font-size:20px;line-height:135%;"
                                                                                            th:href="@{${frontEndUrl}}"
-                                                                                           target="_blank">Pay Transfer
-                                                                                            Fees
+                                                                                           target="_blank">
                                                                                         </a>
                                                                                     </td>
                                                                                 </tr>
