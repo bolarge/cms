@@ -96,6 +96,19 @@ public class LicenseTransferMailSenderAsync extends AbstractMailSender {
     }
 
     @Async
+    public void sendPendingFinalApprovalMailToLslbAdmins(LicenseTransfer licenseTransfer) {
+        List<AuthInfo> lslbMembers = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.FINAL_LICENSE_TRANSFER_APPROVER_ID);
+        if (lslbMembers.isEmpty()) {
+            return;
+        }
+        String mailContent = buildLicenceTransferEmailContent(licenseTransfer, "license-transfer/LicenseTransferFinalApprovalPendingNotificationLSLB");
+        for (AuthInfo lslbMember : lslbMembers) {
+            String subject = String.format("%s's licence is ready for approval", licenseTransfer.getToInstitution());
+            sendLicenseTransferMail(lslbMember.getEmailAddress(), mailContent, subject);
+        }
+    }
+
+    @Async
     public void sendRejectionNotificationToTransferee(LicenseTransfer licenseTransfer) {
         List<AuthInfo> transfereeAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(licenseTransfer.getToInstitutionId());
         String transfereeMailContent = buildLicenceTransferEmailContent(licenseTransfer, "license-transfer/LicenseTransferRejectionNotificationTransferee");

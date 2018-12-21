@@ -227,11 +227,13 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
                 licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.PENDING_NEW_INSTITUTION_ADDITION_ID);
             } else if (licenseTransfer.isPendingAddInstitutionApproval()) {
                 licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.PENDING_FINAL_APPROVAL_ID);
+                licenseTransferMailSenderAsync.sendPendingFinalApprovalMailToLslbAdmins(licenseTransfer);
             } else if (licenseTransfer.isPendingFinalApproval()) {
-                ScheduledMeeting scheduledMeeting = scheduledMeetingService.findCompletedMeetingForEntityAndPurpose(licenseTransferId, ScheduledMeetingPurposeReferenceData.TRANSFEREE_ID);
-                if (scheduledMeeting == null) {
-                    //       return Mono.just(new ResponseEntity<>("There is no completed presentation scheduled for Transferee", HttpStatus.BAD_REQUEST));
-                }
+                /*
+                 ScheduledMeeting scheduledMeeting = scheduledMeetingService.findCompletedMeetingForEntityAndPurpose(licenseTransferId, ScheduledMeetingPurposeReferenceData.TRANSFEREE_ID);
+                 if (scheduledMeeting == null) {
+                 return Mono.just(new ResponseEntity<>("There is no completed presentation scheduled for Transferee", HttpStatus.BAD_REQUEST));
+                 }*/
                 ApplicationForm applicationForm = licenseService.getApprovedApplicationFormForInstitution(licenseTransfer.getToInstitutionId(), licenseTransfer.getGameTypeId());
                 if (applicationForm == null) {
                     return Mono.just(new ResponseEntity<>(String.format("%s does not have an approved application", licenseTransfer.getToInstitution()), HttpStatus.BAD_REQUEST));
