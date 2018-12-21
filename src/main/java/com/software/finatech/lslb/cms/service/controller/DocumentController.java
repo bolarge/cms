@@ -546,7 +546,7 @@ public class DocumentController extends BaseController {
         }
         List<DocumentType> documentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
         List<String> documentTypeIds = new ArrayList<>();
-        documentTypes.stream().forEach(documentType -> {
+        documentTypes.forEach(documentType -> {
             documentTypeIds.add(documentType.getId());
         });
 

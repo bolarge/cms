@@ -75,6 +75,7 @@ public class AgentServiceImpl implements AgentService {
                                               String institutionIds,
                                               String gameTypeIds,
                                               String agentStatusId,
+                                              String agentId,
                                               HttpServletResponse httpServletResponse) {
         try {
             Query query = new Query();
@@ -88,6 +89,9 @@ public class AgentServiceImpl implements AgentService {
             }
             if (!StringUtils.isEmpty(agentStatusId)) {
                 query.addCriteria(Criteria.where("agentStatusId").is(agentStatusId));
+            }
+            if (!StringUtils.isEmpty(agentId)) {
+                query.addCriteria(Criteria.where("agentId").is(agentId));
             }
 
             if (page == 0) {

@@ -28,8 +28,7 @@ public class AgentController extends BaseController {
         this.agentService = agentService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType",
-            "sortProperty", "institutionIds", "gameTypeIds", "agentStatusId"})
+    @RequestMapping(method = RequestMethod.GET, value = "/all")
     @ApiOperation(value = "Get all agents", response = AgentDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -43,8 +42,9 @@ public class AgentController extends BaseController {
                                              @RequestParam("gameTypeIds") String gameTypeIds,
                                              @RequestParam("institutionIds") String institutionIds,
                                              @RequestParam("agentStatusId") String agentStatusId,
+                                             @RequestParam(value = "agentId", required = false) String agentId,
                                              HttpServletResponse httpServletResponse) {
-        return agentService.findAllAgents(page, pageSize, sortType, sortParam, institutionIds, gameTypeIds,agentStatusId, httpServletResponse);
+        return agentService.findAllAgents(page, pageSize, sortType, sortParam, institutionIds, gameTypeIds,agentStatusId,agentId, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create")

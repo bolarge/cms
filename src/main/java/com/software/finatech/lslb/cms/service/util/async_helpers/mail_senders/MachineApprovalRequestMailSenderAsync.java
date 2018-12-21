@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import static com.software.finatech.lslb.cms.service.util.StringCapitalizer.convertToTitleCaseIteratingChars;
 
@@ -86,10 +87,15 @@ public class MachineApprovalRequestMailSenderAsync extends AbstractMailSender {
     @Async
     public void sendMachineApprovalNotificationToRequestInitiator(MachineApprovalRequest approvalRequest) {
         String content = buildMachineApprovalNotificationOperator(approvalRequest);
-        String machineSerialNumber = approvalRequest.getMachineRequestSerialNumber();
         if (approvalRequest.isInitiatedByInstitution()) {
             List<AuthInfo> operatorAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(approvalRequest.getInstitutionId());
-            String mailSubject = String.format("Update on your machine approval for machine with serial number %s", machineSerialNumber);
+            String mailSubject = "";
+            if (approvalRequest.isGamingTerminalRequest()) {
+                mailSubject = "Update on your terminal approval request";
+            }
+            if (approvalRequest.isGamingMachineRequest()) {
+                mailSubject = "Update on your machine approval request";
+            }
             for (AuthInfo operatorAdmin : operatorAdmins) {
                 String adminEmail = operatorAdmin.getEmailAddress();
                 try {
@@ -102,28 +108,28 @@ public class MachineApprovalRequestMailSenderAsync extends AbstractMailSender {
 
             if (approvalRequest.isAssignMultipleTerminalsToAgent() || approvalRequest.isAssignTerminalToAgent()) {
                 Agent agent = approvalRequest.getAgent();
-//                String mailContentForAgent = buildAssignTerminalsForAgent(approvalRequest);
-
+                String mailContentForAgent = buildAssignTerminalsApprovalForAgent(approvalRequest);
+                emailService.sendEmail(mailContentForAgent, "New Terminal(s) Notification", agent.getEmailAddress());
             }
 
         } else {
             AuthInfo initiator = approvalRequest.getInitiator();
-            String mailSubject = String.format("Update on your approval request for terminal with serial number %s", machineSerialNumber);
+            String mailSubject = "Update on your terminal approval request";
             logger.info("Sending machine approval notification to {}", initiator.getEmailAddress());
             emailService.sendEmail(content, mailSubject, initiator.getEmailAddress());
         }
     }
 
     private String buildAssignTerminalsApprovalForAgent(MachineApprovalRequest approvalRequest) {
-        Agent agent = approvalRequest.getAgent();
+        Set<String> machineIds = approvalRequest.getMachineIds();
+        String frontEndUrl = String.format("%s/payment-page", frontEndPropertyHelper.getFrontEndUrl());
         HashMap<String, Object> model = new HashMap<>();
         String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
-        model.put("agentName", agent.getFullName());
         model.put("date", presentDateString);
-        model.put("approvalType", convertToTitleCaseIteratingChars(String.valueOf(approvalRequest.getMachineApprovalRequestTypeId())));
-     //   model.put("serialNumber", gamingTerminal.getSerialNumber());
-       // model.put("frontEndUrl", frontEndUrl);
-        return mailContentBuilderService.build(model, "machine-approvals/Agent-MachineApproval-Operator-Notification");
+        model.put("operatorName", convertToTitleCaseIteratingChars(String.valueOf(approvalRequest.getRequestInitiatorName())));
+        model.put("count", String.valueOf(machineIds.size()));
+        model.put("frontEndUrl", frontEndUrl);
+        return mailContentBuilderService.build(model, "machine-approvals/Machine-ApprovalNotification-AgentTerminals");
     }
 
     private String buildInitialMachineApprovalRequestOperatorNotificationContent(MachineApprovalRequest machineApprovalRequest) {
