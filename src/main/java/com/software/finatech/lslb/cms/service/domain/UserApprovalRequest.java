@@ -177,7 +177,11 @@ public class UserApprovalRequest extends AbstractApprovalRequest {
 
         PendingAuthInfo pendingAuthInfo = getPendingAuthInfo(this.pendingAuthInfoId);
         if (pendingAuthInfo != null) {
-            dto.setSubjectUserName(pendingAuthInfo.getFullName());
+            if (!StringUtils.isEmpty(pendingAuthInfo.getFullName())) {
+                dto.setSubjectUserName(pendingAuthInfo.getFullName());
+            } else {
+                dto.setSubjectUserName(pendingAuthInfo.getFirstName() + " " + pendingAuthInfo.getLastName());
+            }
         }
         LocalDateTime dateCreated = getDateCreated();
         if (dateCreated != null) {

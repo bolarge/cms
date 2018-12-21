@@ -340,6 +340,7 @@ public class AuthInfoController extends BaseController {
                 pendingAuthInfo.setTitle(authInfoCreateDto.getTitle());
                 pendingAuthInfo.setPhoneNumber(authInfoCreateDto.getPhoneNumber());
                 pendingAuthInfo.setAuthRoleId(authInfoCreateDto.getAuthRoleId());
+                pendingAuthInfo.setFullName(authInfoCreateDto.getFirstName() + " " + authInfoCreateDto.getLastName());
                 mongoRepositoryReactive.saveOrUpdate(pendingAuthInfo);
 
                 UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
