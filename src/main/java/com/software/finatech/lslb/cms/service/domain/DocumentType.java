@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.DocumentTypeDto;
+import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -70,18 +71,10 @@ public class DocumentType extends EnumeratedFact {
     }
 
     private GameType getGameType(String gameTypeId) {
-        Map gameTypeMap = Mapstore.STORE.get("GameType");
-        GameType gameType = null;
-        if (gameTypeMap != null) {
-            gameType = (GameType) gameTypeMap.get(gameTypeId);
+        if (StringUtils.isEmpty(gameTypeId)) {
+            return null;
         }
-        if (gameType == null) {
-            gameType = (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
-            if (gameType != null && gameTypeMap != null) {
-                gameTypeMap.put(gameTypeId, gameType);
-            }
-        }
-        return gameType;
+        return (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
     }
 
     private Set<String> getGameTypeNames() {
@@ -94,6 +87,19 @@ public class DocumentType extends EnumeratedFact {
         }
         return gameTypeNames;
     }
+
+    private Set<GameTypeDto> getGameTypeDtos() {
+        Set<GameTypeDto> gameTypeDtos = new HashSet<>();
+
+        for (String gameTypeId : this.gameTypeIds) {
+            GameType gameType = getGameType(gameTypeId);
+            if (gameType != null) {
+                gameTypeDtos.add(gameType.convertToDto());
+            }
+        }
+        return gameTypeDtos;
+    }
+
 
     public AuthInfo getApprover() {
         if (StringUtils.isEmpty(this.approverId)) {
@@ -111,7 +117,7 @@ public class DocumentType extends EnumeratedFact {
         dto.setDocumentPurpose(getDocumentPurpose() == null ? null : getDocumentPurpose().convertToDto());
         dto.setActive(isActive());
         dto.setRequired(isRequired());
-        dto.setGameTypeNames(getGameTypeNames());
+        dto.setGameTypeDtos(getGameTypeDtos());
         AuthInfo approver = getApprover();
         if (approver != null) {
             dto.setApproverName(approver.getFullName());
