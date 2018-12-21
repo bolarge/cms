@@ -220,6 +220,9 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
                 if (scheduledMeeting == null) {
                     return Mono.just(new ResponseEntity<>("There is no completed exit meeting scheduled for Transferor", HttpStatus.BAD_REQUEST));
                 }
+                if (!loggedInUser.getAllUserPermissionIdsForUser().contains(LSLBAuthPermissionReferenceData.INITIAL_LICENSE_TRANSFER_APPROVER_ID)) {
+                    return Mono.just(new ResponseEntity<>("User does not have permission to approve exit of operator", HttpStatus.BAD_REQUEST));
+                }
                 licenseTransferMailSenderAsync.sendInitialLicenseTransferApprovalMailToTransferorAdmins(licenseTransfer);
                 licenseTransfer.setLicenseTransferStatusId(LicenseTransferStatusReferenceData.PENDING_NEW_INSTITUTION_ADDITION_ID);
             } else if (licenseTransfer.isPendingAddInstitutionApproval()) {
@@ -228,6 +231,10 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
                 ScheduledMeeting scheduledMeeting = scheduledMeetingService.findCompletedMeetingForEntityAndPurpose(licenseTransferId, ScheduledMeetingPurposeReferenceData.TRANSFEREE_ID);
                 if (scheduledMeeting == null) {
                     //       return Mono.just(new ResponseEntity<>("There is no completed presentation scheduled for Transferee", HttpStatus.BAD_REQUEST));
+                }
+                ApplicationForm applicationForm = licenseService.getApprovedApplicationFormForInstitution(licenseTransfer.getToInstitutionId(), licenseTransfer.getGameTypeId());
+                if (applicationForm == null) {
+                    return Mono.just(new ResponseEntity<>(String.format("%s does not have an approved application", licenseTransfer.getToInstitution()), HttpStatus.BAD_REQUEST));
                 }
                 if (!loggedInUser.getAllUserPermissionIdsForUser().contains(LSLBAuthPermissionReferenceData.FINAL_LICENSE_TRANSFER_APPROVER_ID)) {
                     return Mono.just(new ResponseEntity<>("User does not have permission to approve license transfer", HttpStatus.BAD_REQUEST));

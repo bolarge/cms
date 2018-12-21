@@ -1350,7 +1350,8 @@ public class LicenseServiceImpl implements LicenseService {
         return null;
     }
 
-    private ApplicationForm getApprovedApplicationFormForInstitution(String institutionId, String gameTypeId) {
+    @Override
+    public ApplicationForm getApprovedApplicationFormForInstitution(String institutionId, String gameTypeId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));

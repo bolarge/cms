@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -126,6 +127,34 @@ public class LicenseTransferMailSenderAsync extends AbstractMailSender {
         model.put("frontEndUrl", url);
         model.put("frontEndUrlPayment", paymentPageUrl);
         return mailContentBuilderService.build(model, templateName);
+    }
+
+    @Async
+    public void sendExitMeetingCompletionMailToLSlbAdmins(LicenseTransfer licenseTransfer) {
+        ArrayList<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.INITIAL_LICENSE_TRANSFER_APPROVER_ID);
+        if (lslbAdmins.isEmpty()) {
+            return;
+        }
+        String mailContent = buildCompletedExitMeetingNotificationLslbAdmin(licenseTransfer);
+        for (AuthInfo lslbAdmin : lslbAdmins) {
+            logger.info("Sending email to {}", lslbAdmin.getEmailAddress());
+            emailService.sendEmail(mailContent, "Notification To approve Transfer", lslbAdmin.getEmailAddress());
+        }
+    }
+
+    private String buildCompletedExitMeetingNotificationLslbAdmin(LicenseTransfer licenseTransfer) {
+        String url = String.format("%s/licence-transfer-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), licenseTransfer.getId());
+        String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
+        HashMap<String, Object> model = new HashMap<>();
+        String transferor = "";
+        Institution fromInstitution = licenseTransfer.getFromInstitution();
+        if (fromInstitution != null) {
+            transferor = String.valueOf(fromInstitution);
+        }
+        model.put("date", presentDateString);
+        model.put("transferor", transferor);
+        model.put("frontEndUrl", url);
+        return mailContentBuilderService.build(model, "license-transfer/LicenseTransferExitMeetingCompletionNotificationLSLB");
     }
 
     private void sendLicenseTransferMail(String emailAddress, String mailContent, String mailSubject) {

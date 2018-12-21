@@ -13,12 +13,12 @@ public class LicenseTransferStatusReferenceData {
     public static final String REJECTED_ID = "4";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
-        loadForIdAndName(PENDING_INITIAL_APPROVAL_ID, mongoRepositoryReactive, "PENDING INITIAL APPROVAL");
+        loadForIdAndName(PENDING_INITIAL_APPROVAL_ID, mongoRepositoryReactive, "PENDING EXIT APPROVAL");
         loadForIdAndName(PENDING_FINAL_APPROVAL_ID, mongoRepositoryReactive, "PENDING FINAL APPROVAL");
         loadForIdAndName(APPROVED_ID, mongoRepositoryReactive, "APPROVED");
         loadForIdAndName(REJECTED_ID, mongoRepositoryReactive, "REJECTED");
-        loadForIdAndName(PENDING_ADD_INSTITUTION_APPROVAL_ID, mongoRepositoryReactive, "PENDING ADD OPERATOR APPROVAL");
-        loadForIdAndName(PENDING_NEW_INSTITUTION_ADDITION_ID, mongoRepositoryReactive, "PENDING NEW OPERATOR ADDITION");
+        loadForIdAndName(PENDING_ADD_INSTITUTION_APPROVAL_ID, mongoRepositoryReactive, "PENDING CLAIM APPROVAL");
+        loadForIdAndName(PENDING_NEW_INSTITUTION_ADDITION_ID, mongoRepositoryReactive, "PENDING TRANSFEREE CLAIM");
     }
 
 

@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
+import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
 import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.domain.LoggedCase;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
@@ -90,4 +91,6 @@ public interface LicenseService {
                                         String agentId,
                                         String gameTypeId,
                                         String licenseTypeId);
+
+    ApplicationForm getApprovedApplicationFormForInstitution(String institutionId, String gameTypeId);
 }
