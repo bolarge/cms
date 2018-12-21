@@ -20,6 +20,7 @@ public class LSLBAuthPermissionReferenceData {
     public static final String RECEIVE_FEE_EXPIRIY_NOTIFICATION_ID = "65";
     public static final String RECEIVE_LICENSE_TRANSFER_NOTIFICATION_ID = "66";
     public static final String FINAL_LICENSE_TRANSFER_APPROVER_ID = "93";
+    public static final String INITIAL_LICENSE_TRANSFER_APPROVER_ID = "95";
     public static final String RECEIVE_INSPECTION_FORM_NOTIFICATION_ID = "94";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
@@ -885,6 +886,16 @@ public class LSLBAuthPermissionReferenceData {
         permission.setName("RECEIVE INSPECTION FORMS NOTIFICATION");
         permission.setDescription("Receive inspection form  Notification");
         permission.setUsedBySystem(true);
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById(INITIAL_LICENSE_TRANSFER_APPROVER_ID, AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId(INITIAL_LICENSE_TRANSFER_APPROVER_ID);
+        }
+        permission.setName("APPROVE INITIAL /EXIT LICENCE TRANSFER");
+        permission.setDescription("Approve Initial / Exit License Transfer");
+        permission.setAuthRoleId(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID);
         mongoRepositoryReactive.saveOrUpdate(permission);
     }
 

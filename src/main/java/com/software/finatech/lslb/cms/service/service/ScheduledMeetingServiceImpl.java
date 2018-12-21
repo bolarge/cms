@@ -12,6 +12,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.ScheduledMeeting
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApplicationFormEmailSenderAsync;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.LicenseTransferMailSenderAsync;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ScheduledMeetingMailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
@@ -53,6 +54,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
     private ScheduledMeetingMailSenderAsync scheduledMeetingMailSenderAsync;
     private InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService;
     private ApplicationFormEmailSenderAsync applicationFormEmailSenderAsync;
+    private LicenseTransferMailSenderAsync licenseTransferMailSenderAsync;
 
     private static final int NUMBER_OF_DAYS_BEFORE_MEETING_REMINDER = 1;
     private static final int POST_MEETING_REMINDER_DAYS = 7;
@@ -65,7 +67,8 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                                        SpringSecurityAuditorAware springSecurityAuditorAware,
                                        ScheduledMeetingMailSenderAsync scheduledMeetingMailSenderAsync,
                                        InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService,
-                                       ApplicationFormEmailSenderAsync applicationFormEmailSenderAsync) {
+                                       ApplicationFormEmailSenderAsync applicationFormEmailSenderAsync,
+                                       LicenseTransferMailSenderAsync licenseTransferMailSenderAsync) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.authInfoService = authInfoService;
         this.auditLogHelper = auditLogHelper;
@@ -73,6 +76,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
         this.scheduledMeetingMailSenderAsync = scheduledMeetingMailSenderAsync;
         this.institutionOnboardingWorkflowService = institutionOnboardingWorkflowService;
         this.applicationFormEmailSenderAsync = applicationFormEmailSenderAsync;
+        this.licenseTransferMailSenderAsync = licenseTransferMailSenderAsync;
     }
 
 
@@ -290,6 +294,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                     }
                     if (scheduledMeeting.isForLicenseTransferror()) {
                         licenseTransfer.setTransferorMeetingCompleted(true);
+                        licenseTransferMailSenderAsync.sendExitMeetingCompletionMailToLSlbAdmins(licenseTransfer);
                     }
                     mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
                 }
