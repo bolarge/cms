@@ -21,7 +21,7 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
 
     @Async
     public void sendPaymentNotificationForPaymentRecordDetail(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
-        if (paymentRecord.isAgentPayment()) {
+        if (paymentRecord.isAgentPayment() || paymentRecord.isGamingTerminalPayment()) {
             Agent agent = paymentRecord.getAgent();
             sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, agent.getEmailAddress(), "payment-notifications/PaymentNotificationExternalUser");
         }

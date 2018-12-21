@@ -562,12 +562,14 @@
                                                                             </h3>
                                                                             <div mc:edit="body"
                                                                                  style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:rgb(0, 0, 0);line-height:135%;">
-                                                                                In line with your application
-                                                                                for [[${gameType}]] licence,
-                                                                                we are pleased to inform you that your
-                                                                                application has been approved and you
-                                                                                can proceed to make payment for license
-                                                                                on our platform.
+                                                                                This is inform you that <span
+                                                                                    th:text="${count}"></span>
+                                                                                terminal(s) have been assigned to you by
+                                                                                <span th:text="${operatorName}"></span>.
+                                                                                <br/>
+                                                                                <br/>
+                                                                                Kindly click the link below to make
+                                                                                payment for the terminals.
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -606,8 +608,8 @@
                                                                                         style="padding-top:15px;padding-bottom:15px;padding-right:15px;padding-left:15px;">
                                                                                         <a style="color:#FFFFFF;text-decoration:none;font-family:Helvetica,Arial,sans-serif;font-size:20px;line-height:135%;"
                                                                                            th:href="@{${frontEndUrl}}"
-                                                                                           target="_blank">Pay Licence
-                                                                                            Fee
+                                                                                           target="_blank">
+                                                                                            Make Payment.
                                                                                         </a>
                                                                                     </td>
                                                                                 </tr>

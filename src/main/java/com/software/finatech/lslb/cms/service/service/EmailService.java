@@ -115,6 +115,9 @@ public class EmailService {
             Response response = sendGrid.api(request);
             logger.info(response.getBody());
             logger.info("{}", response.getStatusCode());
+            if (response.getStatusCode() < 200 || response.getStatusCode() > 299) {
+                throw new Exception(response.getBody());
+            }
         } catch (Exception e) {
             throw new Exception(e.getMessage(), e);
         }
