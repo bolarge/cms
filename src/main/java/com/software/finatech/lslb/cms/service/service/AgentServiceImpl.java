@@ -91,7 +91,7 @@ public class AgentServiceImpl implements AgentService {
                 query.addCriteria(Criteria.where("agentStatusId").is(agentStatusId));
             }
             if (!StringUtils.isEmpty(agentId)) {
-                query.addCriteria(Criteria.where("agentId").is(agentId));
+                query.addCriteria(Criteria.where("id").is(agentId));
             }
 
             if (page == 0) {
