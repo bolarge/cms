@@ -31,9 +31,6 @@ public class EmailService {
     @Async("threadPoolTaskExecutor")
     public void sendEmail(String content, String subject, String to) {
         //mailSender.send(email);
-
-
-        /**
          MimeMessagePreparator messagePreparator = mimeMessage -> {
          MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
          messageHelper.setFrom("noreply@lslbcms.com");
@@ -41,10 +38,10 @@ public class EmailService {
          messageHelper.setSubject(subject);
          messageHelper.setText(content, true);
          };
-         */
+
         try {
-            sendSendGridEmail(content, subject, to);
-            //  mailSender.send(messagePreparator);
+         //   sendSendGridEmail(content, subject, to);
+            mailSender.send(messagePreparator);
         } catch (Throwable e) {
             FailedEmailNotification failedEmailNotification = new FailedEmailNotification();
             failedEmailNotification.setId(UUID.randomUUID().toString());
