@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -14,6 +15,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 @Component("emailService")
@@ -26,6 +29,10 @@ public class EmailService {
     private JavaMailSender mailSender;
     @Autowired
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
+    @Autowired
+    private Environment environment;
+
+
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
     @Async("threadPoolTaskExecutor")
@@ -33,7 +40,7 @@ public class EmailService {
         //mailSender.send(email);
          MimeMessagePreparator messagePreparator = mimeMessage -> {
          MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-         messageHelper.setFrom("noreply@lslbcms.com");
+         messageHelper.setFrom(getMailSender());
          messageHelper.setTo(to);
          messageHelper.setSubject(subject);
          messageHelper.setText(content, true);
@@ -85,7 +92,7 @@ public class EmailService {
     public void sendEmailWithAttachment(String content, String subject, String to, File file) {
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true);
-            messageHelper.setFrom("noreply@lslbcms.com");
+            messageHelper.setFrom(getMailSender());
             messageHelper.setTo(to);
             messageHelper.setSubject(subject);
             messageHelper.setText(content, true);
@@ -118,6 +125,18 @@ public class EmailService {
         } catch (Exception e) {
             throw new Exception(e.getMessage(), e);
         }
+    }
+
+    private String getMailSender(){
+        List<String> activeProfiles = Arrays.asList(environment.getActiveProfiles());
+        if (activeProfiles.contains("test") || activeProfiles.contains("staging")){
+            return "dev@lslbcms.com";
+        }
+
+        if (activeProfiles.contains("production")){
+            return "no-reply@lslbcms.com";
+        }
+        return "";
     }
 
    /* @Async("threadPoolTaskExecutor")
