@@ -62,7 +62,6 @@ public class FeeController extends BaseController {
         return feeService.createFee(feeCreateDto, request);
     }
 
-
     @RequestMapping(method = RequestMethod.POST, value = "/updateFeePaymentType")
     @ApiOperation(value = "Update FeePaymentType Configuration", response = FeePaymentTypeDto.class, consumes = "application/json")
     @ApiResponses(value = {
