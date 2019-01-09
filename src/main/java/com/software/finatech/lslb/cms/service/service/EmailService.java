@@ -1,6 +1,5 @@
 package com.software.finatech.lslb.cms.service.service;
 
-import com.sendgrid.*;
 import com.software.finatech.lslb.cms.service.domain.FailedEmailNotification;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import org.slf4j.Logger;
@@ -23,8 +22,8 @@ import java.util.UUID;
 public class EmailService {
 
 
-    @Autowired
-    private SendGrid sendGrid;
+    //    @Autowired
+//    private SendGrid sendGrid;
     @Autowired
     private JavaMailSender mailSender;
     @Autowired
@@ -38,16 +37,16 @@ public class EmailService {
     @Async("threadPoolTaskExecutor")
     public void sendEmail(String content, String subject, String to) {
         //mailSender.send(email);
-         MimeMessagePreparator messagePreparator = mimeMessage -> {
-         MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-         messageHelper.setFrom(getMailSender());
-         messageHelper.setTo(to);
-         messageHelper.setSubject(subject);
-         messageHelper.setText(content, true);
-         };
+        MimeMessagePreparator messagePreparator = mimeMessage -> {
+            MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+            messageHelper.setFrom(getMailSender());
+            messageHelper.setTo(to);
+            messageHelper.setSubject(subject);
+            messageHelper.setText(content, true);
+        };
 
         try {
-         //   sendSendGridEmail(content, subject, to);
+            //   sendSendGridEmail(content, subject, to);
             mailSender.send(messagePreparator);
         } catch (Throwable e) {
             FailedEmailNotification failedEmailNotification = new FailedEmailNotification();
@@ -105,6 +104,7 @@ public class EmailService {
         }
     }
 
+    /*
     private void sendSendGridEmail(String contentString, String subject, String toEmailAddress) throws Exception {
         try {
             Email fromEmail = new Email("noreply@lslbcms.com");
@@ -126,14 +126,14 @@ public class EmailService {
             throw new Exception(e.getMessage(), e);
         }
     }
-
-    private String getMailSender(){
+*/
+    private String getMailSender() {
         List<String> activeProfiles = Arrays.asList(environment.getActiveProfiles());
-        if (activeProfiles.contains("test") || activeProfiles.contains("staging")){
+        if (activeProfiles.contains("test") || activeProfiles.contains("staging")) {
             return "dev@lslbcms.com";
         }
 
-        if (activeProfiles.contains("production")){
+        if (activeProfiles.contains("production")) {
             return "no-reply@lslbcms.com";
         }
         return "";
