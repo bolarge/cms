@@ -67,11 +67,13 @@ public class Scheduler {
 
 
     @Scheduled(cron = "0 0 6 * * *")
+    // @Scheduled(fixedRate = 1000)
     @SchedulerLock(name = "Check For Licenses Close To Expirations", lockAtMostFor = ONE_HOUR, lockAtLeastFor = ONE_HOUR)
     protected void checkForLicensesCloseToExpirations() {
         logger.info(" checkForLicensesCloseToExpirations");
         ArrayList<String> licenseStatuses = new ArrayList<>();
         licenseStatuses.add(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+        licenseStatuses.add(LicenseStatusReferenceData.RENEWED_ID);
 
         List<License> licenses =
                 expirationList.getExpiringLicences(90, licenseStatuses);

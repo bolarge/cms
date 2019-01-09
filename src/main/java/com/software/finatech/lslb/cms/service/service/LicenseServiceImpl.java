@@ -321,7 +321,7 @@ public class LicenseServiceImpl implements LicenseService {
 //        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("renewalStatus").is("true"));
         LocalDateTime dateTime = new LocalDateTime();
         dateTime = dateTime.plusDays(90);
-        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").in(Arrays.asList(LicenseTypeReferenceData.INSTITUTION_ID, LicenseTypeReferenceData.GAMING_MACHINE_ID)));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").in(Arrays.asList(LicenseTypeReferenceData.INSTITUTION_ID)));
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("expiryDate").lt(dateTime));
      //   queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("renewalStatus").is("true"));
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseStatusId").is(Arrays.asList(LICENSED_LICENSE_STATUS_ID, LicenseStatusReferenceData.RENEWED_ID)));
