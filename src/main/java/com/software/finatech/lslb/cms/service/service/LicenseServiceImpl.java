@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.dto.NotificationDto;
 import com.software.finatech.lslb.cms.service.model.applicantDetails.ApplicantDetails;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
+import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseService;
 import com.software.finatech.lslb.cms.service.util.*;
@@ -37,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID;
 import static com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData.getAllowedLicensedStatusIds;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
@@ -65,6 +67,8 @@ public class LicenseServiceImpl implements LicenseService {
 
     @Autowired
     private InstitutionService institutionService;
+    @Autowired
+    private GameTypeService gameTypeService;
 
 
     @Autowired
@@ -313,8 +317,15 @@ public class LicenseServiceImpl implements LicenseService {
         if (!StringUtils.isEmpty(institutionId)) {
             queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("institutionId").is(institutionId));
         }
-        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
+//        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
+//        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("renewalStatus").is("true"));
+        LocalDateTime dateTime = new LocalDateTime();
+        dateTime = dateTime.plusDays(90);
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").in(Arrays.asList(LicenseTypeReferenceData.INSTITUTION_ID, LicenseTypeReferenceData.GAMING_MACHINE_ID)));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("expiryDate").lt(dateTime));
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("renewalStatus").is("true"));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseStatusId").is(Arrays.asList(LICENSED_LICENSE_STATUS_ID, LicenseStatusReferenceData.RENEWED_ID)));
+
         List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryForLicensedInstitutionInGameType, License.class).toStream().collect(Collectors.toList());
         if (licenses.size() == 0) {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
@@ -754,8 +765,10 @@ public class LicenseServiceImpl implements LicenseService {
                 PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById(license.getPaymentRecordId(), PaymentRecord.class).block();
                 if (paymentRecord != null) {
                     licenseNumber = generateLicenseNumberForPaymentRecord(paymentRecord);
-                    createLicense.setLicenseNumber(licenseNumber);
+                } else {
+                    licenseNumber = generateLicenseNumberForPaymentRecord(paymentRecord);
                 }
+                createLicense.setLicenseNumber(licenseNumber);
                 createLicense.setId(UUID.randomUUID().toString());
                 createLicense.setEffectiveDate(license.getExpiryDate().plusDays(1));
                 createLicense.setExpiryDate(licenseEndDate);
@@ -1285,6 +1298,13 @@ public class LicenseServiceImpl implements LicenseService {
             prefix = prefix + gameType.getShortCode() + "-";
         }
         return String.format("%s%s%s", prefix, randomDigit, LocalDateTime.now().getSecondOfMinute());
+    }
+
+    private String generateLicenseNumberForOperator(String gameTypeId) {
+        GameType gameType = gameTypeService.findById(gameTypeId);
+        LocalDateTime time = LocalDateTime.now();
+        String randomDigit = String.valueOf(NumberUtil.getRandomNumberInRange(10, 1000));
+        return String.format("LSLB-OP-%s-%s%s", gameType.getShortCode(), randomDigit, time.getSecondOfMinute());
     }
 
     private License findExistingGamingMachineLicenseInPresentYear(PaymentRecord paymentRecord) {
