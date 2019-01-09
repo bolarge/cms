@@ -48,7 +48,6 @@ public class ExpirationList {
                     mongoRepositoryReactive.saveOrUpdate(license);
                 }
             }
-
             return licenses;
         } catch (Throwable ex) {
             logger.info(ex.getMessage());

@@ -22,6 +22,9 @@ public interface AgentService {
                                        String gameTypeIds,
                                        String agentStatusId,
                                        String agentId,
+                                       String name,
+                                       String bvn,
+                                       String agentIdNumber,
                                        HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> findAgentsBySearchKey(String searchKey);
