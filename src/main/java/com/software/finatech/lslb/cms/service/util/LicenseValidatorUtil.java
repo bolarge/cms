@@ -61,6 +61,9 @@ public class LicenseValidatorUtil {
             badRequestResponseString = badRequestResponseString.replaceAll("Operator", institutionName);
             return Mono.just(new ResponseEntity<>(badRequestResponseString, HttpStatus.BAD_REQUEST));
         }
+        if (!LicenseStatusReferenceData.getAllowedLicensedStatusIds().contains(currentLicence.getLicenseStatusId())) {
+            badRequestResponseString = String.format("Operator licence for %s is not valid", gameType);
+        }
         if (currentLicence.isSuspendedLicence()) {
             badRequestResponseString = String.format("Operator licence for %s is currently suspended", gameType);
         }
@@ -69,9 +72,6 @@ public class LicenseValidatorUtil {
         }
         if (currentLicence.isTerminatedLicence()) {
             badRequestResponseString = String.format("Operator licence for %s is currently terminated", gameType);
-        }
-        if (!LicenseStatusReferenceData.getAllowedLicensedStatusIds().contains(currentLicence.getLicenseStatusId())) {
-            badRequestResponseString = String.format("Operator licence for %s is not valid", gameType);
         }
         if (!StringUtils.isEmpty(badRequestResponseString)) {
             Institution institution = institutionService.findByInstitutionId(institutionId);
