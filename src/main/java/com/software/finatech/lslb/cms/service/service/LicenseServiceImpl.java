@@ -332,6 +332,10 @@ public class LicenseServiceImpl implements LicenseService {
         }
         List<LicenseDto> licenseDtos = new ArrayList<>();
         licenses.stream().forEach(license -> {
+            if (!StringUtils.equals("true", license.getRenewalStatus())) {
+                license.setRenewalStatus("true");
+                mongoRepositoryReactive.saveOrUpdate(license);
+            }
             licenseDtos.add(license.convertToDto());
         });
         return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
