@@ -76,6 +76,9 @@ public class AgentServiceImpl implements AgentService {
                                               String gameTypeIds,
                                               String agentStatusId,
                                               String agentId,
+                                              String name,
+                                              String bvn,
+                                              String agentIdNumber,
                                               HttpServletResponse httpServletResponse) {
         try {
             Query query = new Query();
@@ -92,6 +95,15 @@ public class AgentServiceImpl implements AgentService {
             }
             if (!StringUtils.isEmpty(agentId)) {
                 query.addCriteria(Criteria.where("id").is(agentId));
+            }
+            if (!StringUtils.isEmpty(name)){
+                query.addCriteria(Criteria.where("fullName").regex(name, "i"));
+            }
+            if (!StringUtils.isEmpty(bvn)){
+                query.addCriteria(Criteria.where("bvn").is(bvn));
+            }
+            if (!StringUtils.isEmpty(agentIdNumber)){
+                query.addCriteria(Criteria.where("agentId").regex(agentIdNumber, "i"));
             }
 
             if (page == 0) {
@@ -363,6 +375,7 @@ public class AgentServiceImpl implements AgentService {
         agentInstitution.setInstitutionId(institutionId);
         List<AgentInstitution> agentInstitutions = new ArrayList<>();
         agentInstitutions.add(agentInstitution);
+        agent.setAgentInstitutions(agentInstitutions);
         agent.setEnabled(false);
         agent.setGameTypeIds(gameTypeIds);
         agent.setInstitutionIds(institutionIds);

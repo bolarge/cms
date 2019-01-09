@@ -1,13 +1,11 @@
 package com.software.finatech.lslb.cms.service.util.data_updater;
 
-import com.software.finatech.lslb.cms.service.domain.GameType;
-import com.software.finatech.lslb.cms.service.domain.Institution;
-import com.software.finatech.lslb.cms.service.domain.InstitutionCategoryDetails;
-import com.software.finatech.lslb.cms.service.domain.License;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.InstitutionLoadDetails;
 import com.software.finatech.lslb.cms.service.dto.InstitutionUpload;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
@@ -25,7 +23,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,27 +38,25 @@ public class ExistingOperatorLoader {
     private DateTimeFormatter dateTimeFormat = DateTimeFormat.forPattern("dd/MM/yyyy");
 
 
-
-//    @PostConstruct
-    public void init(){
+    //    @PostConstruct
+    public void init() {
         Query query = new Query();
         query.addCriteria(Criteria.where("fromLiveData").is(true));
-        ArrayList<Institution> operators = (ArrayList<Institution>)mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
-        for (Institution institution: operators) {
+        ArrayList<Institution> operators = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
+        for (Institution institution : operators) {
             query = new Query();
             query.addCriteria(Criteria.where("institutionId").is(institution.getId()));
-            ArrayList<License> licenses = (ArrayList<License>)mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
-            for (License license:licenses) {
+            ArrayList<License> licenses = (ArrayList<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
+            for (License license : licenses) {
                 mongoRepositoryReactive.delete(license);
             }
-            ArrayList<InstitutionCategoryDetails> institutionCategoryDetails = (ArrayList<InstitutionCategoryDetails>)mongoRepositoryReactive.findAll(query, InstitutionCategoryDetails.class).toStream().collect(Collectors.toList());
-            for (InstitutionCategoryDetails categoryDetails: institutionCategoryDetails) {
+            ArrayList<InstitutionCategoryDetails> institutionCategoryDetails = (ArrayList<InstitutionCategoryDetails>) mongoRepositoryReactive.findAll(query, InstitutionCategoryDetails.class).toStream().collect(Collectors.toList());
+            for (InstitutionCategoryDetails categoryDetails : institutionCategoryDetails) {
                 mongoRepositoryReactive.delete(categoryDetails);
             }
             mongoRepositoryReactive.delete(institution);
         }
     }
-
 
 
     public void loadFromCsv(MultipartFile multipartFile) throws LicenseServiceException {
@@ -176,7 +171,17 @@ public class ExistingOperatorLoader {
                 }
                 pendingLicense.setLicenseStatusId(licenseStatusId);
                 //    pendingLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
-                pendingLicense.setLicenseNumber(generateLicenseNumber(institutionLoadDetails.getGameTypeId()));
+                if (pendingLicense.isAIPRelatedLicense()) {
+                    AIPDocumentApproval aipDocumentApproval = new AIPDocumentApproval();
+                    aipDocumentApproval.setFormStatusId(ApplicationFormStatusReferenceData.CREATED_STATUS_ID);
+                    aipDocumentApproval.setGameTypeId(pendingLicense.getGameTypeId());
+                    aipDocumentApproval.setInstitutionId(pendingLicense.getInstitutionId());
+                    aipDocumentApproval.setId(UUID.randomUUID().toString());
+                    aipDocumentApproval.setReadyForApproval(false);
+                    mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
+                } else {
+                    pendingLicense.setLicenseNumber(generateLicenseNumber(institutionLoadDetails.getGameTypeId()));
+                }
                 mongoRepositoryReactive.saveOrUpdate(pendingLicense);
                 mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
             }
