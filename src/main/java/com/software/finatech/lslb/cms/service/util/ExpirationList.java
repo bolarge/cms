@@ -8,6 +8,7 @@ import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeRefer
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,15 +29,15 @@ public class ExpirationList {
     private static Logger logger = LoggerFactory.getLogger(ExpirationList.class);
 
     public List<License> getExpiringLicences(int duration, ArrayList<String> licenseStatusIds) {
-        LocalDateTime dateTime = new LocalDateTime();
+        LocalDate dateTime = new LocalDate();
         dateTime = dateTime.plusDays(duration);
         Query queryLicence = new Query();
         ArrayList<String> licenceTypes = new ArrayList<>();
         licenceTypes.add(LicenseTypeReferenceData.AGENT_ID);
         licenceTypes.add(LicenseTypeReferenceData.INSTITUTION_ID);
-        queryLicence.addCriteria(Criteria.where("expiryDate").lt(dateTime));
+        queryLicence.addCriteria(Criteria.where("expiryDate").lte(dateTime));
         queryLicence.addCriteria(Criteria.where("licenseStatusId").in(licenseStatusIds));
-        queryLicence.addCriteria(Criteria.where("licenceTypeId").in(licenceTypes));
+        queryLicence.addCriteria(Criteria.where("licenseTypeId").in(licenceTypes));
         try {
             List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryLicence, License.class).toStream().collect(Collectors.toList());
             if (licenses.size() == 0) {
