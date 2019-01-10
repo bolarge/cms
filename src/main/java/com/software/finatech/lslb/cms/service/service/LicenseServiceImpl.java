@@ -323,7 +323,7 @@ public class LicenseServiceImpl implements LicenseService {
         dateTime = dateTime.plusDays(90);
         queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
       queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("expiryDate").lte(dateTime));
-        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseStatusId").in(Arrays.asList(LICENSED_LICENSE_STATUS_ID, LicenseStatusReferenceData.RENEWED_ID)));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseStatusId").in(Arrays.asList(LICENSED_LICENSE_STATUS_ID, LicenseStatusReferenceData.RENEWED_ID, LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID)));
 
         ArrayList<License> licenses = (ArrayList<License>) mongoRepositoryReactive.findAll(queryForLicensedInstitutionInGameType, License.class).toStream().collect(Collectors.toList());
         if (licenses.size() == 0) {
