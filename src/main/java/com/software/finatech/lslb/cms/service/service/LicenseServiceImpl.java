@@ -319,14 +319,13 @@ public class LicenseServiceImpl implements LicenseService {
         }
 //        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
 //        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("renewalStatus").is("true"));
-        LocalDateTime dateTime = new LocalDateTime();
+        LocalDate dateTime = LocalDate.now();
         dateTime = dateTime.plusDays(90);
-        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").in(Arrays.asList(LicenseTypeReferenceData.INSTITUTION_ID, LicenseTypeReferenceData.GAMING_MACHINE_ID)));
-        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("expiryDate").lt(dateTime));
-     //   queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("renewalStatus").is("true"));
-        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseStatusId").is(Arrays.asList(LICENSED_LICENSE_STATUS_ID, LicenseStatusReferenceData.RENEWED_ID)));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
+      queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("expiryDate").lte(dateTime));
+        queryForLicensedInstitutionInGameType.addCriteria(Criteria.where("licenseStatusId").in(Arrays.asList(LICENSED_LICENSE_STATUS_ID, LicenseStatusReferenceData.RENEWED_ID)));
 
-        List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(queryForLicensedInstitutionInGameType, License.class).toStream().collect(Collectors.toList());
+        ArrayList<License> licenses = (ArrayList<License>) mongoRepositoryReactive.findAll(queryForLicensedInstitutionInGameType, License.class).toStream().collect(Collectors.toList());
         if (licenses.size() == 0) {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
         }
@@ -770,7 +769,7 @@ public class LicenseServiceImpl implements LicenseService {
                 if (paymentRecord != null) {
                     licenseNumber = generateLicenseNumberForPaymentRecord(paymentRecord);
                 } else {
-                    licenseNumber = generateLicenseNumberForPaymentRecord(paymentRecord);
+                    licenseNumber = generateLicenseNumberForOperator(license.getGameTypeId());
                 }
                 createLicense.setLicenseNumber(licenseNumber);
                 createLicense.setId(UUID.randomUUID().toString());

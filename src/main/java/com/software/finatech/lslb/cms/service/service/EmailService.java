@@ -21,7 +21,6 @@ import java.util.UUID;
 @Component("emailService")
 public class EmailService {
 
-
     //    @Autowired
 //    private SendGrid sendGrid;
     @Autowired
