@@ -87,12 +87,15 @@ public class Scheduler {
                 if (license.getLastSentExpiryEmailDate() == null) {
                     check = true;
                     license.setLastSentExpiryEmailDate(LocalDate.now());
+
                 } else {
                     days_diff = Days.daysBetween(license.getLastSentExpiryEmailDate(), LocalDate.now().plusDays(7)).getDays();
                     if (days_diff > 0) {
                         check = true;
+                        license.setLastSentExpiryEmailDate(LocalDate.now());
                     }
                 }
+                mongoRepositoryReactive.saveOrUpdate(license);
                 if (check == true) {
                     int days = 0;
                     String licenceType = license.getLicenseTypeId();
@@ -271,6 +274,7 @@ public class Scheduler {
                 if (license.getLastSentExpiryEmailDate() == null) {
                     check = true;
                     license.setLastSentExpiryEmailDate(LocalDate.now());
+
                 } else {
                     days_diff = Days.daysBetween(license.getLastSentExpiryEmailDate(), LocalDate.now().plusDays(7)).getDays();
                     if (days_diff > 0) {
@@ -278,6 +282,7 @@ public class Scheduler {
                         license.setLastSentExpiryEmailDate(LocalDate.now());
                     }
                 }
+                mongoRepositoryReactive.saveOrUpdate(license);
                 if (check == true) {
                     String licenceType = license.getLicenseTypeId();
                     NotificationDto notificationDto = new NotificationDto();

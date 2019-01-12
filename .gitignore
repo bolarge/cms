@@ -8,6 +8,7 @@ racs-user-service.iml
 lslb-cms-user-service.iml
 lslb-cms.iml
 application-test.yml
+application-development.yml
 src/main/resources/agent-data/
 src/main/resources/application-adedev.yml
 Failed-Machines.csv
