@@ -87,6 +87,7 @@ public class Scheduler {
                 if (license.getLastSentExpiryEmailDate() == null) {
                     check = true;
                     license.setLastSentExpiryEmailDate(LocalDate.now());
+                    mongoRepositoryReactive.saveOrUpdate(license);
                 } else {
                     days_diff = Days.daysBetween(license.getLastSentExpiryEmailDate(), LocalDate.now().plusDays(7)).getDays();
                     if (days_diff > 0) {
