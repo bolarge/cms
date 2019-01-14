@@ -112,6 +112,7 @@ public class ExpirationList {
 
             Query queryExpiredLicence = new Query();
             queryExpiredLicence.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID));
+            queryExpiredLicence.addCriteria(Criteria.where("licenseTypeId").in(licenceTypes));
             List<License> expiredLicenses = (List<License>) mongoRepositoryReactive.findAll(queryExpiredLicence, License.class).toStream().collect(Collectors.toList());
             return expiredLicenses;
         } catch (Throwable ex) {

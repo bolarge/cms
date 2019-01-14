@@ -314,7 +314,9 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             if (renewalForm == null) {
                 return Mono.just(new ResponseEntity<>("Invalid Renewal Form Selected", HttpStatus.BAD_REQUEST));
             }
-            renewalForm.setCheckChangeInGamingMachines(renewalFormUpdateDto.getCheckChangeInGamingMachines());
+            if(!renewalFormUpdateDto.getCheckChangeInGamingMachines().isEmpty()){
+                renewalForm.setCheckChangeInGamingMachines(renewalFormUpdateDto.getCheckChangeInGamingMachines());
+            }
             renewalForm.setCheckConvictedCrime(renewalFormUpdateDto.getCheckConvictedCrime());
             renewalForm.setCheckNewInvestors(renewalFormUpdateDto.getCheckNewInvestors());
             renewalForm.setCheckPoliticalOffice(renewalFormUpdateDto.getCheckPoliticalOffice());
