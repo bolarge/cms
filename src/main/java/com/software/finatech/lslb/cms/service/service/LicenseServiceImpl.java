@@ -725,6 +725,13 @@ public class LicenseServiceImpl implements LicenseService {
             License createLicense = new License();
             String licenseNumber = "";
 
+            Query queryGameType = new Query();
+
+            queryGameType.addCriteria(Criteria.where("id").is(license.getGameTypeId()));
+            GameType gameType = (GameType) mongoRepositoryReactive.find(queryGameType, GameType.class).block();
+            int duration = gameType.getInstitutionLicenseDurationMonths();
+
+
             if (!StringUtils.isEmpty(license.getLicenseTransferId())) {
                 license.setLicenseStatusId(LicenseStatusReferenceData.AIP_COMPLETED);
                 mongoRepositoryReactive.saveOrUpdate(license);
@@ -750,13 +757,7 @@ public class LicenseServiceImpl implements LicenseService {
             } else {
 
                 license.setLicenseStatusId(LicenseStatusReferenceData.AIP_COMPLETED);
-
-                Query queryGameType = new Query();
-
-                queryGameType.addCriteria(Criteria.where("id").is(license.getGameTypeId()));
-                GameType gameType = (GameType) mongoRepositoryReactive.find(queryGameType, GameType.class).block();
-                int duration = gameType.getInstitutionLicenseDurationMonths();
-           /* int days_diff = 0;
+             /* int days_diff = 0;
             LocalDate licenseEndDate = LocalDate.now();
             if (license.getExpiryDate().isAfter(LocalDate.now())) {
                 days_diff = Days.daysBetween(LocalDate.now(), license.getExpiryDate()).getDays();
@@ -787,7 +788,14 @@ public class LicenseServiceImpl implements LicenseService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.AIP_ID,
                     springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
-            mongoRepositoryReactive.saveOrUpdate(createLicense);
+            Institution institution = getInstitution(institutionId);
+            if (institution.isFromLiveData() && license.getExpiryDate().isBefore(LocalDate.now())) {
+                generateLegacyLicenses(license, duration);
+
+            } else {
+                mongoRepositoryReactive.saveOrUpdate(createLicense);
+
+            }
             verbiage = getInstitution(license.getInstitutionId()).getInstitutionName() + " is Licensed ";
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LICENCE_ID,
                     springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
@@ -1386,5 +1394,50 @@ public class LicenseServiceImpl implements LicenseService {
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         query.addCriteria(Criteria.where("applicationFormStatusId").is(ApplicationFormStatusReferenceData.APPROVED_STATUS_ID));
         return (ApplicationForm) mongoRepositoryReactive.find(query, ApplicationForm.class).block();
+    }
+
+
+    protected void generateLegacyLicenses(License license, int duration) {
+        int days_diff;
+        days_diff = Days.daysBetween(license.getExpiryDate(), LocalDate.now()).getDays();
+        String licenseNumber = "";
+        int count = 0;
+        licenseNumber = generateLicenseNumberForOperator(license.getGameTypeId());
+        while (days_diff > 0) {
+            count++;
+            License createLicense = new License();
+
+            createLicense.setLicenseNumber(licenseNumber);
+            createLicense.setId(UUID.randomUUID().toString());
+            createLicense.setRenewalStatus("false");
+            createLicense.setInstitutionId(license.getInstitutionId());
+            if (count == 1) {
+                createLicense.setEffectiveDate(license.getExpiryDate().plusDays(1));
+                LocalDate licenseEndDate = createLicense.getEffectiveDate().plusMonths(duration);
+                createLicense.setExpiryDate(licenseEndDate);
+
+                createLicense.setParentLicenseId(license.getId());
+                createLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+            } else {
+                Query query = new Query();
+                query.addCriteria(Criteria.where("institutionId").is(license.getInstitutionId()));
+                query.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
+                Sort sort = new Sort(Sort.Direction.DESC, "expiryDate");
+                query.with(PageRequest.of(0, 1, sort));
+                query.with(sort);
+                License currentLicense = (License) mongoRepositoryReactive.find(query, License.class).block();
+                createLicense.setEffectiveDate(currentLicense.getExpiryDate().plusDays(1));
+                createLicense.setExpiryDate(createLicense.getEffectiveDate().plusMonths(duration));
+                createLicense.setLicenseStatusId(LicenseStatusReferenceData.RENEWED_ID);
+                createLicense.setParentLicenseId(currentLicense.getId());
+            }
+            createLicense.setGameTypeId(license.getGameTypeId());
+            createLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
+            days_diff = Days.daysBetween(createLicense.getExpiryDate(), LocalDate.now()).getDays();
+            if (days_diff > 0) {
+                createLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
+            }
+            mongoRepositoryReactive.saveOrUpdate(createLicense);
+        }
     }
 }

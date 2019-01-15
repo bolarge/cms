@@ -25,7 +25,6 @@ public class RenewalFormUpdateDto {
     @NotEmpty(message = "Please enter checkTechnicalPartner")
     protected String checkTechnicalPartner;
     protected String technicalPartner;
-    @NotEmpty(message = "Please enter checkChangeInGamingMachines")
     protected String checkChangeInGamingMachines;
     protected String changeInGamingMachines;
     @NotEmpty(message = "Please enter checkNewInvestors")
