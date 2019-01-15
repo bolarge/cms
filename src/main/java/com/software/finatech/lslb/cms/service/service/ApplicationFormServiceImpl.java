@@ -579,7 +579,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), aipDocumentApproval.getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
-         //   applicationFormNotificationHelperAsync.sendApprovedMailToInstitutionAdmins(aipDocumentApproval);
+            //   applicationFormNotificationHelperAsync.sendApprovedMailToInstitutionAdmins(aipDocumentApproval);
             return Mono.just(new ResponseEntity<>("Application form approved successfully", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving application form", e);
@@ -629,7 +629,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             aipDocumentApproval.setSubmissionDate(LocalDate.now());
             saveAIPForm(aipDocumentApproval);
             Query queryAIP = new Query();
-            queryAIP.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID));
+            queryAIP.addCriteria(Criteria.where("licenseStatusId").in(Arrays.asList(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID, LicenseStatusReferenceData.LICENSE_RUNNING)));
             queryAIP.addCriteria(Criteria.where("institutionId").is(institutionId));
             queryAIP.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
 
