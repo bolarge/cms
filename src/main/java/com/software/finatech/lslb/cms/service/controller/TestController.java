@@ -174,9 +174,11 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/delete-payment")
     public Mono<ResponseEntity> deletePayment() {
         try {
+
+
             Institution institution = new Institution();
             institution.setId(UUID.randomUUID().toString());
-            institution.setInstitutionName("Test Old Payment operator");
+            institution.setInstitutionName("Test Old Payment operator OSB");
             institution.setGameTypeIds(new HashSet<>(Arrays.asList("01", "02")));
             institution.setEmailAddress("test@mailinator.com");
             institution.setFromLiveData(true);
@@ -188,7 +190,7 @@ public class TestController extends BaseController {
             license.setEffectiveDate(new LocalDate("2016-04-01"));
             license.setExpiryDate(new LocalDate("2016-07-01"));
             license.setInstitutionId(institution.getId());
-            license.setGameTypeId("01");
+            license.setGameTypeId("02");
             license.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
             mongoRepositoryReactive.saveOrUpdate(license);
 
