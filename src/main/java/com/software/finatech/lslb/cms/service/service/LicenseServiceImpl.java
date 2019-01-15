@@ -1103,7 +1103,13 @@ public class LicenseServiceImpl implements LicenseService {
                 return;
             }
 
-            LocalDate newLicenseStartDate = latestLicense.getExpiryDate();
+            LocalDate newLicenseStartDate;
+            LocalDate today = LocalDate.now();
+            if (today.isBefore(latestLicense.getExpiryDate())) {
+                newLicenseStartDate = latestLicense.getExpiryDate();
+            } else {
+                newLicenseStartDate = LocalDate.now();
+            }
             LocalDate newLicenseEndDate = getNewLicenseEndDate(latestLicense, gameType);
 
             License newPendingApprovalRenewedLicense = new License();

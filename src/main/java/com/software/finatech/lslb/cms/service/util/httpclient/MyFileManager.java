@@ -5,6 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 
 @Component
 public class MyFileManager {
@@ -16,7 +20,7 @@ public class MyFileManager {
      * (e.g)let them pass  the name of the biller into the function from the ui
      */
     public void writeImageToFile(MultipartFile multipartFile) {
-        /**
+
          File file = new File("smile-networks.jpg");
          try {
          FileOutputStream fileOutputStream = new FileOutputStream(file);
@@ -28,7 +32,6 @@ public class MyFileManager {
          } catch (Exception e) {
          logger.error("An error occurred while saving file", e);
          }
-         */
     }
 
     public String readImage(String billerId) {

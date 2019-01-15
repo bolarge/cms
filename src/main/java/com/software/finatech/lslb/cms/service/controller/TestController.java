@@ -1,11 +1,15 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
+import com.software.finatech.lslb.cms.service.domain.AIPDocumentApproval;
 import com.software.finatech.lslb.cms.service.domain.GameType;
 import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.domain.License;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
+import com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordDetailService;
 import com.software.finatech.lslb.cms.service.service.contracts.VigipayService;
@@ -22,16 +26,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/test")
@@ -171,16 +174,40 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/delete-payment")
     public Mono<ResponseEntity> deletePayment() {
         try {
-            Query query = new Query();
+            Institution institution = new Institution();
+            institution.setId(UUID.randomUUID().toString());
+            institution.setInstitutionName("Test Old Payment operator");
+            institution.setGameTypeIds(new HashSet<>(Arrays.asList("01", "02")));
+            institution.setEmailAddress("test@mailinator.com");
+            institution.setFromLiveData(true);
+            mongoRepositoryReactive.saveOrUpdate(institution);
+
+            License license = new License();
+            license.setId(UUID.randomUUID().toString());
+            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_RUNNING);
+            license.setEffectiveDate(new LocalDate("2016-04-01"));
+            license.setExpiryDate(new LocalDate("2016-07-01"));
+            license.setInstitutionId(institution.getId());
+            license.setGameTypeId("01");
+            license.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
+            mongoRepositoryReactive.saveOrUpdate(license);
 
 
-            ArrayList<Institution> institutions = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
-            for (Institution institution : institutions) {
-                logger.info("Changing institution email {}", institution.getEmailAddress());
-                institution.setEmailAddress("test@mailinator.com");
-                mongoRepositoryReactive.saveOrUpdate(institution);
-            }
-
+            AIPDocumentApproval aipDocumentApproval = new AIPDocumentApproval();
+            aipDocumentApproval.setFormStatusId(ApplicationFormStatusReferenceData.CREATED_STATUS_ID);
+            aipDocumentApproval.setGameTypeId(license.getGameTypeId());
+            aipDocumentApproval.setInstitutionId(license.getInstitutionId());
+            aipDocumentApproval.setId(UUID.randomUUID().toString());
+            aipDocumentApproval.setReadyForApproval(false);
+            mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
+            /**
+             ArrayList<Institution> institutions = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
+             for (Institution institution : institutions) {
+             logger.info("Changing institution email {}", institution.getEmailAddress());
+             institution.setEmailAddress("test@mailinator.com");
+             mongoRepositoryReactive.saveOrUpdate(institution);
+             }
+             */
 
             /**
              List<String> aipStatuses = new ArrayList<>(LicenseStatusReferenceData.getAIPLicenseStatues());
