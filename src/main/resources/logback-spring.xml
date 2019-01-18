@@ -94,7 +94,7 @@
 
         <!-- LOG everything at INFO level -->
         <root level="info">
-            <appender-ref ref="Stackify" />
+            <appender-ref ref="Console" />
             <appender-ref ref="RollingFile" />
         </root>
 
