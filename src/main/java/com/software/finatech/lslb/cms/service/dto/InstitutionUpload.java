@@ -1,8 +1,5 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class InstitutionUpload {
     private String institutionName;
     private String emailAddress;
@@ -10,15 +7,24 @@ public class InstitutionUpload {
     private String address;
     private String description;
     private String line;
-    private List<InstitutionLoadDetails> institutionLoadDetails = new ArrayList<>();
+    //   private List<InstitutionLoadDetails> institutionLoadDetails = new ArrayList<>();
+    private InstitutionLoadDetails loadDetails;
 
-    public List<InstitutionLoadDetails> getInstitutionLoadDetails() {
-        return institutionLoadDetails;
+    public InstitutionLoadDetails getLoadDetails() {
+        return loadDetails;
     }
 
-    public void setInstitutionLoadDetails(List<InstitutionLoadDetails> institutionLoadDetails) {
-        this.institutionLoadDetails = institutionLoadDetails;
+    public void setLoadDetails(InstitutionLoadDetails loadDetails) {
+        this.loadDetails = loadDetails;
     }
+
+//    public List<InstitutionLoadDetails> getInstitutionLoadDetails() {
+//        return institutionLoadDetails;
+//    }
+//
+//    public void setInstitutionLoadDetails(List<InstitutionLoadDetails> institutionLoadDetails) {
+//        this.institutionLoadDetails = institutionLoadDetails;
+//    }
 
     public String getLine() {
         return line;

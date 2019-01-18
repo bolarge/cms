@@ -116,6 +116,14 @@ public class PaymentRecordDetail extends AbstractFact {
         return paymentStatus;
     }
 
+    public String getPaymentStatusName(){
+        PaymentStatus paymentStatus = getPaymentStatus();
+        if (paymentStatus != null){
+            return paymentStatus.toString();
+        }
+        return null;
+    }
+
     public ModeOfPayment getModeOfPayment() {
         Map modeOfPaymentMap = Mapstore.STORE.get("ModeOfPayment");
         ModeOfPayment modeOfPayment = null;

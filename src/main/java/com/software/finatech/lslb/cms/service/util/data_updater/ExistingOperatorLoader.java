@@ -63,31 +63,30 @@ public class ExistingOperatorLoader {
         if (multipartFile.isEmpty()) {
             throw new LicenseServiceException("File is empty");
         }
-        Map<String, InstitutionUpload> institutionUploadMap = new HashMap<>();
+        List<InstitutionUpload> institutionUploads = new ArrayList<>();
         try {
             byte[] bytes = multipartFile.getBytes();
             String completeData = new String(bytes);
             String[] rows = completeData.split("\\r?\\n");
+
             for (int i = 2; i < rows.length; i++) {
                 // String[] columns = rows[i].split(",");
                 String[] columns = rows[i].split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
                 if (columns.length < 15) {
-                    throw new LicenseServiceException("File is less than 15 columns");
+                    throw new LicenseServiceException("File is less than 15 columns" + rows[i]);
                 }
                 try {
                     String institutionName = columns[3];
                     if (!StringUtils.isEmpty(institutionName)) {
-                        InstitutionUpload institutionUpload = institutionUploadMap.get(institutionName);
-                        if (institutionUpload == null) {
-                            institutionUpload = new InstitutionUpload();
-                            institutionUpload.setLine(rows[i]);
-                            institutionUpload.setInstitutionName(institutionName);
-                            institutionUpload.setDescription(columns[5]);
-                            institutionUpload.setEmailAddress(columns[8]);
-                            institutionUpload.setPhoneNumber(columns[9]);
-                            String address = columns[10].replace("\"", "").replace("?", "");
-                            institutionUpload.setAddress(address);
-                        }
+                        InstitutionUpload institutionUpload = new InstitutionUpload();
+                        institutionUpload.setLine(rows[i]);
+                        institutionUpload.setInstitutionName(institutionName + " Test");
+                        institutionUpload.setDescription(columns[5]);
+                        institutionUpload.setEmailAddress(columns[8]);
+                        institutionUpload.setPhoneNumber(columns[9]);
+                        String address = columns[10].replace("\"", "").replace("?", "");
+                        institutionUpload.setAddress(address);
+
                         String gameTypeSearchKey = columns[6];
                         GameType gameType = gameTypeService.findGameTypeBySearchKey(gameTypeSearchKey);
                         if (gameType == null) {
@@ -116,14 +115,15 @@ public class ExistingOperatorLoader {
                             logger.info("{} has no licence status for category {}, Skipping", institutionName, gameTypeSearchKey);
                             continue;
                         }
-                        institutionUpload.getInstitutionLoadDetails().add(loadDetails);
-                        institutionUploadMap.put(institutionName, institutionUpload);
+                        //institutionUpload.getInstitutionLoadDetails().add(loadDetails);
+                        institutionUpload.setLoadDetails(loadDetails);
+                        institutionUploads.add(institutionUpload);
                     }
                 } catch (IllegalArgumentException e) {
                     throw new LicenseServiceException("Error occurred while parsing date ");
                 }
             }
-            loadInstitutionsFromMap(institutionUploadMap);
+            loadInstitutionsFromUploads(institutionUploads);
         } catch (IOException e) {
             logger.error("IO Exception ", e);
             throw new LicenseServiceException("An error occurred while parsing the file");
@@ -133,60 +133,149 @@ public class ExistingOperatorLoader {
         }
     }
 
-    private void loadInstitutionsFromMap(Map<String, InstitutionUpload> institutionUploadMap) {
-        for (InstitutionUpload institutionUpload : institutionUploadMap.values()) {
-            Institution pendingInstitution = new Institution();
-            pendingInstitution.setId(UUID.randomUUID().toString());
-            pendingInstitution.setInstitutionName(institutionUpload.getInstitutionName());
-            pendingInstitution.setActive(true);
-            pendingInstitution.setDescription(institutionUpload.getDescription());
-            pendingInstitution.setEmailAddress(institutionUpload.getEmailAddress());
-            pendingInstitution.setPhoneNumber(String.format("0%s", institutionUpload.getPhoneNumber()));
-            pendingInstitution.setFromLiveData(true);
-            pendingInstitution.setAddress(institutionUpload.getAddress());
-            for (InstitutionLoadDetails institutionLoadDetails : institutionUpload.getInstitutionLoadDetails()) {
-                InstitutionCategoryDetails institutionCategoryDetails = new InstitutionCategoryDetails();
-                institutionCategoryDetails.setId(UUID.randomUUID().toString());
-                institutionCategoryDetails.setFirstCommencementDate(institutionLoadDetails.getFirstCommencementDate());
-                institutionCategoryDetails.setGameTypeId(institutionLoadDetails.getGameTypeId());
-                institutionCategoryDetails.setTradeName(institutionLoadDetails.getTradeName());
-                Set<String> directorNames = directorNamesFromString(institutionLoadDetails.getDirector());
-                institutionCategoryDetails.getDirectorsNames().addAll(directorNames);
-                pendingInstitution.getDirectorsNames().addAll(directorNames);
-                institutionCategoryDetails.setInstitutionId(pendingInstitution.getId());
-                pendingInstitution.getGameTypeIds().add(institutionLoadDetails.getGameTypeId());
-                pendingInstitution.getInstitutionCategoryDetailIds().add(institutionCategoryDetails.getId());
 
-                License pendingLicense = new License();
-                pendingLicense.setId(UUID.randomUUID().toString());
-                pendingLicense.setInstitutionId(pendingInstitution.getId());
-                pendingLicense.setEffectiveDate(institutionLoadDetails.getLicenseStartDate());
-                pendingLicense.setExpiryDate(institutionLoadDetails.getLicenseEndDate());
-                pendingLicense.setGameTypeId(institutionLoadDetails.getGameTypeId());
-                pendingLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
-                String licenseStatusId = findLicenseStatusIdByKey(institutionLoadDetails.getStatus());
-                if (licenseStatusId == null) {
-                    logger.info("{} has no license status ", pendingInstitution);
-                    continue;
+    public void loadAIPOrSuspendedFromCsv(MultipartFile multipartFile) throws LicenseServiceException {
+        if (multipartFile.isEmpty()) {
+            throw new LicenseServiceException("File is empty");
+        }
+        Map<String, InstitutionUpload> institutionUploadMap = new HashMap<>();
+        List<InstitutionUpload> institutionUploads = new ArrayList<>();
+        try {
+            byte[] bytes = multipartFile.getBytes();
+            String completeData = new String(bytes);
+            String[] rows = completeData.split("\\r?\\n");
+
+            for (int i = 2; i < rows.length; i++) {
+                // String[] columns = rows[i].split(",");
+                String[] columns = rows[i].split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+
+                if (columns.length < 13) {
+                    throw new LicenseServiceException("File is less than 13 columns" + rows[i]);
                 }
-                pendingLicense.setLicenseStatusId(licenseStatusId);
-                //    pendingLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
-                if (pendingLicense.isAIPRelatedLicense()) {
-                    AIPDocumentApproval aipDocumentApproval = new AIPDocumentApproval();
-                    aipDocumentApproval.setFormStatusId(ApplicationFormStatusReferenceData.CREATED_STATUS_ID);
-                    aipDocumentApproval.setGameTypeId(pendingLicense.getGameTypeId());
-                    aipDocumentApproval.setInstitutionId(pendingLicense.getInstitutionId());
-                    aipDocumentApproval.setId(UUID.randomUUID().toString());
-                    aipDocumentApproval.setReadyForApproval(false);
-                    mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
-                } else {
-                    pendingLicense.setLicenseNumber(generateLicenseNumber(institutionLoadDetails.getGameTypeId()));
+                try {
+
+                    String institutionName = columns[1];
+                    if (!StringUtils.isEmpty(institutionName)) {
+                        InstitutionUpload institutionUpload = institutionUploadMap.get(institutionName);
+                        if (institutionUpload == null) {
+                            institutionUpload = new InstitutionUpload();
+                            institutionUpload.setLine(rows[i]);
+                            institutionUpload.setInstitutionName(institutionName + " Test");
+                            institutionUpload.setDescription(columns[3]);
+                            institutionUpload.setEmailAddress(columns[6]);
+                            institutionUpload.setPhoneNumber(columns[7]);
+                            String address = columns[8].replace("\"", "").replace("?", "");
+                            institutionUpload.setAddress(address);
+                        }
+                        String gameTypeSearchKey = columns[4];
+                        GameType gameType = gameTypeService.findGameTypeBySearchKey(gameTypeSearchKey);
+                        if (gameType == null) {
+                            throw new LicenseServiceException(String.format("Game type with search key %s not found", gameTypeSearchKey));
+                        }
+                        InstitutionLoadDetails loadDetails = new InstitutionLoadDetails();
+
+                        if (!StringUtils.isEmpty(columns[9])) {
+                            LocalDate licenseStartDate = dateTimeFormat.parseLocalDate(columns[9]);
+                            loadDetails.setLicenseStartDate(licenseStartDate);
+                        }
+                        if (!StringUtils.isEmpty(columns[10])) {
+                            LocalDate licenseEndDate = dateTimeFormat.parseLocalDate(columns[10]);
+                            loadDetails.setLicenseEndDate(licenseEndDate);
+                        }
+                        if (!StringUtils.isEmpty(columns[11])) {
+                            LocalDate licenseFirstDate = dateTimeFormat.parseLocalDate(columns[11]);
+                            loadDetails.setFirstCommencementDate(licenseFirstDate);
+                        }
+                        loadDetails.setGameTypeId(gameType.getId());
+                        loadDetails.setTradeName(columns[2]);
+                        loadDetails.setDirector(columns[5]);
+                        loadDetails.setStatus(columns[12]);
+                        String status = columns[12];
+                        if (StringUtils.isEmpty(status)) {
+                            logger.info("{} has no licence status for category {}, Skipping", institutionName, gameTypeSearchKey);
+                            continue;
+                        }
+                        //institutionUpload.getInstitutionLoadDetails().add(loadDetails);
+                        institutionUpload.setLoadDetails(loadDetails);
+                        institutionUploads.add(institutionUpload);
+                        //  institutionUploadMap.put(institutionName, institutionUpload);
+                    }
+                } catch (IllegalArgumentException e) {
+                    throw new LicenseServiceException("Error occurred while parsing date ");
                 }
-                mongoRepositoryReactive.saveOrUpdate(pendingLicense);
-                mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
             }
-            mongoRepositoryReactive.saveOrUpdate(pendingInstitution);
+            loadInstitutionsFromUploads(institutionUploads);
+        } catch (IOException e) {
+            logger.error("IO Exception ", e);
+            throw new LicenseServiceException("An error occurred while parsing the file");
+        } catch (Exception e) {
+            logger.error("An error occurred ", e);
+            throw new LicenseServiceException("An error occurred while parsing file");
+        }
+    }
 
+
+    private void loadInstitutionsFromUploads(List<InstitutionUpload> institutionUploads) {
+        for (InstitutionUpload institutionUpload : institutionUploads) {
+            Query query = new Query();
+            query.addCriteria(Criteria.where("institutionName").regex(institutionUpload.getInstitutionName(), "i"));
+            Institution pendingInstitution = (Institution) mongoRepositoryReactive.find(query, Institution.class).block();
+            if (pendingInstitution == null) {
+                pendingInstitution = new Institution();
+                pendingInstitution.setId(UUID.randomUUID().toString());
+                pendingInstitution.setInstitutionName(institutionUpload.getInstitutionName());
+                pendingInstitution.setActive(true);
+                pendingInstitution.setDescription(institutionUpload.getDescription());
+                pendingInstitution.setEmailAddress("test@mailinator.com");
+                // pendingInstitution.setEmailAddress(institutionUpload.getEmailAddress());
+                pendingInstitution.setPhoneNumber(String.format("0%s", institutionUpload.getPhoneNumber()));
+                pendingInstitution.setFromLiveData(true);
+                pendingInstitution.setAddress(institutionUpload.getAddress());
+                pendingInstitution.setForTest(true);
+            }
+            // for (InstitutionLoadDetails institutionLoadDetails : institutionUpload.getInstitutionLoadDetails()) {
+            InstitutionLoadDetails institutionLoadDetails = institutionUpload.getLoadDetails();
+            InstitutionCategoryDetails institutionCategoryDetails = new InstitutionCategoryDetails();
+            institutionCategoryDetails.setId(UUID.randomUUID().toString());
+            institutionCategoryDetails.setFirstCommencementDate(institutionLoadDetails.getFirstCommencementDate());
+            institutionCategoryDetails.setGameTypeId(institutionLoadDetails.getGameTypeId());
+            institutionCategoryDetails.setTradeName(institutionLoadDetails.getTradeName());
+            Set<String> directorNames = directorNamesFromString(institutionLoadDetails.getDirector());
+            institutionCategoryDetails.getDirectorsNames().addAll(directorNames);
+            pendingInstitution.getDirectorsNames().addAll(directorNames);
+            institutionCategoryDetails.setInstitutionId(pendingInstitution.getId());
+            pendingInstitution.getGameTypeIds().add(institutionLoadDetails.getGameTypeId());
+            pendingInstitution.getInstitutionCategoryDetailIds().add(institutionCategoryDetails.getId());
+
+            License pendingLicense = new License();
+            pendingLicense.setId(UUID.randomUUID().toString());
+            pendingLicense.setInstitutionId(pendingInstitution.getId());
+            pendingLicense.setEffectiveDate(institutionLoadDetails.getLicenseStartDate());
+            pendingLicense.setExpiryDate(institutionLoadDetails.getLicenseEndDate());
+            pendingLicense.setGameTypeId(institutionLoadDetails.getGameTypeId());
+            pendingLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
+            String licenseStatusId = findLicenseStatusIdByKey(institutionLoadDetails.getStatus());
+            if (licenseStatusId == null) {
+                logger.info("{} has no license status ", pendingInstitution);
+                continue;
+            }
+            pendingLicense.setLicenseStatusId(licenseStatusId);
+            //    pendingLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+            if (pendingLicense.isAIPRelatedLicense()) {
+                AIPDocumentApproval aipDocumentApproval = new AIPDocumentApproval();
+                aipDocumentApproval.setFormStatusId(ApplicationFormStatusReferenceData.CREATED_STATUS_ID);
+                aipDocumentApproval.setGameTypeId(pendingLicense.getGameTypeId());
+                aipDocumentApproval.setInstitutionId(pendingLicense.getInstitutionId());
+                aipDocumentApproval.setId(UUID.randomUUID().toString());
+                aipDocumentApproval.setReadyForApproval(false);
+                mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
+            } else {
+                pendingLicense.setLicenseNumber(generateLicenseNumber(institutionLoadDetails.getGameTypeId()));
+            }
+            mongoRepositoryReactive.saveOrUpdate(pendingLicense);
+            mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
+            // }
+            mongoRepositoryReactive.saveOrUpdate(pendingInstitution);
         }
     }
 

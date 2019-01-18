@@ -33,9 +33,10 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
         }
         if (paymentRecordDetail.isSuccessfulPayment()) {
             sendPaymentNotificationToLSLBUsers(paymentRecordDetail, paymentRecord);
+        } else {
+            sendFailedPaymentToVGGAdminAndUsers(paymentRecordDetail, paymentRecord);
         }
     }
-
 
     private void sendPaymentNotificationToLSLBUsers(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
         ArrayList<AuthInfo> lslbMembersForPaymentNotification = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_PAYMENT_NOTIFICATION_ID);
@@ -100,6 +101,50 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             emailService.sendEmail(content, "LSLB Payment Notification", userEmail);
         } catch (Exception e) {
             logger.error(String.format("An error occurred while sending payment notification email to user -> %s", userEmail), e);
+        }
+    }
+
+
+    private void sendFailedPaymentToVGGAdminAndUsers(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
+        HashMap<String, Object> model = new HashMap<>();
+        String presentDateString = DateTime.now().toString("dd-MM-yyyy");
+        boolean hasTransactionReference = !StringUtils.isEmpty(paymentRecordDetail.getVigiPayTransactionReference());
+        boolean hasInvoiceNumber = !StringUtils.isEmpty(paymentRecordDetail.getInvoiceNumber());
+        String paymentInitiator = "";
+        if (paymentRecord.isInstitutionPayment() || paymentRecord.isGamingMachinePayment()) {
+            Institution institution = paymentRecord.getInstitution();
+            if (institution != null) {
+                paymentInitiator = institution.getInstitutionName();
+            }
+        }
+        if (paymentRecord.isAgentPayment() || paymentRecord.isGamingTerminalPayment()) {
+            Agent agent = paymentRecord.getAgent();
+            if (agent != null) {
+                paymentInitiator = agent.getFullName();
+            }
+        }
+
+        model.put("amount", String.valueOf(paymentRecordDetail.getAmount()));
+        model.put("date", presentDateString);
+        model.put("hasTransactionReference", hasTransactionReference);
+        model.put("hasInvoiceNumber", hasInvoiceNumber);
+        model.put("transactionReference", paymentRecordDetail.getVigiPayTransactionReference());
+        model.put("invoiceNumber", paymentRecordDetail.getInvoiceNumber());
+        model.put("channel", paymentRecordDetail.getModeOfPaymentName());
+        model.put("id", paymentRecordDetail.getId());
+        model.put("paymentStatus", paymentRecordDetail.getPaymentStatusName());
+        model.put("paymentInitiator", paymentInitiator);
+        String content = mailContentBuilderService.build(model, "payment-notifications/vgg-payment-failed-notification");
+
+        ArrayList<AuthInfo> vggAdminsAndUsers = authInfoService.findAllActiveVGGAdminAndUsers();
+        if (vggAdminsAndUsers.isEmpty()) {
+            logger.info("There are no active vgg admins or users, skipping failed notification email");
+        }
+        for (AuthInfo vggAdmin : vggAdminsAndUsers) {
+            String mailSubject = "LSLB Failed Payment Notification";
+            String email = vggAdmin.getEmailAddress();
+            logger.info("Sending failed payment notification to {}", email);
+            emailService.sendEmail(content, mailSubject, email);
         }
     }
 }

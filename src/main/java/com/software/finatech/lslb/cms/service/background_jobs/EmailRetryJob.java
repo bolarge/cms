@@ -4,6 +4,7 @@ import com.software.finatech.lslb.cms.service.domain.FailedEmailNotification;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import net.javacrumbs.shedlock.core.SchedulerLock;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,10 @@ public class EmailRetryJob {
         try {
             ArrayList<FailedEmailNotification> failedEmailNotifications = getPendingFailedEmails();
             for (FailedEmailNotification failedEmailNotification : failedEmailNotifications) {
+                if (StringUtils.isEmpty(failedEmailNotification.getToEmailAddress())) {
+                    mongoRepositoryReactive.delete(failedEmailNotification);
+                    return;
+                }
                 emailService.sendFailedEmail(failedEmailNotification);
             }
         } catch (Throwable e) {
@@ -46,7 +51,7 @@ public class EmailRetryJob {
         query.addCriteria(Criteria.where("sent").is(false));
         query.addCriteria(Criteria.where("processing").is(false));
         Sort sort = new Sort(Sort.Direction.DESC, "createdAt");
-        query.with(PageRequest.of(0, 100, sort));
+        query.with(PageRequest.of(0, 1000, sort));
         query.with(sort);
         return (ArrayList<FailedEmailNotification>) mongoRepositoryReactive.findAll(query, FailedEmailNotification.class).toStream().collect(Collectors.toList());
     }

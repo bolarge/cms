@@ -8,10 +8,7 @@ import com.software.finatech.lslb.cms.service.domain.VerificationToken;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.dto.sso.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.UserApprovalRequestTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthPermissionService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthRoleService;
@@ -788,6 +785,14 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             }
         }
         return validMembers;
+    }
+
+    @Override
+    public ArrayList<AuthInfo> findAllActiveVGGAdminAndUsers() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("enabled").is(true));
+        query.addCriteria(Criteria.where("authRoleId").in(Arrays.asList(AuthRoleReferenceData.VGG_ADMIN_ID, AuthRoleReferenceData.VGG_USER_ID)));
+        return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
     }
 
     @Override
