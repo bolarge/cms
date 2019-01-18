@@ -26,8 +26,6 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/v1/institution")
 public class InstitutionController extends BaseController {
-
-
     private InstitutionService institutionService;
     private InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService;
 
@@ -140,7 +138,7 @@ public class InstitutionController extends BaseController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> getInstitutionOnboardinWorkflow(@RequestParam("institutionId") String institutionId) {
+    public Mono<ResponseEntity> getInstitutionOnboardingWorkflow(@RequestParam("institutionId") String institutionId) {
         return institutionOnboardingWorkflowService.getWorkflowByInstitutionId(institutionId);
     }
 

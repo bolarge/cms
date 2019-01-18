@@ -1414,8 +1414,7 @@ public class LicenseServiceImpl implements LicenseService {
             if (count == 1) {
                 createLicense.setEffectiveDate(license.getExpiryDate().plusDays(1));
                 LocalDate licenseEndDate = createLicense.getEffectiveDate().plusMonths(duration);
-                createLicense.setExpiryDate(licenseEndDate);
-
+                createLicense.setExpiryDate(licenseEndDate.minusDays(1));
                 createLicense.setParentLicenseId(license.getId());
                 createLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
             } else {
@@ -1427,7 +1426,7 @@ public class LicenseServiceImpl implements LicenseService {
                 query.with(sort);
                 License currentLicense = (License) mongoRepositoryReactive.find(query, License.class).block();
                 createLicense.setEffectiveDate(currentLicense.getExpiryDate().plusDays(1));
-                createLicense.setExpiryDate(createLicense.getEffectiveDate().plusMonths(duration));
+                createLicense.setExpiryDate(createLicense.getEffectiveDate().plusMonths(duration).minusDays(1));
                 createLicense.setLicenseStatusId(LicenseStatusReferenceData.RENEWED_ID);
                 createLicense.setParentLicenseId(currentLicense.getId());
             }

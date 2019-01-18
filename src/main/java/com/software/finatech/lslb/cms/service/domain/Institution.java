@@ -29,8 +29,15 @@ public class Institution extends AbstractFact {
     private Set<String> directorsNames = new HashSet<>();
     private Set<String> shareHolderNames = new HashSet<>();
     private boolean fromLiveData;
+    private boolean forTest;
 
+    public boolean isForTest() {
+        return forTest;
+    }
 
+    public void setForTest(boolean forTest) {
+        this.forTest = forTest;
+    }
 
     public Set<String> getShareHolderNames() {
         return shareHolderNames;

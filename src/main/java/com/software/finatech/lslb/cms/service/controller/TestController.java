@@ -1,10 +1,7 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
-import com.software.finatech.lslb.cms.service.domain.AIPDocumentApproval;
-import com.software.finatech.lslb.cms.service.domain.GameType;
-import com.software.finatech.lslb.cms.service.domain.Institution;
-import com.software.finatech.lslb.cms.service.domain.License;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
 import com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData;
@@ -20,21 +17,26 @@ import com.software.finatech.lslb.cms.service.util.data_updater.ExistingGamingTe
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingOperatorLoader;
 import com.software.finatech.lslb.cms.service.util.httpclient.MyFileManager;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/test")
@@ -77,9 +79,15 @@ public class TestController extends BaseController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/load-existing-operators")
-    public Mono<ResponseEntity> create(@RequestParam("file") MultipartFile multipartFile) {
+    public Mono<ResponseEntity> create(@RequestParam("file") MultipartFile multipartFile,
+                                       @RequestParam("type") String type) {
         try {
-            existingOperatorLoader.loadFromCsv(multipartFile);
+            if (StringUtils.equalsIgnoreCase("licenced", type)) {
+                existingOperatorLoader.loadFromCsv(multipartFile);
+            }
+            if (StringUtils.equalsIgnoreCase("aip", type) || StringUtils.equalsIgnoreCase("suspended", type)) {
+                existingOperatorLoader.loadAIPOrSuspendedFromCsv(multipartFile);
+            }
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (LicenseServiceException e) {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
@@ -120,7 +128,26 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/delete-operators")
     public Mono<ResponseEntity> delete() {
         try {
-            existingOperatorLoader.init();
+            Query query = new Query();
+            query.addCriteria(Criteria.where("forTest").is(true));
+            ArrayList<Institution> institutions = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
+            for (Institution institution : institutions) {
+                query = new Query();
+                query.addCriteria(Criteria.where("institutionId").is(institution.getId()));
+                ArrayList<License> licenses = (ArrayList<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
+                for (License license : licenses) {
+                    mongoRepositoryReactive.delete(license);
+                }
+                ArrayList<InstitutionCategoryDetails> categoryDetails = (ArrayList<InstitutionCategoryDetails>) mongoRepositoryReactive.findAll(query, InstitutionCategoryDetails.class).toStream().collect(Collectors.toList());
+                for (InstitutionCategoryDetails categoryDetails1 : categoryDetails) {
+                    mongoRepositoryReactive.delete(categoryDetails1);
+                }
+                ArrayList<AIPDocumentApproval> documentApproval = (ArrayList<AIPDocumentApproval>) mongoRepositoryReactive.findAll(query, AIPDocumentApproval.class).toStream().collect(Collectors.toList());
+                for (AIPDocumentApproval aipDocumentApproval : documentApproval) {
+                    mongoRepositoryReactive.delete(aipDocumentApproval);
+                }
+                mongoRepositoryReactive.delete(institution);
+            }
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
@@ -174,11 +201,9 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/delete-payment")
     public Mono<ResponseEntity> deletePayment() {
         try {
-
-
             Institution institution = new Institution();
             institution.setId(UUID.randomUUID().toString());
-            institution.setInstitutionName("Test Old Payment operator OSB");
+            institution.setInstitutionName("Legacy Payment Operator");
             institution.setGameTypeIds(new HashSet<>(Arrays.asList("01", "02")));
             institution.setEmailAddress("test@mailinator.com");
             institution.setFromLiveData(true);
@@ -187,8 +212,8 @@ public class TestController extends BaseController {
             License license = new License();
             license.setId(UUID.randomUUID().toString());
             license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_RUNNING);
-            license.setEffectiveDate(new LocalDate("2016-04-01"));
-            license.setExpiryDate(new LocalDate("2016-07-01"));
+            license.setEffectiveDate(new LocalDate("2016-08-01"));
+            license.setExpiryDate(new LocalDate("2016-11-01"));
             license.setInstitutionId(institution.getId());
             license.setGameTypeId("02");
             license.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);

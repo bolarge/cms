@@ -19,24 +19,6 @@
         </root>
     </springProfile>
 
-    <springProfile name="adedev">
-        <property name="LOGS" value="./logs" />
-
-        <appender name="Console"
-                  class="ch.qos.logback.core.ConsoleAppender">
-            <layout class="ch.qos.logback.classic.PatternLayout">
-                <Pattern>
-                    %black(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable
-                </Pattern>
-            </layout>
-        </appender>
-
-        <!-- LOG everything at INFO level -->
-        <root level="info">
-            <appender-ref ref="Console" />
-        </root>
-    </springProfile>
-
 
     <springProfile name="test">
         <property name="LOGS" value="./logs" />
@@ -50,17 +32,30 @@
             </layout>
         </appender>
 
-        <appender name="Stackify"
-                  class="com.stackify.log.logback.StackifyLogAppender">
-            <apiKey>4Rg1Yv3Kr3To3Lq3Tf9Yj3Qw7Ka7Re9Is6Bb8Hh</apiKey>
-            <application>lslb-cms-service</application>
-            <environment>test</environment>
+        <appender name="RollingFile"
+                  class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOGS}/lslb-cms.log</file>
+            <encoder
+                    class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
+            </encoder>
+
+            <rollingPolicy
+                    class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- rollover daily and when the file reaches 10 MegaBytes -->
+                <fileNamePattern>${LOGS}/archived/spring-boot-logger-%d{yyyy-MM-dd}.%i.log
+                </fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <maxFileSize>10MB</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
         </appender>
 
         <!-- LOG everything at INFO level -->
         <root level="info">
-            <appender-ref ref="Stackify" />
-            <appender-ref ref="Console" />
+            <appender-ref ref="Console"  />
+            <appender-ref ref="RollingFile" />
         </root>
 
     </springProfile>
@@ -77,17 +72,30 @@
             </layout>
         </appender>
 
-        <appender name="Stackify"
-                  class="com.stackify.log.logback.StackifyLogAppender">
-            <apiKey>4Rg1Yv3Kr3To3Lq3Tf9Yj3Qw7Ka7Re9Is6Bb8Hh</apiKey>
-            <application>lslb-cms-service</application>
-            <environment>staging</environment>
+        <appender name="RollingFile"
+                  class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOGS}/lslb-cms.log</file>
+            <encoder
+                    class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
+            </encoder>
+
+            <rollingPolicy
+                    class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- rollover daily and when the file reaches 10 MegaBytes -->
+                <fileNamePattern>${LOGS}/archived/spring-boot-logger-%d{yyyy-MM-dd}.%i.log
+                </fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy
+                        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <maxFileSize>10MB</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+            </rollingPolicy>
         </appender>
 
         <!-- LOG everything at INFO level -->
         <root level="info">
             <appender-ref ref="Stackify" />
-            <appender-ref ref="Console" />
+            <appender-ref ref="RollingFile" />
         </root>
 
     </springProfile>
@@ -113,10 +121,9 @@
         </appender>
 
         <!-- LOG everything at INFO level -->
-        <root level="info">
+        <root level="error">
             <appender-ref ref="Stackify" />
             <appender-ref ref="Console" />
         </root>
     </springProfile>
-
 </configuration>
