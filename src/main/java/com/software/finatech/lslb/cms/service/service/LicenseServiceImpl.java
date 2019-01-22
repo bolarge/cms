@@ -330,13 +330,28 @@ public class LicenseServiceImpl implements LicenseService {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
         }
         List<LicenseDto> licenseDtos = new ArrayList<>();
-        licenses.stream().forEach(license -> {
+        for (License license : licenses) {
             if (!StringUtils.equals("true", license.getRenewalStatus())) {
                 license.setRenewalStatus("true");
                 mongoRepositoryReactive.saveOrUpdate(license);
             }
-            licenseDtos.add(license.convertToDto());
-        });
+            Query query = new Query();
+            query.addCriteria(Criteria.where("institutionId").is(license.getInstitutionId()));
+            query.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
+            Sort sort = new Sort(Sort.Direction.DESC, "expiryDate");
+            query.with(sort);
+            License mostRecentLicense = (License) mongoRepositoryReactive.find(query, License.class).block();
+            if (mostRecentLicense!= null && StringUtils.equals(mostRecentLicense.getId(), license.getId())){
+                licenseDtos.add(license.convertToDto());
+                continue;
+            }
+            if (mostRecentLicense != null &&
+                    mostRecentLicense.getExpiryDate() != null &&
+                    mostRecentLicense.getExpiryDate().isBefore(dateTime)) {
+                licenseDtos.add(license.convertToDto());
+            }
+        }
+
         return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
     }
 

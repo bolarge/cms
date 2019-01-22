@@ -77,7 +77,7 @@ public class AgentServiceImpl implements AgentService {
                                               String agentStatusId,
                                               String agentId,
                                               String name,
-                                              String bvn,
+                                              String phoneNumber,
                                               String agentIdNumber,
                                               HttpServletResponse httpServletResponse) {
         try {
@@ -99,13 +99,12 @@ public class AgentServiceImpl implements AgentService {
             if (!StringUtils.isEmpty(name)){
                 query.addCriteria(Criteria.where("fullName").regex(name, "i"));
             }
-            if (!StringUtils.isEmpty(bvn)){
-                query.addCriteria(Criteria.where("bvn").is(bvn));
+            if (!StringUtils.isEmpty(phoneNumber)){
+                query.addCriteria(Criteria.where("phoneNumber").regex(phoneNumber, "i"));
             }
             if (!StringUtils.isEmpty(agentIdNumber)){
                 query.addCriteria(Criteria.where("agentId").regex(agentIdNumber, "i"));
             }
-
             if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, Agent.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));

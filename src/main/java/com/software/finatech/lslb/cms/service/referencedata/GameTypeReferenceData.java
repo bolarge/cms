@@ -13,7 +13,6 @@ public class GameTypeReferenceData {
     public static String POOLS_BETTING_ID = "06";
     public static String OTHER_LICENSE_ID = "07";
 
-
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         GameType gameType = (GameType) mongoRepositoryReactive.findById(POL_GAME_TYPE_ID, GameType.class).block();
         if (gameType == null) {

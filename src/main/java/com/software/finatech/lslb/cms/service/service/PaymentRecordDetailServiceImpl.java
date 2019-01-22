@@ -627,6 +627,12 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
 
 
     private Mono<ResponseEntity> validateLicensePayment(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, Fee fee) throws Exception {
+        if (!StringUtils.isEmpty(paymentRecordDetailCreateDto.getInstitutionId())) {
+            Institution institution = institutionService.findByInstitutionId(paymentRecordDetailCreateDto.getInstitutionId());
+            if (institution != null && institution.isFromLiveData()) {
+                return Mono.just(new ResponseEntity<>("Kindly make payment for licence renewal", HttpStatus.BAD_REQUEST));
+            }
+        }
         String institutionId = paymentRecordDetailCreateDto.getInstitutionId();
         String agentId = paymentRecordDetailCreateDto.getAgentId();
         String gameTypeId = fee.getGameTypeId();
@@ -682,6 +688,13 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
 
 
     private Mono<ResponseEntity> validateApplicationPayment(String institutionId, String gameTypeId) {
+        if (!StringUtils.isEmpty(institutionId)) {
+            Institution institution = institutionService.findByInstitutionId(institutionId);
+            if (institution != null && institution.isFromLiveData()) {
+                return Mono.just(new ResponseEntity<>("Kindly make payment for licence renewal", HttpStatus.BAD_REQUEST));
+            }
+        }
+
         String applicationFeeTypeId = FeePaymentTypeReferenceData.APPLICATION_FEE_TYPE_ID;
         String institutionLicenseTypeId = LicenseTypeReferenceData.INSTITUTION_ID;
 

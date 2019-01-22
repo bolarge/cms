@@ -23,7 +23,7 @@ public interface AgentService {
                                        String agentStatusId,
                                        String agentId,
                                        String name,
-                                       String bvn,
+                                       String phoneNumber,
                                        String agentIdNumber,
                                        HttpServletResponse httpServletResponse);
 

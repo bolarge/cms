@@ -44,12 +44,12 @@ public class AgentController extends BaseController {
                                              @RequestParam("agentStatusId") String agentStatusId,
                                              @RequestParam(value = "agentId", required = false) String agentId,
                                              @RequestParam(value = "name", required = false) String name,
-                                             @RequestParam(value = "bvn", required = false) String bvn,
+                                             @RequestParam(value = "phoneNumber", required = false) String phoneNumber,
                                              @RequestParam(value = "agentIdNumber", required = false) String agentIdNumber,
                                              HttpServletResponse httpServletResponse) {
         return agentService.findAllAgents(page, pageSize,
                 sortType, sortParam, institutionIds, gameTypeIds, agentStatusId, agentId,
-                name, bvn, agentIdNumber, httpServletResponse);
+                name, phoneNumber, agentIdNumber, httpServletResponse);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create")
