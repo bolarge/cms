@@ -91,11 +91,20 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             }
             Query query = new Query();
             query.addCriteria(Criteria.where("documentPurposeId").is(DocumentPurposeReferenceData.RENEWAL_LICENSE_ID));
-            query.addCriteria(Criteria.where("required").is(true));
+            query.addCriteria(Criteria.where("active").is(true));
+          //  query.addCriteria(Criteria.where("approverId").is(null));
             List<DocumentType> documentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(query, DocumentType.class).toStream().collect(Collectors.toList());
-            if(documentTypes==null){
+            int notApprrovalRequired=0;
+            for(DocumentType documentType: documentTypes){
+                if(documentType.getApproverId()==null){
+                    notApprrovalRequired=+1;
+                }
+            }
+
+            if(notApprrovalRequired==documentTypes.size()){
                renewalForm.setReadyForApproval(true);
             }
+
             if (renewalForm.getReadyForApproval() == false) {
                 return Mono.just(new ResponseEntity<>("Not all documents on this application are approved", HttpStatus.BAD_REQUEST));
             }
@@ -441,8 +450,9 @@ public class RenewalFormServiceImpl implements RenewalFormService {
         int countApprovedDocument = 0;
         Query queryDocumentType = new Query();
         queryDocumentType.addCriteria(Criteria.where("documentPurposeId").is(DocumentPurposeReferenceData.RENEWAL_LICENSE_ID));
-        queryDocumentType.addCriteria(Criteria.where("required").is(true));
-        List<DocumentType> requiredDocumentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
+        queryDocumentType.addCriteria(Criteria.where("active").is(true));
+        queryDocumentType.addCriteria(Criteria.where("approverId").ne(null));
+        List<DocumentType> approvalDocumentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
 
         for (Document doc : documents) {
             if (doc.getApprovalRequestStatusId() != null) {
@@ -452,7 +462,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
                 }
             }
         }
-        if (requiredDocumentTypes.size()== countApprovedDocument) {
+        if (approvalDocumentTypes.size()== countApprovedDocument) {
             if (renewalForm.getFormStatusId().equals(RenewalFormStatusReferenceData.SUBMITTED)) {
                 renewalForm.setReadyForApproval(true);
             }

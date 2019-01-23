@@ -559,6 +559,21 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             if (StringUtils.equals(ApplicationFormStatusReferenceData.REJECTED_STATUS_ID, aipDocumentApproval.getFormStatusId())) {
                 return Mono.just(new ResponseEntity<>("AIP already rejected", HttpStatus.BAD_REQUEST));
             }
+            Query query = new Query();
+            query.addCriteria(Criteria.where("documentPurposeId").is(DocumentPurposeReferenceData.AIP_LICENSE_ID));
+            query.addCriteria(Criteria.where("active").is(true));
+            //  query.addCriteria(Criteria.where("approverId").is(null));
+            List<DocumentType> documentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(query, DocumentType.class).toStream().collect(Collectors.toList());
+            int notApprrovalRequired=0;
+            for(DocumentType documentType: documentTypes){
+                if(documentType.getApproverId()==null){
+                    notApprrovalRequired=+1;
+                }
+            }
+
+            if(notApprrovalRequired==documentTypes.size()){
+                aipDocumentApproval.setReadyForApproval(true);
+            }
             if (!aipDocumentApproval.getReadyForApproval()) {
                 return Mono.just(new ResponseEntity<>("Not all documents on this application are approved", HttpStatus.BAD_REQUEST));
             }
@@ -887,19 +902,24 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             query.addCriteria(Criteria.where("entityId").is(aipDocumentApproval.getId()));
             query.addCriteria(Criteria.where("isCurrent").is(true));
             List<Document> documents = (List<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
-            int countDocumentWithApproval = 0;
+           // int countDocumentWithApproval = 0;
             int countApprovedDocument = 0;
+            Query queryDocumentType = new Query();
+            queryDocumentType.addCriteria(Criteria.where("documentPurposeId").is(DocumentPurposeReferenceData.AIP_LICENSE_ID));
+            queryDocumentType.addCriteria(Criteria.where("active").is(true));
+            queryDocumentType.addCriteria(Criteria.where("approverId").ne(null));
+            List<DocumentType> approvalDocumentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
 
             for (Document doc : documents) {
                 if (doc.getApprovalRequestStatusId() != null) {
-                    countDocumentWithApproval = countDocumentWithApproval + 1;
+                    //countDocumentWithApproval = countDocumentWithApproval + 1;
                     if (doc.getApprovalRequestStatusId().equals(ApprovalRequestStatusReferenceData.APPROVED_ID)) {
                         countApprovedDocument = countApprovedDocument + 1;
                     }
                 }
             }
 
-            if (countDocumentWithApproval == countApprovedDocument) {
+            if (approvalDocumentTypes.size() == countApprovedDocument) {
                 aipDocumentApproval.setReadyForApproval(true);
                 //      applicationFormNotificationHelperAsync.sendApproverMailToFinalApproval(aipDocumentApproval);
             }
