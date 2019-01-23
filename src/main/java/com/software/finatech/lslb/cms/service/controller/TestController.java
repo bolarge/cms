@@ -2,9 +2,11 @@ package com.software.finatech.lslb.cms.service.controller;
 
 
 import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.dto.DocumentTypeDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
 import com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
@@ -32,10 +34,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -153,12 +152,47 @@ public class TestController extends BaseController {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
+    @RequestMapping(method = RequestMethod.GET, value = "/checkApproval")
+    public Mono<ResponseEntity> checkApproval(){
+            Query query = new Query();
+            query.addCriteria(Criteria.where("documentPurposeId").is(DocumentPurposeReferenceData.RENEWAL_LICENSE_ID));
+            query.addCriteria(Criteria.where("active").is(true));
+            //  query.addCriteria(Criteria.where("approverId").is(null));
+         query.addCriteria(Criteria.where("gameTypeIds").in("02"));
+
+        List<DocumentType> documentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(query, DocumentType.class).toStream().collect(Collectors.toList());
+//            int notApprrovalRequired=0;
+////            for(DocumentType documentType: documentTypes){
+////                if(documentType.getApproverId()==null){
+////                    notApprrovalRequired=+1;
+////                }
+////            }
+        List<DocumentTypeDto> documentTypeDtos= new ArrayList<>();
+        documentTypes.stream().forEach(documentType -> {
+            documentType.setApproverId("");
+            mongoRepositoryReactive.saveOrUpdate(documentType);
+            documentTypeDtos.add(documentType.convertToDto());
+        });
+
+        return Mono.just(new ResponseEntity<>(documentTypeDtos, HttpStatus.OK));
 
 
+    }
 //    @RequestMapping(method = RequestMethod.POST, value = "/back-date")
 //    public Mono<ResponseEntity> backDate() {
 //        try {
-//            existingOperatorLoader.init();
+//            Query query = new Query();
+//            query.addCriteria(Criteria.where("institutionId").is("7c905dbb-9183-405e-92aa-6065f36e03e2"));
+//            query.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
+//            query.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID));
+//
+//            License license = (License) mongoRepositoryReactive.find(query, License.class).block();
+//
+//
+//            license.setEffectiveDate(new LocalDate("2019-01-04"));
+//            license.setExpiryDate(new LocalDate("2019-01-30"));
+//            license.setRenewalStatus("true");
+//            mongoRepositoryReactive.saveOrUpdate(license);
 //            return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
 //        } catch (Exception e) {
 //            return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
