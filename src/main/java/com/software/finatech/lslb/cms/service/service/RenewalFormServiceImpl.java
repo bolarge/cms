@@ -97,7 +97,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             int notApprrovalRequired=0;
             for(DocumentType documentType: documentTypes){
                 if(documentType.getApproverId()==null){
-                    notApprrovalRequired=notApprrovalRequired+1;
+                    notApprrovalRequired=+1;
                 }
             }
 
