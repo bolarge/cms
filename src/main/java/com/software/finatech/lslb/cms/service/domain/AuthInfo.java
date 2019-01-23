@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.AuthInfoDto;
 import com.software.finatech.lslb.cms.service.dto.AuthPermissionDto;
+import com.software.finatech.lslb.cms.service.dto.GameTypeDto;
 import com.software.finatech.lslb.cms.service.referencedata.AuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil;
@@ -298,6 +299,7 @@ public class AuthInfo extends AbstractFact {
         authPermissionDtos.addAll(getPermissionDtos(this.authPermissionIds));
         authPermissionDtos.addAll(getPermissionDtos(authRole.authPermissionIds));
         dto.setAuthPermissions(authPermissionDtos);
+        dto.setGameTypeDtos(getGameTypeDtos());
         return dto;
     }
 
@@ -413,6 +415,31 @@ public class AuthInfo extends AbstractFact {
         return dtos;
     }
 
+    private List<GameTypeDto> getGameTypeDtos() {
+        if (StringUtils.isEmpty(this.institutionId)) {
+            return new ArrayList<>();
+        }
+        Institution institution = getInstitution();
+        if (institution == null) {
+            return new ArrayList<>();
+        }
+        List<GameTypeDto> gameTypeDtos = new ArrayList<>();
+        for (String gameTypeId : institution.getGameTypeIds()) {
+            GameType gameType = findGameTypeById(gameTypeId);
+            if (gameType != null) {
+                gameTypeDtos.add(gameType.convertToDto());
+            }
+        }
+        return gameTypeDtos;
+    }
+
+
+    private GameType findGameTypeById(String gameTypeId) {
+        if (StringUtils.isEmpty(gameTypeId)) {
+            return null;
+        }
+        return (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
+    }
 
     public boolean isAgent() {
         return StringUtils.equals(LSLBAuthRoleReferenceData.AGENT_ROLE_ID, this.authRoleId);
