@@ -89,6 +89,13 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             if (!StringUtils.equals(RenewalFormStatusReferenceData.SUBMITTED, renewalForm.getFormStatusId())) {
                 return Mono.just(new ResponseEntity<>("Form has not be submitted", HttpStatus.BAD_REQUEST));
             }
+            Query query = new Query();
+            query.addCriteria(Criteria.where("documentPurposeId").is(DocumentPurposeReferenceData.RENEWAL_LICENSE_ID));
+            query.addCriteria(Criteria.where("required").is(true));
+            List<DocumentType> documentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(query, DocumentType.class).toStream().collect(Collectors.toList());
+            if(documentTypes==null){
+               renewalForm.setReadyForApproval(true);
+            }
             if (renewalForm.getReadyForApproval() == false) {
                 return Mono.just(new ResponseEntity<>("Not all documents on this application are approved", HttpStatus.BAD_REQUEST));
             }
@@ -430,19 +437,22 @@ public class RenewalFormServiceImpl implements RenewalFormService {
         query.addCriteria(Criteria.where("entityId").is(renewalForm.getId()));
         query.addCriteria(Criteria.where("isCurrent").is(true));
         List<Document> documents = (List<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
-        int countDocumentWithApproval = 0;
+      //  int countDocumentWithApproval = 0;
         int countApprovedDocument = 0;
+        Query queryDocumentType = new Query();
+        queryDocumentType.addCriteria(Criteria.where("documentPurposeId").is(DocumentPurposeReferenceData.RENEWAL_LICENSE_ID));
+        queryDocumentType.addCriteria(Criteria.where("required").is(true));
+        List<DocumentType> requiredDocumentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
 
         for (Document doc : documents) {
             if (doc.getApprovalRequestStatusId() != null) {
-                countDocumentWithApproval = +1;
+                //countDocumentWithApproval = +1;
                 if (doc.getApprovalRequestStatusId().equals(ApprovalRequestStatusReferenceData.APPROVED_ID)) {
                     countApprovedDocument = +1;
                 }
             }
         }
-
-        if (countDocumentWithApproval == countApprovedDocument) {
+        if (requiredDocumentTypes.size()== countApprovedDocument) {
             if (renewalForm.getFormStatusId().equals(RenewalFormStatusReferenceData.SUBMITTED)) {
                 renewalForm.setReadyForApproval(true);
             }
