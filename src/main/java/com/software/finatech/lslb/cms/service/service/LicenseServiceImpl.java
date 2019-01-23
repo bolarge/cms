@@ -338,10 +338,11 @@ public class LicenseServiceImpl implements LicenseService {
             Query query = new Query();
             query.addCriteria(Criteria.where("institutionId").is(license.getInstitutionId()));
             query.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
+            query.addCriteria(Criteria.where("licenseStatusId").ne(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID));
             Sort sort = new Sort(Sort.Direction.DESC, "expiryDate");
             query.with(sort);
             License mostRecentLicense = (License) mongoRepositoryReactive.find(query, License.class).block();
-            if (mostRecentLicense!= null && StringUtils.equals(mostRecentLicense.getId(), license.getId())){
+            if (mostRecentLicense != null && StringUtils.equals(mostRecentLicense.getId(), license.getId())) {
                 licenseDtos.add(license.convertToDto());
                 continue;
             }
