@@ -37,7 +37,7 @@ public class EmailRetryJob {
             for (FailedEmailNotification failedEmailNotification : failedEmailNotifications) {
                 if (StringUtils.isEmpty(failedEmailNotification.getToEmailAddress())) {
                     mongoRepositoryReactive.delete(failedEmailNotification);
-                    return;
+                    continue;
                 }
                 emailService.sendFailedEmail(failedEmailNotification);
             }
