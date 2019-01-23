@@ -98,7 +98,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             List<DocumentType> documentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(query, DocumentType.class).toStream().collect(Collectors.toList());
             int notApprrovalRequired=0;
             for(DocumentType documentType: documentTypes){
-                if(documentType.getApproverId().isEmpty()){
+                if(documentType.getApproverId().isEmpty()||documentType.getApproverId()==null){
                     notApprrovalRequired=notApprrovalRequired+1;
                 }
             }

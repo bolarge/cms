@@ -52,6 +52,9 @@ public class DocumentType extends EnumeratedFact {
     }
 
     public String getApproverId() {
+        if(approverId==null){
+            return "";
+        }
         return approverId;
     }
 
