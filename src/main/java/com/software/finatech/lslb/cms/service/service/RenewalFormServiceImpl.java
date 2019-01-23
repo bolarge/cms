@@ -98,8 +98,8 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             List<DocumentType> documentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(query, DocumentType.class).toStream().collect(Collectors.toList());
             int notApprrovalRequired=0;
             for(DocumentType documentType: documentTypes){
-                if(documentType.getApproverId()==null){
-                    notApprrovalRequired=+1;
+                if(documentType.getApproverId().isEmpty()){
+                    notApprrovalRequired=notApprrovalRequired+1;
                 }
             }
 
@@ -458,10 +458,10 @@ public class RenewalFormServiceImpl implements RenewalFormService {
         List<DocumentType> approvalDocumentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
 
         for (Document doc : documents) {
-            if (doc.getApprovalRequestStatusId() != null) {
+            if (!doc.getApprovalRequestStatusId().isEmpty()) {
                 //countDocumentWithApproval = +1;
                 if (doc.getApprovalRequestStatusId().equals(ApprovalRequestStatusReferenceData.APPROVED_ID)) {
-                    countApprovedDocument = +1;
+                    countApprovedDocument = countApprovedDocument+1;
                 }
             }
         }
