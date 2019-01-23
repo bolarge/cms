@@ -24,6 +24,15 @@ public class AuthInfoDto {
     private List<AuthPermissionDto> rolePermissions = new ArrayList<>();
     private List<AuthPermissionDto> userPermissions = new ArrayList<>();
     private List<AuthPermissionDto> authPermissions = new ArrayList<>();
+    private List<GameTypeDto> gameTypeDtos = new ArrayList<>();
+
+    public List<GameTypeDto> getGameTypeDtos() {
+        return gameTypeDtos;
+    }
+
+    public void setGameTypeDtos(List<GameTypeDto> gameTypeDtos) {
+        this.gameTypeDtos = gameTypeDtos;
+    }
 
     public List<AuthPermissionDto> getRolePermissions() {
         return rolePermissions;
