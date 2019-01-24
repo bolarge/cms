@@ -2,13 +2,9 @@ package com.software.finatech.lslb.cms.service.controller;
 
 
 import com.software.finatech.lslb.cms.service.domain.*;
-import com.software.finatech.lslb.cms.service.dto.DocumentTypeDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
 import com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordDetailService;
 import com.software.finatech.lslb.cms.service.service.contracts.VigipayService;
@@ -34,7 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @RestController
@@ -152,47 +148,12 @@ public class TestController extends BaseController {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
-    @RequestMapping(method = RequestMethod.GET, value = "/checkApproval")
-    public Mono<ResponseEntity> checkApproval(){
-            Query query = new Query();
-            query.addCriteria(Criteria.where("documentPurposeId").is(DocumentPurposeReferenceData.RENEWAL_LICENSE_ID));
-            query.addCriteria(Criteria.where("active").is(true));
-            //  query.addCriteria(Criteria.where("approverId").is(null));
-         query.addCriteria(Criteria.where("gameTypeIds").in("02"));
-
-        List<DocumentType> documentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(query, DocumentType.class).toStream().collect(Collectors.toList());
-//            int notApprrovalRequired=0;
-////            for(DocumentType documentType: documentTypes){
-////                if(documentType.getApproverId()==null){
-////                    notApprrovalRequired=+1;
-////                }
-////            }
-        List<DocumentTypeDto> documentTypeDtos= new ArrayList<>();
-        documentTypes.stream().forEach(documentType -> {
-            documentType.setApproverId("");
-            mongoRepositoryReactive.saveOrUpdate(documentType);
-            documentTypeDtos.add(documentType.convertToDto());
-        });
-
-        return Mono.just(new ResponseEntity<>(documentTypeDtos, HttpStatus.OK));
 
 
-    }
 //    @RequestMapping(method = RequestMethod.POST, value = "/back-date")
 //    public Mono<ResponseEntity> backDate() {
 //        try {
-//            Query query = new Query();
-//            query.addCriteria(Criteria.where("institutionId").is("7c905dbb-9183-405e-92aa-6065f36e03e2"));
-//            query.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
-//            query.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID));
-//
-//            License license = (License) mongoRepositoryReactive.find(query, License.class).block();
-//
-//
-//            license.setEffectiveDate(new LocalDate("2019-01-04"));
-//            license.setExpiryDate(new LocalDate("2019-01-30"));
-//            license.setRenewalStatus("true");
-//            mongoRepositoryReactive.saveOrUpdate(license);
+//            existingOperatorLoader.init();
 //            return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
 //        } catch (Exception e) {
 //            return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
@@ -235,88 +196,128 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.POST, value = "/delete-payment")
     public Mono<ResponseEntity> deletePayment() {
         try {
-            Institution institution = new Institution();
-            institution.setId(UUID.randomUUID().toString());
-            institution.setInstitutionName("Legacy Payment Operator");
-            institution.setGameTypeIds(new HashSet<>(Arrays.asList("01", "02")));
-            institution.setEmailAddress("test@mailinator.com");
-            institution.setFromLiveData(true);
-            mongoRepositoryReactive.saveOrUpdate(institution);
-
-            License license = new License();
-            license.setId(UUID.randomUUID().toString());
-            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_RUNNING);
-            license.setEffectiveDate(new LocalDate("2016-08-01"));
-            license.setExpiryDate(new LocalDate("2016-11-01"));
-            license.setInstitutionId(institution.getId());
-            license.setGameTypeId("02");
-            license.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
-            mongoRepositoryReactive.saveOrUpdate(license);
-
-
-            AIPDocumentApproval aipDocumentApproval = new AIPDocumentApproval();
-            aipDocumentApproval.setFormStatusId(ApplicationFormStatusReferenceData.CREATED_STATUS_ID);
-            aipDocumentApproval.setGameTypeId(license.getGameTypeId());
-            aipDocumentApproval.setInstitutionId(license.getInstitutionId());
-            aipDocumentApproval.setId(UUID.randomUUID().toString());
-            aipDocumentApproval.setReadyForApproval(false);
-            mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
             /**
-             ArrayList<Institution> institutions = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
-             for (Institution institution : institutions) {
-             logger.info("Changing institution email {}", institution.getEmailAddress());
-             institution.setEmailAddress("test@mailinator.com");
-             mongoRepositoryReactive.saveOrUpdate(institution);
-             }
-             */
-
-            /**
-             List<String> aipStatuses = new ArrayList<>(LicenseStatusReferenceData.getAIPLicenseStatues());
-             aipStatuses.add(LicenseStatusReferenceData.LICENSE_RUNNING);
              Query query = new Query();
-             query.addCriteria(Criteria.where("licenseStatusId").in(aipStatuses));
-             ArrayList<License> licenses = (ArrayList<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
-             for (License license : licenses) {
-             Institution institution = license.getInstitution();
-             if (institution != null && institution.isFromLiveData()) {
-             Query query1 = new Query();
-             query1.addCriteria(Criteria.where("institutionId").is(license.getInstitutionId()));
-             query1.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID));
-             query1.addCriteria(Criteria.where("licenseTypeId").is(license.getLicenseTypeId()));
-             query1.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
-             License mainLicense = (License) mongoRepositoryReactive.find(query1, License.class).block();
-             if (mainLicense != null) {
-             mainLicense.setLicenseNumber(generateLicenseNumberForOperator(license.getGameTypeId()));
-             mongoRepositoryReactive.saveOrUpdate(mainLicense);
+             query.addCriteria(Criteria.where("fromLiveData").is(true));
+             ArrayList<Agent> agents = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
+             for (Agent agent : agents) {
+             for (String gameTypeId : agent.getGameTypeIds()) {
+             GameType gameType = gameTypeService.findById(gameTypeId);
+             License license = new License();
+             license.setId(UUID.randomUUID().toString());
+             license.setAgentId(agent.getId());
+             license.setGameTypeId(gameTypeId);
+             if (gameType.getAllowsGamingTerminal()) {
+             license.setLicenseTypeId(LicenseTypeReferenceData.GAMING_TERMINAL_ID);
+             } else {
+             license.setLicenseTypeId(LicenseTypeReferenceData.AGENT_ID);
              }
-             license.setLicenseNumber(null);
+             String licenseNumber = generateLicenseNumberForAgent(gameType);
+             license.setEffectiveDate(LocalDate.now().withDayOfYear(1));
+             license.setExpiryDate(LocalDate.now().withDayOfYear(365));
+             license.setLicenseNumber(licenseNumber);
+             license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+             license.setParentLicenseId("1234");
              mongoRepositoryReactive.saveOrUpdate(license);
 
-             Query query2 = new Query();
-             query2.addCriteria(Criteria.where("institutionId").is(license.getInstitutionId()));
-             query2.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
-             query2.addCriteria(Criteria.where("fromStatusId").is(ApplicationFormStatusReferenceData.CREATED_STATUS_ID));
-             ArrayList<AIPDocumentApproval> aipDocumentApprovals = (ArrayList<AIPDocumentApproval>) mongoRepositoryReactive.findAll(query2, AIPDocumentApproval.class).toStream().collect(Collectors.toList());
-             for (AIPDocumentApproval documentApproval : aipDocumentApprovals) {
-             mongoRepositoryReactive.delete(documentApproval);
+             query = new Query();
+             query.addCriteria(Criteria.where("agentId").is(agent.getId()));
+             query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+             ArrayList<Machine> machines = (ArrayList<Machine>) mongoRepositoryReactive.findAll(query, Machine.class).toStream().collect(Collectors.toList());
+             for (Machine machine : machines) {
+             machine.setMachineStatusId(MachineStatusReferenceData.ACTIVE_ID);
+             machine.setLicenseId(license.getId());
+             mongoRepositoryReactive.saveOrUpdate(machine);
              }
-
-             AIPDocumentApproval aipDocumentApproval = new AIPDocumentApproval();
-             aipDocumentApproval.setFormStatusId(ApplicationFormStatusReferenceData.CREATED_STATUS_ID);
-             aipDocumentApproval.setGameTypeId(license.getGameTypeId());
-             aipDocumentApproval.setInstitutionId(license.getInstitutionId());
-             aipDocumentApproval.setId(UUID.randomUUID().toString());
-             aipDocumentApproval.setReadyForApproval(false);
-             mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
              }
              }
 
+
+             */
+            Query query = new Query();
+            query.addCriteria(Criteria.where("formStatusId").is(ApplicationFormStatusReferenceData.IN_REVIEW_STATUS_ID));
+            query.addCriteria(Criteria.where("finalNotificationSent").is(false));
+            ArrayList<AIPDocumentApproval> aipDocumentApprovals = (ArrayList<AIPDocumentApproval>) mongoRepositoryReactive.findAll(query, AIPDocumentApproval.class).toStream().collect(Collectors.toList());
+            for (AIPDocumentApproval aipDocumentApproval : aipDocumentApprovals) {
+                query = new Query();
+                query.addCriteria(Criteria.where("entityId").is(aipDocumentApproval.getId()));
+                query.addCriteria(Criteria.where("isCurrent").is(true));
+                ArrayList<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
+                if (!documents.isEmpty()) {
+                    int countApproval = 0;
+
+                    for (Document document : documents) {
+                        if (document.requiresApproval()) {
+                            countApproval = countApproval + 1;
+                        }
+                    }
+                    logger.info("==== COUNT = {}", countApproval);
+                    if (countApproval == 0) {
+                        aipDocumentApproval.setReadyForApproval(true);
+                        mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
+                    }
+                }
+            }
+            /**
+             query.addCriteria(Criteria.where("forTest").is(true));
+
+             ArrayList<Institution> institutions = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
+             for (Institution institution : institutions) {
+             String institutionPresentId = institution.getId();
+             String oldInstitutionName = institution.getInstitutionName().replace(" Test", "");
+             query = new Query();
+             query.addCriteria(Criteria.where("institutionName").regex(oldInstitutionName, "i"));
+             Institution oldInstitution = (Institution) mongoRepositoryReactive.find(query, Institution.class).block();
+             if (oldInstitution == null) {
+             continue;
+             }
+             String oldInstitutionId = oldInstitution.getId();
+             query = new Query();
+             query.addCriteria(Criteria.where("institutionIds").in(oldInstitution.getId()));
+             ArrayList<Agent> agents = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
+             for (Agent agent : agents) {
+             agent.getInstitutionIds().add(institutionPresentId);
+
+             for (AgentInstitution agentInstitution : agent.getAgentInstitutions()) {
+             if (StringUtils.equals(agentInstitution.getInstitutionId(), oldInstitutionId)) {
+             agentInstitution.setInstitutionId(institutionPresentId);
+             agentInstitution.setOldInstitutionId(oldInstitutionId);
+             }
+             }
+             agent.getInstitutionIds().add(institutionPresentId);
+             mongoRepositoryReactive.saveOrUpdate(agent);
+             }
+
+             query = new Query();
+             query.addCriteria(Criteria.where("institutionId").is(oldInstitutionId));
+             ArrayList<Machine> machines = (ArrayList<Machine>) mongoRepositoryReactive.findAll(query, Machine.class).toStream().collect(Collectors.toList());
+             for (Machine machine : machines) {
+             machine.setInstitutionId(institutionPresentId);
+             machine.setOldInstitutionId(oldInstitutionId);
+             mongoRepositoryReactive.saveOrUpdate(machine);
+             }
+             }
              */
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
             logger.error("An error occurred ", e);
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
         }
+    }
+
+    private String generateLicenseNumberForAgent(GameType gameType) {
+        String prefix = "LSLB-";
+
+        if (gameType.getAllowsGamingTerminal()) {
+            prefix = prefix + "GT-";
+        } else {
+            prefix = prefix + "AG-";
+        }
+        String randomDigit = String.valueOf(NumberUtil.getRandomNumberInRange(100, 1000));
+        if (gameType != null && !StringUtils.isEmpty(gameType.getShortCode())) {
+            prefix = prefix + gameType.getShortCode() + "-";
+        }
+        return String.format("%s%s%s", prefix, randomDigit, LocalDateTime.now().getSecondOfMinute());
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/upload-terminals")
@@ -360,4 +361,5 @@ public class TestController extends BaseController {
     }
 
 }
+
 

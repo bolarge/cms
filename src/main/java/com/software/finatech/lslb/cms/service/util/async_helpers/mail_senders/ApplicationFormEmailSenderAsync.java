@@ -389,7 +389,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
     private ArrayList<Document> getAllDocumentsForAIPForm(AIPDocumentApproval aipDocumentApproval) {
         Query query = new Query();
         query.addCriteria(Criteria.where("entityId").is(aipDocumentApproval.getId()));
-        query.addCriteria(Criteria.where("isActive").is(true));
+        query.addCriteria(Criteria.where("isCurrent").is(true));
         query.addCriteria(Criteria.where("notificationSent").is(false));
         return (ArrayList<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
     }
@@ -532,6 +532,7 @@ public class ApplicationFormEmailSenderAsync extends AbstractMailSender {
         try {
             List<DocumentNotification> documentNotifications = getDocumentNotificationsForAIPForm(aipDocumentApproval);
             if (documentNotifications.isEmpty()) {
+                aipDocumentApproval.setReadyForApproval(true);
                 mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
                 sendApproverMailToFinalApproval(aipDocumentApproval);
                 return;
