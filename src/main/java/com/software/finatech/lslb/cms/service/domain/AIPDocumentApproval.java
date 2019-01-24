@@ -250,6 +250,7 @@ public class AIPDocumentApproval extends AbstractFact {
         Query query = new Query();
         query.addCriteria(Criteria.where("documentPurposeId").is(DocumentPurposeReferenceData.AIP_REPORT_ID));
         query.addCriteria(Criteria.where("active").is(true));
+        query.addCriteria(Criteria.where("required").is(true));
         Map<String, com.software.finatech.lslb.cms.service.domain.Document> reportDocumentsMap = new HashMap<>();
         ArrayList<DocumentType> documentTypes = (ArrayList<DocumentType>) mongoRepositoryReactive.findAll(query, DocumentType.class).toStream().collect(Collectors.toList());
         for (DocumentType documentType : documentTypes) {
