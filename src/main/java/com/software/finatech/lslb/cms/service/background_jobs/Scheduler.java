@@ -82,10 +82,10 @@ public class Scheduler {
         dateTime = dateTime.plusMonths(3);
         if (licenses != null) {
             for (License license : licenses) {
-               int days_diff = 0;
-                days_diff = Days.daysBetween(LocalDate.now(),license.getExpiryDate()).getDays();
+                int days_diff = 0;
+                days_diff = Days.daysBetween(LocalDate.now(), license.getExpiryDate()).getDays();
 
-                if(days_diff<=7 && days_diff>=0){
+                if (days_diff <= 7 && days_diff >= 0) {
 
                     int days = 0;
                     String licenceType = license.getLicenseTypeId();
