@@ -923,7 +923,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                 }
             }
 
-            if (approvalDocumentTypes.size() == countApprovedDocument) {
+            if (countUnApprovedDocument==0) {
                 aipDocumentApproval.setReadyForApproval(true);
                 //      applicationFormNotificationHelperAsync.sendApproverMailToFinalApproval(aipDocumentApproval);
             }
