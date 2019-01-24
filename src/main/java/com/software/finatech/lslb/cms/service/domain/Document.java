@@ -77,6 +77,9 @@ public class Document extends AbstractFact {
     }
 
     public String getApprovalRequestStatusId() {
+        if(approvalRequestStatusId==null){
+            return "";
+        }
         return approvalRequestStatusId;
     }
 

@@ -158,7 +158,7 @@ public class TestController extends BaseController {
             query.addCriteria(Criteria.where("documentPurposeId").is(DocumentPurposeReferenceData.RENEWAL_LICENSE_ID));
             query.addCriteria(Criteria.where("active").is(true));
             //  query.addCriteria(Criteria.where("approverId").is(null));
-         query.addCriteria(Criteria.where("gameTypeIds").in("02"));
+         query.addCriteria(Criteria.where("gameTypeIds").in("01"));
 
         List<DocumentType> documentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(query, DocumentType.class).toStream().collect(Collectors.toList());
 //            int notApprrovalRequired=0;
@@ -169,8 +169,8 @@ public class TestController extends BaseController {
 ////            }
         List<DocumentTypeDto> documentTypeDtos= new ArrayList<>();
         documentTypes.stream().forEach(documentType -> {
-            documentType.setApproverId("");
-            mongoRepositoryReactive.saveOrUpdate(documentType);
+//            documentType.setApproverId("");
+//            mongoRepositoryReactive.saveOrUpdate(documentType);
             documentTypeDtos.add(documentType.convertToDto());
         });
 
@@ -178,26 +178,26 @@ public class TestController extends BaseController {
 
 
     }
-//    @RequestMapping(method = RequestMethod.POST, value = "/back-date")
-//    public Mono<ResponseEntity> backDate() {
-//        try {
-//            Query query = new Query();
-//            query.addCriteria(Criteria.where("institutionId").is("7c905dbb-9183-405e-92aa-6065f36e03e2"));
-//            query.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
-//            query.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID));
-//
-//            License license = (License) mongoRepositoryReactive.find(query, License.class).block();
-//
-//
-//            license.setEffectiveDate(new LocalDate("2019-01-04"));
-//            license.setExpiryDate(new LocalDate("2019-01-30"));
-//            license.setRenewalStatus("true");
-//            mongoRepositoryReactive.saveOrUpdate(license);
-//            return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
-//        } catch (Exception e) {
-//            return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
-//        }
-//    }
+    @RequestMapping(method = RequestMethod.POST, value = "/back-date")
+    public Mono<ResponseEntity> backDate() {
+        try {
+            Query query = new Query();
+            query.addCriteria(Criteria.where("institutionId").is("050c8760-4237-4c0a-95d7-8254b7d84b54"));
+            query.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
+            query.addCriteria(Criteria.where("licenseStatusId").is(LicenseStatusReferenceData.RENEWED_ID));
+
+            License license = (License) mongoRepositoryReactive.find(query, License.class).block();
+
+
+            license.setEffectiveDate(new LocalDate("2019-02-21"));
+            license.setExpiryDate(new LocalDate("2019-03-05"));
+            license.setRenewalStatus("true");
+            mongoRepositoryReactive.saveOrUpdate(license);
+            return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
+        } catch (Exception e) {
+            return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
 
     @RequestMapping(method = RequestMethod.POST, value = "/backdate-licence")
     public Mono<ResponseEntity> moviedocus() {

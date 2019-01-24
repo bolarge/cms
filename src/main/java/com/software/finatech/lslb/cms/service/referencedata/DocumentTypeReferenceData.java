@@ -170,8 +170,8 @@ public class DocumentTypeReferenceData {
             documentType13.setName(documentNames[i]);
             documentType13.setDocumentPurposeId(RENEWALDocumentPurposeId);
             documentType13.setGameTypeIds(getOSbAndPolGameTypeIdSet());
-            documentType13.setActive(true);
-            documentType13.setRequired(true);
+           // documentType13.setActive(true);
+           // documentType13.setRequired(true);
             mongoRepositoryReactive.saveOrUpdate(documentType13);
         }
         DocumentType documentType22 = (DocumentType) mongoRepositoryReactive.findById("22", DocumentType.class).block();
@@ -182,8 +182,8 @@ public class DocumentTypeReferenceData {
         documentType22.setName("IMAGE FROM AGENT");
         documentType22.setDocumentPurposeId(DocumentPurposeReferenceData.AGENT_UPLOADS);
         documentType22.setGameTypeIds(getOSbAndPolGameTypeIdSet());
-        documentType22.setActive(true);
-        documentType22.setRequired(true);
+        //documentType22.setActive(true);
+      //  documentType22.setRequired(true);
 
 
         DocumentType documentType23 = (DocumentType) mongoRepositoryReactive.findById("23", DocumentType.class).block();
