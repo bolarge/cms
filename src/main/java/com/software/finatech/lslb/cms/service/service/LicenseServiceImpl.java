@@ -541,8 +541,6 @@ public class LicenseServiceImpl implements LicenseService {
         });
 
         return Mono.just(new ResponseEntity<>(aipCheckDtos, HttpStatus.OK));
-
-
     }
 
     public Mono<ResponseEntity> updateToDocumentAIP(License license) {
