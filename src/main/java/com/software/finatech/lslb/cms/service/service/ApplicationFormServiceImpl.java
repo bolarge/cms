@@ -913,7 +913,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             List<DocumentType> approvalDocumentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
 
             for (Document doc : documents) {
-                if (!doc.getApprovalRequestStatusId().isEmpty()) {
+                if (!StringUtils.isEmpty(doc.getApprovalRequestStatusId())) {
                     //countDocumentWithApproval = countDocumentWithApproval + 1;
                     if (doc.getApprovalRequestStatusId().equals(ApprovalRequestStatusReferenceData.APPROVED_ID)) {
                         countApprovedDocument = countApprovedDocument + 1;
