@@ -563,10 +563,11 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             query.addCriteria(Criteria.where("documentPurposeId").is(DocumentPurposeReferenceData.AIP_LICENSE_ID));
             query.addCriteria(Criteria.where("active").is(true));
             //  query.addCriteria(Criteria.where("approverId").is(null));
+            query.addCriteria(Criteria.where("gameTypeIdS").in(aipDocumentApproval.getGameTypeId()));
             List<DocumentType> documentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(query, DocumentType.class).toStream().collect(Collectors.toList());
             int notApprrovalRequired=0;
             for(DocumentType documentType: documentTypes){
-                if(documentType.getApproverId()==null){
+                if(documentType.getApproverId().isEmpty()){
                     notApprrovalRequired=+1;
                 }
             }
@@ -908,10 +909,11 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             queryDocumentType.addCriteria(Criteria.where("documentPurposeId").is(DocumentPurposeReferenceData.AIP_LICENSE_ID));
             queryDocumentType.addCriteria(Criteria.where("active").is(true));
             queryDocumentType.addCriteria(Criteria.where("approverId").ne(null));
+            queryDocumentType.addCriteria(Criteria.where("gameTypeIds").in(aipDocumentApproval.getGameTypeId()));
             List<DocumentType> approvalDocumentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
 
             for (Document doc : documents) {
-                if (doc.getApprovalRequestStatusId() != null) {
+                if (!doc.getApprovalRequestStatusId().isEmpty()) {
                     //countDocumentWithApproval = countDocumentWithApproval + 1;
                     if (doc.getApprovalRequestStatusId().equals(ApprovalRequestStatusReferenceData.APPROVED_ID)) {
                         countApprovedDocument = countApprovedDocument + 1;
