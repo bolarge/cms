@@ -912,7 +912,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
 //            queryDocumentType.addCriteria(Criteria.where("gameTypeIds").in(aipDocumentApproval.getGameTypeId()));
 //            List<DocumentType> approvalDocumentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
             for (Document doc : documents) {
-                String documentApprovalStatus = document.getApprovalRequestStatusId();
+                String documentApprovalStatus = doc.getApprovalRequestStatusId();
                 if (!StringUtils.isEmpty(documentApprovalStatus)) {
                     countRequiredDocument = countRequiredDocument + 1;
                     if (StringUtils.equals(documentApprovalStatus, ApprovalRequestStatusReferenceData.APPROVED_ID)) {

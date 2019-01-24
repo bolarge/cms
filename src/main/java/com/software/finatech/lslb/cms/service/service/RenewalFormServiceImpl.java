@@ -450,22 +450,23 @@ public class RenewalFormServiceImpl implements RenewalFormService {
         List<Document> documents = (List<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
       //  int countDocumentWithApproval = 0;
         int countApprovedDocument = 0;
-        Query queryDocumentType = new Query();
-        queryDocumentType.addCriteria(Criteria.where("documentPurposeId").is(DocumentPurposeReferenceData.RENEWAL_LICENSE_ID));
-        queryDocumentType.addCriteria(Criteria.where("active").is(true));
-        queryDocumentType.addCriteria(Criteria.where("approverId").ne(null));
-        queryDocumentType.addCriteria(Criteria.where("gameTypeIds").in(renewalForm.getGameTypeId()));
-        List<DocumentType> approvalDocumentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
-
+//        Query queryDocumentType = new Query();
+//        queryDocumentType.addCriteria(Criteria.where("documentPurposeId").is(DocumentPurposeReferenceData.RENEWAL_LICENSE_ID));
+//        queryDocumentType.addCriteria(Criteria.where("active").is(true));
+//        queryDocumentType.addCriteria(Criteria.where("gameTypeIds").in(renewalForm.getGameTypeId()));
+//        List<DocumentType> approvalDocumentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
+        int countUnApprovedDocument=0;
         for (Document doc : documents) {
             if (!doc.getApprovalRequestStatusId().isEmpty()) {
                 //countDocumentWithApproval = +1;
                 if (doc.getApprovalRequestStatusId().equals(ApprovalRequestStatusReferenceData.APPROVED_ID)) {
                     countApprovedDocument = countApprovedDocument+1;
+                }else if(doc.getApprovalRequestStatusId().equals(ApprovalRequestStatusReferenceData.PENDING_ID)){
+                    countUnApprovedDocument = countUnApprovedDocument+1;
                 }
             }
         }
-        if (approvalDocumentTypes.size()== countApprovedDocument) {
+        if (countUnApprovedDocument==0) {
             if (renewalForm.getFormStatusId().equals(RenewalFormStatusReferenceData.SUBMITTED)) {
                 renewalForm.setReadyForApproval(true);
             }
