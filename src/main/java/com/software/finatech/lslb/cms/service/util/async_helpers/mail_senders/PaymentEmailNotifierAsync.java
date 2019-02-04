@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders;
 
 import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
@@ -8,6 +9,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -145,6 +149,29 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             String email = vggAdmin.getEmailAddress();
             logger.info("Sending failed payment notification to {}", email);
             emailService.sendEmail(content, mailSubject, email);
+        }
+    }
+
+
+    @Async
+    public void handlePostPaymentInitiationEvents(PaymentRecord paymentRecord, PaymentRecordDetailCreateDto paymentRecordDetailCreateDto) {
+        /**
+         *  If payment is license renewal payment and it is first payment
+         *  (set RenewalPayment initiated for license object
+         */
+        if (paymentRecord.isLicenseRenewalPayment() && paymentRecordDetailCreateDto.isFirstPayment()) {
+            Query query = new Query();
+            query.addCriteria(Criteria.where("institutionId").is(paymentRecord.getInstitutionId()));
+            query.addCriteria(Criteria.where("gameTypeId").is(paymentRecord.getGameTypeId()));
+            query.addCriteria(Criteria.where("licenseTypeId").is(paymentRecord.getLicenseTypeId()));
+            Sort sort = new Sort(Sort.Direction.DESC, "expiryDate");
+            query.with(sort);
+            License license = (License) mongoRepositoryReactive.find(query, License.class).block();
+            if (license != null) {
+                license.setRenewalPaymentInitiated(true);
+                license.setRenewalPaymentRecordId(paymentRecord.getId());
+                mongoRepositoryReactive.saveOrUpdate(license);
+            }
         }
     }
 }

@@ -105,7 +105,7 @@ public class MachineServiceImpl implements MachineService {
                 query.addCriteria(Criteria.where("machineStatusId").is(machineStatusId));
             }
             if (!StringUtils.isEmpty(licenseNumber)) {
-                License license = (License) mongoRepositoryReactive.find(Query.query(Criteria.where("licenseNumber").is(licenseNumber)), License.class).block();
+                License license = (License) mongoRepositoryReactive.find(Query.query(Criteria.where("licenseNumber").regex(licenseNumber, "i")), License.class).block();
                 if (license != null) {
                     query.addCriteria(Criteria.where("licenseId").is(license.getId()));
                 }

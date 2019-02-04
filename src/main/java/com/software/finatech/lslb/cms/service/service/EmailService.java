@@ -13,6 +13,8 @@ import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -62,6 +64,12 @@ public class EmailService {
     }
 
     public void sendFailedEmail(FailedEmailNotification failedEmailNotification) {
+        String toEmailAddress = failedEmailNotification.getToEmailAddress();
+        if (!isValidEmailAddress(toEmailAddress)) {
+            mongoRepositoryReactive.delete(failedEmailNotification);
+            logger.info("Invalid Email Address ==> {}", toEmailAddress);
+            return;
+        }
         failedEmailNotification.setProcessing(true);
         mongoRepositoryReactive.saveOrUpdate(failedEmailNotification);
         MimeMessagePreparator messagePreparator = mimeMessage -> {
@@ -126,6 +134,18 @@ public class EmailService {
         }
     }
 */
+
+    private boolean isValidEmailAddress(String email) {
+        boolean result = true;
+        try {
+            InternetAddress emailAddr = new InternetAddress(email);
+            emailAddr.validate();
+        } catch (AddressException ex) {
+            result = false;
+        }
+        return result;
+    }
+
     private String getMailSender() {
         List<String> activeProfiles = Arrays.asList(environment.getActiveProfiles());
         if (activeProfiles.contains("test") || activeProfiles.contains("staging")) {

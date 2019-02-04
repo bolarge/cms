@@ -128,9 +128,6 @@ public class DatabaseConfiguration {
 
         uri.append(mongoHosts);
         uri.append("/");
-        if (getActiveProfiles().contains("adedev")) {
-            uri.append(mongoDatabase);
-        }
         if (replicaSet != null && !replicaSet.isEmpty()) {
             uri.append("?replicaSet=");
             uri.append(replicaSet);
