@@ -211,7 +211,7 @@ public class ExistingOperatorLoader {
                 pendingInstitution.setPhoneNumber(String.format("0%s", institutionUpload.getPhoneNumber()));
                 pendingInstitution.setFromLiveData(true);
                 pendingInstitution.setAddress(institutionUpload.getAddress());
-                pendingInstitution.setForTest(true);
+              //  pendingInstitution.setForTest(true);
             }
             // for (InstitutionLoadDetails institutionLoadDetails : institutionUpload.getInstitutionLoadDetails()) {
             InstitutionLoadDetails institutionLoadDetails = institutionUpload.getLoadDetails();
