@@ -286,6 +286,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             if (paymentRecordDetailCreateDto.isGamingTerminalPayment() || paymentRecordDetailCreateDto.isGamingMachinePayment()) {
                 verbiage = String.format("Created Multiple Machine payment -> Machine Serial Numbers -> %s, Amount -> %s", multipleMachinePaymentToAuditString(machineMultiplePayment), machineMultiplePayment.getTotalAmount());
             }
+            paymentEmailNotifierAsync.handlePostPaymentInitiationEvents(paymentRecord, paymentRecordDetailCreateDto);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(paymentAuditActionId,
                     currentAuditorName, currentAuditorName,
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
@@ -387,6 +388,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             if (paymentRecordDetailCreateDto.isGamingTerminalPayment() || paymentRecordDetailCreateDto.isGamingMachinePayment()) {
                 verbiage = String.format("Created Multiple Machine payment  -> Machine Serial Numbers -> %s, Amount -> %s", multipleMachinePaymentToAuditString(machineMultiplePayment), machineMultiplePayment.getTotalAmount());
             }
+            paymentEmailNotifierAsync.handlePostPaymentInitiationEvents(paymentRecord, paymentRecordDetailCreateDto);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(paymentAuditActionId,
                     currentAuditorName, currentAuditorName,
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
@@ -629,7 +631,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     private Mono<ResponseEntity> validateLicensePayment(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, Fee fee) throws Exception {
         if (!StringUtils.isEmpty(paymentRecordDetailCreateDto.getInstitutionId())) {
             Institution institution = institutionService.findByInstitutionId(paymentRecordDetailCreateDto.getInstitutionId());
-            if (institution != null && institution.isFromLiveData()) {
+            if (institution != null && institution.isFromLiveData() && !institution.isOnAIPLicense()) {
                 return Mono.just(new ResponseEntity<>("Kindly make payment for licence renewal", HttpStatus.BAD_REQUEST));
             }
         }
@@ -691,7 +693,11 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         if (!StringUtils.isEmpty(institutionId)) {
             Institution institution = institutionService.findByInstitutionId(institutionId);
             if (institution != null && institution.isFromLiveData()) {
-                return Mono.just(new ResponseEntity<>("Kindly make payment for licence renewal", HttpStatus.BAD_REQUEST));
+                if (institution.isOnAIPLicense()) {
+                    return Mono.just(new ResponseEntity<>("Kindly make licence Payment", HttpStatus.BAD_REQUEST));
+                } else {
+                    return Mono.just(new ResponseEntity<>("Kindly make payment for licence renewal", HttpStatus.BAD_REQUEST));
+                }
             }
         }
 

@@ -38,26 +38,6 @@ public class ExistingOperatorLoader {
     private DateTimeFormatter dateTimeFormat = DateTimeFormat.forPattern("dd/MM/yyyy");
 
 
-    //    @PostConstruct
-    public void init() {
-        Query query = new Query();
-        query.addCriteria(Criteria.where("fromLiveData").is(true));
-        ArrayList<Institution> operators = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
-        for (Institution institution : operators) {
-            query = new Query();
-            query.addCriteria(Criteria.where("institutionId").is(institution.getId()));
-            ArrayList<License> licenses = (ArrayList<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
-            for (License license : licenses) {
-                mongoRepositoryReactive.delete(license);
-            }
-            ArrayList<InstitutionCategoryDetails> institutionCategoryDetails = (ArrayList<InstitutionCategoryDetails>) mongoRepositoryReactive.findAll(query, InstitutionCategoryDetails.class).toStream().collect(Collectors.toList());
-            for (InstitutionCategoryDetails categoryDetails : institutionCategoryDetails) {
-                mongoRepositoryReactive.delete(categoryDetails);
-            }
-            mongoRepositoryReactive.delete(institution);
-        }
-    }
-
 
     public void loadFromCsv(MultipartFile multipartFile) throws LicenseServiceException {
         if (multipartFile.isEmpty()) {

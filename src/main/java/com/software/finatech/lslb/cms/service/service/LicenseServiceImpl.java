@@ -153,7 +153,6 @@ public class LicenseServiceImpl implements LicenseService {
             licenses.forEach(license -> {
                 licenseDtos.add(license.convertToDto());
             });
-
             return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             String errorMsg = "Invalid date format , please use YYYY-MM-dd";
@@ -1149,9 +1148,9 @@ public class LicenseServiceImpl implements LicenseService {
             paymentRecord.setLicenseId(newPendingApprovalRenewedLicense.getId());
             mongoRepositoryReactive.saveOrUpdate(paymentRecord);
 
-
             latestLicense.setRenewalPaymentMade(true);
             latestLicense.setRenewalPaymentRecordId(paymentRecord.getId());
+            latestLicense.setRenewalStatus("false");
             mongoRepositoryReactive.saveOrUpdate(latestLicense);
 
 //            verbiage = "UPDATED : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from AIP DOC UPLOADED to AIP COMPLETED";

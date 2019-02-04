@@ -31,14 +31,14 @@ public class Institution extends AbstractFact {
     private Set<String> directorsNames = new HashSet<>();
     private Set<String> shareHolderNames = new HashSet<>();
     private boolean fromLiveData;
-    private boolean forTest;
+    private boolean isOnAIPLicense;
 
-    public boolean isForTest() {
-        return forTest;
+    public boolean isOnAIPLicense() {
+        return isOnAIPLicense;
     }
 
-    public void setForTest(boolean forTest) {
-        this.forTest = forTest;
+    public void setOnAIPLicense(boolean onAIPLicense) {
+        isOnAIPLicense = onAIPLicense;
     }
 
     public Set<String> getShareHolderNames() {

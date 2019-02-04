@@ -919,7 +919,6 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                         countApprovedDocument = countApprovedDocument + 1;
                     }
                 }
-
             }
             if (countApprovedDocument == countRequiredDocument) {
                 aipDocumentApproval.setReadyForApproval(true);

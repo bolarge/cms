@@ -39,6 +39,15 @@ public class License extends AbstractFact {
     private boolean renewalInProgress;
     private boolean renewalPaymentMade;
     private String renewalPaymentRecordId;
+    private boolean renewalPaymentInitiated;
+
+    public boolean isRenewalPaymentInitiated() {
+        return renewalPaymentInitiated;
+    }
+
+    public void setRenewalPaymentInitiated(boolean renewalPaymentInitiated) {
+        this.renewalPaymentInitiated = renewalPaymentInitiated;
+    }
 
     public String getRenewalPaymentRecordId() {
         return renewalPaymentRecordId;
@@ -318,6 +327,7 @@ public class License extends AbstractFact {
         licenseDto.setRenewalInProgress(isRenewalInProgress());
         licenseDto.setRenewalPaymentRecordId(getRenewalPaymentRecordId());
         licenseDto.setRenewalPaymentMade(isRenewalPaymentMade());
+        licenseDto.setRenewalPaymentInitiated(isRenewalPaymentInitiated());
         return licenseDto;
     }
 

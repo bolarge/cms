@@ -24,6 +24,15 @@ public class LicenseDto {
     private boolean renewalInProgress;
     private String renewalPaymentRecordId;
     private boolean renewalPaymentMade;
+    private boolean renewalPaymentInitiated;
+
+    public boolean isRenewalPaymentInitiated() {
+        return renewalPaymentInitiated;
+    }
+
+    public void setRenewalPaymentInitiated(boolean renewalPaymentInitiated) {
+        this.renewalPaymentInitiated = renewalPaymentInitiated;
+    }
 
     public String getRenewalPaymentRecordId() {
         return renewalPaymentRecordId;
