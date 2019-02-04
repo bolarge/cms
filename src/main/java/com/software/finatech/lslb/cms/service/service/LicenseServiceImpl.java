@@ -336,6 +336,7 @@ public class LicenseServiceImpl implements LicenseService {
             }
             Query query = new Query();
             query.addCriteria(Criteria.where("institutionId").is(license.getInstitutionId()));
+            query.addCriteria(Criteria.where("licenseTypeId").is(license.getLicenseTypeId()));
             query.addCriteria(Criteria.where("gameTypeId").is(license.getGameTypeId()));
             query.addCriteria(Criteria.where("licenseStatusId").ne(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID));
             Sort sort = new Sort(Sort.Direction.DESC, "expiryDate");

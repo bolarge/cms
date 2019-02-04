@@ -25,7 +25,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Api(value = "Dashboard", description = "For everything related to dashboard requests", tags = "")
@@ -328,9 +331,9 @@ public class DashboardController extends BaseController {
                 institutionDashboardSummaryDto.setNumberOfGamingTerminals(getGamingTerminalCountForInstitutionAndGameType(institutionId, license.getGameTypeId()));
                 institutionDashboardSummaryDto.setAllowsGamingMachine(getGameType(license.getGameTypeId()).getAllowsGamingMachine());
                 institutionDashboardSummaryDto.setAllowsGamingTerminal(getGameType(license.getGameTypeId()).getAllowsGamingTerminal());
-                institutionDashboardSummaryDtoHashMap.put(license.getGameTypeId(), institutionDashboardSummaryDto);
-
-
+                if (license.isInstitutionLicense()) {
+                    institutionDashboardSummaryDtoHashMap.put(license.getGameTypeId(), institutionDashboardSummaryDto);
+                }
             }
         }
         if (institutionDashboardSummaryDtoHashMap.values().size() == 0) {
