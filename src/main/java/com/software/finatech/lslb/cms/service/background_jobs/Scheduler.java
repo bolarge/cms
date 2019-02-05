@@ -438,6 +438,7 @@ public class Scheduler {
                     if (agentPaymentRecord.size() == 0) {
                         agent.setInactive(false);
                         agent.setInactiveReason("You have been deactivated for lack of license payment, please kindly click forget password below to begin re-activation");
+                        agent.setLastInactiveDate(LocalDate.now());
                         mongoRepositoryReactive.saveOrUpdate(agent);
                         NotificationDto notificationDto = new NotificationDto();
                         notificationDto.setDescription("You have been deactivated for lack of license payment");

@@ -414,6 +414,10 @@ public class DashboardController extends BaseController {
                     dashboardMachineStatusCountDto.setStolenCount(statusCount.getMachineStatusCount());
                     dashboardMachineStatusCountDto.setStolenStatusId(MachineStatusReferenceData.STOLEN_ID);
 
+                }if (statusCount.getMachineStatusId().equals(MachineStatusReferenceData.EXPIRED_ID)) {
+                    dashboardMachineStatusCountDto.setExpiredCount(statusCount.getMachineStatusCount());
+                    dashboardMachineStatusCountDto.setExpiredStatusId(MachineStatusReferenceData.EXPIRED_ID);
+
                 }
             });
 
