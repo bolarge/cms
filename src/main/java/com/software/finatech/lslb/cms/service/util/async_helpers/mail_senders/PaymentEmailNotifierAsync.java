@@ -164,6 +164,7 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             query.addCriteria(Criteria.where("institutionId").is(paymentRecord.getInstitutionId()));
             query.addCriteria(Criteria.where("gameTypeId").is(paymentRecord.getGameTypeId()));
             query.addCriteria(Criteria.where("licenseTypeId").is(paymentRecord.getLicenseTypeId()));
+            query.addCriteria(Criteria.where("renewalStatus").is("true"));
             Sort sort = new Sort(Sort.Direction.DESC, "expiryDate");
             query.with(sort);
             License license = (License) mongoRepositoryReactive.find(query, License.class).block();
