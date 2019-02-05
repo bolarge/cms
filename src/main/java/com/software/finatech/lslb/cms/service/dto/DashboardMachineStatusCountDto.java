@@ -10,6 +10,24 @@ public class DashboardMachineStatusCountDto {
     protected String faultyStatusId;
     protected long stolenCount;
     protected String stolenStatusId;
+    protected long expiredCount;
+    protected String expiredStatusId;
+
+    public long getExpiredCount() {
+        return expiredCount;
+    }
+
+    public void setExpiredCount(long expiredCount) {
+        this.expiredCount = expiredCount;
+    }
+
+    public String getExpiredStatusId() {
+        return expiredStatusId;
+    }
+
+    public void setExpiredStatusId(String expiredStatusId) {
+        this.expiredStatusId = expiredStatusId;
+    }
 
     public String getActiveStatusId() {
         return activeStatusId;
