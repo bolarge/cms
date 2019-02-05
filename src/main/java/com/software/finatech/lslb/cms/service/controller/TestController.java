@@ -17,14 +17,6 @@ import com.software.finatech.lslb.cms.service.util.data_updater.ExistingOperator
 import com.software.finatech.lslb.cms.service.util.httpclient.MyFileManager;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
@@ -33,16 +25,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -104,7 +94,7 @@ public class TestController extends BaseController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/load-existing-agents")
-    public Mono<ResponseEntity> createAgents() {
+    public Mono<ResponseEntity> createAgents(MultipartFile multipartFile) {
         try {
             existingAgentLoader.loadExistingAgents();
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
@@ -162,17 +152,6 @@ public class TestController extends BaseController {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
-
-
-//    @RequestMapping(method = RequestMethod.POST, value = "/back-date")
-//    public Mono<ResponseEntity> backDate() {
-//        try {
-//            existingOperatorLoader.init();
-//            return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
-//        } catch (Exception e) {
-//            return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
-//        }
-//    }
 
     @RequestMapping(method = RequestMethod.POST, value = "/backdate-licence")
     public Mono<ResponseEntity> moviedocus() {
@@ -372,41 +351,11 @@ public class TestController extends BaseController {
     @RequestMapping(method = RequestMethod.GET, value = "/read-image")
     public Mono<ResponseEntity> readImage() throws UnsupportedEncodingException {
         try {
-            String url = "https://partners.upnp.xyz/Auth/GetTokenLagosAuth";
-            String username = "LagosLDAP";
-            String password = "A0PN7F*x4CRNBGemU9z}Q0l{SeheTbx";
-            HttpClient httpClient = HttpClientBuilder.create().build();
-            HttpPost httpPost = new HttpPost(url);
-            List<NameValuePair> urlParameters = new ArrayList<>();
-            urlParameters.add(new BasicNameValuePair("Login", username));
-            urlParameters.add(new BasicNameValuePair("Password", password));
-            httpPost.setEntity(new UrlEncodedFormEntity(urlParameters));
-            httpPost.addHeader("Content-Type", "application/json");
-            HttpResponse response = httpClient.execute(httpPost);
-            int responseCode = response.getStatusLine().getStatusCode();
-            String stringResponse = EntityUtils.toString(response.getEntity());
-
-            if (responseCode == 200) {
-                // everything is fine, handle the response
-                String token = mapper.readValue(stringResponse, String.class);
-                logger.info("TOken GOtten {}", token);
-            }
-
-
-            RestTemplate restTemplate = new RestTemplate();
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HashMap<String, String> map = new HashMap<>();
-            map.put("Login", username);
-            map.put("Password", password);
-            String requestJson = mapper.writeValueAsString(map);
-            HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
-            ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, entity, String.class);
-            if (responseEntity.getStatusCode() == HttpStatus.OK && responseEntity.getBody() != null) {
-                String responseBody = responseEntity.getBody();
-                String splitted = responseBody.replace("\"", "");
-                logger.info("Body gotten {}", responseBody);
-                logger.info("Body Trimmed {}", splitted);
+            Query query = new Query();
+            ArrayList<Agent> agents = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
+            for (Agent agent : agents) {
+                agent.setPhoneNumber("0" + agent.getPhoneNumber());
+                mongoRepositoryReactive.saveOrUpdate(agent);
             }
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {

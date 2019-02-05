@@ -25,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class ExistingOperatorLoader {
@@ -36,8 +35,6 @@ public class ExistingOperatorLoader {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
 
     private DateTimeFormatter dateTimeFormat = DateTimeFormat.forPattern("dd/MM/yyyy");
-
-
 
     public void loadFromCsv(MultipartFile multipartFile) throws LicenseServiceException {
         if (multipartFile.isEmpty()) {
@@ -53,14 +50,14 @@ public class ExistingOperatorLoader {
                 // String[] columns = rows[i].split(",");
                 String[] columns = rows[i].split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
                 if (columns.length < 15) {
-                    throw new LicenseServiceException("File is less than 15 columns" + rows[i]);
+                    throw new LicenseServiceException("File is less than 15 columns =>" + rows[i]);
                 }
                 try {
                     String institutionName = columns[3];
                     if (!StringUtils.isEmpty(institutionName)) {
                         InstitutionUpload institutionUpload = new InstitutionUpload();
                         institutionUpload.setLine(rows[i]);
-                        institutionUpload.setInstitutionName(institutionName + " Test");
+                        institutionUpload.setInstitutionName(institutionName);
                         institutionUpload.setDescription(columns[5]);
                         institutionUpload.setEmailAddress(columns[8]);
                         institutionUpload.setPhoneNumber(columns[9]);
@@ -140,7 +137,7 @@ public class ExistingOperatorLoader {
                         if (institutionUpload == null) {
                             institutionUpload = new InstitutionUpload();
                             institutionUpload.setLine(rows[i]);
-                            institutionUpload.setInstitutionName(institutionName + " Test");
+                            institutionUpload.setInstitutionName(institutionName);
                             institutionUpload.setDescription(columns[3]);
                             institutionUpload.setEmailAddress(columns[6]);
                             institutionUpload.setPhoneNumber(columns[7]);
@@ -211,7 +208,7 @@ public class ExistingOperatorLoader {
                 pendingInstitution.setPhoneNumber(String.format("0%s", institutionUpload.getPhoneNumber()));
                 pendingInstitution.setFromLiveData(true);
                 pendingInstitution.setAddress(institutionUpload.getAddress());
-              //  pendingInstitution.setForTest(true);
+                //  pendingInstitution.setForTest(true);
             }
             // for (InstitutionLoadDetails institutionLoadDetails : institutionUpload.getInstitutionLoadDetails()) {
             InstitutionLoadDetails institutionLoadDetails = institutionUpload.getLoadDetails();
