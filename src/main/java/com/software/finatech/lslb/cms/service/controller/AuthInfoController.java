@@ -377,7 +377,7 @@ public class AuthInfoController extends BaseController {
             // Lookup AuthInfo in database by e-mail
             AuthInfo authInfoExists = (AuthInfo) mongoRepositoryReactive.find(new Query(Criteria.where("emailAddress").is(createGameOperatorAuthInfoDto.getEmailAddress())), AuthInfo.class).block();
             if (authInfoExists != null) {
-                return Mono.just(new ResponseEntity("Email already registered", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Email already registered", HttpStatus.BAD_REQUEST));
             }
 
             /*String appUrl =
