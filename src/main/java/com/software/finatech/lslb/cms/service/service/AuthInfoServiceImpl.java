@@ -277,7 +277,6 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         authInfo.setLastName(createApplicantAuthInfoDto.getLastName());
         authInfo.setTitle(createApplicantAuthInfoDto.getTitle());
         authInfo.setFullName(createApplicantAuthInfoDto.getFirstName() + " " + createApplicantAuthInfoDto.getLastName());
-        mongoRepositoryReactive.saveOrUpdate(authInfo);
 
         // First we check if User exists
         try {
@@ -338,6 +337,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 String content = mailContentBuilderService.build(model, "continueRegistration-new");
                 content = content.replaceAll("CallbackUrl", url);
                 emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
+                mongoRepositoryReactive.saveOrUpdate(authInfo);
             }
 
             String verbiage = String.format("Create user  -> Name : %s ", authInfo.getFullName());
