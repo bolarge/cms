@@ -25,6 +25,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -388,6 +389,9 @@ public class AuthInfoController extends BaseController {
             String appUrl = appHostPort + request.getContextPath();
 
             AuthInfo authInfo = authInfoService.createApplicantAuthInfo(createGameOperatorAuthInfoDto, appUrl, request);
+            if (authInfo == null) {
+                return Mono.just(new ResponseEntity<>("Unable to create user", HttpStatus.INTERNAL_SERVER_ERROR));
+            }
             return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {
@@ -714,22 +718,47 @@ public class AuthInfoController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request")
     }
     )
-    public Mono<ResponseEntity> updateAuthInfo(@Valid @RequestBody AuthInfoUpdateDto authInfoUpdateDto) {
+    public Mono<ResponseEntity> updateAuthInfo(@Valid @RequestBody AuthInfoUpdateDto authInfoUpdateDto, HttpServletRequest request) {
         try {
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(authInfoUpdateDto.getId(), AuthInfo.class).block();
             if (authInfo == null) {
                 return Mono.just(new ResponseEntity<>("Bad Request", HttpStatus.BAD_REQUEST));
             }
 
-            if (authInfoUpdateDto.getFirstName() != null && !authInfoUpdateDto.getFirstName().isEmpty()) {
-                authInfo.setFirstName(authInfoUpdateDto.getFirstName());
-            } else if (authInfoUpdateDto.getLastName() != null && !authInfoUpdateDto.getLastName().isEmpty()) {
-                authInfo.setLastName(authInfoUpdateDto.getLastName());
-            } else if (authInfoUpdateDto.getPhoneNumber() != null && !authInfoUpdateDto.getPhoneNumber().isEmpty()) {
-                authInfo.setPhoneNumber(authInfoUpdateDto.getPhoneNumber());
-            }
+            AuthInfo oldAuthInfo = new AuthInfo();
+            BeanUtils.copyProperties(authInfo, oldAuthInfo);
+            authInfo.setFirstName(authInfoUpdateDto.getFirstName());
+            authInfo.setLastName(authInfoUpdateDto.getLastName());
+            authInfo.setPhoneNumber(authInfoUpdateDto.getPhoneNumber());
+            authInfo.setFullName(String.format("%s %s", authInfo.getFirstName(), authInfo.getLastName()));
             mongoRepositoryReactive.saveOrUpdate(authInfo);
-            return Mono.just(new ResponseEntity(authInfo.convertToDto(), HttpStatus.OK));
+
+
+            StringBuilder builder = new StringBuilder("Updated User Details ");
+            if (!StringUtils.equals(oldAuthInfo.getFirstName(), authInfo.getFirstName())) {
+                builder.append(String.format(", Old FirstName => %s, New FirstName => %s", oldAuthInfo.getFirstName(), authInfo.getFirstName()));
+            }
+            if (!StringUtils.equals(oldAuthInfo.getLastName(), authInfo.getLastName())) {
+                builder.append(String.format(",Old LastName => %s, New LastName => %s", oldAuthInfo.getLastName(), authInfo.getLastName()));
+            }
+            if (!StringUtils.equals(oldAuthInfo.getPhoneNumber(), authInfo.getPhoneNumber())) {
+                builder.append(String.format(",Old PhoneNumber => %s, New PhoneNumber => %s", oldAuthInfo.getPhoneNumber(), authInfo.getPhoneNumber()));
+            }
+            builder.append(" .");
+            String verbiage = builder.toString();
+            String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID,
+                    currentAuditorName, authInfo.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+
+            //        if (authInfoUpdateDto.getFirstName() != null && !authInfoUpdateDto.getFirstName().isEmpty()) {
+//                authInfo.setFirstName(authInfoUpdateDto.getFirstName());
+//            } else if (authInfoUpdateDto.getLastName() != null && !authInfoUpdateDto.getLastName().isEmpty()) {
+//                authInfo.setLastName(authInfoUpdateDto.getLastName());
+//            } else if (authInfoUpdateDto.getPhoneNumber() != null && !authInfoUpdateDto.getPhoneNumber().isEmpty()) {
+//                authInfo.setPhoneNumber(authInfoUpdateDto.getPhoneNumber());
+//            }
+
+            return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {
             e.printStackTrace();
