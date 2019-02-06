@@ -4,7 +4,6 @@ import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
-import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
 import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
 import org.joda.time.LocalDate;
@@ -47,6 +46,18 @@ public class ApprovalRequestNotifierAsync  {
             String userEmail = user.getEmailAddress();
             logger.info("Sending new user email to {}", userEmail);
             emailService.sendEmail(mailContent, "New User Approval Request on LSLB CMS", userEmail);
+        }
+
+        //post initial stuff
+        Query query = new Query();
+        query.addCriteria(Criteria.where("authRoleId").is(initiator.getAuthRoleId()));
+        query.addCriteria(Criteria.where("id").ne(initiator.getId()));
+        query.addCriteria(Criteria.where("enabled").is(true));
+        AuthInfo otherApprovingUser = (AuthInfo)mongoRepositoryReactive.find(query, AuthInfo.class).block();
+        if (otherApprovingUser == null){
+            logger.info("There is no other user in user role to approve request");
+            userApprovalRequest.setInitiatorId(null);
+            mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
         }
     }
 
