@@ -332,7 +332,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             if (renewalForm == null) {
                 return Mono.just(new ResponseEntity<>("Invalid Renewal Form Selected", HttpStatus.BAD_REQUEST));
             }
-            if(!renewalFormUpdateDto.getCheckChangeInGamingMachines().isEmpty()){
+            if(!StringUtils.isEmpty(renewalFormUpdateDto.getCheckChangeInGamingMachines())){
                 renewalForm.setCheckChangeInGamingMachines(renewalFormUpdateDto.getCheckChangeInGamingMachines());
             }
             renewalForm.setCheckConvictedCrime(renewalFormUpdateDto.getCheckConvictedCrime());
@@ -457,7 +457,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
 //        List<DocumentType> approvalDocumentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
         int countUnApprovedDocument=0;
         for (Document doc : documents) {
-            if (!doc.getApprovalRequestStatusId().isEmpty()) {
+            if (!StringUtils.isEmpty(doc.getApprovalRequestStatusId())) {
                 //countDocumentWithApproval = +1;
                 if (doc.getApprovalRequestStatusId().equals(ApprovalRequestStatusReferenceData.APPROVED_ID)) {
                     countApprovedDocument = countApprovedDocument+1;
