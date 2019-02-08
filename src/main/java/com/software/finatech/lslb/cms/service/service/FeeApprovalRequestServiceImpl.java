@@ -276,7 +276,7 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             fee.setAmount(pendingFee.getAmount());
             fee.setEndDate(pendingFee.getEndDate());
             if (fee.getEndDate() != null) {
-                fee.setNextNotificationDate(fee.getNextNotificationDate().minusDays(7));
+                fee.setNextNotificationDate(fee.getEndDate().minusDays(7));
 //                if (fee.getEndDate().isBefore(today) || fee.getEndDate().isEqual(today)) {
 //                    fee.setActive(false);
 //                }}
