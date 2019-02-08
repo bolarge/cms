@@ -148,7 +148,7 @@ public class EmailService {
 
     private String getMailSender() {
         List<String> activeProfiles = Arrays.asList(environment.getActiveProfiles());
-        if (activeProfiles.contains("test") || activeProfiles.contains("staging")) {
+        if (activeProfiles.contains("development") || activeProfiles.contains("test") || activeProfiles.contains("staging")) {
             return "dev@lslbcms.com";
         }
 

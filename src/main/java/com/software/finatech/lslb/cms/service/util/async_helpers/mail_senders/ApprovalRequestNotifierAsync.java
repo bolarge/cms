@@ -4,7 +4,6 @@ import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
-import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
 import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
 import org.joda.time.LocalDate;
@@ -36,9 +35,12 @@ public class ApprovalRequestNotifierAsync  {
 
     @Async
     public void sendNewUserApprovalRequestEmailToAllOtherUsersInRole(AuthInfo initiator, UserApprovalRequest userApprovalRequest) {
+        //Find if there is user available for approvals, if there no user, set approver to him
         ArrayList<AuthInfo> otherUserWithRole = findAllOtherActiveUsersForApproval(initiator);
         if (otherUserWithRole == null || otherUserWithRole.isEmpty()) {
             logger.info("There are no other enabled users with user role");
+            userApprovalRequest.setInitiatorId(null);
+            mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
             return;
         }
 
