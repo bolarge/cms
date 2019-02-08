@@ -17,6 +17,15 @@ public class LslbGamingTerminal {
     private String failReason;
     private Institution institution;
     private GameType gameType;
+    private String licenseId;
+
+    public String getLicenseId() {
+        return licenseId;
+    }
+
+    public void setLicenseId(String licenseId) {
+        this.licenseId = licenseId;
+    }
 
     public GameType getGameType() {
         return gameType;
