@@ -444,10 +444,10 @@ public class DashboardController extends BaseController {
             List<Criteria> filterCriteria = new ArrayList<>();
 
             if (!StringUtils.isEmpty(institutionId)) {
-                filterCriteria.add(Criteria.where("institutionId").in(institutionId));
+                filterCriteria.add(Criteria.where("institutionIds").in(institutionId));
             }
             if (!StringUtils.isEmpty(gameTypeId)) {
-                filterCriteria.add(Criteria.where("gameTypeId").in(gameTypeId));
+                filterCriteria.add(Criteria.where("gameTypeIds").in(gameTypeId));
             }
             if (filterCriteria.size() > 0) {
                 criteria.andOperator(filterCriteria.toArray(new Criteria[filterCriteria.size()]));
@@ -467,7 +467,6 @@ public class DashboardController extends BaseController {
                 if (statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.IN_ACTIVE_ID)) {
                     dashboardAgentStatusCountDto.setInactiveCount(statusCount.getAgentStatusCount());
                     dashboardAgentStatusCountDto.setInactiveStatusId(AgentStatusReferenceData.IN_ACTIVE_ID);
-
                 }
                 if (statusCount.getAgentStatusId().equalsIgnoreCase(AgentStatusReferenceData.BLACK_LISTED_ID)) {
                     dashboardAgentStatusCountDto.setBlackListCount(statusCount.getAgentStatusCount());

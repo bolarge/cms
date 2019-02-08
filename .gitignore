@@ -16,3 +16,4 @@ smile-networks.jpg
 lslb-live-files/
 src/main/resources/Binary
 logs/
+src/main/java/com/software/finatech/lslb/cms/service/controller/NewTestController.java
