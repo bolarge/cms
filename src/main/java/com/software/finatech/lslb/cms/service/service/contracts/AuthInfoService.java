@@ -56,4 +56,6 @@ public interface AuthInfoService {
     AuthInfo findActiveUserWithEmail(String emailAddres);
 
     void updateInstitutionMembersToGamingOperatorRole(String institutionId);
+
+    ArrayList<AuthInfo> findAllEnabledUsersForInstitution(String institutionId);
 }
