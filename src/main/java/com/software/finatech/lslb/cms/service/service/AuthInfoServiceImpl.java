@@ -1039,4 +1039,12 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         createAuthInfoResponse.setVerificationToken(verificationToken.getConfirmationToken());
         return createAuthInfoResponse;
     }
+
+    @Override
+    public ArrayList<AuthInfo> findAllEnabledUsersForInstitution(String institutionId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("enabled").is(true));
+        query.addCriteria(Criteria.where("institutionId").is(institutionId));
+        return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
+    }
 }

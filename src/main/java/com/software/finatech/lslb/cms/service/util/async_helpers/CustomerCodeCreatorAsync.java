@@ -11,34 +11,39 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class CustomerCodeCreatorAsync {
     private static final Logger logger = LoggerFactory.getLogger(CustomerCodeCreatorAsync.class);
 
     private VigipayService vigipayService;
-    private AuthInfoService authInfoService;
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
+    private AuthInfoService authInfoService;
 
     @Autowired
     public CustomerCodeCreatorAsync(VigipayService vigipayService,
                                     AuthInfoService authInfoService,
                                     MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         this.vigipayService = vigipayService;
-        this.authInfoService = authInfoService;
         this.mongoRepositoryReactive = mongoRepositoryReactive;
+        this.authInfoService = authInfoService;
     }
 
     @Async
     public void createVigipayCustomerCodeForInstitution(Institution institution) {
         logger.info("Trying to get customer code for institution {} -> {}", institution.getInstitutionName(), institution.getInstitutionName());
-        List<AuthInfo> gamingOperatorAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(institution.getId());
-        if (gamingOperatorAdmins.isEmpty()) {
-            logger.info("Institution does not have gaming operator admins");
+        List<AuthInfo> gamingOperatorUsers = authInfoService.findAllEnabledUsersForInstitution(institution.getId());
+        if (gamingOperatorUsers.isEmpty()) {
+            logger.info("Institution does not have gaming operator users");
+            return;
         }
         String customerCode = vigipayService.createCustomerCodeForInstitution(institution);
         if (!StringUtils.isEmpty(customerCode)) {
@@ -64,4 +69,5 @@ public class CustomerCodeCreatorAsync {
             logger.info("Unable to get customer code for agent {} -> {}", agent.getFullName(), agent.getId());
         }
     }
+
 }

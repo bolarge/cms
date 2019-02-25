@@ -35,24 +35,29 @@ public class CustomerCodeCreator {
     private static final Logger logger = LoggerFactory.getLogger(CustomerCodeCreator.class);
 
 
-    @Scheduled(fixedRate = 30000, initialDelay = 600000)
+    @Scheduled(fixedRate = 3000,initialDelay = 500)
     @SchedulerLock(name = "Create Customer Code for Institutions and Agents without Customer code", lockAtMostFor = FIVE_MIN, lockAtLeastFor = FIVE_MIN)
     public void createCustomers() {
         Query query = new Query();
         query.addCriteria(Criteria.where("vgPayCustomerCode").is(null));
         ArrayList<Institution> institutionsWithoutVigiPayCustomerCode = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
         for (Institution institution : institutionsWithoutVigiPayCustomerCode) {
-            List<AuthInfo> gamingOperatorAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(institution.getId());
-            if (gamingOperatorAdmins.isEmpty()) {
-                continue;
-            }
-            logger.info("Attempting to create customer for {}", institution.getInstitutionName());
-            String customerCode = vigipayService.createCustomerCodeForInstitution(institution);
-            if (!StringUtils.isEmpty(customerCode)) {
-                logger.info("Gotten customer code {}", customerCode);
-                institution.setVgPayCustomerCode(customerCode);
-                mongoRepositoryReactive.saveOrUpdate(institution);
-                logger.info("Finished for institution {} -> {}", institution.getInstitutionName(), institution.getId());
+            try {
+                List<AuthInfo> gamingOperatorUsers = authInfoService.findAllEnabledUsersForInstitution(institution.getId());
+                if (gamingOperatorUsers.isEmpty()) {
+                    logger.info("Institution does not have gaming operator users");
+                    continue;
+                }
+                logger.info("Attempting to create customer for {}", institution.getInstitutionName());
+                String customerCode = vigipayService.createCustomerCodeForInstitution(institution);
+                if (!StringUtils.isEmpty(customerCode)) {
+                    logger.info("Gotten customer code {}", customerCode);
+                    institution.setVgPayCustomerCode(customerCode);
+                    mongoRepositoryReactive.saveOrUpdate(institution);
+                    logger.info("Finished for institution {} -> {}", institution.getInstitutionName(), institution.getId());
+                }
+            } catch (Throwable e) {
+                logger.error("An error occurred while creating customer for {}", institution.getInstitutionName());
             }
         }
 
