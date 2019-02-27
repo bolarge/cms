@@ -89,6 +89,7 @@ vigipay:
   location-code: LSG
   currency-code: NGN
   corporate-revenue-code: 1234
+  corporate-code: COR4U5K98HDDBCR
 
 email-host: ${EMAIL_HOST}
 email-username: ${EMAIL_USERNAME}
