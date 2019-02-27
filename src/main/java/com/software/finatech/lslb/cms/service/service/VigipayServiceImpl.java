@@ -26,6 +26,8 @@ public class VigipayServiceImpl implements VigipayService {
 
     @Value("${vigipay.country-code}")
     private String countryCode;
+    @Value("${vigipay.corporate-code}")
+    private String corporateCode;
 
     @Value("${vigipay.location-code}")
     private String locationCode;
@@ -96,6 +98,7 @@ public class VigipayServiceImpl implements VigipayService {
         vigipayCreateCustomer.setContactPersonLastName(agent.getLastName());
         vigipayCreateCustomer.setContactPersonPhone(agent.getPhoneNumber());
         vigipayCreateCustomer.setCountryCode(countryCode);
+        vigipayCreateCustomer.setCorporateCode(corporateCode);
         return vigipayCreateCustomer;
     }
 
@@ -113,6 +116,7 @@ public class VigipayServiceImpl implements VigipayService {
         vigipayCreateCustomer.setContactPersonLastName(admin1.getLastName());
         vigipayCreateCustomer.setContactPersonPhone(admin1.getPhoneNumber());
         vigipayCreateCustomer.setCountryCode(countryCode);
+        vigipayCreateCustomer.setCorporateCode(corporateCode);
         return vigipayCreateCustomer;
     }
 
