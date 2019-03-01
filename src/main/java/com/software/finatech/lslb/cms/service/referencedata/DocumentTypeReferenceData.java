@@ -8,9 +8,9 @@ import java.util.Set;
 
 public class DocumentTypeReferenceData {
 
-    private static String applicationFormDocumentPurposeId = DocumentPurposeReferenceData.APPLICATION_FORM_DOCUMENT_PURPOSE_ID;
-    private static String AIPDocumentPurposeId = DocumentPurposeReferenceData.AIP_LICENSE_ID;
-    private static String AIPReportDocumentPurposeId = DocumentPurposeReferenceData.AIP_REPORT_ID;
+    private static final String applicationFormDocumentPurposeId = DocumentPurposeReferenceData.APPLICATION_FORM_DOCUMENT_PURPOSE_ID;
+    private static final String AIPDocumentPurposeId = DocumentPurposeReferenceData.AIP_LICENSE_ID;
+    private static final String AIPReportDocumentPurposeId = DocumentPurposeReferenceData.AIP_REPORT_ID;
 
     private static String RENEWALDocumentPurposeId = DocumentPurposeReferenceData.RENEWAL_LICENSE_ID;
     private static String INSPECTION_ID = DocumentPurposeReferenceData.INSPECTION_ID;

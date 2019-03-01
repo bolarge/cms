@@ -130,7 +130,7 @@ public class AuthRoleController extends BaseController {
             return Mono.just(new ResponseEntity(authRole.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
 
         return null;
@@ -151,7 +151,7 @@ public class AuthRoleController extends BaseController {
     )
     public Mono<ResponseEntity> updateAuthRole(@Valid @RequestBody AuthRoleUpdateDto authRoleUpdateDto, HttpServletRequest request) {
         try {
-            AuthRole authRole = (AuthRole)mongoRepositoryReactive.findById(authRoleUpdateDto.getId(), AuthRole.class).block();
+            AuthRole authRole = (AuthRole) mongoRepositoryReactive.findById(authRoleUpdateDto.getId(), AuthRole.class).block();
             if (authRole == null) {
                 return Mono.just(new ResponseEntity("Role does not exist", HttpStatus.BAD_REQUEST));
             }
@@ -172,7 +172,7 @@ public class AuthRoleController extends BaseController {
 
             return Mono.just(new ResponseEntity(authRole.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
 
         return null;
@@ -246,7 +246,7 @@ public class AuthRoleController extends BaseController {
 
             return ReferenceDataUtil.getAllEnumeratedEntity("AuthPermission", AuthPermission.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         return null;
     }
@@ -287,9 +287,8 @@ public class AuthRoleController extends BaseController {
             return Mono.just(new ResponseEntity(authPermission.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
-
         return null;
     }
 
@@ -331,9 +330,8 @@ public class AuthRoleController extends BaseController {
             return Mono.just(new ResponseEntity(authPermission.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
-
         return null;
     }
 
