@@ -83,7 +83,7 @@ public class ScheduledMeetingMailSenderAsync extends AbstractMailSender {
                 gameTypeName = applicationForm.getGameTypeName();
             }
         }
-        if (scheduledMeeting.isForLicenseTransferee() || scheduledMeeting.isForLicenseTransferee()) {
+        if (scheduledMeeting.isForLicenseTransferror() || scheduledMeeting.isForLicenseTransferee()) {
             LicenseTransfer licenseTransfer = scheduledMeeting.getLicenseTransfer();
             if (licenseTransfer != null) {
                 gameTypeName = licenseTransfer.getGameTypeName();

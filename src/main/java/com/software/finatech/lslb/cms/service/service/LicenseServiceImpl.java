@@ -145,7 +145,7 @@ public class LicenseServiceImpl implements LicenseService {
             query.with(sort);
 
             List<License> licenses = (List<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
-            if (licenses.size() == 0 || licenses.isEmpty()) {
+            if (licenses.size() == 0) {
                 return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
             }
             ArrayList<LicenseDto> licenseDtos = new ArrayList<>();
@@ -274,7 +274,7 @@ public class LicenseServiceImpl implements LicenseService {
         licenseStatuses.add(LicenseStatusReferenceData.AIP_LICENSE_STATUS_ID);
         List<License> licenses = expirationList.getExpiringLicences(14, licenseStatuses);
         List<LicenseDto> licenseDtos = new ArrayList<>();
-        licenses.stream().forEach(license -> {
+        licenses.forEach(license -> {
             licenseDtos.add(license.convertToDto());
         });
         return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
@@ -287,7 +287,7 @@ public class LicenseServiceImpl implements LicenseService {
 
         List<License> licenses = expirationList.getExpiredLicences(licenseStatuses);
         List<LicenseDto> licenseDtos = new ArrayList<>();
-        licenses.stream().forEach(license -> {
+        licenses.forEach(license -> {
             licenseDtos.add(license.convertToDto());
         });
         return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
@@ -303,7 +303,7 @@ public class LicenseServiceImpl implements LicenseService {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
         }
         List<LicenseDto> licenseDtos = new ArrayList<>();
-        licenses.stream().forEach(license -> {
+        licenses.forEach(license -> {
             licenseDtos.add(license.convertToDto());
         });
         return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
@@ -394,7 +394,7 @@ public class LicenseServiceImpl implements LicenseService {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
         }
         List<LicenseDto> licenseDtos = new ArrayList<>();
-        licenses.stream().forEach(license -> {
+        licenses.forEach(license -> {
             licenseDtos.add(license.convertToDto());
         });
         return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
@@ -413,7 +413,7 @@ public class LicenseServiceImpl implements LicenseService {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
         }
         List<LicenseDto> licenseDtos = new ArrayList<>();
-        licenses.stream().forEach(license -> {
+        licenses.forEach(license -> {
             licenseDtos.add(license.convertToDto());
         });
         return Mono.just(new ResponseEntity<>(licenseDtos, HttpStatus.OK));
@@ -471,7 +471,7 @@ public class LicenseServiceImpl implements LicenseService {
         if (aipsForInstitution.size() == 0) {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
         }
-        aipsForInstitution.stream().forEach(aipForInstitution -> {
+        aipsForInstitution.forEach(aipForInstitution -> {
             AIPCheckDto aipCheckDto = new AIPCheckDto();
             GameType gameType = (GameType) mongoRepositoryReactive.findById(aipForInstitution.getGameTypeId(), GameType.class).block();
             if (gameType != null) {
@@ -518,7 +518,7 @@ public class LicenseServiceImpl implements LicenseService {
         if (aipsForInstitution.size() == 0) {
             return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.BAD_REQUEST));
         }
-        aipsForInstitution.stream().forEach(aipForInstitution -> {
+        aipsForInstitution.forEach(aipForInstitution -> {
             AIPCheckDto aipCheckDto = new AIPCheckDto();
             GameType gameType = (GameType) mongoRepositoryReactive.findById(aipForInstitution.getGameTypeId(), GameType.class).block();
             if (gameType != null) {
@@ -610,7 +610,7 @@ public class LicenseServiceImpl implements LicenseService {
             license.setRenewalStatus("false");
             mongoRepositoryReactive.saveOrUpdate(license);
             List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(license.getInstitutionId());
-            institutionAdmins.stream().forEach(institutionAdmin -> {
+            institutionAdmins.forEach(institutionAdmin -> {
                 NotificationDto notificationDto = new NotificationDto();
                 notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
                 notificationDto.setEndDate(license.getExpiryDate().toString("dd/MM/YYY"));
@@ -653,7 +653,7 @@ public class LicenseServiceImpl implements LicenseService {
             mongoRepositoryReactive.saveOrUpdate(license);
             List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_AIP_ID);
             if (lslbAdmins.size() != 0) {
-                lslbAdmins.stream().forEach(lslbAdmin -> {
+                lslbAdmins.forEach(lslbAdmin -> {
 
                     NotificationDto notificationDto = new NotificationDto();
                     notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
@@ -689,7 +689,7 @@ public class LicenseServiceImpl implements LicenseService {
             mongoRepositoryReactive.saveOrUpdate(license);
             verbiage = "Moved : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from Renewal In Review back to Renewal In Progress";
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
-                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), getInstitution(license.getInstitutionId()).getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 //            List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(license.getInstitutionId());
 //            institutionAdmins.stream().forEach(institutionAdmin -> {
@@ -800,7 +800,7 @@ public class LicenseServiceImpl implements LicenseService {
             mongoRepositoryReactive.saveOrUpdate(license);
             verbiage = "UPDATED : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from AIP DOC UPLOADED to AIP COMPLETED";
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.AIP_ID,
-                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), getInstitution(license.getInstitutionId()).getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
             Institution institution = getInstitution(institutionId);
             if (institution.isFromLiveData() && license.getExpiryDate().isBefore(LocalDate.now())) {
@@ -812,7 +812,7 @@ public class LicenseServiceImpl implements LicenseService {
             }
             verbiage = getInstitution(license.getInstitutionId()).getInstitutionName() + " is Licensed ";
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LICENCE_ID,
-                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), getInstitution(license.getInstitutionId()).getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             NotificationDto notificationDto = new NotificationDto();

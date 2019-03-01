@@ -2,24 +2,26 @@ package com.software.finatech.lslb.cms.service.domain;
 
 import com.software.finatech.lslb.cms.service.dto.InspectionFormCommentDto;
 import com.software.finatech.lslb.cms.service.dto.InspectionFormDto;
-import com.software.finatech.lslb.cms.service.referencedata.InspectionStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 @Document(collection = "InspectionForm")
 public class InspectionForm extends AbstractFact {
+    @Transient
+    private static final Logger logger = LoggerFactory.getLogger(InspectionForm.class);
+
     protected String institutionId;
     protected String gameTypeId;
     protected ArrayList<InspectionFormComments> inspectionFormComments;
@@ -154,59 +156,63 @@ public class InspectionForm extends AbstractFact {
         this.inspectionDate = inspectionDate;
     }
 
-    public InspectionFormDto convertToDto(){
+    public InspectionFormDto convertToDto() {
         InspectionFormDto inspectionFormDto = new InspectionFormDto();
-        ArrayList<InspectionFormComments> inspectionFormComments= (ArrayList<InspectionFormComments>)mongoRepositoryReactive.findAll(new Query(Criteria.where("inspectionFormId").is(getId())), InspectionFormComments.class).toStream().collect(Collectors.toList()) ;
-        ArrayList<InspectionFormCommentDto>inspectionFormCommentDtos= new ArrayList<>();
-        inspectionFormComments.stream().forEach(inspectionFormComments1 -> {
+        ArrayList<InspectionFormComments> inspectionFormComments = (ArrayList<InspectionFormComments>) mongoRepositoryReactive.findAll(new Query(Criteria.where("inspectionFormId").is(getId())), InspectionFormComments.class).toStream().collect(Collectors.toList());
+        ArrayList<InspectionFormCommentDto> inspectionFormCommentDtos = new ArrayList<>();
+        inspectionFormComments.forEach(inspectionFormComments1 -> {
             inspectionFormCommentDtos.add(inspectionFormComments1.convertToDto());
         });
         inspectionFormDto.setInspectionFormComments(inspectionFormCommentDtos);
         inspectionFormDto.setSubject(getSubject());
         inspectionFormDto.setOwnerName(getOwnerName());
         inspectionFormDto.setBody(getBody());
-        InspectionStatus inspectionStatus= (InspectionStatus) mongoRepositoryReactive.findById(getStatus(), InspectionStatus.class).block();
-        if(inspectionStatus!=null){
+        InspectionStatus inspectionStatus = (InspectionStatus) mongoRepositoryReactive.findById(getStatus(), InspectionStatus.class).block();
+        if (inspectionStatus != null) {
             inspectionFormDto.setStatus(inspectionStatus.getName());
         }
-        inspectionFormDto.setAgentBusinessAddress(getAgentBusinessAddress()==null?null:getAgentBusinessAddress());
-        Agent agent =(Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
-        if(agent!=null){
+        inspectionFormDto.setAgentBusinessAddress(getAgentBusinessAddress());
+        Agent agent = (Agent) mongoRepositoryReactive.findById(getAgentId(), Agent.class).block();
+        if (agent != null) {
             inspectionFormDto.setAgent(agent.convertToDto());
         }
-        Institution institution =(Institution) mongoRepositoryReactive.findById(getInstitutionId(), Institution.class).block();
-        if(institution!=null){
+        Institution institution = (Institution) mongoRepositoryReactive.findById(getInstitutionId(), Institution.class).block();
+        if (institution != null) {
             inspectionFormDto.setInstitution(institution.convertToDto());
         }
-        Machine gamingMachine =(Machine) mongoRepositoryReactive.findById(getGamingMachineId(), Machine.class).block();
-        if(gamingMachine!=null){
+        Machine gamingMachine = (Machine) mongoRepositoryReactive.findById(getGamingMachineId(), Machine.class).block();
+        if (gamingMachine != null) {
 
             inspectionFormDto.setGamingMachine(gamingMachine.convertToDto());
-        }if(!StringUtils.isEmpty(institutionId)){
-            try{
-                inspectionFormDto.setOwnerName(institution.getInstitutionName());
-
-            }catch (Exception ex){
-
-            }
-          }if(!StringUtils.isEmpty(agentId)){
-            try{
-                inspectionFormDto.setOwnerName(agent.getFullName());
-
-            }catch (Exception ex){
-
-            }
-          }
-        if(!StringUtils.isEmpty(gamingMachineId)){
-            try{
-                inspectionFormDto.setOwnerName(gamingMachine.getSerialNumber());
-
-            }catch (Exception ex){
-
+        }
+        if (!StringUtils.isEmpty(institutionId)) {
+            try {
+                if (institution != null) {
+                    inspectionFormDto.setOwnerName(institution.getInstitutionName());
+                }
+            } catch (Exception ex) {
+                logger.error(ex.getMessage(), ex);
             }
         }
-        Map gameTypeMap = Mapstore.STORE.get("GameType");
-
+        if (!StringUtils.isEmpty(agentId)) {
+            try {
+                if (agent != null) {
+                    inspectionFormDto.setOwnerName(agent.getFullName());
+                }
+            } catch (Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+        }
+        if (!StringUtils.isEmpty(gamingMachineId)) {
+            try {
+                if (gamingMachine != null) {
+                    inspectionFormDto.setOwnerName(gamingMachine.getSerialNumber());
+                }
+            } catch (Exception ex) {
+                logger.error(ex.getMessage(), ex);
+            }
+        }
+        Map<String,FactObject> gameTypeMap = Mapstore.STORE.get("GameType");
         GameType gameType = null;
         if (gameTypeMap != null) {
             gameType = (GameType) gameTypeMap.get(gameTypeId);
@@ -221,8 +227,8 @@ public class InspectionForm extends AbstractFact {
             inspectionFormDto.setGameType(gameType.convertToDto());
         }
         inspectionFormDto.setId(getId());
-        AuthInfo authInfo =(AuthInfo) mongoRepositoryReactive.findById(userId, AuthInfo.class).block();
-        if(authInfo!=null){
+        AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(userId, AuthInfo.class).block();
+        if (authInfo != null) {
             inspectionFormDto.setReporter(authInfo.getFullName());
         }
 
@@ -233,8 +239,6 @@ public class InspectionForm extends AbstractFact {
         return inspectionFormDto;
 
     }
-
-
     @Override
     public String getFactName() {
         return "RenewalForm";

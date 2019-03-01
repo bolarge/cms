@@ -154,7 +154,7 @@ public class InspectionFormController extends BaseController {
 
             LocalDate fromDate;
             String startDate = inspectionFormCreateDto.getInspectionDate();
-            if ((startDate != "" && !startDate.isEmpty())) {
+            if (!StringUtils.isEmpty(startDate)) {
                 if (!startDate.matches("([0-9]{4})-([0-9]{2})-([0-9]{2})")) {
                     return Mono.just(new ResponseEntity<>("Invalid Date format. " +
                             "Standard Format: YYYY-MM-DD E.G 2018-02-02", HttpStatus.BAD_REQUEST));

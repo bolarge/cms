@@ -1,28 +1,15 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
-import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
-import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.domain.GameType;
+import com.software.finatech.lslb.cms.service.domain.RenewalForm;
 import com.software.finatech.lslb.cms.service.dto.*;
-import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.RenewalFormStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.RenewalFormServiceImpl;
-import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
-import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -30,25 +17,19 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Api(value = "Renewal Form", description = "", tags = "Renewal Form Controller")
 @RestController
 @RequestMapping("/api/v1/renewalForm")
 public class RenewalFormController extends BaseController {
-    @Autowired
-    private AuditLogHelper auditLogHelper;
-    @Autowired
-    protected SpringSecurityAuditorAware springSecurityAuditorAware;
-
     private RenewalFormServiceImpl renewalFormService;
 
     @Autowired
     public void setApplicationFormService(RenewalFormServiceImpl renewalFormService) {
         this.renewalFormService = renewalFormService;
     }
-    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "gameTypeIds", "institutionId","formStatusId","renewalId"})
+
+    @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "gameTypeIds", "institutionId", "formStatusId", "renewalId"})
     @ApiOperation(value = "Get all Renewal Form", response = RenewalFormDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -67,8 +48,8 @@ public class RenewalFormController extends BaseController {
             @RequestParam("gameTypeIds") String gameTypeIds,
             @RequestParam("renewalId") String renewalId,
             HttpServletResponse httpServletResponse) {
-       return renewalFormService.getAllRenewalForms(page, pageSize, sortType, sortParam, institutionId, formStatusId, gameTypeIds,renewalId,
-        httpServletResponse);
+        return renewalFormService.getAllRenewalForms(page, pageSize, sortType, sortParam, institutionId, formStatusId, gameTypeIds, renewalId,
+                httpServletResponse);
 
     }
 
@@ -82,7 +63,7 @@ public class RenewalFormController extends BaseController {
     }
     )
     public Mono<ResponseEntity> createRenewalForm(@RequestBody @Valid RenewalFormCreateDto renewalFormCreateDto) {
-       return renewalFormService.createRenewalForm(renewalFormCreateDto);
+        return renewalFormService.createRenewalForm(renewalFormCreateDto);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/update")
@@ -98,7 +79,8 @@ public class RenewalFormController extends BaseController {
         return renewalFormService.updateRenewalForm(renewalFormUpdateDto);
 
     }
-    @RequestMapping(method = RequestMethod.POST, value = "/approve-renewal-form", params = {"renewalId","userId"})
+
+    @RequestMapping(method = RequestMethod.POST, value = "/approve-renewal-form", params = {"renewalId", "userId"})
     @ApiOperation(value = "Approve Renewal form", response = String.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -106,8 +88,8 @@ public class RenewalFormController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> approveRenewalForm(@RequestParam("renewalId") String renewalId,
-                                               @RequestParam("userId") String approverId,HttpServletRequest request) {
-        return renewalFormService.approveRenewalForm(renewalId,approverId, request);
+                                                   @RequestParam("userId") String approverId, HttpServletRequest request) {
+        return renewalFormService.approveRenewalForm(renewalId, approverId, request);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/create-comment", params = {"renewalId"})
@@ -118,9 +100,10 @@ public class RenewalFormController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> createRenewalFormComment(@RequestParam("renewalId") String renewalId,
-                                                     @RequestBody @Valid AddCommentDto addCommentDto, HttpServletRequest request) {
+                                                         @RequestBody @Valid AddCommentDto addCommentDto, HttpServletRequest request) {
         return renewalFormService.addCommentsToForm(renewalId, addCommentDto, request);
     }
+
     @RequestMapping(method = RequestMethod.POST, value = "/complete-renewal-form", params = {"renewalId"})
     @ApiOperation(value = "complete filling renewal form", response = String.class, consumes = "application/json")
     @ApiResponses(value = {
@@ -154,9 +137,10 @@ public class RenewalFormController extends BaseController {
     }
     )
     public Mono<ResponseEntity> getRenewalFormStatus() {
-      return renewalFormService.getRenewalFormStatus();
+        return renewalFormService.getRenewalFormStatus();
 
     }
+
     @RequestMapping(method = RequestMethod.GET, value = "/get-renewal-form-by-institution", params = {"institutionId"})
     @ApiOperation(value = "Get all Institution Renewal Form", response = RenewalForm.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
@@ -180,7 +164,7 @@ public class RenewalFormController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")
     }
     )
-    public Mono<ResponseEntity> getById(@PathVariable ("id") String renewalFormId) {
+    public Mono<ResponseEntity> getById(@PathVariable("id") String renewalFormId) {
         return renewalFormService.getRenewalFormFullDetailById(renewalFormId);
     }
 }

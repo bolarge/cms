@@ -234,25 +234,4 @@ public class Institution extends AbstractFact {
         return (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof Institution == false) {
-            return false;
-        }
-
-        if (this == obj) {
-            return true;
-        }
-
-        Institution that = (Institution) obj;
-
-        Object thisObject = this.getId();
-        Object thatObject = that.getId();
-
-        if ((thisObject != null) && (thatObject != null)) {
-            return thisObject.equals(thatObject);
-        } else {
-            return false;
-        }
-    }
 }

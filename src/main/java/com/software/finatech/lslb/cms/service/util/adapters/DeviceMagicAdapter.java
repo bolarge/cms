@@ -20,9 +20,6 @@ public class DeviceMagicAdapter {
     @Autowired
     protected MongoRepositoryReactiveImpl mongoRepositoryReactive;
 
-    @Autowired
-    private DeviceMagicAgentAdapter deviceMagicAgentAdapter;
-
 //    public List<DeviceMagicAgent> getAgentsFromAPIResponse(String apiResponseJson) {
 //        String VALUE = "value";
 //        String STREET_ADDRESS = "Street_Address";

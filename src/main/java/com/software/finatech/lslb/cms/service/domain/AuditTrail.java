@@ -7,8 +7,10 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Map;
+
 @Document(collection = "AuditTrails")
-public class AuditTrail extends AbstractFact{
+public class AuditTrail extends AbstractFact {
 
     protected LocalDate auditDate;
     protected LocalDateTime auditDateTime;
@@ -109,12 +111,18 @@ public class AuditTrail extends AbstractFact{
         auditTrailDto.setId(getId());
 
         if (auditActionId != null && !auditActionId.isEmpty()) {
-            AuditAction auditAction = (AuditAction) Mapstore.STORE.get("AuditAction").get(auditActionId);
+            Map<String, FactObject> auditActionMap = Mapstore.STORE.get("AuditAction");
+            AuditAction auditAction = null;
+            if (auditActionMap != null) {
+                auditAction = (AuditAction) auditActionMap.get(auditActionId);
+            }
             if (auditAction == null) {
                 auditAction = (AuditAction) mongoRepositoryReactive.findById(auditActionId, AuditAction.class).block();
-                Mapstore.STORE.get("AuditAction").put(auditAction.getId(), auditAction);
+                if (auditAction != null && auditActionMap != null) {
+                    auditActionMap.put(auditAction.getId(), auditAction);
+                }
             }
-            auditTrailDto.setAuditAction(auditAction==null?null:auditAction.getName());
+            auditTrailDto.setAuditAction(auditAction == null ? null : auditAction.getName());
         }
         return auditTrailDto;
     }

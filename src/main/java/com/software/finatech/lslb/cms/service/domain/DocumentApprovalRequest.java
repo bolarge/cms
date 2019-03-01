@@ -54,14 +54,14 @@ public class DocumentApprovalRequest extends AbstractApprovalRequest {
         if (StringUtils.isEmpty(this.documentApprovalRequestTypeId)) {
             return null;
         }
-        Map documentApprovalRequestTypeMap = Mapstore.STORE.get("DocumentApprovalRequestType");
+        Map<String, FactObject> documentApprovalRequestTypeMap = Mapstore.STORE.get("DocumentApprovalRequestType");
         DocumentApprovalRequestType documentApprovalRequestType = null;
         if (documentApprovalRequestTypeMap != null) {
             documentApprovalRequestType = (DocumentApprovalRequestType) documentApprovalRequestTypeMap.get(this.documentApprovalRequestTypeId);
         }
         if (documentApprovalRequestType == null) {
             documentApprovalRequestType = (DocumentApprovalRequestType) mongoRepositoryReactive.findById(this.documentApprovalRequestTypeId, AgentApprovalRequestType.class).block();
-            if (documentApprovalRequestType != null && documentApprovalRequestType != null) {
+            if (documentApprovalRequestType != null && documentApprovalRequestTypeMap != null) {
                 documentApprovalRequestTypeMap.put(this.documentApprovalRequestTypeId, documentApprovalRequestType);
             }
         }

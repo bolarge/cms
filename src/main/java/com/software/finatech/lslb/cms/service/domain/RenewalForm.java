@@ -342,9 +342,11 @@ public class RenewalForm extends AbstractFact {
             renewalFormDto.setRejectorName(rejector.getFullName());
         }
         PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById(getPaymentRecordId(), PaymentRecord.class).block();
-        renewalFormDto.setPaymentRecord(paymentRecord.convertToDto());
+        if (paymentRecord != null) {
+            renewalFormDto.setPaymentRecord(paymentRecord.convertToDto());
+        }
         if (!StringUtils.isEmpty(formStatusId)) {
-            Map renewalFormStatusMap = Mapstore.STORE.get("RenewalFormStatus");
+            Map<String, FactObject> renewalFormStatusMap = Mapstore.STORE.get("RenewalFormStatus");
 
             RenewalFormStatus renewalFormStatus = null;
             if (renewalFormStatusMap != null) {
@@ -353,7 +355,7 @@ public class RenewalForm extends AbstractFact {
             }
             if (renewalFormStatus == null) {
                 renewalFormStatus = (RenewalFormStatus) mongoRepositoryReactive.findById(formStatusId, RenewalFormStatus.class).block();
-                if (renewalFormStatus != null && renewalFormStatus != null) {
+                if (renewalFormStatus != null && renewalFormStatusMap != null) {
                     renewalFormStatusMap.put(formStatusId, renewalFormStatus);
                 }
             }

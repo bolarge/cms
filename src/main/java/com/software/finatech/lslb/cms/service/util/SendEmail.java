@@ -1,7 +1,6 @@
 package com.software.finatech.lslb.cms.service.util;
 
 import com.software.finatech.lslb.cms.service.dto.NotificationDto;
-import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import org.joda.time.LocalDate;
@@ -16,12 +15,6 @@ public class SendEmail {
     EmailService emailService;
     @Autowired
     MailContentBuilderService mailContentBuilderService;
-    private MongoRepositoryReactiveImpl mongoRepositoryReactive;
-
-    @Autowired
-    public void setMongoRepositoryReactive(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
-        this.mongoRepositoryReactive = mongoRepositoryReactive;
-    }
 
     public String sendEmailNotification(NotificationDto notificationDto, String subject) {
         HashMap<String, Object> model = new HashMap<>();

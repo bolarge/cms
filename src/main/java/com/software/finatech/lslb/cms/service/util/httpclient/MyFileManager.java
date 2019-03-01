@@ -19,19 +19,24 @@ public class MyFileManager {
      * that you want to save most likely the name of the biller
      * (e.g)let them pass  the name of the biller into the function from the ui
      */
-    public void writeImageToFile(MultipartFile multipartFile) {
+    public void writeImageToFile(MultipartFile multipartFile) throws IOException {
 
-         File file = new File("smile-networks.jpg");
-         try {
-         FileOutputStream fileOutputStream = new FileOutputStream(file);
-         fileOutputStream.write(multipartFile.getBytes());
-         fileOutputStream.close();
+        File file = new File("smile-networks.jpg");
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(file);
+            fileOutputStream.write(multipartFile.getBytes());
+            fileOutputStream.close();
 
-         } catch (IOException e) {
-         logger.error("IO error occurred while  saving file", e);
-         } catch (Exception e) {
-         logger.error("An error occurred while saving file", e);
-         }
+        } catch (IOException e) {
+            logger.error("IO error occurred while  saving file", e);
+        } catch (Exception e) {
+            logger.error("An error occurred while saving file", e);
+        } finally {
+            if (fileOutputStream != null) {
+                fileOutputStream.close();
+            }
+        }
     }
 
     public String readImage(String billerId) {

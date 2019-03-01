@@ -104,8 +104,9 @@ public class Scheduler {
                             gameTypeMap.put(license.getGameTypeId(), gameType);
                         }
                     }
-
-                    notificationDto.setGameType(gameType.getDescription());
+                    if (gameType != null) {
+                        notificationDto.setGameType(gameType.getDescription());
+                    }
                     notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
                     if (licenceType.equalsIgnoreCase(LicenseTypeReferenceData.INSTITUTION_ID)) {
                         notificationDto.setInstitutionId(license.getInstitutionId());
@@ -190,7 +191,7 @@ public class Scheduler {
         for (NotificationDto notificationDto : notificationDtos) {
             HashMap<String, Object> model = new HashMap<>();
             model.put("endDate", notificationDto.getEndDate());
-            if (type == "expiring") {
+            if (StringUtils.equals("expiring", type)) {
 //                if (!StringUtils.isEmpty(notificationDto.getGamingMachineId())) {
 //                    model.put("description", notificationDto.getInstitutionName() + " Gaming Machine with machine number: " + notificationDto.getMachineNumber() + " License is due to expire on " + notificationDto.getEndDate());
 //
@@ -205,7 +206,7 @@ public class Scheduler {
                     model.put("description", notificationDto.getInstitutionName() + " with Game Type: " + notificationDto.getGameType() + " License is due to expire on " + notificationDto.getEndDate());
 
                 }
-            } else if (type == "expired") {
+            } else if (StringUtils.equals("expired", type)) {
                 if (!StringUtils.isEmpty(notificationDto.getGamingMachineId())) {
                     model.put("description", notificationDto.getInstitutionName() + " Gaming Machine with machine number: " + notificationDto.getMachineNumber() + " License has expired. License Expiration Date is " + notificationDto.getEndDate());
                 }
@@ -215,9 +216,9 @@ public class Scheduler {
                     model.put("description", notificationDto.getInstitutionName() + " with Game Type: " + notificationDto.getGameType() + " License has expired. License Expiration Date is " + notificationDto.getEndDate());
 
                 }
-            } else if (type == "AIPExpired") {
+            } else if (StringUtils.equals("AIPExpired", type)) {
                 model.put("description", notificationDto.getInstitutionName() + " " + notificationDto.getGameType() + " AIP period has ended");
-            } else if (type == "AIPExpiring") {
+            } else if (StringUtils.equals("AIPExpiring", type)) {
                 model.put("description", notificationDto.getInstitutionName() + " " + notificationDto.getGameType() + " AIP period is due to end on " + notificationDto.getEndDate());
             }
 
@@ -227,7 +228,7 @@ public class Scheduler {
             List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_AIP_ID);
             emailService.sendEmail(content, "AIP Expiration Notification", notificationDto.getInstitutionEmail());
 
-            if ((type == "AIPExpired") || (type == "AIPExpiring")) {
+            if ((StringUtils.equals("AIPExpired", type)) || (StringUtils.equals("AIPExpiring", type))) {
                 if (lslbAdmins.size() != 0) {
                     lslbAdmins.stream().forEach(lslbAdmin -> {
                         emailService.sendEmail(content, "AIP Expiration Notification", lslbAdmin.getEmailAddress());
@@ -391,7 +392,10 @@ public class Scheduler {
                         gameTypeMap.put(license.getGameTypeId(), gameType);
                     }
                 }
-                notificationDto.setGameType(gameType.getDescription());
+
+                if (gameType != null) {
+                    notificationDto.setGameType(gameType.getDescription());
+                }
                 notificationDto.setInstitutionId(license.getPaymentRecord().getInstitutionId());
                 notificationDto.setEndDate(endDate.toString("dd/MM/yyyy"));
                 Institution institution = (Institution) mongoRepositoryReactive.findById(license.getPaymentRecord().getInstitutionId(),

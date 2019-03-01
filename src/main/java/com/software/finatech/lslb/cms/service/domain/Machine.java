@@ -143,9 +143,9 @@ public class Machine extends AbstractFact {
         if (StringUtils.isEmpty(this.machineTypeId)) {
             return null;
         }
-        Map machineTypeMap = Mapstore.STORE.get("MachineType");
+        Map<String, FactObject> machineTypeMap = Mapstore.STORE.get("MachineType");
         MachineType machineType = null;
-        if (machineType != null) {
+        if (machineTypeMap != null) {
             machineType = (MachineType) machineTypeMap.get(this.machineTypeId);
         }
         if (machineType == null) {
@@ -161,9 +161,9 @@ public class Machine extends AbstractFact {
         if (StringUtils.isEmpty(this.machineStatusId)) {
             return null;
         }
-        Map machineStatusMap = Mapstore.STORE.get("MachineStatus");
+        Map<String,FactObject> machineStatusMap = Mapstore.STORE.get("MachineStatus");
         MachineStatus machineStatus = null;
-        if (machineStatus != null) {
+        if (machineStatusMap != null) {
             machineStatus = (MachineStatus) machineStatusMap.get(this.machineStatusId);
         }
         if (machineStatus == null) {
