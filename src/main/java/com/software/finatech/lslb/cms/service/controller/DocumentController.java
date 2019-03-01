@@ -83,7 +83,7 @@ public class DocumentController extends BaseController {
         try {
             documentDtos = mapper.readValue(json, List.class, DocumentCreateDto.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             return Mono.just(new ResponseEntity<>("Invalid Json", HttpStatus.BAD_REQUEST));
         }
         try {
@@ -205,7 +205,7 @@ public class DocumentController extends BaseController {
             try {
                 entry.setAssociatedProperties();
             } catch (FactNotFoundException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
             }
             documentsDto.add(entry.convertToDto());
         });
@@ -365,7 +365,7 @@ public class DocumentController extends BaseController {
             try {
                 entry.setAssociatedProperties();
             } catch (FactNotFoundException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
             }
             documentsDto.add(entry.convertToDto());
         });
@@ -511,11 +511,11 @@ public class DocumentController extends BaseController {
             return Mono.just(new ResponseEntity("No record found", HttpStatus.NOT_FOUND));
         }
         List<DocumentDto> documentDtos = new ArrayList<>();
-        documents.stream().forEach(document -> {
+        documents.forEach(document -> {
             try {
                 document.setAssociatedProperties();
             } catch (FactNotFoundException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
             }
             documentDtos.add(document.convertToDto());
         });
@@ -563,7 +563,7 @@ public class DocumentController extends BaseController {
             try {
                 entry.setAssociatedProperties();
             } catch (FactNotFoundException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage(), e);
             }
             EntityDocumentDto dto = new EntityDocumentDto();
             dto.setDescription(entry.getDescription());
@@ -646,7 +646,7 @@ public class DocumentController extends BaseController {
         try {
             documentDtos = mapper.readValue(json, List.class, DocumentCreateDto.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             return Mono.just(new ResponseEntity<>("Invalid Json", HttpStatus.BAD_REQUEST));
         }
         try {
