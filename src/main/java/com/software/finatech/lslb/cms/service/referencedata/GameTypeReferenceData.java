@@ -5,13 +5,13 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 
 public class GameTypeReferenceData {
 
-    public static String OSB_GAME_TYPE_ID = "02";
-    public static String POL_GAME_TYPE_ID = "01";
-    public static String GAMING_MACHINE_ID = "03";
-    public static String SCRATCH_CARD_ID = "04";
-    public static String CASINO_ID = "05";
-    public static String POOLS_BETTING_ID = "06";
-    public static String OTHER_LICENSE_ID = "07";
+    public static final String OSB_GAME_TYPE_ID = "02";
+    public static final String POL_GAME_TYPE_ID = "01";
+    public static final String GAMING_MACHINE_ID = "03";
+    public static final String SCRATCH_CARD_ID = "04";
+    public static final String CASINO_ID = "05";
+    public static final String POOLS_BETTING_ID = "06";
+    public static final String OTHER_LICENSE_ID = "07";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         GameType gameType = (GameType) mongoRepositoryReactive.findById(POL_GAME_TYPE_ID, GameType.class).block();
@@ -135,5 +135,5 @@ public class GameTypeReferenceData {
         gameType.setGamingMachineLicenseDurationMonths(12);
         gameType.setGamingTerminalLicenseDurationMonths(0);
         mongoRepositoryReactive.saveOrUpdate(gameType);
-        }
+    }
 }

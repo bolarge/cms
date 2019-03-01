@@ -112,7 +112,7 @@ public class AuthInfoController extends BaseController {
             return Mono.just(new ResponseEntity(ssoUserConfirmRequest, HttpStatus.OK));
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
 
         return null;
@@ -172,7 +172,7 @@ public class AuthInfoController extends BaseController {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+           logger.error(e.getMessage(), e);
         }
 
         return null;
@@ -281,7 +281,7 @@ public class AuthInfoController extends BaseController {
             return authInfoService.loginToken(loginDto.getUserName(), loginDto.getPassword(), authInfo, request);
 
         } catch (Exception e) {
-            e.printStackTrace();
+           logger.error(e.getMessage(), e);
         }
 
         return null;
@@ -356,7 +356,7 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+           logger.error(e.getMessage(), e);
         }
         return null;
     }
@@ -523,7 +523,7 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+         logger.error(e.getMessage(), e);
         }
         return null;
     }
@@ -576,7 +576,7 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+          logger.error(e.getMessage(), e);
         }
 
         return null;
@@ -700,7 +700,7 @@ public class AuthInfoController extends BaseController {
             return Mono.just(new ResponseEntity(authInfoDto, HttpStatus.OK));
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         return null;
     }
@@ -761,7 +761,7 @@ public class AuthInfoController extends BaseController {
             return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {
-            e.printStackTrace();
+           logger.error(e.getMessage(), e);
         }
 
         return null;
