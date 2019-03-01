@@ -3,32 +3,24 @@ package com.software.finatech.lslb.cms.service.util.data_updater;
 import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.domain.GameType;
 import com.software.finatech.lslb.cms.service.domain.Institution;
-import com.software.finatech.lslb.cms.service.domain.License;
-import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.EmailService;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
 import com.software.finatech.lslb.cms.service.util.CSVUtils;
-import com.software.finatech.lslb.cms.service.util.NumberUtil;
 import com.software.finatech.lslb.cms.service.util.adapters.LslbGamingTerminalAdapter;
 import com.software.finatech.lslb.cms.service.util.adapters.model.LslbGamingTerminal;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 @Component
@@ -45,9 +37,6 @@ public class ExistingGamingTerminalLoader {
     private InstitutionService institutionService;
     @Autowired
     private GameTypeService gameTypeService;
-    @Autowired
-    private MongoRepositoryReactiveImpl mongoRepositoryReactive;
-
     private static final Logger logger = LoggerFactory.getLogger(ExistingGamingTerminalLoader.class);
 
     public void loadMachinesFromFile(String institutionId, String gameTypeId, MultipartFile multipartFile) {
@@ -59,28 +48,7 @@ public class ExistingGamingTerminalLoader {
         if (gameType == null) {
             return;
         }
-        Query query = new Query();
-        query.addCriteria(Criteria.where("institutionId").is(institutionId));
-        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-        query.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.GAMING_TERMINAL_ID));
-        query.addCriteria(Criteria.where("effectiveDate").is(LocalDate.now().withDayOfYear(1)));
 
-        License license = (License) mongoRepositoryReactive.find(query, License.class).block();
-        if (license == null) {
-            license = new License();
-            license.setId(UUID.randomUUID().toString());
-            license.setLicenseTypeId(LicenseTypeReferenceData.GAMING_TERMINAL_ID);
-            LocalDate effectiveDate = LocalDate.now().dayOfYear().withMinimumValue();
-            LocalDate expiryDate = effectiveDate.plusMonths(gameType.getGamingTerminalLicenseDurationMonths());
-            expiryDate = expiryDate.minusDays(1);
-            license.setEffectiveDate(effectiveDate);
-            license.setExpiryDate(expiryDate);
-            license.setGameTypeId(gameTypeId);
-            license.setInstitutionId(institutionId);
-            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
-            license.setLicenseNumber(generateLicenseNumberForPaymentRecord(gameType));
-            mongoRepositoryReactive.saveOrUpdate(license);
-        }
         List<LslbGamingTerminal> toBeSavedTerminals = new ArrayList<>();
         List<LslbGamingTerminal> invalidTerminals = new ArrayList<>();
         try {
@@ -103,7 +71,6 @@ public class ExistingGamingTerminalLoader {
                     gamingTerminal.setAgentAddress(String.format("%s %s", columns[4].trim(), columns[5].trim()));
                     //  gamingTerminal.setMachineCount(columns[6].trim());
                     gamingTerminal.setMachineId(columns[6].trim());
-                    gamingTerminal.setLicenseId(license.getId());
                     if (agent != null) {
                         gamingTerminal.setAgent(agent);
                         gamingTerminal.setInstitution(institution);
@@ -132,9 +99,10 @@ public class ExistingGamingTerminalLoader {
         if (lslbGamingTerminals.isEmpty()) {
             return;
         }
+        FileWriter fileWriter = null;
         try {
             File file = new File("Failed-Machines.csv");
-            FileWriter fileWriter = new FileWriter(file);
+            fileWriter = new FileWriter(file);
             CSVUtils.writeLine(fileWriter, Arrays.asList("MachineId", "Agent Full name", "Agent BVN", "Agent Address", "Failure Reason"));
             for (LslbGamingTerminal gamingTerminal : lslbGamingTerminals) {
                 CSVUtils.writeLine(fileWriter, Arrays.asList(gamingTerminal.getMachineId(), gamingTerminal.getAgentFullName(), gamingTerminal.getBvn(), gamingTerminal.getAgentAddress(), gamingTerminal.getFailReason()));
@@ -147,25 +115,22 @@ public class ExistingGamingTerminalLoader {
             model.put("gameType", String.valueOf(gameType));
             String mailContent = mailContentBuilderService.build(model, "failed-terminal/FailedMachineNotification");
 
-            List<String> emails = Arrays.asList("adeboludeyi@gmail.com");
+            List<String> emails = Collections.singletonList("adeboludeyi@gmail.com");
             //, "david.jaiyeola@gmail.com");
 
             for (String email : emails) {
                 emailService.sendEmailWithAttachment(mailContent, "Gaming Terminal Upload Notification", email, file);
             }
         } catch (Exception e) {
-            logger.error("An error occurred while sending failed machine mail");
+            logger.error("An error occurred while sending failed machine mail", e);
+        } finally {
+            try {
+                if (fileWriter != null) {
+                    fileWriter.close();
+                }
+            } catch (IOException e) {
+                logger.error("An error occurred while closing file writer", e);
+            }
         }
-    }
-
-
-    private String generateLicenseNumberForPaymentRecord(GameType gameType) {
-        String prefix = "LSLB-";
-        prefix = prefix + "GT-";
-        String randomDigit = String.valueOf(NumberUtil.getRandomNumberInRange(100, 1000));
-        if (gameType != null && !StringUtils.isEmpty(gameType.getShortCode())) {
-            prefix = prefix + gameType.getShortCode() + "-";
-        }
-        return String.format("%s%s%s", prefix, randomDigit, LocalDateTime.now().getSecondOfMinute());
     }
 }

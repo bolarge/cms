@@ -820,9 +820,9 @@ public class MachineServiceImpl implements MachineService {
         if (StringUtils.isEmpty(machineStatusId)) {
             return null;
         }
-        Map machineStatusMap = Mapstore.STORE.get("MachineStatus");
+        Map<String,FactObject> machineStatusMap = Mapstore.STORE.get("MachineStatus");
         MachineStatus machineStatus = null;
-        if (machineStatus != null) {
+        if (machineStatusMap != null) {
             machineStatus = (MachineStatus) machineStatusMap.get(machineStatusId);
         }
         if (machineStatus == null) {
@@ -838,9 +838,9 @@ public class MachineServiceImpl implements MachineService {
         if (StringUtils.isEmpty(machineTypeId)) {
             return null;
         }
-        Map machineTypeMap = Mapstore.STORE.get("MachineType");
+        Map<String,FactObject> machineTypeMap = Mapstore.STORE.get("MachineType");
         MachineType machineType = null;
-        if (machineType != null) {
+        if (machineTypeMap != null) {
             machineType = (MachineType) machineTypeMap.get(machineTypeId);
         }
         if (machineType == null) {

@@ -14,11 +14,10 @@ import java.util.*;
 /**
  * @David Jaiyeola
  */
-@SuppressWarnings("serial")
 @Document(collection = "AuthRoles")
 public class AuthRole extends EnumeratedFact {
-    protected String ssoRoleMapping;
-    protected Set<String> authPermissionIds = new java.util.HashSet<>();
+    private String ssoRoleMapping;
+    private Set<String> authPermissionIds = new java.util.HashSet<>();
 
     public String getSsoRoleMapping() {
         return ssoRoleMapping;
@@ -39,11 +38,6 @@ public class AuthRole extends EnumeratedFact {
     @Override
     public String getFactName() {
         return "AuthRole";
-    }
-
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
     }
 
     private AuthPermission getAuthPermission(String authPermissionId) {

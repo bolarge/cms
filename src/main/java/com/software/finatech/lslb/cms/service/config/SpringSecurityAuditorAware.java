@@ -42,10 +42,7 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
     public String getCurrentAuditorNotNull() {
         try {
             Optional<String> stringOptional = getCurrentAuditor();
-            if (stringOptional != null && stringOptional.isPresent()) {
-                return stringOptional.get();
-            }
-            return null;
+            return stringOptional.orElse(null);
         } catch (Exception e) {
             logger.error("An error occurred while getting current auditor ", e);
             return null;

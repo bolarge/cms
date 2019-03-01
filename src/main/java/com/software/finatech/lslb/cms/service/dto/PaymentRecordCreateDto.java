@@ -15,7 +15,6 @@ public class PaymentRecordCreateDto {
     private String gamingMachineId;
     @NotEmpty(message = "Please provide start Year")
     private String startYear;
-    private String endYear;
 
     public String getStartYear() {
         return startYear;

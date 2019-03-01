@@ -5,11 +5,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "VerificationTokens")
 public class VerificationToken  extends AbstractFact{
-    protected String confirmationToken;
-    protected String authInfoId;
-    protected Boolean activated;
-    protected Boolean expired;
-    protected String healthInstitutionId;
+    private String confirmationToken;
+    private String authInfoId;
+    private Boolean activated;
+    private Boolean expired;
+    private String healthInstitutionId;
     //Expires in 24hrs
     protected DateTime expiryDate;
 
@@ -66,25 +66,4 @@ public class VerificationToken  extends AbstractFact{
         return "VerificationToken";
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof VerificationToken == false) {
-            return false;
-        }
-
-        if (this == obj) {
-            return true;
-        }
-
-        VerificationToken that = (VerificationToken) obj;
-
-        Object thisObject = this.getId();
-        Object thatObject = that.getId();
-
-        if ((thisObject != null) && (thatObject != null)) {
-            return thisObject.equals(thatObject);
-        } else {
-            return false;
-        }
-    }
 }

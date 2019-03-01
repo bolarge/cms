@@ -120,8 +120,8 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
 
     public MachineApprovalRequestType getMachineApprovalRequestType() {
         MachineApprovalRequestType machineApprovalRequestType = null;
-        Map machineApprovalRequestTypeMap = Mapstore.STORE.get("MachineApprovalRequestType");
-        if (machineApprovalRequestType != null) {
+        Map<String, FactObject> machineApprovalRequestTypeMap = Mapstore.STORE.get("MachineApprovalRequestType");
+        if (machineApprovalRequestTypeMap != null) {
             machineApprovalRequestType = (MachineApprovalRequestType) machineApprovalRequestTypeMap.get(this.machineApprovalRequestTypeId);
         }
         if (machineApprovalRequestType == null) {
@@ -300,9 +300,9 @@ public class MachineApprovalRequest extends AbstractApprovalRequest {
         if (StringUtils.isEmpty(this.newMachineStatusId)) {
             return null;
         }
-        Map machineStatusMap = Mapstore.STORE.get("MachineStatus");
+        Map<String, FactObject> machineStatusMap = Mapstore.STORE.get("MachineStatus");
         MachineStatus machineStatus = null;
-        if (machineStatus != null) {
+        if (machineStatusMap != null) {
             machineStatus = (MachineStatus) machineStatusMap.get(this.newMachineStatusId);
         }
         if (machineStatus == null) {

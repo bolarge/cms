@@ -110,9 +110,9 @@ public class LicenseTransfer extends AbstractFact {
         if (StringUtils.isEmpty(this.licenseTransferStatusId)) {
             return null;
         }
-        Map licenseTransferStatusMap = Mapstore.STORE.get("LicenseTransferStatus");
+        Map<String,FactObject> licenseTransferStatusMap = Mapstore.STORE.get("LicenseTransferStatus");
         LicenseTransferStatus licenseTransferStatus = null;
-        if (licenseTransferStatus != null) {
+        if (licenseTransferStatusMap != null) {
             licenseTransferStatus = (LicenseTransferStatus) licenseTransferStatusMap.get(licenseTransferStatusId);
         }
         if (licenseTransferStatus == null) {

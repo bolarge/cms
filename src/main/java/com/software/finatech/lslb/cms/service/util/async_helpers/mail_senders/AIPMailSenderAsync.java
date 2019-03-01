@@ -5,12 +5,10 @@ import com.software.finatech.lslb.cms.service.domain.AIPDocumentApproval;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
-import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.xhtmlrenderer.pdf.ITextRenderer;
@@ -27,8 +25,6 @@ import java.util.List;
 public class AIPMailSenderAsync extends AbstractMailSender {
 
     private static Logger logger = LoggerFactory.getLogger(AIPMailSenderAsync.class);
-    @Autowired
-    private AuthInfoService authInfoService;
 
     @Async
     public void sendAipNotificationToInstitutionAdmins(PaymentRecord paymentRecord) {

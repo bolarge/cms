@@ -250,13 +250,13 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
 
     private void rejectAgentCreationRequest(AgentApprovalRequest agentApprovalRequest, String userId, String rejectReason) {
         PendingAgent pendingAgent = findPendingAgentById(agentApprovalRequest.getPendingAgentId());
-        agentApprovalRequest.setRejectorId(userId);
-        agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
-        agentApprovalRequest.setRejectionReason(rejectReason);
-        Query queryForAgentDocument = new Query();
-        queryForAgentDocument.addCriteria(Criteria.where("entityId").is(pendingAgent.getId()));
-        ArrayList<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(queryForAgentDocument, Document.class).toStream().collect(Collectors.toList());
-        if (documents != null || !documents.isEmpty()) {
+        if (pendingAgent != null) {
+            agentApprovalRequest.setRejectorId(userId);
+            agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
+            agentApprovalRequest.setRejectionReason(rejectReason);
+            Query queryForAgentDocument = new Query();
+            queryForAgentDocument.addCriteria(Criteria.where("entityId").is(pendingAgent.getId()));
+            ArrayList<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(queryForAgentDocument, Document.class).toStream().collect(Collectors.toList());
             for (Document document : documents) {
                 try {
                     mongoRepositoryReactive.delete(document);
@@ -264,11 +264,11 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
                     logger.error("An error occurred while deleting document {}", document.getId(), e);
                 }
             }
+            pendingAgent.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
+            pendingAgent.setEnabled(false);
+            mongoRepositoryReactive.saveOrUpdate(pendingAgent);
+            mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
         }
-        pendingAgent.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
-        pendingAgent.setEnabled(false);
-        mongoRepositoryReactive.saveOrUpdate(pendingAgent);
-        mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
     }
 
 

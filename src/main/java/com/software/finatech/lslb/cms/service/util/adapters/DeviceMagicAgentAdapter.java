@@ -98,7 +98,9 @@ public class DeviceMagicAgentAdapter {
             }
             address = buildAddress(institutionCategoryDetails.getBusinessAddressStreet4(),
                     institutionCategoryDetails.getBusinessAddressCity4(), institutionCategoryDetails.getBusinessAddressState4());
-            if (!StringUtils.isEmpty(address)) {
+          boolean addressIsEmpty = StringUtils.isEmpty(address);
+          boolean addressIsNotEmpty = !addressIsEmpty;
+            if (addressIsNotEmpty) {
                 address = address.replace("\"", "");
                 agentInstitution.getBusinessAddressList().add(address);
                 agent.getBusinessAddresses().add(address);
@@ -158,7 +160,7 @@ public class DeviceMagicAgentAdapter {
     private void saveDocumentForAgent(DeviceMagicAgent deviceMagicAgent, Agent agent) {
         String submissionId = deviceMagicAgent.getSubmissionId();
         try {
-            String filePath = String.format("classpath:agent-data/pictures/%s/Picture.JPEG", submissionId);
+            String filePath = String.format("classpath:Binary/%s/Picture.JPEG", submissionId);
             File file = ResourceUtils.getFile(filePath);
             Document document = new Document();
             document.setId(UUID.randomUUID().toString().replace("-", ""));
@@ -198,7 +200,7 @@ public class DeviceMagicAgentAdapter {
         return null;
     }
 
-    private String findInstitutionIdByOperatorId(String operatorId) {
+    public String findInstitutionIdByOperatorId(String operatorId) {
         if (StringUtils.isEmpty(operatorId)) {
             return null;
         }
@@ -215,10 +217,10 @@ public class DeviceMagicAgentAdapter {
             operatorId = "Golden Chance";
         }
         if (StringUtils.equalsIgnoreCase("BONANZA WIN", operatorId)) {
-            //  operatorId = "BonanzaWin";
+            operatorId = "BonanzaWin";
         }
         if (StringUtils.equalsIgnoreCase("SPORTY BET", operatorId)) {
-            //      operatorId = "Sportybet";
+            operatorId = "Sportybet";
         }
         if (StringUtils.equalsIgnoreCase("POWER BET", operatorId)) {
             operatorId = "Supabet";
@@ -227,7 +229,7 @@ public class DeviceMagicAgentAdapter {
             operatorId = "Give 'n' Take";
         }
         if (StringUtils.equalsIgnoreCase("Access Bet", operatorId)) {
-            //  return null;
+            operatorId = "Access Bet";
         }
 
         Query query = new Query();

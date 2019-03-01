@@ -425,7 +425,7 @@ public class DocumentController extends BaseController {
             throw new FactNotFoundException("document", id);
         }
 
-        Binary binary = documentBinary.getFile();
+        Binary binary = documentBinary != null ? documentBinary.getFile() : null;
         if (binary != null) {
             try {
 
@@ -441,9 +441,7 @@ public class DocumentController extends BaseController {
 
                 httpServletResponse.flushBuffer();
             } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-
+                logger.error("An error occurred while downloading document", e);
             }
         }
 
@@ -540,7 +538,7 @@ public class DocumentController extends BaseController {
         Query queryDocumentType = new Query();
         queryDocumentType.addCriteria(Criteria.where("documentPurposeId").is(purposeId));
         queryDocumentType.addCriteria(Criteria.where("active").is(true));
-        if (!StringUtils.isEmpty(gameTypeIds)){
+        if (!StringUtils.isEmpty(gameTypeIds)) {
             List<String> gameTypeIdList = Arrays.asList(gameTypeIds.split("\\s*,\\s*"));
             queryDocumentType.addCriteria(Criteria.where("gameTypeIds").in(gameTypeIdList));
         }

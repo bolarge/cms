@@ -288,7 +288,7 @@ public class AuthInfo extends AbstractFact {
         AuthInfoDto dto = convertToDto();
         AuthRole authRole = getAuthRole();
         dto.setUserPermissions(getPermissionDtos(getAuthPermissionIds()));
-        dto.setRolePermissions(getPermissionDtos(authRole.authPermissionIds));
+        dto.setRolePermissions(getPermissionDtos(authRole.getAuthPermissionIds()));
         return dto;
     }
 
@@ -297,7 +297,7 @@ public class AuthInfo extends AbstractFact {
         AuthRole authRole = getAuthRole();
         List<AuthPermissionDto> authPermissionDtos = new ArrayList<>();
         authPermissionDtos.addAll(getPermissionDtos(this.authPermissionIds));
-        authPermissionDtos.addAll(getPermissionDtos(authRole.authPermissionIds));
+        authPermissionDtos.addAll(getPermissionDtos(authRole.getAuthPermissionIds()));
         dto.setAuthPermissions(authPermissionDtos);
         dto.setGameTypeDtos(getGameTypeDtos());
         return dto;
@@ -312,26 +312,6 @@ public class AuthInfo extends AbstractFact {
 
     private Institution getInstitution() {
         return (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof AuthInfo == false) {
-            return false;
-        }
-
-        if (this == obj) {
-            return true;
-        }
-        AuthInfo that = (AuthInfo) obj;
-        Object thisObject = this.getId();
-        Object thatObject = that.getId();
-
-        if ((thisObject != null) && (thatObject != null)) {
-            return thisObject.equals(thatObject);
-        } else {
-            return false;
-        }
     }
 
     public Set<String> getAllUserPermissionIdsForUser() {
@@ -444,4 +424,5 @@ public class AuthInfo extends AbstractFact {
     public boolean isAgent() {
         return StringUtils.equals(LSLBAuthRoleReferenceData.AGENT_ROLE_ID, this.authRoleId);
     }
+
 }

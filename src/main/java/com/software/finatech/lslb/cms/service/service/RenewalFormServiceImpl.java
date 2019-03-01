@@ -5,8 +5,6 @@ import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
-import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
-import com.software.finatech.lslb.cms.service.service.contracts.PaymentRecordService;
 import com.software.finatech.lslb.cms.service.service.contracts.RenewalFormService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
@@ -41,8 +39,6 @@ public class RenewalFormServiceImpl implements RenewalFormService {
 
     private static final Logger logger = LoggerFactory.getLogger(RenewalFormServiceImpl.class);
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
-    private AuthInfoService authInfoService;
-    private PaymentRecordService paymentRecordService;
     private ApplicationFormEmailSenderAsync renewalFormNotificationHelperAsync;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
@@ -54,14 +50,10 @@ public class RenewalFormServiceImpl implements RenewalFormService {
 
     @Autowired
     public RenewalFormServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
-                                  AuthInfoService authInfoService,
-                                  PaymentRecordService paymentRecordService,
                                   ApplicationFormEmailSenderAsync renewalFormNotificationHelperAsync,
                                   SpringSecurityAuditorAware springSecurityAuditorAware,
                                   AuditLogHelper auditLogHelper) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
-        this.authInfoService = authInfoService;
-        this.paymentRecordService = paymentRecordService;
         this.renewalFormNotificationHelperAsync = renewalFormNotificationHelperAsync;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.auditLogHelper = auditLogHelper;
@@ -96,15 +88,15 @@ public class RenewalFormServiceImpl implements RenewalFormService {
 
             //  query.addCriteria(Criteria.where("approverId").is(null));
             List<DocumentType> documentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(query, DocumentType.class).toStream().collect(Collectors.toList());
-            int notApprrovalRequired=0;
-            for(DocumentType documentType: documentTypes){
-                if(documentType.getApproverId().isEmpty()||documentType.getApproverId()==null){
-                    notApprrovalRequired=notApprrovalRequired+1;
+            int notApprrovalRequired = 0;
+            for (DocumentType documentType : documentTypes) {
+                if (documentType.getApproverId().isEmpty() || documentType.getApproverId() == null) {
+                    notApprrovalRequired = notApprrovalRequired + 1;
                 }
             }
 
-            if(notApprrovalRequired==documentTypes.size()){
-               renewalForm.setReadyForApproval(true);
+            if (notApprrovalRequired == documentTypes.size()) {
+                renewalForm.setReadyForApproval(true);
             }
 
             if (renewalForm.getReadyForApproval() == false) {
@@ -114,13 +106,13 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             String approvedRenewalFormStatusId = RenewalFormStatusReferenceData.APPROVED;
             renewalForm.setFormStatusId(approvedRenewalFormStatusId);
             String status = licenseService.updateInReviewToLicense(renewalForm.getPaymentRecordId());
-            if (status == "No License Record") {
+            if (StringUtils.equals("No License Record", status)) {
                 return Mono.just(new ResponseEntity<>("No License Record", HttpStatus.BAD_REQUEST));
 
-            } else if (status == "Error! Please contact admin") {
+            } else if (StringUtils.equals("Error! Please contact admin", status)) {
                 return Mono.just(new ResponseEntity<>("Error! Please contact admin", HttpStatus.BAD_REQUEST));
 
-            } else if (status == "OK") {
+            } else if (StringUtils.equals("OK", status)) {
                 saveRenewalForm(renewalForm);
             }
 
@@ -182,10 +174,11 @@ public class RenewalFormServiceImpl implements RenewalFormService {
     @Override
     public Mono<ResponseEntity> createRenewalForm(RenewalFormCreateDto renewalFormCreateDto) {
         PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.findById(renewalFormCreateDto.getPaymentRecordId(), PaymentRecord.class).block();
-
-        if (!paymentRecord.getInstitutionId().equals(renewalFormCreateDto.getInstitutionId())) {
+        if (paymentRecord == null) {
+            return Mono.just(new ResponseEntity<>("No Payment found for renewal form", HttpStatus.BAD_REQUEST));
+        }
+        if (!StringUtils.equals(paymentRecord.getInstitutionId(), renewalFormCreateDto.getInstitutionId())) {
             return Mono.just(new ResponseEntity<>("Invalid Institution Selected", HttpStatus.BAD_REQUEST));
-
         }
         if (!paymentRecord.convertToDto().getGameTypeId().equals(renewalFormCreateDto.getGameTypeId())) {
             return Mono.just(new ResponseEntity<>("Invalid institution Selected", HttpStatus.BAD_REQUEST));
@@ -196,34 +189,27 @@ public class RenewalFormServiceImpl implements RenewalFormService {
 
         if (StringUtils.isEmpty(renewalFormCreateDto.getCheckChangeInGamingMachines())) {
 //            return Mono.just(new ResponseEntity<>("Enter CheckChangeInGamingMachines", HttpStatus.BAD_REQUEST));
-
         }
         if (StringUtils.isEmpty(renewalFormCreateDto.getCheckConvictedCrime())) {
             return Mono.just(new ResponseEntity<>("Enter CheckConvictedCrime", HttpStatus.BAD_REQUEST));
-
         }
         if (StringUtils.isEmpty(renewalFormCreateDto.getCheckNewInvestors())) {
             return Mono.just(new ResponseEntity<>("Enter CheckNewInvestors", HttpStatus.BAD_REQUEST));
-
         }
         if (StringUtils.isEmpty(renewalFormCreateDto.getCheckPoliticalOffice())) {
             return Mono.just(new ResponseEntity<>("Enter CheckPoliticalOffice", HttpStatus.BAD_REQUEST));
-
         }
         if (StringUtils.isEmpty(renewalFormCreateDto.getCheckPoliticalParty())) {
             return Mono.just(new ResponseEntity<>("Enter CheckPoliticalParty", HttpStatus.BAD_REQUEST));
-
         }
         if (StringUtils.isEmpty(renewalFormCreateDto.getCheckTechnicalPartner())) {
             return Mono.just(new ResponseEntity<>("Enter CheckTechnicalPartner", HttpStatus.BAD_REQUEST));
-
         }
         if (StringUtils.isEmpty(renewalFormCreateDto.getCheckStakeHoldersChange())) {
             return Mono.just(new ResponseEntity<>("Enter CheckStakeHoldersChange", HttpStatus.BAD_REQUEST));
         }
         if (StringUtils.isEmpty(renewalFormCreateDto.getCheckSharesAquisition())) {
             return Mono.just(new ResponseEntity<>("Enter CheckSharesAquisition", HttpStatus.BAD_REQUEST));
-
         }
         try {
             Query queryRenewal = new Query();
@@ -235,7 +221,9 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             Query queryLicense = new Query();
             queryLicense.addCriteria(Criteria.where("paymentRecordId").is(renewalFormCreateDto.getPaymentRecordId()));
             License license = (License) mongoRepositoryReactive.findById(renewalFormCreateDto.getLicenseId(), License.class).block();
-
+            if (license == null) {
+                throw new Exception("No License for payment record");
+            }
             RenewalForm renewalForm = new RenewalForm();
             renewalForm.setId(UUID.randomUUID().toString());
             renewalForm.setLicensedId(license.getId());
@@ -263,7 +251,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             mongoRepositoryReactive.saveOrUpdate(renewalForm);
             String verbiage = getInstitution(license.getInstitutionId()).getInstitutionName() + " submitted a renewal form";
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
-                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(license.getInstitutionId()).getInstitutionName(),
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), getInstitution(license.getInstitutionId()).getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             //save the renewalForm to the license
@@ -332,7 +320,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             if (renewalForm == null) {
                 return Mono.just(new ResponseEntity<>("Invalid Renewal Form Selected", HttpStatus.BAD_REQUEST));
             }
-            if(!StringUtils.isEmpty(renewalFormUpdateDto.getCheckChangeInGamingMachines())){
+            if (!StringUtils.isEmpty(renewalFormUpdateDto.getCheckChangeInGamingMachines())) {
                 renewalForm.setCheckChangeInGamingMachines(renewalFormUpdateDto.getCheckChangeInGamingMachines());
             }
             renewalForm.setCheckConvictedCrime(renewalFormUpdateDto.getCheckConvictedCrime());
@@ -355,7 +343,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             mongoRepositoryReactive.saveOrUpdate(renewalForm);
             String verbiage = getInstitution(renewalForm.getInstitutionId()).getInstitutionName() + " updated its renewal form";
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
-                    springSecurityAuditorAware.getCurrentAuditor().get(), getInstitution(renewalForm.getInstitutionId()).getInstitutionName(),
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), getInstitution(renewalForm.getInstitutionId()).getInstitutionName(),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity<>(renewalForm.convertToDto(), HttpStatus.OK));
@@ -370,7 +358,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
         try {
             List<RenewalFormStatus> renewalFormStatuses = (List<RenewalFormStatus>) mongoRepositoryReactive.findAll(new Query(), RenewalFormStatus.class).toStream().collect(Collectors.toList());
             List<RenewalFormStatusDto> renewalFormStatusDtos = new ArrayList<>();
-            renewalFormStatuses.stream().forEach(renewalFormStatus -> {
+            renewalFormStatuses.forEach(renewalFormStatus -> {
                 renewalFormStatusDtos.add(renewalFormStatus.convertToDto());
             });
 
@@ -448,25 +436,25 @@ public class RenewalFormServiceImpl implements RenewalFormService {
         query.addCriteria(Criteria.where("entityId").is(renewalForm.getId()));
         query.addCriteria(Criteria.where("isCurrent").is(true));
         List<Document> documents = (List<Document>) mongoRepositoryReactive.findAll(query, Document.class).toStream().collect(Collectors.toList());
-      //  int countDocumentWithApproval = 0;
+        //  int countDocumentWithApproval = 0;
         int countApprovedDocument = 0;
 //        Query queryDocumentType = new Query();
 //        queryDocumentType.addCriteria(Criteria.where("documentPurposeId").is(DocumentPurposeReferenceData.RENEWAL_LICENSE_ID));
 //        queryDocumentType.addCriteria(Criteria.where("active").is(true));
 //        queryDocumentType.addCriteria(Criteria.where("gameTypeIds").in(renewalForm.getGameTypeId()));
 //        List<DocumentType> approvalDocumentTypes = (List<DocumentType>) mongoRepositoryReactive.findAll(queryDocumentType, DocumentType.class).toStream().collect(Collectors.toList());
-        int countUnApprovedDocument=0;
+        int countUnApprovedDocument = 0;
         for (Document doc : documents) {
             if (!StringUtils.isEmpty(doc.getApprovalRequestStatusId())) {
                 //countDocumentWithApproval = +1;
                 if (doc.getApprovalRequestStatusId().equals(ApprovalRequestStatusReferenceData.APPROVED_ID)) {
-                    countApprovedDocument = countApprovedDocument+1;
-                }else if(doc.getApprovalRequestStatusId().equals(ApprovalRequestStatusReferenceData.PENDING_ID)){
-                    countUnApprovedDocument = countUnApprovedDocument+1;
+                    countApprovedDocument = countApprovedDocument + 1;
+                } else if (doc.getApprovalRequestStatusId().equals(ApprovalRequestStatusReferenceData.PENDING_ID)) {
+                    countUnApprovedDocument = countUnApprovedDocument + 1;
                 }
             }
         }
-        if (countUnApprovedDocument==0) {
+        if (countUnApprovedDocument == 0) {
             if (renewalForm.getFormStatusId().equals(RenewalFormStatusReferenceData.SUBMITTED)) {
                 renewalForm.setReadyForApproval(true);
             }
