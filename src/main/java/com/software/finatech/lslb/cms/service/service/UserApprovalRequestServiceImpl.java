@@ -166,8 +166,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             }
             if (userApprovalRequest.isApprovedRequest() ||
                     userApprovalRequest.isRejectedRequest() ||
-                    !userApprovalRequest.canBeApprovedByUser(user.getId())
-            ) {
+                    !userApprovalRequest.canBeApprovedByUser(user.getId())) {
                 return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
             }
 

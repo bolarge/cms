@@ -21,9 +21,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class ApprovalRequestNotifierAsync  {
-
     private static final Logger logger = LoggerFactory.getLogger(ApprovalRequestNotifierAsync.class);
-
     @Autowired
     protected MailContentBuilderService mailContentBuilderService;
     @Autowired
