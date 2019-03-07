@@ -10,6 +10,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionOnboardingWorkflowService;
 import com.software.finatech.lslb.cms.service.service.contracts.ScheduledMeetingService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
+import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApplicationFormEmailSenderAsync;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.LicenseTransferMailSenderAsync;
@@ -203,7 +204,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                     institutionName, scheduledMeeting.getMeetingPurpose(), scheduledMeeting.getMeetingDateString(), scheduledMeeting.getVenue(), scheduledMeeting.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             if (scheduledMeeting.isForLicenseApplicant()) {
                 institutionOnboardingWorkflowService.updateWorkflowForNewApplicantMeeting(scheduledMeeting);
             }
@@ -243,7 +244,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                     institutionName, scheduledMeeting.getMeetingDateString(), scheduledMeeting.getVenue(), scheduledMeeting.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             if (scheduledMeeting.isForLicenseApplicant()) {
                 institutionOnboardingWorkflowService.updateWorkflowForCanceledMeeting(scheduledMeeting);
             }
@@ -281,7 +282,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                     institutionName, scheduledMeeting.getMeetingDateString(), scheduledMeeting.getVenue(), scheduledMeeting.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             if (scheduledMeeting.isForLicenseApplicant()) {
                 institutionOnboardingWorkflowService.updateWorkflowForCompletedMeeting(scheduledMeeting);
                 applicationFormEmailSenderAsync.sendNotificationForMeetingCompletionForApplication(scheduledMeeting.getApplicationForm());
@@ -360,7 +361,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                     invitedInstitution.getInstitutionName(), existingScheduledMeeting.getMeetingDateString(), existingScheduledMeeting.getVenue(), existingScheduledMeeting.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), invitedInstitution.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(existingScheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
@@ -407,7 +408,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                     institutionName, addCommentDto.getComment(), existingScheduledMeeting.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>("Comment added successfully", HttpStatus.OK));
         } catch (Exception e) {

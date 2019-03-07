@@ -16,6 +16,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.*;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
 import com.software.finatech.lslb.cms.service.util.QueryUtils;
+import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApplicationFormEmailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
@@ -97,7 +98,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                     applicationForm.getApplicationFormId(), applicationForm.getGameTypeName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             institutionOnboardingWorkflowService.updateWorkflowForCreateApplicationForm(applicationForm);
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -209,7 +210,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String verbiage = String.format("Saved applicant details for application form : %s ", applicationForm.getApplicationFormId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant details", e);
@@ -252,7 +253,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String verbiage = String.format("Saved applicant members details for application form : %s", applicationForm.getApplicationFormId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while saving applicant members details", e);
@@ -296,7 +297,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String verbiage = String.format("Saved applicant contact details for application form : %s ->  ", applicationForm.getApplicationFormId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -340,7 +341,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String verbiage = String.format("Saved applicant criminality details for application form : %s ->  ", applicationForm.getApplicationFormId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -384,7 +385,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String verbiage = String.format("Saved applicant declaration details for application form : %s ->  ", applicationForm.getApplicationFormId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -428,7 +429,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String verbiage = String.format("Saved applicant other information for application form : %s ->  ", applicationForm.getApplicationFormId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -472,7 +473,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String verbiage = String.format("Saved applicant outlet information for application form : %s ->  ", applicationForm.getApplicationFormId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -518,7 +519,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String verbiage = String.format("Approved application form : %s ->  ", applicationForm.getApplicationFormId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             //update workflow
             institutionOnboardingWorkflowService.updateWorkflowForApprovedApplicationForm(applicationForm);
             //send notifications
@@ -593,7 +594,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String verbiage = String.format("Approved AIP form : %s ->  ", aipDocumentApproval.getFormStatusId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), aipDocumentApproval.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             //   applicationFormNotificationHelperAsync.sendApprovedMailToInstitutionAdmins(aipDocumentApproval);
             return Mono.just(new ResponseEntity<>("Application form approved successfully", HttpStatus.OK));
@@ -617,7 +618,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String verbiage = String.format("Submitted application form : %s ->  ", applicationForm.getApplicationFormId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             institutionOnboardingWorkflowService.updateWorkflowForCompleteApplicationForm(applicationForm);
             //Send email and update the application form to ready for approval
@@ -655,7 +656,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String verbiage = String.format("Submitted AIP form : %s ->  ", aipDocumentApproval.getFormStatusId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), aipDocumentApproval.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             applicationFormNotificationHelperAsync.sendAIPFormSubmissionMailToLSLBAdmins(aipDocumentApproval);
             return Mono.just(new ResponseEntity<>("AIP completed successfully and now in review", HttpStatus.OK));
@@ -722,7 +723,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String verbiage = String.format("Rejected application form : %s ->  ", applicationForm.getApplicationFormId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             applicationFormNotificationHelperAsync.sendRejectionMailToInstitutionAdmins(applicationForm);
             return Mono.just(new ResponseEntity<>("Application form rejected successfully", HttpStatus.OK));
@@ -754,7 +755,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String verbiage = String.format("Added comment to application form : %s ->  ", applicationForm.getApplicationFormId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             applicationFormNotificationHelperAsync.sendAdminCommentNotificationToInstitutionAdmins(applicationForm);
             return Mono.just(new ResponseEntity<>("Comment added successfully", HttpStatus.OK));
@@ -789,7 +790,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
             String verbiage = String.format("Added comment to AIP form : %s ->  ", aipDocumentApproval.getFormStatusId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), aipDocumentApproval.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             applicationFormNotificationHelperAsync.sendAdminCommentNotificationToInstitutionAdmins(aipDocumentApproval, lslbAdminComment.getComment());
             return Mono.just(new ResponseEntity<>("Comment added successfully", HttpStatus.OK));
@@ -951,7 +952,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                     applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {
@@ -988,7 +989,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                     applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {
@@ -1025,7 +1026,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                     applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {
@@ -1061,7 +1062,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                     applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding comment", e);
@@ -1097,7 +1098,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                     applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {
@@ -1133,7 +1134,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                     applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding comment", e);
@@ -1169,7 +1170,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                     applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {
@@ -1205,7 +1206,7 @@ public class ApplicationFormServiceImpl implements ApplicationFormService {
                     applicationForm.getApplicationFormId(), applicationForm.getGameTypeName(), addCommentDto.getComment());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), applicationForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(applicationForm.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {

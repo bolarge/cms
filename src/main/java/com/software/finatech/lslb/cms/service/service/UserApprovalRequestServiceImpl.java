@@ -12,6 +12,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.UserApprovalRequestService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.FrontEndPropertyHelper;
+import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApprovalRequestNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
@@ -192,7 +193,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             String verbiage = String.format("Approved User approval request ->  Type -> %s,Id -> %s ", userApprovalRequest.getUserApprovalRequestType(), userApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), userApprovalRequest.getSubjectUserName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -236,7 +237,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             String verbiage = String.format("Rejected User approval request ->  Type -> %s, Id -> %s", userApprovalRequest.getUserApprovalRequestType(), userApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), userApprovalRequest.getSubjectUserName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             approvalRequestNotifierAsync.sendRejectedUserApprovalRequestEmailToInitiator(userApprovalRequest);
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));

@@ -13,6 +13,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.MachineService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.LicenseValidatorUtil;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.MachineApprovalRequestMailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
@@ -184,7 +185,7 @@ public class MachineServiceImpl implements MachineService {
             String verbiage = String.format("Created Machine Request, Type  -> %s, Serial Number -> %s", approvalRequest.getMachineApprovalRequestType(), pendingGamingMachine.getSerialNumber());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), pendingGamingMachine.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
 
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
@@ -209,7 +210,7 @@ public class MachineServiceImpl implements MachineService {
             String verbiage = String.format("Updated Gaming Machine, Serial Number -> %s , Old Address -> %s, New Address -> %s", gamingMachine.getSerialNumber(), oldAdress, gamingMachineUpdateDto.getMachineAddress());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), gamingMachine.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(gamingMachine.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -265,7 +266,7 @@ public class MachineServiceImpl implements MachineService {
                     approvalRequest.getMachineApprovalRequestType(), machine.getSerialNumber(), machineGamesToString(newGameDetails));
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), machine.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -307,7 +308,7 @@ public class MachineServiceImpl implements MachineService {
                     machine.getSerialNumber(), machine.getMachineType(), machineGamesToString(gameDetails));
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), machine.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>("Game successfully disabled", HttpStatus.OK));
         } catch (Exception e) {
@@ -369,7 +370,7 @@ public class MachineServiceImpl implements MachineService {
                     approvalRequest.getMachineApprovalRequestType(), machine.getSerialNumber(), machine.getMachineStatus(), newStatus);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), machine.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -429,7 +430,7 @@ public class MachineServiceImpl implements MachineService {
                     approvalRequest.getMachineApprovalRequestType(), machine.getSerialNumber(), machineGameUpgradeToString(gameUpgrades));
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), machine.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
@@ -551,7 +552,7 @@ public class MachineServiceImpl implements MachineService {
                     String verbiage = "Uploaded multiple gaming machines ";
                     auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                             springSecurityAuditorAware.getCurrentAuditorNotNull(), institution.getInstitutionName(),
-                            LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                            LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
 
                     return Mono.just(new ResponseEntity<>(uploadTransactionResponse, HttpStatus.OK));
                 }
@@ -655,7 +656,7 @@ public class MachineServiceImpl implements MachineService {
                     approvalRequest.getMachineApprovalRequestType(), machine.getSerialNumber(), agent.getFullName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), machine.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             machineApprovalRequestMailSenderAsync.sendMachineApprovalInitialNotificationToLSLBAdmins(approvalRequest);
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));

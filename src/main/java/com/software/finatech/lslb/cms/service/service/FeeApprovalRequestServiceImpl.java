@@ -10,6 +10,7 @@ import com.software.finatech.lslb.cms.service.referencedata.AuditActionReference
 import com.software.finatech.lslb.cms.service.service.contracts.FeeApprovalRequestService;
 import com.software.finatech.lslb.cms.service.service.contracts.FeeService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
+import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApprovalRequestNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
@@ -164,7 +165,7 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             String verbiage = String.format("Approved Fee approval request ->  Type -> %s,Id -> %s ", feeApprovalRequest.getFeeApprovalRequestType(), feeApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), loggedInUser.getFullName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(feeApprovalRequest.convertToDto(), HttpStatus.OK));
         } catch (ApprovalRequestProcessException e) {
@@ -206,7 +207,7 @@ public class FeeApprovalRequestServiceImpl implements FeeApprovalRequestService 
             String verbiage = String.format("Rejected Fee approval request ->  Type -> %s,Id -> %s ", feeApprovalRequest.getFeeApprovalRequestType(), feeApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), loggedInUser.getFullName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
 
             approvalRequestNotifierAsync.sendRejectedFeeApprovalRequestEmailToInitiator(feeApprovalRequest);

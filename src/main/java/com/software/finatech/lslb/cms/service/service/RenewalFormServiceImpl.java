@@ -7,6 +7,7 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.RenewalFormService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
+import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApplicationFormEmailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
@@ -120,7 +121,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             String verbiage = String.format("Approved application form : %s ->  ", renewalForm.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), renewalForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             //    renewalFormNotificationHelperAsync.sendApprovedMailToInstitutionAdmins(renewalForm);
 
@@ -161,7 +162,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             String verbiage = String.format("Rejected application form : %s ->  ", renewalForm.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), renewalForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             renewalFormNotificationHelperAsync.sendRejectionMailToInstitutionAdmins(renewalForm);
             return Mono.just(new ResponseEntity<>("Renewal Form rejected successfully", HttpStatus.OK));
@@ -252,7 +253,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             String verbiage = getInstitution(license.getInstitutionId()).getInstitutionName() + " submitted a renewal form";
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), getInstitution(license.getInstitutionId()).getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             //save the renewalForm to the license
             license.setRenewalFormId(renewalForm.getId());
@@ -344,7 +345,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             String verbiage = getInstitution(renewalForm.getInstitutionId()).getInstitutionName() + " updated its renewal form";
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), getInstitution(renewalForm.getInstitutionId()).getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(renewalForm.convertToDto(), HttpStatus.OK));
         } catch (Exception ex) {
@@ -417,7 +418,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
                     renewalForm.getId(), renewalForm.getGameTypeName(), addCommentDto.getComment());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), renewalForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(renewalForm.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {
@@ -497,7 +498,7 @@ public class RenewalFormServiceImpl implements RenewalFormService {
             String verbiage = String.format("Submitted renewal application form : %s ->  ", renewalForm.getFormStatusId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(applicationAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), renewalForm.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             renewalFormNotificationHelperAsync.sendRenewalFormSubmissionMailToLSLBAdmins(renewalForm);
 
