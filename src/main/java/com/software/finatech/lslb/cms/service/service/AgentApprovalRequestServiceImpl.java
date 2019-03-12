@@ -12,6 +12,7 @@ import com.software.finatech.lslb.cms.service.referencedata.AuditActionReference
 import com.software.finatech.lslb.cms.service.service.contracts.AgentApprovalRequestService;
 import com.software.finatech.lslb.cms.service.util.AgentUserCreator;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
+import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AgentCreationNotifierAsync;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -177,7 +178,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             String verbiage = String.format("Approved agent approval request -> Type: %s ", agentApprovalRequest.getAgentApprovalRequestTypeName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), agentApprovalRequest.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsAndLslbOnAgentRequestCreation(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>("Request successfully approved", HttpStatus.OK));
@@ -218,7 +219,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             String verbiage = String.format("Rejected agent approval request -> Type: %s ", agentApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), agentApprovalRequest.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsAndLslbOnAgentRequestCreation(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>("Request successfully rejected", HttpStatus.OK));

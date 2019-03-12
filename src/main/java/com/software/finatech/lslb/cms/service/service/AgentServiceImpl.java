@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.LicenseValidatorUtil;
+import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AgentCreationNotifierAsync;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -182,7 +183,7 @@ public class AgentServiceImpl implements AgentService {
                     agentApprovalRequest.getAgentApprovalRequestTypeName(), agent.getFullName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), agentApprovalRequest.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             agentCreationNotifierAsync.sendNewAgentApprovalRequestToLSLBAdmin(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
@@ -228,7 +229,7 @@ public class AgentServiceImpl implements AgentService {
             String verbiage = String.format("Updated Agent Details -> Agent Id: %s , Agent Name -> %s", agent.getAgentId(), agent.getFullName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             agentCreationNotifierAsync.sentAgentUpdateEmailToAgentInstitutions(agent, oldPhoneAndAddress, newPhoneAndAddress);
             return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
@@ -262,7 +263,7 @@ public class AgentServiceImpl implements AgentService {
             String verbiage = String.format("Created Agent approval request ->  Type :%s", agentApprovalRequest.getAgentApprovalRequestTypeName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), agentApprovalRequest.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             agentCreationNotifierAsync.sendNewAgentApprovalRequestToLSLBAdmin(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>("Agent creation has been submitted for approval", HttpStatus.OK));
         } catch (Exception e) {

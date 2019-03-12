@@ -15,6 +15,7 @@ import com.software.finatech.lslb.cms.service.referencedata.MachineStatusReferen
 import com.software.finatech.lslb.cms.service.service.contracts.MachineApprovalRequestService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
+import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.MachineApprovalRequestMailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
@@ -206,7 +207,7 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
                     approvalRequest.getMachineApprovalRequestType(), approvalRequest.getMachineRequestSerialNumber(), approvalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), approvalRequest.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (ApprovalRequestProcessException e) {
@@ -248,7 +249,7 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             String verbiage = String.format("Rejected Machine approval request -> Type: %s ,  Id -> %s", approvalRequest.getMachineApprovalRequestType(), approvalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), approvalRequest.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
             machineApprovalRequestMailSenderAsync.sendMachineApprovalNotificationToRequestInitiator(approvalRequest);
 
             return Mono.just(new ResponseEntity<>("Request successfully rejected", HttpStatus.OK));

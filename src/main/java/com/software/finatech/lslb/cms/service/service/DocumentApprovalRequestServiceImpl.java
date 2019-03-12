@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatu
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.DocumentApprovalRequestService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
+import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApprovalRequestNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
@@ -170,7 +171,7 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
             String verbiage = String.format("Approved Document approval request ->  Type -> %s,Id -> %s ", documentApprovalRequest.getDocumentApprovalRequestType(), documentApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(configAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), String.valueOf(documentApprovalRequest.getSubjectDocumentType()),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(documentApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -208,7 +209,7 @@ public class DocumentApprovalRequestServiceImpl implements DocumentApprovalReque
 
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(configAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), String.valueOf(documentApprovalRequest.getSubjectDocumentType()),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             approvalRequestNotifierAsync.sendRejectedDocumentApprovalRequestEmailToInitiator(documentApprovalRequest);
             return Mono.just(new ResponseEntity<>(documentApprovalRequest.convertToHalfDto(), HttpStatus.OK));

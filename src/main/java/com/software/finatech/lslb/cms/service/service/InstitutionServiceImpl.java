@@ -15,6 +15,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.InstitutionOnboa
 import com.software.finatech.lslb.cms.service.service.contracts.InstitutionService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
+import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.CustomerCodeCreatorAsync;
 import org.apache.commons.lang3.StringUtils;
@@ -126,7 +127,7 @@ public class InstitutionServiceImpl implements InstitutionService {
             String verbiage = String.format("Updated Institution , Name -> %s ", institutionName);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(institutionAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), existingInstitutionName,
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(existingInstitution.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while updating the institution";
@@ -155,7 +156,7 @@ public class InstitutionServiceImpl implements InstitutionService {
             String verbiage = String.format("Disabled institution, Name -> %s ", existingInstitution.getInstitutionName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(institutionAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), existingInstitution.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(existingInstitution.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -184,7 +185,7 @@ public class InstitutionServiceImpl implements InstitutionService {
             String verbiage = String.format("Enabled institution, Name -> %s ", existingInstitution.getInstitutionName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(institutionAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), existingInstitution.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(existingInstitution.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -345,7 +346,7 @@ public class InstitutionServiceImpl implements InstitutionService {
             String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(institutionAuditActionId,
                     currentAuditorName, currentAuditorName,
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(uploadTransactionResponse, HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while uploading multiple institutions", e);

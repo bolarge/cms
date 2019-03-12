@@ -10,6 +10,7 @@ import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.MapValues;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
+import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApprovalRequestNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
@@ -118,7 +119,7 @@ public class FeeServiceImpl implements FeeService {
                     feeApprovalRequest.getFeeApprovalRequestType(), pendingFee.getLicenseType(), pendingFee.getFeePaymentType(), pendingFee.getGameType(), pendingFee.getAmount());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
                     currentAuditorName, currentAuditorName,
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(feeApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format , please use yyyy-MM-dd", HttpStatus.BAD_REQUEST));
@@ -181,7 +182,7 @@ public class FeeServiceImpl implements FeeService {
             String verbiage = String.format("Updated Fee Payment Type, Name -> %s ", feePaymentTypeName);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
                     currentAuditorName, currentAuditorName,
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(feePaymentType.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -211,7 +212,7 @@ public class FeeServiceImpl implements FeeService {
             String verbiage = String.format("Updated Fee Payment Type, Name -> %s ", feePaymentType);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
                     currentAuditorName, currentAuditorName,
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(feePaymentType.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -243,7 +244,7 @@ public class FeeServiceImpl implements FeeService {
             String verbiage = String.format("Created License Type, Name -> %s ", licenseType);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(feeAuditActionId,
                     currentAuditorName, currentAuditorName,
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(licenseType.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while creating the fee setting";

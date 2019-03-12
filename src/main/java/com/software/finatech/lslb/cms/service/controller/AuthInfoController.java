@@ -172,7 +172,7 @@ public class AuthInfoController extends BaseController {
             }
 
         } catch (Exception e) {
-           logger.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
         }
 
         return null;
@@ -281,7 +281,7 @@ public class AuthInfoController extends BaseController {
             return authInfoService.loginToken(loginDto.getUserName(), loginDto.getPassword(), authInfo, request);
 
         } catch (Exception e) {
-           logger.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
         }
 
         return null;
@@ -356,7 +356,7 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
             }
         } catch (Exception e) {
-           logger.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
         }
         return null;
     }
@@ -523,9 +523,8 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
             }
         } catch (Exception e) {
-         logger.error(e.getMessage(), e);
+            return logAndReturnError(logger, "An error occurred while attemtping to deactivate user", e);
         }
-        return null;
     }
 
     /**
@@ -576,7 +575,7 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
             }
         } catch (Exception e) {
-          logger.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
         }
 
         return null;
@@ -761,7 +760,7 @@ public class AuthInfoController extends BaseController {
             return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
 
         } catch (Exception e) {
-           logger.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
         }
 
         return null;
