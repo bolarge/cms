@@ -124,7 +124,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             query.with(PageRequest.of(page, pageSize, sort));
             query.with(sort);
             ArrayList<AgentApprovalRequest> agentApprovalRequests = (ArrayList<AgentApprovalRequest>) mongoRepositoryReactive.findAll(query, AgentApprovalRequest.class).toStream().collect(Collectors.toList());
-            if (agentApprovalRequests == null || agentApprovalRequests.isEmpty()) {
+            if (agentApprovalRequests.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
             }
             ArrayList<AgentApprovalRequestDto> agentApprovalRequestDtos = new ArrayList<>();
@@ -161,18 +161,27 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             if (agentApprovalRequest == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Agent approval request with id %s does not exist", agentApprovalRequestId), HttpStatus.BAD_REQUEST));
             }
-            if (agentApprovalRequest.isApprovedRequest() || agentApprovalRequest.isRejectedRequest()) {
-                return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
-            }
             AuthInfo approvingUser = springSecurityAuditorAware.getLoggedInUser();
             if (approvingUser == null) {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
-            } else if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.CREATE_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
+            }
+
+            if (agentApprovalRequest.isApprovedRequest() || agentApprovalRequest.isRejectedRequest() || StringUtils.equals(agentApprovalRequest.getInitiatorId(), approvingUser.getId())) {
+                return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
+            }
+            if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.CREATE_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
                 approveAgentCreationRequest(agentApprovalRequest, approvingUser.getId());
-            } else if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.ADD_INSTITUTION_TO_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
+            }
+            if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.ADD_INSTITUTION_TO_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
                 approveAddInstitutionToAgentRequest(agentApprovalRequest, approvingUser.getId());
-            } else {
-                return Mono.just(new ResponseEntity<>("Invalid request supplied", HttpStatus.BAD_REQUEST));
+            }
+
+            if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.BLACK_LIST_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
+                approveBlackListAgentRequest(agentApprovalRequest);
+            }
+
+            if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.BLACK_LIST_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
+                approveWhiteListAgentRequest(agentApprovalRequest);
             }
 
             String verbiage = String.format("Approved agent approval request -> Type: %s ", agentApprovalRequest.getAgentApprovalRequestTypeName());
@@ -184,6 +193,26 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             return Mono.just(new ResponseEntity<>("Request successfully approved", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving request", e);
+        }
+    }
+
+    private void approveWhiteListAgentRequest(AgentApprovalRequest agentApprovalRequest) {
+        Agent agent = agentApprovalRequest.getAgent();
+        if (agent != null) {
+            agent.setAgentStatusId(AgentStatusReferenceData.ACTIVE_ID);
+            mongoRepositoryReactive.saveOrUpdate(agent);
+            agentApprovalRequest.setAsApproved();
+            mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
+        }
+      }
+
+    private void approveBlackListAgentRequest(AgentApprovalRequest agentApprovalRequest) {
+        Agent agent = agentApprovalRequest.getAgent();
+        if (agent != null) {
+            agent.setAgentStatusId(AgentStatusReferenceData.BLACK_LISTED_ID);
+            agentApprovalRequest.setAsApproved();
+            mongoRepositoryReactive.saveOrUpdate(agent);
+            mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
         }
     }
 
@@ -219,7 +248,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             String verbiage = String.format("Rejected agent approval request -> Type: %s ", agentApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), agentApprovalRequest.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsAndLslbOnAgentRequestCreation(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>("Request successfully rejected", HttpStatus.OK));

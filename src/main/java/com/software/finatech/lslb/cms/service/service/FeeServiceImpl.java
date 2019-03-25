@@ -40,7 +40,7 @@ import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logA
 public class FeeServiceImpl implements FeeService {
 
     private static final Logger logger = LoggerFactory.getLogger(FeeServiceImpl.class);
-    public static final String feeAuditActionId = AuditActionReferenceData.CONFIGURATIONS_ID;
+    private static final String feeAuditActionId = AuditActionReferenceData.CONFIGURATIONS_ID;
 
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
@@ -92,7 +92,6 @@ public class FeeServiceImpl implements FeeService {
                 return Mono.just(new ResponseEntity<>("There is a pending fee with the same param, kindly wait for it to be approved", HttpStatus.BAD_REQUEST));
             }
             PendingFee pendingFee = new PendingFee();
-
             pendingFee.setId(UUID.randomUUID().toString());
             pendingFee.setAmount(Double.valueOf(feeCreateDto.getAmount()));
             pendingFee.setFeePaymentTypeId(feePaymentTypeId);
@@ -406,7 +405,7 @@ public class FeeServiceImpl implements FeeService {
         Query query = new Query();
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
         query.addCriteria(Criteria.where("licenseTypeId").is(licenseTypeId));
-        query.addCriteria(Criteria.where("active").is(true));
+      //  query.addCriteria(Criteria.where("active").is(true));
         query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));
         query.with(new Sort(Sort.Direction.DESC, "effectiveDate"));
         return (Fee) mongoRepositoryReactive.find(query, Fee.class).block();

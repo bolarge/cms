@@ -142,6 +142,16 @@ public abstract class AbstractApprovalRequest extends AbstractFact {
     }
 
 
+    public void setAsApproved(){
+        this.approvalRequestStatusId = ApprovalRequestStatusReferenceData.APPROVED_ID;
+    }
+
+
+    public void setAsRejected(){
+        this.approvalRequestStatusId = ApprovalRequestStatusReferenceData.REJECTED_ID;
+    }
+
+
     public boolean canBeApprovedByUser(String userId) {
         return !StringUtils.equals(this.initiatorId, userId);
     }

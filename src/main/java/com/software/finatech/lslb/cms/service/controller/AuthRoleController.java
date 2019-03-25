@@ -359,17 +359,20 @@ public class AuthRoleController extends BaseController {
                 }
 
                 if (loggedInUser.isLSLBUser()) {
-                    notAllowedIds = Arrays.asList(AuthRoleReferenceData.VGG_ADMIN_ID,
-                            AuthRoleReferenceData.VGG_USER_ID,
-                            AuthRoleReferenceData.SUPER_ADMIN_ID,
-                            LSLBAuthRoleReferenceData.LSLB_ADMIN_ID,
-                            LSLBAuthRoleReferenceData.AGENT_ROLE_ID,
-                            LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID);
-                    for (String authRoleId : authRoleIds) {
-                        if (!notAllowedIds.contains(authRoleId)) {
-                            eligibleRoleIds.add(authRoleId);
-                        }
-                    }
+//                    notAllowedIds = Arrays.asList(AuthRoleReferenceData.VGG_ADMIN_ID,
+//                            AuthRoleReferenceData.VGG_USER_ID,
+//                            AuthRoleReferenceData.SUPER_ADMIN_ID,
+//                            LSLBAuthRoleReferenceData.LSLB_ADMIN_ID,
+//                            LSLBAuthRoleReferenceData.AGENT_ROLE_ID,
+//                            LSLBAuthRoleReferenceData.LSLB_USER_ID,
+//                            LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID);
+//                    for (String authRoleId : authRoleIds) {
+//                        if (!notAllowedIds.contains(authRoleId)) {
+//                            eligibleRoleIds.add(authRoleId);
+//                        }
+//                    }
+                    //Make the eligible roles empty to that lslb user (client_user) cannot create a user
+                    eligibleRoleIds = new HashSet<>();
                 }
 
                 if (loggedInUser.isLSLBAdmin()) {
@@ -388,6 +391,8 @@ public class AuthRoleController extends BaseController {
                 if (loggedInUser.isVGGAdmin()) {
                     notAllowedIds = Arrays.asList(AuthRoleReferenceData.SUPER_ADMIN_ID,
                             LSLBAuthRoleReferenceData.AGENT_ROLE_ID,
+                            LSLBAuthRoleReferenceData.LSLB_USER_ID,
+                            LSLBAuthRoleReferenceData.LSLB_ADMIN_ID,
                             LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID);
                     for (String authRoleId : authRoleIds) {
                         if (!notAllowedIds.contains(authRoleId)) {
@@ -397,15 +402,18 @@ public class AuthRoleController extends BaseController {
                 }
 
                 if (loggedInUser.isVGGUser()) {
-                    notAllowedIds = Arrays.asList(AuthRoleReferenceData.VGG_ADMIN_ID,
-                            AuthRoleReferenceData.SUPER_ADMIN_ID,
-                            LSLBAuthRoleReferenceData.AGENT_ROLE_ID,
-                            LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID);
-                    for (String authRoleId : authRoleIds) {
-                        if (!notAllowedIds.contains(authRoleId)) {
-                            eligibleRoleIds.add(authRoleId);
-                        }
-                    }
+//                    notAllowedIds = Arrays.asList(AuthRoleReferenceData.VGG_ADMIN_ID,
+//                            AuthRoleReferenceData.SUPER_ADMIN_ID,
+//                            LSLBAuthRoleReferenceData.AGENT_ROLE_ID,
+//                            LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID);
+//                    for (String authRoleId : authRoleIds) {
+//                        if (!notAllowedIds.contains(authRoleId)) {
+//                            eligibleRoleIds.add(authRoleId);
+//                        }
+//                    }
+
+                    //make the eligile roles empty so that vgg user cannot create anyone
+                    eligibleRoleIds = new HashSet<>();
                 }
 
                 if (eligibleRoleIds.isEmpty()) {

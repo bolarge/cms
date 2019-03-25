@@ -138,11 +138,11 @@ public class AuthInfoController extends BaseController {
         try {
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.find(new Query(Criteria.where("emailAddress").is(emailAddress)), AuthInfo.class).block();
             if (authInfo == null) {
-                return Mono.just(new ResponseEntity("Invalid EmailAddress", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("Invalid EmailAddress", HttpStatus.BAD_REQUEST));
             }
 
             if (authInfo.getSsoUserId() == null || authInfo.getSsoUserId().isEmpty()) {
-                return Mono.just(new ResponseEntity("User has not been created on SSO", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("User has not been created on SSO", HttpStatus.BAD_REQUEST));
             }
 
             String token = authInfoService.resetPasswordToken(emailAddress, request);
@@ -168,7 +168,7 @@ public class AuthInfoController extends BaseController {
 
                 mongoRepositoryReactive.saveOrUpdate(authInfo);
 
-                return Mono.just(new ResponseEntity("Success", HttpStatus.OK));
+                return Mono.just(new ResponseEntity<>("Success", HttpStatus.OK));
             }
 
         } catch (Exception e) {
@@ -207,7 +207,6 @@ public class AuthInfoController extends BaseController {
             return logAndReturnError(logger, errorMsg, e);
         }
     }
-
 
     /**
      * @param ssoChangePasswordModel
@@ -277,13 +276,17 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity("User Deactivated", HttpStatus.UNAUTHORIZED));
             }
 
-
+            //check for agent black listing when logging in
+            if (authInfo.isAgent()) {
+                Agent agent = authInfo.getAgent();
+                if (agent != null && agent.isBlackListed()) {
+                    return Mono.just(new ResponseEntity<>("User Black Listed", HttpStatus.OK));
+                }
+            }
             return authInfoService.loginToken(loginDto.getUserName(), loginDto.getPassword(), authInfo, request);
-
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
-
         return null;
     }
 

@@ -425,4 +425,10 @@ public class AuthInfo extends AbstractFact {
         return StringUtils.equals(LSLBAuthRoleReferenceData.AGENT_ROLE_ID, this.authRoleId);
     }
 
+    public Agent getAgent() {
+        if (StringUtils.isEmpty(this.agentId)) {
+            return null;
+        }
+        return (Agent) mongoRepositoryReactive.findById(this.agentId, Agent.class).block();
+    }
 }

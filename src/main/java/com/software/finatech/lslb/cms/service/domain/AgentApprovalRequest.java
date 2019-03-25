@@ -21,6 +21,15 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
     private String gameTypeId;
     private Set<String> businessAddressList = new HashSet<>();
     private String pendingAgentId;
+    private boolean initiatedByLslb;
+
+    public boolean isInitiatedByLslb() {
+        return initiatedByLslb;
+    }
+
+    public void setInitiatedByLslb(boolean initiatedByLslb) {
+        this.initiatedByLslb = initiatedByLslb;
+    }
 
     public String getPendingAgentId() {
         return pendingAgentId;
@@ -131,11 +140,7 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
     public AgentApprovalRequestDto convertToDto() {
         AgentApprovalRequestDto agentApprovalRequestDto = new AgentApprovalRequestDto();
         agentApprovalRequestDto.setId(getId());
-        Institution institution = getInstitution();
-        if (institution != null) {
-            agentApprovalRequestDto.setInstitutionId(getInstitutionId());
-            agentApprovalRequestDto.setInstitutionName(institution.getInstitutionName());
-        }
+       agentApprovalRequestDto.setInitiatorName(getInitiatorName());
         Agent agent = getAgent();
         if (agent != null) {
             agentApprovalRequestDto.setAgentId(getAgentId());
@@ -229,6 +234,14 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
             agentApprovalRequestDto.setPendingAgentInstitution(AgentInstitutionAdapter.convertAgentInstitutionToDto(agentInstitution, mongoRepositoryReactive));
         }
         return agentApprovalRequestDto;
+    }
+
+    public String getInitiatorName() {
+        if (isInitiatedByLslb()) {
+            return getInitiatorName();
+        } else {
+            return getInstitutionName();
+        }
     }
 
     @Override

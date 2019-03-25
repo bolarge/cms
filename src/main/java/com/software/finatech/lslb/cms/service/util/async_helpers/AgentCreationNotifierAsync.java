@@ -7,6 +7,7 @@ import com.software.finatech.lslb.cms.service.domain.AgentInstitution;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.AbstractMailSender;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -49,7 +50,11 @@ public class AgentCreationNotifierAsync extends AbstractMailSender {
         }
         String content = buildNewAgentRequestLSLBAdminContent(agentApprovalRequest);
         for (AuthInfo lslbAdmin : lslbAdmins) {
-            sendNewAgentRequestToLslbAdmin(content, lslbAdmin.getEmailAddress());
+            //The if statement here is because of requests that are initiated by
+            //LSLB (At first , agent requests are initiated by only institutions
+            if (!StringUtils.equals(agentApprovalRequest.getInitiatorId(), lslbAdmin.getId())) {
+                sendNewAgentRequestToLslbAdmin(content, lslbAdmin.getEmailAddress());
+            }
         }
     }
 
@@ -75,7 +80,7 @@ public class AgentCreationNotifierAsync extends AbstractMailSender {
         String frontEndUrl = String.format("%s/agent-approval-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), agentApprovalRequest.getId());
         String presentDateString = LocalDate.now().toString("dd-MM-YYYY");
         HashMap<String, Object> model = new HashMap<>();
-        model.put("institutionName", agentApprovalRequest.getInstitutionName());
+        model.put("institutionName", agentApprovalRequest.getInitiatorName());
         model.put("date", presentDateString);
         model.put("frontEndUrl", frontEndUrl);
         return mailContentBuilderService.build(model, "agent/Lslb-CreateAgent-Notification");
