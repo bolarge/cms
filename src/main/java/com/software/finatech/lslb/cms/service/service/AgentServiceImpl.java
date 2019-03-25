@@ -7,7 +7,9 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.AgentService;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
+import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
+import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.LicenseValidatorUtil;
 import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AgentCreationNotifierAsync;
@@ -37,7 +39,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
-import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
+import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.*;
 import static com.software.finatech.lslb.cms.service.util.NumberUtil.generateAgentId;
 
 @Service
@@ -48,6 +50,7 @@ public class AgentServiceImpl implements AgentService {
     private AuditLogHelper auditLogHelper;
     private AgentCreationNotifierAsync agentCreationNotifierAsync;
     private AuthInfoService authInfoService;
+    private GameTypeService gameTypeService;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static final Logger logger = LoggerFactory.getLogger(AgentServiceImpl.class);
@@ -59,13 +62,15 @@ public class AgentServiceImpl implements AgentService {
                             SpringSecurityAuditorAware springSecurityAuditorAware,
                             AuditLogHelper auditLogHelper,
                             AgentCreationNotifierAsync agentCreationNotifierAsync,
-                            AuthInfoService authInfoService) {
+                            AuthInfoService authInfoService,
+                            GameTypeService gameTypeService) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.licenseValidatorUtil = licenseValidatorUtil;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.auditLogHelper = auditLogHelper;
         this.agentCreationNotifierAsync = agentCreationNotifierAsync;
         this.authInfoService = authInfoService;
+        this.gameTypeService = gameTypeService;
     }
 
     @Override
@@ -97,13 +102,13 @@ public class AgentServiceImpl implements AgentService {
             if (!StringUtils.isEmpty(agentId)) {
                 query.addCriteria(Criteria.where("id").is(agentId));
             }
-            if (!StringUtils.isEmpty(name)){
+            if (!StringUtils.isEmpty(name)) {
                 query.addCriteria(Criteria.where("fullName").regex(name, "i"));
             }
-            if (!StringUtils.isEmpty(phoneNumber)){
+            if (!StringUtils.isEmpty(phoneNumber)) {
                 query.addCriteria(Criteria.where("phoneNumber").regex(phoneNumber, "i"));
             }
-            if (!StringUtils.isEmpty(agentIdNumber)){
+            if (!StringUtils.isEmpty(agentIdNumber)) {
                 query.addCriteria(Criteria.where("agentId").regex(agentIdNumber, "i"));
             }
             if (page == 0) {
@@ -287,6 +292,22 @@ public class AgentServiceImpl implements AgentService {
             if (agent == null) {
                 return Mono.just(new ResponseEntity<>("No Record found", HttpStatus.NOT_FOUND));
             }
+            if (agent.isBlackListed()) {
+                return Mono.just(new ResponseEntity<>("The Agent is currently blacklisted", HttpStatus.OK));
+            }
+
+            License license = agent.getMostRecentLicenseInCategory(gameTypeId);
+            if (license != null) {
+                if (license.isSuspendedLicence()) {
+                    return ErrorResponseUtil.BadRequestResponse(String.format("Agents %s licence is suspended", gameTypeService.findById(gameTypeId)));
+                }
+                if (license.isTerminatedLicence()) {
+                    return ErrorResponseUtil.BadRequestResponse(String.format("Agents %s licence is terminated", gameTypeService.findById(gameTypeId)));
+                }
+                if (license.isRevokedLicence()) {
+                    return ErrorResponseUtil.BadRequestResponse(String.format("Agents %s licence is revoked", gameTypeService.findById(gameTypeId)));
+                }
+            }
             return Mono.just(new ResponseEntity<>(agent.convertToFullDetailDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while validating agent", e);
@@ -455,6 +476,80 @@ public class AgentServiceImpl implements AgentService {
     @Override
     public Agent findAgentByBvn(String bvn) {
         return (Agent) mongoRepositoryReactive.find(Query.query(Criteria.where("bvn").is(bvn)), Agent.class).block();
+    }
+
+    @Override
+    public Mono<ResponseEntity> blackListAgent(String agentId) {
+        try {
+            Agent agent = findAgentById(agentId);
+            if (agent == null) {
+                return ErrorResponseUtil.BadRequestResponse(String.format("Agent with id %s does not exist", agentId));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return ErrorResponse("Could not find logged in user");
+            }
+            if (agent.isBlackListed()) {
+                return BadRequestResponse("Agent is already black listed");
+            }
+            Query query = new Query();
+            query.addCriteria(Criteria.where("agentId").is(agentId));
+            query.addCriteria(Criteria.where("agentApprovalRequestTypeId").is(AgentApprovalRequestTypeReferenceData.BLACK_LIST_AGENT_ID));
+            query.addCriteria(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID));
+            AgentApprovalRequest approvalRequest = (AgentApprovalRequest) mongoRepositoryReactive.find(query, AgentApprovalRequest.class).block();
+            if (approvalRequest != null) {
+                return BadRequestResponse("There is a pending approval request to black list the agent");
+            }
+            approvalRequest = new AgentApprovalRequest();
+            approvalRequest.setId(UUID.randomUUID().toString());
+            approvalRequest.setAgentId(agentId);
+            approvalRequest.setInitiatedByLslb(true);
+            approvalRequest.setAgentApprovalRequestTypeId(AgentApprovalRequestTypeReferenceData.BLACK_LIST_AGENT_ID);
+            approvalRequest.setInitiatorId(loggedInUser.getId());
+            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+            agentCreationNotifierAsync.sendNewAgentApprovalRequestToLSLBAdmin(approvalRequest);
+
+            return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while blacklisting agent", e);
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> whiteListAgent(String agentId) {
+        try {
+            Agent agent = findAgentById(agentId);
+            if (agent == null) {
+                return ErrorResponseUtil.BadRequestResponse(String.format("Agent with id %s does not exist", agentId));
+            }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return ErrorResponse("Could not find logged in user");
+            }
+            if (!agent.isBlackListed()) {
+                return BadRequestResponse("Agent is not black listed");
+            }
+            Query query = new Query();
+            query.addCriteria(Criteria.where("agentId").is(agentId));
+            query.addCriteria(Criteria.where("agentApprovalRequestTypeId").is(AgentApprovalRequestTypeReferenceData.WHITE_LIST_AGENT_ID));
+            query.addCriteria(Criteria.where("approvalRequestStatusId").is(ApprovalRequestStatusReferenceData.PENDING_ID));
+            AgentApprovalRequest approvalRequest = (AgentApprovalRequest) mongoRepositoryReactive.find(query, AgentApprovalRequest.class).block();
+            if (approvalRequest != null) {
+                return BadRequestResponse("There is a pending approval request to white list the agent");
+            }
+            approvalRequest = new AgentApprovalRequest();
+            approvalRequest.setId(UUID.randomUUID().toString());
+            approvalRequest.setAgentId(agentId);
+            approvalRequest.setInitiatedByLslb(true);
+            approvalRequest.setAgentApprovalRequestTypeId(AgentApprovalRequestTypeReferenceData.WHITE_LIST_AGENT_ID);
+            approvalRequest.setInitiatorId(loggedInUser.getId());
+            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+            agentCreationNotifierAsync.sendNewAgentApprovalRequestToLSLBAdmin(approvalRequest);
+
+            return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while blacklisting agent", e);
+        }
     }
 
     private PendingAgent findPendingApprovalAgentWithEmail(String email) {

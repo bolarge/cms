@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.BadRequestResponse;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Service
@@ -392,7 +393,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             paymentEmailNotifierAsync.handlePostPaymentInitiationEvents(paymentRecord, paymentRecordDetailCreateDto);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(paymentAuditActionId,
                     currentAuditorName, currentAuditorName,
-                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(paymentRecordDetail.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -676,7 +677,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         String sortDirection = "DESC";
         String sortProperty = "createdAt";
         Mono<ResponseEntity> findLicenseResponse = licenseService.findAllLicense(page, pageSize, sortDirection, sortProperty, institutionId, agentId, null, null, gameTypeId, null, null, null, null, null, null, null, null);
-        if (findLicenseResponse.block().getStatusCode() != HttpStatus.OK) {
+        if (findLicenseResponse.block() != null && findLicenseResponse.block().getStatusCode() != HttpStatus.OK) {
             String categoryName = fee.getGameTypeName();
             return Mono.just(new ResponseEntity<>(String.format("You do not have an existing license for %s, please get licensed for category %s before attempting to pay for licence renewal for the category", categoryName, categoryName), HttpStatus.BAD_REQUEST));
         }
@@ -684,7 +685,19 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         License latestExistingLicense = licenseService.getPreviousConfirmedLicense(paymentRecordDetailCreateDto.getInstitutionId(), paymentRecordDetailCreateDto.getAgentId(), fee.getGameTypeId(), fee.getLicenseTypeId());
         if (latestExistingLicense == null) {
             String categoryName = fee.getGameTypeName();
-            return Mono.just(new ResponseEntity<>(String.format("You do not have a valid license for %s, kindly contact lslb before attempting to pay for licence renewal for %s", categoryName, categoryName), HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>(String.format("You do not have a valid %s licence, kindly contact lslb before attempting to pay for licence renewal for %s", categoryName, categoryName), HttpStatus.BAD_REQUEST));
+        }
+        if (latestExistingLicense.isRevokedLicence()) {
+            String categoryName = fee.getGameTypeName();
+            return BadRequestResponse(String.format("Your %s licence is revoked", categoryName));
+        }
+        if (latestExistingLicense.isTerminatedLicence()) {
+            String categoryName = fee.getGameTypeName();
+            return BadRequestResponse(String.format("Your %s licence is terminated", categoryName));
+        }
+        if (latestExistingLicense.isSuspendedLicence()) {
+            String categoryName = fee.getGameTypeName();
+            return BadRequestResponse(String.format("Your %s licence is suspended", categoryName));
         }
         return null;
     }

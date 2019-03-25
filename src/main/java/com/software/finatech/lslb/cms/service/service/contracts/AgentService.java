@@ -52,4 +52,8 @@ public interface AgentService {
     Mono<ResponseEntity> getAllAgentGender();
 
     Agent findAgentByBvn(String bvn);
+
+    Mono<ResponseEntity> blackListAgent(String agentId);
+
+    Mono<ResponseEntity> whiteListAgent(String agentId);
 }

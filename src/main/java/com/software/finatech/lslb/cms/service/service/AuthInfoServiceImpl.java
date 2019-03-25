@@ -176,6 +176,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                     return Mono.just(new ResponseEntity<>(String.format("Role with id %s not found", authInfo.getAuthRoleId()), HttpStatus.BAD_REQUEST));
                 }
                 userDetail = SSOUserDetail.getData().get(0);
+                authInfo.setSsoUserId(userDetail.getId());
 
                 SSOClaim applicationClaim = new SSOClaim();
                 applicationClaim.setType("application");
@@ -211,6 +212,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 if (responseCode != 200) {
                     return Mono.just(new ResponseEntity<>(stringResponse, HttpStatus.valueOf(responseCode)));
                 }
+
                 model.put("name", authInfo.getFirstName() + " " + authInfo.getLastName());
                 model.put("frontEndUrl", frontEndPropertyHelper.getFrontEndUrl());
                 String content = mailContentBuilderService.build(model, "ExistingUserRegistrationEmail");
@@ -225,10 +227,8 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                         springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
                         LocalDateTime.now(), LocalDate.now(), true, requestIpAddress, verbiage));
-
                 return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
             } else {
-
                 VerificationToken verificationToken = new VerificationToken();
                 verificationToken.setId(UUID.randomUUID().toString());
                 verificationToken.setActivated(false);
@@ -255,7 +255,6 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                         springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
                         LocalDateTime.now(), LocalDate.now(), true, requestIpAddress, verbiage));
-
                 return Mono.just(new ResponseEntity<>(toCreateAuthInfoResponse(authInfo, verificationToken), HttpStatus.OK));
             }
         } catch (Exception e) {
@@ -312,11 +311,72 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
             // user exist so we add claims
             if (userExists) {
-                userDetail = SSOUserDetail.getData().get(0);
-                model.put("name", authInfo.getFirstName() + " " + authInfo.getLastName());
-                String content = mailContentBuilderService.build(model, "ExistingUserRegistrationEmail");
-                emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
+//                userDetail = SSOUserDetail.getData().get(0);
+//                model.put("name", authInfo.getFirstName() + " " + authInfo.getLastName());
+//                String content = mailContentBuilderService.build(model, "ExistingUserRegistrationEmail");
+//                emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
 
+
+                String content;
+                SSOUserDetailInfo ssoUserDetailInfo = SSOUserDetail.getData().get(0);
+
+                AuthRole authRole = authRoleService.findRoleById(authInfo.getAuthRoleId());
+                if (authRole == null) {
+                    return null;
+                }
+                userDetail = SSOUserDetail.getData().get(0);
+                authInfo.setSsoUserId(userDetail.getId());
+
+                SSOClaim applicationClaim = new SSOClaim();
+                applicationClaim.setType("application");
+                applicationClaim.setValue("lslb-cms");
+
+                SSOClaim roleClaim1 = new SSOClaim();
+                roleClaim1.setType("role");
+                roleClaim1.setValue(authRole.getSsoRoleMapping());
+
+                SSOClaim roleClaim2 = new SSOClaim();
+                roleClaim2.setType("role");
+                roleClaim2.setValue(authRole.getName());
+                SSOUserAddClaim ssoUserAddClaim = new SSOUserAddClaim();
+                ssoUserAddClaim.setUserId(userDetail.getId());
+                ssoUserAddClaim.getClaims().add(applicationClaim);
+                ssoUserAddClaim.getClaims().add(roleClaim1);
+                ssoUserAddClaim.getClaims().add(roleClaim2);
+
+                //Add claims
+                url = baseAPIURL + "/account/addclaims";
+                httpPost = new HttpPost(url);
+                //final com.fasterxml.jackson.databind.ObjectMapper mapperJson = new com.fasterxml.jackson.databind.ObjectMapper();
+                String json = mapper.toJson(ssoUserAddClaim);
+                httpPost.setEntity(new StringEntity(json));
+                httpPost.addHeader("Authorization", "Bearer " + apiToken);
+                httpPost.addHeader("client-id", clientId);
+                httpPost.addHeader("Content-Type", "application/json");
+
+                response = httpclient.execute(httpPost);
+                responseCode = response.getStatusLine().getStatusCode();
+                String stringResponse = EntityUtils.toString(response.getEntity());
+
+                if (responseCode != 200) {
+                    return null;
+                }
+
+                model.put("name", authInfo.getFirstName() + " " + authInfo.getLastName());
+                model.put("frontEndUrl", frontEndPropertyHelper.getFrontEndUrl());
+                content = mailContentBuilderService.build(model, "ExistingUserRegistrationEmail");
+                emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
+                authInfo.setEnabled(true);
+                if (ssoUserDetailInfo != null) {
+                    authInfo.setSsoUserId(ssoUserDetailInfo.getId());
+                }
+                mongoRepositoryReactive.saveOrUpdate(authInfo);
+
+                String verbiage = String.format("Create user  -> Name : %s , Id -> %s ", authInfo.getFullName(), authInfo.getId());
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
+                        springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
+                        LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                return authInfo;
             } else {
 
                 VerificationToken verificationToken = new VerificationToken();
@@ -441,7 +501,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 String verbiage = String.format("Unsuccessful password reset  -> User : %s ", userFullName);
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                         userFullName, userFullName, LocalDateTime.now(),
-                        LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
+                        LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
                 if (authInfo.isInactive() == true) {
                     authInfo.setInactive(false);
@@ -686,7 +746,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             String stringResponse = EntityUtils.toString(response.getEntity());
 
             if (responseCode == 400 && StringUtils.equalsIgnoreCase("{\"error\":\"invalid_grant\"}", stringResponse)) {
-                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), "Unsuccessful Login Attempt -> Response From SSO : \n" + stringResponse));
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), "Unsuccessful Login Attempt -> Response From SSO : \n" + stringResponse));
                 return Mono.just(new ResponseEntity<>("Invalid Credentials", HttpStatus.UNAUTHORIZED));
             }
 
@@ -694,11 +754,11 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 // everything is fine, handle the response
                 SSOToken token = mapper.readValue(stringResponse, SSOToken.class);
                 token.setAuthInfo(authInfo.convertToLoginDto());
-                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), "Successful Login Attempt"));
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), "Successful Login Attempt"));
 
                 return Mono.just(new ResponseEntity<>((token), HttpStatus.OK));
             } else {
-                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), "Unsuccessful Login Attempt -> Response From SSO : \n" + stringResponse));
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), "Unsuccessful Login Attempt -> Response From SSO : \n" + stringResponse));
                 return Mono.just(new ResponseEntity<>(stringResponse, HttpStatus.valueOf(responseCode)));
             }
         } catch (Throwable e) {
@@ -929,7 +989,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             userApprovalRequest.setAuthInfoId(subjectUserId);
             mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
             approvalRequestNotifierAsync.sendNewUserApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
-            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), String.format("Created user approval request to remove permissions from user %s", subjectUser.getFullName())));
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), String.format("Created user approval request to remove permissions from user %s", subjectUser.getFullName())));
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
             return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while removing permission from user", e);

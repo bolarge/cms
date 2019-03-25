@@ -11,4 +11,12 @@ public class ErrorResponseUtil {
         logger.error(errorMsg, e);
         return Mono.just(new ResponseEntity<>(String.format("%s", errorMsg), HttpStatus.INTERNAL_SERVER_ERROR));
     }
+
+    public static Mono<ResponseEntity> ErrorResponse(String errorMsg) {
+        return Mono.just(new ResponseEntity<>(errorMsg, HttpStatus.INTERNAL_SERVER_ERROR));
+    }
+
+    public static Mono<ResponseEntity> BadRequestResponse(String message) {
+        return Mono.just(new ResponseEntity<>(message, HttpStatus.BAD_REQUEST));
+    }
 }

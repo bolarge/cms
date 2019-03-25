@@ -13,6 +13,7 @@ public class AgentApprovalRequestDto extends AbstractApprovalRequestDto {
     private AgentDto agent;
     private Set<String> businessAddressList = new HashSet<>();
 
+
     public AgentInstitutionDto getPendingAgentInstitution() {
         return pendingAgentInstitution;
     }

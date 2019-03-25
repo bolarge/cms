@@ -153,4 +153,26 @@ public class AgentController extends BaseController {
     public Mono<ResponseEntity> getAllAgentGender() {
         return agentService.getAllAgentGender();
     }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/black-list-agent/{id}")
+    @ApiOperation(value = "Black List Agent", response = AgentApprovalRequestDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> blackListAgent(@PathVariable("id") String id) {
+        return agentService.blackListAgent(id);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/white-list-agent/{id}")
+    @ApiOperation(value = "White List Agent", response = AgentApprovalRequestDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> whiteListAgent(@PathVariable("id") String id) {
+        return agentService.whiteListAgent(id);
+    }
 }
