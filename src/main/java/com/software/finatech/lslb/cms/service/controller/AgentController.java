@@ -155,7 +155,7 @@ public class AgentController extends BaseController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/black-list-agent/{id}")
-    @ApiOperation(value = "Black List Agent", response = AgentApprovalRequestDto.class, responseContainer = "List", consumes = "application/json")
+    @ApiOperation(value = "Black List Agent", response = AgentApprovalRequestDto.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
