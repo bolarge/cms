@@ -140,7 +140,7 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
     public AgentApprovalRequestDto convertToDto() {
         AgentApprovalRequestDto agentApprovalRequestDto = new AgentApprovalRequestDto();
         agentApprovalRequestDto.setId(getId());
-       agentApprovalRequestDto.setInitiatorName(getInitiatorName());
+        agentApprovalRequestDto.setInitiatorName(getInitiatorName());
         Agent agent = getAgent();
         if (agent != null) {
             agentApprovalRequestDto.setAgentId(getAgentId());
@@ -238,7 +238,11 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
 
     public String getInitiatorName() {
         if (isInitiatedByLslb()) {
-            return getInitiatorName();
+            AuthInfo initiator = getInitiator();
+            if (initiator == null) {
+                return null;
+            }
+            return initiator.getFullName();
         } else {
             return getInstitutionName();
         }
