@@ -106,10 +106,15 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             if (!StringUtils.isEmpty(startDate) && !StringUtils.isEmpty(endDate)) {
                 query.addCriteria(Criteria.where("dateCreated").gte(new LocalDate(startDate)).lte(new LocalDate(endDate)));
             }
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser != null && (loggedInUser.isLSLBAdmin() || loggedInUser.isLSLBUser())){
+                query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
+            }
+
             if (page == 0) {
                 Long count = mongoRepositoryReactive.count(query, AgentApprovalRequest.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
-                if (count == 0) {
+                if (count == null|| count == 0) {
                     return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
                 }
             }
@@ -204,7 +209,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             agentApprovalRequest.setAsApproved();
             mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
         }
-      }
+    }
 
     private void approveBlackListAgentRequest(AgentApprovalRequest agentApprovalRequest) {
         Agent agent = agentApprovalRequest.getAgent();
@@ -243,6 +248,11 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             }
             if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.ADD_INSTITUTION_TO_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
                 rejectAddInstitutionToAgentRequest(agentApprovalRequest, rejectingUser.getId(), rejectReason);
+            }
+            if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.BLACK_LIST_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())
+                    || StringUtils.equals(AgentApprovalRequestTypeReferenceData.WHITE_LIST_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
+                agentApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.REJECTED_ID);
+                mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
             }
 
             String verbiage = String.format("Rejected agent approval request -> Type: %s ", agentApprovalRequest.getId());

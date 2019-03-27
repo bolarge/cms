@@ -1254,13 +1254,13 @@ public class LicenseServiceImpl implements LicenseService {
         LocalDate newLicenseStartDate = latestLicense.getExpiryDate();
         String licenseTypeId = latestLicense.getLicenseTypeId();
         if (StringUtils.equals(LicenseTypeReferenceData.AGENT_ID, licenseTypeId)) {
-            return newLicenseStartDate.plusMonths(gameType.getAgentLicenseDurationMonths()).minusDays(1);
+            return newLicenseStartDate.plusMonths(gameType.getAgentLicenseDurationMonths());
         }
         if (StringUtils.equals(LicenseTypeReferenceData.INSTITUTION_ID, licenseTypeId)) {
-            return newLicenseStartDate.plusMonths(gameType.getInstitutionLicenseDurationMonths()).minusDays(1);
+            return newLicenseStartDate.plusMonths(gameType.getInstitutionLicenseDurationMonths());
         }
         if (StringUtils.equals(LicenseTypeReferenceData.GAMING_MACHINE_ID, licenseTypeId)) {
-            return newLicenseStartDate.plusMonths(gameType.getGamingMachineLicenseDurationMonths()).minusDays(1);
+            return newLicenseStartDate.plusMonths(gameType.getGamingMachineLicenseDurationMonths());
         }
         throw new Exception();
     }
