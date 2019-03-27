@@ -123,7 +123,7 @@ public class DocumentTypeController extends BaseController {
             documentType.setGameTypeIds(documentTypeCreateDto.getGameTypeIds());
             mongoRepositoryReactive.saveOrUpdate(documentType);
 
-            String verbiage = String.format("Created document type -> Ticket Name: -> %s, Id -> %s ", documentType, documentType.getId());
+            String verbiage = String.format("Created document type -> Document Type  Name: -> %s, Id -> %s ", documentType, documentType.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(configAuditActionId,
                     loggedInUserName, String.format("%s--%s", loggedInUserName, documentType),
                     LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
@@ -137,7 +137,7 @@ public class DocumentTypeController extends BaseController {
         PendingDocumentType pendingDocumentType = new PendingDocumentType();
         pendingDocumentType.setId(UUID.randomUUID().toString());
         pendingDocumentType.setDocumentPurposeId(documentTypeCreateDto.getDocumentPurposeId());
-        pendingDocumentType.setActive(documentTypeCreateDto.isActive());
+        pendingDocumentType.setActive(true);
         pendingDocumentType.setRequired(true);
         pendingDocumentType.setGameTypeIds(documentTypeCreateDto.getGameTypeIds());
         pendingDocumentType.setName(documentTypeCreateDto.getName());
