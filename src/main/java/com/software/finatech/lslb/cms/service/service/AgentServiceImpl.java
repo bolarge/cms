@@ -155,7 +155,7 @@ public class AgentServiceImpl implements AgentService {
             query.addCriteria(criteria);
             query.with(PageRequest.of(0, 20));
             ArrayList<Agent> agents = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
-            if (agents == null || agents.isEmpty()) {
+            if (agents.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
             }
             ArrayList<AgentDto> agentDtos = new ArrayList<>();
@@ -293,7 +293,7 @@ public class AgentServiceImpl implements AgentService {
                 return Mono.just(new ResponseEntity<>("No Record found", HttpStatus.NOT_FOUND));
             }
             if (agent.isBlackListed()) {
-                return Mono.just(new ResponseEntity<>("The Agent is currently blacklisted", HttpStatus.OK));
+                return Mono.just(new ResponseEntity<>("The Agent is currently blacklisted", HttpStatus.BAD_REQUEST));
             }
 
             License license = agent.getMostRecentLicenseInCategory(gameTypeId);
