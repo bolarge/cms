@@ -185,7 +185,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
                 approveBlackListAgentRequest(agentApprovalRequest);
             }
 
-            if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.BLACK_LIST_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
+            if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.WHITE_LIST_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
                 approveWhiteListAgentRequest(agentApprovalRequest);
             }
 
