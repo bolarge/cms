@@ -6,7 +6,6 @@ import javax.validation.constraints.NotEmpty;
 public class AgentValidationDto {
 
     @Email
-    @NotEmpty(message = "Please provide agent email")
     private String email;
     private String agentId;
     @NotEmpty
