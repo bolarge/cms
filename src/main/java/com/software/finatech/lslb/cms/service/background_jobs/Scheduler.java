@@ -147,7 +147,7 @@ public class Scheduler {
         List<License> licenses = expirationList.getExpiringLicences(14, licenseStatuses);
         List<AuthInfo> lslbAdmins = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_AIP_ID);
         if (lslbAdmins.size() != 0) {
-            lslbAdmins.stream().forEach(lslbAdmin -> {
+            lslbAdmins.forEach(lslbAdmin -> {
 
                 List<NotificationDto> notificationDtos = new ArrayList<>();
                 LocalDate endDate;
