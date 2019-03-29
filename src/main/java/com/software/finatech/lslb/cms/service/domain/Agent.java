@@ -477,7 +477,7 @@ public class Agent extends AbstractFact {
         Sort sort = new Sort(Sort.Direction.DESC, "expiryDate");
         query.with(PageRequest.of(0, 1, sort));
         query.with(sort);
-        return (License) mongoRepositoryReactive.find(query, Agent.class).block();
+        return (License) mongoRepositoryReactive.find(query, License.class).block();
     }
 
     public boolean isBlackListed() {
