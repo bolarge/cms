@@ -107,14 +107,14 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
                 query.addCriteria(Criteria.where("dateCreated").gte(new LocalDate(startDate)).lte(new LocalDate(endDate)));
             }
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
-            if (loggedInUser != null && (loggedInUser.isLSLBAdmin() || loggedInUser.isLSLBUser())){
+            if (loggedInUser != null && (loggedInUser.isLSLBAdmin() || loggedInUser.isLSLBUser())) {
                 query.addCriteria(Criteria.where("initiatorId").ne(loggedInUser.getId()));
             }
 
             if (page == 0) {
                 Long count = mongoRepositoryReactive.count(query, AgentApprovalRequest.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
-                if (count == null|| count == 0) {
+                if (count == null || count == 0) {
                     return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
                 }
             }
