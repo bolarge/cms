@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.util.adapters.model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DeviceMagicAgent {
     private String title;
@@ -108,7 +109,7 @@ public class DeviceMagicAgent {
     }
 
     public String getPhoneNumber1() {
-        return phoneNumber1;
+        return formattedPhone(phoneNumber1);
     }
 
     public void setPhoneNumber1(String phoneNumber1) {
@@ -116,7 +117,7 @@ public class DeviceMagicAgent {
     }
 
     public String getPhoneNumber2() {
-        return phoneNumber2;
+        return formattedPhone(phoneNumber2);
     }
 
     public void setPhoneNumber2(String phoneNumber2) {
@@ -209,5 +210,16 @@ public class DeviceMagicAgent {
 
     public void setInstitutionCategoryDetailsList(List<DeviceMagicAgentInstitutionCategoryDetails> institutionCategoryDetailsList) {
         this.institutionCategoryDetailsList = institutionCategoryDetailsList;
+    }
+
+    private String formattedPhone(String phoneNumber) {
+        if (phoneNumber.startsWith("234")) {
+            return phoneNumber.replace("234", "0");
+        }
+
+        if (phoneNumber.startsWith("23")) {
+            return phoneNumber.replace("23", "0");
+        }
+        return "0" + phoneNumber;
     }
 }

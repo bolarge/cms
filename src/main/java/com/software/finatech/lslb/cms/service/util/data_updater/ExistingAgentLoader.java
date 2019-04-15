@@ -137,4 +137,58 @@ public class ExistingAgentLoader {
             logger.error("An error occurred while parsing file", e);
         }
     }
+
+
+    public void printAgents(MultipartFile multipartFile) throws LicenseServiceException {
+        if (multipartFile.isEmpty()) {
+            throw new LicenseServiceException("File is empty");
+        }
+        Map<String, DeviceMagicAgent> deviceMagicAgentMap = new HashMap<>();
+        try {
+            String completeData = new String(multipartFile.getBytes());
+            String[] rows = completeData.split("\\r?\\n");
+            for (int i = 1; i < rows.length; i++) {
+                String[] columns = rows[i].split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+                //   String[] columns = rows[i].split(",");
+                ///length of columns
+                if (columns.length < 36) {
+                    throw new LicenseServiceException("File is less than 36 columns");
+                } else {
+                    String operatorId = columns[6];
+                    if (StringUtils.equalsIgnoreCase("BETKING", operatorId)) {
+                        String bvn = columns[31];
+                        String email = columns[30];
+                        if (StringUtils.isEmpty(email)) {
+                            logger.info("{} {} with submission id {}  with operator id {} has no email",
+                                    columns[10], columns[11], columns[4], columns[6]);
+                        }
+                        if (StringUtils.isEmpty(bvn)) {
+                            logger.info("{} {} with submission id {} has no bvn", columns[10], columns[11], columns[4]);
+                        }
+                        DeviceMagicAgent deviceMagicAgent = deviceMagicAgentMap.get(bvn);
+                        if (deviceMagicAgent == null) {
+                            deviceMagicAgent = new DeviceMagicAgent();
+                            deviceMagicAgent.setBvn(bvn);
+                        } else {
+                            logger.info("Agent with bvn {} has more than one record for betking", bvn);
+                        }
+                        deviceMagicAgentMap.put(bvn, deviceMagicAgent);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("An error occurred while parsing file", e);
+        }
+    }
+
+    private String formatPhone(String phoneNumber){
+        if (StringUtils.isEmpty(phoneNumber)){
+            return null;
+        }
+        if (StringUtils.startsWith(phoneNumber,"234")){
+          //  phoneNumber = phoneNumber.re
+        }
+
+        return null;
+    }
 }

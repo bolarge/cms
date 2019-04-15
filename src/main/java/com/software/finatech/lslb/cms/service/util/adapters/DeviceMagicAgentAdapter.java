@@ -156,7 +156,6 @@ public class DeviceMagicAgentAdapter {
         }
     }
 
-
     private void saveDocumentForAgent(DeviceMagicAgent deviceMagicAgent, Agent agent) {
         String submissionId = deviceMagicAgent.getSubmissionId();
         try {
