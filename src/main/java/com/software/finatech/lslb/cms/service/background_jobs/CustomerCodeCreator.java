@@ -34,12 +34,12 @@ public class CustomerCodeCreator {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerCodeCreator.class);
 
-
     @Scheduled(fixedRate = 3000, initialDelay = 200)
     @SchedulerLock(name = "Create Customer Code for Institutions and Agents without Customer code", lockAtMostFor = FIVE_MIN, lockAtLeastFor = FIVE_MIN)
     public void createCustomers() {
         Query query = new Query();
         query.addCriteria(Criteria.where("vgPayCustomerCode").is(null));
+        query.addCriteria(Criteria.where("fromLiveData").is(false));
         ArrayList<Institution> institutionsWithoutVigiPayCustomerCode = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
         for (Institution institution : institutionsWithoutVigiPayCustomerCode) {
             try {
@@ -60,7 +60,6 @@ public class CustomerCodeCreator {
                 logger.error("An error occurred while creating customer for {}", institution.getInstitutionName());
             }
         }
-
 
         query.addCriteria(Criteria.where("skipVigipay").is(false));
         ArrayList<Agent> agentWithoutVigiPayCustomerCode = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());

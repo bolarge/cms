@@ -120,7 +120,6 @@ public class VigipayServiceImpl implements VigipayService {
         return vigipayCreateCustomer;
     }
 
-
     private VigipayCreateInvoice createInvoiceFromInstitution(Institution institution, List<AuthInfo> authInfos,
                                                               List<VigipayInvoiceItem> vigipayInvoiceItems) {
         VigipayCreateInvoice vigipayCreateInvoice = new VigipayCreateInvoice();
@@ -139,6 +138,7 @@ public class VigipayServiceImpl implements VigipayService {
         vigipayCreateInvoice.setInvoiceType(1);
         vigipayCreateInvoice.setInvoiceAction(2);
         vigipayCreateInvoice.setCreateContacts(true);
+        vigipayCreateInvoice.setCorporateCode(corporateCode);
         return vigipayCreateInvoice;
     }
 
@@ -161,6 +161,7 @@ public class VigipayServiceImpl implements VigipayService {
         vigipayCreateInvoice.setInvoiceType(1);
         vigipayCreateInvoice.setInvoiceAction(2);
         vigipayCreateInvoice.setCreateContacts(true);
+        vigipayCreateInvoice.setCorporateCode(corporateCode);
         return vigipayCreateInvoice;
     }
 
@@ -181,6 +182,7 @@ public class VigipayServiceImpl implements VigipayService {
         vigipayCreateInvoice.setInvoiceType(1);
         vigipayCreateInvoice.setInvoiceAction(2);
         vigipayCreateInvoice.setCreateContacts(true);
+        vigipayCreateInvoice.setCorporateCode(corporateCode);
         return vigipayCreateInvoice;
     }
 
