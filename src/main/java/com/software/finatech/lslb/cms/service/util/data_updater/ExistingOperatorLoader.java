@@ -18,6 +18,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,9 @@ public class ExistingOperatorLoader {
     private GameTypeService gameTypeService;
     @Autowired
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
+
+    @Autowired
+    private Environment environment;
 
     private DateTimeFormatter dateTimeFormat = DateTimeFormat.forPattern("dd/MM/yyyy");
 
@@ -203,12 +207,10 @@ public class ExistingOperatorLoader {
                 pendingInstitution.setInstitutionName(institutionUpload.getInstitutionName());
                 pendingInstitution.setActive(true);
                 pendingInstitution.setDescription(institutionUpload.getDescription());
-                pendingInstitution.setEmailAddress("test@mailinator.com");
-                // pendingInstitution.setEmailAddress(institutionUpload.getEmailAddress());
+                pendingInstitution.setEmailAddress(getInstitutionAddressBasedOnEnvironment(institutionUpload));
                 pendingInstitution.setPhoneNumber(String.format("0%s", institutionUpload.getPhoneNumber()));
                 pendingInstitution.setFromLiveData(true);
                 pendingInstitution.setAddress(institutionUpload.getAddress());
-                //  pendingInstitution.setForTest(true);
             }
             // for (InstitutionLoadDetails institutionLoadDetails : institutionUpload.getInstitutionLoadDetails()) {
             InstitutionLoadDetails institutionLoadDetails = institutionUpload.getLoadDetails();
@@ -300,5 +302,19 @@ public class ExistingOperatorLoader {
         LocalDateTime time = LocalDateTime.now();
         String randomDigit = String.valueOf(NumberUtil.getRandomNumberInRange(10, 1000));
         return String.format("LSLB-OP-%s-%s%s", gameType.getShortCode(), randomDigit, time.getSecondOfMinute());
+    }
+
+
+    public String getInstitutionAddressBasedOnEnvironment(InstitutionUpload institutionUpload) {
+        List<String> profiles = Arrays.asList(environment.getActiveProfiles());
+        if (profiles.contains("staging") ||
+                profiles.contains("test") ||
+                profiles.contains("development")) {
+            return "test@mailinator.com";
+        }
+        if (profiles.contains("production")) {
+            return institutionUpload.getAddress();
+        }
+        return null;
     }
 }
