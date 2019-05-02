@@ -1,6 +1,5 @@
 package com.software.finatech.lslb.cms.service.util.adapters;
 
-import com.google.common.io.Files;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
@@ -8,8 +7,6 @@ import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.adapters.model.DeviceMagicAgent;
 import com.software.finatech.lslb.cms.service.util.adapters.model.DeviceMagicAgentInstitutionCategoryDetails;
 import org.apache.commons.lang3.StringUtils;
-import org.bson.BsonBinarySubType;
-import org.bson.types.Binary;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -17,6 +14,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
@@ -25,6 +23,8 @@ import org.springframework.util.ResourceUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -35,6 +35,8 @@ public class DeviceMagicAgentAdapter {
     private static final Logger logger = LoggerFactory.getLogger(DeviceMagicAgentAdapter.class);
     @Autowired
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
+    @Autowired
+    private Environment environment;
 
     public void saveDeviceMagicAgentToAgentDb(DeviceMagicAgent deviceMagicAgent) {
         if (StringUtils.isEmpty(deviceMagicAgent.getEmail())) {
@@ -98,8 +100,8 @@ public class DeviceMagicAgentAdapter {
             }
             address = buildAddress(institutionCategoryDetails.getBusinessAddressStreet4(),
                     institutionCategoryDetails.getBusinessAddressCity4(), institutionCategoryDetails.getBusinessAddressState4());
-          boolean addressIsEmpty = StringUtils.isEmpty(address);
-          boolean addressIsNotEmpty = !addressIsEmpty;
+            boolean addressIsEmpty = StringUtils.isEmpty(address);
+            boolean addressIsNotEmpty = !addressIsEmpty;
             if (addressIsNotEmpty) {
                 address = address.replace("\"", "");
                 agentInstitution.getBusinessAddressList().add(address);
@@ -175,10 +177,14 @@ public class DeviceMagicAgentAdapter {
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
             document.setAgentId(agent.getId());
             try {
-                DocumentBinary documentBinary = new DocumentBinary();
-                documentBinary.setFile(new Binary(BsonBinarySubType.BINARY, Files.toByteArray(file)));
-                documentBinary.setDocumentId(document.getId());
-                mongoRepositoryReactive.saveOrUpdate(documentBinary);
+                document.setAwsObjectKey(getAgentPassportKey(deviceMagicAgent));
+                /**
+                 *    Old method that saves in DB
+                 */
+//                DocumentBinary documentBinary = new DocumentBinary();
+//                documentBinary.setFile(new Binary(BsonBinarySubType.BINARY, Files.toByteArray(file)));
+//                documentBinary.setDocumentId(document.getId());
+//                mongoRepositoryReactive.saveOrUpdate(documentBinary);
             } catch (IOException e) {
                 logger.error("An error occurred while setting bytes of document");
             }
@@ -510,5 +516,22 @@ public class DeviceMagicAgentAdapter {
         Query query = new Query();
         query.addCriteria(Criteria.where("submissionId").is(submissionId));
         return (Agent) mongoRepositoryReactive.find(query, Agent.class).block();
+    }
+
+    private String getAgentPassportKey(DeviceMagicAgent deviceMagicAgent) throws IOException {
+        List<String> activeProfiles = Arrays.asList(environment.getActiveProfiles());
+        if (activeProfiles.contains("test")) {
+            return String.format("lslb-cms/test/Agent_Passports/%s/Picture.JPEG", deviceMagicAgent.getSubmissionId());
+        }
+        if (activeProfiles.contains("staging")) {
+            return String.format("lslb-cms/staging/Agent_Passports/%s/Picture.JPEG", deviceMagicAgent.getSubmissionId());
+        }
+        if (activeProfiles.contains("production")) {
+            return String.format("lslb-cms/production/Agent_Passports/%s/Picture.JPEG", deviceMagicAgent.getSubmissionId());
+        }
+        if (activeProfiles.contains("development")) {
+            return String.format("lslb-cms/development/Agent_Passports/%s/Picture.JPEG", deviceMagicAgent.getSubmissionId());
+        }
+        throw new IOException("Invalid Environment");
     }
 }
