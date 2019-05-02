@@ -91,6 +91,13 @@ vigipay:
   corporate-revenue-code: Default
   corporate-code: COR4U7CJTRAZW7H
 
+
+amazon:
+  s3:
+    bucket-name: vgg-aws-finatech
+    access-key-id: AKIA4NIIUUQEO26RTVXY
+    secret-access-key: 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
+
 email-host: ${EMAIL_HOST}
 email-username: ${EMAIL_USERNAME}
 email-password: ${EMAIL_PASSWORD}

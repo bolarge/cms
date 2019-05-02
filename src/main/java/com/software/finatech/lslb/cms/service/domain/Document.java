@@ -42,7 +42,16 @@ public class Document extends AbstractFact {
     protected String approvalRequestStatusId;
     protected LocalDate nextReminderDate;
     protected List<CommentDetail> comments = new ArrayList<>();
+    //AWS Key of document in AWS
+    private String awsObjectKey;
 
+    public String getAwsObjectKey() {
+        return awsObjectKey;
+    }
+
+    public void setAwsObjectKey(String awsObjectKey) {
+        this.awsObjectKey = awsObjectKey;
+    }
 
     public List<CommentDetail> getComments() {
         return comments;
@@ -77,7 +86,7 @@ public class Document extends AbstractFact {
     }
 
     public String getApprovalRequestStatusId() {
-        if(approvalRequestStatusId==null){
+        if (approvalRequestStatusId == null) {
             return "";
         }
         return approvalRequestStatusId;

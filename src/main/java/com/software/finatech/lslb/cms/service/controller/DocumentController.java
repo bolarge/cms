@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.referencedata.AuditActionReference
 import com.software.finatech.lslb.cms.service.referencedata.DocumentPurposeReferenceData;
 import com.software.finatech.lslb.cms.service.service.RenewalFormServiceImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.ApplicationFormService;
+import com.software.finatech.lslb.cms.service.service.contracts.S3Service;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
@@ -30,7 +31,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
@@ -61,6 +61,8 @@ public class DocumentController extends BaseController {
     private ApplicationFormService applicationFormService;
     @Autowired
     private RenewalFormServiceImpl renewalFormService;
+    @Autowired
+    private S3Service s3Service;
 
 
     @RequestMapping(method = RequestMethod.POST, value = "/upload", produces = "application/json")
@@ -96,7 +98,7 @@ public class DocumentController extends BaseController {
             //We then reconcile it with the document objects
             ArrayList<FactObject> documents = new ArrayList<>();
             ArrayList<FactObject> documentCheck = new ArrayList<>();
-            documentDtos.stream().forEach(documentDto -> {
+            documentDtos.forEach(documentDto -> {
                 try {
                     logger.info("Creating file : " + documentDto.getFilename());
 
@@ -139,11 +141,13 @@ public class DocumentController extends BaseController {
                         document.setPreviousDocumentId(documentDto.getPreviousDocumentId());
                         //document.setValidFrom(new LocalDate(documentDto.getValidFrom()));
                         //document.setValidTo(new LocalDate(documentDto.getValidTo()));
-                        DocumentBinary documentBinary = new DocumentBinary();
-                        documentBinary.setId(UUID.randomUUID().toString());
-                        documentBinary.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
-                        documentBinary.setDocumentId(document.getId());
-                        mongoRepositoryReactive.saveOrUpdate(documentBinary);
+
+
+                        s3Service.uploadMultipartForDocument(file, document);
+                        /**
+                         * Previous method that sets binary for documents
+                         */
+                        //    saveBinaryForDocument(file, document);
                         if (document.requiresApproval()) {
                             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
                         }
@@ -168,8 +172,7 @@ public class DocumentController extends BaseController {
             if (documentCheck.size() != files.length) {
                 return Mono.just(new ResponseEntity<>("Json & file length do not match. Please make sure the each file has a corresponding filename in the json.", HttpStatus.BAD_REQUEST));
             }
-            documents.stream().forEach(doc -> {
-
+            documents.forEach(doc -> {
                 mongoRepositoryReactive.saveOrUpdate(doc);
             });
 
@@ -283,11 +286,8 @@ public class DocumentController extends BaseController {
                 document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
             }
             try {
-                DocumentBinary documentBinary = new DocumentBinary();
-                documentBinary.setId(UUID.randomUUID().toString());
-                documentBinary.setFile(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
-                documentBinary.setDocumentId(document.getId());
-                mongoRepositoryReactive.saveOrUpdate(documentBinary);
+                s3Service.uploadMultipartForDocument(multipartFile, document);
+                //   saveBinaryForDocument(multipartFile, document);
             } catch (IOException e) {
                 logger.error("An error occurred while setting bytes of document");
             }
@@ -321,6 +321,15 @@ public class DocumentController extends BaseController {
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while re uploading document", e);
         }
+    }
+
+
+    private void saveBinaryForDocument(MultipartFile multipartFile, Document document) throws IOException {
+        DocumentBinary documentBinary = new DocumentBinary();
+        documentBinary.setId(UUID.randomUUID().toString());
+        documentBinary.setFile(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
+        documentBinary.setDocumentId(document.getId());
+        mongoRepositoryReactive.saveOrUpdate(documentBinary);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/get-institution-document-aip", params = {"gameTypeId", "documentPurposeId", "institutionId"})
@@ -386,13 +395,9 @@ public class DocumentController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getByInstitution(@RequestParam("documentId") String documentId) {
-
         if (StringUtils.isEmpty(documentId)) {
             return Mono.just(new ResponseEntity("documentId is required", HttpStatus.BAD_REQUEST));
-
         }
-
-
         Document document = (Document) mongoRepositoryReactive.findById(documentId, Document.class).block();
 
         if (document == null) {
@@ -417,27 +422,23 @@ public class DocumentController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public void downloadById(@PathVariable("id") String id, HttpServletResponse httpServletResponse) throws FactNotFoundException {
-
         Document document = (Document) mongoRepositoryReactive.findById((id), Document.class).block();
-        DocumentBinary documentBinary = (DocumentBinary) mongoRepositoryReactive.find(new Query(Criteria.where("documentId").is(document.getId())), DocumentBinary.class).block();
-
+        //DocumentBinary documentBinary = (DocumentBinary) mongoRepositoryReactive.find(new Query(Criteria.where("documentId").is(document.getId())), DocumentBinary.class).block();
         if (document == null) {
             throw new FactNotFoundException("document", id);
         }
-
-        Binary binary = documentBinary != null ? documentBinary.getFile() : null;
-        if (binary != null) {
+        // Binary binary = documentBinary != null ? documentBinary.getFile() : null;
+        if (document != null) {
             try {
-
                 String filename = document.getFilename();
                 httpServletResponse.setHeader("filename", filename);
                 httpServletResponse.setHeader("Content-Disposition", String.format("inline; filename=\"" + filename + "\""));
                 httpServletResponse.setContentType(document.getMimeType());
-                httpServletResponse.setContentLength(binary.getData().length);
-
+                //   httpServletResponse.setContentLength(binary.getData().length);
+                s3Service.downloadFileToHttpResponse(document.getAwsObjectKey(), filename, httpServletResponse);
                 //We are using Spring FileCopyUtils utility class to copy stream from source to destination.
                 //Copy bytes from source to destination(outputstream in this example), closes both streams.
-                FileCopyUtils.copy(binary.getData(), httpServletResponse.getOutputStream());
+                //     FileCopyUtils.copy(binary.getData(), httpServletResponse.getOutputStream());
 
                 httpServletResponse.flushBuffer();
             } catch (Exception e) {
