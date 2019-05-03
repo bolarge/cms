@@ -102,3 +102,9 @@ email-host: ${EMAIL_HOST}
 email-username: ${EMAIL_USERNAME}
 email-password: ${EMAIL_PASSWORD}
 email-port: ${EMAIL_PORT}
+
+seed_user_1:
+  email: ${SEED_USER1_EMAIL}
+
+seed_user_2:
+  email: ${SEED_USER2_EMAIL}
