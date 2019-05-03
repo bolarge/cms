@@ -48,6 +48,8 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -1107,5 +1109,42 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         query.addCriteria(Criteria.where("enabled").is(true));
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
         return (ArrayList<AuthInfo>) mongoRepositoryReactive.findAll(query, AuthInfo.class).toStream().collect(Collectors.toList());
+    }
+
+    @Override
+    public SSOUserDetailInfo getSSOUserDetailInfoByEmail(String email) {
+
+        HttpClient httpclient = HttpClientBuilder.create().build();
+
+        try {
+
+            String token = this.getAPIToken();
+
+            String url = baseAPIURL + "/account/getuserbyemail?email=" + email;
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.addHeader("Authorization", "Bearer " + token);
+            httpGet.addHeader("client-id", clientId);
+            HttpResponse response = httpclient.execute(httpGet);
+
+            if (response.getStatusLine().getStatusCode() != 200) {
+
+                logger.error("get user by email returns status code " + response.getStatusLine().getStatusCode());
+                logger.error(response.getStatusLine().getReasonPhrase());
+                logger.error(EntityUtils.toString(response.getEntity()));
+                return null;
+
+            }
+
+            String stringResponse = EntityUtils.toString(response.getEntity());
+            logger.info("string response is " + stringResponse);
+            SSOUserDetail userDetail = mapper.readValue(stringResponse, SSOUserDetail.class);
+
+            return userDetail.getData().get(0);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new UncheckedIOException(e);
+        }
+
     }
 }

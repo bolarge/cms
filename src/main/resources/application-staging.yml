@@ -13,6 +13,7 @@ management:
   enabled-by-default: false
   shutdown:
     enabled: true
+
 management:
   endpoints:
     web:
@@ -39,15 +40,10 @@ mongodb:
   authDb:
   replicaSet:
 
-
 logging:
   level:
     ROOT: INFO
     #Rememeber to change the credentials for SSO
-
-
-
-
 
 sso:
   baseIdentityURL: https://sso.staging.vggdev.com/identity
@@ -63,12 +59,10 @@ sso:
 jwt:
   header: Authorization
 
-
 racs:
   ui:
     host: ${UI_HOST}
     port:
-
 
 vigipay:
   client_id: ${VIGIPAY_CLIENT_ID}
@@ -96,3 +90,8 @@ email-username: ${EMAIL_USERNAME}
 email-password: ${EMAIL_PASSWORD}
 email-port: ${EMAIL_PORT}
 
+seed_user_1:
+  email: ${SEED_USER1_EMAIL}
+
+seed_user_2:
+  email: ${SEED_USER2_EMAIL}

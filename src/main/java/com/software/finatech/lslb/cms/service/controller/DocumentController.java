@@ -83,19 +83,23 @@ public class DocumentController extends BaseController {
         List<DocumentCreateDto> documentDtos;
 
         try {
+
             documentDtos = mapper.readValue(json, List.class, DocumentCreateDto.class);
+
         } catch (Exception e) {
+
             logger.error(e.getMessage(), e);
             return Mono.just(new ResponseEntity<>("Invalid Json", HttpStatus.BAD_REQUEST));
+
         }
+
         try {
             //Put the files in a map
             HashMap<String, MultipartFile> fileMap = new HashMap<>();
             for (MultipartFile file : files) {
                 fileMap.put(file.getOriginalFilename(), file);
             }
-            Boolean filenameValidationCheckFailed = false;
-            //We then reconcile it with the document objects
+
             ArrayList<FactObject> documents = new ArrayList<>();
             ArrayList<FactObject> documentCheck = new ArrayList<>();
             documentDtos.forEach(documentDto -> {
@@ -324,14 +328,6 @@ public class DocumentController extends BaseController {
     }
 
 
-    private void saveBinaryForDocument(MultipartFile multipartFile, Document document) throws IOException {
-        DocumentBinary documentBinary = new DocumentBinary();
-        documentBinary.setId(UUID.randomUUID().toString());
-        documentBinary.setFile(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
-        documentBinary.setDocumentId(document.getId());
-        mongoRepositoryReactive.saveOrUpdate(documentBinary);
-    }
-
     @RequestMapping(method = RequestMethod.GET, value = "/get-institution-document-aip", params = {"gameTypeId", "documentPurposeId", "institutionId"})
     @ApiOperation(value = "Get AIP Documents", response = ApplicationFormDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
@@ -434,11 +430,9 @@ public class DocumentController extends BaseController {
                 httpServletResponse.setHeader("filename", filename);
                 httpServletResponse.setHeader("Content-Disposition", String.format("inline; filename=\"" + filename + "\""));
                 httpServletResponse.setContentType(document.getMimeType());
-                //   httpServletResponse.setContentLength(binary.getData().length);
+
                 s3Service.downloadFileToHttpResponse(document.getAwsObjectKey(), filename, httpServletResponse);
-                //We are using Spring FileCopyUtils utility class to copy stream from source to destination.
-                //Copy bytes from source to destination(outputstream in this example), closes both streams.
-                //     FileCopyUtils.copy(binary.getData(), httpServletResponse.getOutputStream());
+
 
                 httpServletResponse.flushBuffer();
             } catch (Exception e) {
@@ -666,6 +660,7 @@ public class DocumentController extends BaseController {
 
                     if (file != null) {
                         String originalFilename = file.getOriginalFilename();
+
                         Document document = new Document();
                         document.setId(UUID.randomUUID().toString().replace("-", ""));
                         document.setEntityId(documentDto.getEntityId());
@@ -682,15 +677,12 @@ public class DocumentController extends BaseController {
                         document.setInstitutionId(documentDto.getInstitutionId());
                         document.setAgentId(documentDto.getAgentId());
                         document.setPreviousDocumentId(documentDto.getPreviousDocumentId());
-                        DocumentBinary documentBinary = new DocumentBinary();
-                        documentBinary.setId(UUID.randomUUID().toString());
-                        documentBinary.setFile(new Binary(BsonBinarySubType.BINARY, file.getBytes()));
-                        documentBinary.setDocumentId(document.getId());
-                        mongoRepositoryReactive.saveOrUpdate(documentBinary);
+
+                        //sets aws object key
+                        s3Service.uploadMultipartForDocument(file, document);
                         documents.add(document);
                         documentCheck.add(document);
-                        //If there is an existing doc we set it to false
-
+ 
                     }
                 } catch (Exception e) {
                     logger.error("An error occurred while saving document", e);
