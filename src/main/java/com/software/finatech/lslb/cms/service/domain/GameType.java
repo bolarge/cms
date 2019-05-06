@@ -117,6 +117,7 @@ public class GameType extends EnumeratedFact {
         gameType.setShortCode(getShortCode());
         gameType.setAllowsGamingMachine(getAllowsGamingMachine());
         gameType.setAllowsGamingTerminal(getAllowsGamingTerminal());
+        gameType.setAllowsAgents(isAllowsAgents());
         gameType.setGamingTerminalLicenseDuration(String.valueOf(getGamingTerminalLicenseDurationMonths()));
         return gameType;
     }
