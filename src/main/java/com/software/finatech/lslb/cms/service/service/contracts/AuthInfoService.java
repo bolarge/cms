@@ -5,6 +5,8 @@ import com.software.finatech.lslb.cms.service.domain.VerificationToken;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOChangePasswordModel;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOPasswordResetModel;
+import com.software.finatech.lslb.cms.service.dto.sso.SSOUser;
+import com.software.finatech.lslb.cms.service.dto.sso.SSOUserDetailInfo;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
@@ -58,4 +60,6 @@ public interface AuthInfoService {
     void updateInstitutionMembersToGamingOperatorRole(String institutionId);
 
     ArrayList<AuthInfo> findAllEnabledUsersForInstitution(String institutionId);
+
+    SSOUserDetailInfo getSSOUserDetailInfoByEmail(String email);
 }

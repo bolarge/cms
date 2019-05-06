@@ -1,14 +1,16 @@
 package com.software.finatech.lslb.cms.service.util;
 
 import com.software.finatech.lslb.cms.service.domain.*;
+import com.software.finatech.lslb.cms.service.dto.sso.SSOUser;
+import com.software.finatech.lslb.cms.service.dto.sso.SSOUserDetailInfo;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
+import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -21,37 +23,70 @@ import java.util.stream.Collectors;
 @Component("databaseLoaderUtils")
 public class DatabaseLoaderUtils {
     private static Logger logger = LoggerFactory.getLogger(DatabaseLoaderUtils.class);
+
+    @Value("${seed_user_1.email}")
+    private String seedUserEmail1;
+
+    @Value("${seed_user_2.email}")
+    private String seedUserEmail2;
+
     @Autowired
     protected MongoRepositoryReactiveImpl mongoRepositoryReactive;
+
+    @Autowired
+    protected AuthInfoService authInfoService;
+
     protected io.advantageous.boon.json.ObjectMapper mapper;
 
     public void runSeedData(Environment env) {
-        //Seed AuthInfo
+
         AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById("1", AuthInfo.class).block();
+
         if (authInfo == null) {
+
             authInfo = new AuthInfo();
             authInfo.setId("1");
-        }
-        if (Arrays.asList(env.getActiveProfiles()).contains("development") || Arrays.asList(env.getActiveProfiles()).contains("test")) {
-            authInfo.setEmailAddress("David_J");
-        } else if (Arrays.asList(env.getActiveProfiles()).contains("staging")) {
-            authInfo.setEmailAddress("david.jaiyeola@venturegardengroup.com");
-            //authInfo.setSsoUserId("44016f38-7897-4a5b-b9af-46ee4589b9a1");
-        } else if (Arrays.asList(env.getActiveProfiles()).contains("production")) {
-            authInfo.setEmailAddress("david.jaiyeola@venturegardengroup.com");
-            authInfo.setSsoUserId("44016f38-7897-4a5b-b9af-46ee4589b9a1");
+
         }
 
+        SSOUserDetailInfo user = authInfoService.getSSOUserDetailInfoByEmail(seedUserEmail1);
+        authInfo.setEmailAddress(seedUserEmail1);
         authInfo.setEnabled(true);
         authInfo.setAuthRoleId("2");
-        authInfo.setAccountLocked(false);
+        authInfo.setAccountLocked(user.isLocked());
         authInfo.setAttachmentId(null);
-        authInfo.setPhoneNumber("");
-        authInfo.setFirstName("David");
-        authInfo.setLastName("Jaiyeola");
-        authInfo.setFullName("David" + " " + "Jaiyeola");
+        authInfo.setPhoneNumber(user.getPhoneNumber());
+        authInfo.setFirstName(user.getFirstName());
+        authInfo.setLastName(user.getLastName());
+        authInfo.setFullName(user.getFirstName() + " " + user.getLastName());
         authInfo.setInstitutionId(null);
+        authInfo.setSsoUserId(user.getId());
+
         mongoRepositoryReactive.saveOrUpdate(authInfo);
+
+        AuthInfo authInfo2 = (AuthInfo) mongoRepositoryReactive.findById("2", AuthInfo.class).block();
+
+        if (authInfo2 == null) {
+
+            authInfo2 = new AuthInfo();
+            authInfo2.setId("2");
+
+        }
+
+        SSOUserDetailInfo user2 = authInfoService.getSSOUserDetailInfoByEmail(seedUserEmail2);
+        authInfo2.setEmailAddress(seedUserEmail2);
+        authInfo2.setEnabled(true);
+        authInfo2.setAuthRoleId("2");
+        authInfo2.setAccountLocked(user2.isLocked());
+        authInfo2.setAttachmentId(null);
+        authInfo2.setPhoneNumber(user2.getPhoneNumber());
+        authInfo2.setFirstName(user2.getFirstName());
+        authInfo2.setLastName(user2.getLastName());
+        authInfo2.setFullName(user2.getFirstName() + " " + user2.getLastName());
+        authInfo2.setInstitutionId(null);
+        authInfo2.setSsoUserId(user2.getId());
+
+        mongoRepositoryReactive.saveOrUpdate(authInfo2);
 
         AuthRoleReferenceData.load(mongoRepositoryReactive);
         LSLBAuthPermissionReferenceData.load(mongoRepositoryReactive);
@@ -86,6 +121,7 @@ public class DatabaseLoaderUtils {
         LoggedCaseOutcomeReferenceData.load(mongoRepositoryReactive);
         GenderReferenceData.load(mongoRepositoryReactive);
         InspectionStatusReferenceData.load(mongoRepositoryReactive);
+
     }
 
     // @Profile("test")
@@ -132,6 +168,7 @@ public class DatabaseLoaderUtils {
         factEnums.put("Gender", Gender.class);
 
         for (Map.Entry<String, Class> entry : factEnums.entrySet()) {
+
             logger.info("Importing ReferenceMasterData for > " + entry.getKey());
             Long startTime = System.nanoTime();
             HashSet<FactObject> factObjects =
@@ -146,7 +183,9 @@ public class DatabaseLoaderUtils {
             Long endTime = System.nanoTime() - startTime;
             Double timeMills = Double.valueOf(endTime) / Double.valueOf(1000000);
             logger.info("Importing took " + " -> " + endTime + "ns" + " >>> " + timeMills + "ms");
+
         }
+
     }
 
     public MongoRepositoryReactiveImpl getMongoRepositoryReactive() {

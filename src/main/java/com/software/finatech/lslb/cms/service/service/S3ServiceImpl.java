@@ -5,6 +5,8 @@ import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiv
 import com.software.finatech.lslb.cms.service.service.contracts.S3Service;
 import org.apache.commons.lang3.StringUtils;
 import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +24,10 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,6 +36,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.software.finatech.lslb.cms.service.util.NumberUtil.getRandomNumberInRange;
 import static org.apache.commons.io.FilenameUtils.getExtension;
@@ -67,36 +69,41 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public void uploadMultipartForDocument(MultipartFile multipartFile, Document document) throws Exception {
+
         String key = getDecoratedKeyWithFolderName(String.format("%s-%s.%s", removeExtension(multipartFile.getOriginalFilename()),
                 getRandomNumberInRange(0, 1000),
                 getExtension(multipartFile.getOriginalFilename())));
         try {
-            File temp_file = writeToTempFile(multipartFile);
-            PutObjectRequest putObjectRequest = PutObjectRequest
-                    .builder()
-                    .bucket(bucketName)
-                    .key(key)
-                    .contentType(multipartFile.getContentType())
-                    .contentLength(temp_file.length()).build();
-            multipartFile.transferTo(temp_file);
-            PutObjectResponse response = client.putObject(putObjectRequest,
-                    AsyncRequestProvider.fromFile(temp_file.toPath())).get();
+
+            PutObjectResponse response = putObjectInBucket(key, new AsyncRequestProvider() {
+
+                @Override
+                public long contentLength() {
+                    return multipartFile.getSize();
+                }
+
+                @Override
+                public void subscribe(Subscriber<? super ByteBuffer> subscriber) {
+                    try {
+                        subscriber.onSubscribe(new UploadSubscription(multipartFile.getInputStream(), subscriber));
+                    } catch (IOException e) {
+                        logger.error("error occured in subscribe exception",e);
+                        throw  new UncheckedIOException(e);
+                    }
+
+                }
+            }).get();
+
             if (response != null) {
                 logger.info(" Response ==> {}", response);
                 document.setAwsObjectKey(key);
                 mongoRepositoryReactive.saveOrUpdate(document);
-                if (!temp_file.delete()) {
-                    logger.error("Could not delete temp file {}", temp_file.getName());
-                }
+
             } else {
                 logger.error("Invalid response");
-                if (!temp_file.delete()) {
-                    logger.error("Could not delete temp file {}", temp_file.getName());
-                }
+
             }
-        } catch (IOException e) {
-            logger.error("IO Error occurred while trying to upload file", e);
-        } catch (InterruptedException | ExecutionException e) {
+        }  catch (InterruptedException | ExecutionException e) {
             logger.error("Error occurred while working with completable future", e);
         }
     }
@@ -152,6 +159,13 @@ public class S3ServiceImpl implements S3Service {
         return client.getObject(GetObjectRequest.builder().bucket(bucketName).key(objectKey).build(), handler);
     }
 
+    private CompletableFuture<PutObjectResponse> putObjectInBucket(String objectKey, AsyncRequestProvider provider) {
+        return client.putObject(PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(objectKey)
+                .build(),provider);
+    }
+
     private SimpleSubscriber createSubscriber(OutputStream out) {
         WritableByteChannel channel = Channels.newChannel(out);
         return new SimpleSubscriber(byteBuffer -> {
@@ -161,19 +175,6 @@ public class S3ServiceImpl implements S3Service {
                 logger.error("IO error occurred on subscribe", e);
             }
         });
-    }
-
-
-    private File writeToTempFile(MultipartFile file) throws Exception {
-        if (StringUtils.isEmpty(file.getOriginalFilename())) {
-            throw new Exception("File Name must not be empty");
-        }
-        Path filepath = Paths.get(file.getOriginalFilename());
-
-        try (OutputStream os = Files.newOutputStream(filepath)) {
-            os.write(file.getBytes());
-            return filepath.toFile();
-        }
     }
 
     private String getDecoratedKeyWithFolderName(String key) throws Exception {
@@ -191,5 +192,67 @@ public class S3ServiceImpl implements S3Service {
             return String.format("lslb-cms/development/%s", key);
         }
         throw new Exception("Invalid Environment");
+    }
+
+    private class UploadSubscription implements  Subscription {
+
+        private ReadableByteChannel inputChannel;
+        private Subscriber<? super ByteBuffer> subscriber;
+        private AtomicLong outstandingRequests;
+        private boolean writeInProgress;
+
+        public UploadSubscription (InputStream inputStream, Subscriber<? super ByteBuffer> subscriber) {
+
+            this.writeInProgress = false;
+            inputChannel = Channels.newChannel(inputStream);
+            this.subscriber = subscriber;
+            this.outstandingRequests = new AtomicLong(0L);
+
+        }
+
+        @Override
+        public void request(long n) {
+            this.outstandingRequests.addAndGet(n);
+            synchronized(this) {
+                if (!this.writeInProgress) {
+                    this.writeInProgress = true;
+                    this.readData();
+                }
+            }
+        }
+
+        private void readData() {
+
+            ByteBuffer buffer = ByteBuffer.allocate(1024);
+            try {
+                while (inputChannel.read(buffer) != -1 || buffer.position() > 0) {
+                    buffer.flip();
+                    subscriber.onNext(buffer);
+                    buffer.compact();
+                }
+            } catch (IOException ex) {
+                logger.error("IOException occured in readData()", ex);
+                throw new UncheckedIOException(ex);
+            }
+
+            UploadSubscription.this.writeInProgress = false;
+
+        }
+
+        private void closeFile() {
+            try {
+                this.inputChannel.close();
+                subscriber.onComplete();
+            } catch(IOException ex) {
+                logger.error("IOException occured in closeFile()", ex);
+                throw new UncheckedIOException(ex);
+            }
+        }
+
+        @Override
+        public void cancel() {
+            this.closeFile();
+        }
+
     }
 }

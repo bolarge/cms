@@ -29,7 +29,6 @@ security:
   enable-csrf: false
   ignored: /resources/**
   basic:
-
     enabled: false
 mongodb:
   hosts: localhost:27017 #172.31.31.29:27017,172.31.22.131:27017
@@ -38,7 +37,6 @@ mongodb:
   database: LslbCMSTestDb
   authDb: admin
   replicaSet:
-
 
 logging:
   level:
@@ -80,14 +78,22 @@ vigipay:
   corporate-revenue-code: Default
   corporate-code: COR4U7CJTRAZW7H
 
+
+email-host: smtp.gmail.com
+email-username: lslbcms@gmail.com
+email-password: password@123456
+email-port: 587
+
+
 amazon:
   s3:
     bucket-name: vgg-aws-finatech
     access-key-id: AKIA4NIIUUQEO26RTVXY
     secret-access-key: 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
 
+seed_user_1:
+  email: ${SEED_USER1_EMAIL:ola@qa.team}
 
-email-host: smtp.gmail.com
-email-username: lslbcms@gmail.com
-email-password: password@123456
-email-port: 587
+seed_user_2:
+  email: ${SEED_USER2_EMAIL:ola@qa.team}
+
