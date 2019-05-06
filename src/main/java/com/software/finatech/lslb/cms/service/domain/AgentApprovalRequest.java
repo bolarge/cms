@@ -229,7 +229,7 @@ public class AgentApprovalRequest extends AbstractApprovalRequest {
             AgentInstitution agentInstitution = new AgentInstitution();
             agentInstitution.setInstitutionId(getInstitutionId());
             //TODO:: fix this !!!!!!!!!!!!!!!!!!!!!!!
-            //    agentInstitution.setGameTypeId(getGameTypeId());
+           //   agentInstitution.setGameTypeId(getGameTypeId());
             agentInstitution.setBusinessAddressList(getBusinessAddressList());
             agentApprovalRequestDto.setPendingAgentInstitution(AgentInstitutionAdapter.convertAgentInstitutionToDto(agentInstitution, mongoRepositoryReactive));
         }

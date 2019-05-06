@@ -12,6 +12,7 @@ public class GameTypeReferenceData {
     public static final String CASINO_ID = "05";
     public static final String POOLS_BETTING_ID = "06";
     public static final String OTHER_LICENSE_ID = "07";
+    public static final String ONLINE_CASINO_ID= "08";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         GameType gameType = (GameType) mongoRepositoryReactive.findById(POL_GAME_TYPE_ID, GameType.class).block();
@@ -30,6 +31,7 @@ public class GameTypeReferenceData {
         gameType.setGamingMachineLicenseDurationMonths(0);
         gameType.setGamingTerminalLicenseDurationMonths(12);
         gameType.setAgentLicenseDurationMonths(0);
+        gameType.setAllowsAgents(true);
         mongoRepositoryReactive.saveOrUpdate(gameType);
 
 
@@ -48,6 +50,7 @@ public class GameTypeReferenceData {
         gameType.setGamingMachineLicenseDurationMonths(0);
         gameType.setGamingTerminalLicenseDurationMonths(0);
         gameType.setAgentLicenseDurationMonths(12);
+        gameType.setAllowsAgents(true);
         mongoRepositoryReactive.saveOrUpdate(gameType);
 
         gameType = (GameType) mongoRepositoryReactive.findById(GAMING_MACHINE_ID, GameType.class).block();
@@ -126,7 +129,27 @@ public class GameTypeReferenceData {
         }
         gameType.setDescription("Other Licence");
         gameType.setName("Other Licence");
-        gameType.setShortCode("O-L");
+        gameType.setShortCode("OTL");
+        gameType.setAipDurationMonths(3);
+        gameType.setAgentLicenseDurationMonths(0);
+        gameType.setAllowsGamingMachine(false);
+        gameType.setAllowsGamingTerminal(true);
+        gameType.setInstitutionLicenseDurationMonths(12);
+        gameType.setGamingMachineLicenseDurationMonths(12);
+        gameType.setGamingTerminalLicenseDurationMonths(0);
+        gameType.setAgentLicenseDurationMonths(12);
+        mongoRepositoryReactive.saveOrUpdate(gameType);
+
+
+
+        gameType = (GameType) mongoRepositoryReactive.findById(ONLINE_CASINO_ID, GameType.class).block();
+        if (gameType == null) {
+            gameType = new GameType();
+            gameType.setId(ONLINE_CASINO_ID);
+        }
+        gameType.setDescription("Online Casino");
+        gameType.setName("Online Casino");
+        gameType.setShortCode("OCS");
         gameType.setAipDurationMonths(3);
         gameType.setAgentLicenseDurationMonths(0);
         gameType.setAllowsGamingMachine(false);
