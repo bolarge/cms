@@ -161,8 +161,8 @@ public class DeviceMagicAgentAdapter {
     private void saveDocumentForAgent(DeviceMagicAgent deviceMagicAgent, Agent agent) {
         String submissionId = deviceMagicAgent.getSubmissionId();
         try {
-            String filePath = String.format("classpath:Binary/%s/Picture.JPEG", submissionId);
-            File file = ResourceUtils.getFile(filePath);
+            //String filePath = String.format("classpath:Binary/%s/Picture.JPEG", submissionId);
+            //File file = ResourceUtils.getFile(filePath);
             Document document = new Document();
             document.setId(UUID.randomUUID().toString().replace("-", ""));
             document.setEntityId(agent.getId());
@@ -171,7 +171,7 @@ public class DeviceMagicAgentAdapter {
             document.setDocumentTypeId(DocumentTypeReferenceData.AGENT_PASSPORT_ID);
             document.setEntity(agent.getId());
             document.setEntryDate(LocalDateTime.now());
-            document.setFilename(file.getName());
+            document.setFilename("Picture.JPEG");
             document.setOriginalFilename("Picture.JPEG");
             document.setArchive(false);
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
@@ -190,9 +190,13 @@ public class DeviceMagicAgentAdapter {
             }
             mongoRepositoryReactive.saveOrUpdate(document);
             logger.info("Saved passport for agent with submission {}", submissionId);
-        } catch (FileNotFoundException e) {
-            logger.error("No Passport found for agent {}", agent.getFullName());
-        } catch (Exception e) {
+        }
+
+//        catch (FileNotFoundException e) {
+//            logger.error("No Passport found for agent {}", agent.getFullName());
+//        }
+
+        catch (Exception e) {
             logger.error(String.format("An error occurred while saving agent passport for agent %s", submissionId), e);
         }
     }
