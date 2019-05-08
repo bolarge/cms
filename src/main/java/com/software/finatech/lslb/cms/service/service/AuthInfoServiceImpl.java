@@ -779,10 +779,10 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
             urlParameters.add(new BasicNameValuePair("grant_type", "client_credentials"));
             urlParameters.add(new BasicNameValuePair("scope", "identity-server-api"));
+            urlParameters.add(new BasicNameValuePair("client_id",apiUsername));
+            urlParameters.add(new BasicNameValuePair("client_secret",apiPassword));
 
             httpPost.setEntity(new UrlEncodedFormEntity(urlParameters));
-            httpPost.addHeader("Authorization",
-                    "Basic " + Base64.getEncoder().encodeToString((apiUsername + ":" + apiPassword).getBytes()));
             httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
             HttpResponse response = httpclient.execute(httpPost);
