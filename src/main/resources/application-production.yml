@@ -1,0 +1,95 @@
+spring:
+  application:
+    name: lslb-cms
+  servlet:
+    multipart:
+      max-file-size: 30MB
+      max-request-size: 30MB
+  sendgrid:
+    api-key: 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
+
+management:
+  endpoint:
+  enabled-by-default: false
+  shutdown:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+  enabled-by-default: true
+  health:
+    show-details: ALWAYS
+  shutdown:
+    enabled: true
+server:
+  port: ${APPLICATION_PORT:2001}
+security:
+  enable-csrf: false
+  ignored: /resources/**
+  basic:
+    enabled: false
+mongodb:
+  hosts: ${MONGO_HOSTS}
+  username: ${MONGO_USERNAME}
+  password: ${MONGO_PASSWORD}
+  database: ${MONGO_DATABASE_NAME}
+  authDb:
+  replicaSet:
+
+logging:
+  level:
+    ROOT: INFO
+    #Rememeber to change the credentials for SSO
+
+sso:
+  baseIdentityURL: https://sso.venturegardengroup.com/identity
+  baseAPIURL: http://ssoapi.venturegardengroup.com
+  apiUsername: lslb-cms-api
+  apiPassword: ${SSO_API_PASSWORD}
+  clientId: lslb-cms
+  clientSecret:  ${SSO_CLIENT_SECRET}
+  baseLogoutURL: https://sso.venturegardengroup.com
+  publicKeyURL: https://sso.venturegardengroup.com/identity/.well-known/jwks
+  applicationName: lslb-cms
+
+jwt:
+  header: Authorization
+
+racs:
+  ui:
+    host: ${UI_HOST}
+    port:
+
+vigipay:
+  client_id: ${VIGIPAY_CLIENT_ID}
+  client-secret: ${VIGIPAY_CLIENT_SECRET}
+  username: ${VIGIPAY_USERNAME}
+  password: ${VIGIPAY_PASSWORD}
+  scope: identity-server-api offline_access roles profile
+  grant-type: password
+  token-url: http://sso.venturegardengroup.com/identity/connect/token
+  loop-base-url: https://gateway.vigipay.co/api
+  country-code: 566
+  location-code: LOC
+  currency-code: NGN
+  corporate-revenue-code: 12345
+  corporate-code: COR4U5K98HDDBCR
+
+amazon:
+  s3:
+    bucket-name: vgg-aws-finatech
+    access-key-id: AKIA4NIIUUQEO26RTVXY
+    secret-access-key: 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
+
+email-host: ${EMAIL_HOST}
+email-username: ${EMAIL_USERNAME}
+email-password: ${EMAIL_PASSWORD}
+email-port: ${EMAIL_PORT}
+
+seed_user_1:
+  email: ${SEED_USER1_EMAIL}
+

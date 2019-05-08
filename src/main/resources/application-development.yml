@@ -86,6 +86,3 @@ email-port: 587
 seed_user_1:
   email: ${SEED_USER1_EMAIL}
 
-seed_user_2:
-  email: ${SEED_USER2_EMAIL}
-
