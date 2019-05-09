@@ -354,6 +354,20 @@ public class AuthRoleController extends BaseController {
                 Set<String> eligibleRoleIds = new HashSet<>();
                 Map authRoleMap = Mapstore.STORE.get("AuthRole");
                 Set<String> authRoleIds = (Set<String>) authRoleMap.keySet();
+                if(loggedInUser.isVGGSuperAdmin()){
+                    notAllowedIds= Arrays.asList(LSLBAuthRoleReferenceData.AGENT_ROLE_ID,
+                            LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID,
+                            LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID,
+                            LSLBAuthRoleReferenceData.LSLB_USER_ID,
+                            LSLBAuthRoleReferenceData.LSLB_ADMIN_ID,
+                            AuthRoleReferenceData.VGG_USER_ID,
+                            AuthRoleReferenceData.SUPER_ADMIN_ID);
+                    for (String authRoleId : authRoleIds) {
+                        if (!notAllowedIds.contains(authRoleId)) {
+                            eligibleRoleIds.add(authRoleId);
+                        }
+                    }
+                }
                 if (loggedInUser.isGamingOperator()) {
                     eligibleRoleIds.add(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID);
                 }

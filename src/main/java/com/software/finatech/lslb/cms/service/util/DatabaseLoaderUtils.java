@@ -27,9 +27,6 @@ public class DatabaseLoaderUtils {
     @Value("${seed_user_1.email}")
     private String seedUserEmail1;
 
-    @Value("${seed_user_2.email}")
-    private String seedUserEmail2;
-
     @Autowired
     protected MongoRepositoryReactiveImpl mongoRepositoryReactive;
 
@@ -52,7 +49,7 @@ public class DatabaseLoaderUtils {
         SSOUserDetailInfo user = authInfoService.getSSOUserDetailInfoByEmail(seedUserEmail1);
         authInfo.setEmailAddress(seedUserEmail1);
         authInfo.setEnabled(true);
-        authInfo.setAuthRoleId("2");
+        authInfo.setAuthRoleId(AuthRoleReferenceData.SUPER_ADMIN_ID);
         authInfo.setAccountLocked(user.isLocked());
         authInfo.setAttachmentId(null);
         authInfo.setPhoneNumber(user.getPhoneNumber());
@@ -72,21 +69,6 @@ public class DatabaseLoaderUtils {
             authInfo2.setId("2");
 
         }
-
-        SSOUserDetailInfo user2 = authInfoService.getSSOUserDetailInfoByEmail(seedUserEmail2);
-        authInfo2.setEmailAddress(seedUserEmail2);
-        authInfo2.setEnabled(true);
-        authInfo2.setAuthRoleId("2");
-        authInfo2.setAccountLocked(user2.isLocked());
-        authInfo2.setAttachmentId(null);
-        authInfo2.setPhoneNumber(user2.getPhoneNumber());
-        authInfo2.setFirstName(user2.getFirstName());
-        authInfo2.setLastName(user2.getLastName());
-        authInfo2.setFullName(user2.getFirstName() + " " + user2.getLastName());
-        authInfo2.setInstitutionId(null);
-        authInfo2.setSsoUserId(user2.getId());
-
-        mongoRepositoryReactive.saveOrUpdate(authInfo2);
 
         AuthRoleReferenceData.load(mongoRepositoryReactive);
         LSLBAuthPermissionReferenceData.load(mongoRepositoryReactive);

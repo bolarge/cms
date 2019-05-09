@@ -351,6 +351,10 @@ public class AuthInfo extends AbstractFact {
         return StringUtils.equals(AuthRoleReferenceData.VGG_ADMIN_ID, this.authRoleId);
     }
 
+    public boolean isVGGSuperAdmin() {
+        return StringUtils.equals(AuthRoleReferenceData.SUPER_ADMIN_ID, this.authRoleId);
+    }
+
     public boolean isVGGUser() {
         return StringUtils.equals(AuthRoleReferenceData.VGG_USER_ID, this.authRoleId);
     }
