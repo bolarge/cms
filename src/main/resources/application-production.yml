@@ -47,7 +47,7 @@ logging:
 
 sso:
   baseIdentityURL: https://sso.venturegardengroup.com/identity
-  baseAPIURL: http://ssoapi.venturegardengroup.com
+  baseAPIURL: https://ssoapi.venturegardengroup.com
   apiUsername: lslb-cms-api
   apiPassword: ${SSO_API_PASSWORD}
   clientId: lslb-cms
@@ -71,13 +71,13 @@ vigipay:
   password: ${VIGIPAY_PASSWORD}
   scope: identity-server-api offline_access roles profile
   grant-type: password
-  token-url: http://sso.venturegardengroup.com/identity/connect/token
+  token-url: https://sso.venturegardengroup.com/identity/connect/token
   loop-base-url: https://gateway.vigipay.co/api
   country-code: 566
   location-code: LOC
   currency-code: NGN
-  corporate-revenue-code: 12345
-  corporate-code: COR4U5K98HDDBCR
+  corporate-revenue-code: Default
+  corporate-code: COR4U7GLRAC93HU
 
 amazon:
   s3:
