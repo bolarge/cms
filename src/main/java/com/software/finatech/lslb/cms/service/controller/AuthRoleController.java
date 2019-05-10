@@ -393,6 +393,7 @@ public class AuthRoleController extends BaseController {
                     notAllowedIds = Arrays.asList(AuthRoleReferenceData.VGG_ADMIN_ID,
                             AuthRoleReferenceData.VGG_USER_ID,
                             AuthRoleReferenceData.SUPER_ADMIN_ID,
+                            LSLBAuthRoleReferenceData.LSLB_ADMIN_ID,
                             LSLBAuthRoleReferenceData.AGENT_ROLE_ID,
                             LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID);
                     for (String authRoleId : authRoleIds) {
@@ -407,6 +408,7 @@ public class AuthRoleController extends BaseController {
                             AuthRoleReferenceData.VGG_ADMIN_ID,
                             LSLBAuthRoleReferenceData.AGENT_ROLE_ID,
                             LSLBAuthRoleReferenceData.LSLB_USER_ID,
+                            LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID,
                             LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID
                     );
                     for (String authRoleId : authRoleIds) {
