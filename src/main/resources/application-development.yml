@@ -31,11 +31,11 @@ security:
   basic:
     enabled: false
 mongodb:
-  hosts: localhost:27017 #172.31.31.29:27017,172.31.22.131:27017
-  username:
-  password:
-  database: LslbCMSTestDb
-  authDb: admin
+  hosts: db2.mlnx.staging.vggdev.com #172.31.31.29:27017,172.31.22.131:27017
+  username: useradmin
+  password: f1nat3ch-user
+  database: LslbCMSDb
+  authDb:
   replicaSet:
 
 logging:
@@ -63,37 +63,26 @@ racs:
     port: 3000
 
 
+
 vigipay:
-  client_id: LAGOS_STATE_LOTTERIES_BOARD_API1G302IAOYGB6
-  client-secret: pgmDKCCqeXfb3eXK
-  username: tunde123@mailinator.com
-  password: Password@12
+  client-id: LAGOS_STATE_LOTTERIES_BOARD_TEST_API1DH9V9PLSI4W
+  client-secret: vgPsvZAUJMLmHHhe
+  username: adeboludeyi@gmail.com
+  password: vigipayP@ssw0rd
   scope: ebipsgatewayapi offline_access roles profile
   grant-type: password
-  token-url: http://sso.test.vggdev.com/identity/connect/token
+  token-url: https://ebipssso.test.vggdev.com/core/connect/token
   loop-base-url: https://ebipsgateway.test.vggdev.com/api
   country-code: 566
-  location-code: LOC
+  location-code: LSG
   currency-code: NGN
-  corporate-revenue-code: Default
-  corporate-code: COR4U7CJTRAZW7H
-
+  corporate-revenue-code: 1234
 
 email-host: smtp.gmail.com
 email-username: lslbcms@gmail.com
 email-password: password@123456
 email-port: 587
 
-
-amazon:
-  s3:
-    bucket-name: vgg-aws-finatech
-    access-key-id: AKIA4NIIUUQEO26RTVXY
-    secret-access-key: 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
-
 seed_user_1:
-  email: ${SEED_USER1_EMAIL:ola@qa.team}
-
-seed_user_2:
-  email: ${SEED_USER2_EMAIL:ola@qa.team}
+  email: ${SEED_USER1_EMAIL}
 
