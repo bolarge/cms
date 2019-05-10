@@ -404,9 +404,9 @@ public class AuthRoleController extends BaseController {
 
                 if (loggedInUser.isVGGAdmin()) {
                     notAllowedIds = Arrays.asList(AuthRoleReferenceData.SUPER_ADMIN_ID,
+                            AuthRoleReferenceData.VGG_ADMIN_ID,
                             LSLBAuthRoleReferenceData.AGENT_ROLE_ID,
-                           // LSLBAuthRoleReferenceData.LSLB_USER_ID,
-                            //LSLBAuthRoleReferenceData.LSLB_ADMIN_ID,
+                            LSLBAuthRoleReferenceData.LSLB_USER_ID,
                             LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID
                     );
                     for (String authRoleId : authRoleIds) {
