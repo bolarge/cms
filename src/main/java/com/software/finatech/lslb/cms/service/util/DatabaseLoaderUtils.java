@@ -61,6 +61,15 @@ public class DatabaseLoaderUtils {
 
         mongoRepositoryReactive.saveOrUpdate(authInfo);
 
+        AuthInfo authInfo2 = (AuthInfo) mongoRepositoryReactive.findById("2", AuthInfo.class).block();
+
+        if (authInfo2 == null) {
+
+            authInfo2 = new AuthInfo();
+            authInfo2.setId("2");
+
+        }
+
         AuthRoleReferenceData.load(mongoRepositoryReactive);
         LSLBAuthPermissionReferenceData.load(mongoRepositoryReactive);
         LSLBAuthRoleReferenceData.load(mongoRepositoryReactive);
