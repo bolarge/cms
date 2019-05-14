@@ -92,4 +92,3 @@ email-port: ${EMAIL_PORT}
 
 seed_user_1:
   email: ${SEED_USER1_EMAIL}
-
