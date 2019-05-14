@@ -119,6 +119,7 @@ public class S3ServiceImpl implements S3Service {
 
                 @Override
                 public void onStream(Publisher<ByteBuffer> publisher) {
+
                     try {
                         httpServletResponse.setHeader("Transfer-Encoding", "chunked");
                         publisher.subscribe(createSubscriber(httpServletResponse.getOutputStream()));
@@ -220,13 +221,13 @@ public class S3ServiceImpl implements S3Service {
 
         private void readData() {
 
-            ByteBuffer buffer = ByteBuffer.allocate(1024);
+            ByteBuffer buffer = ByteBuffer.allocate(outstandingRequests.intValue());
             try {
-                while (inputChannel.read(buffer) != -1 || buffer.position() > 0) {
-                    buffer.flip();
-                    subscriber.onNext(buffer);
-                    buffer.compact();
-                }
+
+                inputChannel.read(buffer);
+                buffer.flip();
+                subscriber.onNext(buffer);
+
             } catch (IOException ex) {
                 logger.error("IOException occured in readData()", ex);
                 throw new UncheckedIOException(ex);

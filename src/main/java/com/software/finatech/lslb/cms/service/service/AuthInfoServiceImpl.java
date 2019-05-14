@@ -1044,7 +1044,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             }
 
             String stringResponse = EntityUtils.toString(response.getEntity());
-            logger.info("string response is " + stringResponse);
+            //logger.info("string response is " + stringResponse);
             SSOUserDetail userDetail = mapper.readValue(stringResponse, SSOUserDetail.class);
 
             return userDetail.getData().get(0);

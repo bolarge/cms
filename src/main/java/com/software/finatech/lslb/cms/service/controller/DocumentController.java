@@ -415,9 +415,9 @@ public class DocumentController extends BaseController {
         if (document != null) {
             try {
                 String filename = document.getFilename();
-                httpServletResponse.setHeader("filename", filename);
-                httpServletResponse.setHeader("Content-Disposition", String.format("inline; filename=\"" + filename + "\""));
-                httpServletResponse.setContentType(document.getMimeType());
+//                httpServletResponse.setHeader("filename", filename);
+//                httpServletResponse.setHeader("Content-Disposition", String.format("inline; filename=\"" + filename + "\""));
+//                httpServletResponse.setContentType(document.getMimeType());
 
                 s3Service.downloadFileToHttpResponse(document.getAwsObjectKey(), filename, httpServletResponse);
 
