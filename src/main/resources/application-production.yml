@@ -37,7 +37,7 @@ mongodb:
   username: ${MONGO_USERNAME}
   password: ${MONGO_PASSWORD}
   database: ${MONGO_DATABASE_NAME}
-  authDb:
+  authDb: ${MONGO_DATABASE_NAME}
   replicaSet:
 
 logging:

@@ -80,6 +80,12 @@ public class DatabaseConfiguration {
         } else {
             uri.append("?connectTimeoutMS=300000");
         }
+
+        if(authDatabase != null && !authDatabase.isEmpty()) {
+            uri.append("&authSource=");
+            uri.append(authDatabase);
+        }
+
         uri.append("&maxPoolSize=10000");
         uri.append("&socketTimeoutMS=300000");
 
@@ -131,6 +137,12 @@ public class DatabaseConfiguration {
         } else {
             uri.append("?connectTimeoutMS=300000");
         }
+
+        if(authDatabase != null && !authDatabase.isEmpty()) {
+            uri.append("&authSource=");
+            uri.append(authDatabase);
+        }
+
         uri.append("&maxPoolSize=10000");
         uri.append("&socketTimeoutMS=300000");
         String connectionString = uri.toString();
