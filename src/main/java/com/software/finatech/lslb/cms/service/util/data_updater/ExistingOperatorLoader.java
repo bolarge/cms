@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatu
 import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
+import com.software.finatech.lslb.cms.service.util.EnvironmentUtils;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
@@ -18,7 +19,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
@@ -34,9 +34,8 @@ public class ExistingOperatorLoader {
     private GameTypeService gameTypeService;
     @Autowired
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
-
     @Autowired
-    private Environment environment;
+    private EnvironmentUtils environmentUtils;
 
     private DateTimeFormatter dateTimeFormat = DateTimeFormat.forPattern("dd/MM/yyyy");
 
@@ -306,13 +305,12 @@ public class ExistingOperatorLoader {
 
 
     public String getInstitutionAddressBasedOnEnvironment(InstitutionUpload institutionUpload) {
-        List<String> profiles = Arrays.asList(environment.getActiveProfiles());
-        if (profiles.contains("staging") ||
-                profiles.contains("test") ||
-                profiles.contains("development")) {
+        if (environmentUtils.isDevelopmentEnvironment() ||
+                environmentUtils.isStagingEnvironment() ||
+                environmentUtils.isTestEnvironment()) {
             return "test@mailinator.com";
         }
-        if (profiles.contains("production")) {
+        if (environmentUtils.isProductionEnvironment()) {
             return institutionUpload.getAddress();
         }
         return null;

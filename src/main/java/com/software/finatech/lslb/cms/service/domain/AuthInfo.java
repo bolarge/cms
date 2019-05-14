@@ -36,6 +36,16 @@ public class AuthInfo extends AbstractFact {
     protected String title;
     protected String agentId;
     protected LocalDate lastInactiveDate;
+    protected String initialPassword;
+
+
+    public String getInitialPassword() {
+        return initialPassword;
+    }
+
+    public void setInitialPassword(String initialPassword) {
+        this.initialPassword = initialPassword;
+    }
 
     public LocalDate getLastInactiveDate() {
         return lastInactiveDate;

@@ -43,7 +43,7 @@ public class LoggedCaseMailSenderAsync extends AbstractMailSender {
     }
 
     private String buildNewCaseNotificationContent(LoggedCase loggedCase) {
-        String frontEndUrl = String.format("%s/logged-cases/%s", frontEndPropertyHelper.getFrontEndUrl(), loggedCase.getId());
+        String frontEndUrl = String.format("%s/update-case/%s", frontEndPropertyHelper.getFrontEndUrl(), loggedCase.getId());
         String ticketId = loggedCase.getTicketId();
         String presentDateString = DateTime.now().toString("dd-MM-yyyy");
 

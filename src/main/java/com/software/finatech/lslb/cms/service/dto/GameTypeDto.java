@@ -10,6 +10,16 @@ public class GameTypeDto extends EnumeratedFactDto {
     protected Boolean allowsGamingMachine;
     protected Boolean allowsGamingTerminal;
     private String gamingTerminalLicenseDuration;
+    private Boolean allowsAgents;
+
+
+    public Boolean getAllowsAgents() {
+        return allowsAgents;
+    }
+
+    public void setAllowsAgents(Boolean allowsAgents) {
+        this.allowsAgents = allowsAgents;
+    }
 
     public String getGamingTerminalLicenseDuration() {
         return gamingTerminalLicenseDuration;

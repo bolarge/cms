@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthRoleReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.util.async_helpers.CustomerCodeCreatorAsync;
+import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +29,10 @@ public class AgentUserCreator {
         this.customerCodeCreatorAsync = customerCodeCreatorAsync;
     }
 
-    public void createUserAndCustomerCodeForAgent(Agent agent) {
+    public void createUserAndCustomerCodeForAgent(Agent agent, HttpServletRequest httpServletRequest) {
         try {
             AuthInfoCreateDto agentUserCreateDto = createAuthInfoDtoFromAgent(agent);
-            authInfoService.createAuthInfo(agentUserCreateDto, frontEndPropertyHelper.getFrontEndUrl(), null).block();
+            authInfoService.createAuthInfo(agentUserCreateDto, frontEndPropertyHelper.getFrontEndUrl(), httpServletRequest).block();
         } catch (Exception e) {
             logger.error("An error occurred while creating user for agent {} -> {}", agent.getId(), agent.getFullName(), e);
         }

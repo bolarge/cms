@@ -5,19 +5,12 @@ import com.software.finatech.lslb.cms.service.util.adapters.DeviceMagicAgentAdap
 import com.software.finatech.lslb.cms.service.util.adapters.model.DeviceMagicAgent;
 import com.software.finatech.lslb.cms.service.util.adapters.model.DeviceMagicAgentInstitutionCategoryDetails;
 import org.apache.commons.lang3.StringUtils;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,42 +19,6 @@ public class ExistingAgentLoader {
     private static final Logger logger = LoggerFactory.getLogger(ExistingAgentLoader.class);
     @Autowired
     private DeviceMagicAgentAdapter deviceMagicAgentAdapter;
-
-    private DeviceMagicAgent agentFromFile(File file) throws IOException, ParseException {
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(new FileReader(file));
-        if (jsonObject != null) {
-            //return deviceMagicAgentAdapter.fromJsonObject(jsonObject);
-        }
-        return null;
-    }
-
-    public void loadExistingAgents() {
-        try {
-            File folder = ResourceUtils.getFile("classpath:agent-data/json");
-            File[] listOfFiles = folder.listFiles();
-            if (listOfFiles != null) {
-                for (File listOfFile : listOfFiles) {
-                    if (listOfFile.isFile()) {
-                        loadAgentForFile(listOfFile);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Error occurred while parsing file", e);
-        }
-    }
-
-    private void loadAgentForFile(File file) throws IOException, ParseException {
-        DeviceMagicAgent deviceMagicAgent = agentFromFile(file);
-        String submissionId = file.getName().replace(".json", "");
-        if (deviceMagicAgent == null) {
-            logger.info("No Device Magic Agent for submission {}", submissionId);
-            return;
-        }
-        deviceMagicAgent.setSubmissionId(submissionId);
-        deviceMagicAgentAdapter.saveDeviceMagicAgentToAgentDb(deviceMagicAgent);
-    }
 
     public void loadAgentsFromCSV(MultipartFile multipartFile) throws LicenseServiceException {
         if (multipartFile.isEmpty()) {
@@ -179,16 +136,5 @@ public class ExistingAgentLoader {
         } catch (Exception e) {
             logger.error("An error occurred while parsing file", e);
         }
-    }
-
-    private String formatPhone(String phoneNumber){
-        if (StringUtils.isEmpty(phoneNumber)){
-            return null;
-        }
-        if (StringUtils.startsWith(phoneNumber,"234")){
-          //  phoneNumber = phoneNumber.re
-        }
-
-        return null;
     }
 }

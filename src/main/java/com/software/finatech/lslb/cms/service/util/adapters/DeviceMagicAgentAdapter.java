@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.util.adapters;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
+import com.software.finatech.lslb.cms.service.util.EnvironmentUtils;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.adapters.model.DeviceMagicAgent;
 import com.software.finatech.lslb.cms.service.util.adapters.model.DeviceMagicAgentInstitutionCategoryDetails;
@@ -14,17 +15,11 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -36,7 +31,7 @@ public class DeviceMagicAgentAdapter {
     @Autowired
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     @Autowired
-    private Environment environment;
+    private EnvironmentUtils environmentUtils;
 
     public void saveDeviceMagicAgentToAgentDb(DeviceMagicAgent deviceMagicAgent) {
         if (StringUtils.isEmpty(deviceMagicAgent.getEmail())) {
@@ -161,8 +156,8 @@ public class DeviceMagicAgentAdapter {
     private void saveDocumentForAgent(DeviceMagicAgent deviceMagicAgent, Agent agent) {
         String submissionId = deviceMagicAgent.getSubmissionId();
         try {
-            String filePath = String.format("classpath:Binary/%s/Picture.JPEG", submissionId);
-            File file = ResourceUtils.getFile(filePath);
+            //String filePath = String.format("classpath:Binary/%s/Picture.JPEG", submissionId);
+            //File file = ResourceUtils.getFile(filePath);
             Document document = new Document();
             document.setId(UUID.randomUUID().toString().replace("-", ""));
             document.setEntityId(agent.getId());
@@ -171,7 +166,7 @@ public class DeviceMagicAgentAdapter {
             document.setDocumentTypeId(DocumentTypeReferenceData.AGENT_PASSPORT_ID);
             document.setEntity(agent.getId());
             document.setEntryDate(LocalDateTime.now());
-            document.setFilename(file.getName());
+            document.setFilename("Picture.JPEG");
             document.setOriginalFilename("Picture.JPEG");
             document.setArchive(false);
             document.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
@@ -190,9 +185,13 @@ public class DeviceMagicAgentAdapter {
             }
             mongoRepositoryReactive.saveOrUpdate(document);
             logger.info("Saved passport for agent with submission {}", submissionId);
-        } catch (FileNotFoundException e) {
-            logger.error("No Passport found for agent {}", agent.getFullName());
-        } catch (Exception e) {
+        }
+
+//        catch (FileNotFoundException e) {
+//            logger.error("No Passport found for agent {}", agent.getFullName());
+//        }
+
+        catch (Exception e) {
             logger.error(String.format("An error occurred while saving agent passport for agent %s", submissionId), e);
         }
     }
@@ -283,17 +282,16 @@ public class DeviceMagicAgentAdapter {
     }
 
     private String getAgentPassportKey(DeviceMagicAgent deviceMagicAgent) throws IOException {
-        List<String> activeProfiles = Arrays.asList(environment.getActiveProfiles());
-        if (activeProfiles.contains("test")) {
+        if (environmentUtils.isTestEnvironment()) {
             return String.format("lslb-cms/test/Agent_Passports/%s/Picture.JPEG", deviceMagicAgent.getSubmissionId());
         }
-        if (activeProfiles.contains("staging")) {
+        if (environmentUtils.isStagingEnvironment()) {
             return String.format("lslb-cms/staging/Agent_Passports/%s/Picture.JPEG", deviceMagicAgent.getSubmissionId());
         }
-        if (activeProfiles.contains("production")) {
+        if (environmentUtils.isProductionEnvironment()) {
             return String.format("lslb-cms/production/Agent_Passports/%s/Picture.JPEG", deviceMagicAgent.getSubmissionId());
         }
-        if (activeProfiles.contains("development")) {
+        if (environmentUtils.isDevelopmentEnvironment()) {
             return String.format("lslb-cms/development/Agent_Passports/%s/Picture.JPEG", deviceMagicAgent.getSubmissionId());
         }
         throw new IOException("Invalid Environment");

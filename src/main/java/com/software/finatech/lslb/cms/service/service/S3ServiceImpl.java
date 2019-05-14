@@ -3,7 +3,7 @@ package com.software.finatech.lslb.cms.service.service;
 import com.software.finatech.lslb.cms.service.domain.Document;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.S3Service;
-import org.apache.commons.lang3.StringUtils;
+import com.software.finatech.lslb.cms.service.util.EnvironmentUtils;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.async.AsyncRequestProvider;
@@ -24,16 +23,14 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
@@ -55,15 +52,15 @@ public class S3ServiceImpl implements S3Service {
     private String bucketName;
 
     private S3AsyncClient client;
-    private Environment environment;
+    private EnvironmentUtils environmentUtils;
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
 
     @Autowired
     public S3ServiceImpl(S3AsyncClient client,
-                         Environment environment,
+                         EnvironmentUtils environmentUtils,
                          MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         this.client = client;
-        this.environment = environment;
+        this.environmentUtils = environmentUtils;
         this.mongoRepositoryReactive = mongoRepositoryReactive;
     }
 
@@ -87,8 +84,8 @@ public class S3ServiceImpl implements S3Service {
                     try {
                         subscriber.onSubscribe(new UploadSubscription(multipartFile.getInputStream(), subscriber));
                     } catch (IOException e) {
-                        logger.error("error occured in subscribe exception",e);
-                        throw  new UncheckedIOException(e);
+                        logger.error("error occured in subscribe exception", e);
+                        throw new UncheckedIOException(e);
                     }
 
                 }
@@ -103,7 +100,7 @@ public class S3ServiceImpl implements S3Service {
                 logger.error("Invalid response");
 
             }
-        }  catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             logger.error("Error occurred while working with completable future", e);
         }
     }
@@ -154,7 +151,6 @@ public class S3ServiceImpl implements S3Service {
         }
     }
 
-
     private CompletableFuture<Object> getObjectFromBucket(String objectKey, AsyncResponseHandler<GetObjectResponse, Object> handler) {
         return client.getObject(GetObjectRequest.builder().bucket(bucketName).key(objectKey).build(), handler);
     }
@@ -163,7 +159,7 @@ public class S3ServiceImpl implements S3Service {
         return client.putObject(PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(objectKey)
-                .build(),provider);
+                .build(), provider);
     }
 
     private SimpleSubscriber createSubscriber(OutputStream out) {
@@ -178,30 +174,29 @@ public class S3ServiceImpl implements S3Service {
     }
 
     private String getDecoratedKeyWithFolderName(String key) throws Exception {
-        List<String> activeProfiles = Arrays.asList(environment.getActiveProfiles());
-        if (activeProfiles.contains("test")) {
+        if (environmentUtils.isTestEnvironment()) {
             return String.format("lslb-cms/test/%s", key);
         }
-        if (activeProfiles.contains("staging")) {
+        if (environmentUtils.isStagingEnvironment()) {
             return String.format("lslb-cms/staging/%s", key);
         }
-        if (activeProfiles.contains("production")) {
+        if (environmentUtils.isProductionEnvironment()) {
             return String.format("lslb-cms/production/%s", key);
         }
-        if (activeProfiles.contains("development")) {
+        if (environmentUtils.isDevelopmentEnvironment()) {
             return String.format("lslb-cms/development/%s", key);
         }
         throw new Exception("Invalid Environment");
     }
 
-    private class UploadSubscription implements  Subscription {
+    private class UploadSubscription implements Subscription {
 
         private ReadableByteChannel inputChannel;
         private Subscriber<? super ByteBuffer> subscriber;
         private AtomicLong outstandingRequests;
         private boolean writeInProgress;
 
-        public UploadSubscription (InputStream inputStream, Subscriber<? super ByteBuffer> subscriber) {
+        public UploadSubscription(InputStream inputStream, Subscriber<? super ByteBuffer> subscriber) {
 
             this.writeInProgress = false;
             inputChannel = Channels.newChannel(inputStream);
@@ -213,7 +208,7 @@ public class S3ServiceImpl implements S3Service {
         @Override
         public void request(long n) {
             this.outstandingRequests.addAndGet(n);
-            synchronized(this) {
+            synchronized (this) {
                 if (!this.writeInProgress) {
                     this.writeInProgress = true;
                     this.readData();
@@ -243,7 +238,7 @@ public class S3ServiceImpl implements S3Service {
             try {
                 this.inputChannel.close();
                 subscriber.onComplete();
-            } catch(IOException ex) {
+            } catch (IOException ex) {
                 logger.error("IOException occured in closeFile()", ex);
                 throw new UncheckedIOException(ex);
             }

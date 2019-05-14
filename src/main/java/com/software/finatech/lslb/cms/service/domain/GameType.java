@@ -15,6 +15,15 @@ public class GameType extends EnumeratedFact {
     protected String shortCode;
     protected boolean allowsGamingTerminal;
     protected boolean allowsGamingMachine;
+    private boolean allowsAgents;
+
+    public boolean isAllowsAgents() {
+        return allowsAgents;
+    }
+
+    public void setAllowsAgents(boolean allowsAgents) {
+        this.allowsAgents = allowsAgents;
+    }
 
     public int getGamingTerminalLicenseDurationMonths() {
         return gamingTerminalLicenseDurationMonths;
@@ -108,6 +117,7 @@ public class GameType extends EnumeratedFact {
         gameType.setShortCode(getShortCode());
         gameType.setAllowsGamingMachine(getAllowsGamingMachine());
         gameType.setAllowsGamingTerminal(getAllowsGamingTerminal());
+        gameType.setAllowsAgents(isAllowsAgents());
         gameType.setGamingTerminalLicenseDuration(String.valueOf(getGamingTerminalLicenseDurationMonths()));
         return gameType;
     }

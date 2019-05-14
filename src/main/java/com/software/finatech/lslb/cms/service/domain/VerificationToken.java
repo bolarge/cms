@@ -12,6 +12,15 @@ public class VerificationToken  extends AbstractFact{
     private String healthInstitutionId;
     //Expires in 24hrs
     protected DateTime expiryDate;
+    private  boolean forResourceOwnerUserCreation;
+
+    public boolean isForResourceOwnerUserCreation() {
+        return forResourceOwnerUserCreation;
+    }
+
+    public void setForResourceOwnerUserCreation(boolean forResourceOwnerUserCreation) {
+        this.forResourceOwnerUserCreation = forResourceOwnerUserCreation;
+    }
 
     public String getConfirmationToken() {
         return confirmationToken;

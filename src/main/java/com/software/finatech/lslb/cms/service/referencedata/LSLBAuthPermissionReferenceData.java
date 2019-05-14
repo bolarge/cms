@@ -452,6 +452,7 @@ public class LSLBAuthPermissionReferenceData {
         }
         permission.setName("RECEIVE NEW CASE NOTIFICATION");
         permission.setDescription("Receive new case Notification");
+        permission.setUsedBySystem(true);
         mongoRepositoryReactive.saveOrUpdate(permission);
 
         permission = (AuthPermission) mongoRepositoryReactive.findById(RECEIVE_AGENT_APPROVAL_AGENT_REQUEST_ID, AuthPermission.class).block();
