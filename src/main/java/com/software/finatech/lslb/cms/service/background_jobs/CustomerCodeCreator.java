@@ -6,6 +6,7 @@ import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.VigipayService;
+import com.software.finatech.lslb.cms.service.util.EnvironmentUtils;
 import net.javacrumbs.shedlock.core.SchedulerLock;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,6 +30,8 @@ public class CustomerCodeCreator {
     private AuthInfoService authInfoService;
     @Autowired
     private VigipayService vigipayService;
+    @Autowired
+    private EnvironmentUtils environmentUtils;
 
     private static final int FIVE_MIN = 5 * 60 * 1000;
 
@@ -39,7 +42,9 @@ public class CustomerCodeCreator {
     public void createCustomers() {
         Query query = new Query();
         query.addCriteria(Criteria.where("vgPayCustomerCode").is(null));
-        query.addCriteria(Criteria.where("fromLiveData").is(false));
+        if (!environmentUtils.isProductionEnvironment()) {
+            query.addCriteria(Criteria.where("fromLiveData").is(false));
+        }
         ArrayList<Institution> institutionsWithoutVigiPayCustomerCode = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
         for (Institution institution : institutionsWithoutVigiPayCustomerCode) {
             try {
@@ -61,7 +66,6 @@ public class CustomerCodeCreator {
             }
         }
 
-        query.addCriteria(Criteria.where("skipVigipay").is(false));
         ArrayList<Agent> agentWithoutVigiPayCustomerCode = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
         for (Agent agent : agentWithoutVigiPayCustomerCode) {
             String customerCode = vigipayService.createCustomerCodeForAgent(agent);

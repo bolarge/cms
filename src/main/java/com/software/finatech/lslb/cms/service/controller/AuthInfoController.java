@@ -447,10 +447,8 @@ public class AuthInfoController extends BaseController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
-            @ApiResponse(code = 400, message = "Bad request")
-    }
-    )
-    public Mono<ResponseEntity> completeAuthInfo(@Valid @RequestBody AuthInfoCompleteDto authInfoCompleteDto) {
+            @ApiResponse(code = 400, message = "Bad request")})
+    public Mono<ResponseEntity> completeAuthInfo(@Valid @RequestBody AuthInfoCompleteDto authInfoCompleteDto, HttpServletRequest httpServletRequest) {
         try {
             //@TODO please validate if the token has been confirmed
             VerificationToken verificationToken = (VerificationToken) mongoRepositoryReactive.find(new Query(Criteria.where("confirmationToken").is(authInfoCompleteDto.getToken())), VerificationToken.class).block();
@@ -470,6 +468,10 @@ public class AuthInfoController extends BaseController {
             AuthInfo authInfo = (AuthInfo) mongoRepositoryReactive.findById(verificationToken.getAuthInfoId(), AuthInfo.class).block();
             //authInfo.setOldFact(authInfo);
             authInfo.setEnabled(true);
+
+            if (verificationToken.isForResourceOwnerUserCreation()) {
+                return authInfoService.completeResourceOwnerCreatedUserRegistration(authInfo, httpServletRequest, authInfoCompleteDto);
+            }
 
             return authInfoService.completeRegistration(verificationToken, authInfoCompleteDto, authInfo);
         } catch (Exception e) {
@@ -808,7 +810,7 @@ public class AuthInfoController extends BaseController {
         verificationToken.setExpired(false);
         verificationToken.setAuthInfoId(expiredVerificationToken.getAuthInfoId());
         verificationToken.setExpiryDate(DateTime.now().plusHours(24));
-
+        verificationToken.setForResourceOwnerUserCreation(expiredVerificationToken.isForResourceOwnerUserCreation());
 
         AuthInfo AuthInfo = (AuthInfo) mongoRepositoryReactive.find(new Query(Criteria.where("id").is(verificationToken.getAuthInfoId())), AuthInfo.class).block();
         if (AuthInfo.getSsoUserId() != null) {

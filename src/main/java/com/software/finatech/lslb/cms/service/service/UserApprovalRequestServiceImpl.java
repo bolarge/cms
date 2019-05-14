@@ -5,6 +5,7 @@ import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.ApprovalRequestOperationtDto;
 import com.software.finatech.lslb.cms.service.dto.AuthInfoCreateDto;
 import com.software.finatech.lslb.cms.service.dto.UserApprovalRequestDto;
+import com.software.finatech.lslb.cms.service.exception.ApprovalRequestProcessException;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.ApprovalRequestStatusReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
@@ -32,6 +33,7 @@ import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -155,24 +157,25 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
 
     @Override
     public Mono<ResponseEntity> approveRequest(ApprovalRequestOperationtDto requestOperationtDto, HttpServletRequest request) {
+        AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
+        if (user == null) {
+            return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+        String approvalRequestId = requestOperationtDto.getApprovalRequestId();
+        UserApprovalRequest userApprovalRequest = findApprovalRequestById(approvalRequestId);
+        if (userApprovalRequest == null) {
+            return Mono.just(new ResponseEntity<>(String.format("User approval request with id %s not found", approvalRequestId), HttpStatus.BAD_REQUEST));
+        }
+        if (userApprovalRequest.isApprovedRequest() ||
+                userApprovalRequest.isRejectedRequest() ||
+                !userApprovalRequest.canBeApprovedByUser(user.getId())) {
+            return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
+        }
         try {
-            AuthInfo user = springSecurityAuditorAware.getLoggedInUser();
-            if (user == null) {
-                return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.INTERNAL_SERVER_ERROR));
-            }
-            String approvalRequestId = requestOperationtDto.getApprovalRequestId();
-            UserApprovalRequest userApprovalRequest = findApprovalRequestById(approvalRequestId);
-            if (userApprovalRequest == null) {
-                return Mono.just(new ResponseEntity<>(String.format("User approval request with id %s not found", approvalRequestId), HttpStatus.BAD_REQUEST));
-            }
-            if (userApprovalRequest.isApprovedRequest() ||
-                    userApprovalRequest.isRejectedRequest() ||
-                    !userApprovalRequest.canBeApprovedByUser(user.getId())) {
-                return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
-            }
+
 
             if (userApprovalRequest.isCreateUser()) {
-                approveCreateUser(userApprovalRequest);
+                approveCreateUser(userApprovalRequest, request);
             } else if (userApprovalRequest.isUpdateUserRole()) {
                 approveChangeUserRole(userApprovalRequest);
             } else if (userApprovalRequest.isRemovePermissionFromUser()) {
@@ -196,6 +199,9 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
                     LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
+        } catch (ApprovalRequestProcessException e) {
+            userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
+            return logAndReturnError(logger, e.getMessage(), e);
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while approving user approval request ", e);
         }
@@ -237,7 +243,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             String verbiage = String.format("Rejected User approval request ->  Type -> %s, Id -> %s", userApprovalRequest.getUserApprovalRequestType(), userApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), userApprovalRequest.getSubjectUserName(),
-                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             approvalRequestNotifierAsync.sendRejectedUserApprovalRequestEmailToInitiator(userApprovalRequest);
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
@@ -259,11 +265,11 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
         }
     }
 
-    private void approveCreateUser(UserApprovalRequest userApprovalRequest) {
+    private void approveCreateUser(UserApprovalRequest userApprovalRequest, HttpServletRequest httpServletRequest) throws IOException, ApprovalRequestProcessException {
         PendingAuthInfo pendingAuthInfo = getPendingAuthInfoById(userApprovalRequest.getPendingAuthInfoId());
         if (pendingAuthInfo != null) {
             AuthInfoCreateDto authInfoCreateDto = pendingAuthInfoToCreateAuthInfo(pendingAuthInfo);
-            authInfoService.createAuthInfo(authInfoCreateDto, frontEndPropertyHelper.getFrontEndUrl(), null).block();
+            authInfoService.createAuthInfo(authInfoCreateDto, frontEndPropertyHelper.getFrontEndUrl(), httpServletRequest).block();
             pendingAuthInfo.setUserApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
             mongoRepositoryReactive.saveOrUpdate(pendingAuthInfo);
         }

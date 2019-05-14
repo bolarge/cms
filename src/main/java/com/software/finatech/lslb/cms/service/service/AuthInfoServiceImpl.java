@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.software.finatech.jjwt.JwtHeaderTokenExtractor;
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.AuthInfo;
 import com.software.finatech.lslb.cms.service.domain.AuthRole;
@@ -7,6 +8,7 @@ import com.software.finatech.lslb.cms.service.domain.UserApprovalRequest;
 import com.software.finatech.lslb.cms.service.domain.VerificationToken;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.dto.sso.*;
+import com.software.finatech.lslb.cms.service.exception.ApprovalRequestProcessException;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
@@ -73,10 +75,16 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     @Value("${sso.baseLogoutURL}")
     private String baseLogoutURL;
 
+
+    private static final String DEFAULT_PASSWORD = "Password@12";
+
     @Autowired
     private MailContentBuilderService mailContentBuilderService;
     @Autowired
     private NewUserEmailNotifierAsync newUserEmailNotifierAsync;
+
+    @Autowired
+    private JwtHeaderTokenExtractor tokenExtractor;
 
     @Autowired
     private AuthPermissionService authPermissionService;
@@ -110,11 +118,8 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl, HttpServletRequest request) {
-        String requestIpAddress = null;
-        if (request != null) {
-            requestIpAddress = RequestAddressUtil.getClientIpAddr(request);
-        }
+    public Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl, HttpServletRequest request) throws ApprovalRequestProcessException {
+        String requestIpAddress = RequestAddressUtil.getClientIpAddr(request);
 
         if (!StringUtils.isEmpty(authInfoCreateDto.getInstitutionId())) {
             Mono<ResponseEntity> validateCreateAuthInfo = validateCreateGamingOperatorAuthInfo(authInfoCreateDto);
@@ -150,7 +155,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             SSOUserDetailInfo userDetail = null;
             HashMap<String, Object> model = new HashMap<>();
 
-            String apiToken = getAPIToken();
+            String apiToken = tokenExtractor.extract(request.getHeader("Authorization"));
             url = baseAPIURL + "/account/getuserbyemail?email=" + authInfo.getEmailAddress();
             httpGet = new HttpGet(url);
             httpGet.addHeader("Authorization", "Bearer " + apiToken);
@@ -158,79 +163,23 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             response = httpclient.execute(httpGet);
             responseCode = response.getStatusLine().getStatusCode();
             SSOUserDetail SSOUserDetail = null;
-            switch (responseCode) {
-                case 200: {
-                    // everything is fine, handle the response
-                    String stringResponse = EntityUtils.toString(response.getEntity());
-                    SSOUserDetail = mapper.readValue(stringResponse, SSOUserDetail.class);
-                    if (SSOUserDetail.getData().size() > 0) {
-                        userExists = true;
-                    }
+
+            if (responseCode == 200) {
+                // everything is fine, handle the response
+                String stringResponse = EntityUtils.toString(response.getEntity());
+                SSOUserDetail = mapper.readValue(stringResponse, SSOUserDetail.class);
+                if (SSOUserDetail.getData().size() > 0) {
+                    userExists = true;
                 }
+            } else {
+                throw new ApprovalRequestProcessException("Unable to check if user exist on SSO");
             }
 
             // user exist so we add claims
             if (userExists) {
-                SSOUserDetailInfo ssoUserDetailInfo = SSOUserDetail.getData().get(0);
-
-                AuthRole authRole = authRoleService.findRoleById(authInfo.getAuthRoleId());
-                if (authRole == null) {
-                    return Mono.just(new ResponseEntity<>(String.format("Role with id %s not found", authInfo.getAuthRoleId()), HttpStatus.BAD_REQUEST));
-                }
-                userDetail = SSOUserDetail.getData().get(0);
-                authInfo.setSsoUserId(userDetail.getId());
-
-                SSOClaim applicationClaim = new SSOClaim();
-                applicationClaim.setType("application");
-                applicationClaim.setValue("lslb-cms");
-
-                SSOClaim roleClaim1 = new SSOClaim();
-                roleClaim1.setType("role");
-                roleClaim1.setValue(authRole.getSsoRoleMapping());
-
-                SSOClaim roleClaim2 = new SSOClaim();
-                roleClaim2.setType("role");
-                roleClaim2.setValue(authRole.getName());
-                SSOUserAddClaim ssoUserAddClaim = new SSOUserAddClaim();
-                ssoUserAddClaim.setUserId(userDetail.getId());
-                ssoUserAddClaim.getClaims().add(applicationClaim);
-                ssoUserAddClaim.getClaims().add(roleClaim1);
-                ssoUserAddClaim.getClaims().add(roleClaim2);
-
-                //Add claims
-                url = baseAPIURL + "/account/addclaims";
-                httpPost = new HttpPost(url);
-                //final com.fasterxml.jackson.databind.ObjectMapper mapperJson = new com.fasterxml.jackson.databind.ObjectMapper();
-                String json = mapper.toJson(ssoUserAddClaim);
-                httpPost.setEntity(new StringEntity(json));
-                httpPost.addHeader("Authorization", "Bearer " + apiToken);
-                httpPost.addHeader("client-id", clientId);
-                httpPost.addHeader("Content-Type", "application/json");
-
-                response = httpclient.execute(httpPost);
-                responseCode = response.getStatusLine().getStatusCode();
-                String stringResponse = EntityUtils.toString(response.getEntity());
-
-                if (responseCode != 200) {
-                    return Mono.just(new ResponseEntity<>(stringResponse, HttpStatus.valueOf(responseCode)));
-                }
-
-                model.put("name", authInfo.getFirstName() + " " + authInfo.getLastName());
-                model.put("frontEndUrl", frontEndPropertyHelper.getFrontEndUrl());
-                String content = mailContentBuilderService.build(model, "ExistingUserRegistrationEmail");
-                emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
-                authInfo.setEnabled(true);
-                if (ssoUserDetailInfo != null) {
-                    authInfo.setSsoUserId(ssoUserDetailInfo.getId());
-                }
-                mongoRepositoryReactive.saveOrUpdate(authInfo);
-
-                String verbiage = String.format("Create user  -> Name : %s ", authInfo.getFullName());
-                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
-                        springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
-                        LocalDateTime.now(), LocalDate.now(), true, requestIpAddress, verbiage));
-                return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
+                return createExistingSSOUser(SSOUserDetail, authInfo, apiToken, requestIpAddress);
             } else {
+                createNewUserOnSSO(authInfo, request);
                 VerificationToken verificationToken = new VerificationToken();
                 verificationToken.setId(UUID.randomUUID().toString());
                 verificationToken.setActivated(false);
@@ -239,6 +188,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 verificationToken.setExpired(false);
                 verificationToken.setAuthInfoId(authInfo.getId());
                 verificationToken.setExpiryDate(DateTime.now().plusHours(24));
+                verificationToken.setForResourceOwnerUserCreation(true);
                 mongoRepositoryReactive.saveOrUpdate(verificationToken);
 
                 // HashMap<String, Object> model = new HashMap<>();
@@ -252,7 +202,6 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 content = content.replaceAll("CallbackUrl", url);
                 emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
 
-
                 String verbiage = String.format("Create user  -> Name : %s ", authInfo.getFullName());
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                         springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
@@ -260,6 +209,9 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 return Mono.just(new ResponseEntity<>(toCreateAuthInfoResponse(authInfo, verificationToken), HttpStatus.OK));
             }
         } catch (Exception e) {
+            if (e instanceof ApprovalRequestProcessException) {
+                throw new ApprovalRequestProcessException(e.getMessage());
+            }
             String errorMsg = "An error occurred when trying to create user";
             return logAndReturnError(logger, errorMsg, e);
         }
@@ -313,12 +265,6 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
             // user exist so we add claims
             if (userExists) {
-//                userDetail = SSOUserDetail.getData().get(0);
-//                model.put("name", authInfo.getFirstName() + " " + authInfo.getLastName());
-//                String content = mailContentBuilderService.build(model, "ExistingUserRegistrationEmail");
-//                emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
-
-
                 String content;
                 SSOUserDetailInfo ssoUserDetailInfo = SSOUserDetail.getData().get(0);
 
@@ -779,8 +725,8 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
             urlParameters.add(new BasicNameValuePair("grant_type", "client_credentials"));
             urlParameters.add(new BasicNameValuePair("scope", "identity-server-api"));
-            urlParameters.add(new BasicNameValuePair("client_id",apiUsername));
-            urlParameters.add(new BasicNameValuePair("client_secret",apiPassword));
+            urlParameters.add(new BasicNameValuePair("client_id", apiUsername));
+            urlParameters.add(new BasicNameValuePair("client_secret", apiPassword));
 
             httpPost.setEntity(new UrlEncodedFormEntity(urlParameters));
             httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -898,26 +844,6 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     @Override
     public Mono<ResponseEntity> addPermissionsToUser(UserAuthPermissionDto userAuthPermissionDto, HttpServletRequest request) {
         try {
-//            String userId = userAuthPermissionDto.getUserId();
-//            Set<String> newPermissionIds = userAuthPermissionDto.getAuthPermissionIds();
-//            AuthInfo user = getUserById(userId);
-//            if (user == null) {
-//                return Mono.just(new ResponseEntity<>(String.format("User with id %s not found", userId), HttpStatus.BAD_REQUEST));
-//            }
-//            Set<String> allUserPermissionIdsForUser = user.getAllUserPermissionIdsForUser();
-//            Set<String> userSpecificPermissionIdsForUser = user.getAuthPermissionIds();
-//            for (String newPermissionId : newPermissionIds) {
-//                AuthPermission authPermission = authPermissionService.findAuthPermissionById(newPermissionId);
-//                if (authPermission == null) {
-//                    return Mono.just(new ResponseEntity<>(String.format("Auth Permission with id %s does not exist", newPermissionId), HttpStatus.BAD_REQUEST));
-//                }
-//                if (!allUserPermissionIdsForUser.contains(newPermissionId)) {
-//                    userSpecificPermissionIdsForUser.add(newPermissionId);
-//                }
-//            }
-//            user.setAuthPermissionIds(userSpecificPermissionIdsForUser);
-//            mongoRepositoryReactive.saveOrUpdate(user);
-//            return Mono.just(new ResponseEntity<>(user.convertToDto(), HttpStatus.OK));
             String subjectUserId = userAuthPermissionDto.getUserId();
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser == null) {
@@ -951,26 +877,6 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     @Override
     public Mono<ResponseEntity> removePermissionFromUser(UserAuthPermissionDto userAuthPermissionDto, HttpServletRequest request) {
         try {
-//            String userId = userAuthPermissionDto.getUserId();
-//            Set<String> removedPermissionIds = userAuthPermissionDto.getAuthPermissionIds();
-//            AuthInfo user = getUserById(userId);
-//            if (user == null) {
-//                return Mono.just(new ResponseEntity<>(String.format("User with id %s not found", userId), HttpStatus.BAD_REQUEST));
-//            }
-//            Set<String> userMappedPermissions = user.getAuthPermissionIds();
-//            for (String removedPermissionId : removedPermissionIds) {
-//                AuthPermission authPermission = authPermissionService.findAuthPermissionById(removedPermissionId);
-//                if (authPermission == null) {
-//                    return Mono.just(new ResponseEntity<>(String.format("Auth Permission with id %s does not exist", removedPermissionId), HttpStatus.BAD_REQUEST));
-//                }
-//                if (userMappedPermissions.contains(removedPermissionId)) {
-//                    userMappedPermissions.remove(removedPermissionId);
-//                }
-//            }
-//            user.setAuthPermissionIds(userMappedPermissions);
-//            mongoRepositoryReactive.saveOrUpdate(user);
-            //     return Mono.just(new ResponseEntity<>(user.convertToDto(), HttpStatus.OK));
-
             String subjectUserId = userAuthPermissionDto.getUserId();
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser == null) {
@@ -1146,5 +1052,186 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             throw new UncheckedIOException(e);
         }
 
+    }
+
+
+    private Mono<ResponseEntity> createExistingSSOUser(SSOUserDetail SSOUserDetail,
+                                                       AuthInfo authInfo,
+                                                       String apiToken,
+                                                       String requestIpAddress) throws ApprovalRequestProcessException {
+        try {
+            SSOUserDetailInfo ssoUserDetailInfo = SSOUserDetail.getData().get(0);
+
+            HashMap<String, Object> model = new HashMap<>();
+            HttpClient httpclient = HttpClientBuilder.create().build();
+            HttpPost httpPost = null;
+            HttpGet httpGet = null;
+            String url = null;
+            HttpResponse response = null;
+            int responseCode;
+            boolean userExists = false;
+            SSOUserDetailInfo userDetail = null;
+            AuthRole authRole = authRoleService.findRoleById(authInfo.getAuthRoleId());
+            if (authRole == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Role with id %s not found", authInfo.getAuthRoleId()), HttpStatus.BAD_REQUEST));
+            }
+            userDetail = SSOUserDetail.getData().get(0);
+            authInfo.setSsoUserId(userDetail.getId());
+
+            SSOClaim applicationClaim = new SSOClaim();
+            applicationClaim.setType("application");
+            applicationClaim.setValue("lslb-cms");
+
+            SSOClaim roleClaim1 = new SSOClaim();
+            roleClaim1.setType("role");
+            roleClaim1.setValue(authRole.getSsoRoleMapping());
+
+            SSOClaim roleClaim2 = new SSOClaim();
+            roleClaim2.setType("role");
+            roleClaim2.setValue(authRole.getName());
+            SSOUserAddClaim ssoUserAddClaim = new SSOUserAddClaim();
+            ssoUserAddClaim.setUserId(userDetail.getId());
+            ssoUserAddClaim.getClaims().add(applicationClaim);
+            ssoUserAddClaim.getClaims().add(roleClaim1);
+            ssoUserAddClaim.getClaims().add(roleClaim2);
+
+            //Add claims
+            url = baseAPIURL + "/account/addclaims";
+            httpPost = new HttpPost(url);
+            //final com.fasterxml.jackson.databind.ObjectMapper mapperJson = new com.fasterxml.jackson.databind.ObjectMapper();
+            String json = mapper.toJson(ssoUserAddClaim);
+            httpPost.setEntity(new StringEntity(json));
+
+            httpPost.addHeader("Authorization", "Bearer " + apiToken);
+            httpPost.addHeader("client-id", clientId);
+            httpPost.addHeader("Content-Type", "application/json");
+
+            response = httpclient.execute(httpPost);
+            responseCode = response.getStatusLine().getStatusCode();
+            String stringResponse = EntityUtils.toString(response.getEntity());
+
+            if (responseCode != 200) {
+                return Mono.just(new ResponseEntity<>(stringResponse, HttpStatus.valueOf(responseCode)));
+            }
+
+            model.put("name", authInfo.getFirstName() + " " + authInfo.getLastName());
+            model.put("frontEndUrl", frontEndPropertyHelper.getFrontEndUrl());
+            String content = mailContentBuilderService.build(model, "ExistingUserRegistrationEmail");
+            emailService.sendEmail(content, "Registration Confirmation", authInfo.getEmailAddress());
+            authInfo.setEnabled(true);
+            if (ssoUserDetailInfo != null) {
+                authInfo.setSsoUserId(ssoUserDetailInfo.getId());
+            }
+            mongoRepositoryReactive.saveOrUpdate(authInfo);
+
+            String verbiage = String.format("Create user  -> Name : %s ", authInfo.getFullName());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
+                    LocalDateTime.now(), LocalDate.now(), true, requestIpAddress, verbiage));
+            return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
+        } catch (IOException e) {
+            throw new ApprovalRequestProcessException(e.getMessage());
+        }
+    }
+
+    private void createNewUserOnSSO(AuthInfo authInfo, HttpServletRequest httpServletRequest) throws ApprovalRequestProcessException {
+        try {
+            authInfo.setInitialPassword(DEFAULT_PASSWORD);
+            String apiToken = tokenExtractor.extract(httpServletRequest.getHeader("Authorization"));
+            if (StringUtils.isEmpty(apiToken)) {
+                throw new ApprovalRequestProcessException("Could not get authentication from request");
+            }
+
+            AuthRole authRole = authInfo.getAuthRole();
+
+            SSOClaim applicationClaim = new SSOClaim();
+            applicationClaim.setType("application");
+            applicationClaim.setValue("lslb-cms");
+
+            SSOClaim roleClaim1 = new SSOClaim();
+            roleClaim1.setType("role");
+            roleClaim1.setValue(authRole.getSsoRoleMapping());
+
+            SSOClaim roleClaim2 = new SSOClaim();
+            roleClaim2.setType("role");
+            roleClaim2.setValue(authRole.getName());
+
+            SSOUser ssoUser = new SSOUser();
+            ssoUser.getClaims().add(applicationClaim);
+            ssoUser.getClaims().add(roleClaim1);
+            ssoUser.getClaims().add(roleClaim2);
+            ssoUser.setEmail(authInfo.getEmailAddress());
+            String firstName = authInfo.getFirstName();
+            String[] names = firstName.split(" ");
+            ssoUser.setFirstName(names[0]);
+            ssoUser.setLastName(authInfo.getLastName());
+            ssoUser.setPassword(authInfo.getInitialPassword());
+            ssoUser.setPhoneNumber(authInfo.getPhoneNumber());
+            ssoUser.setUserName(authInfo.getEmailAddress());
+            ssoUser.setConfirmEmail(true);
+
+            HttpClient httpclient = HttpClientBuilder.create().build();
+            HttpPost httpPost = null;
+            HttpGet httpGet = null;
+            String url = null;
+            UserRegisterResponse userRegisterResponse = null;
+            HttpResponse response = null;
+            int responseCode;
+            url = baseAPIURL + "/account/register";
+            httpPost = new HttpPost(url);
+            String json = mapper.toJson(ssoUser);
+            httpPost.setEntity(new StringEntity(json));
+            httpPost.addHeader("Authorization", "Bearer " + apiToken);
+            httpPost.addHeader("client-id", clientId);
+            httpPost.addHeader("Content-Type", "application/json");
+
+            response = httpclient.execute(httpPost);
+            responseCode = response.getStatusLine().getStatusCode();
+            if (responseCode != 201) {
+                throw new ApprovalRequestProcessException(EntityUtils.toString(response.getEntity()));
+            }
+
+            String stringResponse = EntityUtils.toString(response.getEntity());
+            userRegisterResponse = mapper.readValue(stringResponse, UserRegisterResponse.class);
+            // GetUserId set
+            String UserId = userRegisterResponse.getUserId();
+
+            authInfo.setSsoUserId(UserId);
+            authInfo.setEnabled(true);
+            //Set UnActive to true so User will not be to login on  CMS
+            authInfo.setInactive(true);
+            authInfo.setInactiveReason("Kindly Set Password");
+            mongoRepositoryReactive.saveOrUpdate(authInfo);
+        } catch (IOException e) {
+            throw new ApprovalRequestProcessException(e.getMessage());
+        }
+    }
+
+    @Override
+    public Mono<ResponseEntity> completeResourceOwnerCreatedUserRegistration(AuthInfo authInfo, HttpServletRequest httpServletRequest, AuthInfoCompleteDto authInfoCompleteDto) {
+        SSOChangePasswordModel ssoChangePasswordModel = new SSOChangePasswordModel();
+        ssoChangePasswordModel.setCurrentPassword(authInfo.getInitialPassword());
+        ssoChangePasswordModel.setNewPassword(authInfoCompleteDto.getPassword());
+        ssoChangePasswordModel.setUserId(authInfo.getSsoUserId());
+        Mono<ResponseEntity> responseEntityMono = loginToken(authInfo.getEmailAddress(), authInfo.getInitialPassword(), authInfo, httpServletRequest);
+        ResponseEntity<SSOToken> responseEntity = responseEntityMono.block();
+        if (responseEntity == null
+                || responseEntity.getBody() == null
+                || responseEntity.getStatusCode() != HttpStatus.OK) {
+            return responseEntityMono;
+        }
+
+        String token = responseEntity.getBody().getAccess_token();
+        responseEntityMono = changePassword(token, ssoChangePasswordModel, httpServletRequest);
+        responseEntity = responseEntityMono.block();
+        if (responseEntity == null
+                || responseEntity.getBody() == null
+                || responseEntity.getStatusCode() != HttpStatus.OK) {
+            return responseEntityMono;
+        }
+        authInfo.setInactiveReason(null);
+        authInfo.setInactive(false);
+        mongoRepositoryReactive.saveOrUpdate(authInfo);
+        return responseEntityMono;
     }
 }

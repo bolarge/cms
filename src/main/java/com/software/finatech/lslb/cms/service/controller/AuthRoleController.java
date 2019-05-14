@@ -343,93 +343,59 @@ public class AuthRoleController extends BaseController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
-            @ApiResponse(code = 400, message = "Bad request")
-    }
-    )
+            @ApiResponse(code = 400, message = "Bad request")})
     public Mono<ResponseEntity> getEligibleRolesForCreation() {
         try {
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser != null) {
-                List<String> notAllowedIds;
                 Set<String> eligibleRoleIds = new HashSet<>();
                 Map authRoleMap = Mapstore.STORE.get("AuthRole");
-                Set<String> authRoleIds = (Set<String>) authRoleMap.keySet();
-                if(loggedInUser.isVGGSuperAdmin()){
-                    notAllowedIds= Arrays.asList(LSLBAuthRoleReferenceData.AGENT_ROLE_ID,
-                            LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID,
-                            LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID,
-                            LSLBAuthRoleReferenceData.LSLB_USER_ID,
-                            LSLBAuthRoleReferenceData.LSLB_ADMIN_ID,
-                            AuthRoleReferenceData.VGG_USER_ID,
-                            AuthRoleReferenceData.SUPER_ADMIN_ID);
-                    for (String authRoleId : authRoleIds) {
-                        if (!notAllowedIds.contains(authRoleId)) {
-                            eligibleRoleIds.add(authRoleId);
-                        }
-                    }
+
+                /**
+                 *Super Admin creates only VGG admin according to SSO policy
+                 */
+                if (loggedInUser.isVGGSuperAdmin()) {
+                    eligibleRoleIds.addAll(Collections.singletonList(AuthRoleReferenceData.VGG_ADMIN_ID));
                 }
+
+                /**
+                 * Gaming operator creates only gaming operator because of FRD specifications
+                 * There is a limit to create only three gaming operator users per operator
+                 */
                 if (loggedInUser.isGamingOperator()) {
                     eligibleRoleIds.add(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID);
                 }
 
+                /**
+                 * Make the eligible roles empty to that lslb user (client_user) cannot create a user
+                 */
                 if (loggedInUser.isLSLBUser()) {
-//                    notAllowedIds = Arrays.asList(AuthRoleReferenceData.VGG_ADMIN_ID,
-//                            AuthRoleReferenceData.VGG_USER_ID,
-//                            AuthRoleReferenceData.SUPER_ADMIN_ID,
-//                            LSLBAuthRoleReferenceData.LSLB_ADMIN_ID,
-//                            LSLBAuthRoleReferenceData.AGENT_ROLE_ID,
-//                            LSLBAuthRoleReferenceData.LSLB_USER_ID,
-//                            LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID);
-//                    for (String authRoleId : authRoleIds) {
-//                        if (!notAllowedIds.contains(authRoleId)) {
-//                            eligibleRoleIds.add(authRoleId);
-//                        }
-//                    }
-                    //Make the eligible roles empty to that lslb user (client_user) cannot create a user
                     eligibleRoleIds = new HashSet<>();
                 }
 
+                /**
+                 * LSLB Admin(Client admin) can create only client users
+                 * which are the roles below
+                 */
                 if (loggedInUser.isLSLBAdmin()) {
-                    notAllowedIds = Arrays.asList(AuthRoleReferenceData.VGG_ADMIN_ID,
-                            AuthRoleReferenceData.VGG_USER_ID,
-                            AuthRoleReferenceData.SUPER_ADMIN_ID,
-                            LSLBAuthRoleReferenceData.LSLB_ADMIN_ID,
-                            LSLBAuthRoleReferenceData.AGENT_ROLE_ID,
-                            LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID);
-                    for (String authRoleId : authRoleIds) {
-                        if (!notAllowedIds.contains(authRoleId)) {
-                            eligibleRoleIds.add(authRoleId);
-                        }
-                    }
-                }
-
-                if (loggedInUser.isVGGAdmin()) {
-                    notAllowedIds = Arrays.asList(AuthRoleReferenceData.SUPER_ADMIN_ID,
-                            AuthRoleReferenceData.VGG_ADMIN_ID,
-                            LSLBAuthRoleReferenceData.AGENT_ROLE_ID,
+                    eligibleRoleIds.addAll(Arrays.asList(LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID,
                             LSLBAuthRoleReferenceData.LSLB_USER_ID,
-                            LSLBAuthRoleReferenceData.GAMING_OPERATOR_ROLE_ID,
-                            LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID
-                    );
-                    for (String authRoleId : authRoleIds) {
-                        if (!notAllowedIds.contains(authRoleId)) {
-                            eligibleRoleIds.add(authRoleId);
-                        }
-                    }
+                            LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID,
+                            LSLBAuthRoleReferenceData.AGENT_ROLE_ID));
                 }
 
-                if (loggedInUser.isVGGUser()) {
-//                    notAllowedIds = Arrays.asList(AuthRoleReferenceData.VGG_ADMIN_ID,
-//                            AuthRoleReferenceData.SUPER_ADMIN_ID,
-//                            LSLBAuthRoleReferenceData.AGENT_ROLE_ID,
-//                            LSLBAuthRoleReferenceData.APPLICANT_ROLE_ID);
-//                    for (String authRoleId : authRoleIds) {
-//                        if (!notAllowedIds.contains(authRoleId)) {
-//                            eligibleRoleIds.add(authRoleId);
-//                        }
-//                    }
+                /**
+                 * VGG admin can create only client admin and VGG user
+                 */
+                if (loggedInUser.isVGGAdmin()) {
+                    eligibleRoleIds.addAll(Arrays.asList(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID,
+                            AuthRoleReferenceData.VGG_USER_ID));
+                }
 
-                    //make the eligile roles empty so that vgg user cannot create anyone
+                /**
+                 *make the eligible roles empty so that vgg user cannot create anyone
+                 */
+                if (loggedInUser.isVGGUser()) {
                     eligibleRoleIds = new HashSet<>();
                 }
 
