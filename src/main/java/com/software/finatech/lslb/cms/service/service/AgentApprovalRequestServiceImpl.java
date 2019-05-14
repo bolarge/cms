@@ -175,7 +175,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
                 return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
             }
             if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.CREATE_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
-                approveAgentCreationRequest(agentApprovalRequest, approvingUser.getId());
+                approveAgentCreationRequest(agentApprovalRequest, approvingUser.getId(),request);
             }
             if (StringUtils.equals(AgentApprovalRequestTypeReferenceData.ADD_INSTITUTION_TO_AGENT_ID, agentApprovalRequest.getAgentApprovalRequestTypeId())) {
                 approveAddInstitutionToAgentRequest(agentApprovalRequest, approvingUser.getId());
@@ -339,7 +339,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
         mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
     }
 
-    private void approveAgentCreationRequest(AgentApprovalRequest agentApprovalRequest, String userId) {
+    private void approveAgentCreationRequest(AgentApprovalRequest agentApprovalRequest, String userId,HttpServletRequest request) {
         PendingAgent pendingAgent = findPendingAgentById(agentApprovalRequest.getPendingAgentId());
         if (pendingAgent != null) {
             pendingAgent.setEnabled(true);
@@ -375,7 +375,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             agentApprovalRequest.setApproverId(userId);
             mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
             mongoRepositoryReactive.saveOrUpdate(agent);
-            agentUserCreatorAsync.createUserAndCustomerCodeForAgent(agent);
+            agentUserCreatorAsync.createUserAndCustomerCodeForAgent(agent, request);
         }
     }
 
