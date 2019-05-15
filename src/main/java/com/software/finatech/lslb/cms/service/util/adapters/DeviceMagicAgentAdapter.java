@@ -3,7 +3,6 @@ package com.software.finatech.lslb.cms.service.util.adapters;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
-import com.software.finatech.lslb.cms.service.util.AgentUserCreator;
 import com.software.finatech.lslb.cms.service.util.EnvironmentUtils;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.adapters.model.DeviceMagicAgent;
@@ -20,7 +19,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
@@ -34,7 +32,6 @@ public class DeviceMagicAgentAdapter {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     @Autowired
     private EnvironmentUtils environmentUtils;
-
 
 
     public void saveDeviceMagicAgentToAgentDb(DeviceMagicAgent deviceMagicAgent) {
@@ -53,7 +50,7 @@ public class DeviceMagicAgentAdapter {
         agent.setFullName(String.format("%s %s", deviceMagicAgent.getFirstName(), deviceMagicAgent.getLastName()));
         agent.setFirstName(deviceMagicAgent.getFirstName());
         agent.setLastName(deviceMagicAgent.getLastName());
-        agent.setEmailAddress(deviceMagicAgent.getEmail());
+        agent.setEmailAddress(getEmailBasedOnEnvironment(deviceMagicAgent));
         agent.setPhoneNumber(deviceMagicAgent.getPhoneNumber1());
         if (!StringUtils.isEmpty(deviceMagicAgent.getPhoneNumber1())) {
             agent.getPhoneNumbers().add(deviceMagicAgent.getPhoneNumber1());
@@ -157,6 +154,13 @@ public class DeviceMagicAgentAdapter {
         }
     }
 
+    private String getEmailBasedOnEnvironment(DeviceMagicAgent deviceMagicAgent) {
+        if (environmentUtils.isProductionEnvironment()) {
+            return deviceMagicAgent.getEmail();
+        }
+        return "test@mailinator.com";
+    }
+
     private void saveDocumentForAgent(DeviceMagicAgent deviceMagicAgent, Agent agent) {
         String submissionId = deviceMagicAgent.getSubmissionId();
         try {
@@ -189,8 +193,7 @@ public class DeviceMagicAgentAdapter {
             }
             mongoRepositoryReactive.saveOrUpdate(document);
             logger.info("Saved passport for agent with submission {}", submissionId);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error(String.format("An error occurred while saving agent passport for agent %s", submissionId), e);
         }
     }

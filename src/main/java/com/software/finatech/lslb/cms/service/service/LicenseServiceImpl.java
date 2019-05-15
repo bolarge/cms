@@ -1233,7 +1233,11 @@ public class LicenseServiceImpl implements LicenseService {
             }
 
             LicenseStatus oldLicenseStatus = license.getLicenseStatus();
-            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+            if (StringUtils.isEmpty(license.getOldLicenseStatusId())) {
+                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
+            } else {
+                license.setLicenseStatusId(license.getOldLicenseStatusId());
+            }
 
             LocalDate today = LocalDate.now();
             LocalDate licenseExpiryDate = license.getExpiryDate();

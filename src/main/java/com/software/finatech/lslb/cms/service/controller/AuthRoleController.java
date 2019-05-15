@@ -349,8 +349,6 @@ public class AuthRoleController extends BaseController {
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser != null) {
                 Set<String> eligibleRoleIds = new HashSet<>();
-                Map authRoleMap = Mapstore.STORE.get("AuthRole");
-
                 /**
                  *Super Admin creates only VGG admin according to SSO policy
                  */
