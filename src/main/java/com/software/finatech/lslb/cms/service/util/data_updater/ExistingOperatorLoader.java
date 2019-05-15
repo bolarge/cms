@@ -305,14 +305,9 @@ public class ExistingOperatorLoader {
 
 
     public String getInstitutionAddressBasedOnEnvironment(InstitutionUpload institutionUpload) {
-        if (environmentUtils.isDevelopmentEnvironment() ||
-                environmentUtils.isStagingEnvironment() ||
-                environmentUtils.isTestEnvironment()) {
-            return "test@mailinator.com";
-        }
         if (environmentUtils.isProductionEnvironment()) {
             return institutionUpload.getAddress();
         }
-        return null;
+        return "test@mailinator.com";
     }
 }

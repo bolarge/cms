@@ -2,10 +2,10 @@ package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.domain.FailedEmailNotification;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.util.EnvironmentUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -16,8 +16,6 @@ import org.springframework.stereotype.Component;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 @Component("emailService")
@@ -30,7 +28,7 @@ public class EmailService {
     @Autowired
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     @Autowired
-    private Environment environment;
+    private EnvironmentUtils environmentUtils;
 
 
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
@@ -54,7 +52,7 @@ public class EmailService {
             failedEmailNotification.setId(UUID.randomUUID().toString());
             failedEmailNotification.setExceptionMessage(e.getMessage());
             failedEmailNotification.setContent(content);
-            failedEmailNotification.setFromEmailAddress("noreply@lslbcms.com");
+            failedEmailNotification.setFromEmailAddress(getMailSender());
             failedEmailNotification.setSent(false);
             failedEmailNotification.setToEmailAddress(to);
             failedEmailNotification.setSubject(subject);
@@ -74,7 +72,7 @@ public class EmailService {
         mongoRepositoryReactive.saveOrUpdate(failedEmailNotification);
         MimeMessagePreparator messagePreparator = mimeMessage -> {
             MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-            messageHelper.setFrom("noreply@lslbcms.com");
+            messageHelper.setFrom(getMailSender());
             messageHelper.setTo(failedEmailNotification.getToEmailAddress());
             messageHelper.setSubject(failedEmailNotification.getSubject());
             messageHelper.setText(failedEmailNotification.getContent(), true);
@@ -147,19 +145,15 @@ public class EmailService {
     }
 
     private String getMailSender() {
-        List<String> activeProfiles = Arrays.asList(environment.getActiveProfiles());
-        if (activeProfiles.contains("development") || activeProfiles.contains("test") || activeProfiles.contains("staging")) {
+        if (environmentUtils.isDevelopmentEnvironment() ||
+                environmentUtils.isStagingEnvironment() ||
+                environmentUtils.isTestEnvironment()) {
             return "dev@lslbcms.com";
         }
 
-        if (activeProfiles.contains("production")) {
+        if (environmentUtils.isProductionEnvironment()) {
             return "no-reply@lslbcms.com";
         }
         return "";
     }
-
-   /* @Async("threadPoolTaskExecutor")
-    public void sendEmail(SimpleMailMessage email) {
-        mailSender.send(email);
-    }*/
 }

@@ -50,7 +50,7 @@ public class DeviceMagicAgentAdapter {
         agent.setFullName(String.format("%s %s", deviceMagicAgent.getFirstName(), deviceMagicAgent.getLastName()));
         agent.setFirstName(deviceMagicAgent.getFirstName());
         agent.setLastName(deviceMagicAgent.getLastName());
-        agent.setEmailAddress(getEmailBasedOnEnvironment(deviceMagicAgent));
+        agent.setEmailAddress(deviceMagicAgent.getEmail());
         agent.setPhoneNumber(deviceMagicAgent.getPhoneNumber1());
         if (!StringUtils.isEmpty(deviceMagicAgent.getPhoneNumber1())) {
             agent.getPhoneNumbers().add(deviceMagicAgent.getPhoneNumber1());
@@ -152,13 +152,6 @@ public class DeviceMagicAgentAdapter {
         } else {
             logger.info("Updated Agent for submission {} , Agent Id {}", deviceMagicAgent.getSubmissionId(), agent.getId());
         }
-    }
-
-    private String getEmailBasedOnEnvironment(DeviceMagicAgent deviceMagicAgent) {
-        if (environmentUtils.isProductionEnvironment()) {
-            return deviceMagicAgent.getEmail();
-        }
-        return "test@mailinator.com";
     }
 
     private void saveDocumentForAgent(DeviceMagicAgent deviceMagicAgent, Agent agent) {
