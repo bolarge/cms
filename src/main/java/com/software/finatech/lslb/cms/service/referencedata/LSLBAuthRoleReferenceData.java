@@ -27,8 +27,6 @@ public class LSLBAuthRoleReferenceData {
         role4.setDescription("LSLB Admin");
         role4.setName("LSLB ADMIN");
         role4.setSsoRoleMapping(SSO_CLIENT_ADMIN);
-        Set<String> permissionIds = LSLBAuthPermissionReferenceData.getLSLBAdminPermissions();
-        //  role4.setAuthPermissionIds(permissionIds);
 
         AuthRole role5 = (AuthRole) mongoRepositoryReactive.findById(LSLB_USER_ID, AuthRole.class).block();
         if (role5 == null) {
@@ -38,8 +36,6 @@ public class LSLBAuthRoleReferenceData {
         role5.setDescription("LSLB user");
         role5.setName("LSLB USER");
         role5.setSsoRoleMapping(SSO_CLIENT_USER);
-        permissionIds = LSLBAuthPermissionReferenceData.getLSLBUserPermissions();
-        //   role5.setAuthPermissionIds(permissionIds);
 
 
         AuthRole role6 = (AuthRole) mongoRepositoryReactive.findById(GAMING_OPERATOR_ROLE_ID, AuthRole.class).block();
@@ -50,9 +46,6 @@ public class LSLBAuthRoleReferenceData {
         role6.setDescription("GAMING OPERATOR");
         role6.setName("GAMING OPERATOR");
         role6.setSsoRoleMapping(SSO_CLIENT_USER);
-        permissionIds = LSLBAuthPermissionReferenceData.getGamingOperatorAdminPermissions();
-        //     role6.setAuthPermissionIds(permissionIds);
-
 
         AuthRole role8 = (AuthRole) mongoRepositoryReactive.findById(AGENT_ROLE_ID, AuthRole.class).block();
         if (role8 == null) {
@@ -62,9 +55,6 @@ public class LSLBAuthRoleReferenceData {
         role8.setDescription("AGENT");
         role8.setName("AGENT");
         role8.setSsoRoleMapping(SSO_CLIENT_USER);
-        permissionIds = LSLBAuthPermissionReferenceData.getAllAgentPermissions();
-        //  role8.setAuthPermissionIds(permissionIds);
-
 
         AuthRole role9 = (AuthRole) mongoRepositoryReactive.findById(APPLICANT_ROLE_ID, AuthRole.class).block();
         if (role9 == null) {
@@ -74,9 +64,6 @@ public class LSLBAuthRoleReferenceData {
         role9.setDescription("Applicant user for gaming operators");
         role9.setName("APPLICANT");
         role9.setSsoRoleMapping(SSO_CLIENT_USER);
-        permissionIds = LSLBAuthPermissionReferenceData.getApplicantPermissions();
-        //     role9.setAuthPermissionIds(permissionIds);
-
 
         mongoRepositoryReactive.saveOrUpdate(role4);
         mongoRepositoryReactive.saveOrUpdate(role5);

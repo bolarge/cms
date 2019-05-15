@@ -320,7 +320,7 @@ public class AuthInfoController extends BaseController {
 
             if (loggedInUser.isGamingOperator()) {
                 String appUrl = appHostPort + request.getContextPath();
-                return authInfoService.createAuthInfo(authInfoCreateDto, appUrl, request);
+                return authInfoService.createAuthInfo(authInfoCreateDto, appUrl);
             /*String appUrl =
                     "http://" + request.getServerName() +
                             ":" + request.getServerPort() +

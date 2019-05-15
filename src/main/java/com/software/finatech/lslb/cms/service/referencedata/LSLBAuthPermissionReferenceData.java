@@ -2,11 +2,13 @@ package com.software.finatech.lslb.cms.service.referencedata;
 
 import com.software.finatech.lslb.cms.service.domain.AuthPermission;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class LSLBAuthPermissionReferenceData {
     public static final String RECEIVE_APPLICATION_ID = "31";
@@ -24,6 +26,7 @@ public class LSLBAuthPermissionReferenceData {
     public static final String RECEIVE_INSPECTION_FORM_NOTIFICATION_ID = "94";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
+        deleteAllPermissions(mongoRepositoryReactive);
         AuthPermission permission = (AuthPermission) mongoRepositoryReactive.findById("1", AuthPermission.class).block();
         if (permission == null) {
             permission = new AuthPermission();
@@ -564,7 +567,8 @@ public class LSLBAuthPermissionReferenceData {
         permission.setName("VIEW USER APPROVAL REQUESTS");
         permission.setDescription("Can View User Approval Requests");
         permission.setUsedBySystem(false);
-        mongoRepositoryReactive.saveOrUpdate(permission);
+        //Not loaded because its a duplicate
+       // mongoRepositoryReactive.saveOrUpdate(permission);
 
         permission = (AuthPermission) mongoRepositoryReactive.findById("59", AuthPermission.class).block();
         if (permission == null) {
@@ -604,7 +608,8 @@ public class LSLBAuthPermissionReferenceData {
         permission.setName("VIEW AGENT APPROVAL REQUESTS");
         permission.setDescription("Can View Agent Approval Requests");
         permission.setUsedBySystem(false);
-        mongoRepositoryReactive.saveOrUpdate(permission);
+        //Not loaded because its a duplicate
+//        mongoRepositoryReactive.saveOrUpdate(permission);
 
         permission = (AuthPermission) mongoRepositoryReactive.findById("63", AuthPermission.class).block();
         if (permission == null) {
@@ -614,7 +619,8 @@ public class LSLBAuthPermissionReferenceData {
         permission.setName("APPROVE AGENT APPROVAL REQUESTS");
         permission.setDescription("Can Approve/Reject AGENT Approval Requests");
         permission.setUsedBySystem(false);
-        mongoRepositoryReactive.saveOrUpdate(permission);
+        //Not loaded because its a duplicate
+        //mongoRepositoryReactive.saveOrUpdate(permission);
 
         permission = (AuthPermission) mongoRepositoryReactive.findById(RECEIVE_MACHINE_APPLICATION_NOTIFICATION_ID, AuthPermission.class).block();
         if (permission == null) {
@@ -1102,5 +1108,13 @@ public class LSLBAuthPermissionReferenceData {
         codePermissions.add(RECEIVE_FEE_EXPIRIY_NOTIFICATION_ID);
         codePermissions.add(RECEIVE_LICENSE_TRANSFER_NOTIFICATION_ID);
         return codePermissions;
+    }
+
+
+    private static void deleteAllPermissions(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
+        ArrayList<AuthPermission> authPermissions = (ArrayList<AuthPermission>) mongoRepositoryReactive.findAll(new Query(), AuthPermission.class).toStream().collect(Collectors.toList());
+        for (AuthPermission authPermission : authPermissions) {
+            mongoRepositoryReactive.delete(authPermission);
+        }
     }
 }

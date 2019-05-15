@@ -175,7 +175,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
 
 
             if (userApprovalRequest.isCreateUser()) {
-                approveCreateUser(userApprovalRequest, request);
+                approveCreateUser(userApprovalRequest);
             } else if (userApprovalRequest.isUpdateUserRole()) {
                 approveChangeUserRole(userApprovalRequest);
             } else if (userApprovalRequest.isRemovePermissionFromUser()) {
@@ -265,11 +265,11 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
         }
     }
 
-    private void approveCreateUser(UserApprovalRequest userApprovalRequest, HttpServletRequest httpServletRequest) throws IOException, ApprovalRequestProcessException {
+    private void approveCreateUser(UserApprovalRequest userApprovalRequest) throws IOException, ApprovalRequestProcessException {
         PendingAuthInfo pendingAuthInfo = getPendingAuthInfoById(userApprovalRequest.getPendingAuthInfoId());
         if (pendingAuthInfo != null) {
             AuthInfoCreateDto authInfoCreateDto = pendingAuthInfoToCreateAuthInfo(pendingAuthInfo);
-            authInfoService.createAuthInfo(authInfoCreateDto, frontEndPropertyHelper.getFrontEndUrl(), httpServletRequest).block();
+            authInfoService.createAuthInfo(authInfoCreateDto, frontEndPropertyHelper.getFrontEndUrl()).block();
             pendingAuthInfo.setUserApprovalRequestStatusId(ApprovalRequestStatusReferenceData.APPROVED_ID);
             mongoRepositoryReactive.saveOrUpdate(pendingAuthInfo);
         }

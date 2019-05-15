@@ -428,6 +428,10 @@ public class Agent extends AbstractFact {
         return (AuthInfo) mongoRepositoryReactive.find(Query.query(Criteria.where("agentId").is(this.getId())), AuthInfo.class).block();
     }
 
+    public boolean hasUser() {
+        return getAuthInfo() != null;
+    }
+
     public AgentStatus getAgentStatus() {
         if (StringUtils.isEmpty(this.agentStatusId)) {
             return null;

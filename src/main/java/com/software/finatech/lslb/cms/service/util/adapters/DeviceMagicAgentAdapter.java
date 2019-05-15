@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.util.adapters;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
+import com.software.finatech.lslb.cms.service.util.AgentUserCreator;
 import com.software.finatech.lslb.cms.service.util.EnvironmentUtils;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.adapters.model.DeviceMagicAgent;
@@ -19,6 +20,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
@@ -32,6 +34,8 @@ public class DeviceMagicAgentAdapter {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     @Autowired
     private EnvironmentUtils environmentUtils;
+
+
 
     public void saveDeviceMagicAgentToAgentDb(DeviceMagicAgent deviceMagicAgent) {
         if (StringUtils.isEmpty(deviceMagicAgent.getEmail())) {
@@ -186,11 +190,6 @@ public class DeviceMagicAgentAdapter {
             mongoRepositoryReactive.saveOrUpdate(document);
             logger.info("Saved passport for agent with submission {}", submissionId);
         }
-
-//        catch (FileNotFoundException e) {
-//            logger.error("No Passport found for agent {}", agent.getFullName());
-//        }
-
         catch (Exception e) {
             logger.error(String.format("An error occurred while saving agent passport for agent %s", submissionId), e);
         }
