@@ -26,7 +26,7 @@ public interface UserApprovalRequestService {
 
     Mono<ResponseEntity> getAllUserApprovalRequestType();
 
-    Mono<ResponseEntity> approveRequest(ApprovalRequestOperationtDto approvalRequestOperationtDto, HttpServletRequest request);
+    Mono<ResponseEntity> approveRequest(ApprovalRequestOperationtDto approvalRequestOperationtDto, HttpServletRequest httpServletRequest);
 
     Mono<ResponseEntity> rejectRequest(ApprovalRequestOperationtDto approvalRequestOperationtDto, HttpServletRequest request);
 

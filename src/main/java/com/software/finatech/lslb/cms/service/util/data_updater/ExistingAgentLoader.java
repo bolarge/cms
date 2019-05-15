@@ -1,6 +1,9 @@
 package com.software.finatech.lslb.cms.service.util.data_updater;
 
+import com.software.finatech.lslb.cms.service.domain.Agent;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
+import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.util.AgentUserCreator;
 import com.software.finatech.lslb.cms.service.util.adapters.DeviceMagicAgentAdapter;
 import com.software.finatech.lslb.cms.service.util.adapters.model.DeviceMagicAgent;
 import com.software.finatech.lslb.cms.service.util.adapters.model.DeviceMagicAgentInstitutionCategoryDetails;
@@ -8,17 +11,28 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class ExistingAgentLoader {
     private static final Logger logger = LoggerFactory.getLogger(ExistingAgentLoader.class);
     @Autowired
     private DeviceMagicAgentAdapter deviceMagicAgentAdapter;
+    @Autowired
+    private AgentUserCreator agentUserCreator;
+    @Autowired
+    private HttpServletRequest httpServletRequest;
+    @Autowired
+    private MongoRepositoryReactiveImpl mongoRepositoryReactive;
 
     public void loadAgentsFromCSV(MultipartFile multipartFile) throws LicenseServiceException {
         if (multipartFile.isEmpty()) {
@@ -92,6 +106,23 @@ public class ExistingAgentLoader {
             }
         } catch (Exception e) {
             logger.error("An error occurred while parsing file", e);
+        }
+    }
+
+
+    public void createUserAndCustomerCodeForLiveAgents() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("fromLiveData").is(true));
+        ArrayList<Agent> liveAgents = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
+        for (Agent liveAgent : liveAgents) {
+            try {
+                if (!liveAgent.hasUser()) {
+                    agentUserCreator.createUserAndCustomerCodeForAgent(liveAgent, httpServletRequest);
+                    logger.info("Created user for {}", liveAgent.getFullName());
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
         }
     }
 

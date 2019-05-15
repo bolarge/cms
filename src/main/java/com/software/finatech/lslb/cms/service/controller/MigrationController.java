@@ -1,7 +1,6 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
-import com.software.finatech.lslb.cms.service.util.DatabaseLoaderUtils;
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingAgentLoader;
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingGamingMachineLoader;
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingGamingTerminalLoader;
@@ -57,6 +56,17 @@ public class MigrationController {
     public Mono<ResponseEntity> createAgentFromCSV(@RequestParam("file") MultipartFile multipartFile) {
         try {
             existingAgentLoader.loadAgentsFromCSV(multipartFile);
+            return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
+        } catch (Exception e) {
+            return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/create-agent-users")
+    public Mono<ResponseEntity> createAgentUsers() {
+        try {
+            existingAgentLoader.createUserAndCustomerCodeForLiveAgents();
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));

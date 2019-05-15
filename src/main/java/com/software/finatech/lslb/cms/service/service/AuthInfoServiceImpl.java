@@ -106,6 +106,8 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     @Autowired
     protected MongoRepositoryReactiveImpl mongoRepositoryReactive;
     protected ObjectMapper mapper;
+    @Autowired
+    private HttpServletRequest request;
 
     private static final String userAuditActionId = AuditActionReferenceData.USER_ID;
 
@@ -118,7 +120,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     }
 
     @Override
-    public Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl, HttpServletRequest request) throws ApprovalRequestProcessException {
+    public Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl) throws ApprovalRequestProcessException {
         String requestIpAddress = RequestAddressUtil.getClientIpAddr(request);
 
         if (!StringUtils.isEmpty(authInfoCreateDto.getInstitutionId())) {
@@ -155,7 +157,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             SSOUserDetailInfo userDetail = null;
             HashMap<String, Object> model = new HashMap<>();
 
-            String apiToken = tokenExtractor.extract(request.getHeader("Authorization"));
+            String apiToken = getTokenFromRequest(request);
             url = baseAPIURL + "/account/getuserbyemail?email=" + authInfo.getEmailAddress();
             httpGet = new HttpGet(url);
             httpGet.addHeader("Authorization", "Bearer " + apiToken);
@@ -1233,5 +1235,18 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         authInfo.setInactive(false);
         mongoRepositoryReactive.saveOrUpdate(authInfo);
         return responseEntityMono;
+    }
+
+    private String getTokenFromRequest(HttpServletRequest request) {
+        String apiToken = null;
+        try {
+            apiToken = tokenExtractor.extract(request.getHeader("Authorization"));
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        if (StringUtils.isEmpty(apiToken)) {
+            apiToken = getAPIToken();
+        }
+        return apiToken;
     }
 }

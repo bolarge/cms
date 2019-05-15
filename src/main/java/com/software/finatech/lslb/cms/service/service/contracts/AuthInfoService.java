@@ -5,7 +5,6 @@ import com.software.finatech.lslb.cms.service.domain.VerificationToken;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOChangePasswordModel;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOPasswordResetModel;
-import com.software.finatech.lslb.cms.service.dto.sso.SSOUser;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOUserDetailInfo;
 import com.software.finatech.lslb.cms.service.exception.ApprovalRequestProcessException;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public interface AuthInfoService {
-    Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl, HttpServletRequest request) throws IOException, ApprovalRequestProcessException;
+    Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl) throws IOException, ApprovalRequestProcessException;
 
     AuthInfo createApplicantAuthInfo(CreateApplicantAuthInfoDto createApplicantAuthInfoDto, String appUrl, HttpServletRequest request);
 
@@ -25,7 +24,7 @@ public interface AuthInfoService {
 
     String resetPasswordToken(String email, HttpServletRequest request);
 
-    Mono<ResponseEntity> resetPassword(SSOPasswordResetModel ssoPasswordResetModel, HttpServletRequest request ,AuthInfo authInfo);
+    Mono<ResponseEntity> resetPassword(SSOPasswordResetModel ssoPasswordResetModel, HttpServletRequest request, AuthInfo authInfo);
 
     Mono<ResponseEntity> changePassword(String token, SSOChangePasswordModel model, HttpServletRequest request);
 
