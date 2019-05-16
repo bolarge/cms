@@ -157,7 +157,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             SSOUserDetailInfo userDetail = null;
             HashMap<String, Object> model = new HashMap<>();
 
-            String apiToken = getTokenFromRequest(request);
+            String apiToken = getTokenFromRequest();
             url = baseAPIURL + "/account/getuserbyemail?email=" + authInfo.getEmailAddress();
             httpGet = new HttpGet(url);
             httpGet.addHeader("Authorization", "Bearer " + apiToken);
@@ -1237,7 +1237,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         return responseEntityMono;
     }
 
-    private String getTokenFromRequest(HttpServletRequest request) {
+    private String getTokenFromRequest() {
         String apiToken = null;
         try {
             apiToken = tokenExtractor.extract(request.getHeader("Authorization"));

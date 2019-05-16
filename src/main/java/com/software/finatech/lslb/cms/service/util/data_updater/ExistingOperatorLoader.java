@@ -207,7 +207,7 @@ public class ExistingOperatorLoader {
                 pendingInstitution.setActive(true);
                 pendingInstitution.setDescription(institutionUpload.getDescription());
                 pendingInstitution.setEmailAddress(getInstitutionAddressBasedOnEnvironment(institutionUpload));
-                pendingInstitution.setPhoneNumber(String.format("0%s", institutionUpload.getPhoneNumber()));
+                pendingInstitution.setPhoneNumbers(getPhoneNumbersFromUpload(institutionUpload));
                 pendingInstitution.setFromLiveData(true);
                 pendingInstitution.setAddress(institutionUpload.getAddress());
             }
@@ -255,6 +255,21 @@ public class ExistingOperatorLoader {
             // }
             mongoRepositoryReactive.saveOrUpdate(pendingInstitution);
         }
+    }
+
+    private Set<String> getPhoneNumbersFromUpload(InstitutionUpload institutionUpload) {
+        Set<String> phoneNumber = new HashSet<>();
+        String[] phoneNumbers = institutionUpload.getPhoneNumber().split("\\s+");
+        for (String number : phoneNumbers) {
+            if (StringUtils.isNotEmpty(number)) {
+                number = number.trim().replace("\"", "");
+                if (!number.startsWith("0")) {
+                    number = String.format("0%s", number);
+                }
+                phoneNumber.add(number);
+            }
+        }
+        return phoneNumber;
     }
 
     private Set<String> directorNamesFromString(String director) {
