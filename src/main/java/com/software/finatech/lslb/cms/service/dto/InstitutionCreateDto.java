@@ -13,7 +13,6 @@ public class InstitutionCreateDto {
     @NotEmpty(message = "Email should not be empty")
     protected String emailAddress;
     protected String description;
-    @Size(min = 9, message = "Phone number should not be less than 9 characters")
     @NotEmpty(message = "Phone Numbers should not be empty")
     protected Set<String> phoneNumbers = new HashSet<>();
     @NotEmpty(message = "Address should not be empty")
