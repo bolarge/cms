@@ -14,8 +14,8 @@ public class InstitutionCreateDto {
     protected String emailAddress;
     protected String description;
     @Size(min = 9, message = "Phone number should not be less than 9 characters")
-    @NotEmpty(message = "Phone Number should not be empty")
-    protected String phoneNumber;
+    @NotEmpty(message = "Phone Numbers should not be empty")
+    protected Set<String> phoneNumbers = new HashSet<>();
     @NotEmpty(message = "Address should not be empty")
     protected String address;
     private String userId;
@@ -60,12 +60,12 @@ public class InstitutionCreateDto {
         this.description = description;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public Set<String> getPhoneNumbers() {
+        return phoneNumbers;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setPhoneNumbers(Set<String> phoneNumbers) {
+        this.phoneNumbers = phoneNumbers;
     }
 
     public Set<String> getGameTypeIds() {

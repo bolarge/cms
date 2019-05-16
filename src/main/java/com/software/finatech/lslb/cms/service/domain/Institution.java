@@ -22,7 +22,6 @@ public class Institution extends AbstractFact {
     protected String description;
     protected Boolean active;
     private String address;
-    protected String phoneNumber;
     protected String vgPayCustomerCode;
     protected String website;
     private String tradeName;
@@ -32,6 +31,15 @@ public class Institution extends AbstractFact {
     private Set<String> shareHolderNames = new HashSet<>();
     private boolean fromLiveData;
     private boolean isOnAIPLicense;
+    private Set<String> phoneNumbers = new HashSet<>();
+
+    public Set<String> getPhoneNumbers() {
+        return phoneNumbers;
+    }
+
+    public void setPhoneNumbers(Set<String> phoneNumbers) {
+        this.phoneNumbers = phoneNumbers;
+    }
 
     public boolean isOnAIPLicense() {
         return isOnAIPLicense;
@@ -156,26 +164,17 @@ public class Institution extends AbstractFact {
         this.active = active;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
     @Override
     public String getFactName() {
         return "Institution";
     }
-
 
     public InstitutionDto convertToDto() {
         InstitutionDto institutionDto = new InstitutionDto();
         institutionDto.setActive(getActive());
         institutionDto.setId(getId());
         institutionDto.setEmailAddress(getEmailAddress());
-        institutionDto.setPhoneNumber(getPhoneNumber());
+        institutionDto.setPhoneNumbers(getPhoneNumbers());
         institutionDto.setInstitutionName(getInstitutionName());
         institutionDto.setDescription(getDescription());
         institutionDto.setActive(getActive());
@@ -233,5 +232,4 @@ public class Institution extends AbstractFact {
         }
         return (GameType) mongoRepositoryReactive.findById(gameTypeId, GameType.class).block();
     }
-
 }

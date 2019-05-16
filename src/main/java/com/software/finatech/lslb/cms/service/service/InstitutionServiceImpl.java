@@ -118,7 +118,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         }
         existingInstitution.setGameTypeIds(institutionUpdateDto.getGameTypeIds());
         existingInstitution.setEmailAddress(institutionUpdateDto.getEmailAddress());
-        existingInstitution.setPhoneNumber(institutionUpdateDto.getPhoneNumber());
+        existingInstitution.setPhoneNumbers(institutionUpdateDto.getPhoneNumbers());
         existingInstitution.setDescription(institutionUpdateDto.getDescription());
         existingInstitution.setInstitutionName(institutionUpdateDto.getInstitutionName());
         try {
@@ -467,7 +467,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         institution.setEmailAddress(institutionUpload.getEmailAddress());
         //    institution.getGameTypeIds().add(institutionUpload.getGameTypeId());
         institution.setDescription(institutionUpload.getDescription());
-        institution.setPhoneNumber(institutionUpload.getPhoneNumber());
+        institution.getPhoneNumbers().add(institutionUpload.getPhoneNumber());
         institution.setId(UUID.randomUUID().toString());
         return institution;
     }
@@ -505,7 +505,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         institution.setId(UUID.randomUUID().toString());
         institution.setInstitutionName(institutionCreateDto.getInstitutionName());
         institution.setDescription(institutionCreateDto.getDescription());
-        institution.setPhoneNumber(institutionCreateDto.getPhoneNumber());
+        institution.setPhoneNumbers(institutionCreateDto.getPhoneNumbers());
         institution.setEmailAddress(institutionCreateDto.getEmailAddress());
         institution.setGameTypeIds(institutionCreateDto.getGameTypeIds());
         institution.setAddress(institutionCreateDto.getAddress());

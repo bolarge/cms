@@ -1,7 +1,6 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 
-import com.software.finatech.lslb.cms.service.domain.InstitutionCategoryDetails;
 import org.springframework.data.annotation.Transient;
 
 import java.util.ArrayList;
@@ -15,18 +14,20 @@ public class InstitutionDto {
     protected String emailAddress;
     protected String description;
     protected Boolean active;
-    protected String phoneNumber;
-    protected String sectorId;
-    protected String bankAccountId;
-    protected String billCycleId;
-    protected String dataSourceId;
     protected String licenseId;
-    protected String vatFormulaId;
-    protected String settlementCycleId;
     private List<InstitutionCategoryDetailsDto> institutionCategoryDetails = new ArrayList<>();
     private Set<String> directorsNames = new HashSet<>();
     private Set<String> shareHolderNames = new HashSet<>();
     private String address;
+    private Set<String> phoneNumbers;
+
+    public Set<String> getPhoneNumbers() {
+        return phoneNumbers;
+    }
+
+    public void setPhoneNumbers(Set<String> phoneNumbers) {
+        this.phoneNumbers = phoneNumbers;
+    }
 
 
     public String getAddress() {
@@ -93,10 +94,6 @@ public class InstitutionDto {
         this.status = status;
     }
 
-    public void setDataSourceId(String dataSourceId) {
-        this.dataSourceId = dataSourceId;
-    }
-
     public String getTenantId() {
         return tenantId;
     }
@@ -145,46 +142,6 @@ public class InstitutionDto {
         this.active = active;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public String getSectorId() {
-        return sectorId;
-    }
-
-    public void setSectorId(String sectorId) {
-        this.sectorId = sectorId;
-    }
-
-    public String getBankAccountId() {
-        return bankAccountId;
-    }
-
-    public void setBankAccountId(String bankAccountId) {
-        this.bankAccountId = bankAccountId;
-    }
-
-    public String getBillCycleId() {
-        return billCycleId;
-    }
-
-    public void setBillCycleId(String billCycleId) {
-        this.billCycleId = billCycleId;
-    }
-
-    public String getDataSourceId() {
-        return dataSourceId;
-    }
-
-    public void setDataSoureId(String dataSourceId) {
-        this.dataSourceId = dataSourceId;
-    }
-
     public String getLicenseId() {
         return licenseId;
     }
@@ -193,19 +150,4 @@ public class InstitutionDto {
         this.licenseId = licenseId;
     }
 
-    public String getVatFormulaId() {
-        return vatFormulaId;
-    }
-
-    public void setVatFormulaId(String vatFormulaId) {
-        this.vatFormulaId = vatFormulaId;
-    }
-
-    public String getSettlementCycleId() {
-        return settlementCycleId;
-    }
-
-    public void setSettlementCycleId(String settlementCycleId) {
-        this.settlementCycleId = settlementCycleId;
-    }
 }
