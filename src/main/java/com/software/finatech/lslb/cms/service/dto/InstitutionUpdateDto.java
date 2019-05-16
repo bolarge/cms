@@ -2,7 +2,6 @@ package com.software.finatech.lslb.cms.service.dto;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,7 +15,6 @@ public class InstitutionUpdateDto {
     @Email(message = "Email should be valid")
     protected String emailAddress;
     protected String description;
-    @Size(min = 9, message = "Phone number should not be less than 9 characters")
     @NotEmpty
     protected Set<String> phoneNumbers = new HashSet<>();
     protected Set<String> gameTypeIds = new java.util.HashSet<>();

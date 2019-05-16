@@ -207,7 +207,7 @@ public class ExistingOperatorLoader {
                 pendingInstitution.setActive(true);
                 pendingInstitution.setDescription(institutionUpload.getDescription());
                 pendingInstitution.setEmailAddress(getInstitutionAddressBasedOnEnvironment(institutionUpload));
-                pendingInstitution.setPhoneNumbers(getPhoneNumbersFromUpload(institutionUpload));
+                pendingInstitution.getPhoneNumbers().addAll(getPhoneNumbersFromUpload(institutionUpload));
                 pendingInstitution.setFromLiveData(true);
                 pendingInstitution.setAddress(institutionUpload.getAddress());
             }
@@ -218,6 +218,7 @@ public class ExistingOperatorLoader {
             institutionCategoryDetails.setFirstCommencementDate(institutionLoadDetails.getFirstCommencementDate());
             institutionCategoryDetails.setGameTypeId(institutionLoadDetails.getGameTypeId());
             institutionCategoryDetails.setTradeName(institutionLoadDetails.getTradeName());
+            institutionCategoryDetails.getPhoneNumbers().addAll(getPhoneNumbersFromUpload(institutionUpload));
             Set<String> directorNames = directorNamesFromString(institutionLoadDetails.getDirector());
             institutionCategoryDetails.getDirectorsNames().addAll(directorNames);
             pendingInstitution.getDirectorsNames().addAll(directorNames);

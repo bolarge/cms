@@ -17,6 +17,16 @@ public class InstitutionCategoryDetails extends AbstractFact {
     private LocalDate firstCommencementDate;
     private Set<String> directorsNames = new HashSet<>();
     private Set<String> shareHolderNames = new HashSet<>();
+    private Set<String> phoneNumbers = new HashSet<>();
+
+
+    public Set<String> getPhoneNumbers() {
+        return phoneNumbers;
+    }
+
+    public void setPhoneNumbers(Set<String> phoneNumbers) {
+        this.phoneNumbers = phoneNumbers;
+    }
 
     public Set<String> getShareHolderNames() {
         return shareHolderNames;
