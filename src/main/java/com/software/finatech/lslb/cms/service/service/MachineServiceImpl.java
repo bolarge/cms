@@ -89,6 +89,7 @@ public class MachineServiceImpl implements MachineService {
                                                 String machineStatusId,
                                                 boolean forAgentAssignment,
                                                 String licenseNumber,
+                                                String machineNumber,
                                                 HttpServletResponse httpServletResponse) {
 
         try {
@@ -106,10 +107,10 @@ public class MachineServiceImpl implements MachineService {
                 query.addCriteria(Criteria.where("machineStatusId").is(machineStatusId));
             }
             if (!StringUtils.isEmpty(licenseNumber)) {
-                License license = (License) mongoRepositoryReactive.find(Query.query(Criteria.where("licenseNumber").regex(licenseNumber, "i")), License.class).block();
-                if (license != null) {
-                    query.addCriteria(Criteria.where("licenseId").is(license.getId()));
-                }
+                query.addCriteria(Criteria.where("licenseNumber").regex(licenseNumber, "i"));
+            }
+            if (!StringUtils.isEmpty(machineNumber)) {
+                query.addCriteria(Criteria.where("machineNumber").regex(machineNumber, "i"));
             }
             if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, Machine.class).block();
@@ -210,7 +211,7 @@ public class MachineServiceImpl implements MachineService {
             String verbiage = String.format("Updated Gaming Machine, Serial Number -> %s , Old Address -> %s, New Address -> %s", gamingMachine.getSerialNumber(), oldAdress, gamingMachineUpdateDto.getMachineAddress());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), gamingMachine.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(gamingMachine.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -308,7 +309,7 @@ public class MachineServiceImpl implements MachineService {
                     machine.getSerialNumber(), machine.getMachineType(), machineGamesToString(gameDetails));
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), machine.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>("Game successfully disabled", HttpStatus.OK));
         } catch (Exception e) {
@@ -550,7 +551,7 @@ public class MachineServiceImpl implements MachineService {
                     String verbiage = "Uploaded multiple gaming machines ";
                     auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                             springSecurityAuditorAware.getCurrentAuditorNotNull(), institution.getInstitutionName(),
-                            LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
+                            LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
                     return Mono.just(new ResponseEntity<>(uploadTransactionResponse, HttpStatus.OK));
                 }
@@ -819,7 +820,7 @@ public class MachineServiceImpl implements MachineService {
         if (StringUtils.isEmpty(machineStatusId)) {
             return null;
         }
-        Map<String,FactObject> machineStatusMap = Mapstore.STORE.get("MachineStatus");
+        Map<String, FactObject> machineStatusMap = Mapstore.STORE.get("MachineStatus");
         MachineStatus machineStatus = null;
         if (machineStatusMap != null) {
             machineStatus = (MachineStatus) machineStatusMap.get(machineStatusId);
@@ -837,7 +838,7 @@ public class MachineServiceImpl implements MachineService {
         if (StringUtils.isEmpty(machineTypeId)) {
             return null;
         }
-        Map<String,FactObject> machineTypeMap = Mapstore.STORE.get("MachineType");
+        Map<String, FactObject> machineTypeMap = Mapstore.STORE.get("MachineType");
         MachineType machineType = null;
         if (machineTypeMap != null) {
             machineType = (MachineType) machineTypeMap.get(machineTypeId);

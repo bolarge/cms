@@ -28,6 +28,15 @@ public class Machine extends AbstractFact {
     private String licenseId;
     private String oldSerialNumber;
     private boolean fromLiveData;
+    private String licenseNumber;
+
+    public String getLicenseNumber() {
+        return licenseNumber;
+    }
+
+    public void setLicenseNumber(String licenseNumber) {
+        this.licenseNumber = licenseNumber;
+    }
 
     public String getOldSerialNumber() {
         return oldSerialNumber;
@@ -161,7 +170,7 @@ public class Machine extends AbstractFact {
         if (StringUtils.isEmpty(this.machineStatusId)) {
             return null;
         }
-        Map<String,FactObject> machineStatusMap = Mapstore.STORE.get("MachineStatus");
+        Map<String, FactObject> machineStatusMap = Mapstore.STORE.get("MachineStatus");
         MachineStatus machineStatus = null;
         if (machineStatusMap != null) {
             machineStatus = (MachineStatus) machineStatusMap.get(this.machineStatusId);

@@ -68,6 +68,7 @@ public class LslbGamingTerminalAdapter {
         machine.setSerialNumber(lslbGamingTerminal.getMachineId());
         machine.setFromLiveData(true);
         machine.setLicenseId(license.getId());
+        machine.setLicenseNumber(license.getLicenseNumber());
         mongoRepositoryReactive.saveOrUpdate(machine);
         logger.info("Saving Gaming Terminal {}", lslbGamingTerminal.getMachineId());
     }
