@@ -324,7 +324,7 @@ public class ExistingOperatorLoader {
 
     public String getInstitutionAddressBasedOnEnvironment(InstitutionUpload institutionUpload) {
         if (environmentUtils.isProductionEnvironment()) {
-            return institutionUpload.getAddress();
+            return institutionUpload.getEmailAddress();
         }
         return "test@mailinator.com";
     }

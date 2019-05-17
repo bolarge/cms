@@ -53,9 +53,13 @@ public class LslbGamingTerminalAdapter {
             license.setLicenseNumber(generateLicenseNumberForPaymentRecord(gameType));
             mongoRepositoryReactive.saveOrUpdate(license);
         }
-        Machine machine = new Machine();
+        Machine machine;
+        machine = findMachineBySerialNumber(lslbGamingTerminal.getMachineId());
+        if (machine == null) {
+            machine = new Machine();
+            machine.setId(UUID.randomUUID().toString());
+        }
         Institution institution = lslbGamingTerminal.getInstitution();
-        machine.setId(UUID.randomUUID().toString());
         machine.setGameTypeId(gameType.getId());
         String address = lslbGamingTerminal.getAgentAddress().replace("\"", "").trim();
         //address = address.replace("\"", "");
@@ -71,6 +75,10 @@ public class LslbGamingTerminalAdapter {
         machine.setLicenseNumber(license.getLicenseNumber());
         mongoRepositoryReactive.saveOrUpdate(machine);
         logger.info("Saving Gaming Terminal {}", lslbGamingTerminal.getMachineId());
+    }
+
+    private Machine findMachineBySerialNumber(String machineId) {
+        return (Machine) mongoRepositoryReactive.find(Query.query(Criteria.where("serialNumber").is(machineId)), Machine.class).block();
     }
 
     private String generateLicenseNumberForPaymentRecord(GameType gameType) {
