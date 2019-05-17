@@ -115,7 +115,7 @@ public class ExistingGamingTerminalLoader {
             model.put("gameType", String.valueOf(gameType));
             String mailContent = mailContentBuilderService.build(model, "failed-terminal/FailedMachineNotification");
 
-            List<String> emails = Collections.singletonList("adeboludeyi@gmail.com");
+            List<String> emails = Arrays.asList("adeboludeyi@gmail.com", "kunmi.akinlawon@finatechng.com");
             //, "david.jaiyeola@gmail.com");
 
             for (String email : emails) {
