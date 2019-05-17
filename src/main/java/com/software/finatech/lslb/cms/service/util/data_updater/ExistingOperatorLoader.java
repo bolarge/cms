@@ -239,7 +239,6 @@ public class ExistingOperatorLoader {
                 continue;
             }
             pendingLicense.setLicenseStatusId(licenseStatusId);
-            //    pendingLicense.setLicenseStatusId(LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID);
             if (pendingLicense.isAIPRelatedLicense()) {
                 AIPDocumentApproval aipDocumentApproval = new AIPDocumentApproval();
                 aipDocumentApproval.setFormStatusId(ApplicationFormStatusReferenceData.CREATED_STATUS_ID);
@@ -252,6 +251,9 @@ public class ExistingOperatorLoader {
                 pendingLicense.setLicenseNumber(generateLicenseNumber(institutionLoadDetails.getGameTypeId()));
             }
             mongoRepositoryReactive.saveOrUpdate(pendingLicense);
+            if (pendingLicense.isSuspendedLicence()) {
+                institutionCategoryDetails.setFirstCommencementDate(null);
+            }
             mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
             // }
             mongoRepositoryReactive.saveOrUpdate(pendingInstitution);
