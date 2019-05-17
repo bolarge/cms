@@ -16,7 +16,7 @@ public class NumberUtil {
 
     public static String generateTransactionReferenceForPaymentRecord() {
         LocalDateTime presentDateTime = LocalDateTime.now();
-        return String.format("%s%s%s%s%s%s%s", getRandomNumberInRange(20, 5000),
+        return String.format("%s%s%s%s%s%s%s%s", getRandomNumberInRange(20, 5000),
                 presentDateTime.getDayOfMonth(),
                 presentDateTime.getMonthOfYear(),
                 presentDateTime.getYear(),
@@ -26,6 +26,7 @@ public class NumberUtil {
     }
 
     public static String generateAgentId() {
-        return String.format("LAGOS-AG-%s%s%s", NumberUtil.getRandomNumberInRange(20, 100), LocalDateTime.now().getMinuteOfHour(), LocalDateTime.now().getSecondOfMinute());
+        return String.format("LAGOS-AG-%s%s%s", NumberUtil.getRandomNumberInRange(20, 100),LocalDateTime.now().getSecondOfMinute(),
+                getRandomNumberInRange(100, 1000));
     }
 }
