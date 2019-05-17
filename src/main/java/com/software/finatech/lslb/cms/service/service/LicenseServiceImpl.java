@@ -1373,6 +1373,7 @@ public class LicenseServiceImpl implements LicenseService {
         for (Machine machine : machines) {
             try {
                 machine.setLicenseId(license.getId());
+                machine.setLicenseNumber(license.getLicenseNumber());
                 mongoRepositoryReactive.saveOrUpdate(machine);
             } catch (Exception e) {
                 logger.error("An error occurred while adding license {} to machine {}", license.getLicenseNumber(), machine.getSerialNumber(), e);

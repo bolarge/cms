@@ -78,8 +78,9 @@ public class ExistingGamingMachineLoader {
                                 machine.setManufacturer(columns[1]);
                                 machine.setInstitutionId(institutionId);
                                 machine.setMachineStatusId(MachineStatusReferenceData.ACTIVE_ID);
-                               // machine.setOldInstitutionId("DOXX");
+                                // machine.setOldInstitutionId("DOXX");
                                 machine.setLicenseId(license.getId());
+                                machine.setLicenseNumber(license.getLicenseNumber());
                                 machine.setGameTypeId(gameTypeId);
                                 machine.setMachineTypeId(MachineTypeReferenceData.GAMING_MACHINE_ID);
                                 machine.setMachineAddress(columns[2]);
