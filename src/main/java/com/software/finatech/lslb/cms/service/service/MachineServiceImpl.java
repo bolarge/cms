@@ -110,7 +110,7 @@ public class MachineServiceImpl implements MachineService {
                 query.addCriteria(Criteria.where("licenseNumber").regex(licenseNumber, "i"));
             }
             if (!StringUtils.isEmpty(machineNumber)) {
-                query.addCriteria(Criteria.where("machineNumber").regex(machineNumber, "i"));
+                query.addCriteria(Criteria.where("serialNumber").regex(machineNumber, "i"));
             }
             if (page == 0) {
                 long count = mongoRepositoryReactive.count(query, Machine.class).block();
