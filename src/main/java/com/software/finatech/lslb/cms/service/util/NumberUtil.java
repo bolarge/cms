@@ -16,7 +16,7 @@ public class NumberUtil {
 
     public static String generateTransactionReferenceForPaymentRecord() {
         LocalDateTime presentDateTime = LocalDateTime.now();
-        return String.format("%s%s%s%s%s%s%s%s", getRandomNumberInRange(20, 5000),
+        return String.format("%s%s%s%s%s%s%s", getRandomNumberInRange(20, 5000),
                 presentDateTime.getDayOfMonth(),
                 presentDateTime.getMonthOfYear(),
                 presentDateTime.getYear(),
