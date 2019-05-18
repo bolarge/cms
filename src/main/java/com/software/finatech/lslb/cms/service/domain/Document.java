@@ -272,22 +272,6 @@ public class Document extends AbstractFact {
         }
     }
 
-    public void setAssociatedProperties() throws FactNotFoundException {
-        if (documentTypeId != null) {
-            DocumentType DocumentType = (DocumentType) Mapstore.STORE.get("DocumentType").get(documentTypeId);
-            if (DocumentType == null) {
-                DocumentType = (DocumentType) mongoRepositoryReactive.findById(documentTypeId, DocumentType.class).block();
-                if (DocumentType == null) {
-                    throw new FactNotFoundException("DocumentType", documentTypeId);
-                } else {
-                    Mapstore.STORE.get("DocumentType").put(DocumentType.getId(), DocumentType);
-                }
-            }
-            setDocumentType(DocumentType);
-        }
-
-    }
-
     public DocumentDto convertToDto() {
         DocumentDto dto = new DocumentDto();
         dto.setEntityId(getEntityId());

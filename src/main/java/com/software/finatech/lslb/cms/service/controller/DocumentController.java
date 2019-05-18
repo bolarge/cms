@@ -18,8 +18,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
-import org.bson.BsonBinarySubType;
-import org.bson.types.Binary;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
@@ -209,11 +207,6 @@ public class DocumentController extends BaseController {
 
         ArrayList<DocumentDto> documentsDto = new ArrayList<>();
         documents.forEach(entry -> {
-            try {
-                entry.setAssociatedProperties();
-            } catch (FactNotFoundException e) {
-                logger.error(e.getMessage(), e);
-            }
             documentsDto.add(entry.convertToDto());
         });
 
@@ -367,11 +360,6 @@ public class DocumentController extends BaseController {
         List<Document> documents = (ArrayList<Document>) mongoRepositoryReactive.findAll(queryDocument, Document.class).toStream().collect(Collectors.toList());
         ArrayList<DocumentDto> documentsDto = new ArrayList<>();
         documents.forEach(entry -> {
-            try {
-                entry.setAssociatedProperties();
-            } catch (FactNotFoundException e) {
-                logger.error(e.getMessage(), e);
-            }
             documentsDto.add(entry.convertToDto());
         });
 
@@ -507,11 +495,6 @@ public class DocumentController extends BaseController {
         }
         List<DocumentDto> documentDtos = new ArrayList<>();
         documents.forEach(document -> {
-            try {
-                document.setAssociatedProperties();
-            } catch (FactNotFoundException e) {
-                logger.error(e.getMessage(), e);
-            }
             documentDtos.add(document.convertToDto());
         });
 
@@ -555,11 +538,6 @@ public class DocumentController extends BaseController {
 
         ArrayList<EntityDocumentDto> documentsDto = new ArrayList<>();
         documents.forEach(entry -> {
-            try {
-                entry.setAssociatedProperties();
-            } catch (FactNotFoundException e) {
-                logger.error(e.getMessage(), e);
-            }
             EntityDocumentDto dto = new EntityDocumentDto();
             dto.setDescription(entry.getDescription());
             dto.setDocumentTypeId(entry.getDocumentTypeId());
@@ -682,7 +660,7 @@ public class DocumentController extends BaseController {
                         s3Service.uploadMultipartForDocument(file, document);
                         documents.add(document);
                         documentCheck.add(document);
- 
+
                     }
                 } catch (Exception e) {
                     logger.error("An error occurred while saving document", e);
