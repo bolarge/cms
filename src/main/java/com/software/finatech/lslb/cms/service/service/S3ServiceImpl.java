@@ -115,6 +115,7 @@ public class S3ServiceImpl implements S3Service {
                     httpServletResponse.setHeader("Content-Disposition", "inline; filename=\"" + fileName + "\"");
                     httpServletResponse.setContentType(getObjectResponse.contentType());
                     httpServletResponse.setContentLength(Math.toIntExact(getObjectResponse.contentLength()));
+                    httpServletResponse.setHeader("Transfer-Encoding", "chunked");
                 }
 
                 @Override
@@ -139,6 +140,7 @@ public class S3ServiceImpl implements S3Service {
                 @Override
                 public Object complete() {
                     try {
+                        //           httpServletResponse.setHeader("Transfer-Encoding", "chunked");
                         httpServletResponse.getOutputStream().close();
                     } catch (IOException e) {
                         logger.error("IO error while closing output stream", e);
