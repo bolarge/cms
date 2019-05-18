@@ -121,7 +121,6 @@ public class S3ServiceImpl implements S3Service {
                 public void onStream(Publisher<ByteBuffer> publisher) {
 
                     try {
-                        httpServletResponse.setHeader("Transfer-Encoding", "chunked");
                         publisher.subscribe(createSubscriber(httpServletResponse.getOutputStream()));
                     } catch (IOException e) {
                         logger.error("IO error occurred on stream", e);
@@ -141,7 +140,6 @@ public class S3ServiceImpl implements S3Service {
                 @Override
                 public Object complete() {
                     try {
-                        //           httpServletResponse.setHeader("Transfer-Encoding", "chunked");
                         httpServletResponse.getOutputStream().close();
                     } catch (IOException e) {
                         logger.error("IO error while closing output stream", e);
