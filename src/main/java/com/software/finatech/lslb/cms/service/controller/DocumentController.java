@@ -407,21 +407,14 @@ public class DocumentController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public void downloadById(@PathVariable("id") String id, HttpServletResponse httpServletResponse) throws FactNotFoundException {
         Document document = (Document) mongoRepositoryReactive.findById((id), Document.class).block();
-        //DocumentBinary documentBinary = (DocumentBinary) mongoRepositoryReactive.find(new Query(Criteria.where("documentId").is(document.getId())), DocumentBinary.class).block();
         if (document == null) {
             throw new FactNotFoundException("document", id);
         }
-        // Binary binary = documentBinary != null ? documentBinary.getFile() : null;
         if (document != null) {
             try {
+
                 String filename = document.getFilename();
-//                httpServletResponse.setHeader("filename", filename);
-//                httpServletResponse.setHeader("Content-Disposition", String.format("inline; filename=\"" + filename + "\""));
-//                httpServletResponse.setContentType(document.getMimeType());
-
-                s3Service.downloadFileToHttpResponse(document.getAwsObjectKey(), filename, httpServletResponse);
-
-
+                s3Service.downloadFileToHttpResponseSync(document.getAwsObjectKey(), filename, httpServletResponse);
                 httpServletResponse.flushBuffer();
             } catch (Exception e) {
                 logger.error("An error occurred while downloading document", e);

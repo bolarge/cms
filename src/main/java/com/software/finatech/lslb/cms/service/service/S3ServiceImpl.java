@@ -15,13 +15,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.async.AsyncRequestProvider;
 import software.amazon.awssdk.async.AsyncResponseHandler;
+import software.amazon.awssdk.http.AbortableInputStream;
 import software.amazon.awssdk.http.async.SimpleSubscriber;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import software.amazon.awssdk.sync.RequestBody;
+import software.amazon.awssdk.sync.StreamingResponseHandler;
+import software.amazon.awssdk.utils.IoUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +40,7 @@ import java.nio.channels.WritableByteChannel;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.StreamHandler;
 
 import static com.software.finatech.lslb.cms.service.util.NumberUtil.getRandomNumberInRange;
 import static org.apache.commons.io.FilenameUtils.getExtension;
@@ -52,14 +59,17 @@ public class S3ServiceImpl implements S3Service {
     private String bucketName;
 
     private S3AsyncClient client;
+    private S3Client syncClient;
     private EnvironmentUtils environmentUtils;
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
 
     @Autowired
     public S3ServiceImpl(S3AsyncClient client,
+                         S3Client syncClient,
                          EnvironmentUtils environmentUtils,
                          MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         this.client = client;
+        this.syncClient = syncClient;
         this.environmentUtils = environmentUtils;
         this.mongoRepositoryReactive = mongoRepositoryReactive;
     }
@@ -152,8 +162,23 @@ public class S3ServiceImpl implements S3Service {
         }
     }
 
+    public void downloadFileToHttpResponseSync(String objectKey, String fileName, HttpServletResponse res) throws IOException {
+        syncClient.getObject(GetObjectRequest.builder().bucket(bucketName).key(objectKey).build(), (resp, in) -> {
+            GetObjectResponse getObjectResponse = (GetObjectResponse) resp;
+            res.setHeader("filename", fileName);
+            res.setContentType(getObjectResponse.contentType());
+            res.setContentLength(Math.toIntExact(getObjectResponse.contentLength()));
+            IoUtils.copy(in, res.getOutputStream());
+            return resp;
+        });
+   }
+
     private CompletableFuture<Object> getObjectFromBucket(String objectKey, AsyncResponseHandler<GetObjectResponse, Object> handler) {
         return client.getObject(GetObjectRequest.builder().bucket(bucketName).key(objectKey).build(), handler);
+    }
+
+    private Object putObjectFromBucketSync(String objectKey, MultipartFile multipartFile) throws IOException {
+        return syncClient.putObject(PutObjectRequest.builder().build().builder().bucket(bucketName).key(objectKey).build(), RequestBody.of(multipartFile.getInputStream(), Math.toIntExact(multipartFile.getSize())));
     }
 
     private CompletableFuture<PutObjectResponse> putObjectInBucket(String objectKey, AsyncRequestProvider provider) {
