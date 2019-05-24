@@ -512,8 +512,8 @@ public class LSLBAuthPermissionReferenceData {
             permission = new AuthPermission();
             permission.setId("53");
         }
-        permission.setName("VIEW CUSTOMER COMPLAINS");
-        permission.setDescription("Can view customer complains");
+        permission.setName("VIEW CUSTOMER COMPLAINTS");
+        permission.setDescription("Can view customer complaints");
         permission.setUsedBySystem(false);
         mongoRepositoryReactive.saveOrUpdate(permission);
 
@@ -522,8 +522,8 @@ public class LSLBAuthPermissionReferenceData {
             permission = new AuthPermission();
             permission.setId("54");
         }
-        permission.setName("UPDATE CUSTOMER COMPLAINS");
-        permission.setDescription("Can update customer complains");
+        permission.setName("UPDATE CUSTOMER COMPLAINTS");
+        permission.setDescription("Can update customer complaints");
         permission.setUsedBySystem(false);
         mongoRepositoryReactive.saveOrUpdate(permission);
 
