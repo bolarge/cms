@@ -125,7 +125,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format , please use yyyy-MM-dd", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
-            String errorMsg = "An error occurred while finding customer complains";
+            String errorMsg = "An error occurred while finding customer complaints";
             return logAndReturnError(logger, errorMsg, e);
         }
     }
@@ -186,7 +186,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
             if (!canResolveCustomerComplain(user)) {
-                return Mono.just(new ResponseEntity<>("User does not have permission to update customer complains", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("User does not have permission to update customer complaints", HttpStatus.BAD_REQUEST));
             }
             CustomerComplain existingCustomerComplain = findCustomerComplainById(customerComplainId);
             if (existingCustomerComplain == null) {
@@ -227,7 +227,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
                 return Mono.just(new ResponseEntity<>("Cannot find logged in user", HttpStatus.BAD_REQUEST));
             }
             if (!canResolveCustomerComplain(user)) {
-                return Mono.just(new ResponseEntity<>("User does not have permission to update customer complains", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>("User does not have permission to update customer complaints", HttpStatus.BAD_REQUEST));
             }
             CustomerComplain existingCustomerComplain = findCustomerComplainById(customerComplainId);
             if (existingCustomerComplain == null) {
