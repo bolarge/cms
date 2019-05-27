@@ -813,8 +813,11 @@ public class AuthInfoController extends BaseController {
         verificationToken.setForResourceOwnerUserCreation(expiredVerificationToken.isForResourceOwnerUserCreation());
 
         AuthInfo AuthInfo = (AuthInfo) mongoRepositoryReactive.find(new Query(Criteria.where("id").is(verificationToken.getAuthInfoId())), AuthInfo.class).block();
-        if (AuthInfo.getSsoUserId() != null) {
-            return Mono.just(new ResponseEntity("Registration Already Completed", HttpStatus.BAD_REQUEST));
+        if (AuthInfo == null) {
+            return ErrorResponseUtil.BadRequestResponse("There is no user attached to token");
+        }
+        if (AuthInfo.getEnabled()) {
+            return Mono.just(new ResponseEntity<>("Registration Already Completed", HttpStatus.BAD_REQUEST));
         }
         String appUrl =
                 appHostPort +
@@ -893,7 +896,9 @@ public class AuthInfoController extends BaseController {
             ArrayList<AuthPermission> permissions = new ArrayList<>();
             for (FactObject factObject : factObjects) {
                 AuthPermission permission = (AuthPermission) factObject;
-                if (((StringUtils.equals(loggedInUser.getAuthRoleId(), permission.getAuthRoleId()) || permission.isUsedBySystem())) &&
+                if (((StringUtils.equals(loggedInUser.getAuthRoleId(), permission.getAuthRoleId()) ||
+                        permission.isUsedBySystem() ||
+                        permission.getAuthRoleIds().contains(loggedInUser.getAuthRoleId()))) &&
                         !loggedInUser.getAllUserPermissionIdsForUser().contains(permission.getId())) {
                     permissions.add(permission);
                 }

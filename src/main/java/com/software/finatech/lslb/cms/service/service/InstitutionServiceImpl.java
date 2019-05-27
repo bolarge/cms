@@ -113,7 +113,7 @@ public class InstitutionServiceImpl implements InstitutionService {
             queryForEmail.addCriteria(Criteria.where("emailAddress").is(institutionEmail));
             Institution existingInstitutionWithEmail = (Institution) mongoRepositoryReactive.find(queryForEmail, Institution.class).block();
             if (existingInstitutionWithEmail != null) {
-                return Mono.just(new ResponseEntity<>(String.format("Institution with email %s already exist", institutionName), HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>(String.format("Institution with email %s already exist", institutionEmail), HttpStatus.BAD_REQUEST));
             }
         }
         existingInstitution.setGameTypeIds(institutionUpdateDto.getGameTypeIds());
