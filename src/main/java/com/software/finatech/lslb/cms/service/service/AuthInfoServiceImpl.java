@@ -1199,7 +1199,6 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             String UserId = userRegisterResponse.getUserId();
 
             authInfo.setSsoUserId(UserId);
-            authInfo.setEnabled(true);
             //Set UnActive to true so User will not be to login on  CMS
             authInfo.setInactive(true);
             authInfo.setInactiveReason("Kindly Set Password");
@@ -1233,6 +1232,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         }
         authInfo.setInactiveReason(null);
         authInfo.setInactive(false);
+        authInfo.setEnabled(true);
         mongoRepositoryReactive.saveOrUpdate(authInfo);
         return responseEntityMono;
     }
