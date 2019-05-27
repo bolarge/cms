@@ -4,9 +4,7 @@ import com.software.finatech.lslb.cms.service.domain.AuthPermission;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import org.springframework.data.mongodb.core.query.Query;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class LSLBAuthPermissionReferenceData {
@@ -978,6 +976,17 @@ public class LSLBAuthPermissionReferenceData {
         return codePermissions;
     }
 
+
+    public static Set<String> getAllVGGSuperAdminPermissions() {
+        Set<String> permissions = new HashSet<>();
+        List<String> codeGeneratedPermissionIds = getCodeUsedPermissions();
+        for (int i = 1; i <= 51; i++) {
+            if (!codeGeneratedPermissionIds.contains(String.valueOf(i))) {
+                permissions.add(String.valueOf(i));
+            }
+        }
+        return permissions;
+    }
 
     private static void deleteAllPermissions(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         ArrayList<AuthPermission> authPermissions = (ArrayList<AuthPermission>) mongoRepositoryReactive.findAll(new Query(), AuthPermission.class).toStream().collect(Collectors.toList());
