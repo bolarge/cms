@@ -906,6 +906,8 @@ public class AuthInfoController extends BaseController {
             if (permissions.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
             }
+
+            permissions.sort((o1, o2) -> StringUtils.compare(o1.getName(),o2.getName()));
             ArrayList<AuthPermissionDto> dtos = new ArrayList<>();
             for (AuthPermission permission : permissions) {
                 dtos.add(permission.convertToDto());
