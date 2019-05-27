@@ -823,12 +823,14 @@ public class AuthInfoController extends BaseController {
                 appHostPort +
                         request.getContextPath();
 
+        String url = appUrl + "/authInfo/confirm?token=" + verificationToken.getConfirmationToken();
         HashMap<String, Object> model = new HashMap<>();
         model.put("name", AuthInfo.getFirstName() + " " + AuthInfo.getLastName());
         model.put("date", LocalDate.now().toString("dd-MM-YYYY"));
-        String url = appUrl + "/authInfo/confirm?token=" + verificationToken.getConfirmationToken();
         model.put("CallbackUrl", url);
-        String content = mailContentBuilderService.build(model, "ContinueRegistrationEmail");
+        model.put("isApplicant", false);
+        model.put("isAgent", AuthInfo.isAgent());
+        String content = mailContentBuilderService.build(model, "continueRegistration-new");
         content = content.replaceAll("CallbackUrl", url);
         emailService.sendEmail(content, "Registration Confirmation", AuthInfo.getEmailAddress());
 
