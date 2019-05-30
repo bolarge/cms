@@ -115,7 +115,7 @@
 
         <appender name="Stackify"
                   class="com.stackify.log.logback.StackifyLogAppender">
-            <apiKey>r4Rg1Yv3Kr3To3Lq3Tf9Yj3Qw7Ka7Re9Is6Bb8Hh</apiKey>
+            <apiKey>4Rg1Yv3Kr3To3Lq3Tf9Yj3Qw7Ka7Re9Is6Bb8Hh</apiKey>
             <application>lslb-cms-service</application>
             <environment>production</environment>
         </appender>
