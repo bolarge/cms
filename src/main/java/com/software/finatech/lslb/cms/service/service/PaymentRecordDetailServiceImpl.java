@@ -1,5 +1,6 @@
 package com.software.finatech.lslb.cms.service.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
@@ -174,8 +175,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 String feeName = feeDto.getFeePaymentTypeName();
                 String gameTypeName = feeDto.getGameTypeName();
                 String revenueName = feeDto.getRevenueName();
-                feeDescription = String.format("%s for %ss for %s ", feeName, revenueName, gameTypeName);
-                feeDescription = StringCapitalizer.convertToTitleCaseIteratingChars(feeDescription);
+                feeDescription = buildFeeDescription(feeName, gameTypeName, revenueName);
                 if (paymentRecordDetailCreateDto.getAmount() < fee.getAmount()) {
                     feeDescription = String.format("%s (Part Payment)", feeDescription);
                 }
@@ -191,8 +191,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 String feeName = paymentRecord.getFeePaymentTypeName();
                 String gameTypeName = paymentRecord.getGameTypeName();
                 String revenueName = paymentRecord.getLicenseTypeName();
-                feeDescription = String.format("%s for %ss for %s ", feeName, revenueName, gameTypeName);
-                feeDescription = StringCapitalizer.convertToTitleCaseIteratingChars(feeDescription);
+                feeDescription = buildFeeDescription(feeName, gameTypeName, revenueName);
                 if (paymentRecordDetailCreateDto.getAmount() < paymentRecord.getAmount()) {
                     feeDescription = String.format("%s (Part Payment)", feeDescription);
                 }
@@ -429,7 +428,11 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
 
     @Override
     public Mono<ResponseEntity> handleVigipayInBranchNotification(VigipayInBranchNotification vigipayInBranchNotification) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        VigipayPaymentNotification paymentNotification = new VigipayPaymentNotification();
+        paymentNotification.setId(UUID.randomUUID().toString());
         try {
+            paymentNotification.setRequest(objectMapper.writeValueAsString(vigipayInBranchNotification));
             VigiPayMessage vigiPayMessage = vigipayInBranchNotification.getMessage();
             if (vigiPayMessage != null) {
 
@@ -437,6 +440,8 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                 query.addCriteria(Criteria.where("invoiceNumber").is(vigiPayMessage.getInvoiceNumber()));
                 PaymentRecordDetail existingPaymentRecordDetail = (PaymentRecordDetail) mongoRepositoryReactive.find(query, PaymentRecordDetail.class).block();
                 if (existingPaymentRecordDetail == null) {
+                    paymentNotification.setResponse("Invoice does not exist");
+                    mongoRepositoryReactive.saveOrUpdate(paymentNotification);
                     return Mono.just(new ResponseEntity<>("Invoice does not exist", HttpStatus.BAD_REQUEST));
                 }
                 if (!StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, existingPaymentRecordDetail.getPaymentStatusId())) {
@@ -474,14 +479,22 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                         existingPaymentRecordDetail.setInvoiceNumber(vigiPayMessage.getInvoiceNumber());
                         savePaymentRecordDetail(existingPaymentRecordDetail);
                         paymentEmailNotifierAsync.sendPaymentNotificationForPaymentRecordDetail(existingPaymentRecordDetail, paymentRecord);
+                        paymentNotification.setResponse("updated successfully");
+                        mongoRepositoryReactive.saveOrUpdate(paymentNotification);
                         return Mono.just(new ResponseEntity<>("updated successfully", HttpStatus.OK));
                     }
                     existingPaymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.PENDING_VIGIPAY_CONFIRMATION_STATUS_ID);
                     savePaymentRecordDetail(existingPaymentRecordDetail);
+                    paymentNotification.setResponse("Payment status was not confirmed ");
+                    mongoRepositoryReactive.saveOrUpdate(paymentNotification);
                     return Mono.just(new ResponseEntity<>("Payment status was not confirmed ", HttpStatus.FAILED_DEPENDENCY));
                 }
+                paymentNotification.setResponse("Payment completed already");
+                mongoRepositoryReactive.saveOrUpdate(paymentNotification);
                 return Mono.just(new ResponseEntity<>("Payment completed already", HttpStatus.BAD_REQUEST));
             }
+            paymentNotification.setResponse("Empty Message object");
+            mongoRepositoryReactive.saveOrUpdate(paymentNotification);
             return Mono.just(new ResponseEntity<>("Empty Message object", HttpStatus.BAD_REQUEST));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while processing the vigi pay notification", e);
@@ -945,5 +958,11 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             builder.append("\n");
         }
         return builder.toString();
+    }
+
+    private String buildFeeDescription(String feeName, String gameTypeName, String revenueName) {
+        String feeDescription = String.format("%s category %s for %ss", gameTypeName, feeName, revenueName);
+        feeDescription = StringCapitalizer.convertToTitleCaseIteratingChars(feeDescription);
+        return feeDescription;
     }
 }

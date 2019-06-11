@@ -11,7 +11,6 @@ import com.software.finatech.lslb.cms.service.model.vigipay.VigipayRecipient;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.VigipayService;
 import com.software.finatech.lslb.cms.service.util.httpclient.VigipayHttpClient;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -74,12 +73,11 @@ public class VigipayServiceImpl implements VigipayService {
 
     @Override
     public String createInBranchMultipleItemInvoiceForInstitution(Institution institution,
-                                                      List<AuthInfo> adminsForInstitution,
-                                                      List<VigipayInvoiceItem> vigipayInvoiceItems) {
+                                                                  List<AuthInfo> adminsForInstitution,
+                                                                  List<VigipayInvoiceItem> vigipayInvoiceItems) {
         VigipayCreateInvoice vigipayCreateInvoice = createMultipleItemInvoiceFromInstitution(institution, adminsForInstitution, vigipayInvoiceItems);
         return vigipayHttpClient.createInvoice(vigipayCreateInvoice);
     }
-
 
 
     @Override
@@ -123,11 +121,16 @@ public class VigipayServiceImpl implements VigipayService {
     private VigipayCreateInvoice createInvoiceFromInstitution(Institution institution, List<AuthInfo> authInfos,
                                                               List<VigipayInvoiceItem> vigipayInvoiceItems) {
         VigipayCreateInvoice vigipayCreateInvoice = new VigipayCreateInvoice();
+
         vigipayCreateInvoice.setCustomerCode(institution.getVgPayCustomerCode());
         vigipayCreateInvoice.setRecipients(vigipayRecipientListFromAdmins(authInfos));
         vigipayCreateInvoice.setLocationCode(locationCode);
         vigipayCreateInvoice.setCurrencyCode(currencyCode);
-        vigipayCreateInvoice.setNote("From Lagos State Lotteries Board");
+        String invoiceNote = "LSLB Payment";
+        if (!vigipayInvoiceItems.isEmpty() && vigipayInvoiceItems.size() == 1) {
+            invoiceNote = vigipayInvoiceItems.get(0).getdetail();
+        }
+        vigipayCreateInvoice.setNote(invoiceNote);
         vigipayCreateInvoice.setInvoiceItems(vigipayInvoiceItems);
         vigipayCreateInvoice.setCorporateRevenueCode(corporateRevenueCode);
         DateTime today = DateTime.now();
@@ -192,7 +195,7 @@ public class VigipayServiceImpl implements VigipayService {
         VigipayRecipient vigipayRecipient = new VigipayRecipient();
         vigipayRecipient.setEmail(agent.getEmailAddress());
         vigipayRecipient.setPhone(agent.getPhoneNumber());
-        vigipayRecipient.setTitle( "Mr");
+        vigipayRecipient.setTitle("Mr");
         vigipayRecipient.setLastName(agent.getLastName());
         vigipayRecipient.setFirstName(agent.getFirstName());
         vigipayRecipientList.add(vigipayRecipient);
