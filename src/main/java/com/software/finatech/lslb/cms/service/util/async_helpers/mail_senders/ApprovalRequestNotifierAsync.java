@@ -110,7 +110,7 @@ public class ApprovalRequestNotifierAsync  {
     }
 
     private String buildNewUserApprovalRequestEmailContent(UserApprovalRequest userApprovalRequest) {
-        String frontEndUrl = String.format("%s/user-approvals/%s", frontEndPropertyHelper.getFrontEndUrl(), userApprovalRequest.getId());
+        String frontEndUrl = String.format("%s/user-approval-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), userApprovalRequest.getId());
         String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
         AuthInfo initiator = userApprovalRequest.getInitiator();
         String initiatorName = "";
@@ -188,7 +188,7 @@ public class ApprovalRequestNotifierAsync  {
     }
 
     private String buildRejectedUserApprovalRequestEmailContent(UserApprovalRequest userApprovalRequest) {
-        String frontEndUrl = String.format("%s/user-approvals/%s", frontEndPropertyHelper.getFrontEndUrl(), userApprovalRequest.getId());
+        String frontEndUrl = String.format("%s/user-approval-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), userApprovalRequest.getId());
         String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
         String subjectUserName = userApprovalRequest.getSubjectUserName();
         String approvalRequestType = String.valueOf(userApprovalRequest.getUserApprovalRequestType());
