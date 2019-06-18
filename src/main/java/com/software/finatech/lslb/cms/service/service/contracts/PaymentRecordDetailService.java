@@ -3,7 +3,7 @@ package com.software.finatech.lslb.cms.service.service.contracts;
 import com.software.finatech.lslb.cms.service.domain.PaymentRecordDetail;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailUpdateDto;
-import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInBranchNotification;
+import com.software.finatech.lslb.cms.service.model.vigipay.VigiPayMessage;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
@@ -22,5 +22,6 @@ public interface PaymentRecordDetailService {
 
     PaymentRecordDetail findById(String paymentRecordDetailId);
 
-    Mono<ResponseEntity> handleVigipayInBranchNotification(VigipayInBranchNotification vigipayInBranchNotification);
+    //   Mono<ResponseEntity> handleVigipayInBranchNotification(VigipayInBranchNotification vigipayInBranchNotification);
+    Mono<ResponseEntity> handleVigipayInBranchNotification(VigiPayMessage vigiPayMessage);
 }
