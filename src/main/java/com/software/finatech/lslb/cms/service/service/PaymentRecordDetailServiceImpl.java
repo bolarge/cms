@@ -427,13 +427,13 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     }
 
     @Override
-    public Mono<ResponseEntity> handleVigipayInBranchNotification(VigipayInBranchNotification vigipayInBranchNotification) {
+    public Mono<ResponseEntity> handleVigipayInBranchNotification(VigiPayMessage vigiPayMessage) {
         ObjectMapper objectMapper = new ObjectMapper();
         VigipayPaymentNotification paymentNotification = new VigipayPaymentNotification();
         paymentNotification.setId(UUID.randomUUID().toString());
         try {
-            paymentNotification.setRequest(objectMapper.writeValueAsString(vigipayInBranchNotification));
-            VigiPayMessage vigiPayMessage = vigipayInBranchNotification.getMessage();
+            paymentNotification.setRequest(objectMapper.writeValueAsString(vigiPayMessage));
+         //   VigiPayMessage vigiPayMessage = vigipayInBranchNotification.getMessage();
             if (vigiPayMessage != null) {
 
                 Query query = new Query();
