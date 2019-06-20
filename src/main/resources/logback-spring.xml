@@ -50,6 +50,7 @@
         <logger name="com.software" level="info" additivity="false">
             <!--<appender-ref ref="RollingFile"/>-->
             <appender-ref ref="Console"/>
+            <!--<appender-ref ref="Stackify"/>-->
         </logger>
 
 
@@ -101,7 +102,7 @@
         </appender>
 
         <logger name="com.software" level="error" additivity="false">
-            <!--<appender-ref ref="Stackify"/>-->
+            <appender-ref ref="Stackify"/>
             <appender-ref ref="RollingFile"/>
             <appender-ref ref="Console"/>
         </logger>
@@ -109,6 +110,7 @@
         <logger name="com.software" level="info" additivity="false">
             <appender-ref ref="RollingFile"/>
             <appender-ref ref="Console"/>
+            <appender-ref ref="Stackify"/>
         </logger>
 
         <!-- LOG everything at INFO level -->
@@ -226,6 +228,7 @@
         <logger name="com.software" level="info" additivity="false">
             <appender-ref ref="RollingFile"/>
             <appender-ref ref="Console"/>
+            <appender-ref ref="Stackify"/>
         </logger>
         <!-- LOG everything at INFO level -->
         <root level="info">
