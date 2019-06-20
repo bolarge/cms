@@ -305,7 +305,9 @@ public class ExistingOperatorLoader {
             institutionCategoryDetails = new InstitutionCategoryDetails();
             institutionCategoryDetails.setId(UUID.randomUUID().toString());
         }
-        institutionCategoryDetails.setFirstCommencementDate(new LocalDate(migratedInstitutionUpload.getFirstCommencementDate()));
+        if (StringUtils.isNotEmpty(migratedInstitutionUpload.getFirstCommencementDate())) {
+            institutionCategoryDetails.setFirstCommencementDate(new LocalDate(migratedInstitutionUpload.getFirstCommencementDate()));
+        }
         institutionCategoryDetails.setGameTypeId(migratedInstitutionUpload.getGameTypeId());
         institutionCategoryDetails.setTradeName(migratedInstitutionUpload.getTradeName());
         institutionCategoryDetails.getPhoneNumbers().addAll(migratedInstitutionUpload.getPhoneNumbers());
@@ -357,7 +359,7 @@ public class ExistingOperatorLoader {
         }
         mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
         mongoRepositoryReactive.saveOrUpdate(pendingInstitution);
-        return  pendingInstitution;
+        return pendingInstitution;
     }
 
 
