@@ -1,10 +1,13 @@
 package com.software.finatech.lslb.cms.service.controller;
 
+import com.software.finatech.lslb.cms.service.domain.Institution;
 import com.software.finatech.lslb.cms.service.dto.CreateExpiredLicensePaymentDto;
 import com.software.finatech.lslb.cms.service.dto.DirectorsUpdateDto;
 import com.software.finatech.lslb.cms.service.dto.MigrateCategoryDto;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
+import com.software.finatech.lslb.cms.service.model.migrations.MigratedInstitutionUpload;
 import com.software.finatech.lslb.cms.service.model.migrations.NewMigratedAgent;
+import com.software.finatech.lslb.cms.service.util.OKResponseUtil;
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingAgentLoader;
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingGamingMachineLoader;
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingGamingTerminalLoader;
@@ -106,6 +109,11 @@ public class MigrationController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.POST, value = "/upload-operator-from-json")
+    public Mono<ResponseEntity> uploadInstitution(@RequestBody MigratedInstitutionUpload migratedInstitutionUpload) {
+        Institution institution = existingOperatorLoader.loadMigratedInstitutionUpload(migratedInstitutionUpload);
+        return OKResponseUtil.OKResponse(institution.convertToFullDto());
+    }
 
     @RequestMapping(method = RequestMethod.POST, value = "/change-directors")
     public Mono<ResponseEntity> uploadMachines(@RequestBody DirectorsUpdateDto shareHoldersUpdateDto) {

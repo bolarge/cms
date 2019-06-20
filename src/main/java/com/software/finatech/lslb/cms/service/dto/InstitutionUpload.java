@@ -1,13 +1,13 @@
 package com.software.finatech.lslb.cms.service.dto;
 
-public class InstitutionUpload {
+import com.software.finatech.lslb.cms.service.model.migrations.BaseInstitutionUpload;
+
+public class InstitutionUpload extends BaseInstitutionUpload {
     private String institutionName;
-    private String emailAddress;
     private String phoneNumber;
     private String address;
     private String description;
     private String line;
-    //   private List<InstitutionLoadDetails> institutionLoadDetails = new ArrayList<>();
     private InstitutionLoadDetails loadDetails;
 
     public InstitutionLoadDetails getLoadDetails() {
@@ -17,14 +17,6 @@ public class InstitutionUpload {
     public void setLoadDetails(InstitutionLoadDetails loadDetails) {
         this.loadDetails = loadDetails;
     }
-
-//    public List<InstitutionLoadDetails> getInstitutionLoadDetails() {
-//        return institutionLoadDetails;
-//    }
-//
-//    public void setInstitutionLoadDetails(List<InstitutionLoadDetails> institutionLoadDetails) {
-//        this.institutionLoadDetails = institutionLoadDetails;
-//    }
 
     public String getLine() {
         return line;
@@ -40,14 +32,6 @@ public class InstitutionUpload {
 
     public void setInstitutionName(String institutionName) {
         this.institutionName = institutionName;
-    }
-
-    public String getEmailAddress() {
-        return emailAddress;
-    }
-
-    public void setEmailAddress(String emailAddress) {
-        this.emailAddress = emailAddress;
     }
 
     public String getPhoneNumber() {
