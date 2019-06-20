@@ -1191,7 +1191,7 @@ public class LicenseServiceImpl implements LicenseService {
             newPendingApprovalRenewedLicense.setEffectiveDate(newLicenseStartDate.plusDays(1));
             newPendingApprovalRenewedLicense.setExpiryDate(newLicenseEndDate);
             newPendingApprovalRenewedLicense.setPaymentRecordId(paymentRecord.getId());
-            newPendingApprovalRenewedLicense.setLicenseStatusId(LicenseStatusReferenceData.RENEWED_ID);
+            newPendingApprovalRenewedLicense.setLicenseStatusId(LicenseStatusReferenceData.RENEWAL_IN_PROGRESS_LICENSE_STATUS_ID);
 
             newPendingApprovalRenewedLicense.setLicenseTypeId(paymentRecord.getLicenseTypeId());
             newPendingApprovalRenewedLicense.setGameTypeId(paymentRecord.getGameTypeId());
@@ -1203,8 +1203,9 @@ public class LicenseServiceImpl implements LicenseService {
             mongoRepositoryReactive.saveOrUpdate(paymentRecord);
 
             latestLicense.setRenewalPaymentMade(true);
+            latestLicense.setRenewalPaymentInitiated(true);
             latestLicense.setRenewalPaymentRecordId(paymentRecord.getId());
-            latestLicense.setRenewalStatus("false");
+            latestLicense.setRenewalStatus("true");
             mongoRepositoryReactive.saveOrUpdate(latestLicense);
         } catch (Exception e) {
             logger.error("An error occurred while creating renewed license for payment record {}", paymentRecord.getId(), e);
