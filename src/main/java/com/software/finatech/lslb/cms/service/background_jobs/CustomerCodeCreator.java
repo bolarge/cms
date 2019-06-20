@@ -43,7 +43,7 @@ public class CustomerCodeCreator {
         Query query = new Query();
         query.addCriteria(Criteria.where("vgPayCustomerCode").is(null));
         if (!environmentUtils.isProductionEnvironment()) {
-            query.addCriteria(Criteria.where("fromLiveData").is(false));
+            //         query.addCriteria(Criteria.where("fromLiveData").is(false));
         }
         ArrayList<Institution> institutionsWithoutVigiPayCustomerCode = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
         for (Institution institution : institutionsWithoutVigiPayCustomerCode) {
@@ -62,18 +62,22 @@ public class CustomerCodeCreator {
                     logger.info("Finished for institution {} -> {}", institution.getInstitutionName(), institution.getId());
                 }
             } catch (Throwable e) {
-                logger.error("An error occurred while creating customer for {}", institution.getInstitutionName());
+                logger.error("An error occurred while creating customer for {}, error message => {}", institution.getInstitutionName(), e.getMessage());
             }
         }
 
         ArrayList<Agent> agentWithoutVigiPayCustomerCode = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
         for (Agent agent : agentWithoutVigiPayCustomerCode) {
-            String customerCode = vigipayService.createCustomerCodeForAgent(agent);
-            if (!StringUtils.isEmpty(customerCode)) {
-                logger.info("Gotten customer code {}", customerCode);
-                agent.setVgPayCustomerCode(customerCode);
-                mongoRepositoryReactive.saveOrUpdate(agent);
-                logger.info("Finished for agent {} -> {}", agent.getFullName(), agent.getId());
+            try {
+                String customerCode = vigipayService.createCustomerCodeForAgent(agent);
+                if (!StringUtils.isEmpty(customerCode)) {
+                    logger.info("Gotten customer code {}", customerCode);
+                    agent.setVgPayCustomerCode(customerCode);
+                    mongoRepositoryReactive.saveOrUpdate(agent);
+                    logger.info("Finished for agent {} -> {}", agent.getFullName(), agent.getId());
+                }
+            } catch (Exception e) {
+                logger.error("An error occurred {}", e.getMessage());
             }
         }
     }

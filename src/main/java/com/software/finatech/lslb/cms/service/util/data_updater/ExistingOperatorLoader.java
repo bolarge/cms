@@ -4,14 +4,17 @@ import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
+import com.software.finatech.lslb.cms.service.exception.VigiPayServiceException;
 import com.software.finatech.lslb.cms.service.model.migrations.BaseInstitutionUpload;
 import com.software.finatech.lslb.cms.service.model.migrations.MigratedInstitutionUpload;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
+import com.software.finatech.lslb.cms.service.service.contracts.VigipayService;
 import com.software.finatech.lslb.cms.service.util.EnvironmentUtils;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
+import com.software.finatech.lslb.cms.service.util.OKResponseUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -40,6 +43,8 @@ public class ExistingOperatorLoader {
     private static final Logger logger = LoggerFactory.getLogger(ExistingOperatorLoader.class);
     @Autowired
     private GameTypeService gameTypeService;
+    @Autowired
+    private VigipayService vigipayService;
     @Autowired
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     @Autowired
@@ -716,6 +721,31 @@ public class ExistingOperatorLoader {
         for (Institution institution : institutions) {
             institution.setVgPayCustomerCode(null);
             mongoRepositoryReactive.saveOrUpdate(institution);
+        }
+    }
+
+    public Mono<ResponseEntity> createVigiPayCustomerCodeForOperator(CreateCustomerCodeDto createCustomerCodeDto) {
+        try {
+            String institutionId = createCustomerCodeDto.getInstitutionId();
+
+            Institution institution = (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+            if (institution == null) {
+                return ErrorResponseUtil.BadRequestResponse("Invalid institution");
+            }
+
+            if (!createCustomerCodeDto.isForceUpdate() && StringUtils.isNotEmpty(institution.getVgPayCustomerCode())) {
+                return ErrorResponseUtil.BadRequestResponse("Institution already has a customer code");
+            }
+
+            String customerCode = vigipayService.createCustomerCodeForInstitution(institution);
+            if (customerCode == null) {
+                return ErrorResponseUtil.ErrorResponse("Could not create customer code");
+            }
+            institution.setVgPayCustomerCode(customerCode);
+            mongoRepositoryReactive.saveOrUpdate(institution);
+            return OKResponseUtil.OKResponse("Customer code created successfully");
+        } catch (VigiPayServiceException e) {
+            return ErrorResponseUtil.logAndReturnError(logger, e.getMessage(), e);
         }
     }
 }

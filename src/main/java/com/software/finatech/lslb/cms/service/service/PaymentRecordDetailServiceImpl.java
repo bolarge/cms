@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
+import com.software.finatech.lslb.cms.service.exception.VigiPayServiceException;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigiPayMessage;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInvoiceItem;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
@@ -292,6 +293,9 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                     LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(paymentRecordDetail.convertToDto(), HttpStatus.OK));
+        } catch (VigiPayServiceException e) {
+            String errorMessage = "An error occurred while creating invoice";
+            return Mono.just(new ResponseEntity<>(new PaymentErrorResponse(errorMessage, e.getMessage()), HttpStatus.EXPECTATION_FAILED));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while creating payment record detail", e);
         }
@@ -500,7 +504,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         }
     }
 
-    private String createInBranchRecordDetailForInstitution(Institution institution, String feeDescription, PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, List<AuthInfo> admins) {
+    private String createInBranchRecordDetailForInstitution(Institution institution, String feeDescription, PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, List<AuthInfo> admins) throws VigiPayServiceException {
         VigipayInvoiceItem vigipayInvoiceItem = new VigipayInvoiceItem();
         vigipayInvoiceItem.setAmount(paymentRecordDetailCreateDto.getAmount());
         vigipayInvoiceItem.setDetail(feeDescription);
@@ -511,7 +515,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         return vigipayService.createInBranchInvoiceForInstitution(institution, admins, vigipayInvoiceItems);
     }
 
-    private String createInBranchRecordDetailForAgent(Agent agent, String feeDescription, PaymentRecordDetailCreateDto paymentRecordDetailCreateDto) {
+    private String createInBranchRecordDetailForAgent(Agent agent, String feeDescription, PaymentRecordDetailCreateDto paymentRecordDetailCreateDto) throws VigiPayServiceException {
         VigipayInvoiceItem vigipayInvoiceItem = new VigipayInvoiceItem();
         vigipayInvoiceItem.setAmount(paymentRecordDetailCreateDto.getAmount());
         vigipayInvoiceItem.setDetail(feeDescription);
@@ -522,7 +526,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         return vigipayService.createInBranchInvoiceForAgent(agent, vigipayInvoiceItems);
     }
 
-    private String createInBranchRecordDetailForGamingMachine(Institution institution, List<MachinePaymentDetail> machinePaymentDetails, List<AuthInfo> admins) {
+    private String createInBranchRecordDetailForGamingMachine(Institution institution, List<MachinePaymentDetail> machinePaymentDetails, List<AuthInfo> admins) throws VigiPayServiceException {
         List<VigipayInvoiceItem> vigipayInvoiceItems = new ArrayList<>();
         for (MachinePaymentDetail machinePaymentDetail : machinePaymentDetails) {
             VigipayInvoiceItem vigipayInvoiceItem = new VigipayInvoiceItem();
@@ -539,7 +543,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         return vigipayService.createInBranchInvoiceForInstitution(institution, admins, vigipayInvoiceItems);
     }
 
-    private String createInBranchRecordDetailForGamingTerminal(Agent agent, List<MachinePaymentDetail> machinePaymentDetails) {
+    private String createInBranchRecordDetailForGamingTerminal(Agent agent, List<MachinePaymentDetail> machinePaymentDetails) throws VigiPayServiceException {
         List<VigipayInvoiceItem> vigipayInvoiceItems = new ArrayList<>();
         for (MachinePaymentDetail machinePaymentDetail : machinePaymentDetails) {
             VigipayInvoiceItem vigipayInvoiceItem = new VigipayInvoiceItem();

@@ -46,19 +46,19 @@ public class VigipayServiceImpl implements VigipayService {
     }
 
     @Override
-    public String createCustomerCodeForAgent(Agent agent) {
+    public String createCustomerCodeForAgent(Agent agent) throws VigiPayServiceException {
         VigipayCreateCustomer vigipayCreateCustomer = createCustomerFromAgent(agent);
         return vigipayHttpClient.createCustomerCode(vigipayCreateCustomer);
     }
 
     @Override
-    public String createCustomerCodeForInstitution(Institution institution) {
+    public String createCustomerCodeForInstitution(Institution institution) throws VigiPayServiceException {
         VigipayCreateCustomer vigipayCreateCustomer = createCustomerFromInstitution(institution);
         return vigipayHttpClient.createCustomerCode(vigipayCreateCustomer);
     }
 
     @Override
-    public String createInBranchInvoiceForAgent(Agent agent, List<VigipayInvoiceItem> vigipayInvoiceItems) {
+    public String createInBranchInvoiceForAgent(Agent agent, List<VigipayInvoiceItem> vigipayInvoiceItems) throws VigiPayServiceException {
         VigipayCreateInvoice vigipayCreateInvoice = createInvoiceForAgent(agent, vigipayInvoiceItems);
         return vigipayHttpClient.createInvoice(vigipayCreateInvoice);
     }
@@ -66,7 +66,7 @@ public class VigipayServiceImpl implements VigipayService {
     @Override
     public String createInBranchInvoiceForInstitution(Institution institution,
                                                       List<AuthInfo> adminsForInstitution,
-                                                      List<VigipayInvoiceItem> vigipayInvoiceItems) {
+                                                      List<VigipayInvoiceItem> vigipayInvoiceItems) throws VigiPayServiceException {
         VigipayCreateInvoice vigipayCreateInvoice = createInvoiceFromInstitution(institution, adminsForInstitution, vigipayInvoiceItems);
         return vigipayHttpClient.createInvoice(vigipayCreateInvoice);
     }
@@ -74,7 +74,7 @@ public class VigipayServiceImpl implements VigipayService {
     @Override
     public String createInBranchMultipleItemInvoiceForInstitution(Institution institution,
                                                                   List<AuthInfo> adminsForInstitution,
-                                                                  List<VigipayInvoiceItem> vigipayInvoiceItems) {
+                                                                  List<VigipayInvoiceItem> vigipayInvoiceItems) throws VigiPayServiceException {
         VigipayCreateInvoice vigipayCreateInvoice = createMultipleItemInvoiceFromInstitution(institution, adminsForInstitution, vigipayInvoiceItems);
         return vigipayHttpClient.createInvoice(vigipayCreateInvoice);
     }
