@@ -4,6 +4,8 @@ import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
+import com.software.finatech.lslb.cms.service.model.migrations.BaseInstitutionUpload;
+import com.software.finatech.lslb.cms.service.model.migrations.MigratedInstitutionUpload;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
@@ -205,68 +207,159 @@ public class ExistingOperatorLoader {
 
     private void loadInstitutionsFromUploads(List<InstitutionUpload> institutionUploads) {
         for (InstitutionUpload institutionUpload : institutionUploads) {
-            Query query = new Query();
-            query.addCriteria(Criteria.where("institutionName").regex(institutionUpload.getInstitutionName(), "i"));
-            Institution pendingInstitution = (Institution) mongoRepositoryReactive.find(query, Institution.class).block();
-            if (pendingInstitution == null) {
-                pendingInstitution = new Institution();
-                pendingInstitution.setId(UUID.randomUUID().toString());
-                pendingInstitution.setInstitutionName(institutionUpload.getInstitutionName());
-                pendingInstitution.setActive(true);
-                pendingInstitution.setDescription(institutionUpload.getDescription());
-                pendingInstitution.setEmailAddress(getInstitutionAddressBasedOnEnvironment(institutionUpload));
-                pendingInstitution.getPhoneNumbers().addAll(getPhoneNumbersFromUpload(institutionUpload));
-                pendingInstitution.setFromLiveData(true);
-                pendingInstitution.setAddress(institutionUpload.getAddress());
-            }
-            // for (InstitutionLoadDetails institutionLoadDetails : institutionUpload.getInstitutionLoadDetails()) {
-            InstitutionLoadDetails institutionLoadDetails = institutionUpload.getLoadDetails();
-            InstitutionCategoryDetails institutionCategoryDetails = new InstitutionCategoryDetails();
-            institutionCategoryDetails.setId(UUID.randomUUID().toString());
-            institutionCategoryDetails.setFirstCommencementDate(institutionLoadDetails.getFirstCommencementDate());
-            institutionCategoryDetails.setGameTypeId(institutionLoadDetails.getGameTypeId());
-            institutionCategoryDetails.setTradeName(institutionLoadDetails.getTradeName());
-            institutionCategoryDetails.getPhoneNumbers().addAll(getPhoneNumbersFromUpload(institutionUpload));
-            Set<String> directorNames = directorNamesFromString(institutionLoadDetails.getDirector());
-            institutionCategoryDetails.getDirectorsNames().addAll(directorNames);
-            pendingInstitution.getDirectorsNames().addAll(directorNames);
-            institutionCategoryDetails.setInstitutionId(pendingInstitution.getId());
-            pendingInstitution.getGameTypeIds().add(institutionLoadDetails.getGameTypeId());
-            pendingInstitution.getInstitutionCategoryDetailIds().add(institutionCategoryDetails.getId());
-
-            License pendingLicense = new License();
-            pendingLicense.setId(UUID.randomUUID().toString());
-            pendingLicense.setInstitutionId(pendingInstitution.getId());
-            pendingLicense.setEffectiveDate(institutionLoadDetails.getLicenseStartDate());
-            pendingLicense.setExpiryDate(institutionLoadDetails.getLicenseEndDate());
-            pendingLicense.setGameTypeId(institutionLoadDetails.getGameTypeId());
-            pendingLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
-            String licenseStatusId = findLicenseStatusIdByKey(institutionLoadDetails.getStatus());
-            if (licenseStatusId == null) {
-                logger.info("{} has no license status ", pendingInstitution);
-                continue;
-            }
-            pendingLicense.setLicenseStatusId(licenseStatusId);
-            if (pendingLicense.isAIPRelatedLicense()) {
-                AIPDocumentApproval aipDocumentApproval = new AIPDocumentApproval();
-                aipDocumentApproval.setFormStatusId(ApplicationFormStatusReferenceData.CREATED_STATUS_ID);
-                aipDocumentApproval.setGameTypeId(pendingLicense.getGameTypeId());
-                aipDocumentApproval.setInstitutionId(pendingLicense.getInstitutionId());
-                aipDocumentApproval.setId(UUID.randomUUID().toString());
-                aipDocumentApproval.setReadyForApproval(false);
-                mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
-            } else {
-                pendingLicense.setLicenseNumber(generateLicenseNumber(institutionLoadDetails.getGameTypeId()));
-            }
-            mongoRepositoryReactive.saveOrUpdate(pendingLicense);
-            if (pendingLicense.isSuspendedLicence()) {
-                institutionCategoryDetails.setFirstCommencementDate(null);
-            }
-            mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
-            // }
-            mongoRepositoryReactive.saveOrUpdate(pendingInstitution);
+            loadInstitutionUpload(institutionUpload);
         }
     }
+
+
+    private void loadInstitutionUpload(InstitutionUpload institutionUpload) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionName").regex(institutionUpload.getInstitutionName(), "i"));
+        Institution pendingInstitution = (Institution) mongoRepositoryReactive.find(query, Institution.class).block();
+
+        if (pendingInstitution == null) {
+            pendingInstitution = new Institution();
+            pendingInstitution.setId(UUID.randomUUID().toString());
+            pendingInstitution.setInstitutionName(institutionUpload.getInstitutionName());
+            pendingInstitution.setActive(true);
+            pendingInstitution.setDescription(institutionUpload.getDescription());
+            pendingInstitution.setEmailAddress(getInstitutionAddressBasedOnEnvironment(institutionUpload));
+            pendingInstitution.getPhoneNumbers().addAll(getPhoneNumbersFromUpload(institutionUpload));
+            pendingInstitution.setFromLiveData(true);
+            pendingInstitution.setAddress(institutionUpload.getAddress());
+        }
+        InstitutionLoadDetails institutionLoadDetails = institutionUpload.getLoadDetails();
+        InstitutionCategoryDetails institutionCategoryDetails = new InstitutionCategoryDetails();
+        institutionCategoryDetails.setId(UUID.randomUUID().toString());
+        institutionCategoryDetails.setFirstCommencementDate(institutionLoadDetails.getFirstCommencementDate());
+        institutionCategoryDetails.setGameTypeId(institutionLoadDetails.getGameTypeId());
+        institutionCategoryDetails.setTradeName(institutionLoadDetails.getTradeName());
+        institutionCategoryDetails.getPhoneNumbers().addAll(getPhoneNumbersFromUpload(institutionUpload));
+        Set<String> directorNames = directorNamesFromString(institutionLoadDetails.getDirector());
+        institutionCategoryDetails.getDirectorsNames().addAll(directorNames);
+        pendingInstitution.getDirectorsNames().addAll(directorNames);
+        institutionCategoryDetails.setInstitutionId(pendingInstitution.getId());
+        pendingInstitution.getGameTypeIds().add(institutionLoadDetails.getGameTypeId());
+        pendingInstitution.getInstitutionCategoryDetailIds().add(institutionCategoryDetails.getId());
+
+        License pendingLicense = new License();
+        pendingLicense.setId(UUID.randomUUID().toString());
+        pendingLicense.setInstitutionId(pendingInstitution.getId());
+        pendingLicense.setEffectiveDate(institutionLoadDetails.getLicenseStartDate());
+        pendingLicense.setExpiryDate(institutionLoadDetails.getLicenseEndDate());
+        pendingLicense.setGameTypeId(institutionLoadDetails.getGameTypeId());
+        pendingLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
+        String licenseStatusId = findLicenseStatusIdByKey(institutionLoadDetails.getStatus());
+        if (licenseStatusId == null) {
+            logger.info("{} has no license status ", pendingInstitution);
+            return;
+        }
+        pendingLicense.setLicenseStatusId(licenseStatusId);
+        if (pendingLicense.isAIPRelatedLicense()) {
+            AIPDocumentApproval aipDocumentApproval = new AIPDocumentApproval();
+            aipDocumentApproval.setFormStatusId(ApplicationFormStatusReferenceData.CREATED_STATUS_ID);
+            aipDocumentApproval.setGameTypeId(pendingLicense.getGameTypeId());
+            aipDocumentApproval.setInstitutionId(pendingLicense.getInstitutionId());
+            aipDocumentApproval.setId(UUID.randomUUID().toString());
+            aipDocumentApproval.setReadyForApproval(false);
+            mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
+        } else {
+            pendingLicense.setLicenseNumber(generateLicenseNumber(institutionLoadDetails.getGameTypeId()));
+        }
+        mongoRepositoryReactive.saveOrUpdate(pendingLicense);
+        if (pendingLicense.isSuspendedLicence()) {
+            institutionCategoryDetails.setFirstCommencementDate(null);
+        }
+        mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
+        mongoRepositoryReactive.saveOrUpdate(pendingInstitution);
+    }
+
+    public Institution loadMigratedInstitutionUpload(MigratedInstitutionUpload migratedInstitutionUpload) {
+        String gameTypeId = migratedInstitutionUpload.getGameTypeId();
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionName").regex(migratedInstitutionUpload.getInstitutionName(), "i"));
+        Institution pendingInstitution;
+        if (migratedInstitutionUpload.isUseInstitutionId()) {
+            pendingInstitution = (Institution) mongoRepositoryReactive.findById(migratedInstitutionUpload.getInstitutionId(), Institution.class).block();
+        } else {
+            pendingInstitution = (Institution) mongoRepositoryReactive.find(query, Institution.class).block();
+        }
+        if (pendingInstitution == null) {
+            pendingInstitution = new Institution();
+            pendingInstitution.setId(UUID.randomUUID().toString());
+            pendingInstitution.setInstitutionName(migratedInstitutionUpload.getInstitutionName());
+            pendingInstitution.setActive(true);
+            pendingInstitution.setDescription(migratedInstitutionUpload.getDescription());
+            pendingInstitution.setEmailAddress(getInstitutionAddressBasedOnEnvironment(migratedInstitutionUpload));
+            pendingInstitution.getPhoneNumbers().addAll(migratedInstitutionUpload.getPhoneNumbers());
+            pendingInstitution.setFromLiveData(true);
+            pendingInstitution.setAddress(migratedInstitutionUpload.getAddress());
+        }
+        String insitutionId = pendingInstitution.getId();
+        InstitutionCategoryDetails institutionCategoryDetails;
+        query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(insitutionId));
+        query.addCriteria(Criteria.where("gameTypeId").is(migratedInstitutionUpload.getGameTypeId()));
+        institutionCategoryDetails = (InstitutionCategoryDetails) mongoRepositoryReactive.find(query, InstitutionCategoryDetails.class).block();
+        if (institutionCategoryDetails == null) {
+            institutionCategoryDetails = new InstitutionCategoryDetails();
+            institutionCategoryDetails.setId(UUID.randomUUID().toString());
+        }
+        institutionCategoryDetails.setFirstCommencementDate(new LocalDate(migratedInstitutionUpload.getFirstCommencementDate()));
+        institutionCategoryDetails.setGameTypeId(migratedInstitutionUpload.getGameTypeId());
+        institutionCategoryDetails.setTradeName(migratedInstitutionUpload.getTradeName());
+        institutionCategoryDetails.getPhoneNumbers().addAll(migratedInstitutionUpload.getPhoneNumbers());
+        institutionCategoryDetails.getDirectorsNames().addAll(migratedInstitutionUpload.getDirectors());
+        pendingInstitution.getDirectorsNames().addAll(migratedInstitutionUpload.getDirectors());
+        institutionCategoryDetails.setInstitutionId(pendingInstitution.getId());
+        pendingInstitution.getGameTypeIds().add(migratedInstitutionUpload.getGameTypeId());
+        pendingInstitution.getInstitutionCategoryDetailIds().add(institutionCategoryDetails.getId());
+
+        query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(insitutionId));
+        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        query.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
+
+        License pendingLicense;
+        pendingLicense = (License) mongoRepositoryReactive.find(query, License.class).block();
+        if (pendingLicense == null) {
+            pendingLicense = new License();
+            pendingLicense.setId(UUID.randomUUID().toString());
+        }
+        pendingLicense.setInstitutionId(pendingInstitution.getId());
+        pendingLicense.setEffectiveDate(new LocalDate(migratedInstitutionUpload.getLicenseStartDate()));
+        pendingLicense.setExpiryDate(new LocalDate(migratedInstitutionUpload.getLicenseEndDate()));
+        pendingLicense.setGameTypeId(migratedInstitutionUpload.getGameTypeId());
+        pendingLicense.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
+        pendingLicense.setLicenseStatusId(migratedInstitutionUpload.getLicenseStatusId());
+        if (pendingLicense.isAIPRelatedLicense()) {
+            query = new Query();
+            query.addCriteria(Criteria.where("institutionId").is(insitutionId));
+            query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+
+            AIPDocumentApproval aipDocumentApproval;
+            aipDocumentApproval = (AIPDocumentApproval) mongoRepositoryReactive.find(query, AIPDocumentApproval.class).block();
+            if (aipDocumentApproval == null) {
+                aipDocumentApproval = new AIPDocumentApproval();
+                aipDocumentApproval.setId(UUID.randomUUID().toString());
+            }
+            aipDocumentApproval.setFormStatusId(ApplicationFormStatusReferenceData.CREATED_STATUS_ID);
+            aipDocumentApproval.setGameTypeId(pendingLicense.getGameTypeId());
+            aipDocumentApproval.setInstitutionId(pendingLicense.getInstitutionId());
+            aipDocumentApproval.setReadyForApproval(false);
+            mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
+        } else {
+            pendingLicense.setLicenseNumber(generateLicenseNumber(gameTypeId));
+        }
+        mongoRepositoryReactive.saveOrUpdate(pendingLicense);
+        if (pendingLicense.isSuspendedLicence()) {
+            institutionCategoryDetails.setFirstCommencementDate(null);
+        }
+        mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
+        mongoRepositoryReactive.saveOrUpdate(pendingInstitution);
+        return  pendingInstitution;
+    }
+
 
     private Set<String> getPhoneNumbersFromUpload(InstitutionUpload institutionUpload) {
         Set<String> phoneNumber = new HashSet<>();
@@ -330,7 +423,7 @@ public class ExistingOperatorLoader {
     }
 
 
-    private String getInstitutionAddressBasedOnEnvironment(InstitutionUpload institutionUpload) {
+    private String getInstitutionAddressBasedOnEnvironment(BaseInstitutionUpload institutionUpload) {
         if (environmentUtils.isProductionEnvironment()) {
             return institutionUpload.getEmailAddress();
         }
