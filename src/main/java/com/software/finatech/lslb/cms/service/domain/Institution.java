@@ -184,28 +184,28 @@ public class Institution extends AbstractFact {
 
     public InstitutionDto convertToFullDto() {
         InstitutionDto dto = convertToDto();
-        dto.setInstitutionCategoryDetails(getInstitutionCategoryDetailsList());
-        dto.setDirectorsNames(getDirectorsNames());
-        dto.setShareHolderNames(getShareHolderNames());
+        List<InstitutionCategoryDetailsDto> categoryDetailsDtos = new ArrayList<>();
+        Set<String> shareHolderNames = new HashSet<>();
+        Set<String> directorNameSet = new HashSet<>();
+        if (!this.institutionCategoryDetailIds.isEmpty()) {
+            for (String id : this.institutionCategoryDetailIds) {
+                InstitutionCategoryDetails categoryDetails = getInstitutionCategoryDetailById(id);
+                if (categoryDetails != null) {
+                    categoryDetailsDtos.add(categoryDetails.convertToDto());
+                    directorNameSet.addAll(categoryDetails.getDirectorsNames());
+                    shareHolderNames.addAll(categoryDetails.getShareHolderNames());
+                }
+            }
+        }
+        dto.setInstitutionCategoryDetails(categoryDetailsDtos);
+        dto.setDirectorsNames(directorNameSet);
+        dto.setShareHolderNames(shareHolderNames);
         dto.setAddress(getAddress());
         return dto;
     }
 
 
-    public List<InstitutionCategoryDetailsDto> getInstitutionCategoryDetailsList() {
-        List<InstitutionCategoryDetailsDto> dtos = new ArrayList<>();
-        if (!this.institutionCategoryDetailIds.isEmpty()) {
-            for (String id : this.institutionCategoryDetailIds) {
-                InstitutionCategoryDetails categoryDetails = getInstitutionCategoryDetailById(id);
-                if (categoryDetails != null) {
-                    dtos.add(categoryDetails.convertToDto());
-                }
-            }
-        }
-        return dtos;
-    }
-
-    public InstitutionCategoryDetails getInstitutionCategoryDetailById(String id) {
+    private InstitutionCategoryDetails getInstitutionCategoryDetailById(String id) {
         return (InstitutionCategoryDetails) mongoRepositoryReactive.findById(id, InstitutionCategoryDetails.class).block();
     }
 

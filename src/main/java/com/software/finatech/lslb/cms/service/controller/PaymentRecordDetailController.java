@@ -70,28 +70,14 @@ public class PaymentRecordDetailController extends BaseController {
         return paymentRecordDetailService.updateWebPaymentRecordDetail(paymentRecordDetailUpdateDto, request);
     }
 
-    //    @RequestMapping(method = RequestMethod.POST, value = "/vigipay-in-branch-payment-notification")
-//    @ApiOperation(value = "Notification of successful in branch payment from Vigipay", response = String.class ,consumes= "application/json")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "OK"),
-//            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
-//            @ApiResponse(code = 400, message = "Bad request"),
-//            @ApiResponse(code = 404, message = "Not Found")
-//    }
-//    )
-//    public Mono<ResponseEntity> updateVigiPayInBranchNotification(@RequestBody VigipayInBranchNotification vigipayInBranchNotification) {
-//        return paymentRecordDetailService.handleVigipayInBranchNotification(vigipayInBranchNotification);
-//    }
-//
+
     @RequestMapping(method = RequestMethod.POST, value = "/vigipay-in-branch-payment-notification")
     @ApiOperation(value = "Notification of successful in branch payment from Vigipay", response = String.class, consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
-            @ApiResponse(code = 404, message = "Not Found")
-    }
-    )
+            @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> updateVigiPayInBranchNotification(@RequestBody VigiPayMessage vigiPayMessage) {
         return paymentRecordDetailService.handleVigipayInBranchNotification(vigiPayMessage);
     }

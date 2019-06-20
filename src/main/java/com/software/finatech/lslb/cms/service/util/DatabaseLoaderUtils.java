@@ -1,7 +1,6 @@
 package com.software.finatech.lslb.cms.service.util;
 
 import com.software.finatech.lslb.cms.service.domain.*;
-import com.software.finatech.lslb.cms.service.dto.sso.SSOUser;
 import com.software.finatech.lslb.cms.service.dto.sso.SSOUserDetailInfo;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
@@ -13,7 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -57,7 +57,9 @@ public class DatabaseLoaderUtils {
         authInfo.setLastName(user.getLastName());
         authInfo.setFullName(user.getFirstName() + " " + user.getLastName());
         authInfo.setInstitutionId(null);
-        authInfo.setSsoUserId(user.getId());
+        if (user != null) {
+            authInfo.setSsoUserId(user.getId());
+        }
 
         mongoRepositoryReactive.saveOrUpdate(authInfo);
 

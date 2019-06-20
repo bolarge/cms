@@ -1,6 +1,10 @@
 package com.software.finatech.lslb.cms.service.controller;
 
+import com.software.finatech.lslb.cms.service.dto.CreateExpiredLicensePaymentDto;
+import com.software.finatech.lslb.cms.service.dto.DirectorsUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.MigrateCategoryDto;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
+import com.software.finatech.lslb.cms.service.model.migrations.NewMigratedAgent;
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingAgentLoader;
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingGamingMachineLoader;
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingGamingTerminalLoader;
@@ -10,12 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
+
+import javax.validation.Valid;
 
 /**
  * @author adeyi.adebolu
@@ -74,6 +77,11 @@ public class MigrationController {
     }
 
 
+    @RequestMapping(method = RequestMethod.POST, value = "/create-agent-from-migration")
+    public Mono<ResponseEntity> createAgentFromMigration(@RequestBody @Valid NewMigratedAgent newMigratedAgent) {
+        return existingAgentLoader.loadAgentFromModel(newMigratedAgent);
+    }
+
     @RequestMapping(method = RequestMethod.POST, value = "/upload-terminals")
     public Mono<ResponseEntity> uploadTerminals(@RequestParam("institutionId") String institutionId,
                                                 @RequestParam("gameTypeId") String gameTypeId,
@@ -97,4 +105,32 @@ public class MigrationController {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/change-directors")
+    public Mono<ResponseEntity> uploadMachines(@RequestBody DirectorsUpdateDto shareHoldersUpdateDto) {
+        return existingOperatorLoader.updateDirectorDetails(shareHoldersUpdateDto);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/change-category-record")
+    public Mono<ResponseEntity> uploadMachines(@RequestBody MigrateCategoryDto migrateCategoryDto) {
+        return existingOperatorLoader.changeExistingOperatorCategory(migrateCategoryDto);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/create-expired-payment")
+    public Mono<ResponseEntity> uploadMachines(@RequestBody CreateExpiredLicensePaymentDto createExpiredLicensePaymentDto) {
+        return existingOperatorLoader.createExpiredLicenseForOperator(createExpiredLicensePaymentDto);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/clear-customer-codes")
+    public Mono<ResponseEntity> clearVigiPayCustomerCodes() {
+        try {
+            existingOperatorLoader.clearAllVigipayCustomerCodes();
+            existingAgentLoader.clearAllVigipayCustomerCodes();
+            return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
+        } catch (Exception e) {
+            return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
+        }
+    }
+
 }

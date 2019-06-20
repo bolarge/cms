@@ -9,10 +9,12 @@ public class GameTypeReferenceData {
     public static final String POL_GAME_TYPE_ID = "01";
     public static final String GAMING_MACHINE_ID = "03";
     public static final String SCRATCH_CARD_ID = "04";
-    public static final String CASINO_ID = "05";
+    public static final String HOTEL_CASINO_ID = "05";
     public static final String POOLS_BETTING_ID = "06";
     public static final String OTHER_LICENSE_ID = "07";
-    public static final String ONLINE_CASINO_ID= "08";
+    public static final String ONLINE_CASINO_ID = "08";
+    public static final String HOTEL_PREMISE_CASINO_ID = "09";
+    public static final String STAND_ALONE_CASINO_ID = "10";
 
     public static void load(MongoRepositoryReactiveImpl mongoRepositoryReactive) {
         GameType gameType = (GameType) mongoRepositoryReactive.findById(POL_GAME_TYPE_ID, GameType.class).block();
@@ -30,7 +32,7 @@ public class GameTypeReferenceData {
         gameType.setInstitutionLicenseDurationMonths(60);
         gameType.setGamingMachineLicenseDurationMonths(0);
         gameType.setGamingTerminalLicenseDurationMonths(12);
-        gameType.setAgentLicenseDurationMonths(0);
+        gameType.setAgentLicenseDurationMonths(12);
         gameType.setAllowsAgents(true);
         mongoRepositoryReactive.saveOrUpdate(gameType);
 
@@ -68,6 +70,7 @@ public class GameTypeReferenceData {
         gameType.setGamingMachineLicenseDurationMonths(12);
         gameType.setGamingTerminalLicenseDurationMonths(0);
         gameType.setAgentLicenseDurationMonths(12);
+        gameType.setAllowsAgents(true);
         mongoRepositoryReactive.saveOrUpdate(gameType);
 
         gameType = (GameType) mongoRepositoryReactive.findById(SCRATCH_CARD_ID, GameType.class).block();
@@ -85,6 +88,7 @@ public class GameTypeReferenceData {
         gameType.setGamingMachineLicenseDurationMonths(0);
         gameType.setGamingTerminalLicenseDurationMonths(0);
         gameType.setAgentLicenseDurationMonths(12);
+        gameType.setAllowsAgents(true);
         mongoRepositoryReactive.saveOrUpdate(gameType);
 
         gameType = (GameType) mongoRepositoryReactive.findById(POOLS_BETTING_ID, GameType.class).block();
@@ -102,17 +106,55 @@ public class GameTypeReferenceData {
         gameType.setGamingMachineLicenseDurationMonths(0);
         gameType.setGamingTerminalLicenseDurationMonths(12);
         gameType.setAgentLicenseDurationMonths(12);
+        gameType.setAllowsAgents(true);
         mongoRepositoryReactive.saveOrUpdate(gameType);
 
 
-        gameType = (GameType) mongoRepositoryReactive.findById(CASINO_ID, GameType.class).block();
+        gameType = (GameType) mongoRepositoryReactive.findById(HOTEL_CASINO_ID, GameType.class).block();
         if (gameType == null) {
             gameType = new GameType();
-            gameType.setId(CASINO_ID);
+            gameType.setId(HOTEL_CASINO_ID);
         }
-        gameType.setDescription("Casino");
-        gameType.setName("Casino");
-        gameType.setShortCode("CS");
+        gameType.setDescription("Hotel Casino (Casino A)");
+        gameType.setName("Hotel Casino");
+        gameType.setShortCode("CSA");
+        gameType.setAipDurationMonths(3);
+        gameType.setAllowsGamingMachine(true);
+        gameType.setAllowsGamingTerminal(false);
+        gameType.setInstitutionLicenseDurationMonths(12);
+        gameType.setGamingMachineLicenseDurationMonths(12);
+        gameType.setGamingTerminalLicenseDurationMonths(0);
+        gameType.setAgentLicenseDurationMonths(0);
+        gameType.setAllowsAgents(false);
+        mongoRepositoryReactive.saveOrUpdate(gameType);
+
+        gameType = (GameType) mongoRepositoryReactive.findById(HOTEL_PREMISE_CASINO_ID, GameType.class).block();
+
+        if (gameType == null) {
+            gameType = new GameType();
+            gameType.setId(HOTEL_PREMISE_CASINO_ID);
+        }
+        gameType.setDescription("Hotel Premise Casino (Casino B)");
+        gameType.setName("Hotel Premise Casino");
+        gameType.setShortCode("CSA");
+        gameType.setAipDurationMonths(3);
+        gameType.setAllowsGamingMachine(true);
+        gameType.setAllowsGamingTerminal(false);
+        gameType.setInstitutionLicenseDurationMonths(12);
+        gameType.setGamingMachineLicenseDurationMonths(12);
+        gameType.setGamingTerminalLicenseDurationMonths(0);
+        gameType.setAgentLicenseDurationMonths(0);
+        gameType.setAllowsAgents(false);
+        mongoRepositoryReactive.saveOrUpdate(gameType);
+
+        gameType = (GameType) mongoRepositoryReactive.findById(STAND_ALONE_CASINO_ID, GameType.class).block();
+        if (gameType == null) {
+            gameType = new GameType();
+            gameType.setId(STAND_ALONE_CASINO_ID);
+        }
+        gameType.setDescription("Stand Alone Casino (Casino A)");
+        gameType.setName("Stand Alone Casino");
+        gameType.setShortCode("CSA");
         gameType.setAipDurationMonths(3);
         gameType.setAllowsGamingMachine(true);
         gameType.setAllowsGamingTerminal(false);
@@ -121,6 +163,7 @@ public class GameTypeReferenceData {
         gameType.setGamingTerminalLicenseDurationMonths(0);
         gameType.setAgentLicenseDurationMonths(0);
         mongoRepositoryReactive.saveOrUpdate(gameType);
+
 
         gameType = (GameType) mongoRepositoryReactive.findById(OTHER_LICENSE_ID, GameType.class).block();
         if (gameType == null) {
@@ -139,7 +182,6 @@ public class GameTypeReferenceData {
         gameType.setGamingTerminalLicenseDurationMonths(0);
         gameType.setAgentLicenseDurationMonths(12);
         mongoRepositoryReactive.saveOrUpdate(gameType);
-
 
 
         gameType = (GameType) mongoRepositoryReactive.findById(ONLINE_CASINO_ID, GameType.class).block();
