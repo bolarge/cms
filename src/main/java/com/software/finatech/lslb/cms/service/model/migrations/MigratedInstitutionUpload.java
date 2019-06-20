@@ -19,7 +19,6 @@ public class MigratedInstitutionUpload extends BaseInstitutionUpload {
     private String licenseStartDate;
     private String licenseEndDate;
     private List<String> directors = new ArrayList<>();
-    private String licenseDate;
     private boolean useInstitutionId;
     private String institutionId;
     private String licenseStatusId;
@@ -118,14 +117,6 @@ public class MigratedInstitutionUpload extends BaseInstitutionUpload {
 
     public void setDirectors(List<String> directors) {
         this.directors = directors;
-    }
-
-    public String getLicenseDate() {
-        return licenseDate;
-    }
-
-    public void setLicenseDate(String licenseDate) {
-        this.licenseDate = licenseDate;
     }
 
     public boolean isUseInstitutionId() {

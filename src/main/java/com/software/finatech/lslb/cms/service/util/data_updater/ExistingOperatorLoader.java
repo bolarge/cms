@@ -486,20 +486,18 @@ public class ExistingOperatorLoader {
         boolean operatorHasMadeSomePayment = amountPaid > 0;
 
         try {
-
             LocalDate paymentDate = new LocalDate(paymentDateString);
             LocalDateTime paymentDateTime = paymentDate.toLocalDateTime(LocalTime.MIDNIGHT);
             Query query = new Query();
             query.addCriteria(Criteria.where("institutionId").is(institutionId));
             query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
             License license = (License) mongoRepositoryReactive.find(query, License.class).block();
-            if (license != null) {
-                if (createExpiredLicensePaymentDto.isUpdateLicense()) {
-                    license.setEffectiveDate(new LocalDate(createExpiredLicensePaymentDto.getLicenseStartDate()));
-                    license.setExpiryDate(new LocalDate(createExpiredLicensePaymentDto.getLicenseEndDate()));
-                }
-                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
-                mongoRepositoryReactive.saveOrUpdate(license);
+            if (license == null) {
+                return ErrorResponseUtil.BadRequestResponse("Operator does not have license in category");
+            }
+            if (createExpiredLicensePaymentDto.isUpdateLicense()) {
+                license.setEffectiveDate(new LocalDate(createExpiredLicensePaymentDto.getLicenseStartDate()));
+                license.setExpiryDate(new LocalDate(createExpiredLicensePaymentDto.getLicenseEndDate()));
             }
             PaymentRecord record = new PaymentRecord();
             record.setId(UUID.randomUUID().toString());
@@ -530,14 +528,17 @@ public class ExistingOperatorLoader {
                 record.getPaymentRecordDetailIds().add(recordDetail.getId());
                 mongoRepositoryReactive.saveOrUpdate(recordDetail);
             }
-
             mongoRepositoryReactive.saveOrUpdate(record);
-            return OKResponse("Payment Updated Successfully");
+
+            license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
+            license.setRenewalPaymentInitiated(true);
+            license.setRenewalPaymentRecordId(record.getId());
+            mongoRepositoryReactive.saveOrUpdate(license);
+            return OKResponse(record.convertToFullDto());
         } catch (IllegalArgumentException e) {
             return Mono.just(new ResponseEntity<>("Invalid Date format , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
         }
     }
-
 
     public Mono<ResponseEntity> updateDirectorDetails(DirectorsUpdateDto shareHoldersUpdateDto) {
         String institutionId = shareHoldersUpdateDto.getInstitutionId();
@@ -559,7 +560,7 @@ public class ExistingOperatorLoader {
             mongoRepositoryReactive.saveOrUpdate(categoryDetails);
         }
         mongoRepositoryReactive.saveOrUpdate(institution);
-        return OKResponse("Updated successfully");
+        return OKResponse(institution.convertToFullDto());
     }
 
     public Mono<ResponseEntity> changeExistingOperatorCategory(MigrateCategoryDto migrateCategoryDto) {
