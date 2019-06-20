@@ -9,6 +9,7 @@ import com.software.finatech.lslb.cms.service.exception.FileUploadException;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.S3Service;
 import com.software.finatech.lslb.cms.service.util.EnvironmentUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.utils.IoUtils;
-import software.amazon.awssdk.utils.StringUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
