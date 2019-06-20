@@ -9,7 +9,6 @@ import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferen
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -38,6 +37,15 @@ public class PaymentRecord extends AbstractFact {
     private String licenseId;
     private LocalDate creationDate;
     private LocalDate completionDate;
+    private boolean forIncompleteOfflineLicenceRenewal;
+
+    public boolean isForIncompleteOfflineLicenceRenewal() {
+        return forIncompleteOfflineLicenceRenewal;
+    }
+
+    public void setForIncompleteOfflineLicenceRenewal(boolean forIncompleteOfflineLicenceRenewal) {
+        this.forIncompleteOfflineLicenceRenewal = forIncompleteOfflineLicenceRenewal;
+    }
 
     public LocalDate getCreationDate() {
         return creationDate;
@@ -275,12 +283,12 @@ public class PaymentRecord extends AbstractFact {
     }
 
 
-    public String getLicenseTypeName(){
+    public String getLicenseTypeName() {
         LicenseType licenseType = getLicenseType();
-        if (licenseType != null){
+        if (licenseType != null) {
             return licenseType.getName();
         }
-    return null;
+        return null;
     }
 
     public String getFeePaymentTypeName() {

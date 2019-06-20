@@ -5,7 +5,6 @@ import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigiPayMessage;
-import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInBranchNotification;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInvoiceItem;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
@@ -433,7 +432,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         paymentNotification.setId(UUID.randomUUID().toString());
         try {
             paymentNotification.setRequest(objectMapper.writeValueAsString(vigiPayMessage));
-         //   VigiPayMessage vigiPayMessage = vigipayInBranchNotification.getMessage();
+            //   VigiPayMessage vigiPayMessage = vigipayInBranchNotification.getMessage();
             if (vigiPayMessage != null) {
 
                 Query query = new Query();
@@ -562,6 +561,13 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         if (paymentRecord.getAmountOutstanding() <= 0) {
             paymentRecord.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
             paymentRecord.setCompletionDate(LocalDate.now());
+
+            //for existing operators that paid offline
+            if (paymentRecord.isForIncompleteOfflineLicenceRenewal()) {
+                licenseService.createRenewedLicenseForMigratedOperatorPayment(paymentRecord);
+                paymentRecordService.savePaymentRecord(paymentRecord);
+                return;
+            }
 
             if (paymentRecord.isInstitutionPayment() && (paymentRecord.isLicensePayment() || paymentRecord.isLicenseTransferPayment())) {
                 licenseService.createAIPLicenseForCompletedPayment(paymentRecord);

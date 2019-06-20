@@ -1162,6 +1162,56 @@ public class LicenseServiceImpl implements LicenseService {
         }
     }
 
+
+    @Override
+    public void createRenewedLicenseForMigratedOperatorPayment(PaymentRecord paymentRecord) {
+        try {
+            if (!StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, paymentRecord.getPaymentStatusId())) {
+                return;
+            }
+            GameType gameType = paymentRecord.getGameType();
+            String institutionId = paymentRecord.getInstitutionId();
+            String agentId = paymentRecord.getAgentId();
+            String gameTypeId = paymentRecord.getGameTypeId();
+            String licenseTypeId = paymentRecord.getLicenseTypeId();
+
+            License latestLicense = getPreviousConfirmedLicense(institutionId, agentId, gameTypeId, licenseTypeId);
+            if (latestLicense == null) {
+                logger.info("There is no previous license found for the payment record with id {}", paymentRecord.getId());
+                return;
+            }
+
+            LocalDate newLicenseStartDate = latestLicense.getExpiryDate();
+            LocalDate newLicenseEndDate = getNewLicenseEndDate(latestLicense, gameType);
+
+            License newPendingApprovalRenewedLicense = new License();
+            newPendingApprovalRenewedLicense.setId(UUID.randomUUID().toString());
+            newPendingApprovalRenewedLicense.setInstitutionId(institutionId);
+            newPendingApprovalRenewedLicense.setAgentId(agentId);
+            newPendingApprovalRenewedLicense.setEffectiveDate(newLicenseStartDate.plusDays(1));
+            newPendingApprovalRenewedLicense.setExpiryDate(newLicenseEndDate);
+            newPendingApprovalRenewedLicense.setPaymentRecordId(paymentRecord.getId());
+            newPendingApprovalRenewedLicense.setLicenseStatusId(LicenseStatusReferenceData.RENEWED_ID);
+
+            newPendingApprovalRenewedLicense.setLicenseTypeId(paymentRecord.getLicenseTypeId());
+            newPendingApprovalRenewedLicense.setGameTypeId(paymentRecord.getGameTypeId());
+            newPendingApprovalRenewedLicense.setParentLicenseId(latestLicense.getId());
+            newPendingApprovalRenewedLicense.setRenewalStatus("false");
+            newPendingApprovalRenewedLicense.setLicenseNumber(latestLicense.getLicenseNumber());
+            mongoRepositoryReactive.saveOrUpdate(newPendingApprovalRenewedLicense);
+            paymentRecord.setLicenseId(newPendingApprovalRenewedLicense.getId());
+            mongoRepositoryReactive.saveOrUpdate(paymentRecord);
+
+            latestLicense.setRenewalPaymentMade(true);
+            latestLicense.setRenewalPaymentRecordId(paymentRecord.getId());
+            latestLicense.setRenewalStatus("false");
+            mongoRepositoryReactive.saveOrUpdate(latestLicense);
+        } catch (Exception e) {
+            logger.error("An error occurred while creating renewed license for payment record {}", paymentRecord.getId(), e);
+        }
+    }
+
+
     @Override
     public License findLicenseById(String id) {
         if (StringUtils.isEmpty(id)) {

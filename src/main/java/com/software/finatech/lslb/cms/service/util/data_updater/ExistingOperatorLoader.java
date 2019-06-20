@@ -1,19 +1,19 @@
 package com.software.finatech.lslb.cms.service.util.data_updater;
 
+import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
-import com.software.finatech.lslb.cms.service.dto.InstitutionLoadDetails;
-import com.software.finatech.lslb.cms.service.dto.InstitutionUpload;
+import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
-import com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData;
-import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
+import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
 import com.software.finatech.lslb.cms.service.util.EnvironmentUtils;
+import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -21,11 +21,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.software.finatech.lslb.cms.service.util.OKResponseUtil.OKResponse;
 
 @Component
 public class ExistingOperatorLoader {
@@ -36,6 +42,8 @@ public class ExistingOperatorLoader {
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     @Autowired
     private EnvironmentUtils environmentUtils;
+    @Autowired
+    private SpringSecurityAuditorAware springSecurityAuditorAware;
 
     private DateTimeFormatter dateTimeFormat = DateTimeFormat.forPattern("dd/MM/yyyy");
 
@@ -322,10 +330,296 @@ public class ExistingOperatorLoader {
     }
 
 
-    public String getInstitutionAddressBasedOnEnvironment(InstitutionUpload institutionUpload) {
+    private String getInstitutionAddressBasedOnEnvironment(InstitutionUpload institutionUpload) {
         if (environmentUtils.isProductionEnvironment()) {
             return institutionUpload.getEmailAddress();
         }
         return "test@mailinator.com";
+    }
+
+
+    public void deleteMigratedOperatorsData() {
+        logger.info("<------------- Start of Delete ------>");
+        Query query = new Query();
+        query.addCriteria(Criteria.where("fromLiveData").is(true));
+        ArrayList<Institution> migratedInstitutions = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
+        List<String> institutionIds = new ArrayList<>();
+        for (Institution migratedInstitution : migratedInstitutions) {
+            institutionIds.add(migratedInstitution.getId());
+        }
+
+        logger.info("---- Deleting Institution Category Details---------");
+        query = new Query();
+        query.addCriteria(Criteria.where("institutionId").in(institutionIds));
+        ArrayList<InstitutionCategoryDetails> institutionCategoryDetails = (ArrayList<InstitutionCategoryDetails>) mongoRepositoryReactive.findAll(query, InstitutionCategoryDetails.class).toStream().collect(Collectors.toList());
+        for (InstitutionCategoryDetails categoryDetails : institutionCategoryDetails) {
+            mongoRepositoryReactive.delete(categoryDetails);
+        }
+
+        logger.info("---- Deleting Agents --------");
+        ArrayList<Agent> agents = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
+        for (Agent agent : agents) {
+            mongoRepositoryReactive.delete(agent);
+        }
+
+        logger.info("---- Deleting Machines --------");
+        ArrayList<Machine> machines = (ArrayList<Machine>) mongoRepositoryReactive.findAll(query, Machine.class).toStream().collect(Collectors.toList());
+        for (Machine machine : machines) {
+            mongoRepositoryReactive.delete(machine);
+        }
+
+        logger.info("---- Deleting AIP Document Approvals --------");
+        ArrayList<AIPDocumentApproval> aipDocumentApprovals = (ArrayList<AIPDocumentApproval>) mongoRepositoryReactive.findAll(query, AIPDocumentApproval.class).toStream().collect(Collectors.toList());
+        for (AIPDocumentApproval aipDocumentApproval : aipDocumentApprovals) {
+            mongoRepositoryReactive.delete(aipDocumentApproval);
+        }
+
+        logger.info("---- Deleting Licenses --------");
+        ArrayList<License> licenses = (ArrayList<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
+        for (License license : licenses) {
+            mongoRepositoryReactive.delete(license);
+        }
+
+    }
+
+    public Mono<ResponseEntity> createExpiredLicenseForOperator(CreateExpiredLicensePaymentDto createExpiredLicensePaymentDto) {
+        String institutionId = createExpiredLicensePaymentDto.getInstitutionId();
+        String gameTypeId = createExpiredLicensePaymentDto.getGameTypeId();
+        double amountPaid = createExpiredLicensePaymentDto.getAmountPaid();
+        double amountOutstanding = createExpiredLicensePaymentDto.getAmountOutstanding();
+        String paymentDateString = createExpiredLicensePaymentDto.getPaymentDate();
+        boolean operatorHasMadeSomePayment = amountPaid > 0;
+
+        try {
+
+            LocalDate paymentDate = new LocalDate(paymentDateString);
+            LocalDateTime paymentDateTime = paymentDate.toLocalDateTime(LocalTime.MIDNIGHT);
+            Query query = new Query();
+            query.addCriteria(Criteria.where("institutionId").is(institutionId));
+            query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+            License license = (License) mongoRepositoryReactive.find(query, License.class).block();
+            if (license != null) {
+                if (createExpiredLicensePaymentDto.isUpdateLicense()) {
+                    license.setEffectiveDate(new LocalDate(createExpiredLicensePaymentDto.getLicenseStartDate()));
+                    license.setExpiryDate(new LocalDate(createExpiredLicensePaymentDto.getLicenseEndDate()));
+                }
+                license.setLicenseStatusId(LicenseStatusReferenceData.LICENSE_EXPIRED_STATUS_ID);
+                mongoRepositoryReactive.saveOrUpdate(license);
+            }
+            PaymentRecord record = new PaymentRecord();
+            record.setId(UUID.randomUUID().toString());
+            record.setGameTypeId(gameTypeId);
+            record.setAmount(amountPaid + amountOutstanding);
+            record.setAmountPaid(amountPaid);
+            record.setAmountOutstanding(amountOutstanding);
+            record.setCreationDate(LocalDate.now());
+            record.setForIncompleteOfflineLicenceRenewal(true);
+            record.setFeePaymentTypeId(FeePaymentTypeReferenceData.LICENSE_RENEWAL_FEE_TYPE_ID);
+            record.setLicenseTypeId(LicenseTypeReferenceData.INSTITUTION_ID);
+            record.setInstitutionId(institutionId);
+            if (operatorHasMadeSomePayment) {
+                record.setPaymentStatusId(PaymentStatusReferenceData.PARTIALLY_PAID_STATUS_ID);
+            } else {
+                record.setPaymentStatusId(PaymentStatusReferenceData.UNPAID_STATUS_ID);
+            }
+
+            if (operatorHasMadeSomePayment) {
+                PaymentRecordDetail recordDetail = new PaymentRecordDetail();
+                recordDetail.setId(UUID.randomUUID().toString());
+                recordDetail.setPaymentRecordId(record.getId());
+                recordDetail.setAmount(amountPaid);
+                recordDetail.setInvoiceNumber(NumberUtil.generateTransactionReferenceForPaymentRecord());
+                recordDetail.setPaymentDate(paymentDateTime);
+                recordDetail.setModeOfPaymentId(ModeOfPaymentReferenceData.LSLB_OFFLINE_ID);
+                recordDetail.setPaymentStatusId(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID);
+                record.getPaymentRecordDetailIds().add(recordDetail.getId());
+                mongoRepositoryReactive.saveOrUpdate(recordDetail);
+            }
+
+            mongoRepositoryReactive.saveOrUpdate(record);
+            return OKResponse("Payment Updated Successfully");
+        } catch (IllegalArgumentException e) {
+            return Mono.just(new ResponseEntity<>("Invalid Date format , please use yyyy-MM-dd HH:mm:ss", HttpStatus.BAD_REQUEST));
+        }
+    }
+
+
+    public Mono<ResponseEntity> updateDirectorDetails(DirectorsUpdateDto shareHoldersUpdateDto) {
+        String institutionId = shareHoldersUpdateDto.getInstitutionId();
+        String gameTypeId = shareHoldersUpdateDto.getGameTypeId();
+        Institution institution = (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+        if (institution == null) {
+            return ErrorResponseUtil.BadRequestResponse("Invalid institution");
+        }
+        institution.getDirectorsNames().clear();
+        institution.getDirectorsNames().addAll(shareHoldersUpdateDto.getNames());
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(institutionId));
+        query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+        InstitutionCategoryDetails categoryDetails = (InstitutionCategoryDetails) mongoRepositoryReactive.find(query, InstitutionCategoryDetails.class).block();
+        if (categoryDetails != null) {
+            categoryDetails.getDirectorsNames().clear();
+            categoryDetails.getDirectorsNames().addAll(shareHoldersUpdateDto.getNames());
+            mongoRepositoryReactive.saveOrUpdate(categoryDetails);
+        }
+        mongoRepositoryReactive.saveOrUpdate(institution);
+        return OKResponse("Updated successfully");
+    }
+
+    public Mono<ResponseEntity> changeExistingOperatorCategory(MigrateCategoryDto migrateCategoryDto) {
+        String institutionId = migrateCategoryDto.getInstitutionId();
+        String oldGameTypeId = migrateCategoryDto.getOldGameTypeId();
+        String newGameTypeId = migrateCategoryDto.getNewGameTypeId();
+        Institution institution = (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
+        GameType oldGameType = gameTypeService.findById(oldGameTypeId);
+        GameType newGameType = gameTypeService.findById(newGameTypeId);
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("Affected Entities ==> ");
+
+        if (institution != null && oldGameType != null && newGameType != null) {
+            if (institution.getGameTypeIds().contains(oldGameTypeId)) {
+                institution.getGameTypeIds().remove(oldGameTypeId);
+            }
+            institution.getGameTypeIds().add(newGameTypeId);
+            mongoRepositoryReactive.saveOrUpdate(institution);
+            builder.append("\n Institution Category ");
+
+            Query query = new Query();
+            query.addCriteria(Criteria.where("institutionId").is(institutionId));
+            query.addCriteria(Criteria.where("gameTypeId").is(oldGameTypeId));
+
+            //update operators licencse
+            ArrayList<License> licenses = (ArrayList<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
+            if (!licenses.isEmpty()) {
+                for (License license : licenses) {
+                    logger.info(" updating license with number {}", license.getLicenseNumber());
+                    license.setGameTypeId(newGameTypeId);
+                    mongoRepositoryReactive.saveOrUpdate(license);
+                }
+                builder.append("\n Licences ");
+            }
+
+            //update operators category details
+            InstitutionCategoryDetails institutionCategoryDetails = (InstitutionCategoryDetails) mongoRepositoryReactive.find(query, InstitutionCategoryDetails.class).block();
+            if (institutionCategoryDetails != null) {
+                logger.info("Updating Category Details");
+                institutionCategoryDetails.setGameTypeId(newGameTypeId);
+                mongoRepositoryReactive.saveOrUpdate(institutionCategoryDetails);
+                builder.append("\n Institution Category Details ");
+            }
+
+            //update operators AIP document approval
+            AIPDocumentApproval aipDocumentApproval = (AIPDocumentApproval) mongoRepositoryReactive.find(query, AIPDocumentApproval.class).block();
+            if (aipDocumentApproval != null) {
+                logger.info("Updating Aip Document Approval");
+                aipDocumentApproval.setGameTypeId(newGameTypeId);
+                mongoRepositoryReactive.saveOrUpdate(aipDocumentApproval);
+                builder.append("\n AIP Document Approval ");
+            }
+
+            //update operators payment records
+            ArrayList<PaymentRecord> paymentRecords = (ArrayList<PaymentRecord>) mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
+            if (!paymentRecords.isEmpty()) {
+                for (PaymentRecord paymentRecord : paymentRecords) {
+                    logger.info("updating payment record with id ---- {}", paymentRecord.getId());
+                    paymentRecord.setGameTypeId(newGameTypeId);
+                    mongoRepositoryReactive.saveOrUpdate(paymentRecord);
+                }
+                builder.append("\n Payment Records ");
+            }
+
+            //update operators application form
+            ApplicationForm applicationForm = (ApplicationForm) mongoRepositoryReactive.find(query, ApplicationForm.class).block();
+            if (applicationForm != null) {
+                logger.info("Updating Application form");
+                applicationForm.setGameTypeId(newGameTypeId);
+                mongoRepositoryReactive.saveOrUpdate(applicationForm);
+                builder.append("\n Application Form ");
+            }
+
+            //udpdate AGents belonging to operator in the category
+            query = new Query();
+            query.addCriteria(Criteria.where("institutionIds").in(Collections.singletonList(institutionId)));
+            query.addCriteria(Criteria.where("gameTypeIds").in(Collections.singletonList(oldGameTypeId)));
+            ArrayList<Agent> agents = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
+            if (!agents.isEmpty()) {
+                for (Agent agent : agents) {
+                    logger.info("Updating Agent {}", agent.getFullName());
+
+                    //change the detail that binds them
+                    agent.getGameTypeIds().remove(oldGameTypeId);
+                    agent.getGameTypeIds().add(newGameTypeId);
+                    List<AgentInstitution> agentInstitutions = agent.getAgentInstitutions();
+                    for (AgentInstitution agentInstitution : agentInstitutions) {
+                        if (StringUtils.equals(agentInstitution.getInstitutionId(), institutionId)
+                                && agentInstitution.getGameTypeIds().contains(oldGameTypeId)) {
+                            agentInstitution.getGameTypeIds().remove(oldGameTypeId);
+                            agent.getGameTypeIds().add(newGameTypeId);
+                        }
+                    }
+                    agent.setAgentInstitutions(agentInstitutions);
+
+                    //update Agent payment records in old category
+                    query = new Query();
+                    query.addCriteria(Criteria.where("agentId").is(agent.getId()));
+                    query.addCriteria(Criteria.where("gameTypeId").is(oldGameTypeId));
+                    paymentRecords = (ArrayList<PaymentRecord>) mongoRepositoryReactive.findAll(query, PaymentRecord.class).toStream().collect(Collectors.toList());
+                    if (!paymentRecords.isEmpty()) {
+                        for (PaymentRecord paymentRecord : paymentRecords) {
+                            logger.info("updating payment record with id ---- {}", paymentRecord.getId());
+                            paymentRecord.setGameTypeId(newGameTypeId);
+                            mongoRepositoryReactive.saveOrUpdate(paymentRecord);
+                        }
+                    }
+                    //update agents licences
+                    licenses = (ArrayList<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
+                    if (!licenses.isEmpty()) {
+                        for (License license : licenses) {
+                            logger.info(" updating license with number {}", license.getLicenseNumber());
+                            license.setGameTypeId(newGameTypeId);
+                            mongoRepositoryReactive.saveOrUpdate(license);
+                        }
+                    }
+                }
+                builder.append("\n Agent");
+            }
+
+            query = new Query();
+            query.addCriteria(Criteria.where("institutionId").is(institutionId));
+            query.addCriteria(Criteria.where("initiatedByLslb").is(false));
+            query.addCriteria(Criteria.where("gameTypeId").is(oldGameTypeId));
+            ArrayList<AgentApprovalRequest> agentApprovalRequests = (ArrayList<AgentApprovalRequest>) mongoRepositoryReactive.findAll(query, AgentApprovalRequest.class).toStream().collect(Collectors.toList());
+            if (!agentApprovalRequests.isEmpty()) {
+                for (AgentApprovalRequest agentApprovalRequest : agentApprovalRequests) {
+                    agentApprovalRequest.setGameTypeId(newGameTypeId);
+                    mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
+                }
+                builder.append(" \n Agent Approval Requests");
+            }
+
+            OperatorCategoryChangeHistory operatorChangeHistory = new OperatorCategoryChangeHistory();
+            operatorChangeHistory.setAuditorName(springSecurityAuditorAware.getCurrentAuditorNotNull());
+            operatorChangeHistory.setId(UUID.randomUUID().toString());
+            operatorChangeHistory.setNewGameTypeId(newGameTypeId);
+            operatorChangeHistory.setOldGameTypeId(oldGameTypeId);
+            operatorChangeHistory.setAffectedEntities(builder.toString());
+            mongoRepositoryReactive.saveOrUpdate(operatorChangeHistory);
+            return OKResponse(String.format("Successfully changed \n\n\n => %s", builder.toString()));
+        } else {
+            return ErrorResponseUtil.BadRequestResponse("Invalid Parameters");
+        }
+    }
+
+
+    public void clearAllVigipayCustomerCodes() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("vgPayCustomerCode").ne(null));
+        ArrayList<Institution> institutions = (ArrayList<Institution>) mongoRepositoryReactive.findAll(query, Institution.class).toStream().collect(Collectors.toList());
+        for (Institution institution : institutions) {
+            institution.setVgPayCustomerCode(null);
+            mongoRepositoryReactive.saveOrUpdate(institution);
+        }
     }
 }

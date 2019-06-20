@@ -1035,12 +1035,10 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             HttpResponse response = httpclient.execute(httpGet);
 
             if (response.getStatusLine().getStatusCode() != 200) {
-
                 logger.error("get user by email returns status code " + response.getStatusLine().getStatusCode());
                 logger.error(response.getStatusLine().getReasonPhrase());
                 logger.error(EntityUtils.toString(response.getEntity()));
                 return null;
-
             }
 
             String stringResponse = EntityUtils.toString(response.getEntity());
@@ -1053,7 +1051,6 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             e.printStackTrace();
             throw new UncheckedIOException(e);
         }
-
     }
 
 

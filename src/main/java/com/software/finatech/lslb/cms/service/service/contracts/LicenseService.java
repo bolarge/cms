@@ -77,6 +77,8 @@ public interface LicenseService {
 
     void createRenewedLicenseForPayment(PaymentRecord paymentRecord);
 
+    void createRenewedLicenseForMigratedOperatorPayment(PaymentRecord paymentRecord);
+
     License findLicenseById(String id);
 
     License findInstitutionActiveLicenseInGameType(String institutionId, String gameTypeId);
