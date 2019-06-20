@@ -1,6 +1,5 @@
 package com.software.finatech.lslb.cms.service.dto.sso;
 
-import cucumber.api.java.eo.Se;
 import io.advantageous.boon.json.annotations.SerializedName;
 
 import java.util.Set;
