@@ -10,17 +10,17 @@ import java.util.List;
 
 public interface VigipayService {
 
-    String createCustomerCodeForAgent(Agent agent);
+    String createCustomerCodeForAgent(Agent agent) throws VigiPayServiceException;
 
-    String createCustomerCodeForInstitution(Institution institution);
+    String createCustomerCodeForInstitution(Institution institution) throws VigiPayServiceException;
 
-    String createInBranchInvoiceForAgent(Agent agent, List<VigipayInvoiceItem> vigipayInvoiceItems);
+    String createInBranchInvoiceForAgent(Agent agent, List<VigipayInvoiceItem> vigipayInvoiceItems) throws VigiPayServiceException;
 
-    String createInBranchInvoiceForInstitution(Institution institution, List<AuthInfo> adminsForInstitution, List<VigipayInvoiceItem> vigipayInvoiceItems);
+    String createInBranchInvoiceForInstitution(Institution institution, List<AuthInfo> adminsForInstitution, List<VigipayInvoiceItem> vigipayInvoiceItems) throws VigiPayServiceException;
 
     String createInBranchMultipleItemInvoiceForInstitution(Institution institution,
                                                            List<AuthInfo> adminsForInstitution,
-                                                           List<VigipayInvoiceItem> vigipayInvoiceItems);
+                                                           List<VigipayInvoiceItem> vigipayInvoiceItems) throws VigiPayServiceException;
 
     boolean isConfirmedInvoicePayment(String invoiceNumber) throws VigiPayServiceException;
 }

@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 import com.software.finatech.lslb.cms.service.domain.Institution;
+import com.software.finatech.lslb.cms.service.dto.CreateCustomerCodeDto;
 import com.software.finatech.lslb.cms.service.dto.CreateExpiredLicensePaymentDto;
 import com.software.finatech.lslb.cms.service.dto.DirectorsUpdateDto;
 import com.software.finatech.lslb.cms.service.dto.MigrateCategoryDto;
@@ -118,6 +119,12 @@ public class MigrationController {
         } catch (Exception e) {
             return ErrorResponseUtil.BadRequestResponse("Please provide date in yyyy-MM-dd");
         }
+    }
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/create-operator-vigipay-code")
+    public Mono<ResponseEntity> createOperatorVgPayCode(@RequestBody CreateCustomerCodeDto createCustomerCodeDto) {
+        return existingOperatorLoader.createVigiPayCustomerCodeForOperator(createCustomerCodeDto);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/change-directors")

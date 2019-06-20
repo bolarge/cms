@@ -44,8 +44,7 @@ public class VigipayHttpClient {
     @Value("${vigipay.loop-base-url}")
     private String vigipayBaseUrl;
 
-
-    private String getAccessToken() {
+    private String getAccessToken() throws VigiPayServiceException {
         try {
             RestTemplate restTemplate = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
@@ -64,17 +63,17 @@ public class VigipayHttpClient {
                 SSOToken ssoToken = OBJECT_MAPPER.readValue(responseBody, SSOToken.class);
                 return ssoToken.getAccess_token();
             }
-            return null;
+            throw new VigiPayServiceException(response.getBody());
         } catch (IOException e) {
             logger.error("An error occurred while parsing the response body", e);
-            return null;
+            throw new VigiPayServiceException(e.getMessage(), e);
         } catch (Exception e) {
             logger.error("An error occurred while getting access token on vg pay", e);
-            return null;
+            throw new VigiPayServiceException(e.getMessage());
         }
     }
 
-    public String createCustomerCode(VigipayCreateCustomer vigipayCreateCustomer) {
+    public String createCustomerCode(VigipayCreateCustomer vigipayCreateCustomer) throws VigiPayServiceException {
         String url = vigipayBaseUrl + "/Customers/New";
         try {
             String accessToken = getAccessToken();
@@ -94,19 +93,21 @@ public class VigipayHttpClient {
                     JSONObject responseJson = new JSONObject(responseBody);
                     return responseJson.getString("Code");
                 }
-                return null;
+                throw new VigiPayServiceException(responseEntity.getBody());
             }
-            return null;
+            throw new VigiPayServiceException("Unable to get access token");
         } catch (IOException e) {
-            logger.error("An error occurred while parsing the response body", e);
-            return null;
+            String message = "An error occurred while parsing the response body";
+            logger.error(message, e);
+            throw new VigiPayServiceException(message);
         } catch (Exception e) {
-            logger.error("An error occurred while creating customer with vg pay", e);
-            return null;
+            String message = "An error occurred while creating customer with vg pay";
+            logger.error(message, e);
+            throw new VigiPayServiceException(message, e);
         }
     }
 
-    public String createInvoice(VigipayCreateInvoice vigipayCreateInvoice) {
+    public String createInvoice(VigipayCreateInvoice vigipayCreateInvoice) throws VigiPayServiceException {
         String url = vigipayBaseUrl + "/Invoices/New";
         try {
             String accessToken = getAccessToken();
@@ -124,13 +125,13 @@ public class VigipayHttpClient {
                     String invoiceNumber = responseEntity.getBody();
                     return invoiceNumber.replace("\"", "");
                 }
-                return null;
+                throw new VigiPayServiceException(responseEntity.getBody());
             }
-            return null;
+            throw new VigiPayServiceException("Unable to get access token");
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.error("An error occurred while creating invoice with Vigipay", e);
-            return null;
+            throw new VigiPayServiceException(e.getMessage(), e);
         }
     }
 
