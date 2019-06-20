@@ -117,6 +117,7 @@
         <root level="info">
             <appender-ref ref="Console"/>
             <appender-ref ref="RollingFile"/>
+            <appender-ref ref="Stackify"/>
         </root>
     </springProfile>
 
