@@ -206,7 +206,7 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             String modeOfPaymentName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecordDetail.getModeOfPaymentName());
             String revenueName = StringCapitalizer.convertToTitleCaseIteratingChars(String.valueOf(paymentRecord.getLicenseType()));
             String gameTypeName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getGameTypeName());
-            String paymentDate = paymentRecordDetail.getPaymentDate().toString("dd LLLL yyyy");
+            String paymentDate = paymentRecordDetail.getCreatedAt().toString("dd-MM-yyyy");
             boolean isPartPayment = paymentRecord.getAmount() > paymentRecordDetail.getAmount();
             boolean isCompletePayment = paymentRecord.isCompletedPayment();
 
