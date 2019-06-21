@@ -7,7 +7,7 @@ import java.util.List;
  * @author adeyi.adebolu
  * created on 20/06/2019
  */
-public class MigratedInstitutionUpload extends BaseInstitutionUpload {
+public class MigratedInstitutionUpload {
     private String institutionName;
     private String emailAddress;
     private List<String> phoneNumbers = new ArrayList<>();
