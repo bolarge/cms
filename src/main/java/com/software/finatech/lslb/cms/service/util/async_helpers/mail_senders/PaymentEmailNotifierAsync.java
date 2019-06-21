@@ -211,6 +211,7 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             boolean isCompletePayment = paymentRecord.isCompletedPayment();
 
             model.put("amount", amount);
+            model.put("invoiceNumber", paymentRecordDetail.getInvoiceNumber());
             model.put("date", presentDateString);
             model.put("paymentDate", paymentDate);
             model.put("modeOfPayment", modeOfPaymentName);
