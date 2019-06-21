@@ -97,7 +97,7 @@ public class PaymentRecordDetailController extends BaseController {
         return paymentRecordDetailService.findAllPaymentRecordDetailForPaymentRecord(paymentRecordId);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/get-invoice-details}", params = {"id"})
+    @RequestMapping(method = RequestMethod.GET, value = "/get-invoice-details", params = {"id"})
     @ApiOperation(value = "Get Payment Invoice Details", response = PaymentInvoiceResponse.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
