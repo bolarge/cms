@@ -221,7 +221,7 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             model.put("isPartPayment", isPartPayment);
             model.put("isCompletePayment", isCompletePayment);
 
-            String mailContent = mailContentBuilderService.build(model, "NewVigiPayInBranchPaymentNotificationExternalUser");
+            String mailContent = mailContentBuilderService.build(model, "payment-notifications/NewVigiPayInBranchPaymentNotificationExternalUser");
             String mailSubject = "LSLB Payment Invoice";
             if (sendToOperator) {
                 ArrayList<AuthInfo> operatorAdmins = authInfoService.findAllEnabledUsersForInstitution(paymentRecord.getInstitutionId());
