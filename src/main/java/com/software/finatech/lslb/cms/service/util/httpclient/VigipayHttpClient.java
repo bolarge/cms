@@ -58,6 +58,7 @@ public class VigipayHttpClient {
             map.add("client_secret", vigipayClientSecret);
             HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
             ResponseEntity<String> response = restTemplate.postForEntity(vigipayTokenUrl, request, String.class);
+            logger.info(" response from Vigipay -> {}", response.getBody());
             if (response.getStatusCode() == HttpStatus.OK) {
                 String responseBody = response.getBody();
                 SSOToken ssoToken = OBJECT_MAPPER.readValue(responseBody, SSOToken.class);
