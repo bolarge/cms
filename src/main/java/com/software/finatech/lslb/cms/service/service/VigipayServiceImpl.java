@@ -139,7 +139,7 @@ public class VigipayServiceImpl implements VigipayService {
         vigipayCreateInvoice.setDueDate(next7days.toString("yyyy-MM-dd"));
         vigipayCreateInvoice.setEnforceDueDate(false);
         vigipayCreateInvoice.setInvoiceType(1);
-        vigipayCreateInvoice.setInvoiceAction(2);
+        vigipayCreateInvoice.setInvoiceAction(1);
         vigipayCreateInvoice.setCreateContacts(true);
         vigipayCreateInvoice.setCorporateCode(corporateCode);
         return vigipayCreateInvoice;
@@ -162,7 +162,7 @@ public class VigipayServiceImpl implements VigipayService {
         vigipayCreateInvoice.setDueDate(next7days.toString("yyyy-MM-dd"));
         vigipayCreateInvoice.setEnforceDueDate(false);
         vigipayCreateInvoice.setInvoiceType(1);
-        vigipayCreateInvoice.setInvoiceAction(2);
+        vigipayCreateInvoice.setInvoiceAction(1);
         vigipayCreateInvoice.setCreateContacts(true);
         vigipayCreateInvoice.setCorporateCode(corporateCode);
         return vigipayCreateInvoice;
@@ -183,7 +183,7 @@ public class VigipayServiceImpl implements VigipayService {
         vigipayCreateInvoice.setDueDate(next7days.toString("yyyy-MM-dd"));
         vigipayCreateInvoice.setEnforceDueDate(false);
         vigipayCreateInvoice.setInvoiceType(1);
-        vigipayCreateInvoice.setInvoiceAction(2);
+        vigipayCreateInvoice.setInvoiceAction(1);
         vigipayCreateInvoice.setCreateContacts(true);
         vigipayCreateInvoice.setCorporateCode(corporateCode);
         return vigipayCreateInvoice;

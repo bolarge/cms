@@ -24,4 +24,6 @@ public interface PaymentRecordDetailService {
 
     //   Mono<ResponseEntity> handleVigipayInBranchNotification(VigipayInBranchNotification vigipayInBranchNotification);
     Mono<ResponseEntity> handleVigipayInBranchNotification(VigiPayMessage vigiPayMessage);
+
+    Mono<ResponseEntity> getPaymentInvoiceDetails(String id);
 }

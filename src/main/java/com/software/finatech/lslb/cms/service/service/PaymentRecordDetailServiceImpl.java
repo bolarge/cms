@@ -10,10 +10,7 @@ import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInvoiceItem;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
 import com.software.finatech.lslb.cms.service.service.contracts.*;
-import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
-import com.software.finatech.lslb.cms.service.util.NumberUtil;
-import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
-import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
+import com.software.finatech.lslb.cms.service.util.*;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.PaymentEmailNotifierAsync;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
@@ -291,7 +288,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(paymentAuditActionId,
                     currentAuditorName, currentAuditorName,
                     LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
-
+            paymentEmailNotifierAsync.sendInitialVigiPayPaymentNotificationToInitiator(paymentRecordDetail, paymentRecord);
             return Mono.just(new ResponseEntity<>(paymentRecordDetail.convertToDto(), HttpStatus.OK));
         } catch (VigiPayServiceException e) {
             String errorMessage = "An error occurred while creating invoice";
@@ -656,8 +653,15 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     private Mono<ResponseEntity> validateLicensePayment(PaymentRecordDetailCreateDto paymentRecordDetailCreateDto, Fee fee) throws Exception {
         if (!StringUtils.isEmpty(paymentRecordDetailCreateDto.getInstitutionId())) {
             Institution institution = institutionService.findByInstitutionId(paymentRecordDetailCreateDto.getInstitutionId());
-            if (institution != null && institution.isFromLiveData() && !institution.isOnAIPLicense()) {
-                return Mono.just(new ResponseEntity<>("Kindly make payment for licence renewal", HttpStatus.BAD_REQUEST));
+            if (institution != null && institution.isFromLiveData()) {
+                Query query = new Query();
+                query.addCriteria(Criteria.where("gameTypeId").is(fee.getGameTypeId()));
+                query.addCriteria(Criteria.where("institutionId").is(paymentRecordDetailCreateDto.getInstitutionId()));
+                query.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
+                ArrayList<License> licenses = (ArrayList<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
+                if (licenses.size() == 1 && !licenses.get(0).isAIPRelatedLicense()) {
+                    return BadRequestResponse("Kindly make payment for licence renewal");
+                }
             }
         }
         String institutionId = paymentRecordDetailCreateDto.getInstitutionId();
@@ -730,10 +734,16 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         if (!StringUtils.isEmpty(institutionId)) {
             Institution institution = institutionService.findByInstitutionId(institutionId);
             if (institution != null && institution.isFromLiveData()) {
-                if (institution.isOnAIPLicense()) {
-                    return Mono.just(new ResponseEntity<>("Kindly make licence Payment", HttpStatus.BAD_REQUEST));
-                } else {
-                    return Mono.just(new ResponseEntity<>("Kindly make payment for licence renewal", HttpStatus.BAD_REQUEST));
+                Query query = new Query();
+                query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
+                query.addCriteria(Criteria.where("institutionId").is(institutionId));
+                query.addCriteria(Criteria.where("licenseTypeId").is(LicenseTypeReferenceData.INSTITUTION_ID));
+                ArrayList<License> licenses = (ArrayList<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
+                if ((licenses.size() >= 1)) {
+                    if ((licenses.size() == 1) && (licenses.get(0).isAIPRelatedLicense())) {
+                        return BadRequestResponse("Kindly make payment for licence");
+                    }
+                    return BadRequestResponse("Kindly make payment for licence renewal");
                 }
             }
         }
@@ -974,5 +984,18 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         String feeDescription = String.format("%s category %s for %ss", gameTypeName, feeName, revenueName);
         feeDescription = StringCapitalizer.convertToTitleCaseIteratingChars(feeDescription);
         return feeDescription;
+    }
+
+    @Override
+    public Mono<ResponseEntity> getPaymentInvoiceDetails(String id) {
+        try {
+            PaymentRecordDetail detail = findById(id);
+            if (detail == null) {
+                return BadRequestResponse("Invalid Id");
+            }
+            return OKResponseUtil.OKResponse(detail.convertToPaymentInvoice());
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while sending invoice details", e);
+        }
     }
 }
