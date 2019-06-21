@@ -5,10 +5,10 @@ import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.*;
 import com.software.finatech.lslb.cms.service.exception.LicenseServiceException;
 import com.software.finatech.lslb.cms.service.exception.VigiPayServiceException;
-import com.software.finatech.lslb.cms.service.model.migrations.BaseInstitutionUpload;
 import com.software.finatech.lslb.cms.service.model.migrations.MigratedInstitutionUpload;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.*;
+import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.GameTypeService;
 import com.software.finatech.lslb.cms.service.service.contracts.VigipayService;
 import com.software.finatech.lslb.cms.service.util.EnvironmentUtils;
@@ -51,6 +51,8 @@ public class ExistingOperatorLoader {
     private EnvironmentUtils environmentUtils;
     @Autowired
     private SpringSecurityAuditorAware springSecurityAuditorAware;
+    @Autowired
+    private AuthInfoService authInfoService;
 
     private DateTimeFormatter dateTimeFormat = DateTimeFormat.forPattern("dd/MM/yyyy");
 
@@ -430,7 +432,14 @@ public class ExistingOperatorLoader {
     }
 
 
-    private String getInstitutionAddressBasedOnEnvironment(BaseInstitutionUpload institutionUpload) {
+    private String getInstitutionAddressBasedOnEnvironment(InstitutionUpload institutionUpload) {
+        if (environmentUtils.isProductionEnvironment()) {
+            return institutionUpload.getEmailAddress();
+        }
+        return "test@mailinator.com";
+    }
+
+    private String getInstitutionAddressBasedOnEnvironment(MigratedInstitutionUpload institutionUpload) {
         if (environmentUtils.isProductionEnvironment()) {
             return institutionUpload.getEmailAddress();
         }
@@ -731,6 +740,11 @@ public class ExistingOperatorLoader {
             Institution institution = (Institution) mongoRepositoryReactive.findById(institutionId, Institution.class).block();
             if (institution == null) {
                 return ErrorResponseUtil.BadRequestResponse("Invalid institution");
+            }
+
+            ArrayList<AuthInfo> admins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(institutionId);
+            if (admins.isEmpty()){
+                return ErrorResponseUtil.BadRequestResponse("There are no users for operator");
             }
 
             if (!createCustomerCodeDto.isForceUpdate() && StringUtils.isNotEmpty(institution.getVgPayCustomerCode())) {

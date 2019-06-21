@@ -100,8 +100,10 @@ public class VigipayHttpClient {
             String message = "An error occurred while parsing the response body";
             logger.error(message, e);
             throw new VigiPayServiceException(message);
+        } catch (VigiPayServiceException e) {
+            throw new VigiPayServiceException(e.getMessage(), e);
         } catch (Exception e) {
-            String message = "An error occurred while creating customer with vg pay";
+            String message = "An error occurred while creating customer with vg pay => " + e.getMessage();
             logger.error(message, e);
             throw new VigiPayServiceException(message, e);
         }
