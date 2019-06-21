@@ -69,7 +69,7 @@ vigipay:
   client-secret: ${VIGIPAY_CLIENT_SECRET}
   username: ${VIGIPAY_USERNAME}
   password: ${VIGIPAY_PASSWORD}
-  scope: identity-server-api offline_access roles profile
+  scope: ebipsgatewayapi offline_access roles profile
   grant-type: password
   token-url: https://sso.venturegardengroup.com/identity/connect/token
   loop-base-url: https://gateway.vigipay.co/api
