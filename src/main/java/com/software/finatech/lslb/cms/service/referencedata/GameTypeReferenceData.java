@@ -195,7 +195,7 @@ public class GameTypeReferenceData {
         gameType.setAipDurationMonths(3);
         gameType.setAgentLicenseDurationMonths(0);
         gameType.setAllowsGamingMachine(false);
-        gameType.setAllowsGamingTerminal(true);
+        gameType.setAllowsGamingTerminal(false);
         gameType.setInstitutionLicenseDurationMonths(12);
         gameType.setGamingMachineLicenseDurationMonths(0);
         gameType.setGamingTerminalLicenseDurationMonths(0);
