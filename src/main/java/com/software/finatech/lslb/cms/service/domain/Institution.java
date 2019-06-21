@@ -30,7 +30,6 @@ public class Institution extends AbstractFact {
     private Set<String> directorsNames = new HashSet<>();
     private Set<String> shareHolderNames = new HashSet<>();
     private boolean fromLiveData;
-    private boolean isOnAIPLicense;
     private Set<String> phoneNumbers = new HashSet<>();
 
     public Set<String> getPhoneNumbers() {
@@ -39,14 +38,6 @@ public class Institution extends AbstractFact {
 
     public void setPhoneNumbers(Set<String> phoneNumbers) {
         this.phoneNumbers = phoneNumbers;
-    }
-
-    public boolean isOnAIPLicense() {
-        return isOnAIPLicense;
-    }
-
-    public void setOnAIPLicense(boolean onAIPLicense) {
-        isOnAIPLicense = onAIPLicense;
     }
 
     public Set<String> getShareHolderNames() {

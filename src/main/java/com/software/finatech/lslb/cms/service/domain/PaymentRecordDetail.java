@@ -1,6 +1,8 @@
 package com.software.finatech.lslb.cms.service.domain;
 
+import com.software.finatech.lslb.cms.service.dto.PaymentInvoiceResponse;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailDto;
+import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
@@ -116,9 +118,9 @@ public class PaymentRecordDetail extends AbstractFact {
         return paymentStatus;
     }
 
-    public String getPaymentStatusName(){
+    public String getPaymentStatusName() {
         PaymentStatus paymentStatus = getPaymentStatus();
-        if (paymentStatus != null){
+        if (paymentStatus != null) {
             return paymentStatus.toString();
         }
         return null;
@@ -162,18 +164,38 @@ public class PaymentRecordDetail extends AbstractFact {
         return StringUtils.equals(PaymentStatusReferenceData.FAILED_PAYMENT_STATUS_ID, this.paymentStatusId);
     }
 
-    public String getPaymentDateString(){
-        if (this.paymentDate != null){
+    public String getPaymentDateString() {
+        if (this.paymentDate != null) {
             return this.paymentDate.toString("dd-MM-yyyy");
         }
         return null;
     }
 
-    public String getPaymentTimeString(){
-        if (this.paymentDate != null){
+    public String getPaymentTimeString() {
+        if (this.paymentDate != null) {
             return this.paymentDate.toString("HH:mm:ss a");
         }
         return null;
+    }
+
+    public PaymentInvoiceResponse convertToPaymentInvoice() {
+        PaymentInvoiceResponse paymentInvoiceResponse = new PaymentInvoiceResponse();
+        paymentInvoiceResponse.setAmount(getAmount());
+        PaymentRecord paymentRecord = getPaymentRecord();
+        PaymentRecordDto paymentRecordDto = paymentRecord.convertToDto();
+        paymentInvoiceResponse.setCreationDate(getPaymentDate().toString("dd LLLL yyyy"));
+        paymentInvoiceResponse.setFeePaymentTypeName(paymentRecordDto.getFeePaymentTypeName());
+        paymentInvoiceResponse.setGameTypeName(paymentRecordDto.getGameTypeName());
+        paymentInvoiceResponse.setOwnerName(paymentRecordDto.getOwnerName());
+        paymentInvoiceResponse.setRevenueName(paymentRecordDto.getRevenueName());
+        paymentInvoiceResponse.setInvoiceNumber(getInvoiceNumber());
+        paymentInvoiceResponse.setModeOfPaymentName(getModeOfPaymentName());
+        if (this.amount < paymentRecord.getAmount()) {
+            paymentInvoiceResponse.setPaymentType("Partial Payment");
+        } else {
+            paymentInvoiceResponse.setPaymentType("Full Payment");
+        }
+        return paymentInvoiceResponse;
     }
 
     @Override

@@ -175,4 +175,66 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             }
         }
     }
+
+    @Async
+    public void sendInitialVigiPayPaymentNotificationToInitiator(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
+        try {
+            String paymentInitiator = "";
+            Institution institution = null;
+            Agent agent = null;
+            boolean sendToOperator = true;
+            boolean sendToAgent = true;
+            if (paymentRecord.isInstitutionPayment() || paymentRecord.isGamingMachinePayment()) {
+                institution = paymentRecord.getInstitution();
+                if (institution != null) {
+                    paymentInitiator = institution.getInstitutionName();
+                    sendToOperator = true;
+                }
+            }
+            if (paymentRecord.isAgentPayment() || paymentRecord.isGamingTerminalPayment()) {
+                agent = paymentRecord.getAgent();
+                if (agent != null) {
+                    paymentInitiator = agent.getFullName();
+                    sendToAgent = true;
+                }
+            }
+
+            HashMap<String, Object> model = new HashMap<>();
+            String presentDateString = DateTime.now().toString("dd-MM-yyyy");
+            String feePaymentTypeName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getFeePaymentTypeName());
+            String amount = NumberFormat.getInstance().format(paymentRecordDetail.getAmount());
+            String modeOfPaymentName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecordDetail.getModeOfPaymentName());
+            String revenueName = StringCapitalizer.convertToTitleCaseIteratingChars(String.valueOf(paymentRecord.getLicenseType()));
+            String gameTypeName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getGameTypeName());
+            String paymentDate = paymentRecordDetail.getPaymentDate().toString("dd LLLL yyyy");
+            boolean isPartPayment = paymentRecord.getAmount() > paymentRecordDetail.getAmount();
+            boolean isCompletePayment = paymentRecord.isCompletedPayment();
+
+            model.put("amount", amount);
+            model.put("date", presentDateString);
+            model.put("paymentDate", paymentDate);
+            model.put("modeOfPayment", modeOfPaymentName);
+            model.put("feePaymentType", feePaymentTypeName);
+            model.put("revenueName", revenueName);
+            model.put("gameType", gameTypeName);
+            model.put("paymentInitiator", paymentInitiator);
+            model.put("isPartPayment", isPartPayment);
+            model.put("isCompletePayment", isCompletePayment);
+
+            String mailContent = mailContentBuilderService.build(model, "NewVigiPayInBranchPaymentNotificationExternalUser");
+            String mailSubject = "LSLB Payment Invoice";
+            if (sendToOperator) {
+                ArrayList<AuthInfo> operatorAdmins = authInfoService.findAllEnabledUsersForInstitution(paymentRecord.getInstitutionId());
+                for (AuthInfo authInfo : operatorAdmins) {
+                    emailService.sendEmail(mailContent, mailSubject, authInfo.getEmailAddress());
+                }
+            }
+
+            if (sendToAgent) {
+                emailService.sendEmail(mailContent, mailSubject, agent.getEmailAddress());
+            }
+        } catch (Exception e) {
+            logger.error("An error occurred while sending payment invoice notification email ", e);
+        }
+    }
 }

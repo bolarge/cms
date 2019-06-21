@@ -1,6 +1,7 @@
 package com.software.finatech.lslb.cms.service.controller;
 
 
+import com.software.finatech.lslb.cms.service.dto.PaymentInvoiceResponse;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailUpdateDto;
@@ -94,5 +95,18 @@ public class PaymentRecordDetailController extends BaseController {
     )
     public Mono<ResponseEntity> findAllPaymentRecordDetailsForPaymentRecord(@RequestParam("paymentRecordId") String paymentRecordId) {
         return paymentRecordDetailService.findAllPaymentRecordDetailForPaymentRecord(paymentRecordId);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/get-invoice-details}", params = {"id"})
+    @ApiOperation(value = "Get Payment Invoice Details", response = PaymentInvoiceResponse.class, responseContainer = "List", consumes = "application/json")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")
+    }
+    )
+    public Mono<ResponseEntity> getInvoiceDetails(@RequestParam("id") String id) {
+        return paymentRecordDetailService.getPaymentInvoiceDetails(id);
     }
 }
