@@ -197,7 +197,7 @@ public class GameTypeReferenceData {
         gameType.setAllowsGamingMachine(false);
         gameType.setAllowsGamingTerminal(true);
         gameType.setInstitutionLicenseDurationMonths(12);
-        gameType.setGamingMachineLicenseDurationMonths(12);
+        gameType.setGamingMachineLicenseDurationMonths(0);
         gameType.setGamingTerminalLicenseDurationMonths(0);
         gameType.setAllowsAgents(false);
         mongoRepositoryReactive.saveOrUpdate(gameType);

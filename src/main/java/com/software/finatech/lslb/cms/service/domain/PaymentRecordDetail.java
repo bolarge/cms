@@ -183,7 +183,7 @@ public class PaymentRecordDetail extends AbstractFact {
         paymentInvoiceResponse.setAmount(getAmount());
         PaymentRecord paymentRecord = getPaymentRecord();
         PaymentRecordDto paymentRecordDto = paymentRecord.convertToDto();
-        paymentInvoiceResponse.setCreationDate(getPaymentDate().toString("dd LLLL yyyy"));
+        paymentInvoiceResponse.setCreationDate(getCreatedAt().toString("dd-MM-yyyy"));
         paymentInvoiceResponse.setFeePaymentTypeName(paymentRecordDto.getFeePaymentTypeName());
         paymentInvoiceResponse.setGameTypeName(paymentRecordDto.getGameTypeName());
         paymentInvoiceResponse.setOwnerName(paymentRecordDto.getOwnerName());

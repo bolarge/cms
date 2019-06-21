@@ -995,7 +995,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             }
             return OKResponseUtil.OKResponse(detail.convertToPaymentInvoice());
         } catch (Exception e) {
-            return logAndReturnError(logger, "An error occurred while sending invoice details", e);
+            return logAndReturnError(logger, "An error occurred while getiinginvoice details", e);
         }
     }
 }
