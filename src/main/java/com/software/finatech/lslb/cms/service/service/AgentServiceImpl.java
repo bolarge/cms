@@ -18,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
@@ -188,7 +187,7 @@ public class AgentServiceImpl implements AgentService {
                     agentApprovalRequest.getAgentApprovalRequestTypeName(), agent.getFullName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), agentApprovalRequest.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             agentCreationNotifierAsync.sendNewAgentApprovalRequestToLSLBAdmin(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
@@ -234,7 +233,7 @@ public class AgentServiceImpl implements AgentService {
             String verbiage = String.format("Updated Agent Details -> Agent Id: %s , Agent Name -> %s", agent.getAgentId(), agent.getFullName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             agentCreationNotifierAsync.sentAgentUpdateEmailToAgentInstitutions(agent, oldPhoneAndAddress, newPhoneAndAddress);
             return Mono.just(new ResponseEntity<>(agent.convertToDto(), HttpStatus.OK));
@@ -268,7 +267,7 @@ public class AgentServiceImpl implements AgentService {
             String verbiage = String.format("Created Agent approval request ->  Type :%s", agentApprovalRequest.getAgentApprovalRequestTypeName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), agentApprovalRequest.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             agentCreationNotifierAsync.sendNewAgentApprovalRequestToLSLBAdmin(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>("Agent creation has been submitted for approval", HttpStatus.OK));
         } catch (Exception e) {

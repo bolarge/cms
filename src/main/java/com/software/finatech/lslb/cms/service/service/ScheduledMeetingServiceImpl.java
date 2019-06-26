@@ -204,7 +204,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                     institutionName, scheduledMeeting.getMeetingPurpose(), scheduledMeeting.getMeetingDateString(), scheduledMeeting.getVenue(), scheduledMeeting.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             if (scheduledMeeting.isForLicenseApplicant()) {
                 institutionOnboardingWorkflowService.updateWorkflowForNewApplicantMeeting(scheduledMeeting);
             }
@@ -244,7 +244,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                     institutionName, scheduledMeeting.getMeetingDateString(), scheduledMeeting.getVenue(), scheduledMeeting.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             if (scheduledMeeting.isForLicenseApplicant()) {
                 institutionOnboardingWorkflowService.updateWorkflowForCanceledMeeting(scheduledMeeting);
             }
@@ -282,7 +282,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                     institutionName, scheduledMeeting.getMeetingDateString(), scheduledMeeting.getVenue(), scheduledMeeting.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             if (scheduledMeeting.isForLicenseApplicant()) {
                 institutionOnboardingWorkflowService.updateWorkflowForCompletedMeeting(scheduledMeeting);
                 applicationFormEmailSenderAsync.sendNotificationForMeetingCompletionForApplication(scheduledMeeting.getApplicationForm());
@@ -361,7 +361,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                     invitedInstitution.getInstitutionName(), existingScheduledMeeting.getMeetingDateString(), existingScheduledMeeting.getVenue(), existingScheduledMeeting.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), invitedInstitution.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(existingScheduledMeeting.convertToDto(), HttpStatus.OK));
         } catch (IllegalArgumentException e) {
@@ -408,7 +408,7 @@ public class ScheduledMeetingServiceImpl implements ScheduledMeetingService {
                     institutionName, addCommentDto.getComment(), existingScheduledMeeting.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(scheduleMeetingAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institutionName,
-                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true,RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>("Comment added successfully", HttpStatus.OK));
         } catch (Exception e) {

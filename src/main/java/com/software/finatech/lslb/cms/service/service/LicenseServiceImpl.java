@@ -690,7 +690,7 @@ public class LicenseServiceImpl implements LicenseService {
             verbiage = "Moved : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from Renewal In Review back to Renewal In Progress";
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), getInstitution(license.getInstitutionId()).getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 //            List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(license.getInstitutionId());
 //            institutionAdmins.stream().forEach(institutionAdmin -> {
 //                NotificationDto notificationDto = new NotificationDto();
@@ -801,7 +801,7 @@ public class LicenseServiceImpl implements LicenseService {
             verbiage = "UPDATED : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from AIP DOC UPLOADED to AIP COMPLETED";
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.AIP_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), getInstitution(license.getInstitutionId()).getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             Institution institution = getInstitution(institutionId);
             if (institution.isFromLiveData() && license.getExpiryDate().isBefore(LocalDate.now())) {
                 generateLegacyLicenses(license, duration);
@@ -813,7 +813,7 @@ public class LicenseServiceImpl implements LicenseService {
             verbiage = getInstitution(license.getInstitutionId()).getInstitutionName() + " is Licensed ";
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LICENCE_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), getInstitution(license.getInstitutionId()).getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             NotificationDto notificationDto = new NotificationDto();
             notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
@@ -918,7 +918,7 @@ public class LicenseServiceImpl implements LicenseService {
                 String verbiage = String.format("Transferred License Number -> %s , Category ->%s, Transferor -> %s, Transfereree -> %s",
                         transferredLicense.getLicenseNumber(), transferredLicense.getGameType(), licenseTransfer.getFromInstitution(), licenseTransfer.getToInstitution());
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LICENCE_ID, "System Admin",
-                        String.valueOf(licenseTransfer.getToInstitution()), LocalDateTime.now(), LocalDate.now(), true, null, verbiage));
+                        String.valueOf(licenseTransfer.getToInstitution()), true, null, verbiage));
             }
 
             GameType gameType = paymentRecord.getGameType();
@@ -967,7 +967,7 @@ public class LicenseServiceImpl implements LicenseService {
                     aipDocumentApproval.getFormStatusId(), aipDocumentApproval.getGameTypeName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.AIP_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), aipDocumentApproval.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             aipMailSenderAsync.sendAipNotificationToInstitutionAdmins(paymentRecord);
             paymentRecord.setLicenseId(license.getId());
             mongoRepositoryReactive.saveOrUpdate(paymentRecord);
@@ -1302,7 +1302,7 @@ public class LicenseServiceImpl implements LicenseService {
             String verbiage = String.format("Re licenced , Owner -> %s,license Number -> %s , Category -> %s, Old Status  -> %s, New Status -> LICENSED",
                     licenseOwner, license.getLicenseNumber(), license.getGameType(), oldLicenseStatus);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LICENCE_ID, "System Admin",
-                    String.valueOf(license.getOwnerName()), LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    String.valueOf(license.getOwnerName()), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             //send email to owner
             loggedCaseMailSenderAsync.sendRelicenseMailToLicense(license, oldLicenseStatus);

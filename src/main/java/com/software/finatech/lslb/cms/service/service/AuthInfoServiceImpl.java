@@ -36,7 +36,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -207,7 +206,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 String verbiage = String.format("Create user  -> Name : %s ", authInfo.getFullName());
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                         springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
-                        LocalDateTime.now(), LocalDate.now(), true, requestIpAddress, verbiage));
+                        true, requestIpAddress, verbiage));
                 return Mono.just(new ResponseEntity<>(toCreateAuthInfoResponse(authInfo, verificationToken), HttpStatus.OK));
             }
         } catch (Exception e) {
@@ -325,7 +324,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 String verbiage = String.format("Create user  -> Name : %s , Id -> %s ", authInfo.getFullName(), authInfo.getId());
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                         springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
-                        LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                        true, RequestAddressUtil.getClientIpAddr(request), verbiage));
                 return authInfo;
             } else {
 
@@ -354,7 +353,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             String verbiage = String.format("Create user  -> Name : %s ", authInfo.getFullName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return authInfo;
         } catch (Exception e) {
@@ -398,7 +397,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             String verbiage = String.format("Reset password for user  -> Email : %s ", emailAddress);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return SSOPasswordReset.getResponse().getPasswordToken();
 
@@ -442,16 +441,16 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             if (responseCode == 200) {
                 String verbiage = String.format("Successful password reset  -> User : %s ", userFullName);
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
-                        userFullName, userFullName, LocalDateTime.now(),
-                        LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                        userFullName, userFullName,
+                        true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
                 return Mono.just(new ResponseEntity<>("Success", HttpStatus.OK));
             } else {
 
                 String verbiage = String.format("Unsuccessful password reset  -> User : %s ", userFullName);
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
-                        userFullName, userFullName, LocalDateTime.now(),
-                        LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                        userFullName, userFullName,
+                        true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
                 if (authInfo.isInactive() == true) {
                     authInfo.setInactive(false);
@@ -494,16 +493,16 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             if (responseCode == 200) {
                 String verbiage = String.format("Successful password change  -> User : %s ", userFullName);
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
-                        userFullName, userFullName, LocalDateTime.now(),
-                        LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                        userFullName, userFullName,
+                        true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
 
                 return Mono.just(new ResponseEntity<>("Success", HttpStatus.OK));
             } else {
                 String verbiage = String.format("Unsuccessful password change  -> User : %s ", userFullName);
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
-                        userFullName, userFullName, LocalDateTime.now(),
-                        LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                        userFullName, userFullName,
+                        true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
                 return Mono.just(new ResponseEntity<>(EntityUtils.toString(response.getEntity()), HttpStatus.valueOf(responseCode)));
             }
@@ -696,7 +695,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             String stringResponse = EntityUtils.toString(response.getEntity());
 
             if (responseCode == 400 && StringUtils.equalsIgnoreCase("{\"error\":\"invalid_grant\"}", stringResponse)) {
-                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), "Unsuccessful Login Attempt -> Response From SSO : \n" + stringResponse));
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, true, RequestAddressUtil.getClientIpAddr(request), "Unsuccessful Login Attempt -> Response From SSO : \n" + stringResponse));
                 return Mono.just(new ResponseEntity<>("Invalid Credentials", HttpStatus.UNAUTHORIZED));
             }
 
@@ -704,11 +703,11 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 // everything is fine, handle the response
                 SSOToken token = mapper.readValue(stringResponse, SSOToken.class);
                 token.setAuthInfo(authInfo.convertToLoginDto());
-                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), "Successful Login Attempt"));
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, true, RequestAddressUtil.getClientIpAddr(request), "Successful Login Attempt"));
 
                 return Mono.just(new ResponseEntity<>((token), HttpStatus.OK));
             } else {
-                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), "Unsuccessful Login Attempt -> Response From SSO : \n" + stringResponse));
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LOGIN_ID, authInfo.getFullName(), null, true, RequestAddressUtil.getClientIpAddr(request), "Unsuccessful Login Attempt -> Response From SSO : \n" + stringResponse));
                 return Mono.just(new ResponseEntity<>(stringResponse, HttpStatus.valueOf(responseCode)));
             }
         } catch (Throwable e) {
@@ -868,7 +867,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
             approvalRequestNotifierAsync.sendNewUserApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
 
-            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), String.format("Created user approval request to add permissions to user %s", subjectUser.getFullName())));
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), true, RequestAddressUtil.getClientIpAddr(request), String.format("Created user approval request to add permissions to user %s", subjectUser.getFullName())));
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
 
         } catch (Exception e) {
@@ -899,7 +898,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             userApprovalRequest.setAuthInfoId(subjectUserId);
             mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
             approvalRequestNotifierAsync.sendNewUserApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
-            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), String.format("Created user approval request to remove permissions from user %s", subjectUser.getFullName())));
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), true, RequestAddressUtil.getClientIpAddr(request), String.format("Created user approval request to remove permissions from user %s", subjectUser.getFullName())));
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
             return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while removing permission from user", e);
@@ -946,7 +945,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             approvalRequestNotifierAsync.sendNewUserApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
             mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
 
-            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request),
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), subjectUser.getFullName(), true, RequestAddressUtil.getClientIpAddr(request),
                     String.format("Created user approval request to change role, old role -> %s, New Role -> %s", oldRole, newRole)));
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -1126,7 +1125,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             String verbiage = String.format("Create user  -> Name : %s ", authInfo.getFullName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
-                    LocalDateTime.now(), LocalDate.now(), true, requestIpAddress, verbiage));
+                    true, requestIpAddress, verbiage));
             return Mono.just(new ResponseEntity<>(authInfo.convertToDto(), HttpStatus.OK));
         } catch (IOException e) {
             throw new ApprovalRequestProcessException(e.getMessage());
