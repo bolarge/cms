@@ -13,6 +13,16 @@ public class PaymentRecordDetailUpdateDto {
     private String id;
     private String vigipayReference;
 
+    public PaymentRecordDetailUpdateDto() {
+    }
+
+    public static PaymentRecordDetailUpdateDto fromIdAndPaymentStatus(String id, String paymentStatusId) {
+        PaymentRecordDetailUpdateDto detailUpdateDto = new PaymentRecordDetailUpdateDto();
+        detailUpdateDto.setPaymentStatusId(paymentStatusId);
+        detailUpdateDto.setId(id);
+        return detailUpdateDto;
+    }
+
     public String getVigipayReference() {
         return vigipayReference;
     }

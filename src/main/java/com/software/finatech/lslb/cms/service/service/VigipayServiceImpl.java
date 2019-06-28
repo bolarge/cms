@@ -8,9 +8,11 @@ import com.software.finatech.lslb.cms.service.model.vigipay.VigipayCreateCustome
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayCreateInvoice;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayInvoiceItem;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigipayRecipient;
+import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.AuthInfoService;
 import com.software.finatech.lslb.cms.service.service.contracts.VigipayService;
 import com.software.finatech.lslb.cms.service.util.httpclient.VigipayHttpClient;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -79,10 +81,9 @@ public class VigipayServiceImpl implements VigipayService {
         return vigipayHttpClient.createInvoice(vigipayCreateInvoice);
     }
 
-
     @Override
-    public boolean isConfirmedInvoicePayment(String invoiceNumber) throws VigiPayServiceException {
-        return vigipayHttpClient.validateInvoicePaid(invoiceNumber);
+    public String getVigipayPaymentStatusForInvoice(String invoiceNumber) throws VigiPayServiceException {
+        return vigipayHttpClient.lookupInvoicePaymentStatus(invoiceNumber);
     }
 
     private VigipayCreateCustomer createCustomerFromAgent(Agent agent) {

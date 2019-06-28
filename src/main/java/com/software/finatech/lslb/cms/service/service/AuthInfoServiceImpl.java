@@ -54,6 +54,7 @@ import java.io.UncheckedIOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.BadRequestResponse;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 
 @Service("authInfoService")
@@ -121,7 +122,11 @@ public class AuthInfoServiceImpl implements AuthInfoService {
     @Override
     public Mono<ResponseEntity> createAuthInfo(AuthInfoCreateDto authInfoCreateDto, String appUrl) throws ApprovalRequestProcessException {
         String requestIpAddress = RequestAddressUtil.getClientIpAddr(request);
-
+        Query query = new Query();
+        query.addCriteria(Criteria.where("emailAddress").is(authInfoCreateDto.getEmailAddress()));
+        if (mongoRepositoryReactive.find(query, AuthInfo.class).block() != null){
+            return BadRequestResponse("There is an existing user with the email address");
+        }
         if (!StringUtils.isEmpty(authInfoCreateDto.getInstitutionId())) {
             Mono<ResponseEntity> validateCreateAuthInfo = validateCreateGamingOperatorAuthInfo(authInfoCreateDto);
             if (validateCreateAuthInfo != null) {
@@ -142,7 +147,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
         authInfo.setFullName(authInfoCreateDto.getFirstName() + " " + authInfoCreateDto.getLastName());
         authInfo.setInstitutionId(authInfoCreateDto.getInstitutionId());
         authInfo.setAgentId(authInfoCreateDto.getAgentId());
-        mongoRepositoryReactive.saveOrUpdate(authInfo);
+      //  mongoRepositoryReactive.saveOrUpdate(authInfo);
 
         // First we check if User exists
         try {
@@ -221,6 +226,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
 
     @Override
     public AuthInfo createApplicantAuthInfo(CreateApplicantAuthInfoDto createApplicantAuthInfoDto, String appUrl, HttpServletRequest request) {
+
         AuthInfo authInfo = new AuthInfo();
         authInfo.setId(UUID.randomUUID().toString());
         authInfo.setEnabled(true);

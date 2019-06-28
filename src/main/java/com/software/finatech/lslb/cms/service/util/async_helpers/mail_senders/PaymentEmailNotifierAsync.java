@@ -108,7 +108,6 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
         }
     }
 
-
     private void sendFailedPaymentToVGGAdminAndUsers(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
         HashMap<String, Object> model = new HashMap<>();
         String presentDateString = DateTime.now().toString("dd-MM-yyyy");
@@ -182,8 +181,8 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             String paymentInitiator = "";
             Institution institution = null;
             Agent agent = null;
-            boolean sendToOperator = true;
-            boolean sendToAgent = true;
+            boolean sendToOperator = false;
+            boolean sendToAgent = false;
             if (paymentRecord.isInstitutionPayment() || paymentRecord.isGamingMachinePayment()) {
                 institution = paymentRecord.getInstitution();
                 if (institution != null) {
@@ -236,6 +235,57 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             }
         } catch (Exception e) {
             logger.error("An error occurred while sending payment invoice notification email ", e);
+        }
+    }
+
+    public void sendIrregularPaymentStatusToVGGAdminAndUsers(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord, String vigipayPaymentStatus) {
+        HashMap<String, Object> model = new HashMap<>();
+        String presentDateString = DateTime.now().toString("dd-MM-yyyy");
+        String paymentInitiator = "";
+        if (paymentRecord.isInstitutionPayment() || paymentRecord.isGamingMachinePayment()) {
+            Institution institution = paymentRecord.getInstitution();
+            if (institution != null) {
+                paymentInitiator = institution.getInstitutionName();
+            }
+        }
+        if (paymentRecord.isAgentPayment() || paymentRecord.isGamingTerminalPayment()) {
+            Agent agent = paymentRecord.getAgent();
+            if (agent != null) {
+                paymentInitiator = agent.getFullName();
+            }
+        }
+        String feePaymentTypeName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getFeePaymentTypeName());
+        String modeOfPaymentName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecordDetail.getModeOfPaymentName());
+        String revenueName = StringCapitalizer.convertToTitleCaseIteratingChars(String.valueOf(paymentRecord.getLicenseType()));
+        String gameTypeName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getGameTypeName());
+        boolean isPartPayment = paymentRecord.getAmount() > paymentRecordDetail.getAmount();
+
+        model.put("amount", NumberFormat.getInstance().format(paymentRecordDetail.getAmount()));
+        model.put("date", presentDateString);
+        model.put("invoiceNumber", paymentRecordDetail.getInvoiceNumber());
+        model.put("channel", paymentRecordDetail.getModeOfPaymentName());
+        model.put("id", paymentRecordDetail.getId());
+        model.put("paymentStatus", paymentRecordDetail.getPaymentStatusName());
+        model.put("paymentInitiator", paymentInitiator);
+        model.put("modeOfPayment", modeOfPaymentName);
+        model.put("feePaymentType", feePaymentTypeName);
+        model.put("revenueName", revenueName);
+        model.put("gameType", gameTypeName);
+        model.put("isPartPayment", isPartPayment);
+        model.put("vigipayPaymentStatus", vigipayPaymentStatus);
+
+        String content = mailContentBuilderService.build(model, "payment-notifications/vgg-irregular-payment-notification");
+
+        ArrayList<AuthInfo> vggAdminsAndUsers = authInfoService.findAllActiveVGGAdminAndUsers();
+        if (vggAdminsAndUsers.isEmpty()) {
+            logger.info("There are no active vgg admins or users, skipping failed notification email");
+            return;
+        }
+        for (AuthInfo vggAdmin : vggAdminsAndUsers) {
+            String mailSubject = "LSLB Irregular Payment Status Notification";
+            String email = vggAdmin.getEmailAddress();
+            logger.info("Sending payment status notification to {}", email);
+            emailService.sendEmail(content, mailSubject, email);
         }
     }
 }
