@@ -73,7 +73,6 @@ public class DatabaseLoaderUtils {
         FeePaymentTypeReferenceData.load(mongoRepositoryReactive);
         ScheduledMeetingStatusReferenceData.load(mongoRepositoryReactive);
         DocumentPurposeReferenceData.load(mongoRepositoryReactive);
-        DocumentTypeReferenceData.load(mongoRepositoryReactive);
         ModeOfPaymentReferenceData.load(mongoRepositoryReactive);
         LicenseTypeReferenceData.load(mongoRepositoryReactive);
         ApprovalRequestStatusReferenceData.load(mongoRepositoryReactive);
