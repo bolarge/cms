@@ -42,9 +42,8 @@ public class VigipayRequeryTask {
 
     private static final int SIX_HOURS = 60 * 60 * 1000;
 
-   // @Scheduled(fixedRate = 60 * 50 * 1000, initialDelay = 600)
-   // @SchedulerLock(name = "ReQuery Vigipay Invoices(UnPaid And Pending)", lockAtMostFor = SIX_HOURS, lockAtLeastFor = SIX_HOURS)
-   @Scheduled(fixedRate = 300000000)
+    @Scheduled(fixedRate = 60 * 50 * 1000, initialDelay = 600)
+    @SchedulerLock(name = "ReQuery Vigipay Invoices(UnPaid And Pending)", lockAtMostFor = SIX_HOURS, lockAtLeastFor = SIX_HOURS)
     public void doReQueryForInvoices() {
         try {
             List<PaymentRecordDetail> paymentsPendingRequery = getListOfInvoicesPendingReQuery();

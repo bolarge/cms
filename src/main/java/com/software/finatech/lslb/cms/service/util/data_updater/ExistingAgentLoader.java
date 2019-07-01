@@ -121,63 +121,19 @@ public class ExistingAgentLoader {
         }
     }
 
-
-    public void createUserAndCustomerCodeForLiveAgents() {
+    public void createUserForLiveAgents() {
         Query query = new Query();
         query.addCriteria(Criteria.where("fromLiveData").is(true));
         ArrayList<Agent> liveAgents = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
         for (Agent liveAgent : liveAgents) {
             try {
                 if (!liveAgent.hasUser()) {
-                    agentUserCreator.createUserAndCustomerCodeForAgent(liveAgent, httpServletRequest);
+                    agentUserCreator.createUserForAgent(liveAgent);
                     logger.info("Created user for {}", liveAgent.getFullName());
                 }
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
-        }
-    }
-
-
-    public void printAgents(MultipartFile multipartFile) throws LicenseServiceException {
-        if (multipartFile.isEmpty()) {
-            throw new LicenseServiceException("File is empty");
-        }
-        Map<String, DeviceMagicAgent> deviceMagicAgentMap = new HashMap<>();
-        try {
-            String completeData = new String(multipartFile.getBytes());
-            String[] rows = completeData.split("\\r?\\n");
-            for (int i = 1; i < rows.length; i++) {
-                String[] columns = rows[i].split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
-                //   String[] columns = rows[i].split(",");
-                ///length of columns
-                if (columns.length < 36) {
-                    throw new LicenseServiceException("File is less than 36 columns");
-                } else {
-                    String operatorId = columns[6];
-                    if (StringUtils.equalsIgnoreCase("BETKING", operatorId)) {
-                        String bvn = columns[31];
-                        String email = columns[30];
-                        if (StringUtils.isEmpty(email)) {
-                            logger.info("{} {} with submission id {}  with operator id {} has no email",
-                                    columns[10], columns[11], columns[4], columns[6]);
-                        }
-                        if (StringUtils.isEmpty(bvn)) {
-                            logger.info("{} {} with submission id {} has no bvn", columns[10], columns[11], columns[4]);
-                        }
-                        DeviceMagicAgent deviceMagicAgent = deviceMagicAgentMap.get(bvn);
-                        if (deviceMagicAgent == null) {
-                            deviceMagicAgent = new DeviceMagicAgent();
-                            deviceMagicAgent.setBvn(bvn);
-                        } else {
-                            logger.info("Agent with bvn {} has more than one record for betking", bvn);
-                        }
-                        deviceMagicAgentMap.put(bvn, deviceMagicAgent);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.error("An error occurred while parsing file", e);
         }
     }
 
