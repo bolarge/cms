@@ -498,10 +498,15 @@ public class LicenseServiceImpl implements LicenseService {
         }
         if (page == 0) {
             if (httpServletResponse != null) {
-                Query queryForCount = queryForInstitutionAIP;
-                queryForCount.addCriteria(Criteria.where("formStatusId").is(IN_REVIEW_STATUS_ID));
-                long count = mongoRepositoryReactive.count(queryForCount, AIPDocumentApproval.class).block();
+                queryForInstitutionAIP.addCriteria(Criteria.where("formStatusId").is(IN_REVIEW_STATUS_ID));
+                long count = mongoRepositoryReactive.count(queryForInstitutionAIP, AIPDocumentApproval.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
+                //clear the query from the form status criteria,
+                //and set back to old query before page check
+                queryForInstitutionAIP = new Query();
+                if (!StringUtils.isEmpty(institutionId)) {
+                    queryForInstitutionAIP.addCriteria(Criteria.where("institutionId").is(institutionId));
+                }
             }
         }
 
@@ -543,7 +548,6 @@ public class LicenseServiceImpl implements LicenseService {
             aipCheckDtos.add(aipCheckDto);
 
         });
-
         return Mono.just(new ResponseEntity<>(aipCheckDtos, HttpStatus.OK));
     }
 
