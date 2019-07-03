@@ -498,8 +498,9 @@ public class LicenseServiceImpl implements LicenseService {
         }
         if (page == 0) {
             if (httpServletResponse != null) {
-                queryForInstitutionAIP.addCriteria(Criteria.where("formStatusId").is(IN_REVIEW_STATUS_ID));
-                long count = mongoRepositoryReactive.count(queryForInstitutionAIP, AIPDocumentApproval.class).block();
+                Query queryForCount = queryForInstitutionAIP;
+                queryForCount.addCriteria(Criteria.where("formStatusId").is(IN_REVIEW_STATUS_ID));
+                long count = mongoRepositoryReactive.count(queryForCount, AIPDocumentApproval.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
             }
         }
