@@ -39,7 +39,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData.APPROVED_STATUS_ID;
-import static com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData.REJECTED_STATUS_ID;
+import static com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData.IN_REVIEW_STATUS_ID;
 import static com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID;
 import static com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData.getAllowedLicensedStatusIds;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -498,7 +498,7 @@ public class LicenseServiceImpl implements LicenseService {
         }
         if (page == 0) {
             if (httpServletResponse != null) {
-                queryForInstitutionAIP.addCriteria(Criteria.where("formStatusId").nin(Arrays.asList(APPROVED_STATUS_ID, REJECTED_STATUS_ID)));
+                queryForInstitutionAIP.addCriteria(Criteria.where("formStatusId").is(IN_REVIEW_STATUS_ID));
                 long count = mongoRepositoryReactive.count(queryForInstitutionAIP, AIPDocumentApproval.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
             }
