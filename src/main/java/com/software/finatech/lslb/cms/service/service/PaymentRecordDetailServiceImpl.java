@@ -60,6 +60,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     private AuditLogHelper auditLogHelper;
     private LicenseTransferService licenseTransferService;
     private InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService;
+    private EnvironmentUtils environmentUtils;
 
     @Autowired
     public PaymentRecordDetailServiceImpl(FeeService feeService,
@@ -75,9 +76,11 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                                           PaymentEmailNotifierAsync paymentEmailNotifierAsync,
                                           SpringSecurityAuditorAware springSecurityAuditorAware,
                                           AuditLogHelper auditLogHelper,
+                                          EnvironmentUtils environmentUtils,
                                           LicenseTransferService licenseTransferService,
                                           InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService) {
         this.feeService = feeService;
+        this.environmentUtils = environmentUtils;
         this.paymentRecordService = paymentRecordService;
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.vigipayService = vigipayService;
@@ -427,13 +430,20 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
 
     @Override
     public Mono<ResponseEntity> handleVigipayInBranchNotification(VigiPayMessage vigiPayMessage) {
+        String invoiceNumber = vigiPayMessage.getInvoiceNumber();
         ObjectMapper objectMapper = new ObjectMapper();
         VigipayPaymentNotification paymentNotification = new VigipayPaymentNotification();
         paymentNotification.setId(UUID.randomUUID().toString());
         try {
             paymentNotification.setRequest(objectMapper.writeValueAsString(vigiPayMessage));
-            if (vigiPayMessage != null) {
+            if (StringUtils.isEmpty(invoiceNumber)) {
+                String response = "Invalid Invoice Number";
+                paymentNotification.setResponse(response);
+                mongoRepositoryReactive.saveOrUpdate(paymentNotification);
 
+                return BadRequestResponse(response);
+            }
+            if (vigiPayMessage != null) {
                 Query query = new Query();
                 query.addCriteria(Criteria.where("invoiceNumber").is(vigiPayMessage.getInvoiceNumber()));
                 PaymentRecordDetail existingPaymentRecordDetail = (PaymentRecordDetail) mongoRepositoryReactive.find(query, PaymentRecordDetail.class).block();
@@ -443,26 +453,30 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
                     return Mono.just(new ResponseEntity<>("Invoice does not exist", HttpStatus.BAD_REQUEST));
                 }
                 if (!StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, existingPaymentRecordDetail.getPaymentStatusId())) {
-                    boolean isConfirmedPayment;
-                    try {
-                        String vigipayPaymentStatus = vigipayService.getVigipayPaymentStatusForInvoice(existingPaymentRecordDetail.getInvoiceNumber());
-                        isConfirmedPayment = StringUtils.equals("1", vigipayPaymentStatus);//vigipay payment status is "1" for paid
-                        if (!isConfirmedPayment) {
+
+                    //Confirms payment for only production environment
+                    boolean isConfirmedPayment = true;
+                    if (environmentUtils.isProductionEnvironment()) {
+                        try {
+                            String vigipayPaymentStatus = vigipayService.getVigipayPaymentStatusForInvoice(existingPaymentRecordDetail.getInvoiceNumber());
+                            isConfirmedPayment = StringUtils.equals("1", vigipayPaymentStatus);//vigipay payment status is "1" for paid
+                            if (!isConfirmedPayment) {
+                                existingPaymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.PENDING_VIGIPAY_CONFIRMATION_STATUS_ID);
+                                savePaymentRecordDetail(existingPaymentRecordDetail);
+                                String message = "Payment Status not confirmed as paid , Got  " + vigipayPaymentStatus + " as payment status";
+                                paymentNotification.setResponse(message);
+                                mongoRepositoryReactive.saveOrUpdate(paymentNotification);
+                                return Mono.just(new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR));
+                            }
+                        } catch (VigiPayServiceException e) {
+                            logger.error("An error occurred while confirming payment status from vigipay", e);
                             existingPaymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.PENDING_VIGIPAY_CONFIRMATION_STATUS_ID);
                             savePaymentRecordDetail(existingPaymentRecordDetail);
-                            String message = "Payment Status not confirmed as paid , Got  " + vigipayPaymentStatus + " as payment status";
+                            String message = "An error occurred while confirming payment from vigipay => " + e.getMessage();
                             paymentNotification.setResponse(message);
                             mongoRepositoryReactive.saveOrUpdate(paymentNotification);
                             return Mono.just(new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR));
                         }
-                    } catch (VigiPayServiceException e) {
-                        logger.error("An error occurred while confirming payment status from vigipay", e);
-                        existingPaymentRecordDetail.setPaymentStatusId(PaymentStatusReferenceData.PENDING_VIGIPAY_CONFIRMATION_STATUS_ID);
-                        savePaymentRecordDetail(existingPaymentRecordDetail);
-                        String message = "An error occurred while confirming payment from vigipay => " + e.getMessage();
-                        paymentNotification.setResponse(message);
-                        mongoRepositoryReactive.saveOrUpdate(paymentNotification);
-                        return Mono.just(new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR));
                     }
                     if (isConfirmedPayment) {
                         PaymentRecord paymentRecord = paymentRecordService.findById(existingPaymentRecordDetail.getPaymentRecordId());

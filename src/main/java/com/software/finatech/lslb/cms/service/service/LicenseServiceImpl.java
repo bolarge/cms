@@ -38,6 +38,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData.APPROVED_STATUS_ID;
+import static com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData.REJECTED_STATUS_ID;
 import static com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID;
 import static com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData.getAllowedLicensedStatusIds;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -496,7 +498,8 @@ public class LicenseServiceImpl implements LicenseService {
         }
         if (page == 0) {
             if (httpServletResponse != null) {
-                long count = mongoRepositoryReactive.count(queryForInstitutionAIP, License.class).block();
+                queryForInstitutionAIP.addCriteria(Criteria.where("formStatusId").nin(Arrays.asList(APPROVED_STATUS_ID, REJECTED_STATUS_ID)));
+                long count = mongoRepositoryReactive.count(queryForInstitutionAIP, AIPDocumentApproval.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
             }
         }
@@ -715,7 +718,7 @@ public class LicenseServiceImpl implements LicenseService {
             Query queryAIPFormApproval = new Query();
             queryAIPFormApproval.addCriteria(Criteria.where("institutionId").is(institutionId));
             queryAIPFormApproval.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-            queryAIPFormApproval.addCriteria(Criteria.where("formStatusId").is(ApplicationFormStatusReferenceData.APPROVED_STATUS_ID));
+            queryAIPFormApproval.addCriteria(Criteria.where("formStatusId").is(APPROVED_STATUS_ID));
             AIPDocumentApproval aipDocumentApproval = (AIPDocumentApproval) mongoRepositoryReactive.find(queryAIPFormApproval, AIPDocumentApproval.class).block();
             if (aipDocumentApproval == null) {
                 return Mono.just(new ResponseEntity<>("AIP FORM NOT APPROVED", HttpStatus.BAD_REQUEST));
@@ -1469,7 +1472,7 @@ public class LicenseServiceImpl implements LicenseService {
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-        query.addCriteria(Criteria.where("applicationFormStatusId").is(ApplicationFormStatusReferenceData.APPROVED_STATUS_ID));
+        query.addCriteria(Criteria.where("applicationFormStatusId").is(APPROVED_STATUS_ID));
         return (ApplicationForm) mongoRepositoryReactive.find(query, ApplicationForm.class).block();
     }
 
