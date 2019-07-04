@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 
 public interface GameTypeService {
 
+    String findNameById(String id);
+
     GameType findById(String gameTypeId);
 
     GameType findGameTypeBySearchKey(String searchKey);

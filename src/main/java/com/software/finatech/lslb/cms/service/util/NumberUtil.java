@@ -26,7 +26,13 @@ public class NumberUtil {
     }
 
     public static String generateAgentId() {
-        return String.format("LAGOS-AG-%s%s%s", NumberUtil.getRandomNumberInRange(20, 100),LocalDateTime.now().getSecondOfMinute(),
+        return String.format("LAGOS-AG-%s%s%s", NumberUtil.getRandomNumberInRange(20, 100), LocalDateTime.now().getSecondOfMinute(),
                 getRandomNumberInRange(100, 1000));
+    }
+
+    public static String generateInvoiceNumber() {
+        LocalDateTime presentDateTime = LocalDateTime.now();
+        return String.format("LSH-%s%s%s", getRandomNumberInRange(100, 1000),
+                presentDateTime.getSecondOfMinute(), presentDateTime.getMinuteOfHour());
     }
 }

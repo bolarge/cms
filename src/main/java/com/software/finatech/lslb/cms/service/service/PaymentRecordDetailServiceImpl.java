@@ -13,7 +13,6 @@ import com.software.finatech.lslb.cms.service.service.contracts.*;
 import com.software.finatech.lslb.cms.service.util.*;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.PaymentEmailNotifierAsync;
-import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -30,6 +29,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.BadRequestResponse;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
+import static com.software.finatech.lslb.cms.service.util.RequestAddressUtil.getClientIpAddr;
 
 @Service
 public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailService {
@@ -98,7 +99,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
     }
 
     @Override
-    public Mono<ResponseEntity> updatePaymentRecordDetail(PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto, HttpServletRequest request) {
+    public Mono<ResponseEntity> updatePaymentRecordDetail(PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto, HttpServletRequest httpServletRequest) {
         try {
             String paymentRecordDetailId = paymentRecordDetailUpdateDto.getId();
             PaymentRecordDetail existingPaymentRecordDetail = findById(paymentRecordDetailId);
@@ -129,7 +130,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             String verbiage = String.format("Payment record detail callback -> Payment Record Detail id: %s, Invoice Number -> %s, Status Id -> %s", paymentRecordDetailId, existingPaymentRecordDetail.getInvoiceNumber(), paymentRecordDetailUpdateDto.getPaymentStatusId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(paymentAuditActionId,
                     currentAuditorName, currentAuditorName,
-                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, getClientIpAddr(httpServletRequest), verbiage));
             paymentEmailNotifierAsync.sendPaymentNotificationForPaymentRecordDetail(existingPaymentRecordDetail, paymentRecord);
             return Mono.just(new ResponseEntity<>(existingPaymentRecordDetail.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -289,7 +290,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             paymentEmailNotifierAsync.handlePostPaymentInitiationEvents(paymentRecord, paymentRecordDetailCreateDto);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(paymentAuditActionId,
                     currentAuditorName, currentAuditorName,
-                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, getClientIpAddr(request), verbiage));
             paymentEmailNotifierAsync.sendInitialVigiPayPaymentNotificationToInitiator(paymentRecordDetail, paymentRecord);
             return Mono.just(new ResponseEntity<>(paymentRecordDetail.convertToDto(), HttpStatus.OK));
         } catch (VigiPayServiceException e) {
@@ -394,7 +395,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
             paymentEmailNotifierAsync.handlePostPaymentInitiationEvents(paymentRecord, paymentRecordDetailCreateDto);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(paymentAuditActionId,
                     currentAuditorName, currentAuditorName,
-                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(paymentRecordDetail.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -733,7 +734,7 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         License latestExistingLicense = licenseService.getPreviousConfirmedLicense(paymentRecordDetailCreateDto.getInstitutionId(), paymentRecordDetailCreateDto.getAgentId(), fee.getGameTypeId(), fee.getLicenseTypeId());
         if (latestExistingLicense == null) {
             String categoryName = fee.getGameTypeName();
-            return Mono.just(new ResponseEntity<>(String.format("You do not have a valid %s licence, kindly contact lslb before attempting to pay for licence renewal for %s", categoryName, categoryName), HttpStatus.BAD_REQUEST));
+            return Mono.just(new ResponseEntity<>(String.format("You do not have a valid %s licence, kindly contact LSLB before attempting to pay for licence renewal for %s", categoryName, categoryName), HttpStatus.BAD_REQUEST));
         }
         if (latestExistingLicense.isRevokedLicence()) {
             String categoryName = fee.getGameTypeName();
@@ -799,7 +800,6 @@ public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailServic
         PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.find(query, PaymentRecord.class).block();
         return paymentRecord != null;
     }
-
 
     private PaymentRecordDto getLicensePaymentRecord(String revenueNameId,
                                                      String gameTypeId,

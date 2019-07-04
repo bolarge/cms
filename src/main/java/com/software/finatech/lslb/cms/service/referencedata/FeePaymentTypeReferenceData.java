@@ -2,6 +2,9 @@ package com.software.finatech.lslb.cms.service.referencedata;
 
 import com.software.finatech.lslb.cms.service.domain.FeePaymentType;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.util.Mapstore;
+
+import java.util.Map;
 
 public class FeePaymentTypeReferenceData {
     public static final String APPLICATION_FEE_TYPE_ID = "01";
@@ -51,5 +54,28 @@ public class FeePaymentTypeReferenceData {
         mongoRepositoryReactive.saveOrUpdate(feePaymentType3);
         mongoRepositoryReactive.saveOrUpdate(feePaymentType4);
         mongoRepositoryReactive.saveOrUpdate(feePaymentType6);
+    }
+
+    public static FeePaymentType getTypeById(MongoRepositoryReactiveImpl mongoRepositoryReactive, String feePaymentTypeId) {
+        Map feePaymentTypeMap = Mapstore.STORE.get("FeePaymentType");
+        FeePaymentType feePaymentType = null;
+        if (feePaymentTypeMap != null) {
+            feePaymentType = (FeePaymentType) feePaymentTypeMap.get(feePaymentTypeId);
+        }
+        if (feePaymentType == null) {
+            feePaymentType = (FeePaymentType) mongoRepositoryReactive.findById(feePaymentTypeId, FeePaymentType.class).block();
+            if (feePaymentType != null && feePaymentTypeMap != null) {
+                feePaymentTypeMap.put(feePaymentTypeId, feePaymentType);
+            }
+        }
+        return feePaymentType;
+    }
+
+    public static String getFeePaymentTypeNameById(MongoRepositoryReactiveImpl mongoRepositoryReactive, String id) {
+        FeePaymentType feePaymentType = getTypeById(mongoRepositoryReactive, id);
+        if (feePaymentType != null) {
+            return feePaymentType.getName();
+        }
+        return null;
     }
 }

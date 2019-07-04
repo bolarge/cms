@@ -142,12 +142,22 @@ public abstract class AbstractApprovalRequest extends AbstractFact {
     }
 
 
-    public void setAsApproved(){
+    public void setAsApproved() {
         this.approvalRequestStatusId = ApprovalRequestStatusReferenceData.APPROVED_ID;
     }
 
+    public void setAsApprovedByUser(String userId) {
+        this.setAsApproved();
+        setApproverId(userId);
+    }
 
-    public void setAsRejected(){
+    public void setAsRejectedByUserWithReason(String userId, String reason) {
+        this.setAsRejected();
+        this.setRejectionReason(reason);
+        setRejectorId(userId);
+    }
+
+    public void setAsRejected() {
         this.approvalRequestStatusId = ApprovalRequestStatusReferenceData.REJECTED_ID;
     }
 
@@ -166,5 +176,13 @@ public abstract class AbstractApprovalRequest extends AbstractFact {
 
     public AuthInfo getInitiator() {
         return getAuthInfo(this.initiatorId);
+    }
+
+    public String getAuthInfoName(String authInfoId) {
+        AuthInfo authInfo = getAuthInfo(authInfoId);
+        if (authInfo != null) {
+            return authInfo.getFullName();
+        }
+        return null;
     }
 }

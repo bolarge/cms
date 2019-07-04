@@ -62,6 +62,15 @@ public class GameTypeServiceImpl implements GameTypeService {
     }
 
     @Override
+    public String findNameById(String id) {
+        GameType gameType = findById(id);
+        if (gameType != null) {
+            return gameType.getName();
+        }
+        return null;
+    }
+
+    @Override
     public GameType findGameTypeBySearchKey(String searchKey) {
         if (StringUtils.equalsIgnoreCase("Scartch Card", searchKey)) {
             searchKey = "Scratch Card";

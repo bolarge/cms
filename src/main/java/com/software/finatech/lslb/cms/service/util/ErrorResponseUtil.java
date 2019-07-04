@@ -19,4 +19,8 @@ public class ErrorResponseUtil {
     public static Mono<ResponseEntity> BadRequestResponse(String message) {
         return Mono.just(new ResponseEntity<>(message, HttpStatus.BAD_REQUEST));
     }
+
+    public static Mono<ResponseEntity> NoRecordResponse() {
+        return Mono.just(new ResponseEntity<>("No record Found", HttpStatus.NOT_FOUND));
+    }
 }
