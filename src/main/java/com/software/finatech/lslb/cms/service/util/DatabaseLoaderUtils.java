@@ -73,7 +73,6 @@ public class DatabaseLoaderUtils {
         FeePaymentTypeReferenceData.load(mongoRepositoryReactive);
         ScheduledMeetingStatusReferenceData.load(mongoRepositoryReactive);
         DocumentPurposeReferenceData.load(mongoRepositoryReactive);
-        DocumentTypeReferenceData.load(mongoRepositoryReactive);
         ModeOfPaymentReferenceData.load(mongoRepositoryReactive);
         LicenseTypeReferenceData.load(mongoRepositoryReactive);
         ApprovalRequestStatusReferenceData.load(mongoRepositoryReactive);
@@ -118,7 +117,6 @@ public class DatabaseLoaderUtils {
         factEnums.put("FeePaymentType", FeePaymentType.class);
         factEnums.put("ScheduledMeetingStatus", ScheduledMeetingStatus.class);
         factEnums.put("DocumentPurpose", DocumentPurpose.class);
-        factEnums.put("DocumentType", DocumentType.class);
         factEnums.put("ModeOfPayment", ModeOfPayment.class);
         factEnums.put("LicenseType", LicenseType.class);
         factEnums.put("ApprovalRequestStatus", ApprovalRequestStatus.class);
