@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.controller;
 
 
 import com.software.finatech.lslb.cms.service.dto.FullPaymentConfirmationRequest;
+import com.software.finatech.lslb.cms.service.dto.PartialPaymentConfirmationRequest;
 import com.software.finatech.lslb.cms.service.dto.PaymentConfirmationApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.service.OutsideSystemPaymentService;
 import io.swagger.annotations.Api;
@@ -49,7 +50,7 @@ public class OutsideSystemPaymentsController {
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
-    public Mono<ResponseEntity> createNewPartialPayment(@RequestBody FullPaymentConfirmationRequest fullPaymentConfirmationRequest, HttpServletRequest request) {
-        return outsideSystemPaymentService.createFullPaymentConfirmationRequest(fullPaymentConfirmationRequest, request);
+    public Mono<ResponseEntity> createNewPartialPayment(@RequestBody PartialPaymentConfirmationRequest partialPaymentConfirmationRequest, HttpServletRequest request) {
+        return outsideSystemPaymentService.createPartialPaymentConfirmationRequest(partialPaymentConfirmationRequest, request);
     }
 }

@@ -67,6 +67,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
                                                       String startDate,
                                                       String endDate,
                                                       String dateProperty,
+                                                      String forOutsideSystemPayment,
                                                       HttpServletResponse httpServletResponse) {
         try {
             Query query = new Query();
@@ -78,6 +79,10 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
             }
             if (!StringUtils.isEmpty(agentId)) {
                 query.addCriteria(Criteria.where("agentId").is(agentId));
+            }
+            if (!StringUtils.isEmpty(forOutsideSystemPayment)) {
+                Boolean forOutside = Boolean.valueOf(forOutsideSystemPayment);
+                query.addCriteria(Criteria.where("forOutsideSystemPayment").is(forOutside));
             }
             if (!StringUtils.isEmpty(feePaymentTypeId)) {
                 query.addCriteria(Criteria.where("feePaymentTypeId").is(feePaymentTypeId));

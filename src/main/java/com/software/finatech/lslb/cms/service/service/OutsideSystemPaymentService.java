@@ -2,8 +2,8 @@ package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
-import com.software.finatech.lslb.cms.service.dto.PartialPaymentConfirmationRequest;
 import com.software.finatech.lslb.cms.service.dto.FullPaymentConfirmationRequest;
+import com.software.finatech.lslb.cms.service.dto.PartialPaymentConfirmationRequest;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
@@ -181,6 +181,7 @@ public class OutsideSystemPaymentService {
             PaymentConfirmationApprovalRequest approvalRequest = new PaymentConfirmationApprovalRequest();
             approvalRequest.setId(UUID.randomUUID().toString());
             approvalRequest.setPaymentRecordDetailId(recordDetail.getId());
+            approvalRequest.setPaymentRecordId(paymentRecord.getId());
             approvalRequest.setApprovalRequestTypeId(CONFIRM_PARTIAL_PAYMENT_ID);
             approvalRequest.setInitiatorId(loggedInUser.getId());
             approvalRequest.setPaymentOwnerName(ownerName);
@@ -367,7 +368,7 @@ public class OutsideSystemPaymentService {
             int pageSize = 1000;
 
             Mono<ResponseEntity> paymentRecordsResponse = paymentRecordService.findAllPaymentRecords(page,
-                    pageSize, sortDirection, sortProperty, institutionId, agentId, null, gameTypeId, feePaymentTypeId, revenueNameId, null, null, null, null, null);
+                    pageSize, sortDirection, sortProperty, institutionId, agentId, null, gameTypeId, feePaymentTypeId, revenueNameId, null, null, null, null, null, null);
 
             if (paymentRecordsResponse.block().getStatusCode() == HttpStatus.NOT_FOUND) {
                 return null;
