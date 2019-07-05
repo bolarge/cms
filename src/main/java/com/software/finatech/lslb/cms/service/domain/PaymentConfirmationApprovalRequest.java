@@ -68,6 +68,10 @@ public class PaymentConfirmationApprovalRequest extends AbstractApprovalRequest 
         if (paymentRecord != null) {
             dto.setPaymentRecord(paymentRecord.convertToDto());
         }
+        PaymentRecordDetail detail = getPaymentRecordDetail();
+        if (detail != null) {
+            dto.setPaymentRecordDetail(detail.convertToDto());
+        }
         dto.setApproverId(getApproverId());
         dto.setApproverName(getAuthInfoName(getApproverId()));
         dto.setRejectorId(getRejectorId());
