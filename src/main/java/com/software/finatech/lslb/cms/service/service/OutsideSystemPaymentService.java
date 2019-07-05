@@ -100,6 +100,7 @@ public class OutsideSystemPaymentService {
             paymentRecord.setInstitutionId(fullPaymentConfirmationRequest.getInstitutionId());
             paymentRecord.setFeePaymentTypeId(fullPaymentConfirmationRequest.getFeePaymentTypeId());
             paymentRecord.setAmountPaid(0);
+            paymentRecord.setForOutsideSystemPayment(true);
             paymentRecord.setPaymentReference(NumberUtil.generateTransactionReferenceForPaymentRecord());
             paymentRecord.setGamingMachineIds(fullPaymentConfirmationRequest.getGamingMachineIds());
             paymentRecord.setGamingTerminalIds(fullPaymentConfirmationRequest.getGamingTerminalIds());
