@@ -50,7 +50,7 @@ public class PaymentConfirmationApprovalRequest extends AbstractApprovalRequest 
 
     public PaymentConfirmationApprovalRequestDto convertToDto() {
         PaymentConfirmationApprovalRequestDto dto = new PaymentConfirmationApprovalRequestDto();
-        dto.setId(UUID.randomUUID().toString());
+        dto.setId(getId());
         dto.setInitiatorId(getInitiatorId());
         dto.setDateCreated(getDateCreatedString());
         dto.setInitiatorName(getAuthInfoName(getInitiatorId()));
