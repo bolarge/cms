@@ -16,6 +16,7 @@ import com.software.finatech.lslb.cms.service.util.NumberUtil;
 import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +88,7 @@ public class OutsideSystemPaymentService {
             }
             Mono<ResponseEntity> validateOutsidePaymentResponse = validateOutsidePayment(fullPaymentConfirmationRequest);
             if (validateOutsidePaymentResponse != null) {
-                return null;
+                return validateOutsidePaymentResponse;
             }
             PaymentRecord paymentRecord = new PaymentRecord();
             paymentRecord.setAmountOutstanding(fullPaymentConfirmationRequest.getAmountPaid());
@@ -103,6 +104,7 @@ public class OutsideSystemPaymentService {
             paymentRecord.setGamingMachineIds(fullPaymentConfirmationRequest.getGamingMachineIds());
             paymentRecord.setGamingTerminalIds(fullPaymentConfirmationRequest.getGamingTerminalIds());
             paymentRecord.setLicenseTransferId(fullPaymentConfirmationRequest.getLicenseTransferId());
+            paymentRecord.setCreationDate(LocalDate.now());
             mongoRepositoryReactive.saveOrUpdate(paymentRecord);
             PaymentRecordDetail detail = new PaymentRecordDetail();
             detail.setId(UUID.randomUUID().toString());
