@@ -108,41 +108,40 @@ public class DatabaseLoaderUtils {
     // @PostConstruct
     public void runLoadData() {
 
-        ConcurrentHashMap<String, Class> factEnums = new ConcurrentHashMap<>();
-        factEnums.put("AuthRole", AuthRole.class);
-        factEnums.put("AuthPermission", AuthPermission.class);
-        factEnums.put("GameType", GameType.class);
-        factEnums.put("ApplicationFormStatus", ApplicationFormStatus.class);
-        factEnums.put("LicenseStatus", LicenseStatus.class);
-        factEnums.put("PaymentStatus", PaymentStatus.class);
-        factEnums.put("FeePaymentType", FeePaymentType.class);
-        factEnums.put("ScheduledMeetingStatus", ScheduledMeetingStatus.class);
-        factEnums.put("DocumentPurpose", DocumentPurpose.class);
+        Mapstore.FACT_ENUM.put("AuthRole", AuthRole.class);
+        Mapstore.FACT_ENUM.put("AuthPermission", AuthPermission.class);
+        Mapstore.FACT_ENUM.put("GameType", GameType.class);
+        Mapstore.FACT_ENUM.put("ApplicationFormStatus", ApplicationFormStatus.class);
+        Mapstore.FACT_ENUM.put("LicenseStatus", LicenseStatus.class);
+        Mapstore.FACT_ENUM.put("PaymentStatus", PaymentStatus.class);
+        Mapstore.FACT_ENUM.put("FeePaymentType", FeePaymentType.class);
+        Mapstore.FACT_ENUM.put("ScheduledMeetingStatus", ScheduledMeetingStatus.class);
+        Mapstore.FACT_ENUM.put("DocumentPurpose", DocumentPurpose.class);
 //        factEnums.put("DocumentType", DocumentType.class);
-        factEnums.put("ModeOfPayment", ModeOfPayment.class);
-        factEnums.put("LicenseType", LicenseType.class);
-        factEnums.put("ApprovalRequestStatus", ApprovalRequestStatus.class);
-        factEnums.put("AgentApprovalRequestType", AgentApprovalRequestType.class);
-        factEnums.put("RenewalFormStatus", RenewalFormStatus.class);
-        factEnums.put("CustomerComplainStatus", CustomerComplainStatus.class);
-        factEnums.put("AuditAction", AuditAction.class);
-        factEnums.put("LoggedCaseStatus", LoggedCaseStatus.class);
-        factEnums.put("UserApprovalRequestType", UserApprovalRequestType.class);
-        factEnums.put("FeeApprovalRequestType", FeeApprovalRequestType.class);
-        factEnums.put("DocumentApprovalRequestType", DocumentApprovalRequestType.class);
-        factEnums.put("MachineApprovalRequestType", MachineApprovalRequestType.class);
-        factEnums.put("MachineType", MachineType.class);
-        factEnums.put("MachineStatus", MachineStatus.class);
-        factEnums.put("LicenseTransferStatus", LicenseTransferStatus.class);
-        factEnums.put("MeetingPurpose", ScheduledMeetingPurpose.class);
-        factEnums.put("AgentStatus", AgentStatus.class);
-        factEnums.put("CaseAndComplainType", CaseAndComplainType.class);
-        factEnums.put("CaseAndComplainCategory", CaseAndComplainCategory.class);
-        factEnums.put("LoggedCaseOutcome", LoggedCaseOutcome.class);
-        factEnums.put("InspectionStatus", InspectionStatus.class);
-        factEnums.put("Gender", Gender.class);
+        Mapstore.FACT_ENUM.put("ModeOfPayment", ModeOfPayment.class);
+        Mapstore.FACT_ENUM.put("LicenseType", LicenseType.class);
+        Mapstore.FACT_ENUM.put("ApprovalRequestStatus", ApprovalRequestStatus.class);
+        Mapstore.FACT_ENUM.put("AgentApprovalRequestType", AgentApprovalRequestType.class);
+        Mapstore.FACT_ENUM.put("RenewalFormStatus", RenewalFormStatus.class);
+        Mapstore.FACT_ENUM.put("CustomerComplainStatus", CustomerComplainStatus.class);
+        Mapstore.FACT_ENUM.put("AuditAction", AuditAction.class);
+        Mapstore.FACT_ENUM.put("LoggedCaseStatus", LoggedCaseStatus.class);
+        Mapstore.FACT_ENUM.put("UserApprovalRequestType", UserApprovalRequestType.class);
+        Mapstore.FACT_ENUM.put("FeeApprovalRequestType", FeeApprovalRequestType.class);
+        Mapstore.FACT_ENUM.put("DocumentApprovalRequestType", DocumentApprovalRequestType.class);
+        Mapstore.FACT_ENUM.put("MachineApprovalRequestType", MachineApprovalRequestType.class);
+        Mapstore.FACT_ENUM.put("MachineType", MachineType.class);
+        Mapstore.FACT_ENUM.put("MachineStatus", MachineStatus.class);
+        Mapstore.FACT_ENUM.put("LicenseTransferStatus", LicenseTransferStatus.class);
+        Mapstore.FACT_ENUM.put("MeetingPurpose", ScheduledMeetingPurpose.class);
+        Mapstore.FACT_ENUM.put("AgentStatus", AgentStatus.class);
+        Mapstore.FACT_ENUM.put("CaseAndComplainType", CaseAndComplainType.class);
+        Mapstore.FACT_ENUM.put("CaseAndComplainCategory", CaseAndComplainCategory.class);
+        Mapstore.FACT_ENUM.put("LoggedCaseOutcome", LoggedCaseOutcome.class);
+        Mapstore.FACT_ENUM.put("InspectionStatus", InspectionStatus.class);
+        Mapstore.FACT_ENUM.put("Gender", Gender.class);
 
-        for (Map.Entry<String, Class> entry : factEnums.entrySet()) {
+        for (Map.Entry<String, Class> entry : Mapstore.FACT_ENUM.entrySet()) {
 
             logger.info("Importing ReferenceMasterData for > " + entry.getKey());
             Long startTime = System.nanoTime();
