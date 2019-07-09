@@ -118,7 +118,7 @@ public class DatabaseLoaderUtils {
         factEnums.put("FeePaymentType", FeePaymentType.class);
         factEnums.put("ScheduledMeetingStatus", ScheduledMeetingStatus.class);
         factEnums.put("DocumentPurpose", DocumentPurpose.class);
-        factEnums.put("DocumentType", DocumentType.class);
+//        factEnums.put("DocumentType", DocumentType.class);
         factEnums.put("ModeOfPayment", ModeOfPayment.class);
         factEnums.put("LicenseType", LicenseType.class);
         factEnums.put("ApprovalRequestStatus", ApprovalRequestStatus.class);
