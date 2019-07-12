@@ -66,7 +66,7 @@ public class DatabaseLoaderUtils {
         AuthRoleReferenceData.load(mongoRepositoryReactive);
         LSLBAuthPermissionReferenceData.load(mongoRepositoryReactive);
         LSLBAuthRoleReferenceData.load(mongoRepositoryReactive);
-        GameTypeReferenceData.load(mongoRepositoryReactive);
+        //GameTypeReferenceData.load(mongoRepositoryReactive);
         ApplicationFormStatusReferenceData.load(mongoRepositoryReactive);
         PaymentStatusReferenceData.load(mongoRepositoryReactive);
         LicenseStatusReferenceData.load(mongoRepositoryReactive);
@@ -117,7 +117,7 @@ public class DatabaseLoaderUtils {
         Mapstore.FACT_ENUM.put("FeePaymentType", FeePaymentType.class);
         Mapstore.FACT_ENUM.put("ScheduledMeetingStatus", ScheduledMeetingStatus.class);
         Mapstore.FACT_ENUM.put("DocumentPurpose", DocumentPurpose.class);
-//        factEnums.put("DocumentType", DocumentType.class);
+        Mapstore.FACT_ENUM.put("DocumentType", DocumentType.class);
         Mapstore.FACT_ENUM.put("ModeOfPayment", ModeOfPayment.class);
         Mapstore.FACT_ENUM.put("LicenseType", LicenseType.class);
         Mapstore.FACT_ENUM.put("ApprovalRequestStatus", ApprovalRequestStatus.class);
