@@ -32,6 +32,8 @@ public class Institution extends AbstractFact {
     private boolean fromLiveData;
     private Set<String> phoneNumbers = new HashSet<>();
 
+    public Institution() {}
+
     public Set<String> getPhoneNumbers() {
         return phoneNumbers;
     }
