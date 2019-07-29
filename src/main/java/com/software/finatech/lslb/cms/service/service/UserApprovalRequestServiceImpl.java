@@ -45,6 +45,7 @@ import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logA
 public class UserApprovalRequestServiceImpl implements UserApprovalRequestService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserApprovalRequestServiceImpl.class);
+
     private static final String userAuditActionId = AuditActionReferenceData.USER_ID;
 
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
@@ -172,7 +173,6 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             return Mono.just(new ResponseEntity<>("Invalid request", HttpStatus.BAD_REQUEST));
         }
         try {
-
 
             if (userApprovalRequest.isCreateUser()) {
                 approveCreateUser(userApprovalRequest);

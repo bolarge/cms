@@ -1,11 +1,14 @@
 package com.software.finatech.lslb.cms.service.domain;
 
+import com.software.finatech.lslb.cms.service.controller.AuditTrailController;
 import com.software.finatech.lslb.cms.service.dto.AuthPermissionDto;
 import com.software.finatech.lslb.cms.service.dto.UserApprovalRequestDto;
 import com.software.finatech.lslb.cms.service.referencedata.UserApprovalRequestTypeReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.HashSet;
@@ -16,6 +19,9 @@ import java.util.Set;
 @SuppressWarnings("serial")
 @Document(collection = "UserApprovalRequests")
 public class UserApprovalRequest extends AbstractApprovalRequest {
+
+    private static Logger logger = LoggerFactory.getLogger(UserApprovalRequest.class);
+
     private String newAuthRoleId;
     private String pendingAuthInfoId;
     private String authInfoId;
