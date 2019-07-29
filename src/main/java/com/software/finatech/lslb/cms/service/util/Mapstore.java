@@ -8,6 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by djaiyeola on 9/20/17.
  */
 public class Mapstore {
+
     public static ConcurrentHashMap<String, ConcurrentHashMap<String, FactObject>> STORE = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, Class> FACT_ENUM = new ConcurrentHashMap<>();
 
 }
