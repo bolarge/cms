@@ -20,8 +20,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,7 +123,7 @@ public class AuthRoleController extends BaseController {
             String verbiage = String.format("Created Role -> Role Name : %s ", authRole.getName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(roleAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity(authRole.convertToDto(), HttpStatus.OK));
 
@@ -168,7 +166,7 @@ public class AuthRoleController extends BaseController {
             String verbiage = String.format("Updated Role, Role Name: %s ", authRole.getName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(roleAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity(authRole.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -325,7 +323,7 @@ public class AuthRoleController extends BaseController {
             String verbiage = String.format("Updated Permission, Permission name: %s ", permissionName);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(roleAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity(authPermission.convertToDto(), HttpStatus.OK));
 

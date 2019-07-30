@@ -20,7 +20,6 @@ import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.MachineApprovalRequestMailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -207,7 +206,7 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
                     approvalRequest.getMachineApprovalRequestType(), approvalRequest.getMachineRequestSerialNumber(), approvalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), approvalRequest.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(approvalRequest.convertToDto(), HttpStatus.OK));
         } catch (ApprovalRequestProcessException e) {
@@ -249,7 +248,7 @@ public class MachineApprovalRequestServiceImpl implements MachineApprovalRequest
             String verbiage = String.format("Rejected Machine approval request -> Type: %s ,  Id -> %s", approvalRequest.getMachineApprovalRequestType(), approvalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(machineAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), approvalRequest.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true,RequestAddressUtil.getClientIpAddr(request), verbiage));
             machineApprovalRequestMailSenderAsync.sendMachineApprovalNotificationToRequestInitiator(approvalRequest);
 
             return Mono.just(new ResponseEntity<>("Request successfully rejected", HttpStatus.OK));

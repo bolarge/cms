@@ -23,6 +23,7 @@ public interface PaymentRecordService {
                                                String startDate,
                                                String endDate,
                                                String dateProperty,
+                                               String forOutsideSystemPayment,
                                                HttpServletResponse httpServletResponse);
 
     Mono<ResponseEntity> getAllPaymentStatus();

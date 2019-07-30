@@ -4,9 +4,10 @@ import com.software.finatech.lslb.cms.service.domain.PaymentRecordDetail;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailUpdateDto;
 import com.software.finatech.lslb.cms.service.model.vigipay.VigiPayMessage;
-import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
+
+import javax.servlet.http.HttpServletRequest;
 
 public interface PaymentRecordDetailService {
 
@@ -18,11 +19,10 @@ public interface PaymentRecordDetailService {
 
     Mono<ResponseEntity> findAllPaymentRecordDetailForPaymentRecord(String paymentRecordId);
 
-    Mono<ResponseEntity> updateWebPaymentRecordDetail(PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto, HttpServletRequest request);
+    Mono<ResponseEntity> updatePaymentRecordDetail(PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto, HttpServletRequest request);
 
     PaymentRecordDetail findById(String paymentRecordDetailId);
 
-    //   Mono<ResponseEntity> handleVigipayInBranchNotification(VigipayInBranchNotification vigipayInBranchNotification);
     Mono<ResponseEntity> handleVigipayInBranchNotification(VigiPayMessage vigiPayMessage);
 
     Mono<ResponseEntity> getPaymentInvoiceDetails(String id);

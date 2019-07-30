@@ -83,7 +83,7 @@ vigipay:
   password: ${VIGIPAY_PASSWORD}
   scope: ebipsgatewayapi offline_access roles profile
   grant-type: password
-  token-url: http://sso.test.vggdev.com/identity/connect/token
+  token-url: https://sso.test.vggdev.com/identity/connect/token
   loop-base-url: https://ebipsgateway.test.vggdev.com/api
   country-code: 566
   location-code: LOC

@@ -164,6 +164,11 @@ public class PaymentRecordDetail extends AbstractFact {
         return StringUtils.equals(PaymentStatusReferenceData.FAILED_PAYMENT_STATUS_ID, this.paymentStatusId);
     }
 
+    public boolean isPendingVigiPayConfirmation() {
+        return StringUtils.equals(PaymentStatusReferenceData.PENDING_VIGIPAY_CONFIRMATION_STATUS_ID, this.paymentStatusId);
+    }
+
+
     public String getPaymentDateString() {
         if (this.paymentDate != null) {
             return this.paymentDate.toString("dd-MM-yyyy");

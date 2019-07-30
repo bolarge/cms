@@ -17,7 +17,6 @@ import com.software.finatech.lslb.cms.service.util.async_helpers.AgentCreationNo
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -192,7 +191,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             String verbiage = String.format("Approved agent approval request -> Type: %s ", agentApprovalRequest.getAgentApprovalRequestTypeName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), agentApprovalRequest.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsAndLslbOnAgentRequestCreation(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>("Request successfully approved", HttpStatus.OK));
@@ -258,7 +257,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             String verbiage = String.format("Rejected agent approval request -> Type: %s ", agentApprovalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(agentAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), agentApprovalRequest.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             agentCreationNotifierAsync.sendEmailNotificationToInstitutionAdminsAndLslbOnAgentRequestCreation(agentApprovalRequest);
             return Mono.just(new ResponseEntity<>("Request successfully rejected", HttpStatus.OK));
@@ -375,7 +374,7 @@ public class AgentApprovalRequestServiceImpl implements AgentApprovalRequestServ
             agentApprovalRequest.setApproverId(userId);
             mongoRepositoryReactive.saveOrUpdate(agentApprovalRequest);
             mongoRepositoryReactive.saveOrUpdate(agent);
-            agentUserCreatorAsync.createUserAndCustomerCodeForAgent(agent, request);
+            agentUserCreatorAsync.createUserAndCustomerCodeForAgent(agent);
         }
     }
 

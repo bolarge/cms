@@ -14,8 +14,6 @@ import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.LicenseTransferMailSenderAsync;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,7 +155,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
                     license.getGameType(), license.getLicenseNumber(), licenseTransfer.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(licenseAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institution.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             licenseTransferMailSenderAsync.sendLicenseTransferInitialMailNotificationsToLslbAdmins(licenseTransfer);
             return Mono.just(new ResponseEntity<>(licenseTransfer.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -195,7 +193,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
                     licenseTransfer.getGameType(), licenseTransfer.getLicenseNumber(), licenseTransfer.getFromInstitution(), licenseTransfer.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(licenseAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), institution.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(licenseTransfer.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -255,7 +253,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
                     oldStatus, licenseTransfer.getLicenseTransferStatus(), licenseTransfer.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(licenseAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             mongoRepositoryReactive.saveOrUpdate(licenseTransfer);
             return Mono.just(new ResponseEntity<>(licenseTransfer.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -294,7 +292,7 @@ public class LicenseTransferServiceImpl implements LicenseTransferService {
                     licenseTransfer.getFromInstitution(), licenseTransfer.getToInstitution(), licenseTransfer.getGameType(), licenseTransfer.getLicenseNumber(), licenseTransfer.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(licenseAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(licenseTransfer.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while rejecting license transfer", e);

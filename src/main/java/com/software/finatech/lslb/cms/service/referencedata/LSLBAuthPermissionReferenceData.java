@@ -959,6 +959,26 @@ public class LSLBAuthPermissionReferenceData {
         permission.setDescription("Approve Initial / Exit License Transfer");
         permission.setAuthRoleId(LSLBAuthRoleReferenceData.LSLB_ADMIN_ID);
         mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("96", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("96");
+        }
+        permission.setName("Initiate Payment Confirmation Request");
+        permission.setDescription("Initiate Payment Confirmation Request");
+        permission.getAuthRoleIds().addAll(Arrays.asList(AuthRoleReferenceData.VGG_ADMIN_ID, AuthRoleReferenceData.VGG_USER_ID));
+        mongoRepositoryReactive.saveOrUpdate(permission);
+
+        permission = (AuthPermission) mongoRepositoryReactive.findById("97", AuthPermission.class).block();
+        if (permission == null) {
+            permission = new AuthPermission();
+            permission.setId("97");
+        }
+        permission.setName("Approve/Reject Payment Confirmation Request");
+        permission.setDescription("Approve/Reject Payment Confirmation Request");
+        permission.getAuthRoleIds().addAll(Arrays.asList(AuthRoleReferenceData.VGG_ADMIN_ID, AuthRoleReferenceData.VGG_USER_ID));
+        mongoRepositoryReactive.saveOrUpdate(permission);
     }
 
 

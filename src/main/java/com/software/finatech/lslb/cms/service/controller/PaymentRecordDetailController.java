@@ -68,7 +68,7 @@ public class PaymentRecordDetailController extends BaseController {
     }
     )
     public Mono<ResponseEntity> updatePaymentRecord(@RequestBody @Valid PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto, HttpServletRequest request) {
-        return paymentRecordDetailService.updateWebPaymentRecordDetail(paymentRecordDetailUpdateDto, request);
+        return paymentRecordDetailService.updatePaymentRecordDetail(paymentRecordDetailUpdateDto, request);
     }
 
 

@@ -142,7 +142,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             String verbiage = String.format("Created customer complain -> Ticket Id : %s ", customerComplain.getTicketId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(customerComplainAuditActionId,
                     customerComplain.getCustomerFullName(), customerComplain.getCustomerEmailAddress(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(customerComplain.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -208,7 +208,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             String verbiage = String.format("Closed customer complain -> Ticket Id: %s ", existingCustomerComplain.getTicketId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(customerComplainAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
 
             return Mono.just(new ResponseEntity<>(existingCustomerComplain.convertToFullDetailDto(), HttpStatus.OK));
@@ -252,7 +252,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             String verbiage = String.format("Updated Customer complain status -> Ticket Id: ->  %s ", existingCustomerComplain.getTicketId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(customerComplainAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(existingCustomerComplain.convertToFullDetailDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -293,7 +293,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
             String verbiage = String.format("Started Customer complain Review -> Ticket Id: ->  %s, Category -> %s , Type -> %s ", customerComplain.getTicketId(), customerComplain.getCaseAndComplainCategory(), customerComplain.getCaseAndComplainType());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(customerComplainAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(customerComplain.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -326,7 +326,7 @@ public class CustomerComplainServiceImpl implements CustomerComplainService {
                     customerComplain.getTicketId(), customerComplainCommentCreateDto.getComment());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(customerComplainAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), customerComplain.getCustomerEmailAddress(),
-                    LocalDateTime.now(), LocalDate.now(), true,RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true,RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(customerComplain.convertToFullDetailDto(), HttpStatus.OK));
 
         } catch (Exception e) {

@@ -31,7 +31,16 @@ public class PaymentRecordDto {
     private MachineMultiplePayment machineMultiplePayment;
     private String creationDate;
     private String completionDate;
+    private Boolean forOutsideSystemPayment;
 
+
+    public Boolean getForOutsideSystemPayment() {
+        return forOutsideSystemPayment;
+    }
+
+    public void setForOutsideSystemPayment(Boolean forOutsideSystemPayment) {
+        this.forOutsideSystemPayment = forOutsideSystemPayment;
+    }
 
     public void setGamingMachines(List<MachineDto> gamingMachines) {
         this.gamingMachines = gamingMachines;

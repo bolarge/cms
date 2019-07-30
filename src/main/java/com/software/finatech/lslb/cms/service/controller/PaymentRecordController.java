@@ -31,7 +31,7 @@ public class PaymentRecordController extends BaseController {
 
 
     @RequestMapping(method = RequestMethod.GET, value = "/all", params = {"page", "pageSize", "sortType", "sortProperty", "agentId",
-            "institutionId", "gamingMachineId", "gameTypeId", "feePaymentTypeId", "licenseTypeId", "paymentStatusId", "startDate", "endDate", "dateProperty"})
+            "institutionId", "gamingMachineId", "gameTypeId", "feePaymentTypeId", "licenseTypeId", "paymentStatusId", "startDate", "endDate", "dateProperty", "forOutsideSystemPayment"})
     @ApiOperation(value = "Get all payment records", response = PaymentRecordDto.class, responseContainer = "List", consumes = "application/json")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
@@ -52,10 +52,11 @@ public class PaymentRecordController extends BaseController {
                                                      @RequestParam("startDate") String startDate,
                                                      @RequestParam("endDate") String endDate,
                                                      @RequestParam("dateProperty") String dateProperty,
+                                                     @RequestParam("forOutsideSystemPayment") String forOutsideSystemPayment,
                                                      HttpServletResponse httpServletResponse) {
         try {
             return paymentRecordService.findAllPaymentRecords(page, pageSize, sortType, sortParam, institutionId, agentId, gamingMachineId, gameTypeId,
-                    feePaymentTypeId, revenueNameId, paymentStatusId,startDate, endDate, dateProperty, httpServletResponse);
+                    feePaymentTypeId, revenueNameId, paymentStatusId, startDate, endDate, dateProperty,forOutsideSystemPayment, httpServletResponse);
         } catch (Exception ex) {
             return Mono.just(new ResponseEntity<>("Hey Something Broke", HttpStatus.BAD_REQUEST));
 

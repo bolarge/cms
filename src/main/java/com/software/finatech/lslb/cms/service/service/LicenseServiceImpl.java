@@ -38,6 +38,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData.APPROVED_STATUS_ID;
+import static com.software.finatech.lslb.cms.service.referencedata.ApplicationFormStatusReferenceData.IN_REVIEW_STATUS_ID;
 import static com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData.LICENSED_LICENSE_STATUS_ID;
 import static com.software.finatech.lslb.cms.service.referencedata.LicenseStatusReferenceData.getAllowedLicensedStatusIds;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -496,8 +498,15 @@ public class LicenseServiceImpl implements LicenseService {
         }
         if (page == 0) {
             if (httpServletResponse != null) {
-                long count = mongoRepositoryReactive.count(queryForInstitutionAIP, License.class).block();
+                queryForInstitutionAIP.addCriteria(Criteria.where("formStatusId").is(IN_REVIEW_STATUS_ID));
+                long count = mongoRepositoryReactive.count(queryForInstitutionAIP, AIPDocumentApproval.class).block();
                 httpServletResponse.setHeader("TotalCount", String.valueOf(count));
+                //clear the query from the form status criteria,
+                //and set back to old query before page check
+                queryForInstitutionAIP = new Query();
+                if (!StringUtils.isEmpty(institutionId)) {
+                    queryForInstitutionAIP.addCriteria(Criteria.where("institutionId").is(institutionId));
+                }
             }
         }
 
@@ -539,7 +548,6 @@ public class LicenseServiceImpl implements LicenseService {
             aipCheckDtos.add(aipCheckDto);
 
         });
-
         return Mono.just(new ResponseEntity<>(aipCheckDtos, HttpStatus.OK));
     }
 
@@ -690,7 +698,7 @@ public class LicenseServiceImpl implements LicenseService {
             verbiage = "Moved : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from Renewal In Review back to Renewal In Progress";
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.RENEWAL_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), getInstitution(license.getInstitutionId()).getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 //            List<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(license.getInstitutionId());
 //            institutionAdmins.stream().forEach(institutionAdmin -> {
 //                NotificationDto notificationDto = new NotificationDto();
@@ -715,7 +723,7 @@ public class LicenseServiceImpl implements LicenseService {
             Query queryAIPFormApproval = new Query();
             queryAIPFormApproval.addCriteria(Criteria.where("institutionId").is(institutionId));
             queryAIPFormApproval.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-            queryAIPFormApproval.addCriteria(Criteria.where("formStatusId").is(ApplicationFormStatusReferenceData.APPROVED_STATUS_ID));
+            queryAIPFormApproval.addCriteria(Criteria.where("formStatusId").is(APPROVED_STATUS_ID));
             AIPDocumentApproval aipDocumentApproval = (AIPDocumentApproval) mongoRepositoryReactive.find(queryAIPFormApproval, AIPDocumentApproval.class).block();
             if (aipDocumentApproval == null) {
                 return Mono.just(new ResponseEntity<>("AIP FORM NOT APPROVED", HttpStatus.BAD_REQUEST));
@@ -801,7 +809,7 @@ public class LicenseServiceImpl implements LicenseService {
             verbiage = "UPDATED : " + getInstitution(license.getInstitutionId()).getInstitutionName() + " license status from AIP DOC UPLOADED to AIP COMPLETED";
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.AIP_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), getInstitution(license.getInstitutionId()).getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             Institution institution = getInstitution(institutionId);
             if (institution.isFromLiveData() && license.getExpiryDate().isBefore(LocalDate.now())) {
                 generateLegacyLicenses(license, duration);
@@ -813,7 +821,7 @@ public class LicenseServiceImpl implements LicenseService {
             verbiage = getInstitution(license.getInstitutionId()).getInstitutionName() + " is Licensed ";
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LICENCE_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), getInstitution(license.getInstitutionId()).getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             NotificationDto notificationDto = new NotificationDto();
             notificationDto.setGameType(getGameType(license.getGameTypeId()).getName());
@@ -918,7 +926,7 @@ public class LicenseServiceImpl implements LicenseService {
                 String verbiage = String.format("Transferred License Number -> %s , Category ->%s, Transferor -> %s, Transfereree -> %s",
                         transferredLicense.getLicenseNumber(), transferredLicense.getGameType(), licenseTransfer.getFromInstitution(), licenseTransfer.getToInstitution());
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LICENCE_ID, "System Admin",
-                        String.valueOf(licenseTransfer.getToInstitution()), LocalDateTime.now(), LocalDate.now(), true, null, verbiage));
+                        String.valueOf(licenseTransfer.getToInstitution()), true, null, verbiage));
             }
 
             GameType gameType = paymentRecord.getGameType();
@@ -967,7 +975,7 @@ public class LicenseServiceImpl implements LicenseService {
                     aipDocumentApproval.getFormStatusId(), aipDocumentApproval.getGameTypeName());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.AIP_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), aipDocumentApproval.getInstitutionName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             aipMailSenderAsync.sendAipNotificationToInstitutionAdmins(paymentRecord);
             paymentRecord.setLicenseId(license.getId());
             mongoRepositoryReactive.saveOrUpdate(paymentRecord);
@@ -1302,7 +1310,7 @@ public class LicenseServiceImpl implements LicenseService {
             String verbiage = String.format("Re licenced , Owner -> %s,license Number -> %s , Category -> %s, Old Status  -> %s, New Status -> LICENSED",
                     licenseOwner, license.getLicenseNumber(), license.getGameType(), oldLicenseStatus);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.LICENCE_ID, "System Admin",
-                    String.valueOf(license.getOwnerName()), LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    String.valueOf(license.getOwnerName()), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             //send email to owner
             loggedCaseMailSenderAsync.sendRelicenseMailToLicense(license, oldLicenseStatus);
@@ -1469,7 +1477,7 @@ public class LicenseServiceImpl implements LicenseService {
         Query query = new Query();
         query.addCriteria(Criteria.where("institutionId").is(institutionId));
         query.addCriteria(Criteria.where("gameTypeId").is(gameTypeId));
-        query.addCriteria(Criteria.where("applicationFormStatusId").is(ApplicationFormStatusReferenceData.APPROVED_STATUS_ID));
+        query.addCriteria(Criteria.where("applicationFormStatusId").is(APPROVED_STATUS_ID));
         return (ApplicationForm) mongoRepositoryReactive.find(query, ApplicationForm.class).block();
     }
 

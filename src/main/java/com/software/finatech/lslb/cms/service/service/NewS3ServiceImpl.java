@@ -48,7 +48,6 @@ public class NewS3ServiceImpl implements S3Service {
     @Autowired
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
 
-
     @Override
     public void uploadMultipartForDocument(MultipartFile multipartFile, Document document) throws FileUploadException {
         try {

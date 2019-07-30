@@ -38,6 +38,15 @@ public class PaymentRecord extends AbstractFact {
     private LocalDate creationDate;
     private LocalDate completionDate;
     private boolean forIncompleteOfflineLicenceRenewal;
+    private boolean forOutsideSystemPayment;
+
+    public boolean isForOutsideSystemPayment() {
+        return forOutsideSystemPayment;
+    }
+
+    public void setForOutsideSystemPayment(boolean forOutsideSystemPayment) {
+        this.forOutsideSystemPayment = forOutsideSystemPayment;
+    }
 
     public boolean isForIncompleteOfflineLicenceRenewal() {
         return forIncompleteOfflineLicenceRenewal;
@@ -361,6 +370,7 @@ public class PaymentRecord extends AbstractFact {
         paymentRecordDto.setPaymentReference(getPaymentReference());
         paymentRecordDto.setCreationDate(getCreationDateString());
         paymentRecordDto.setCompletionDate(getCompletionDateString());
+        paymentRecordDto.setForOutsideSystemPayment(isForOutsideSystemPayment());
         return paymentRecordDto;
     }
 

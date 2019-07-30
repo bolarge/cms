@@ -68,6 +68,8 @@ public class VigipayHttpClient {
         } catch (IOException e) {
             logger.error("An error occurred while parsing the response body", e);
             throw new VigiPayServiceException(e.getMessage(), e);
+        } catch (VigiPayServiceException e) {
+            throw new VigiPayServiceException(e);
         } catch (Exception e) {
             logger.error("An error occurred while getting access token on vg pay", e);
             throw new VigiPayServiceException(e.getMessage());
@@ -102,7 +104,7 @@ public class VigipayHttpClient {
             logger.error(message, e);
             throw new VigiPayServiceException(message);
         } catch (VigiPayServiceException e) {
-            throw new VigiPayServiceException(e.getMessage(), e);
+            throw new VigiPayServiceException(e);
         } catch (Exception e) {
             String message = "An error occurred while creating customer with vg pay => " + e.getMessage();
             logger.error(message, e);
@@ -131,6 +133,8 @@ public class VigipayHttpClient {
                 throw new VigiPayServiceException(responseEntity.getBody());
             }
             throw new VigiPayServiceException("Unable to get access token");
+        } catch (VigiPayServiceException e) {
+            throw new VigiPayServiceException(e);
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.error("An error occurred while creating invoice with Vigipay", e);
@@ -138,7 +142,9 @@ public class VigipayHttpClient {
         }
     }
 
-    public boolean validateInvoicePaid(String invoiceNumber) throws VigiPayServiceException {
+    //does lookup of invoice from Vigpay
+    //payment status of 0= Unpaid, 1= Paid
+    public String lookupInvoicePaymentStatus(String invoiceNumber) throws VigiPayServiceException {
         String url = vigipayBaseUrl + "/Invoices/LookUpRef?invoiceReference=" + invoiceNumber;
         try {
             String accessToken = getAccessToken();
@@ -154,16 +160,18 @@ public class VigipayHttpClient {
                 if (responseEntity.getStatusCode() == HttpStatus.OK) {
                     String responseBody = responseEntity.getBody();
                     JSONObject responseJson = new JSONObject(responseBody);
-                    return responseJson.getInt("PaymentStatus") == 1;
+                    return String.valueOf(responseJson.get("PaymentStatus"));
                 }
                 logger.info(responseEntity.getBody());
-                return false;
+                throw new VigiPayServiceException(responseEntity.getBody());
             }
-            return false;
+            throw new VigiPayServiceException("Unable to get access token");
+        } catch (VigiPayServiceException e) {
+            throw new VigiPayServiceException(e);
         } catch (Exception e) {
             String errorMessage = "An error occurred while getting invoice payment status from vigipay";
             logger.error(errorMessage, e);
-            throw new VigiPayServiceException(errorMessage);
+            throw new VigiPayServiceException(errorMessage, e);
         }
     }
 }

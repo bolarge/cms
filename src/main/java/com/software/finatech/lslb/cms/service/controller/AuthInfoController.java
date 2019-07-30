@@ -22,7 +22,6 @@ import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -263,16 +262,16 @@ public class AuthInfoController extends BaseController {
 
 
             if (authInfo == null) {
-                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, loginDto.getUserName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User not found"));
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, loginDto.getUserName(), null, true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User not found"));
                 return Mono.just(new ResponseEntity("Invalid Username/Password", HttpStatus.UNAUTHORIZED));
             }
             if (authInfo.isInactive() == true) {
-                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User Inactive"));
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, authInfo.getFullName(), null, true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User Inactive"));
                 return Mono.just(new ResponseEntity(authInfo.getInactiveReason(), HttpStatus.UNAUTHORIZED));
             }
 
             if (authInfo.getEnabled() != true) {
-                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, authInfo.getFullName(), null, LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User Deactivated"));
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(LOGIN, authInfo.getFullName(), null, true, request.getRemoteAddr(), "Unsuccessful Login Attempt -> User Deactivated"));
                 return Mono.just(new ResponseEntity("User Deactivated", HttpStatus.UNAUTHORIZED));
             }
 
@@ -512,7 +511,7 @@ public class AuthInfoController extends BaseController {
             if (loggedInUser.isGamingOperator()) {
                 authInfo.setEnabled(false);
                 mongoRepositoryReactive.saveOrUpdate(authInfo);
-                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), authInfo.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Deactivated user  %s", authInfo.getFullName())));
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), authInfo.getFullName(), true, request.getRemoteAddr(), String.format("Deactivated user  %s", authInfo.getFullName())));
                 return Mono.just(new ResponseEntity("Success", HttpStatus.OK));
             } else {
                 UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
@@ -524,7 +523,7 @@ public class AuthInfoController extends BaseController {
                 userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
                 mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
                 approvalRequestNotifierAsync.sendNewUserApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
-                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), authInfo.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Created user approval request to disable user %s", authInfo.getFullName())));
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), authInfo.getFullName(), true, request.getRemoteAddr(), String.format("Created user approval request to disable user %s", authInfo.getFullName())));
                 return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
             }
         } catch (Exception e) {
@@ -564,7 +563,7 @@ public class AuthInfoController extends BaseController {
             if (loggedInUser.isGamingOperator()) {
                 authInfo.setEnabled(true);
                 mongoRepositoryReactive.saveOrUpdate(authInfo);
-                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), authInfo.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Activated user %s", authInfo.getFullName())));
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), authInfo.getFullName(), true, request.getRemoteAddr(), String.format("Activated user %s", authInfo.getFullName())));
                 return Mono.just(new ResponseEntity<>("Success", HttpStatus.OK));
             } else {
                 UserApprovalRequest userApprovalRequest = new UserApprovalRequest();
@@ -576,7 +575,7 @@ public class AuthInfoController extends BaseController {
                 userApprovalRequest.setApprovalRequestStatusId(ApprovalRequestStatusReferenceData.PENDING_ID);
                 approvalRequestNotifierAsync.sendNewUserApprovalRequestEmailToAllOtherUsersInRole(loggedInUser, userApprovalRequest);
                 mongoRepositoryReactive.saveOrUpdate(userApprovalRequest);
-                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), authInfo.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), String.format("Created user approval request to activate user %s", authInfo.getFullName())));
+                auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID, loggedInUser.getFullName(), authInfo.getFullName(), true, request.getRemoteAddr(), String.format("Created user approval request to activate user %s", authInfo.getFullName())));
                 return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
             }
         } catch (Exception e) {
@@ -752,7 +751,7 @@ public class AuthInfoController extends BaseController {
             String verbiage = builder.toString();
             String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.USER_ID,
-                    currentAuditorName, authInfo.getFullName(), LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    currentAuditorName, authInfo.getFullName(), true, request.getRemoteAddr(), verbiage));
 
             //        if (authInfoUpdateDto.getFirstName() != null && !authInfoUpdateDto.getFirstName().isEmpty()) {
 //                authInfo.setFirstName(authInfoUpdateDto.getFirstName());

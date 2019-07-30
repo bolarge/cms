@@ -44,6 +44,16 @@ public class MigrationController {
     @Autowired
     private ExistingGamingMachineLoader existingGamingMachineLoader;
 
+
+    /**
+     * Used to load operators from CSV .
+     * Should not be used anymore
+     *
+     * @param multipartFile
+     * @param type
+     * @return
+     */
+    @Deprecated
     @RequestMapping(method = RequestMethod.POST, value = "/load-existing-operators")
     public Mono<ResponseEntity> create(@RequestParam("file") MultipartFile multipartFile,
                                        @RequestParam("type") String type) {
@@ -60,6 +70,14 @@ public class MigrationController {
         }
     }
 
+
+    /**
+     * Used to load agents from csv , should not be used anymore
+     *
+     * @param multipartFile
+     * @return
+     */
+    @Deprecated
     @RequestMapping(method = RequestMethod.POST, value = "/load-existing-agents-from-file")
     public Mono<ResponseEntity> createAgentFromCSV(@RequestParam("file") MultipartFile multipartFile) {
         try {
@@ -74,19 +92,32 @@ public class MigrationController {
     @RequestMapping(method = RequestMethod.POST, value = "/create-agent-users")
     public Mono<ResponseEntity> createAgentUsers() {
         try {
-            existingAgentLoader.createUserAndCustomerCodeForLiveAgents();
+            existingAgentLoader.createUserForLiveAgents();
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
 
-
+    /**
+     * Used to create Migrated Agent
+     *
+     * @param newMigratedAgent
+     * @return
+     */
     @RequestMapping(method = RequestMethod.POST, value = "/create-agent-from-migration")
     public Mono<ResponseEntity> createAgentFromMigration(@RequestBody @Valid NewMigratedAgent newMigratedAgent) {
         return existingAgentLoader.loadAgentFromModel(newMigratedAgent);
     }
 
+    /**
+     * Used to upload migrated terminals
+     *
+     * @param institutionId
+     * @param gameTypeId
+     * @param multipartFile
+     * @return
+     */
     @RequestMapping(method = RequestMethod.POST, value = "/upload-terminals")
     public Mono<ResponseEntity> uploadTerminals(@RequestParam("institutionId") String institutionId,
                                                 @RequestParam("gameTypeId") String gameTypeId,
@@ -99,6 +130,14 @@ public class MigrationController {
         }
     }
 
+    /**
+     * USed to upload migrated machines
+     *
+     * @param institutionId
+     * @param gameTypeId
+     * @param multipartFile
+     * @return
+     */
     @RequestMapping(method = RequestMethod.POST, value = "/upload-machines")
     public Mono<ResponseEntity> uploadMachines(@RequestParam("institutionId") String institutionId,
                                                @RequestParam("gameTypeId") String gameTypeId,
@@ -111,6 +150,12 @@ public class MigrationController {
         }
     }
 
+    /**
+     * USed to upload operators from JSON
+     *
+     * @param migratedInstitutionUpload
+     * @return
+     */
     @RequestMapping(method = RequestMethod.POST, value = "/upload-operator-from-json")
     public Mono<ResponseEntity> uploadInstitution(@RequestBody MigratedInstitutionUpload migratedInstitutionUpload) {
         try {
@@ -122,26 +167,57 @@ public class MigrationController {
     }
 
 
+    /**
+     * Used to manually create operator vigipay customer code
+     *
+     * @param createCustomerCodeDto
+     * @return
+     */
     @RequestMapping(method = RequestMethod.POST, value = "/create-operator-vigipay-code")
     public Mono<ResponseEntity> createOperatorVgPayCode(@RequestBody CreateCustomerCodeDto createCustomerCodeDto) {
         return existingOperatorLoader.createVigiPayCustomerCodeForOperator(createCustomerCodeDto);
     }
 
+    /**
+     * Used to update migrated operator shareholder details
+     *
+     * @param shareHoldersUpdateDto
+     * @return
+     */
     @RequestMapping(method = RequestMethod.POST, value = "/change-directors")
     public Mono<ResponseEntity> uploadMachines(@RequestBody DirectorsUpdateDto shareHoldersUpdateDto) {
         return existingOperatorLoader.updateDirectorDetails(shareHoldersUpdateDto);
     }
 
+    /**
+     * Used to change entire category record of an operator in  a category
+     * (Could be useful when a category is splitted into multiple)
+     *
+     * @param migrateCategoryDto
+     * @return
+     */
     @RequestMapping(method = RequestMethod.POST, value = "/change-category-record")
     public Mono<ResponseEntity> uploadMachines(@RequestBody MigrateCategoryDto migrateCategoryDto) {
         return existingOperatorLoader.changeExistingOperatorCategory(migrateCategoryDto);
     }
 
+    /**
+     * Used to created expired license payment for a migrated operator
+     *
+     * @param createExpiredLicensePaymentDto
+     * @return
+     */
     @RequestMapping(method = RequestMethod.POST, value = "/create-expired-payment")
     public Mono<ResponseEntity> uploadMachines(@RequestBody CreateExpiredLicensePaymentDto createExpiredLicensePaymentDto) {
         return existingOperatorLoader.createExpiredLicenseForOperator(createExpiredLicensePaymentDto);
     }
 
+    /**
+     * used to clear all vigipay customer codes for operators and agents on the system
+     * (can be used in a case where one changes the vigipay merchant account used)
+     *
+     * @return
+     */
     @RequestMapping(method = RequestMethod.POST, value = "/clear-customer-codes")
     public Mono<ResponseEntity> clearVigiPayCustomerCodes() {
         try {
@@ -152,5 +228,4 @@ public class MigrationController {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));
         }
     }
-
 }

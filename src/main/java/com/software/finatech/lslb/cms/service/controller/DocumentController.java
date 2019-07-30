@@ -18,7 +18,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -312,7 +311,7 @@ public class DocumentController extends BaseController {
                     document.getDocumentType(), document.getFilename(), entityName, document.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), document.getOwner(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity<>(document.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -741,7 +740,7 @@ public class DocumentController extends BaseController {
             String verbiage = String.format("Approved document -> Document Type -> %s, File name -> %s, Id -> %s ", document.getDocumentType(), document.getFilename(), documentId);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), document.getOwner(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity<>(document.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -774,7 +773,7 @@ public class DocumentController extends BaseController {
             String verbiage = String.format("Archived Multiple Documents  -> Document Ids -> %s ", builder.toString());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    true, request.getRemoteAddr(), verbiage));
             return Mono.just(new ResponseEntity<>("Document Archived", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while archiving documents", e);
@@ -806,7 +805,7 @@ public class DocumentController extends BaseController {
             String verbiage = String.format("Restored Multiple Documents  -> Document Ids -> %s ", builder.toString());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    true, request.getRemoteAddr(), verbiage));
             return Mono.just(new ResponseEntity<>("Document Archived", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while un archiving documents", e);
@@ -840,7 +839,7 @@ public class DocumentController extends BaseController {
             String verbiage = String.format("Toggled Multiple Documents Archive Status -> Document Ids -> %s ", builder.toString());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), springSecurityAuditorAware.getCurrentAuditorNotNull(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    true, request.getRemoteAddr(), verbiage));
             return Mono.just(new ResponseEntity<>("Document Archive Status Toggled", HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while toggling documents", e);
@@ -887,7 +886,7 @@ public class DocumentController extends BaseController {
             String verbiage = String.format("Rejected document -> Document Type -> %s, File name -> %s, Id -> %s ", document.getDocumentType(), document.getFilename(), documentId);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(AuditActionReferenceData.DOCUMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), document.getOwner(),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity<>(document.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {

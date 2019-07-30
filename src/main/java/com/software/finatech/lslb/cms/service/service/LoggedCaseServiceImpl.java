@@ -166,7 +166,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
                     loggedCase.getTicketId(), loggedCase.getCaseAndComplainType(), loggedCase.getCaseAndComplainCategory(), loggedCase.getLicenseType());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(loggedCaseAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), loggedCase.getReportedEntityName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             loggedCaseMailSenderAsync.sendNewCaseNotificationToLslbUsersThatCanReceive(loggedCase);
 
@@ -214,7 +214,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
                     existingCase.getTicketId(), oldCaseStatus, existingCase.getCaseStatus(existingCase.getLoggedCaseStatusId()));
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(loggedCaseAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), existingCase.getReportedEntityName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
 
             return Mono.just(new ResponseEntity<>(existingCase.convertToFullDto(), HttpStatus.OK));
         } catch (Exception e) {
@@ -252,7 +252,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
                     existingCase.getTicketId(), caseComment.getComment());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(loggedCaseAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), existingCase.getReportedEntityName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(existingCase.convertToFullDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while adding comment to logged case", e);
@@ -340,7 +340,7 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
                     loggedCase.getTicketId(), loggedCaseOutcome);
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(loggedCaseAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), loggedCase.getReportedEntityName(),
-                    LocalDateTime.now(), LocalDate.now(), true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             return Mono.just(new ResponseEntity<>(loggedCase.convertToDto(), HttpStatus.OK));
         } catch (LicenseServiceException e) {
             return Mono.just(new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST));

@@ -9,4 +9,8 @@ public class VigiPayServiceException extends Exception {
     public VigiPayServiceException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public VigiPayServiceException(Throwable cause) {
+        super(cause.getMessage(), cause);
+    }
 }

@@ -2,6 +2,9 @@ package com.software.finatech.lslb.cms.service.referencedata;
 
 import com.software.finatech.lslb.cms.service.domain.LicenseType;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.util.Mapstore;
+
+import java.util.Map;
 
 public class LicenseTypeReferenceData {
 
@@ -42,5 +45,29 @@ public class LicenseTypeReferenceData {
         mongoRepositoryReactive.saveOrUpdate(licenseType1);
         mongoRepositoryReactive.saveOrUpdate(licenseType2);
         mongoRepositoryReactive.saveOrUpdate(licenseType3);
+    }
+
+    public static LicenseType getLicenseTypeById(MongoRepositoryReactiveImpl mongoRepositoryReactive, String licenseTypeId) {
+        Map licenseTypeMap = Mapstore.STORE.get("LicenseType");
+
+        LicenseType licenseType = null;
+        if (licenseTypeMap != null) {
+            licenseType = (LicenseType) licenseTypeMap.get(licenseTypeId);
+        }
+        if (licenseType == null) {
+            licenseType = (LicenseType) mongoRepositoryReactive.findById(licenseTypeId, LicenseType.class).block();
+            if (licenseType != null && licenseTypeMap != null) {
+                licenseTypeMap.put(licenseTypeId, licenseType);
+            }
+        }
+        return licenseType;
+    }
+
+    public static String getLicenseTypeNameById(MongoRepositoryReactiveImpl mongoRepositoryReactive, String id){
+        LicenseType licenseType = getLicenseTypeById(mongoRepositoryReactive, id);
+        if (licenseType != null){
+            return licenseType.getName();
+        }
+        return null;
     }
 }

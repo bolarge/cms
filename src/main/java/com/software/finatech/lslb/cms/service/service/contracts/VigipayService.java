@@ -22,5 +22,5 @@ public interface VigipayService {
                                                            List<AuthInfo> adminsForInstitution,
                                                            List<VigipayInvoiceItem> vigipayInvoiceItems) throws VigiPayServiceException;
 
-    boolean isConfirmedInvoicePayment(String invoiceNumber) throws VigiPayServiceException;
+    String getVigipayPaymentStatusForInvoice(String invoiceNumber) throws VigiPayServiceException;
 }

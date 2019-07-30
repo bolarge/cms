@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
-
 @Component
 public class AgentUserCreator {
 
@@ -30,7 +28,7 @@ public class AgentUserCreator {
         this.customerCodeCreatorAsync = customerCodeCreatorAsync;
     }
 
-    public void createUserAndCustomerCodeForAgent(Agent agent, HttpServletRequest httpServletRequest) {
+    public void createUserAndCustomerCodeForAgent(Agent agent) {
         try {
             AuthInfoCreateDto agentUserCreateDto = createAuthInfoDtoFromAgent(agent);
             authInfoService.createAuthInfo(agentUserCreateDto, frontEndPropertyHelper.getFrontEndUrl()).block();
@@ -41,6 +39,16 @@ public class AgentUserCreator {
             customerCodeCreatorAsync.createVigipayCustomerCodeForAgent(agent);
         } catch (Exception e) {
             logger.error("An error occurred while creating vigipay customer code for agent {} -> {}", agent.getId(), agent.getFullName(), e);
+        }
+    }
+
+
+    public void createUserForAgent(Agent agent) {
+        try {
+            AuthInfoCreateDto agentUserCreateDto = createAuthInfoDtoFromAgent(agent);
+            authInfoService.createAuthInfo(agentUserCreateDto, frontEndPropertyHelper.getFrontEndUrl()).block();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
         }
     }
 

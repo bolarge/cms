@@ -5,6 +5,9 @@ import javax.servlet.http.HttpServletRequest;
 public class RequestAddressUtil {
 
     public static String getClientIpAddr(HttpServletRequest request) {
+        if (request == null) {
+            return "127.0.0.1(Background Service)";
+        }
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");

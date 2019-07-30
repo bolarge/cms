@@ -17,8 +17,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,7 +124,7 @@ public class DocumentTypeController extends BaseController {
             String verbiage = String.format("Created document type -> Document Type  Name: -> %s, Id -> %s ", documentType, documentType.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(configAuditActionId,
                     loggedInUserName, String.format("%s--%s", loggedInUserName, documentType),
-                    LocalDateTime.now(), LocalDate.now(), true, request.getRemoteAddr(), verbiage));
+                    true, request.getRemoteAddr(), verbiage));
 
             return Mono.just(new ResponseEntity(documentType.convertToDto(), HttpStatus.OK));
         }
