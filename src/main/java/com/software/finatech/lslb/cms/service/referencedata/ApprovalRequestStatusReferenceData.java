@@ -1,9 +1,15 @@
 package com.software.finatech.lslb.cms.service.referencedata;
 
 import com.software.finatech.lslb.cms.service.domain.ApprovalRequestStatus;
+import com.software.finatech.lslb.cms.service.domain.UserApprovalRequest;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ApprovalRequestStatusReferenceData {
+
+    private static Logger logger = LoggerFactory.getLogger(ApprovalRequestStatusReferenceData.class);
+
     public static final String APPROVED_ID = "1";
     public static final String PENDING_ID = "2";
     public static final String REJECTED_ID = "3";

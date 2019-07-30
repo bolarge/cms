@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.*;
@@ -18,6 +19,7 @@ import java.util.*;
 @SuppressWarnings("serial")
 @Document(collection = "AuthInfo")
 public class AuthInfo extends AbstractFact {
+
     protected String passwordResetToken;
     protected String attachmentId;
     protected String institutionId;
@@ -30,6 +32,8 @@ public class AuthInfo extends AbstractFact {
     protected boolean accountLocked;
     protected DateTime accountExpirationTime;
     protected DateTime credentialsExpirationTime;
+    //Updated this day 23.07.2917 Applied Unique constraint to the emailAddress property of AuthInfo
+    @Indexed(unique = true)
     protected String emailAddress;
     protected String authRoleId;
     protected String ssoUserId;
@@ -37,7 +41,20 @@ public class AuthInfo extends AbstractFact {
     protected String agentId;
     protected LocalDate lastInactiveDate;
     protected String initialPassword;
+    protected String gameTypeId;
+    protected Set<String> authPermissionIds = new HashSet<>();
+    @Transient
+    protected AuthRole authRole;
+    @Transient
+    protected String gameTypeName;
+    private boolean inactive;
+    private String inactiveReason;
+    //UI application level field settings
+    protected Set<String> authViews = new java.util.HashSet<>();
 
+    public AuthInfo() {
+        super();
+    }
 
     public String getInitialPassword() {
         return initialPassword;
@@ -54,18 +71,6 @@ public class AuthInfo extends AbstractFact {
     public void setLastInactiveDate(LocalDate lastInactiveDate) {
         this.lastInactiveDate = lastInactiveDate;
     }
-
-    //UI application level field settings
-    protected Set<String> authViews = new java.util.HashSet<>();
-    protected String gameTypeId;
-    protected Set<String> authPermissionIds = new HashSet<>();
-    @Transient
-    protected AuthRole authRole;
-    @Transient
-    protected String gameTypeName;
-
-    private boolean inactive;
-    private String inactiveReason;
 
     public boolean isInactive() {
         return inactive;
@@ -126,7 +131,6 @@ public class AuthInfo extends AbstractFact {
     public void setPasswordResetToken(String passwordResetToken) {
         this.passwordResetToken = passwordResetToken;
     }
-
 
     public void setAuthRole(AuthRole authRole) {
         this.authRole = authRole;
@@ -270,6 +274,7 @@ public class AuthInfo extends AbstractFact {
         return super.clone();
     }
 
+    // STATE COMMUNICATION; TO BE REIMPLEMENTED AT THE SERVICE LAYER. TOO TIGHTLY COUPLED AS IT IS
     public AuthInfoDto convertToDto() {
         AuthInfoDto authInfoDto = new AuthInfoDto();
         authInfoDto.setEnabled(getEnabled());

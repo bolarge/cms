@@ -7,6 +7,7 @@ spring:
       max-request-size: 30MB
   sendgrid:
     api-key: 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
+
 management:
   endpoint:
   enabled-by-default: false
@@ -23,25 +24,29 @@ management:
     show-details: ALWAYS
   shutdown:
     enabled: true
+
 server:
-  port: ${APPLICATIONPORT:2001}
+  port: 2001 #${APPLICATIONPORT:2001}cld
+
 security:
   enable-csrf: false
   ignored: /resources/**
   basic:
     enabled: false
+
+#Pointing to Test Environment
 mongodb:
-  hosts: db2.mlnx.test.vggdev.com #172.31.31.29:27017,172.31.22.131:27017
+  hosts: 154.113.17.169 #localhost #172.31.31.29:27017,172.31.22.131:27017
   username: useradmin
   password: f1nat3ch
   database: LslbCMSDb
-  authDb:
+  authDb: admin
   replicaSet:
-
 logging:
   level:
     ROOT: INFO
-    #Rememeber to change the credentials for SSO
+
+#Rememeber to change the credentials for SSO
 sso:
   baseIdentityURL: https://sso.test.vggdev.com/identity
   baseAPIURL: http://ssoapi.test.vggdev.com
@@ -56,12 +61,13 @@ sso:
 jwt:
   header: Authorization
 
-
+#Web Interface Client
 racs:
   ui:
     host: localhost
     port: 3000
 
+#Vigipay Integration
 vigipay:
   client_id: LAGOS_STATE_LOTTERIES_BOARD_API1G302IAOYGB6
   client-secret: pgmDKCCqeXfb3eXK
@@ -77,11 +83,13 @@ vigipay:
   corporate-revenue-code: Default
   corporate-code: COR4U7CJTRAZW7H
 
+#SMTP Integration
 email-host: smtp.gmail.com
 email-username: lslbcms@gmail.com
 email-password: password@123456
 email-port: 587
 
+#Amazon Integration
 amazon:
   s3:
     bucket-name: vgg-aws-finatech
@@ -89,4 +97,4 @@ amazon:
     secret-access-key: ntM0RAmEAeQj3RIKtCkwe67XpSVxTlm/Uofk3jID
 
 seed_user_1:
-  email: ${seed_user1_email:oladapo.animashaun@venturegardengroup.com}
+  email: ${seed_user1_email:abolaji.salau@venturegardengroup.com}

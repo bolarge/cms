@@ -1,20 +1,24 @@
-.idea/
 target/
-.settings
-.vscode/launch.json
-racs-user-service.iml
+!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+.apt_generated
 .classpath
+.factorypath
 .project
-lslb-cms-user-service.iml
-lslb-cms.iml
-application-test.yml
-application-development.yml
-src/main/resources/agent-data/
-src/main/resources/application-adedev.yml
-Failed-Machines.csv
-smile-networks.jpg
-lslb-live-files/
-src/main/resources/Binary
-logs/
-src/main/java/com/software/finatech/lslb/cms/service/controller/NewTestController.java
-#0--
+.settings
+.springBeans
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
