@@ -12,6 +12,7 @@ import com.software.finatech.lslb.cms.service.service.AuthInfoServiceImpl;
 import com.software.finatech.lslb.cms.service.service.MailContentBuilderService;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
+import com.software.finatech.lslb.cms.service.util.FactObjectCache;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApprovalRequestNotifierAsync;
@@ -50,6 +51,7 @@ import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logA
 @RestController
 @RequestMapping("/api/v1/authInfo")
 public class AuthInfoController extends BaseController {
+
     @Autowired
     private AuthInfoServiceImpl authInfoService;
     @Autowired
@@ -60,8 +62,12 @@ public class AuthInfoController extends BaseController {
 
     @Autowired
     private SpringSecurityAuditorAware springSecurityAuditorAware;
+
     @Autowired
     private ApprovalRequestNotifierAsync approvalRequestNotifierAsync;
+
+    @Autowired
+    private FactObjectCache factObjectCache;
 
     private static final String LOGIN = AuditActionReferenceData.LOGIN_ID;
 
@@ -812,12 +818,15 @@ public class AuthInfoController extends BaseController {
         verificationToken.setForResourceOwnerUserCreation(expiredVerificationToken.isForResourceOwnerUserCreation());
 
         AuthInfo AuthInfo = (AuthInfo) mongoRepositoryReactive.find(new Query(Criteria.where("id").is(verificationToken.getAuthInfoId())), AuthInfo.class).block();
+
         if (AuthInfo == null) {
             return ErrorResponseUtil.BadRequestResponse("There is no user attached to token");
         }
+
         if (AuthInfo.getEnabled()) {
             return Mono.just(new ResponseEntity<>("Registration Already Completed", HttpStatus.BAD_REQUEST));
         }
+
         String appUrl =
                 appHostPort +
                         request.getContextPath();
@@ -833,10 +842,10 @@ public class AuthInfoController extends BaseController {
         content = content.replaceAll("CallbackUrl", url);
         emailService.sendEmail(content, "Registration Confirmation", AuthInfo.getEmailAddress());
 
-
         mongoRepositoryReactive.saveOrUpdate(verificationToken);
 
         return Mono.just(new ResponseEntity("Token Resent", HttpStatus.CREATED));
+
     }
 
 
@@ -888,21 +897,40 @@ public class AuthInfoController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getAuthPermissionsToAddForUser(@RequestParam("userId") String userId) {
         try {
+
             AuthInfo loggedInUser = authInfoService.getUserById(userId);
+
             if (loggedInUser == null) {
                 return Mono.just(new ResponseEntity<>(String.format("User with id %s not found", userId), HttpStatus.BAD_REQUEST));
             }
+
             Map<String, FactObject> authPermissionMap = Mapstore.STORE.get("AuthPermission");
+
+            if(authPermissionMap == null) {
+                factObjectCache.reloadFactObjectForKey("AuthPermission");
+
+            }
+
+            authPermissionMap = Mapstore.STORE.get("AuthPermission");
+
+            if(authPermissionMap == null ) {
+                return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
+            }
+
             Collection<FactObject> factObjects = authPermissionMap.values();
             ArrayList<AuthPermission> permissions = new ArrayList<>();
+
             for (FactObject factObject : factObjects) {
+
                 AuthPermission permission = (AuthPermission) factObject;
+
                 if (((StringUtils.equals(loggedInUser.getAuthRoleId(), permission.getAuthRoleId()) ||
                         permission.isUsedBySystem() ||
                         permission.getAuthRoleIds().contains(loggedInUser.getAuthRoleId()))) &&
                         !loggedInUser.getAllUserPermissionIdsForUser().contains(permission.getId())) {
                     permissions.add(permission);
                 }
+
             }
             if (permissions.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
