@@ -429,7 +429,7 @@ public class Agent extends AbstractFact {
     }
 
     public boolean hasUser() {
-        return getAuthInfo() != null;
+        return getAuthInfo() != null; //Check if Agent as an existing User Account
     }
 
     public AgentStatus getAgentStatus() {

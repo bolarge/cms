@@ -126,9 +126,10 @@ public class ExistingAgentLoader {
         Query query = new Query();
         query.addCriteria(Criteria.where("fromLiveData").is(true));
         ArrayList<Agent> liveAgents = (ArrayList<Agent>) mongoRepositoryReactive.findAll(query, Agent.class).toStream().collect(Collectors.toList());
+        logger.info("Size of existing Live Agent is: " + liveAgents.size());
         for (Agent liveAgent : liveAgents) {
             try {
-                if (!liveAgent.hasUser()) {
+                if (!liveAgent.hasUser()) {  //If AgentID attribute is found in AuthInfo, then Agent has been created as a User and Boolean is True.
                     agentUserCreator.createUserAndCustomerCodeForAgent(liveAgent, httpServletRequest);
                     logger.info("Created user for {}", liveAgent.getFullName());
                 }

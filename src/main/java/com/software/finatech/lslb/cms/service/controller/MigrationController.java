@@ -16,6 +16,8 @@ import com.software.finatech.lslb.cms.service.util.data_updater.ExistingGamingTe
 import com.software.finatech.lslb.cms.service.util.data_updater.ExistingOperatorLoader;
 import io.swagger.annotations.Api;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +45,8 @@ public class MigrationController {
     private ExistingGamingTerminalLoader existingGamingTerminalLoader;
     @Autowired
     private ExistingGamingMachineLoader existingGamingMachineLoader;
+
+    private static final Logger logger = LoggerFactory.getLogger(MigrationController.class);
 
     @RequestMapping(method = RequestMethod.POST, value = "/load-existing-operators")
     public Mono<ResponseEntity> create(@RequestParam("file") MultipartFile multipartFile,
@@ -75,6 +79,7 @@ public class MigrationController {
     public Mono<ResponseEntity> createAgentUsers() {
         try {
             existingAgentLoader.createUserAndCustomerCodeForLiveAgents();
+            logger.info("Size of existing Agent to Load is XXXXXX: ");
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
         } catch (Exception e) {
             return Mono.just(new ResponseEntity<>("Error", HttpStatus.INTERNAL_SERVER_ERROR));

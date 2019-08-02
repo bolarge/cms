@@ -36,12 +36,13 @@ security:
 
 #Pointing to Test Environment
 mongodb:
-  hosts: 154.113.17.169 #localhost #172.31.31.29:27017,172.31.22.131:27017
+  hosts: localhost
   username: useradmin
   password: f1nat3ch
-  database: LslbCMSDb
-  authDb: admin
+  database: LslbCMSTestDb
+  authDb: LslbCMSDb
   replicaSet:
+
 logging:
   level:
     ROOT: INFO
