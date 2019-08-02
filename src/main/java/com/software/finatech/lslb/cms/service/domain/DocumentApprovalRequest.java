@@ -59,8 +59,10 @@ public class DocumentApprovalRequest extends AbstractApprovalRequest {
         if (documentApprovalRequestTypeMap != null) {
             documentApprovalRequestType = (DocumentApprovalRequestType) documentApprovalRequestTypeMap.get(this.documentApprovalRequestTypeId);
         }
-        if (documentApprovalRequestType == null) {
-            documentApprovalRequestType = (DocumentApprovalRequestType) mongoRepositoryReactive.findById(this.documentApprovalRequestTypeId, AgentApprovalRequestType.class).block();
+        if (documentApprovalRequestType == null) { 
+        	//31/07/2019
+        	//documentApprovalRequestType = (DocumentApprovalRequestType) mongoRepositoryReactive.findById(this.documentApprovalRequestTypeId, AgentApprovalRequestType.class).block();
+            documentApprovalRequestType = (DocumentApprovalRequestType) mongoRepositoryReactive.findById(this.documentApprovalRequestTypeId, DocumentApprovalRequest.class).block();
             if (documentApprovalRequestType != null && documentApprovalRequestTypeMap != null) {
                 documentApprovalRequestTypeMap.put(this.documentApprovalRequestTypeId, documentApprovalRequestType);
             }
