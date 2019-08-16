@@ -60,7 +60,7 @@ public class DocumentApprovalRequest extends AbstractApprovalRequest {
             documentApprovalRequestType = (DocumentApprovalRequestType) documentApprovalRequestTypeMap.get(this.documentApprovalRequestTypeId);
         }
         if (documentApprovalRequestType == null) { 
-        	//31/07/2019
+        	//31/07/2019 Wrong cast of DocumentApprovalRequestType to AgentApprovalRequestType
         	//documentApprovalRequestType = (DocumentApprovalRequestType) mongoRepositoryReactive.findById(this.documentApprovalRequestTypeId, AgentApprovalRequestType.class).block();
             documentApprovalRequestType = (DocumentApprovalRequestType) mongoRepositoryReactive.findById(this.documentApprovalRequestTypeId, DocumentApprovalRequest.class).block();
             if (documentApprovalRequestType != null && documentApprovalRequestTypeMap != null) {
