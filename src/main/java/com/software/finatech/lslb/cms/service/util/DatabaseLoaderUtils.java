@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class DatabaseLoaderUtils {
     private static Logger logger = LoggerFactory.getLogger(DatabaseLoaderUtils.class);
 
-    @Value("${seed_user_1}") //@Value("${seed_user_1.email}") Property does not exist in environment variable definition in properties file
+    @Value("${seed_user_1.email}")
     private String seedUserEmail1;
 
     @Autowired
