@@ -212,6 +212,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                         springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
                         true, requestIpAddress, verbiage));
+                logger.info("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXXXXXX");
                 return Mono.just(new ResponseEntity<>(toCreateAuthInfoResponse(authInfo, verificationToken), HttpStatus.OK));
             }
         } catch (Exception e) {

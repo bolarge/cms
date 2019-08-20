@@ -148,11 +148,11 @@ public class EmailService {
         if (environmentUtils.isDevelopmentEnvironment() ||
                 environmentUtils.isStagingEnvironment() ||
                 environmentUtils.isTestEnvironment()) {
-            return "dev@lslbcms.com";
+            return "support@lslbcms.com";
         }
 
         if (environmentUtils.isProductionEnvironment()) {
-            return "no-reply@lslbcms.com";
+            return "support@lslbcms.com";
         }
         return "";
     }

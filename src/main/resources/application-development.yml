@@ -88,7 +88,7 @@ vigipay:
 email-host: email-smtp.eu-west-1.amazonaws.com
 email-username: AKIAJO4UADW7RDBL2VLQ #AKIA4NIIUUQEN2XFDDOZ #support@lslbcms.com
 email-password: At16c00DP+uonPCk6KuuGeaHNM3NzfF/Ga6VFGcmuR5d #BBy0JX5u+q/jfx3XvLcbfC+kxPp0rc4Hub/lMwbCeEzl
-email-port: 25
+email-port: 587
 
 #Amazon Integration
 amazon:
@@ -98,4 +98,4 @@ amazon:
     secret-access-key: ntM0RAmEAeQj3RIKtCkwe67XpSVxTlm/Uofk3jID
 
 seed_user_1:
-  email: ${seed_user1_email:abolaji.salau@venturegardengroup.com}
+  email: oladapo.animashaun@venturegardengroup.com #seed_user1_email:oladapo.animashaun@venturegardengroup.com
