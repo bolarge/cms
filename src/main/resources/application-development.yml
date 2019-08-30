@@ -86,8 +86,8 @@ vigipay:
 
 #SMTP Integration
 email-host: email-smtp.eu-west-1.amazonaws.com
-email-username: AKIAJO4UADW7RDBL2VLQ #AKIA4NIIUUQEN2XFDDOZ #support@lslbcms.com
-email-password: At16c00DP+uonPCk6KuuGeaHNM3NzfF/Ga6VFGcmuR5d #BBy0JX5u+q/jfx3XvLcbfC+kxPp0rc4Hub/lMwbCeEzl
+email-username: AKIA4NIIUUQEN2XFDDOZ #support@lslbcms.com
+email-password: BBy0JX5u+q/jfx3XvLcbfC+kxPp0rc4Hub/lMwbCeEzl #At16c00DP+uonPCk6KuuGeaHNM3NzfF/Ga6VFGcmuR5d #BBy0JX5u+q/jfx3XvLcbfC+kxPp0rc4Hub/lMwbCeEzl
 email-port: 587
 
 #Amazon Integration

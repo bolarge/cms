@@ -4,11 +4,14 @@ import com.software.finatech.lslb.cms.service.dto.ApprovalRequestOperationtDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseTrannsferCreateRequest;
 import com.software.finatech.lslb.cms.service.dto.LicenseTransferDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseTransferSetToInstitutionRequest;
+import com.software.finatech.lslb.cms.service.service.AuthInfoServiceImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.LicenseTransferService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +25,11 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/v1/license-transfers")
 public class LicenseTransferController  extends BaseController{
+
     private LicenseTransferService licenseTransferService;
+
+    @Autowired
+    private static Logger logger = LoggerFactory.getLogger(LicenseTransferController.class);
 
     @Autowired
     public void setLicenseTransferService(LicenseTransferService licenseTransferService) {

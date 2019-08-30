@@ -191,10 +191,15 @@ public class ApprovalRequestNotifierAsync  {
         String frontEndUrl = String.format("%s/user-approval-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), userApprovalRequest.getId());
         String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
         String subjectUserName = userApprovalRequest.getSubjectUserName();
+        String reason = userApprovalRequest.getRejectionReason();
         String approvalRequestType = String.valueOf(userApprovalRequest.getUserApprovalRequestType());
         HashMap<String, Object> model = new HashMap<>();
         model.put("userName", subjectUserName);
         model.put("date", presentDateString);
+        //Updated 29/08/2019 Bolaji Salau
+        logger.info("This is the Rejection reason: " + reason);
+        model.put("reason", reason);
+        //\/
         model.put("approvalType", approvalRequestType);
         model.put("frontEndUrl", frontEndUrl);
         return mailContentBuilderService.build(model, "approval-request/RejectedUserApprovalRequest");

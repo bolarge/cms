@@ -6,6 +6,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/fees")
 public class FeeController extends BaseController {
+
+    @Autowired
+    private static Logger logger = LoggerFactory.getLogger(FeeController.class);
+
     @Autowired
     public FeeService feeService;
 
@@ -141,6 +147,9 @@ public class FeeController extends BaseController {
     public Mono<ResponseEntity> findRevenueNamesByParam(@RequestParam("institutionId") String institutionId,
                                                         @RequestParam("agentId") String agentId,
                                                         @RequestParam("gameTypeId")String gameTypeId) {
+
+        Mono<ResponseEntity> aa = feeService.findLicenseTypeByParams(institutionId, agentId, gameTypeId);
+
         return feeService.findLicenseTypeByParams(institutionId, agentId, gameTypeId);
     }
 

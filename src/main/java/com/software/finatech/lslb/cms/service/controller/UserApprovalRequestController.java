@@ -79,6 +79,7 @@ public class UserApprovalRequestController  extends BaseController{
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> rejectRequest(@RequestBody @Valid ApprovalRequestOperationtDto agentApprovalRequestOperationtDto, HttpServletRequest request) {
+        logger.info("XXX AT CONTROLLER INTERCEPT: " + agentApprovalRequestOperationtDto.getReason());
         return userApprovalRequestService.rejectRequest(agentApprovalRequestOperationtDto, request);
     }
 

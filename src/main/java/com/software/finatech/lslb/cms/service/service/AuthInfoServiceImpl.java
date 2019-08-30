@@ -169,6 +169,7 @@ public class AuthInfoServiceImpl implements AuthInfoService {
             response = httpclient.execute(httpGet);
             responseCode = response.getStatusLine().getStatusCode();
             SSOUserDetail SSOUserDetail = null;
+            logger.info("XXXXXXXXXXX SSO is : " + responseCode);
 
             if (responseCode == 200) {
                 // everything is fine, handle the response
@@ -178,7 +179,9 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                     userExists = true;
                 }
             } else {
+                logger.info("XXXXXXXXXXX 222222222 SSO is : " + responseCode);
                 throw new ApprovalRequestProcessException("Unable to check if user exist on SSO");
+
             }
 
             // user exist so we add claims
@@ -212,7 +215,6 @@ public class AuthInfoServiceImpl implements AuthInfoService {
                 auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                         springSecurityAuditorAware.getCurrentAuditorNotNull(), authInfo.getFullName(),
                         true, requestIpAddress, verbiage));
-                logger.info("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXXXXXX");
                 return Mono.just(new ResponseEntity<>(toCreateAuthInfoResponse(authInfo, verificationToken), HttpStatus.OK));
             }
         } catch (Exception e) {

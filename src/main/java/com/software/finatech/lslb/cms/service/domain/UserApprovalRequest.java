@@ -26,6 +26,7 @@ public class UserApprovalRequest extends AbstractApprovalRequest {
     private String pendingAuthInfoId;
     private String authInfoId;
     private String userApprovalRequestTypeId;
+    private String approvalReason;
     private Set<String> newPermissionIds = new HashSet<>();
     private Set<String> removedPermissionIds = new HashSet<>();
 
@@ -75,6 +76,14 @@ public class UserApprovalRequest extends AbstractApprovalRequest {
 
     public void setRemovedPermissionIds(Set<String> removedPermissionIds) {
         this.removedPermissionIds = removedPermissionIds;
+    }
+
+    public String getApprovalReason() {
+        return approvalReason;
+    }
+
+    public void setApprovalReason(String approvalReason) {
+        this.approvalReason = approvalReason;
     }
 
     public UserApprovalRequestType getUserApprovalRequestType() {

@@ -243,6 +243,7 @@ public class UserApprovalRequestServiceImpl implements UserApprovalRequestServic
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(userAuditActionId,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), userApprovalRequest.getSubjectUserName(),
                     true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+            logger.info("XXXXXXX THIS IS IT: " + userApprovalRequest.getRejectionReason());
 
             approvalRequestNotifierAsync.sendRejectedUserApprovalRequestEmailToInitiator(userApprovalRequest);
             return Mono.just(new ResponseEntity<>(userApprovalRequest.convertToHalfDto(), HttpStatus.OK));
