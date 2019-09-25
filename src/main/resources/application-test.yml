@@ -7,25 +7,20 @@ spring:
       max-request-size: 30MB
   sendgrid:
         api-key: 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
-
-management:
-  endpoint:
-  enabled-by-default: false
-  shutdown:
-    enabled: true
 management:
   endpoints:
     web:
       exposure:
         include: "*"
   endpoint:
-  enabled-by-default: true
+    enabled-by-default: true
   health:
     show-details: ALWAYS
   shutdown:
     enabled: true
 server:
   port: ${APPLICATION_PORT:2001}
+  
 security:
   enable-csrf: false
   ignored: /resources/**
@@ -44,16 +39,10 @@ mongodb:
   authDb:
   replicaSet:
 
-
-
 logging:
   level:
     ROOT: INFO
     #Rememeber to change the credentials for SSO
-
-
-
-
 
 sso:
   baseIdentityURL: https://sso.test.vggdev.com/identity
@@ -69,12 +58,10 @@ sso:
 jwt:
   header: Authorization
 
-
 racs:
   ui:
     host: ${UI_HOST}
     port:
-
 
 vigipay:
   client-id: ${VIGIPAY_CLIENT_ID}
@@ -90,7 +77,6 @@ vigipay:
   currency-code: NGN
   corporate-revenue-code: Default
   corporate-code: COR1DCDPGO2JS3X
-
 
 amazon:
   s3:
