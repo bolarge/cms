@@ -31,10 +31,10 @@ server:
 #Pointing to Local Environment
 mongodb:
   hosts: localhost
-  username: useradmin
+  username: cmsadmin
   password: f1nat3ch
   database: LslbCMSDb
-  authDb: LslbCMSDb
+  authDb:   LslbCMSDb
   replicaSet:
 
 logging:
