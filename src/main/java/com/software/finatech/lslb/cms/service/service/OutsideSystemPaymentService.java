@@ -83,6 +83,7 @@ public class OutsideSystemPaymentService {
     public Mono<ResponseEntity> createFullPaymentConfirmationRequest(FullPaymentConfirmationRequest fullPaymentConfirmationRequest, HttpServletRequest request) {
         try {
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            logger.info("Step 1 Checks who LoggedInUser is: " + loggedInUser);
             if (loggedInUser == null) {
                 return ErrorResponse("Could not find logged in user");
             }
@@ -90,6 +91,9 @@ public class OutsideSystemPaymentService {
             if (validateOutsidePaymentResponse != null) {
                 return validateOutsidePaymentResponse;
             }
+            logger.info("Step to be an Outside Payment ");
+            String invoiceNumber = NumberUtil.generateInvoiceNumber();
+
             PaymentRecord paymentRecord = new PaymentRecord();
             paymentRecord.setAmountOutstanding(fullPaymentConfirmationRequest.getAmountPaid());
             paymentRecord.setAmount(fullPaymentConfirmationRequest.getAmountPaid());
@@ -106,6 +110,8 @@ public class OutsideSystemPaymentService {
             paymentRecord.setGamingTerminalIds(fullPaymentConfirmationRequest.getGamingTerminalIds());
             paymentRecord.setLicenseTransferId(fullPaymentConfirmationRequest.getLicenseTransferId());
             paymentRecord.setCreationDate(LocalDate.now());
+            paymentRecord.setInvoiceNumber(invoiceNumber);
+            paymentRecord.setCreationDate(LocalDate.now());
             mongoRepositoryReactive.saveOrUpdate(paymentRecord);
             PaymentRecordDetail detail = new PaymentRecordDetail();
             detail.setId(UUID.randomUUID().toString());
@@ -113,7 +119,7 @@ public class OutsideSystemPaymentService {
             detail.setModeOfPaymentId(OFFLINE_CONFIRMATION_ID);
             detail.setPaymentRecordId(paymentRecord.getId());
             detail.setAmount(fullPaymentConfirmationRequest.getAmountPaid());
-            detail.setInvoiceNumber(generateInvoiceNumber());
+            detail.setInvoiceNumber(invoiceNumber);
             mongoRepositoryReactive.saveOrUpdate(detail);
 
             String gameTypeName = gameTypeService.findNameById(fullPaymentConfirmationRequest.getGameTypeId());
@@ -127,6 +133,7 @@ public class OutsideSystemPaymentService {
             approvalRequest.setPaymentRecordDetailId(detail.getId());
             approvalRequest.setApprovalRequestTypeId(CONFIRM_FULL_PAYMENT_ID);
             approvalRequest.setInitiatorId(loggedInUser.getId());
+            //approvalRequest.setInvoiceNumber(invoiceNumber);
             approvalRequest.setPaymentOwnerName(ownerName);
             mongoRepositoryReactive.saveOrUpdate(approvalRequest);
 
@@ -141,7 +148,8 @@ public class OutsideSystemPaymentService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(PAYMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName,
                     true, RequestAddressUtil.getClientIpAddr(request), verbiage));
-            return OKResponse(approvalRequest.convertToDto());
+            //return OKResponse(approvalRequest.convertToDto());
+            return OKResponse(paymentRecord);
         } catch (Exception e) {
             return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while making outside payment", e);
         }

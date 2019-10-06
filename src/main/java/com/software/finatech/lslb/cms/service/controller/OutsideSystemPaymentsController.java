@@ -53,4 +53,6 @@ public class OutsideSystemPaymentsController {
     public Mono<ResponseEntity> createNewPartialPayment(@RequestBody PartialPaymentConfirmationRequest partialPaymentConfirmationRequest, HttpServletRequest request) {
         return outsideSystemPaymentService.createPartialPaymentConfirmationRequest(partialPaymentConfirmationRequest, request);
     }
+
+
 }

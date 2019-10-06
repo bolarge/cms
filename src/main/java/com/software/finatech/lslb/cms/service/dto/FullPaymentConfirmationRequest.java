@@ -16,6 +16,11 @@ public class FullPaymentConfirmationRequest {
     private String licenseTransferId;
     private Set<String> gamingMachineIds;
     private Set<String> gamingTerminalIds;
+    /*
+   Added to meet implementation logic of Offline Payment Processing
+    */
+    private String invoiceNumber;
+    private String modeOfPaymentId;
 
     public String getLicenseTransferId() {
         return licenseTransferId;
@@ -116,4 +121,12 @@ public class FullPaymentConfirmationRequest {
     public boolean isBeingPaidByAgent() {
         return StringUtils.isNotEmpty(this.agentId);
     }
+
+    public String getInvoiceNumber() { return invoiceNumber; }
+
+    public void setInvoiceNumber(String invoiceNumber) { this.invoiceNumber = invoiceNumber; }
+
+    public String getModeOfPaymentId() { return modeOfPaymentId; }
+
+    public void setModeOfPaymentId(String modeOfPaymentId) { this.modeOfPaymentId = modeOfPaymentId; }
 }

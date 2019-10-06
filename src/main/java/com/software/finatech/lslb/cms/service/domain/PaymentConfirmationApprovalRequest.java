@@ -15,6 +15,10 @@ public class PaymentConfirmationApprovalRequest extends AbstractApprovalRequest 
     private String approvalRequestTypeId;
     private String paymentRecordDetailId;
     private String paymentOwnerName;
+    /*
+   Added to meet implementation logic of Offline Payment Processing
+    */
+    private String invoiceNumber;
 
     public String getPaymentOwnerName() {
         return paymentOwnerName;
@@ -100,6 +104,10 @@ public class PaymentConfirmationApprovalRequest extends AbstractApprovalRequest 
     public boolean isConfirmPartialPayment() {
         return StringUtils.equals(CONFIRM_PARTIAL_PAYMENT_ID, this.approvalRequestTypeId);
     }
+
+    public String getInvoiceNumber() { return invoiceNumber; }
+
+    public void setInvoiceNumber(String invoiceNumber) { this.invoiceNumber = invoiceNumber; }
 
     @Override
     public String getFactName() {

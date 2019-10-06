@@ -39,6 +39,11 @@ public class PaymentRecord extends AbstractFact {
     private LocalDate completionDate;
     private boolean forIncompleteOfflineLicenceRenewal;
     private boolean forOutsideSystemPayment;
+    /*
+    Added to meet implementation logic of Offline Payment Processing
+     */
+    private String invoiceNumber;
+    private String modeOfPaymentId;
 
     public boolean isForOutsideSystemPayment() {
         return forOutsideSystemPayment;
@@ -160,7 +165,6 @@ public class PaymentRecord extends AbstractFact {
         this.feeId = feeId;
     }
 
-
     public String getPaymentStatusId() {
         return paymentStatusId;
     }
@@ -229,6 +233,22 @@ public class PaymentRecord extends AbstractFact {
 
     public void setPaymentRecordDetailIds(List<String> paymentRecordDetailIds) {
         this.paymentRecordDetailIds = paymentRecordDetailIds;
+    }
+
+    public String getInvoiceNumber() {
+        return invoiceNumber;
+    }
+
+    public void setInvoiceNumber(String invoiceNumber) {
+        this.invoiceNumber = invoiceNumber;
+    }
+
+    public String getModeOfPaymentId() {
+        return modeOfPaymentId;
+    }
+
+    public void setModeOfPaymentId(String modeOfPaymentId) {
+        this.modeOfPaymentId = modeOfPaymentId;
     }
 
     public String getGameTypeName() {
