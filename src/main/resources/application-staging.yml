@@ -9,24 +9,19 @@ spring:
         api-key: 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
 
 management:
-  endpoint:
-  enabled-by-default: false
-  shutdown:
-    enabled: true
-
-management:
   endpoints:
     web:
       exposure:
         include: "*"
   endpoint:
-  enabled-by-default: true
+    enabled-by-default: true
   health:
     show-details: ALWAYS
   shutdown:
     enabled: true
 server:
   port: ${APPLICATION_PORT:2001}
+  
 security:
   enable-csrf: false
   ignored: /resources/**
