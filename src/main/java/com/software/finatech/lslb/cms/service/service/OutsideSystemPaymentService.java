@@ -127,7 +127,8 @@ public class OutsideSystemPaymentService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(paymentAuditActionId,
                     currentAuditorName, currentAuditorName,
                     true, getClientIpAddr(httpServletRequest), verbiage));
-            paymentEmailNotifierAsync.sendPaymentNotificationForPaymentRecordDetail(existingInvoicedPayment, paymentRecord);
+            //paymentEmailNotifierAsync.sendPaymentNotificationForPaymentRecordDetail(existingInvoicedPayment, paymentRecord);
+            paymentEmailNotifierAsync.sendPaymentNotificationToLSLBUsers(existingInvoicedPayment, paymentRecord);
             return Mono.just(new ResponseEntity<>(existingInvoicedPayment.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while updating payment record detail", e);

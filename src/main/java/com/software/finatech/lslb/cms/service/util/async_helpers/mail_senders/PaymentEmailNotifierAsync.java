@@ -42,7 +42,8 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
         }
     }
 
-    private void sendPaymentNotificationToLSLBUsers(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
+    @Async
+    public void sendPaymentNotificationToLSLBUsers(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
         ArrayList<AuthInfo> lslbMembersForPaymentNotification = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_PAYMENT_NOTIFICATION_ID);
         if (lslbMembersForPaymentNotification == null || lslbMembersForPaymentNotification.isEmpty()) {
             logger.info("No LSLB finance admin found, skipping email");
