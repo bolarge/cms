@@ -395,7 +395,7 @@ public class PaymentRecord extends AbstractFact {
             paymentRecordDto.setAgentId(getAgentId());
             ownerName = agent.getFullName();
         }
-
+        paymentRecordDto.setInvoiceNumber(getInvoiceNumber());
         paymentRecordDto.setAmount(getAmount());
         paymentRecordDto.setAmountPaid(getAmountPaid());
         paymentRecordDto.setAmountOutstanding(getAmountOutstanding());

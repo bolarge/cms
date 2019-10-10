@@ -32,6 +32,14 @@ public class PaymentRecordDto {
     private String creationDate;
     private String completionDate;
     private Boolean forOutsideSystemPayment;
+    /*
+   Added to meet implementation logic of Offline Payment Processing
+    */
+    private String invoiceNumber;
+    private String modeOfPaymentId;
+    private String lastTellerNumber;
+    private String bankName;
+    private boolean isFullPayment = false;
 
 
     public Boolean getForOutsideSystemPayment() {
@@ -257,5 +265,45 @@ public class PaymentRecordDto {
 
     public String getEndYear() {
         return endYear;
+    }
+
+    public String getInvoiceNumber() {
+        return invoiceNumber;
+    }
+
+    public void setInvoiceNumber(String invoiceNumber) {
+        this.invoiceNumber = invoiceNumber;
+    }
+
+    public String getModeOfPaymentId() {
+        return modeOfPaymentId;
+    }
+
+    public void setModeOfPaymentId(String modeOfPaymentId) {
+        this.modeOfPaymentId = modeOfPaymentId;
+    }
+
+    public String getLastTellerNumber() {
+        return lastTellerNumber;
+    }
+
+    public void setLastTellerNumber(String lastTellerNumber) {
+        this.lastTellerNumber = lastTellerNumber;
+    }
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+
+    public boolean isFullPayment() {
+        return isFullPayment;
+    }
+
+    public void setFullPayment(boolean fullPayment) {
+        isFullPayment = fullPayment;
     }
 }
