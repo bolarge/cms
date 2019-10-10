@@ -44,6 +44,9 @@ public class PaymentRecord extends AbstractFact {
      */
     private String invoiceNumber;
     private String modeOfPaymentId;
+    private String lastTellerNumber;
+    private String bankName;
+    private boolean isFullPayment = false;
 
     public boolean isForOutsideSystemPayment() {
         return forOutsideSystemPayment;
@@ -181,6 +184,18 @@ public class PaymentRecord extends AbstractFact {
         this.institutionId = institutionId;
     }
 
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+
+    public boolean isFullPayment() { return isFullPayment; }
+
+    public void setFullPayment(boolean fullPayment) { isFullPayment = fullPayment; }
+
     public Institution getInstitution() {
         if (StringUtils.isEmpty(this.institutionId)) {
             return null;
@@ -229,6 +244,14 @@ public class PaymentRecord extends AbstractFact {
 
     public List<String> getPaymentRecordDetailIds() {
         return paymentRecordDetailIds;
+    }
+
+    public String getLastTellerNumber() {
+        return lastTellerNumber;
+    }
+
+    public void setLastTellerNumber(String lastTellerNumber) {
+        this.lastTellerNumber = lastTellerNumber;
     }
 
     public void setPaymentRecordDetailIds(List<String> paymentRecordDetailIds) {

@@ -7,6 +7,8 @@ import javax.validation.constraints.NotEmpty;
 
 public class PaymentRecordDetailUpdateDto {
     private String invoiceNumber;
+    private String tellerNumber;
+    private String bankName;
     @NotEmpty(message = "Please provide payment status id")
     private String paymentStatusId;
     @NotEmpty(message = "please provide the id of the entity")
@@ -58,4 +60,12 @@ public class PaymentRecordDetailUpdateDto {
     public void setId(String id) {
         this.id = id;
     }
+
+    public String getTellerNumber() { return tellerNumber; }
+
+    public void setTellerNumber(String tellerNumber) { this.tellerNumber = tellerNumber; }
+
+    public String getBankName() { return bankName; }
+
+    public void setBankName(String bankName) { this.bankName = bankName; }
 }

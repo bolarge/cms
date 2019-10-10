@@ -5,6 +5,7 @@ spring:
     multipart:
       max-file-size: 30MB
       max-request-size: 30MB
+      enabled: true
   sendgrid:
     api-key: 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
 

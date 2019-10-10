@@ -284,5 +284,6 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         query.with(sort);
         return (PaymentRecordDetail) mongoRepositoryReactive.find(query, PaymentRecordDetail.class).block();
     }
+
 }
 

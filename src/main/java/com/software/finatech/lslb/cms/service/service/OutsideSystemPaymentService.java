@@ -4,8 +4,10 @@ import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.FullPaymentConfirmationRequest;
 import com.software.finatech.lslb.cms.service.dto.PartialPaymentConfirmationRequest;
+import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailUpdateDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
+import com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
@@ -15,8 +17,10 @@ import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
 import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.PaymentEmailNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,13 +43,18 @@ import static com.software.finatech.lslb.cms.service.referencedata.PaymentConfir
 import static com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData.UNPAID_STATUS_ID;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.BadRequestResponse;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.ErrorResponse;
+import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
 import static com.software.finatech.lslb.cms.service.util.NumberUtil.generateInvoiceNumber;
 import static com.software.finatech.lslb.cms.service.util.OKResponseUtil.OKResponse;
+import static com.software.finatech.lslb.cms.service.util.RequestAddressUtil.getClientIpAddr;
 
 @Service
 public class OutsideSystemPaymentService {
-    private static final Logger logger = LoggerFactory.getLogger(OutsideSystemPaymentService.class);
 
+    private static final Logger logger = LoggerFactory.getLogger(OutsideSystemPaymentService.class);
+    private static final String paymentAuditActionId = AuditActionReferenceData.PAYMENT_ID;
+
+    private PaymentRecordDetailService paymentRecordDetailService;
     private MongoRepositoryReactiveImpl mongoRepositoryReactive;
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
@@ -56,6 +65,8 @@ public class OutsideSystemPaymentService {
     private PaymentRecordService paymentRecordService;
     private ApplicationFormService applicationFormService;
     private LicenseTransferService licenseTransferService;
+    private PaymentEmailNotifierAsync paymentEmailNotifierAsync;
+
 
     @Autowired
     public OutsideSystemPaymentService(MongoRepositoryReactiveImpl mongoRepositoryReactive,
@@ -67,7 +78,9 @@ public class OutsideSystemPaymentService {
                                        AgentService agentService,
                                        PaymentRecordService paymentRecordService,
                                        ApplicationFormService applicationFormService,
-                                       LicenseTransferService licenseTransferService) {
+                                       LicenseTransferService licenseTransferService,
+                                       PaymentRecordDetailService paymentRecordDetailService,
+                                       PaymentEmailNotifierAsync paymentEmailNotifierAsync) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.auditLogHelper = auditLogHelper;
@@ -78,6 +91,47 @@ public class OutsideSystemPaymentService {
         this.paymentRecordService = paymentRecordService;
         this.applicationFormService = applicationFormService;
         this.licenseTransferService = licenseTransferService;
+        this.paymentRecordDetailService = paymentRecordDetailService;
+        this.paymentEmailNotifierAsync = paymentEmailNotifierAsync;
+    }
+
+    public Mono<ResponseEntity> updateOfflinePaymentRecordDetail(PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto, HttpServletRequest httpServletRequest) {
+        try {
+            String paymentInvoice = paymentRecordDetailUpdateDto.getInvoiceNumber();
+            PaymentRecordDetail existingInvoicedPayment =  (PaymentRecordDetail) mongoRepositoryReactive.find(Query.query(Criteria.where("invoiceNumber").is(paymentRecordDetailUpdateDto.getInvoiceNumber())), PaymentRecordDetail.class).block();
+            if (existingInvoicedPayment == null) {
+                return Mono.just(new ResponseEntity<>(String.format("Payment with invoice %s does not exist", paymentInvoice), HttpStatus.BAD_REQUEST));
+            }
+
+            PaymentRecord paymentRecord = paymentRecordService.findById(existingInvoicedPayment.getPaymentRecordId());
+            if (paymentRecordDetailUpdateDto.isSuccessFulPayment()
+                    && !existingInvoicedPayment.isSuccessfulPayment()) {
+                double amountPaid = paymentRecord.getAmountPaid();
+                amountPaid = amountPaid + existingInvoicedPayment.getAmount();
+                paymentRecord.setAmountPaid(amountPaid);
+
+                double amountOutstanding = paymentRecord.getAmountOutstanding();
+                amountOutstanding = amountOutstanding - existingInvoicedPayment.getAmount();
+                paymentRecord.setAmountOutstanding(amountOutstanding);
+
+                mongoRepositoryReactive.saveOrUpdate(paymentRecord);
+            }
+            existingInvoicedPayment.setInvoiceNumber(paymentRecordDetailUpdateDto.getInvoiceNumber());
+            existingInvoicedPayment.setPaymentDate(LocalDateTime.now());
+            existingInvoicedPayment.setPaymentStatusId(paymentRecordDetailUpdateDto.getPaymentStatusId());
+            existingInvoicedPayment.setVigiPayTransactionReference(paymentRecordDetailUpdateDto.getVigipayReference());
+            mongoRepositoryReactive.saveOrUpdate(existingInvoicedPayment);
+
+            String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
+            String verbiage = String.format("Payment record detail callback -> Payment Record Detail id: %s, Invoice Number -> %s, Status Id -> %s", paymentInvoice, existingInvoicedPayment.getInvoiceNumber(), paymentRecordDetailUpdateDto.getPaymentStatusId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(paymentAuditActionId,
+                    currentAuditorName, currentAuditorName,
+                    true, getClientIpAddr(httpServletRequest), verbiage));
+            paymentEmailNotifierAsync.sendPaymentNotificationForPaymentRecordDetail(existingInvoicedPayment, paymentRecord);
+            return Mono.just(new ResponseEntity<>(existingInvoicedPayment.convertToDto(), HttpStatus.OK));
+        } catch (Exception e) {
+            return logAndReturnError(logger, "An error occurred while updating payment record detail", e);
+        }
     }
 
     public Mono<ResponseEntity> createFullPaymentConfirmationRequest(FullPaymentConfirmationRequest fullPaymentConfirmationRequest, HttpServletRequest request) {
@@ -133,7 +187,7 @@ public class OutsideSystemPaymentService {
             approvalRequest.setPaymentRecordDetailId(detail.getId());
             approvalRequest.setApprovalRequestTypeId(CONFIRM_FULL_PAYMENT_ID);
             approvalRequest.setInitiatorId(loggedInUser.getId());
-            //approvalRequest.setInvoiceNumber(invoiceNumber);
+            approvalRequest.setInvoiceNumber(invoiceNumber);
             approvalRequest.setPaymentOwnerName(ownerName);
             mongoRepositoryReactive.saveOrUpdate(approvalRequest);
 
@@ -149,7 +203,8 @@ public class OutsideSystemPaymentService {
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName,
                     true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             //return OKResponse(approvalRequest.convertToDto());
-            return OKResponse(paymentRecord);
+
+                return OKResponse(paymentRecord.convertToDto());
         } catch (Exception e) {
             return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while making outside payment", e);
         }
@@ -183,7 +238,7 @@ public class OutsideSystemPaymentService {
             String ownerName = paymentRecord.getOwnerName();
             PaymentRecordDetail recordDetail = new PaymentRecordDetail();
             recordDetail.setId(UUID.randomUUID().toString());
-            recordDetail.setAmount(confirmationRequest.getAmount());
+            recordDetail.setAmount(confirmationRequest.getAmount()); //Amount is on Invoice
             recordDetail.setPaymentRecordId(paymentRecord.getId());
             recordDetail.setModeOfPaymentId(OFFLINE_CONFIRMATION_ID);
             recordDetail.setInvoiceNumber(generateInvoiceNumber());

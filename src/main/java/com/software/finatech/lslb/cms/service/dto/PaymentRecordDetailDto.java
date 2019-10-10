@@ -12,6 +12,8 @@ public class PaymentRecordDetailDto {
     private String paymentRecordId;
     private String vigiPayReference;
     private String paymentStatusId;
+    private String tellerNumber;
+    private String bankName;
 
 
     public String getPaymentStatusId() {
@@ -101,4 +103,12 @@ public class PaymentRecordDetailDto {
     public void setInvoiceNumber(String invoiceNumber) {
         this.invoiceNumber = invoiceNumber;
     }
+
+    public String getTellerNumber() { return tellerNumber; }
+
+    public void setTellerNumber(String tellerNumber) { this.tellerNumber = tellerNumber; }
+
+    public String getBankName() { return bankName; }
+
+    public void setBankName(String bankName) { this.bankName = bankName; }
 }

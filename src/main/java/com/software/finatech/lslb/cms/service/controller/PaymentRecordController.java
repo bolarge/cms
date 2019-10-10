@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @RequestMapping("/api/v1/payment-records")
 public class  PaymentRecordController extends BaseController {
-    @Autowired
+    //@Autowired
     private PaymentRecordService paymentRecordService;
 
     @Autowired
