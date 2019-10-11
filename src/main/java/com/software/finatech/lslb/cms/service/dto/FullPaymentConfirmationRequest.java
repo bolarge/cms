@@ -21,6 +21,7 @@ public class FullPaymentConfirmationRequest {
     */
     private String invoiceNumber;
     private String modeOfPaymentId;
+    private String paymentConfirmationApprovalRequestType;
 
     public String getLicenseTransferId() {
         return licenseTransferId;
@@ -129,4 +130,8 @@ public class FullPaymentConfirmationRequest {
     public String getModeOfPaymentId() { return modeOfPaymentId; }
 
     public void setModeOfPaymentId(String modeOfPaymentId) { this.modeOfPaymentId = modeOfPaymentId; }
+
+    public String getPaymentConfirmationApprovalRequestType() { return paymentConfirmationApprovalRequestType; }
+
+    public void setPaymentConfirmationApprovalRequestType(String paymentConfirmationApprovalRequestType) { this.paymentConfirmationApprovalRequestType = paymentConfirmationApprovalRequestType; }
 }

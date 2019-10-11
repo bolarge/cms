@@ -40,7 +40,7 @@ public class PaymentRecordDto {
     private String lastTellerNumber;
     private String bankName;
     private boolean isFullPayment = false;
-
+    private String paymentConfirmationApprovalRequestType;
 
     public Boolean getForOutsideSystemPayment() {
         return forOutsideSystemPayment;
@@ -305,5 +305,13 @@ public class PaymentRecordDto {
 
     public void setFullPayment(boolean fullPayment) {
         isFullPayment = fullPayment;
+    }
+
+    public String getPaymentConfirmationApprovalRequestType() {
+        return paymentConfirmationApprovalRequestType;
+    }
+
+    public void setPaymentConfirmationApprovalRequestType(String paymentConfirmationApprovalRequestType) {
+        this.paymentConfirmationApprovalRequestType = paymentConfirmationApprovalRequestType;
     }
 }

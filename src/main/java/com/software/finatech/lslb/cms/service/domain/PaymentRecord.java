@@ -47,6 +47,7 @@ public class PaymentRecord extends AbstractFact {
     private String lastTellerNumber;
     private String bankName;
     private boolean isFullPayment = false;
+    private String paymentConfirmationApprovalRequestType;
 
     public boolean isForOutsideSystemPayment() {
         return forOutsideSystemPayment;
@@ -274,6 +275,14 @@ public class PaymentRecord extends AbstractFact {
         this.modeOfPaymentId = modeOfPaymentId;
     }
 
+    public String getPaymentConfirmationApprovalRequestType() {
+        return paymentConfirmationApprovalRequestType;
+    }
+
+    public void setPaymentConfirmationApprovalRequestType(String paymentConfirmationApprovalRequestType) {
+        this.paymentConfirmationApprovalRequestType = paymentConfirmationApprovalRequestType;
+    }
+
     public String getGameTypeName() {
         GameType gameType = getGameType();
         if (gameType != null) {
@@ -372,6 +381,7 @@ public class PaymentRecord extends AbstractFact {
     public PaymentRecordDto convertToDto() {
         PaymentRecordDto paymentRecordDto = new PaymentRecordDto();
         paymentRecordDto.setId(getId());
+        paymentRecordDto.setInvoiceNumber(getInvoiceNumber());
         paymentRecordDto.setFeeId(getFeeId());
         String ownerName = "";
         LicenseType licenseType = getLicenseType();
@@ -395,7 +405,6 @@ public class PaymentRecord extends AbstractFact {
             paymentRecordDto.setAgentId(getAgentId());
             ownerName = agent.getFullName();
         }
-        paymentRecordDto.setInvoiceNumber(getInvoiceNumber());
         paymentRecordDto.setAmount(getAmount());
         paymentRecordDto.setAmountPaid(getAmountPaid());
         paymentRecordDto.setAmountOutstanding(getAmountOutstanding());

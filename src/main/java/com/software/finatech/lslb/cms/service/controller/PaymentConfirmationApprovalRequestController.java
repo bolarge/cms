@@ -4,11 +4,14 @@ package com.software.finatech.lslb.cms.service.controller;
 import com.software.finatech.lslb.cms.service.dto.ApprovalRequestOperationtDto;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.PaymentConfirmationApprovalRequestDto;
+import com.software.finatech.lslb.cms.service.service.PaymentRecordDetailServiceImpl;
 import com.software.finatech.lslb.cms.service.service.contracts.PaymentConfirmationApprovalRequestService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +26,9 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/v1/payment-confirmation-approval-requests")
 public class PaymentConfirmationApprovalRequestController {
+
     private PaymentConfirmationApprovalRequestService approvalRequestService;
+    private static final Logger logger = LoggerFactory.getLogger(PaymentConfirmationApprovalRequestController.class);
 
     @Autowired
     public void setApprovalRequestService(PaymentConfirmationApprovalRequestService approvalRequestService) {

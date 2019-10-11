@@ -21,6 +21,7 @@ public class PaymentRecordDetail extends AbstractFact {
     private String modeOfPaymentId;
     private String paymentRecordId;
     private String vigiPayTransactionReference;
+    private String paymentConfirmationApprovalRequestType;
 
     public String getVigiPayTransactionReference() {
         return vigiPayTransactionReference;
@@ -78,6 +79,13 @@ public class PaymentRecordDetail extends AbstractFact {
         this.modeOfPaymentId = modeOfPaymentId;
     }
 
+    public String getPaymentConfirmationApprovalRequestType() {
+        return paymentConfirmationApprovalRequestType;
+    }
+
+    public void setPaymentConfirmationApprovalRequestType(String paymentConfirmationApprovalRequestType) {
+        this.paymentConfirmationApprovalRequestType = paymentConfirmationApprovalRequestType;
+    }
 
     public PaymentRecordDetailDto convertToDto() {
         PaymentRecordDetailDto paymentRecordDetailDto = new PaymentRecordDetailDto();
