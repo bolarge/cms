@@ -142,6 +142,7 @@ public class OutsideSystemPaymentService {
 
             //Check PaymentApprovalRequest Type 1 or 2
             Institution institution = institutionService.findByInstitutionId(paymentRecord.getInstitutionId());
+            Agent agent = agentService.findAgentById(paymentRecord.getAgentId());
             if(existingInvoicedPayment.getPaymentConfirmationApprovalRequestType() == "01") {
                 approvalRequest.setApprovalRequestTypeId(CONFIRM_FULL_PAYMENT_ID);
             }else{
@@ -149,7 +150,12 @@ public class OutsideSystemPaymentService {
             }
             approvalRequest.setInitiatorId(springSecurityAuditorAware.getLoggedInUser().getId());
             approvalRequest.setInvoiceNumber(existingInvoicedPayment.getInvoiceNumber());
-            approvalRequest.setPaymentOwnerName(institution.getInstitutionName());
+            //Check IF Payment is by Institution or Agent
+            if(paymentRecord.isInstitutionPayment()) {
+                approvalRequest.setPaymentOwnerName(institution.getInstitutionName());
+            }else {
+                approvalRequest.setPaymentOwnerName(agent.getFullName());
+            }
             mongoRepositoryReactive.saveOrUpdate(approvalRequest);
 
             String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
