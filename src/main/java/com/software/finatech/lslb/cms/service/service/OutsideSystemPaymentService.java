@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 import static com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData.PAYMENT_ID;
 import static com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReferenceData.INSTITUTION_ID;
+import static com.software.finatech.lslb.cms.service.referencedata.ModeOfPaymentReferenceData.LSLB_OFFLINE_ID;
 import static com.software.finatech.lslb.cms.service.referencedata.ModeOfPaymentReferenceData.OFFLINE_CONFIRMATION_ID;
 import static com.software.finatech.lslb.cms.service.referencedata.PaymentConfirmationApprovalRequestTypeReferenceData.*;
 import static com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData.UNPAID_STATUS_ID;
@@ -210,7 +211,7 @@ public class OutsideSystemPaymentService {
                     PaymentRecordDetail detail = new PaymentRecordDetail();
                     detail.setId(UUID.randomUUID().toString());
                     detail.setPaymentStatusId(UNPAID_STATUS_ID);
-                    detail.setModeOfPaymentId(OFFLINE_CONFIRMATION_ID);
+                    detail.setModeOfPaymentId(LSLB_OFFLINE_ID);
                     detail.setPaymentRecordId(paymentRecord.getId());
                     detail.setAmount(fullPaymentConfirmationRequest.getAmountPaid());
                     detail.setInvoiceNumber(invoiceNumber);
@@ -221,12 +222,11 @@ public class OutsideSystemPaymentService {
                     String licenseTypeName = LicenseTypeReferenceData.getLicenseTypeNameById(mongoRepositoryReactive, fullPaymentConfirmationRequest.getLicenseTypeId());
                     String ownerName = getOwnerName(fullPaymentConfirmationRequest);
 
-                    PaymentConfirmationApprovalRequest approvalRequest = new PaymentConfirmationApprovalRequest();
+                    //Approval Request not required at this point
+                    /*PaymentConfirmationApprovalRequest approvalRequest = new PaymentConfirmationApprovalRequest();
                     approvalRequest.setId(UUID.randomUUID().toString());
                     approvalRequest.setPaymentRecordId(paymentRecord.getId());
                     approvalRequest.setPaymentRecordDetailId(detail.getId());
-
-                    //Check PaymentApprovalRequest Type 1 or 2
                     if(fullPaymentConfirmationRequest.getPaymentConfirmationApprovalRequestType() == "01") {
                         approvalRequest.setApprovalRequestTypeId(CONFIRM_FULL_PAYMENT_ID);
                     }else {
@@ -236,17 +236,15 @@ public class OutsideSystemPaymentService {
                     approvalRequest.setInvoiceNumber(invoiceNumber);
                     approvalRequest.setPaymentOwnerName(ownerName);
                     mongoRepositoryReactive.saveOrUpdate(approvalRequest);
-
-                    String verbiage = String.format("Created Payment Confirmation Approval Request:" +
+*/
+                    String verbiage = String.format("Created Offline Payment Invoice :" +
                                     " Payment Owner -> %s , " +
                                     "Category -> %s, " +
                                     "Payment Type -> %s, for -> %s, Reference -> %s, " +
-                                    "Request Type -> %s", ownerName, gameTypeName,
-                            feePaymentTypeName, licenseTypeName, paymentRecord.getPaymentReference(), getTypeNameById(mongoRepositoryReactive, approvalRequest.getApprovalRequestTypeId()));
+                                    "Request Type -> %s", ownerName,
+                            feePaymentTypeName, licenseTypeName, paymentRecord.getPaymentReference());
                     auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(PAYMENT_ID,
                             springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName, true, RequestAddressUtil.getClientIpAddr(request), verbiage));
-
-                //PaymentRecordDetail notifyuser = paymentRecordDetailService.findById(paymentRecord.getId());
                 paymentEmailNotifierAsync.sendPaymentNotificationForPaymentRecordDetail(paymentRecordDetailService.findById(paymentRecord.getId()), paymentRecord);
                 return OKResponse(paymentRecord.convertToDto());
             } catch (Exception e) {

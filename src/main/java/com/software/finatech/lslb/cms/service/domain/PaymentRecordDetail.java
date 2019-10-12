@@ -22,6 +22,13 @@ public class PaymentRecordDetail extends AbstractFact {
     private String paymentRecordId;
     private String vigiPayTransactionReference;
     private String paymentConfirmationApprovalRequestType;
+    /*
+        Added to meet implementation logic of Offline Payment Processing
+  */
+    private String licenseTypeId;
+    private String tellerNumber;
+    private String bankName;
+    private double amountPaid;
 
     public String getVigiPayTransactionReference() {
         return vigiPayTransactionReference;
@@ -87,6 +94,14 @@ public class PaymentRecordDetail extends AbstractFact {
         this.paymentConfirmationApprovalRequestType = paymentConfirmationApprovalRequestType;
     }
 
+    public String getTellerNumber() { return tellerNumber; }
+
+    public void setTellerNumber(String tellerNumber) { this.tellerNumber = tellerNumber; }
+
+    public String getBankName() { return bankName; }
+
+    public void setBankName(String bankName) { this.bankName = bankName; }
+
     public PaymentRecordDetailDto convertToDto() {
         PaymentRecordDetailDto paymentRecordDetailDto = new PaymentRecordDetailDto();
         paymentRecordDetailDto.setAmount(getAmount());
@@ -106,6 +121,8 @@ public class PaymentRecordDetail extends AbstractFact {
         paymentRecordDetailDto.setCreationDate(getCreatedAt() != null ? getCreatedAt().toString("dd-MM-yyyy") : null);
         paymentRecordDetailDto.setPaymentDate(getPaymentDate() != null ? getPaymentDate().toString("dd-MM-yyyy HH:mm:ss a") : null);
         paymentRecordDetailDto.setInvoiceNumber(getInvoiceNumber());
+        paymentRecordDetailDto.setTellerNumber(getTellerNumber());
+        paymentRecordDetailDto.setBankName(getBankName());
         paymentRecordDetailDto.setVigiPayReference(getVigiPayTransactionReference());
         return paymentRecordDetailDto;
     }

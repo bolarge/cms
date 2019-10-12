@@ -37,7 +37,7 @@ public class PaymentRecordDto {
     */
     private String invoiceNumber;
     private String modeOfPaymentId;
-    private String lastTellerNumber;
+    private String tellerNumber;
     private String bankName;
     private boolean isFullPayment = false;
     private String paymentConfirmationApprovalRequestType;
@@ -283,12 +283,12 @@ public class PaymentRecordDto {
         this.modeOfPaymentId = modeOfPaymentId;
     }
 
-    public String getLastTellerNumber() {
-        return lastTellerNumber;
+    public String getTellerNumber() {
+        return tellerNumber;
     }
 
-    public void setLastTellerNumber(String lastTellerNumber) {
-        this.lastTellerNumber = lastTellerNumber;
+    public void setTellerNumber(String tellerNumber) {
+        this.tellerNumber = tellerNumber;
     }
 
     public String getBankName() {

@@ -122,7 +122,7 @@ public class PaymentConfirmationApprovalRequestServiceImpl implements PaymentCon
             ArrayList<PaymentConfirmationApprovalRequestDto> dtos = new ArrayList<>();
 
             approvalRequests.forEach(approvalRequest -> {
-                dtos.add(approvalRequest.convertToDto());
+                dtos.add(approvalRequest.convertToFullDto());
             });
             return OKResponse(dtos);
         } catch (IllegalArgumentException e) {

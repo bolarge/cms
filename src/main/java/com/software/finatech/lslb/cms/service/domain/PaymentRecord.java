@@ -44,7 +44,7 @@ public class PaymentRecord extends AbstractFact {
      */
     private String invoiceNumber;
     private String modeOfPaymentId;
-    private String lastTellerNumber;
+    private String tellerNumber;
     private String bankName;
     private boolean isFullPayment = false;
     private String paymentConfirmationApprovalRequestType;
@@ -247,12 +247,12 @@ public class PaymentRecord extends AbstractFact {
         return paymentRecordDetailIds;
     }
 
-    public String getLastTellerNumber() {
-        return lastTellerNumber;
+    public String getTellerNumber() {
+        return tellerNumber;
     }
 
-    public void setLastTellerNumber(String lastTellerNumber) {
-        this.lastTellerNumber = lastTellerNumber;
+    public void setTellerNumber(String tellerNumber) {
+        this.tellerNumber = tellerNumber;
     }
 
     public void setPaymentRecordDetailIds(List<String> paymentRecordDetailIds) {
@@ -382,6 +382,8 @@ public class PaymentRecord extends AbstractFact {
         PaymentRecordDto paymentRecordDto = new PaymentRecordDto();
         paymentRecordDto.setId(getId());
         paymentRecordDto.setInvoiceNumber(getInvoiceNumber());
+        paymentRecordDto.setBankName(getBankName());
+        paymentRecordDto.setTellerNumber(getTellerNumber());
         paymentRecordDto.setFeeId(getFeeId());
         String ownerName = "";
         LicenseType licenseType = getLicenseType();

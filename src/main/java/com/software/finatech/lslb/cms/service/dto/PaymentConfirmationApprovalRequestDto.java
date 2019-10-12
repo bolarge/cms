@@ -4,7 +4,14 @@ public class PaymentConfirmationApprovalRequestDto extends AbstractApprovalReque
     private PaymentRecordDto paymentRecord;
     private PaymentRecordDetailDto paymentRecordDetail;
     private String paymentOwnerName;
-
+    /*
+   Added to meet implementation logic of Offline Payment Processing
+    */
+    private String invoiceNumber;
+    private String licenseTypeId;
+    private String tellerNumber;
+    private String bankName;
+    private double amountPaid;
 
     public PaymentRecordDetailDto getPaymentRecordDetail() {
         return paymentRecordDetail;
@@ -29,4 +36,24 @@ public class PaymentConfirmationApprovalRequestDto extends AbstractApprovalReque
     public void setPaymentRecord(PaymentRecordDto paymentRecord) {
         this.paymentRecord = paymentRecord;
     }
+
+    public String getInvoiceNumber() { return invoiceNumber; }
+
+    public void setInvoiceNumber(String invoiceNumber) { this.invoiceNumber = invoiceNumber; }
+
+    public String getLicenseTypeId() { return licenseTypeId; }
+
+    public void setLicenseTypeId(String licenseTypeId) { this.licenseTypeId = licenseTypeId; }
+
+    public String getTellerNumber() { return tellerNumber; }
+
+    public void setTellerNumber(String tellerNumber) { this.tellerNumber = tellerNumber; }
+
+    public String getBankName() { return bankName; }
+
+    public void setBankName(String bankName) { this.bankName = bankName; }
+
+    public double getAmountPaid() { return amountPaid; }
+
+    public void setAmountPaid(double amountPaid) { this.amountPaid = amountPaid; }
 }
