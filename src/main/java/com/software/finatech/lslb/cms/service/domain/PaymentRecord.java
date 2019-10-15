@@ -420,6 +420,7 @@ public class PaymentRecord extends AbstractFact {
             paymentRecordDto.setGameTypeId(getGameTypeId());
             paymentRecordDto.setGameTypeName(gameType.getName());
         }
+        paymentRecordDto.setModeOfPaymentId(getModeOfPaymentId());
         paymentRecordDto.setOwnerName(ownerName);
         paymentRecordDto.setPaymentReference(getPaymentReference());
         paymentRecordDto.setCreationDate(getCreationDateString());

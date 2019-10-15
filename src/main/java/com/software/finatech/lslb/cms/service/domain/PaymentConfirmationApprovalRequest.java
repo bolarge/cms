@@ -23,6 +23,7 @@ public class PaymentConfirmationApprovalRequest extends AbstractApprovalRequest 
     private String tellerNumber;
     private String bankName;
     private double amountPaid;
+    private String tellerDate;
 
     public String getPaymentOwnerName() {
         return paymentOwnerName;
@@ -44,8 +45,12 @@ public class PaymentConfirmationApprovalRequest extends AbstractApprovalRequest 
         return approvalRequestTypeId;
     }
 
-    public void setApprovalRequestTypeId(String approvalRequestTypeId) {
-        this.approvalRequestTypeId = approvalRequestTypeId;
+    public void setApprovalRequestTypeId(String approvalRequestTypeId) { this.approvalRequestTypeId = approvalRequestTypeId; }
+
+    public String getTellerDate() { return tellerDate; }
+
+    public void setTellerDate(String tellerDate) {
+        this.tellerDate = tellerDate;
     }
 
     public String getPaymentRecordDetailId() {

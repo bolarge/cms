@@ -27,6 +27,7 @@ public class PaymentRecordDetail extends AbstractFact {
   */
     private String licenseTypeId;
     private String tellerNumber;
+    private String tellerDate;
     private String bankName;
     private double amountPaid;
 
@@ -101,6 +102,18 @@ public class PaymentRecordDetail extends AbstractFact {
     public String getBankName() { return bankName; }
 
     public void setBankName(String bankName) { this.bankName = bankName; }
+
+    public String getLicenseTypeId() { return licenseTypeId; }
+
+    public void setLicenseTypeId(String licenseTypeId) { this.licenseTypeId = licenseTypeId; }
+
+    public String getTellerDate() { return tellerDate; }
+
+    public void setTellerDate(String tellerDate) { this.tellerDate = tellerDate; }
+
+    public double getAmountPaid() { return amountPaid; }
+
+    public void setAmountPaid(double amountPaid) { this.amountPaid = amountPaid; }
 
     public PaymentRecordDetailDto convertToDto() {
         PaymentRecordDetailDto paymentRecordDetailDto = new PaymentRecordDetailDto();

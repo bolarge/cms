@@ -38,7 +38,7 @@ public class OutsideSystemPaymentsController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/initiate-full-payment")
     @ApiOperation(value = "Initiate Full Payment", response = PaymentConfirmationApprovalRequestDto.class, consumes = "application/json",
-            notes = "Used to create payments for payments that didnt begin on the system")
+            notes = "Used to create payments for payments made outside of the system")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK"),
             @ApiResponse(code = 401, message = "You are not authorized access the resource"),
@@ -72,6 +72,5 @@ public class OutsideSystemPaymentsController {
     public Mono<ResponseEntity> updateOfflinePaymentRecord(@RequestBody @Valid PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto, org.apache.catalina.servlet4preview.http.HttpServletRequest request) {
         return outsideSystemPaymentService.updateOfflinePaymentRecordDetail(paymentRecordDetailUpdateDto, request);
     }
-
 
 }

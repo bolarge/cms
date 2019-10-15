@@ -72,6 +72,7 @@ public class PaymentRecordServiceImpl implements PaymentRecordService {
         try {
             Query query = new Query();
             if (!StringUtils.isEmpty(institutionId)) {
+                logger.info("THIS IS ZZZZZZZZZZZZZZZZZ" + institutionId);
                 query.addCriteria(Criteria.where("institutionId").is(institutionId));
             }
             if (!StringUtils.isEmpty(gamingMachineId)) {

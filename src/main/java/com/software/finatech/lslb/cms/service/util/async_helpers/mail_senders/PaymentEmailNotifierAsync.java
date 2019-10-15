@@ -24,6 +24,25 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
     private static final Logger logger = LoggerFactory.getLogger(PaymentEmailNotifierAsync.class);
 
     @Async
+    public void sendOfflinePaymentNotificationForPaymentRecordDetail(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
+        if (paymentRecord.isAgentPayment() || paymentRecord.isGamingTerminalPayment()) {
+            Agent agent = paymentRecord.getAgent();
+            sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, agent.getEmailAddress(), "payment-notifications/PaymentNotificationExternalUser");
+        }
+        if (paymentRecord.isInstitutionPayment() || paymentRecord.isGamingMachinePayment()) {
+            ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(paymentRecord.getInstitutionId());
+            for (AuthInfo institutionAdmin : institutionAdmins) {
+                sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, institutionAdmin.getEmailAddress(), "payment-notifications/PaymentNotificationExternalUser");
+            }
+        }
+        /*if (paymentRecordDetail.isSuccessfulPayment()) {
+            sendPaymentNotificationToLSLBUsers(paymentRecordDetail, paymentRecord);
+        } else {
+            sendFailedPaymentToVGGAdminAndUsers(paymentRecordDetail, paymentRecord);
+        }*/
+    }
+
+    @Async
     public void sendPaymentNotificationForPaymentRecordDetail(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
         if (paymentRecord.isAgentPayment() || paymentRecord.isGamingTerminalPayment()) {
             Agent agent = paymentRecord.getAgent();
