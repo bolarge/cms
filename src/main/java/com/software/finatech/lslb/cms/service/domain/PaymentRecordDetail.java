@@ -6,9 +6,11 @@ import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.util.Mapstore;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Date;
 import java.util.Map;
 
 @SuppressWarnings("serial")
@@ -27,7 +29,7 @@ public class PaymentRecordDetail extends AbstractFact {
   */
     private String licenseTypeId;
     private String tellerNumber;
-    private String tellerDate;
+    private LocalDateTime tellerDate;
     private String bankName;
     private double amountPaid;
 
@@ -39,9 +41,7 @@ public class PaymentRecordDetail extends AbstractFact {
         this.vigiPayTransactionReference = vigiPayTransactionReference;
     }
 
-    public LocalDateTime getPaymentDate() {
-        return paymentDate;
-    }
+    public LocalDateTime getPaymentDate() { return paymentDate; }
 
     public void setPaymentDate(LocalDateTime paymentDate) {
         this.paymentDate = paymentDate;
@@ -107,9 +107,9 @@ public class PaymentRecordDetail extends AbstractFact {
 
     public void setLicenseTypeId(String licenseTypeId) { this.licenseTypeId = licenseTypeId; }
 
-    public String getTellerDate() { return tellerDate; }
+    public LocalDateTime getTellerDate() { return tellerDate; }
 
-    public void setTellerDate(String tellerDate) { this.tellerDate = tellerDate; }
+    public void setTellerDate(LocalDateTime tellerDate) { this.tellerDate = tellerDate; }
 
     public double getAmountPaid() { return amountPaid; }
 
@@ -135,6 +135,7 @@ public class PaymentRecordDetail extends AbstractFact {
         paymentRecordDetailDto.setPaymentDate(getPaymentDate() != null ? getPaymentDate().toString("dd-MM-yyyy HH:mm:ss a") : null);
         paymentRecordDetailDto.setInvoiceNumber(getInvoiceNumber());
         paymentRecordDetailDto.setTellerNumber(getTellerNumber());
+        //paymentRecordDetailDto.set
         paymentRecordDetailDto.setBankName(getBankName());
         paymentRecordDetailDto.setVigiPayReference(getVigiPayTransactionReference());
         return paymentRecordDetailDto;

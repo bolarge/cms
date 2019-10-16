@@ -2,13 +2,15 @@ package com.software.finatech.lslb.cms.service.dto;
 
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 import javax.validation.constraints.NotEmpty;
 
 public class PaymentRecordDetailUpdateDto {
     private String invoiceNumber;
     private String tellerNumber;
-    private String tellerPaymentDate;
+    private LocalDate tellerPaymentDate;
     private String bankName;
     private String paymentConfirmationApprovalRequestType;
     @NotEmpty(message = "Please provide payment status id")
@@ -71,9 +73,9 @@ public class PaymentRecordDetailUpdateDto {
 
     public void setBankName(String bankName) { this.bankName = bankName; }
 
-    public String getTellerPaymentDate() { return tellerPaymentDate; }
+    public LocalDate getTellerPaymentDate() { return tellerPaymentDate; }
 
-    public void setTellerPaymentDate(String tellerPaymentDate) { this.tellerPaymentDate = tellerPaymentDate; }
+    public void setTellerPaymentDate(LocalDate tellerPaymentDate) { this.tellerPaymentDate = tellerPaymentDate; }
 
     public String getPaymentConfirmationApprovalRequestType() { return paymentConfirmationApprovalRequestType; }
 
