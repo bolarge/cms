@@ -63,7 +63,7 @@ public class PaymentConfirmationApprovalRequest extends AbstractApprovalRequest 
 
     public PaymentConfirmationApprovalRequestDto convertToDto() {
         PaymentConfirmationApprovalRequestDto dto = new PaymentConfirmationApprovalRequestDto();
-        dto.setId(getId());
+        dto.setId(getId()); //Internal Object Identity
         dto.setInitiatorId(getInitiatorId());
         dto.setDateCreated(getDateCreatedString());
         dto.setInitiatorName(getAuthInfoName(getInitiatorId()));
@@ -71,6 +71,9 @@ public class PaymentConfirmationApprovalRequest extends AbstractApprovalRequest 
         dto.setRequestStatusId(getApprovalRequestStatusId());
         dto.setRequestStatusName(getApprovalRequestStatus() != null ? getApprovalRequestStatus().getName() : "");
         dto.setRequestTypeName(getTypeNameById(mongoRepositoryReactive, getApprovalRequestTypeId()));
+        dto.setTellerNumber(getTellerNumber());
+        dto.setBankName(getBankName());
+        dto.setInvoiceNumber(getInvoiceNumber());
         dto.setRequestTypeId(getApprovalRequestTypeId());
         return dto;
     }

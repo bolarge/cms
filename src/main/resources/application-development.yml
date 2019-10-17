@@ -37,10 +37,11 @@ security:
 
 #Pointing to Test Environment
 mongodb:
-  #hosts: db2.mlnx.test.vggdev.com:27017 #172.31.31.29:27017,172.31.22.131:27017
+  #hosts: db2.mlnx.test.vggdev.com:27017
   #username: useradmin
   #password: f1nat3ch
   #database: LslbCMSDb
+
   hosts: 127.0.0.1
   username: cmsadmin
   password: finat3ch

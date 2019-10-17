@@ -14,6 +14,7 @@ public class PaymentRecordDetailDto {
     private String paymentStatusId;
     private String tellerNumber;
     private String bankName;
+    private String paymentConfirmationApprovalRequest;
 
 
     public String getPaymentStatusId() {
@@ -111,4 +112,8 @@ public class PaymentRecordDetailDto {
     public String getBankName() { return bankName; }
 
     public void setBankName(String bankName) { this.bankName = bankName; }
+
+    public String getPaymentConfirmationApprovalRequest() { return paymentConfirmationApprovalRequest; }
+
+    public void setPaymentConfirmationApprovalRequest(String paymentConfirmationApprovalRequest) { this.paymentConfirmationApprovalRequest = paymentConfirmationApprovalRequest; }
 }

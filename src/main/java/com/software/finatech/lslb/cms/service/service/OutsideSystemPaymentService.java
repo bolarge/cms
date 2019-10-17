@@ -99,10 +99,8 @@ public class OutsideSystemPaymentService {
     public Mono<ResponseEntity> updateOfflinePaymentRecordDetail(PaymentRecordDetailUpdateDto paymentRecordDetailUpdateDto, HttpServletRequest httpServletRequest) {
         try {
             String paymentInvoice = paymentRecordDetailUpdateDto.getInvoiceNumber();
-            logger.info("THis is Invoice Number " + paymentInvoice);
             PaymentRecordDetail existingInvoicedPayment =  (PaymentRecordDetail) mongoRepositoryReactive.find(Query.query(Criteria.where("invoiceNumber").is(paymentRecordDetailUpdateDto.getInvoiceNumber())), PaymentRecordDetail.class).block();
             if (existingInvoicedPayment == null) {
-                logger.info("THis is Invoice Number ");
                 return Mono.just(new ResponseEntity<>(String.format("Payment with invoice %s does not exist", paymentInvoice), HttpStatus.BAD_REQUEST));
             }
 
@@ -170,11 +168,16 @@ public class OutsideSystemPaymentService {
                 approvalRequest.setPaymentOwnerName(agent.getFullName());
             }
             mongoRepositoryReactive.saveOrUpdate(approvalRequest);
-
+            //Retrieve PaymentConfirmationApprovalRequest Object ID and set on PaymentRecordDetails
+            PaymentConfirmationApprovalRequest paymentConfirmationApprovalRequest = (PaymentConfirmationApprovalRequest) mongoRepositoryReactive.find(Query.query(Criteria.where("invoiceNumber").is(paymentInvoice)), PaymentConfirmationApprovalRequest.class).block();
+            //logger.info("Payment Approval Confirmation Request is: " + paymentConfirmationApprovalRequest.getId());
+            existingInvoicedPayment.setPaymentConfirmationApprovalRequest(paymentConfirmationApprovalRequest.getId());
+            //Document Activity and write to into Audit
             String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
             String verbiage = String.format("Payment record detail callback -> Payment Record Detail id: %s, Invoice Number -> %s, Status Id -> %s", paymentInvoice, existingInvoicedPayment.getInvoiceNumber(), paymentRecordDetailUpdateDto.getPaymentStatusId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(paymentAuditActionId,
                     currentAuditorName, currentAuditorName, true, getClientIpAddr(httpServletRequest), verbiage));
+            //Trigger notification upon update of Payment Information on an existing Invoice to Business Users
             paymentEmailNotifierAsync.sendPaymentNotificationToLSLBUsers(existingInvoicedPayment, paymentRecord);
             return Mono.just(new ResponseEntity<>(existingInvoicedPayment.convertToDto(), HttpStatus.OK));
         } catch (Exception e) {

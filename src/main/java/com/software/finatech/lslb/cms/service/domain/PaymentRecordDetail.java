@@ -24,9 +24,10 @@ public class PaymentRecordDetail extends AbstractFact {
     private String paymentRecordId;
     private String vigiPayTransactionReference;
     private String paymentConfirmationApprovalRequestType;
+    private String paymentConfirmationApprovalRequest;
     /*
         Added to meet implementation logic of Offline Payment Processing
-  */
+    */
     private String licenseTypeId;
     private String tellerNumber;
     private LocalDateTime tellerDate;
@@ -115,6 +116,10 @@ public class PaymentRecordDetail extends AbstractFact {
 
     public void setAmountPaid(double amountPaid) { this.amountPaid = amountPaid; }
 
+    public String getPaymentConfirmationApprovalRequest() { return paymentConfirmationApprovalRequest; }
+
+    public void setPaymentConfirmationApprovalRequest(String paymentConfirmationApprovalRequest) { this.paymentConfirmationApprovalRequest = paymentConfirmationApprovalRequest; }
+
     public PaymentRecordDetailDto convertToDto() {
         PaymentRecordDetailDto paymentRecordDetailDto = new PaymentRecordDetailDto();
         paymentRecordDetailDto.setAmount(getAmount());
@@ -135,12 +140,12 @@ public class PaymentRecordDetail extends AbstractFact {
         paymentRecordDetailDto.setPaymentDate(getPaymentDate() != null ? getPaymentDate().toString("dd-MM-yyyy HH:mm:ss a") : null);
         paymentRecordDetailDto.setInvoiceNumber(getInvoiceNumber());
         paymentRecordDetailDto.setTellerNumber(getTellerNumber());
-        //paymentRecordDetailDto.set
+        //
         paymentRecordDetailDto.setBankName(getBankName());
         paymentRecordDetailDto.setVigiPayReference(getVigiPayTransactionReference());
+        paymentRecordDetailDto.setPaymentConfirmationApprovalRequest(getPaymentConfirmationApprovalRequest());
         return paymentRecordDetailDto;
     }
-
 
     public PaymentStatus getPaymentStatus() {
         Map paymentStatusMap = Mapstore.STORE.get("PaymentStatus");
