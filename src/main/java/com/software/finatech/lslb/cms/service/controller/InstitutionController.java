@@ -11,6 +11,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +30,7 @@ import javax.validation.Valid;
 public class InstitutionController extends BaseController {
     private InstitutionService institutionService;
     private InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService;
+    private static final Logger logger = LoggerFactory.getLogger(InstitutionController.class);
 
     @Autowired
     public void setInstitutionOnboardingWorkflowService(InstitutionOnboardingWorkflowService institutionOnboardingWorkflowService) {
@@ -56,6 +59,7 @@ public class InstitutionController extends BaseController {
                                                    @RequestParam("gameTypeIds") String gameTypeIds,
                                                    @RequestParam("institutionId") String institutionId,
                                                    HttpServletResponse httpServletResponse) {
+        logger.info(" STEP 0 XXXXXXXXXXXXX");
         return institutionService.findAllInstitutions(page, pageSize, sortType, sortParam, gameTypeIds, institutionId, httpServletResponse);
     }
 

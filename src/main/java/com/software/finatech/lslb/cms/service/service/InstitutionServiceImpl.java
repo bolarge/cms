@@ -213,6 +213,7 @@ public class InstitutionServiceImpl implements InstitutionService {
                 long count = mongoRepositoryReactive.count(query, Institution.class).block();
                 response.setHeader("TotalCount", String.valueOf(count));
             }
+            logger.info(" STEP 1 XXXXXXXXXXXXX");
             Sort sort;
             if (!StringUtils.isEmpty(sortType) && !StringUtils.isEmpty(sortProperty)) {
                 sort = new Sort((sortType.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC),
@@ -222,16 +223,22 @@ public class InstitutionServiceImpl implements InstitutionService {
             }
             query.with(PageRequest.of(page, pageSize, sort));
             query.with(sort);
+            logger.info(" STEP 2 XXXXXXXXXXXXX");
 
             ArrayList<Institution> institutions = (ArrayList<Institution>) mongoRepositoryReactive
                     .findAll(query, Institution.class).toStream().collect(Collectors.toList());
             if (institutions.size() == 0) {
                 return Mono.just(new ResponseEntity<>("No record found", HttpStatus.NOT_FOUND));
             }
+
+            logger.info(" STEP 3 XXXXXXXXXXXXX");
+
             ArrayList<InstitutionDto> institutionDtos = new ArrayList<>();
             institutions.forEach(entry -> {
                 institutionDtos.add(entry.convertToDto());
             });
+
+            logger.info(" STEP 4 XXXXXXXXXXXXX");
             return Mono.just(new ResponseEntity<>(institutionDtos, HttpStatus.OK));
         } catch (Exception e) {
             String errorMsg = "An error occurred while fetching all institutions";

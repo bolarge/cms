@@ -42,7 +42,7 @@ public class FactObjectCache {
         HashSet<FactObject> factObjects =
                 (HashSet<FactObject>) mongoRepositoryReactive.findAll(Mapstore.FACT_ENUM.get(key)).toStream().collect(Collectors.toSet());
 
-        ConcurrentHashMap<String, FactObject> facts = new ConcurrentHashMap<>();
+        ConcurrentHashMap<String, FactObject> facts = new ConcurrentHashMap<String, FactObject>();
         factObjects.forEach(fact -> {
             facts.put(fact.getId(), fact);
         });
