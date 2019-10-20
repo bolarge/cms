@@ -423,17 +423,26 @@ public class AuthRoleController extends BaseController {
             @ApiResponse(code = 400, message = "Bad request")})
     public Mono<ResponseEntity> getAuthPermissionsForRoles() {
         try {
-            Map<String, FactObject> factObjectMap = Mapstore.STORE.get("AuthPermission");
-            //Point of Failure XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-            Collection<FactObject> factObjects = factObjectMap.values();
+            ArrayList<AuthPermission> allPermissions = (ArrayList<AuthPermission>)mongoRepositoryReactive.findAll(new Query(),AuthPermission.class).toStream().collect(Collectors.toList());
             List<AuthPermission> permissions = new ArrayList<AuthPermission>();
-            for (FactObject factObject : factObjects) {
-                AuthPermission permission = (AuthPermission) factObject;
+
+            //SO WHAT I JUST DID IS TO STOP IT FROM READING THE PERMISSIONS FROM THE CACHE AND READ FROM DB DIRECT
+       //     Map<String, FactObject> factObjectMap = Mapstore.STORE.get("AuthPermission");
+            //Point of Failure XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+       //     Collection<FactObject> factObjects = factObjectMap.values(); //COMING BACK AS NULL ON TEST ENVIRONMENT
+      //      for (FactObject factObject : factObjects) {
+      //          AuthPermission permission = (AuthPermission) factObject;
                 //check if permission does not belong to any role and is not used by system
+       //         if (StringUtils.isEmpty(permission.getAuthRoleId()) && !permission.isUsedBySystem()) {
+         //   permissions.add(permission);
+         //       }
+       //     }
+            for (AuthPermission permission: allPermissions){
                 if (StringUtils.isEmpty(permission.getAuthRoleId()) && !permission.isUsedBySystem()) {
                     permissions.add(permission);
                 }
             }
+
             if (permissions.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
             }
