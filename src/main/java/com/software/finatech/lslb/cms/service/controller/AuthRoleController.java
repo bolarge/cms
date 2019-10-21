@@ -446,6 +446,7 @@ public class AuthRoleController extends BaseController {
             if (permissions.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
             }
+
             permissions.sort(ReferenceDataUtil.enumeratedFactComparator);
             ArrayList<AuthPermissionDto> dtos = new ArrayList<AuthPermissionDto>();
             for (AuthPermission permission : permissions) {

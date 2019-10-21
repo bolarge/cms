@@ -1858,23 +1858,28 @@ public class AuthInfoController extends BaseController {
                 return Mono.just(new ResponseEntity<>(String.format("User with id %s not found", userId), HttpStatus.BAD_REQUEST));
             }
 
-            Map<String, FactObject> authPermissionMap = Mapstore.STORE.get("AuthPermission");
-
+            /*Map<String, FactObject> authPermissionMap = Mapstore.STORE.get("AuthPermission");
             if(authPermissionMap == null) {
                 factObjectCache.reloadFactObjectForKey("AuthPermission");
 
-            }
+            }*/
+            //authPermissionMap = Mapstore.STORE.get("AuthPermission");
 
-            authPermissionMap = Mapstore.STORE.get("AuthPermission");
+            //Source of Failure. Map type authPermissionMap is uninitialized from the call to the Internal Cache Mapstore
+            //Issues is that the Cache did not return the Cached AuthPermission as earlier stored in the ConcurrentHashMap instance. BIG ISSUE
 
-            if(authPermissionMap == null ) {
+            ArrayList<AuthPermission> allPermissions = (ArrayList<AuthPermission>)mongoRepositoryReactive.findAll(new Query(),AuthPermission.class).toStream().collect(Collectors.toList());
+            List<AuthPermission> permissions = new ArrayList<AuthPermission>();
+
+
+            if(allPermissions == null ) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
             }
 
-            Collection<FactObject> factObjects = authPermissionMap.values();
-            ArrayList<AuthPermission> permissions = new ArrayList<>();
+            //Collection<FactObject> factObjects = authPermissionMap.values();
+            //ArrayList<AuthPermission> permissions = new ArrayList<>();
 
-            for (FactObject factObject : factObjects) {
+            for (FactObject factObject : allPermissions) {
 
                 AuthPermission permission = (AuthPermission) factObject;
 
