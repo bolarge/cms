@@ -360,9 +360,15 @@ public class FeeServiceImpl implements FeeService {
         }
         LicenseTypeSearch search = new LicenseTypeSearch(institutionId, agentId);
         try {
-            Collection<EnumeratedFact> enumeratedFacts = ReferenceDataUtil.getAllEnumeratedFacts("LicenseType");
+            //Source of Failure. Collection type enumeratedFacts is uninitialized from the call to ReferenceDataUtil.getAllEnumeratedFacts("LicenseTypes")
+            //Issues is that the Cache did not return the Cached LicenseType as earlier stored in the ConcurrentHashMap instance. BIG ISSUE
+
+            //Collection<EnumeratedFact> enumeratedFacts = ReferenceDataUtil.getAllEnumeratedFacts("LicenseType");
+            ArrayList<LicenseType> allLicenseTypes = (ArrayList<LicenseType>)mongoRepositoryReactive.findAll(new Query(),LicenseType.class).toStream().collect(Collectors.toList());
+            List<LicenseType> licenseTypes = new ArrayList<LicenseType>();
+
             List<EnumeratedFactDto> dtos = new ArrayList<>();
-            for (EnumeratedFact enumeratedFact : enumeratedFacts) {
+            for (EnumeratedFact enumeratedFact : allLicenseTypes) {
                 LicenseType licenseType = (LicenseType) enumeratedFact;
                 if (search.isAgentSearch() && licenseType.appliesToAgent()) {
                     if (gameType.getAgentLicenseDurationMonths() == 0 && licenseType.isAgent()) {

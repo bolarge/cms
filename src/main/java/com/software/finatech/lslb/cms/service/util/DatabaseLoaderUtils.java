@@ -141,7 +141,6 @@ public class DatabaseLoaderUtils {
         Mapstore.FACT_ENUM.put("Gender", Gender.class);
         Mapstore.FACT_ENUM.put("PaymentConfirmationApprovalRequestType", PaymentConfirmationApprovalRequestType.class);
 
-
             for (Map.Entry<String, Class> entry : Mapstore.FACT_ENUM.entrySet()) {
 
             logger.info("Importing ReferenceMasterData for > " + entry.getKey());

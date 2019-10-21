@@ -29,7 +29,6 @@ public class OutsideSystemPaymentsController {
     //@Autowired
     private PaymentRecordDetailService paymentRecordDetailService;
 
-
     @Autowired
     public void setOutsideSystemPaymentService(OutsideSystemPaymentService outsideSystemPaymentService, PaymentRecordDetailService paymentRecordDetailService) {
         this.outsideSystemPaymentService = outsideSystemPaymentService;

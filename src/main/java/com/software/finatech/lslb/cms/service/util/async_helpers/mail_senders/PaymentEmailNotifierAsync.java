@@ -35,11 +35,11 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
                 sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, institutionAdmin.getEmailAddress(), "payment-notifications/PaymentNotificationExternalUser");
             }
         }
-        /*if (paymentRecordDetail.isSuccessfulPayment()) {
+        if (paymentRecordDetail.isSuccessfulPayment()) {
             sendPaymentNotificationToLSLBUsers(paymentRecordDetail, paymentRecord);
         } else {
             sendFailedPaymentToVGGAdminAndUsers(paymentRecordDetail, paymentRecord);
-        }*/
+        }
     }
 
     @Async
