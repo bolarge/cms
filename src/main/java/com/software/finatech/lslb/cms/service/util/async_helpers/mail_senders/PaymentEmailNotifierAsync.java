@@ -35,6 +35,7 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
                 sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, institutionAdmin.getEmailAddress(), "payment-notifications/PaymentNotificationExternalUser");
             }
         }
+        //isSuccessFullPayment() will be UNPAID(05) PaymentStatusIS for OfflinePayment after initiation
         if (paymentRecordDetail.isSuccessfulPayment()) {
             sendPaymentNotificationToLSLBUsers(paymentRecordDetail, paymentRecord);
         } else {

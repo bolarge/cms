@@ -242,6 +242,8 @@ public class OutsideSystemPaymentService {
             detail.setPaymentRecordId(paymentRecord.getId());
             detail.setAmount(fullPaymentConfirmationRequest.getAmountPaid());
             detail.setInvoiceNumber(invoiceNumber);
+            //Condition is false at this point
+            detail.isSuccessfulPayment();
             mongoRepositoryReactive.saveOrUpdate(detail);
 
             String gameTypeName = gameTypeService.findNameById(fullPaymentConfirmationRequest.getGameTypeId());
@@ -250,7 +252,7 @@ public class OutsideSystemPaymentService {
             String ownerName = getOwnerName(fullPaymentConfirmationRequest);
 
             //Approval Request not required at this point
-            PaymentConfirmationApprovalRequest approvalRequest = new PaymentConfirmationApprovalRequest();
+            /*PaymentConfirmationApprovalRequest approvalRequest = new PaymentConfirmationApprovalRequest();
             approvalRequest.setId(UUID.randomUUID().toString());
             approvalRequest.setPaymentRecordId(paymentRecord.getId());
             approvalRequest.setPaymentRecordDetailId(detail.getId());
@@ -259,18 +261,17 @@ public class OutsideSystemPaymentService {
             }else {
                 approvalRequest.setApprovalRequestTypeId(CONFIRM_PARTIAL_PAYMENT_ID);
             }
-
             approvalRequest.setInitiatorId(loggedInUser.getId());
             approvalRequest.setInvoiceNumber(invoiceNumber);
             approvalRequest.setPaymentOwnerName(ownerName);
-            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+            mongoRepositoryReactive.saveOrUpdate(approvalRequest);*/
             String verbiage = "";
             if (paymentRecord.isInstitutionPayment() || paymentRecord.isAgentPayment()) {
                 verbiage = String.format("Created offline payment record detail -> License Type -> %s, Amount -> %s, Fee Payment Type -> %s,Category -> %s, Id -> %s",
                         paymentRecord.getLicenseType(), paymentRecord.getAmount(), paymentRecord.getFeePaymentType(), paymentRecord.getGameType(), paymentRecord.getId());
             }
-            //
-                /*if (paymentRecord.isGamingTerminalPayment() || paymentRecord.isGamingMachinePayment()) {
+            /*//
+             *//*if (paymentRecord.isGamingTerminalPayment() || paymentRecord.isGamingMachinePayment()) {
                     verbiage = String.format("Created Multiple Machine payment -> Machine Serial Numbers -> %s, Amount -> %s", multipleMachinePaymentToAuditString(machineMultiplePayment), machineMultiplePayment.getTotalAmount());
                 }*/
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(PAYMENT_ID, springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName, true, RequestAddressUtil.getClientIpAddr(request), verbiage));
