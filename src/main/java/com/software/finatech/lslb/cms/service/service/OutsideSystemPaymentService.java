@@ -154,7 +154,7 @@ public class OutsideSystemPaymentService {
             //Check PaymentApprovalRequest Type 1 or 2
             Institution institution = institutionService.findByInstitutionId(paymentRecord.getInstitutionId());
             Agent agent = agentService.findAgentById(paymentRecord.getAgentId());
-            if(existingInvoicedPayment.getPaymentConfirmationApprovalRequestType() == "01") {
+            if(paymentRecord.getPaymentConfirmationApprovalRequestType() == "01") {
                 approvalRequest.setApprovalRequestTypeId(CONFIRM_FULL_PAYMENT_ID);
             }else{
                 approvalRequest.setApprovalRequestTypeId(CONFIRM_PARTIAL_PAYMENT_ID);
