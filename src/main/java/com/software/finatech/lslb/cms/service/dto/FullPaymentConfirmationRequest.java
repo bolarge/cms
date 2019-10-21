@@ -22,6 +22,9 @@ public class FullPaymentConfirmationRequest {
     private String invoiceNumber;
     private String modeOfPaymentId;
     private String paymentConfirmationApprovalRequestType;
+    private boolean forIncompleteOfflineLicenceRenewal = false;
+    private boolean forOutsideSystemPayment = true;
+    private boolean isFullPayment = false;
 
     public String getLicenseTransferId() {
         return licenseTransferId;
@@ -122,6 +125,27 @@ public class FullPaymentConfirmationRequest {
     public boolean isBeingPaidByAgent() {
         return StringUtils.isNotEmpty(this.agentId);
     }
+
+    //Added to support logic processing for Offline Payments
+    public boolean isForOutsideSystemPayment() {
+        return forOutsideSystemPayment;
+    }
+
+    public void setForOutsideSystemPayment(boolean forOutsideSystemPayment) {
+        this.forOutsideSystemPayment = forOutsideSystemPayment;
+    }
+
+    public boolean isForIncompleteOfflineLicenceRenewal() {
+        return forIncompleteOfflineLicenceRenewal;
+    }
+
+    public void setForIncompleteOfflineLicenceRenewal(boolean forIncompleteOfflineLicenceRenewal) {
+        this.forIncompleteOfflineLicenceRenewal = forIncompleteOfflineLicenceRenewal;
+    }
+
+    public boolean isFullPayment() { return isFullPayment; }
+
+    public void setFullPayment(boolean fullPayment) { isFullPayment = fullPayment; }
 
     public String getInvoiceNumber() { return invoiceNumber; }
 

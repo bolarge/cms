@@ -46,6 +46,7 @@ mongodb:
   #username: cmsadmin
   #password: finat3ch
   #database: LslbCMSDb
+  #authDb:  LslbCMSDb
   authDb:   admin
   replicaSet:
 

@@ -195,14 +195,19 @@ public class OutsideSystemPaymentService {
             }
 
             Query query = new Query();
-            query.addCriteria(Criteria.where("institutionId").is(fullPaymentConfirmationRequest.getInstitutionId()));
+            if(fullPaymentConfirmationRequest.getInstitutionId() != null) {
+                query.addCriteria(Criteria.where("institutionId").is(fullPaymentConfirmationRequest.getInstitutionId()));
+            }else if(fullPaymentConfirmationRequest.getAgentId() != null){
+                query.addCriteria(Criteria.where("agentId").is(fullPaymentConfirmationRequest.getAgentId()));
+            }
             query.addCriteria(Criteria.where("gameTypeId").is(fullPaymentConfirmationRequest.getGameTypeId()));
             query.addCriteria(Criteria.where("paymentStatusId").is(PaymentStatusReferenceData.UNPAID_STATUS_ID));
+            query.addCriteria(Criteria.where("forOutsideSystemPayment").is(fullPaymentConfirmationRequest.isForOutsideSystemPayment()));
 
             PaymentRecord existingUnpaidGamePaymentRecord = (PaymentRecord) mongoRepositoryReactive.find(query, PaymentRecord.class).block();
             if (existingUnpaidGamePaymentRecord != null && StringUtils.equals(PaymentStatusReferenceData.UNPAID_STATUS_ID, existingUnpaidGamePaymentRecord.getPaymentStatusId())) {
                 String ownerName = getOwnerName(fullPaymentConfirmationRequest);
-                return Mono.just(new ResponseEntity<>(ownerName + " has an existing license renewal payment for the game type specified", HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>(ownerName + " has a pending payment for the game type selected", HttpStatus.BAD_REQUEST));
             }
 
             //Check IF Payer has pending payment within the same GameType, revenue or fees types
