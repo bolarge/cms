@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.dto;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import static com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData.*;
@@ -9,22 +10,23 @@ import static com.software.finatech.lslb.cms.service.referencedata.FeePaymentTyp
 public class FullPaymentConfirmationRequest {
     private String agentId;
     private String institutionId;
-    private String feePaymentTypeId;
+    private String feeId;
     private String licenseTypeId;
     private double amountPaid;
     private String gameTypeId;
     private String licenseTransferId;
-    private Set<String> gamingMachineIds;
-    private Set<String> gamingTerminalIds;
+    private Set<String> gamingMachineIds = new HashSet<>();
+    private Set<String> gamingTerminalIds = new HashSet<>();
     /*
    Added to meet implementation logic of Offline Payment Processing
     */
     private String invoiceNumber;
     private String modeOfPaymentId;
     private String paymentConfirmationApprovalRequestType;
-    private boolean forIncompleteOfflineLicenceRenewal = false;
-    private boolean forOutsideSystemPayment = true;
-    private boolean isFullPayment = false;
+    private boolean forIncompleteOfflineLicenceRenewal;
+    private boolean forOutsideSystemPayment;
+    private boolean isFullPayment;
+    private String paymentRecordId;
 
     public String getLicenseTransferId() {
         return licenseTransferId;
@@ -50,12 +52,12 @@ public class FullPaymentConfirmationRequest {
         this.institutionId = institutionId;
     }
 
-    public String getFeePaymentTypeId() {
-        return feePaymentTypeId;
+    public String getFeeId() {
+        return feeId;
     }
 
-    public void setFeePaymentTypeId(String feePaymentTypeId) {
-        this.feePaymentTypeId = feePaymentTypeId;
+    public void setFeeId(String feeId) {
+        this.feeId = feeId;
     }
 
     public String getLicenseTypeId() {
@@ -98,24 +100,33 @@ public class FullPaymentConfirmationRequest {
         this.gamingTerminalIds = gamingTerminalIds;
     }
 
+    public String getPaymentRecordId() {
+        return paymentRecordId;
+    }
+
+    public void setPaymentRecordId(String paymentRecordId) {
+        this.paymentRecordId = paymentRecordId;
+    }
+
+    //
     public boolean isLicenseTransferPayment() {
-        return StringUtils.equals(LICENSE_TRANSFER_FEE_TYPE_ID, this.feePaymentTypeId);
+        return StringUtils.equals(LICENSE_TRANSFER_FEE_TYPE_ID, this.feeId);
     }
 
     public boolean isLicenseFeePayment() {
-        return StringUtils.equals(LICENSE_FEE_TYPE_ID, this.feePaymentTypeId);
+        return StringUtils.equals(LICENSE_FEE_TYPE_ID, this.feeId);
     }
 
     public boolean isLicenseRenewalPayment() {
-        return StringUtils.equals(LICENSE_RENEWAL_FEE_TYPE_ID, this.feePaymentTypeId);
+        return StringUtils.equals(LICENSE_RENEWAL_FEE_TYPE_ID, this.feeId);
     }
 
     public boolean isApplicationFeePayment() {
-        return StringUtils.equals(APPLICATION_FEE_TYPE_ID, this.feePaymentTypeId);
+        return StringUtils.equals(APPLICATION_FEE_TYPE_ID, this.feeId);
     }
 
     public boolean isTaxPayment() {
-        return StringUtils.equals(TAX_FEE_TYPE_ID, this.feePaymentTypeId);
+        return StringUtils.equals(TAX_FEE_TYPE_ID, this.feeId);
     }
 
     public boolean isBeingPaidByOperator() {
@@ -158,4 +169,38 @@ public class FullPaymentConfirmationRequest {
     public String getPaymentConfirmationApprovalRequestType() { return paymentConfirmationApprovalRequestType; }
 
     public void setPaymentConfirmationApprovalRequestType(String paymentConfirmationApprovalRequestType) { this.paymentConfirmationApprovalRequestType = paymentConfirmationApprovalRequestType; }
+
+    public boolean isInstitutionPayment() {
+        return StringUtils.isEmpty(this.getAgentId())
+                && this.gamingMachineIds.isEmpty()
+                && this.gamingTerminalIds.isEmpty()
+                && !StringUtils.isEmpty(this.getInstitutionId());
+    }
+
+    public boolean isAgentPayment() {
+        return !StringUtils.isEmpty(this.getAgentId())
+                && this.gamingTerminalIds.isEmpty()
+                && this.gamingMachineIds.isEmpty()
+                && StringUtils.isEmpty(this.getInstitutionId());
+    }
+
+    public boolean isGamingMachinePayment() {
+        return StringUtils.isEmpty(this.getAgentId())
+                && !this.gamingMachineIds.isEmpty()
+                && this.gamingTerminalIds.isEmpty()
+                && !StringUtils.isEmpty(this.getInstitutionId())
+                && StringUtils.isEmpty(this.licenseTransferId);
+    }
+
+    public boolean isGamingTerminalPayment() {
+        return StringUtils.isEmpty(this.institutionId)
+                && !StringUtils.isEmpty(this.agentId)
+                && this.gamingMachineIds.isEmpty()
+                && !this.gamingTerminalIds.isEmpty()
+                && StringUtils.isEmpty(this.licenseTransferId);
+    }
+
+    public boolean isFirstPayment() {
+        return StringUtils.isEmpty(this.invoiceNumber);
+    }
 }

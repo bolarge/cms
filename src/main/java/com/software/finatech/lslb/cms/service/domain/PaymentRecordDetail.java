@@ -208,6 +208,10 @@ public class PaymentRecordDetail extends AbstractFact {
         return StringUtils.equals(PaymentStatusReferenceData.FAILED_PAYMENT_STATUS_ID, this.paymentStatusId);
     }
 
+    public boolean isUnpaidPayment() {
+        return StringUtils.equals(PaymentStatusReferenceData.PENDING_PAYMENT_STATUS_ID, this.paymentStatusId);
+    }
+
     public boolean isPendingVigiPayConfirmation() {
         return StringUtils.equals(PaymentStatusReferenceData.PENDING_VIGIPAY_CONFIRMATION_STATUS_ID, this.paymentStatusId);
     }
