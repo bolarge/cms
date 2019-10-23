@@ -44,7 +44,7 @@ import static com.software.finatech.lslb.cms.service.util.RequestAddressUtil.get
 public class PaymentRecordDetailServiceImpl implements PaymentRecordDetailService {
 
     private static final Logger logger = LoggerFactory.getLogger(PaymentRecordDetailServiceImpl.class);
-    private static final String paymentAuditActionId = AuditActionReferenceData.PAYMENT_ID;
+    public static final String paymentAuditActionId = AuditActionReferenceData.PAYMENT_ID;
 
     private FeeService feeService;
     private PaymentRecordService paymentRecordService;
