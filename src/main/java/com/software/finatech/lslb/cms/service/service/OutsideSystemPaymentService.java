@@ -157,6 +157,8 @@ public class OutsideSystemPaymentService {
             //
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(PAYMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName, true, getClientIpAddr(request), verbiage));
+            //Trigger Notification
+            paymentEmailNotifierAsync.sendOfflinePaymentNotificationForPaymentRecordDetail(detail, paymentRecord);
             //
             //paymentEmailNotifierAsync.sendOfflinePaymentNotificationForPaymentRecordDetail(detail, paymentRecord);
             return OKResponse(paymentRecord.convertToDto());
@@ -171,19 +173,19 @@ public class OutsideSystemPaymentService {
     public Mono<ResponseEntity> updateOfflinePaymentRecordDetail(PartialPaymentConfirmationRequest partialPaymentConfirmationRequest, HttpServletRequest httpServletRequest) {
         try {
             String paymentRecordId = partialPaymentConfirmationRequest.getPaymentRecordId();
-            //PaymentRecordDetail existingInvoicedPayment =  (PaymentRecordDetail) mongoRepositoryReactive.find(Query.query(Criteria.where("invoiceNumber").is(paymentRecordDetailUpdateDto.getInvoiceNumber())), PaymentRecordDetail.class).block();
-            PaymentRecord paymentRecord = paymentRecordService.findById(partialPaymentConfirmationRequest.getPaymentRecordId());
-
+            PaymentRecord paymentRecord =  (PaymentRecord) mongoRepositoryReactive.find(Query.query(Criteria.where("paymentRecordId").is(paymentRecordId)), PaymentRecord.class).block();
+            logger.info(" PAYMENT RECORD ID IS: " + paymentRecord.getId());
+            //PaymentRecord paymentRecord = paymentRecordService.findById(paymentRecordId);
             if (paymentRecord == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Payment with record id %s does not exist", paymentRecordId), HttpStatus.BAD_REQUEST));
             }
             //Prevent Multi Payment on an Invoice
             if (paymentRecord != null && !StringUtils.equals(PaymentStatusReferenceData.UNPAID_STATUS_ID, paymentRecord.getPaymentStatusId())) {
                 //String ownerName = getOwnerName(paymentRecordDetailUpdateDto);
-                return Mono.just(new ResponseEntity<>(String.format("Payment %s is pending payment approval", paymentRecordId), HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>(String.format("Payment %s is pending payment approval", paymentRecord.getId()), HttpStatus.BAD_REQUEST));
             }
             if (paymentRecord != null && !StringUtils.equals(PENDING_PAYMENT_STATUS_ID, paymentRecord.getPaymentStatusId())) {
-                return Mono.just(new ResponseEntity<>(String.format("Payment %s is pending payment approval", paymentRecordId), HttpStatus.BAD_REQUEST));
+                return Mono.just(new ResponseEntity<>(String.format("Payment %s is pending payment approval", paymentRecord.getId()), HttpStatus.BAD_REQUEST));
             }
             if (paymentRecord.isCompletedPayment()) {
                 return BadRequestResponse("Payment already completed");
