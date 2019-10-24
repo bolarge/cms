@@ -44,7 +44,7 @@ public class OutsideSystemPaymentsController {
         return outsideSystemPaymentService.createFullPaymentConfirmationRequest(fullPaymentConfirmationRequest, request);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/initiate-partial-payment")
+    /*@RequestMapping(method = RequestMethod.POST, value = "/initiate-partial-payment")
     @ApiOperation(value = "Initiate Partial Payment", response = PaymentConfirmationApprovalRequestDto.class, consumes = "application/json",
             notes = "Used to create payment confirmations for payments that began on the system")
     @ApiResponses(value = {
@@ -54,7 +54,7 @@ public class OutsideSystemPaymentsController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> createNewPartialPayment(@RequestBody PartialPaymentConfirmationRequest partialPaymentConfirmationRequest, HttpServletRequest request) {
         return outsideSystemPaymentService.createPartialPaymentConfirmationRequest(partialPaymentConfirmationRequest, request);
-    }
+    }*/
 
     @RequestMapping(method = RequestMethod.POST, value = "/update-offline-payment")
     @ApiOperation(value = "Update an existing offline payment record detail", response = PaymentConfirmationApprovalRequestDto.class, consumes = "application/json")
