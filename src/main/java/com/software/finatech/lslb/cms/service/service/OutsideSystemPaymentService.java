@@ -245,6 +245,8 @@ public class OutsideSystemPaymentService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(PAYMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName,
                     true, getClientIpAddr(request), verbiage));
+            //Trigger notification upon update of Payment Information on an existing Invoice to Business Users
+            paymentEmailNotifierAsync.sendPaymentNotificationToLSLBUsers(recordDetail, paymentRecord);
             return OKResponse(approvalRequest.convertToDto());
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while creating existing payment confirmation request", e);
