@@ -199,7 +199,26 @@ public class OutsideSystemPaymentService {
             String ownerName = paymentRecord.getOwnerName();
             PaymentRecordDetail recordDetail = new PaymentRecordDetail();
             recordDetail.setId(UUID.randomUUID().toString());
-            recordDetail.setAmount(confirmationRequest.getAmount());
+            //Calculate payment balance
+            //recordDetail.setAmount(confirmationRequest.getAmount());
+            //Check if Full or Partial Payment
+            if(paymentRecord.getPaymentConfirmationApprovalRequestType() == "01"){
+                //if (paymentRecordDetailUpdateDto.isSuccessFulPayment() && !existingInvoicedPayment.isSuccessfulPayment()) {
+                paymentRecord.setAmount(confirmationRequest.getAmount());
+                paymentRecord.setAmountPaid(confirmationRequest.getAmount());
+                paymentRecord.setAmountOutstanding(0);
+                mongoRepositoryReactive.saveOrUpdate(paymentRecord);
+                //}
+            }
+            if(paymentRecord.getPaymentConfirmationApprovalRequestType() == "02"){
+                //if (paymentRecordDetailUpdateDto.isSuccessFulPayment() && !existingInvoicedPayment.isSuccessfulPayment()) {
+                double amountPaid = confirmationRequest.getAmount(); paymentRecord.getAmountPaid();
+                double amountOutstanding = paymentRecord.getAmount() - amountPaid;
+                paymentRecord.setAmountPaid(amountPaid);
+                paymentRecord.setAmountOutstanding(amountOutstanding);
+                mongoRepositoryReactive.saveOrUpdate(paymentRecord);
+                //}
+            }
             recordDetail.setPaymentRecordId(paymentRecord.getId());
             recordDetail.setModeOfPaymentId(OFFLINE_CONFIRMATION_ID);
             recordDetail.setInvoiceNumber(generateInvoiceNumber());
@@ -209,7 +228,12 @@ public class OutsideSystemPaymentService {
             approvalRequest.setId(UUID.randomUUID().toString());
             approvalRequest.setPaymentRecordDetailId(recordDetail.getId());
             approvalRequest.setPaymentRecordId(paymentRecord.getId());
-            approvalRequest.setApprovalRequestTypeId(CONFIRM_PARTIAL_PAYMENT_ID);
+            //approvalRequest.setApprovalRequestTypeId(CONFIRM_PARTIAL_PAYMENT_ID);
+            if(paymentRecord.getPaymentConfirmationApprovalRequestType() == "01") {
+                approvalRequest.setApprovalRequestTypeId(CONFIRM_FULL_PAYMENT_ID);
+            }else{
+                approvalRequest.setApprovalRequestTypeId(CONFIRM_PARTIAL_PAYMENT_ID);
+            }
             approvalRequest.setInitiatorId(loggedInUser.getId());
             approvalRequest.setPaymentOwnerName(ownerName);
             mongoRepositoryReactive.saveOrUpdate(approvalRequest);
