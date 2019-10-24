@@ -182,11 +182,15 @@ public class OutsideSystemPaymentService {
                 return ErrorResponse("Could not find logged in user");
             }
             PaymentRecord paymentRecord = paymentRecordService.findById(confirmationRequest.getPaymentRecordId());
-            //PaymentRecord paymentRecord =  (PaymentRecord) mongoRepositoryReactive.find(Query.query(Criteria.where("paymentRecordId").is(confirmationRequest.getPaymentRecordId())), PaymentRecord.class).block();
+            //PaymentRecord paymentRecord =  (PaymentRecord) mongoRepositoryReactive.find(Query.query(Criteria.where("invoiceNumber").is(confirmationRequest.getPaymentRecordId())), PaymentRecord.class).block();
             logger.info(" PAYMENT ID IS: " + paymentRecord.getPaymentStatusId());
             if (paymentRecord == null) {
                 return BadRequestResponse("Invalid Payment Record");
             }
+            if(paymentRecord.getInvoiceNumber().equalsIgnoreCase(confirmationRequest.getInvoiceNumber())){
+                return BadRequestResponse("Invoice already processed");
+            }
+
             if (paymentRecord.isCompletedPayment()) {
                 return BadRequestResponse("Payment already completed");
             }

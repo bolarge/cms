@@ -6,6 +6,7 @@ public class PartialPaymentConfirmationRequest {
     private String tellerNumber;
     private String bankName;
     private String tellerDate;
+    private String invoiceNumber;
     //private String paymentConfirmationApprovalRequestType;
 
     public String getPaymentRecordId() {
@@ -43,6 +44,10 @@ public class PartialPaymentConfirmationRequest {
     public String getTellerDate() { return tellerDate; }
 
     public void setTellerDate(String tellerDate) { this.tellerDate = tellerDate; }
+
+    public String getInvoiceNumber() { return invoiceNumber; }
+
+    public void setInvoiceNumber(String invoiceNumber) { this.invoiceNumber = invoiceNumber; }
 
     /*public String getPaymentConfirmationApprovalRequestType() { return paymentConfirmationApprovalRequestType; }
 
