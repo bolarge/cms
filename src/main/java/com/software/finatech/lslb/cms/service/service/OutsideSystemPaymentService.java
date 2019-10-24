@@ -188,9 +188,8 @@ public class OutsideSystemPaymentService {
                 return BadRequestResponse("Invalid Payment Record");
             }
             if(paymentRecord.getInvoiceNumber().equalsIgnoreCase(confirmationRequest.getInvoiceNumber())){
-                return BadRequestResponse("Invoice already processed");
+                return BadRequestResponse(paymentRecord.getInvoiceNumber() + " invoice already processed");
             }
-
             if (paymentRecord.isCompletedPayment()) {
                 return BadRequestResponse("Payment already completed");
             }
