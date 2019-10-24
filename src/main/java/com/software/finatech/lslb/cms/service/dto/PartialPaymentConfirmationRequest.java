@@ -3,7 +3,7 @@ package com.software.finatech.lslb.cms.service.dto;
 public class PartialPaymentConfirmationRequest {
     private String paymentRecordId;
     private double amount;
-    private String lastTellerNumber;
+    private String tellerNumber;
     private String bankName;
     private String tellerDate;
     //private String paymentConfirmationApprovalRequestType;
@@ -24,12 +24,12 @@ public class PartialPaymentConfirmationRequest {
         this.amount = amount;
     }
 
-    public String getLastTellerNumber() {
-        return lastTellerNumber;
+    public String getTellerNumber() {
+        return tellerNumber;
     }
 
-    public void setLastTellerNumber(String lastTellerNumber) {
-        this.lastTellerNumber = lastTellerNumber;
+    public void setTellerNumber(String tellerNumber) {
+        this.tellerNumber = tellerNumber;
     }
 
     public String getBankName() {

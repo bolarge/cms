@@ -167,107 +167,6 @@ public class OutsideSystemPaymentService {
         }
     }
 
-    /*
-     * Used to update offline payment after physical payment made at bank and teller issued
-     */
-    public Mono<ResponseEntity> updateOfflinePaymentRecordDetail(PartialPaymentConfirmationRequest partialPaymentConfirmationRequest, HttpServletRequest httpServletRequest) {
-        try {
-            String paymentRecordId = partialPaymentConfirmationRequest.getPaymentRecordId();
-            //PaymentRecord paymentRecord = paymentRecordService.findById(partialPaymentConfirmationRequest.getPaymentRecordId());
-            PaymentRecord paymentRecord =  (PaymentRecord) mongoRepositoryReactive.find(Query.query(Criteria.where("paymentRecordId").is(paymentRecordId)), PaymentRecord.class).block();
-            logger.info(" PAYMENT ID IS: " + paymentRecord.getId());
-
-            if (paymentRecord == null) {
-                return Mono.just(new ResponseEntity<>(String.format("Payment with record id %s does not exist", paymentRecordId), HttpStatus.BAD_REQUEST));
-            }
-            //Prevent Multi Payment on an Invoice
-           /* if (paymentRecord != null && !StringUtils.equals(UNPAID_STATUS_ID, paymentRecord.getPaymentStatusId())) {
-                //String ownerName = getOwnerName(paymentRecordDetailUpdateDto);
-                return Mono.just(new ResponseEntity<>(String.format("Payment %s is pending payment approval", paymentRecord.getId()), HttpStatus.BAD_REQUEST));
-            }*/
-            /*if (paymentRecord != null && !StringUtils.equals(PENDING_PAYMENT_STATUS_ID, paymentRecord.getPaymentStatusId())) {
-                return Mono.just(new ResponseEntity<>(String.format("Zayment %s is pending payment approval", paymentRecord.getId()), HttpStatus.BAD_REQUEST));
-            }*/
-            
-            if (paymentRecord.isCompletedPayment()) {
-                return BadRequestResponse("Payment already completed");
-            }
-            if (paymentRecord.getAmountOutstanding() < partialPaymentConfirmationRequest.getAmount()) {
-                return BadRequestResponse("The amount entered is more than the outstanding amount on the payment");
-            }
-
-            //Check if Full or Partial Payment
-            if(paymentRecord.getPaymentConfirmationApprovalRequestType() == "01"){
-                //if (paymentRecordDetailUpdateDto.isSuccessFulPayment() && !existingInvoicedPayment.isSuccessfulPayment()) {
-                paymentRecord.setAmount(partialPaymentConfirmationRequest.getAmount());
-                    paymentRecord.setAmountPaid(partialPaymentConfirmationRequest.getAmount());
-                    paymentRecord.setAmountOutstanding(0);
-                    mongoRepositoryReactive.saveOrUpdate(paymentRecord);
-                //}
-            }else {
-                //if (paymentRecordDetailUpdateDto.isSuccessFulPayment() && !existingInvoicedPayment.isSuccessfulPayment()) {
-                    double amountPaid = partialPaymentConfirmationRequest.getAmount(); paymentRecord.getAmountPaid();
-                    double amountOutstanding = paymentRecord.getAmount() - amountPaid;
-                    paymentRecord.setAmountPaid(amountPaid);
-                    paymentRecord.setAmountOutstanding(amountOutstanding);
-                    mongoRepositoryReactive.saveOrUpdate(paymentRecord);
-                //}
-            }
-            PaymentRecordDetail recordDetail = new PaymentRecordDetail();
-            //detail.setPaymentDate(LocalDateTime.now());
-            //detail.setPaymentStatusId(PENDING_PAYMENT_STATUS_ID);
-            //detail.setPaymentStatusId(paymentRecord.getPaymentStatusId());
-
-            recordDetail.setId(UUID.randomUUID().toString());
-            recordDetail.setAmount(partialPaymentConfirmationRequest.getAmount());
-            recordDetail.setPaymentRecordId(paymentRecord.getId());
-            recordDetail.setModeOfPaymentId(OFFLINE_CONFIRMATION_ID);
-            recordDetail.setPaymentStatusId(PENDING_PAYMENT_STATUS_ID);
-            mongoRepositoryReactive.saveOrUpdate(recordDetail);
-
-            //Request Payment Approval Request
-            PaymentConfirmationApprovalRequest approvalRequest = new PaymentConfirmationApprovalRequest();
-            approvalRequest.setId(UUID.randomUUID().toString());
-            approvalRequest.setPaymentRecordId(paymentRecord.getId());
-            approvalRequest.setPaymentRecordDetailId(paymentRecord.getId());
-
-            //Check PaymentApprovalRequest Type 1 or 2
-            Institution institution = institutionService.findByInstitutionId(paymentRecord.getInstitutionId());
-            Agent agent = agentService.findAgentById(paymentRecord.getAgentId());
-            if(paymentRecord.getPaymentConfirmationApprovalRequestType() == "01") {
-                approvalRequest.setApprovalRequestTypeId(CONFIRM_FULL_PAYMENT_ID);
-            }else{
-                approvalRequest.setApprovalRequestTypeId(CONFIRM_PARTIAL_PAYMENT_ID);
-            }
-            approvalRequest.setInitiatorId(springSecurityAuditorAware.getLoggedInUser().getId());
-            approvalRequest.setInvoiceNumber(paymentRecord.getInvoiceNumber());
-            //Check IF Payment is by Institution or Agent
-            if(paymentRecord.isInstitutionPayment()) {
-                approvalRequest.setPaymentOwnerName(institution.getInstitutionName());
-            }else {
-                approvalRequest.setPaymentOwnerName(agent.getFullName());
-            }
-            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
-            //
-            //Retrieve PaymentConfirmationApprovalRequest Object ID and set on PaymentRecordDetails
-            PaymentConfirmationApprovalRequest paymentConfirmationApprovalRequest = (PaymentConfirmationApprovalRequest) mongoRepositoryReactive.find(Query.query(Criteria.where("paymentRecordId").is(paymentRecordId)), PaymentConfirmationApprovalRequest.class).block();
-            //logger.info("Payment Approval Confirmation Request is: " + paymentConfirmationApprovalRequest.getId());
-            //existingInvoicedPayment.setPaymentConfirmationApprovalRequest(paymentConfirmationApprovalRequest.getId());
-            //Document Activity and write to into Audit
-            String currentAuditorName = springSecurityAuditorAware.getCurrentAuditorNotNull();
-            String verbiage = String.format("Payment record detail callback -> Payment Record Detail id: %s, Invoice Number -> %s, Status Id -> %s", paymentRecordId, paymentRecord.getInvoiceNumber(), paymentRecord.getPaymentStatusId());
-            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(paymentAuditActionId,
-                    currentAuditorName, currentAuditorName, true, getClientIpAddr(httpServletRequest), verbiage));
-            //Trigger notification upon update of Payment Information on an existing Invoice to Business Users
-            paymentEmailNotifierAsync.sendPaymentNotificationToLSLBUsers(recordDetail, paymentRecord);
-            return Mono.just(new ResponseEntity<>(paymentRecord.convertToDto(), HttpStatus.OK));
-        } catch (Exception e) {
-            return logAndReturnError(logger, "An error occurred while updating payment record detail", e);
-        }
-    }
-
-
-
     /**
      * For confirming outside payments that has a
      * PAYMENT RECORD existing on the system
@@ -276,13 +175,15 @@ public class OutsideSystemPaymentService {
      * @param request
      * @return
      */
-    public Mono<ResponseEntity> createPartialPaymentConfirmationRequest(PartialPaymentConfirmationRequest confirmationRequest, HttpServletRequest request) {
+    public Mono<ResponseEntity> updateOfflinePaymentRecordDetail(PartialPaymentConfirmationRequest confirmationRequest, HttpServletRequest request) {
         try {
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser == null) {
                 return ErrorResponse("Could not find logged in user");
             }
             PaymentRecord paymentRecord = paymentRecordService.findById(confirmationRequest.getPaymentRecordId());
+            //PaymentRecord paymentRecord =  (PaymentRecord) mongoRepositoryReactive.find(Query.query(Criteria.where("paymentRecordId").is(confirmationRequest.getPaymentRecordId())), PaymentRecord.class).block();
+            logger.info(" PAYMENT ID IS: " + paymentRecord.getPaymentStatusId());
             if (paymentRecord == null) {
                 return BadRequestResponse("Invalid Payment Record");
             }
