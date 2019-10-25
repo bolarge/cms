@@ -28,11 +28,10 @@ public class PaymentRecordDetail extends AbstractFact {
     /*
         Added to meet implementation logic of Offline Payment Processing
     */
-    private String licenseTypeId;
     private String tellerNumber;
     private LocalDateTime tellerDate;
     private String bankName;
-    private double amountPaid;
+
 
     public String getVigiPayTransactionReference() {
         return vigiPayTransactionReference;
@@ -104,17 +103,9 @@ public class PaymentRecordDetail extends AbstractFact {
 
     public void setBankName(String bankName) { this.bankName = bankName; }
 
-    public String getLicenseTypeId() { return licenseTypeId; }
-
-    public void setLicenseTypeId(String licenseTypeId) { this.licenseTypeId = licenseTypeId; }
-
     public LocalDateTime getTellerDate() { return tellerDate; }
 
     public void setTellerDate(LocalDateTime tellerDate) { this.tellerDate = tellerDate; }
-
-    public double getAmountPaid() { return amountPaid; }
-
-    public void setAmountPaid(double amountPaid) { this.amountPaid = amountPaid; }
 
     public String getPaymentConfirmationApprovalRequest() { return paymentConfirmationApprovalRequest; }
 

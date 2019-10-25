@@ -2,9 +2,8 @@ package com.software.finatech.lslb.cms.service.service;
 
 import com.software.finatech.lslb.cms.service.config.SpringSecurityAuditorAware;
 import com.software.finatech.lslb.cms.service.domain.*;
-import com.software.finatech.lslb.cms.service.dto.FullPaymentConfirmationRequest;
-import com.software.finatech.lslb.cms.service.dto.PartialPaymentConfirmationRequest;
-import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailUpdateDto;
+import com.software.finatech.lslb.cms.service.dto.PaymentConfirmationRequest;
+import com.software.finatech.lslb.cms.service.dto.PaymentUpdateConfirmationRequest;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDto;
 import com.software.finatech.lslb.cms.service.persistence.MongoRepositoryReactiveImpl;
 import com.software.finatech.lslb.cms.service.referencedata.FeePaymentTypeReferenceData;
@@ -12,14 +11,11 @@ import com.software.finatech.lslb.cms.service.referencedata.LicenseTypeReference
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.*;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
-import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
-import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.PaymentEmailNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +37,6 @@ import static com.software.finatech.lslb.cms.service.referencedata.ModeOfPayment
 import static com.software.finatech.lslb.cms.service.referencedata.PaymentConfirmationApprovalRequestTypeReferenceData.*;
 import static com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData.PENDING_PAYMENT_STATUS_ID;
 import static com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData.UNPAID_STATUS_ID;
-import static com.software.finatech.lslb.cms.service.service.PaymentRecordDetailServiceImpl.paymentAuditActionId;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.BadRequestResponse;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.ErrorResponse;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.logAndReturnError;
@@ -90,31 +85,31 @@ public class OutsideSystemPaymentService {
         this.paymentEmailNotifierAsync = paymentEmailNotifierAsync;
     }
 
-    public Mono<ResponseEntity> createFullPaymentConfirmationRequest(FullPaymentConfirmationRequest fullPaymentConfirmationRequest, HttpServletRequest request) {
+    public Mono<ResponseEntity> createFullPaymentConfirmationRequest(PaymentConfirmationRequest paymentConfirmationRequest, HttpServletRequest request) {
         try {
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser == null) {
                 return ErrorResponse("Could not find logged in user");
             }
-            Mono<ResponseEntity> validateOutsidePaymentResponse = validateOutsidePayment(fullPaymentConfirmationRequest);
+            Mono<ResponseEntity> validateOutsidePaymentResponse = validateOutsidePayment(paymentConfirmationRequest);
             if (validateOutsidePaymentResponse != null) {
                 return validateOutsidePaymentResponse;
             }
             PaymentRecord paymentRecord = new PaymentRecord();
-            paymentRecord.setAmountOutstanding(fullPaymentConfirmationRequest.getAmountPaid());
-            paymentRecord.setAmount(fullPaymentConfirmationRequest.getAmountPaid());
+            paymentRecord.setAmountOutstanding(paymentConfirmationRequest.getAmountPaid());
+            paymentRecord.setAmount(paymentConfirmationRequest.getAmountPaid());
             paymentRecord.setPaymentStatusId(UNPAID_STATUS_ID);
-            paymentRecord.setGameTypeId(fullPaymentConfirmationRequest.getGameTypeId());
-            paymentRecord.setLicenseTypeId(fullPaymentConfirmationRequest.getLicenseTypeId());
-            paymentRecord.setAgentId(fullPaymentConfirmationRequest.getAgentId());
-            paymentRecord.setInstitutionId(fullPaymentConfirmationRequest.getInstitutionId());
-            paymentRecord.setFeePaymentTypeId(fullPaymentConfirmationRequest.getFeePaymentTypeId());
+            paymentRecord.setGameTypeId(paymentConfirmationRequest.getGameTypeId());
+            paymentRecord.setLicenseTypeId(paymentConfirmationRequest.getLicenseTypeId());
+            paymentRecord.setAgentId(paymentConfirmationRequest.getAgentId());
+            paymentRecord.setInstitutionId(paymentConfirmationRequest.getInstitutionId());
+            paymentRecord.setFeePaymentTypeId(paymentConfirmationRequest.getFeePaymentTypeId());
             paymentRecord.setAmountPaid(0);
             paymentRecord.setForOutsideSystemPayment(true);
             paymentRecord.setPaymentReference(NumberUtil.generateTransactionReferenceForPaymentRecord());
-            paymentRecord.setGamingMachineIds(fullPaymentConfirmationRequest.getGamingMachineIds());
-            paymentRecord.setGamingTerminalIds(fullPaymentConfirmationRequest.getGamingTerminalIds());
-            paymentRecord.setLicenseTransferId(fullPaymentConfirmationRequest.getLicenseTransferId());
+            paymentRecord.setGamingMachineIds(paymentConfirmationRequest.getGamingMachineIds());
+            paymentRecord.setGamingTerminalIds(paymentConfirmationRequest.getGamingTerminalIds());
+            paymentRecord.setLicenseTransferId(paymentConfirmationRequest.getLicenseTransferId());
             paymentRecord.setCreationDate(LocalDate.now());
             mongoRepositoryReactive.saveOrUpdate(paymentRecord);
             PaymentRecordDetail detail = new PaymentRecordDetail();
@@ -122,14 +117,14 @@ public class OutsideSystemPaymentService {
             detail.setPaymentStatusId(UNPAID_STATUS_ID);
             detail.setModeOfPaymentId(OFFLINE_CONFIRMATION_ID);
             detail.setPaymentRecordId(paymentRecord.getId());
-            detail.setAmount(fullPaymentConfirmationRequest.getAmountPaid());
+            detail.setAmount(paymentConfirmationRequest.getAmountPaid());
             detail.setInvoiceNumber(generateInvoiceNumber());
             mongoRepositoryReactive.saveOrUpdate(detail);
 
-            String gameTypeName = gameTypeService.findNameById(fullPaymentConfirmationRequest.getGameTypeId());
-            String feePaymentTypeName = FeePaymentTypeReferenceData.getFeePaymentTypeNameById(mongoRepositoryReactive, fullPaymentConfirmationRequest.getFeePaymentTypeId());
-            String licenseTypeName = LicenseTypeReferenceData.getLicenseTypeNameById(mongoRepositoryReactive, fullPaymentConfirmationRequest.getLicenseTypeId());
-            String ownerName = getOwnerName(fullPaymentConfirmationRequest);
+            String gameTypeName = gameTypeService.findNameById(paymentConfirmationRequest.getGameTypeId());
+            String feePaymentTypeName = FeePaymentTypeReferenceData.getFeePaymentTypeNameById(mongoRepositoryReactive, paymentConfirmationRequest.getFeePaymentTypeId());
+            String licenseTypeName = LicenseTypeReferenceData.getLicenseTypeNameById(mongoRepositoryReactive, paymentConfirmationRequest.getLicenseTypeId());
+            String ownerName = getOwnerName(paymentConfirmationRequest);
 
             /*PaymentConfirmationApprovalRequest approvalRequest = new PaymentConfirmationApprovalRequest();
             approvalRequest.setId(UUID.randomUUID().toString());
@@ -158,8 +153,6 @@ public class OutsideSystemPaymentService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(PAYMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName, true, getClientIpAddr(request), verbiage));
             //Trigger Notification
-            paymentEmailNotifierAsync.sendOfflinePaymentNotificationForPaymentRecordDetail(detail, paymentRecord);
-            //
             //paymentEmailNotifierAsync.sendOfflinePaymentNotificationForPaymentRecordDetail(detail, paymentRecord);
             return OKResponse(paymentRecord.convertToDto());
         } catch (Exception e) {
@@ -175,20 +168,21 @@ public class OutsideSystemPaymentService {
      * @param request
      * @return
      */
-    public Mono<ResponseEntity> updateOfflinePaymentRecordDetail(PartialPaymentConfirmationRequest confirmationRequest, HttpServletRequest request) {
+    public Mono<ResponseEntity> updateOfflinePaymentRecordDetail(PaymentUpdateConfirmationRequest confirmationRequest, HttpServletRequest request) {
         try {
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
             if (loggedInUser == null) {
                 return ErrorResponse("Could not find logged in user");
             }
             PaymentRecord paymentRecord = paymentRecordService.findById(confirmationRequest.getPaymentRecordId());
-            //PaymentRecord paymentRecord =  (PaymentRecord) mongoRepositoryReactive.find(Query.query(Criteria.where("invoiceNumber").is(confirmationRequest.getPaymentRecordId())), PaymentRecord.class).block();
-            logger.info(" PAYMENT ID IS: " + paymentRecord.getPaymentStatusId());
+            PaymentRecordDetail paymentRecordDetail =  (PaymentRecordDetail) mongoRepositoryReactive.find(Query.query(Criteria.where("invoiceNumber").is(confirmationRequest.getInvoiceNumber())), PaymentRecordDetail.class).block();
+            logger.info("AMOUNT TO BE PAID : " + paymentRecordDetail.getAmount());
             if (paymentRecord == null) {
                 return BadRequestResponse("Invalid Payment Record");
             }
-            if(paymentRecord.getInvoiceNumber().equalsIgnoreCase(confirmationRequest.getInvoiceNumber())){
-                return BadRequestResponse(paymentRecord.getInvoiceNumber() + " invoice already processed");
+            if (paymentRecordDetail != null && !StringUtils.equals(UNPAID_STATUS_ID, paymentRecordDetail.getPaymentStatusId())) {
+                //String ownerName = getOwnerName(paymentRecordDetailUpdateDto);
+                return Mono.just(new ResponseEntity<>(String.format("Payment %s is pending payment approval", paymentRecord.getId()), HttpStatus.BAD_REQUEST));
             }
             if (paymentRecord.isCompletedPayment()) {
                 return BadRequestResponse("Payment already completed");
@@ -196,40 +190,37 @@ public class OutsideSystemPaymentService {
             if (paymentRecord.getAmountOutstanding() < confirmationRequest.getAmount()) {
                 return BadRequestResponse("The amount entered is more than the outstanding amount on the payment");
             }
-            String ownerName = paymentRecord.getOwnerName();
-            PaymentRecordDetail recordDetail = new PaymentRecordDetail();
-            recordDetail.setId(UUID.randomUUID().toString());
-            //Calculate payment balance
-            //recordDetail.setAmount(confirmationRequest.getAmount());
-            //Check if Full or Partial Payment
-            if(paymentRecord.getPaymentConfirmationApprovalRequestType() == "01"){
-                //if (paymentRecordDetailUpdateDto.isSuccessFulPayment() && !existingInvoicedPayment.isSuccessfulPayment()) {
-                paymentRecord.setAmount(confirmationRequest.getAmount());
+           //
+            //Check if Full or Partial Payment  //Calculate payment balance
+            if(paymentRecord.getPaymentConfirmationApprovalRequestType() == "1"){
+                //paymentRecord.setAmount(confirmationRequest.getAmount());
                 paymentRecord.setAmountPaid(confirmationRequest.getAmount());
                 paymentRecord.setAmountOutstanding(0);
                 mongoRepositoryReactive.saveOrUpdate(paymentRecord);
-                //}
             }
-            if(paymentRecord.getPaymentConfirmationApprovalRequestType() == "02"){
-                //if (paymentRecordDetailUpdateDto.isSuccessFulPayment() && !existingInvoicedPayment.isSuccessfulPayment()) {
-                double amountPaid = confirmationRequest.getAmount(); paymentRecord.getAmountPaid();
-                double amountOutstanding = paymentRecord.getAmount() - amountPaid;
-                paymentRecord.setAmountPaid(amountPaid);
+            if(paymentRecord.getPaymentConfirmationApprovalRequestType() == "2"){
+                double amountOutstanding = paymentRecord.getAmount() - confirmationRequest.getAmount();
+                paymentRecord.setAmountPaid(confirmationRequest.getAmount());
                 paymentRecord.setAmountOutstanding(amountOutstanding);
                 mongoRepositoryReactive.saveOrUpdate(paymentRecord);
-                //}
             }
-            recordDetail.setPaymentRecordId(paymentRecord.getId());
-            recordDetail.setModeOfPaymentId(OFFLINE_CONFIRMATION_ID);
-            recordDetail.setInvoiceNumber(generateInvoiceNumber());
-            recordDetail.setPaymentStatusId(UNPAID_STATUS_ID);
-            mongoRepositoryReactive.saveOrUpdate(recordDetail);
+            //
+            String ownerName = paymentRecord.getOwnerName();
+            //PaymentRecordDetail recordDetail = new PaymentRecordDetail();
+            //paymentRecordDetail.setId(UUID.randomUUID().toString());
+            paymentRecordDetail.setId(paymentRecordDetail.getId());
+            paymentRecordDetail.setAmount(confirmationRequest.getAmount());
+            paymentRecordDetail.setPaymentRecordId(paymentRecord.getId());
+            paymentRecordDetail.setPaymentConfirmationApprovalRequestType(confirmationRequest.getPaymentConfirmationApprovalRequestType());
+            paymentRecordDetail.setModeOfPaymentId(OFFLINE_CONFIRMATION_ID);
+            paymentRecordDetail.setPaymentStatusId(PENDING_PAYMENT_STATUS_ID);
+            mongoRepositoryReactive.saveOrUpdate(paymentRecordDetail);
+            //
             PaymentConfirmationApprovalRequest approvalRequest = new PaymentConfirmationApprovalRequest();
             approvalRequest.setId(UUID.randomUUID().toString());
-            approvalRequest.setPaymentRecordDetailId(recordDetail.getId());
+            approvalRequest.setPaymentRecordDetailId(paymentRecordDetail.getId());
             approvalRequest.setPaymentRecordId(paymentRecord.getId());
-            //approvalRequest.setApprovalRequestTypeId(CONFIRM_PARTIAL_PAYMENT_ID);
-            if(paymentRecord.getPaymentConfirmationApprovalRequestType() == "01") {
+            if(paymentRecord.getPaymentConfirmationApprovalRequestType() == "1") {
                 approvalRequest.setApprovalRequestTypeId(CONFIRM_FULL_PAYMENT_ID);
             }else{
                 approvalRequest.setApprovalRequestTypeId(CONFIRM_PARTIAL_PAYMENT_ID);
@@ -241,47 +232,47 @@ public class OutsideSystemPaymentService {
             String verbiage = String.format("Created Payment Confirmation Approval Request:" +
                             " Payment Owner -> %s , Reference -> %s, Invoice Number -> %s, Id -> %s" +
                             "", ownerName, paymentRecord.getPaymentReference(),
-                    recordDetail.getInvoiceNumber(), approvalRequest.getId());
+                    paymentRecordDetail.getInvoiceNumber(), approvalRequest.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(PAYMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName,
                     true, getClientIpAddr(request), verbiage));
             //Trigger notification upon update of Payment Information on an existing Invoice to Business Users
-            paymentEmailNotifierAsync.sendPaymentNotificationToLSLBUsers(recordDetail, paymentRecord);
+            paymentEmailNotifierAsync.sendPaymentNotificationToLSLBUsers(paymentRecordDetail, paymentRecord);
             return OKResponse(approvalRequest.convertToDto());
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while creating existing payment confirmation request", e);
         }
     }
 
-    private Mono<ResponseEntity> validateOutsidePayment(FullPaymentConfirmationRequest fullPaymentConfirmationRequest) throws Exception {
+    private Mono<ResponseEntity> validateOutsidePayment(PaymentConfirmationRequest paymentConfirmationRequest) throws Exception {
 
-        if (fullPaymentConfirmationRequest.isLicenseRenewalPayment()) {
+        if (paymentConfirmationRequest.isLicenseRenewalPayment()) {
             logger.info("Payment is License Renewal Payment XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-            Mono<ResponseEntity> validateRenewalLicenseResponse = validateLicenseRenewalPayment(fullPaymentConfirmationRequest);
+            Mono<ResponseEntity> validateRenewalLicenseResponse = validateLicenseRenewalPayment(paymentConfirmationRequest);
             if (validateRenewalLicenseResponse != null) {
                 return validateRenewalLicenseResponse;
             }
         }
 
-        if (fullPaymentConfirmationRequest.isApplicationFeePayment()) {
+        if (paymentConfirmationRequest.isApplicationFeePayment()) {
             logger.info("Payment is Application Fee Payment XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-            Mono<ResponseEntity> validateApplicationPaymentResponse = validateApplicationPayment(fullPaymentConfirmationRequest);
+            Mono<ResponseEntity> validateApplicationPaymentResponse = validateApplicationPayment(paymentConfirmationRequest);
             if (validateApplicationPaymentResponse != null) {
                 return validateApplicationPaymentResponse;
             }
         }
 
-        if (fullPaymentConfirmationRequest.isLicenseFeePayment()) {
+        if (paymentConfirmationRequest.isLicenseFeePayment()) {
             logger.info("Payment is License Fee Payment XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-            Mono<ResponseEntity> validateLicensePaymentResponse = validateLicensePayment(fullPaymentConfirmationRequest);
+            Mono<ResponseEntity> validateLicensePaymentResponse = validateLicensePayment(paymentConfirmationRequest);
             if (validateLicensePaymentResponse != null) {
                 return validateLicensePaymentResponse;
             }
         }
 
-        if (fullPaymentConfirmationRequest.isLicenseTransferPayment()) {
+        if (paymentConfirmationRequest.isLicenseTransferPayment()) {
             logger.info("Payment is License Transfer Payment XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-            Mono<ResponseEntity> validateLicenseTransferResponse = validateLicenceTransferPayment(fullPaymentConfirmationRequest);
+            Mono<ResponseEntity> validateLicenseTransferResponse = validateLicenceTransferPayment(paymentConfirmationRequest);
             if (validateLicenseTransferResponse != null) {
                 return validateLicenseTransferResponse;
             }
@@ -289,25 +280,25 @@ public class OutsideSystemPaymentService {
         return null;
     }
 
-    private Mono<ResponseEntity> validateLicenseRenewalPayment(FullPaymentConfirmationRequest fullPaymentConfirmationRequest) {
+    private Mono<ResponseEntity> validateLicenseRenewalPayment(PaymentConfirmationRequest paymentConfirmationRequest) {
         logger.info("In validated License Renewal Validator XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-        String institutionId = fullPaymentConfirmationRequest.getInstitutionId();
-        String agentId = fullPaymentConfirmationRequest.getAgentId();
-        String gameTypeId = fullPaymentConfirmationRequest.getGameTypeId();
+        String institutionId = paymentConfirmationRequest.getInstitutionId();
+        String agentId = paymentConfirmationRequest.getAgentId();
+        String gameTypeId = paymentConfirmationRequest.getGameTypeId();
         int page = 0;
         int pageSize = 10000;
         String sortDirection = "DESC";
         String sortProperty = "createdAt";
 
         Query query = new Query();
-        query.addCriteria(Criteria.where("institutionId").is(fullPaymentConfirmationRequest.getInstitutionId()));
-        query.addCriteria(Criteria.where("agentId").is(fullPaymentConfirmationRequest.getAgentId()));
-        query.addCriteria(Criteria.where("gameTypeId").is(fullPaymentConfirmationRequest.getGameTypeId()));
+        query.addCriteria(Criteria.where("institutionId").is(paymentConfirmationRequest.getInstitutionId()));
+        query.addCriteria(Criteria.where("agentId").is(paymentConfirmationRequest.getAgentId()));
+        query.addCriteria(Criteria.where("gameTypeId").is(paymentConfirmationRequest.getGameTypeId()));
         query.addCriteria(Criteria.where("paymentStatusId").is(PaymentStatusReferenceData.UNPAID_STATUS_ID));
         //
         PaymentRecord existingUnpaidGamePaymentRecord = (PaymentRecord) mongoRepositoryReactive.find(query, PaymentRecord.class).block();
         if (existingUnpaidGamePaymentRecord != null && StringUtils.equals(PaymentStatusReferenceData.UNPAID_STATUS_ID, existingUnpaidGamePaymentRecord.getPaymentStatusId())) {
-            String ownerName = getOwnerName(fullPaymentConfirmationRequest);
+            String ownerName = getOwnerName(paymentConfirmationRequest);
             return Mono.just(new ResponseEntity<>(ownerName + " has an existing license renewal payment for the game type specified", HttpStatus.BAD_REQUEST));
         }
 
@@ -315,38 +306,38 @@ public class OutsideSystemPaymentService {
         if (findLicenseResponse.block() != null && findLicenseResponse.block().getStatusCode() != HttpStatus.OK) {
             logger.info("1 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
             String categoryName = gameTypeService.findNameById(gameTypeId);
-            String ownerName = getOwnerName(fullPaymentConfirmationRequest);
+            String ownerName = getOwnerName(paymentConfirmationRequest);
             return Mono.just(new ResponseEntity<>(String.format("%s does not have an existing license for %s, please get licensed for category %s before attempting to pay for licence renewal for the category", ownerName, categoryName, categoryName), HttpStatus.BAD_REQUEST));
         }
 
-        License latestExistingLicense = licenseService.getPreviousConfirmedLicense(fullPaymentConfirmationRequest.getInstitutionId(), fullPaymentConfirmationRequest.getAgentId(), fullPaymentConfirmationRequest.getGameTypeId(), fullPaymentConfirmationRequest.getLicenseTypeId());
+        License latestExistingLicense = licenseService.getPreviousConfirmedLicense(paymentConfirmationRequest.getInstitutionId(), paymentConfirmationRequest.getAgentId(), paymentConfirmationRequest.getGameTypeId(), paymentConfirmationRequest.getLicenseTypeId());
         if (latestExistingLicense == null) {
             logger.info("2 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
             String categoryName = gameTypeService.findNameById(gameTypeId);
-            String ownerName = getOwnerName(fullPaymentConfirmationRequest);
+            String ownerName = getOwnerName(paymentConfirmationRequest);
             return Mono.just(new ResponseEntity<>(String.format("%s does not have a valid %s licence, kindly contact LSLB before attempting to pay for licence renewal for %s", ownerName, categoryName, categoryName), HttpStatus.BAD_REQUEST));
         }
         if (latestExistingLicense.isRevokedLicence()) {
             String categoryName = gameTypeService.findNameById(gameTypeId);
-            String ownerName = getOwnerName(fullPaymentConfirmationRequest);
+            String ownerName = getOwnerName(paymentConfirmationRequest);
             return BadRequestResponse(String.format("%s's %s licence is revoked", ownerName, categoryName));
         }
         if (latestExistingLicense.isTerminatedLicence()) {
             String categoryName = gameTypeService.findNameById(gameTypeId);
-            String ownerName = getOwnerName(fullPaymentConfirmationRequest);
+            String ownerName = getOwnerName(paymentConfirmationRequest);
             return BadRequestResponse(String.format("%s's %s licence is terminated", ownerName, categoryName));
         }
         if (latestExistingLicense.isSuspendedLicence()) {
             String categoryName = gameTypeService.findNameById(gameTypeId);
-            String ownerName = getOwnerName(fullPaymentConfirmationRequest);
+            String ownerName = getOwnerName(paymentConfirmationRequest);
             return BadRequestResponse(String.format("%s's %s licence is suspended", ownerName, categoryName));
         }
         return null;
     }
 
-    private Mono<ResponseEntity> validateApplicationPayment(FullPaymentConfirmationRequest fullPaymentConfirmationRequest) {
-        String gameTypeId = fullPaymentConfirmationRequest.getGameTypeId();
-        String institutionId = fullPaymentConfirmationRequest.getInstitutionId();
+    private Mono<ResponseEntity> validateApplicationPayment(PaymentConfirmationRequest paymentConfirmationRequest) {
+        String gameTypeId = paymentConfirmationRequest.getGameTypeId();
+        String institutionId = paymentConfirmationRequest.getInstitutionId();
         if (!StringUtils.isEmpty(institutionId)) {
             Institution institution = institutionService.findByInstitutionId(institutionId);
             if (institution != null && institution.isFromLiveData()) {
@@ -357,10 +348,10 @@ public class OutsideSystemPaymentService {
                 ArrayList<License> licenses = (ArrayList<License>) mongoRepositoryReactive.findAll(query, License.class).toStream().collect(Collectors.toList());
                 if ((licenses.size() >= 1)) {
                     if ((licenses.size() == 1) && (licenses.get(0).isAIPRelatedLicense())) {
-                        String ownerName = getOwnerName(fullPaymentConfirmationRequest);
+                        String ownerName = getOwnerName(paymentConfirmationRequest);
                         return BadRequestResponse("Kindly make payment for licence for " + ownerName);
                     }
-                    String ownerName = getOwnerName(fullPaymentConfirmationRequest);
+                    String ownerName = getOwnerName(paymentConfirmationRequest);
                     return BadRequestResponse("Kindly make payment for licence renewal for " + ownerName);
                 }
             }
@@ -376,22 +367,22 @@ public class OutsideSystemPaymentService {
 
         PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.find(query, PaymentRecord.class).block();
         if (paymentRecord != null && StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, paymentRecord.getPaymentStatusId())) {
-            String ownerName = getOwnerName(fullPaymentConfirmationRequest);
+            String ownerName = getOwnerName(paymentConfirmationRequest);
             return Mono.just(new ResponseEntity<>(ownerName + " has an existing application fee payment  for the category specified", HttpStatus.BAD_REQUEST));
         }
         if (paymentRecord != null && !StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, paymentRecord.getPaymentStatusId())) {
-            String ownerName = getOwnerName(fullPaymentConfirmationRequest);
+            String ownerName = getOwnerName(paymentConfirmationRequest);
             return Mono.just(new ResponseEntity<>("Please complete " + ownerName + "'s  existing application fee payment for category", HttpStatus.BAD_REQUEST));
         }
         return null;
     }
 
 
-    private Mono<ResponseEntity> validateLicensePayment(FullPaymentConfirmationRequest fullPaymentConfirmationRequest) throws Exception {
-        String institutionId = fullPaymentConfirmationRequest.getInstitutionId();
-        String gameTypeId = fullPaymentConfirmationRequest.getGameTypeId();
-        String licenseTypeId = fullPaymentConfirmationRequest.getLicenseTypeId();
-        String feePaymentTypeId = fullPaymentConfirmationRequest.getFeePaymentTypeId();
+    private Mono<ResponseEntity> validateLicensePayment(PaymentConfirmationRequest paymentConfirmationRequest) throws Exception {
+        String institutionId = paymentConfirmationRequest.getInstitutionId();
+        String gameTypeId = paymentConfirmationRequest.getGameTypeId();
+        String licenseTypeId = paymentConfirmationRequest.getLicenseTypeId();
+        String feePaymentTypeId = paymentConfirmationRequest.getFeePaymentTypeId();
         if (!StringUtils.isEmpty(institutionId)) {
             Institution institution = institutionService.findByInstitutionId(institutionId);
             if (institution != null && institution.isFromLiveData()) {
@@ -405,7 +396,7 @@ public class OutsideSystemPaymentService {
                 }
             }
         }
-        String agentId = fullPaymentConfirmationRequest.getAgentId();
+        String agentId = paymentConfirmationRequest.getAgentId();
         PaymentRecordDto existingLicensePaymentRecordDto = getLicensePaymentRecord(licenseTypeId, gameTypeId, agentId, institutionId);
         if (existingLicensePaymentRecordDto != null && !StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, existingLicensePaymentRecordDto.getPaymentStatusId())) {
             return Mono.just(new ResponseEntity<>("Kindly complete payment of your existing licence payment", HttpStatus.BAD_REQUEST));
@@ -415,7 +406,7 @@ public class OutsideSystemPaymentService {
             return Mono.just(new ResponseEntity<>("You  have an existing license payment for this category and can only proceed to make payment for renewal", HttpStatus.BAD_REQUEST));
         }
 
-        if (fullPaymentConfirmationRequest.isBeingPaidByOperator()) {
+        if (paymentConfirmationRequest.isBeingPaidByOperator()) {
             boolean institutionHasApplicationPayment = institutionHasApplicationPaymentInCategory(institutionId, gameTypeId);
             if (!institutionHasApplicationPayment) {
                 return Mono.just(new ResponseEntity<>("Kindly make payment for application fees for category before proceeding", HttpStatus.BAD_REQUEST));
@@ -474,9 +465,9 @@ public class OutsideSystemPaymentService {
         return paymentRecord != null;
     }
 
-    private Mono<ResponseEntity> validateLicenceTransferPayment(FullPaymentConfirmationRequest fullPaymentConfirmationRequest) {
-        String licenseTransferId = fullPaymentConfirmationRequest.getLicenseTransferId();
-        String gameTypeId = fullPaymentConfirmationRequest.getGameTypeId();
+    private Mono<ResponseEntity> validateLicenceTransferPayment(PaymentConfirmationRequest paymentConfirmationRequest) {
+        String licenseTransferId = paymentConfirmationRequest.getLicenseTransferId();
+        String gameTypeId = paymentConfirmationRequest.getGameTypeId();
         if (StringUtils.isEmpty(licenseTransferId)) {
             return Mono.just(new ResponseEntity<>("Licence Transfer id should not be empty", HttpStatus.BAD_REQUEST));
         }
@@ -493,15 +484,15 @@ public class OutsideSystemPaymentService {
         return null;
     }
 
-    public String getOwnerName(FullPaymentConfirmationRequest fullPaymentConfirmationRequest) {
-        if (StringUtils.isNotEmpty(fullPaymentConfirmationRequest.getInstitutionId())) {
-            Institution institution = institutionService.findByInstitutionId(fullPaymentConfirmationRequest.getInstitutionId());
+    public String getOwnerName(PaymentConfirmationRequest paymentConfirmationRequest) {
+        if (StringUtils.isNotEmpty(paymentConfirmationRequest.getInstitutionId())) {
+            Institution institution = institutionService.findByInstitutionId(paymentConfirmationRequest.getInstitutionId());
             if (institution != null) {
                 return institution.getInstitutionName();
             }
         }
-        if (StringUtils.isNotEmpty(fullPaymentConfirmationRequest.getAgentId())) {
-            Agent agent = agentService.findAgentById(fullPaymentConfirmationRequest.getAgentId());
+        if (StringUtils.isNotEmpty(paymentConfirmationRequest.getAgentId())) {
+            Agent agent = agentService.findAgentById(paymentConfirmationRequest.getAgentId());
             if (agent != null) {
                 return agent.getFullName();
             }
