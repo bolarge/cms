@@ -208,7 +208,7 @@ public class OutsideSystemPaymentService {
             String ownerName = paymentRecord.getOwnerName();
             //PaymentRecordDetail recordDetail = new PaymentRecordDetail();
             //paymentRecordDetail.setId(UUID.randomUUID().toString());
-            paymentRecordDetail.setId(paymentRecordDetail.getId());
+            paymentRecordDetail.setId(paymentRecordDetail.getId());  //Update with existing same object PK
             paymentRecordDetail.setAmount(confirmationRequest.getAmount());
             paymentRecordDetail.setPaymentRecordId(paymentRecord.getId());
             paymentRecordDetail.setPaymentConfirmationApprovalRequestType(confirmationRequest.getPaymentConfirmationApprovalRequestType());
@@ -219,6 +219,7 @@ public class OutsideSystemPaymentService {
             PaymentConfirmationApprovalRequest approvalRequest = new PaymentConfirmationApprovalRequest();
             approvalRequest.setId(UUID.randomUUID().toString());
             approvalRequest.setPaymentRecordDetailId(paymentRecordDetail.getId());
+            approvalRequest.setAmountPaid(confirmationRequest.getAmount());
             approvalRequest.setPaymentRecordId(paymentRecord.getId());
             if(paymentRecord.getPaymentConfirmationApprovalRequestType() == "1") {
                 approvalRequest.setApprovalRequestTypeId(CONFIRM_FULL_PAYMENT_ID);

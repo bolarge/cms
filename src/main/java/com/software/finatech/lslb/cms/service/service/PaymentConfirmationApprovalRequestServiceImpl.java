@@ -13,6 +13,8 @@ import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.ApprovalRequestNotifierAsync;
+import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.PaymentEmailNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 import static com.software.finatech.lslb.cms.service.referencedata.AuditActionReferenceData.PAYMENT_ID;
 import static com.software.finatech.lslb.cms.service.referencedata.PaymentConfirmationApprovalRequestTypeReferenceData.getTypeNameById;
 import static com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID;
+import static com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData.FAILED_PAYMENT_STATUS_ID;
 import static com.software.finatech.lslb.cms.service.referencedata.ReferenceDataUtil.getAllEnumeratedEntity;
 import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.*;
 import static com.software.finatech.lslb.cms.service.util.OKResponseUtil.OKResponse;
@@ -47,16 +50,22 @@ public class PaymentConfirmationApprovalRequestServiceImpl implements PaymentCon
     private SpringSecurityAuditorAware springSecurityAuditorAware;
     private AuditLogHelper auditLogHelper;
     private PaymentRecordDetailService paymentRecordDetailService;
+    private PaymentEmailNotifierAsync paymentEmailNotifierAsync;
+    private ApprovalRequestNotifierAsync approvalRequestNotifierAsync;
 
     @Autowired
     public PaymentConfirmationApprovalRequestServiceImpl(MongoRepositoryReactiveImpl mongoRepositoryReactive,
                                                          SpringSecurityAuditorAware springSecurityAuditorAware,
                                                          AuditLogHelper auditLogHelper,
-                                                         PaymentRecordDetailService paymentRecordDetailService) {
+                                                         PaymentRecordDetailService paymentRecordDetailService,
+                                                         PaymentEmailNotifierAsync paymentEmailNotifierAsync,
+                                                         ApprovalRequestNotifierAsync approvalRequestNotifierAsync) {
         this.mongoRepositoryReactive = mongoRepositoryReactive;
         this.springSecurityAuditorAware = springSecurityAuditorAware;
         this.auditLogHelper = auditLogHelper;
         this.paymentRecordDetailService = paymentRecordDetailService;
+        this.paymentEmailNotifierAsync = paymentEmailNotifierAsync;
+        this.approvalRequestNotifierAsync = approvalRequestNotifierAsync;
     }
 
     @Override
@@ -199,9 +208,15 @@ public class PaymentConfirmationApprovalRequestServiceImpl implements PaymentCon
                     !approvalRequest.canBeApprovedByUser(user.getId())) {
                 return BadRequestResponse("Invalid Request");
             }
-
+            //Update Payment Status ID to FAILED when Rejected
+            PaymentRecordDetail paymentRecordDetail =  (PaymentRecordDetail) mongoRepositoryReactive.find(Query.query(Criteria.where("paymentRecordId").is(approvalRequest.getPaymentRecordId())), PaymentRecordDetail.class).block();
+            logger.info("Approval Request Invoice is: " + paymentRecordDetail.getInvoiceNumber());
+            paymentRecordDetail.setPaymentStatusId(FAILED_PAYMENT_STATUS_ID);
+            //Reject Approval Request
             approvalRequest.setAsRejectedByUserWithReason(user.getId(), requestOperationtDto.getReason());
             mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+            mongoRepositoryReactive.saveOrUpdate(paymentRecordDetail);
+            //Log for Audit Trail
             String verbiage = String.format("Rejected Payment Confirmation approval request -> " +
                             " Type -> %s, Owner Name -> %s, Id -> %s",
                     getTypeNameById(mongoRepositoryReactive, approvalRequest.getApprovalRequestTypeId()),
@@ -209,7 +224,9 @@ public class PaymentConfirmationApprovalRequestServiceImpl implements PaymentCon
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(PAYMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), approvalRequest.getPaymentOwnerName(),
                     true, RequestAddressUtil.getClientIpAddr(request), verbiage));
-
+            //Trigger Notification
+            //paymentEmailNotifierAsync.sendOfflinePaymentNotificationForPaymentRecordDetail(detail, paymentRecord);
+            approvalRequestNotifierAsync.sendRejectedPaymentConfirmationApprovalRequestEmailToInitiator(approvalRequest);
             return OKResponse(approvalRequest.convertToDto());
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while rejecting approval request ", e);

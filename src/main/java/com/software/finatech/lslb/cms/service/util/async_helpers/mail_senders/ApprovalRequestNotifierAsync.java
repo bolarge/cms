@@ -109,6 +109,15 @@ public class ApprovalRequestNotifierAsync  {
         emailService.sendEmail(mailContent, "Update on your User Approval Request on LSLB CMS", userEmail);
     }
 
+    @Async
+    public void sendRejectedPaymentConfirmationApprovalRequestEmailToInitiator(PaymentConfirmationApprovalRequest approvalRequest) {
+        AuthInfo initiator = approvalRequest.getInitiator();
+        String mailContent = buildRejectedOfflinePaymentApprovalRequestEmailContent(approvalRequest);
+        String userEmail = initiator.getEmailAddress();
+        logger.info("Sending rejected payment confirmation email to {}", userEmail);
+        emailService.sendEmail(mailContent, "Update on your Payment Confirmation Approval Request on LSLB CMS", userEmail);
+    }
+
     private String buildNewUserApprovalRequestEmailContent(UserApprovalRequest userApprovalRequest) {
         String frontEndUrl = String.format("%s/user-approval-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), userApprovalRequest.getId());
         String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
@@ -193,6 +202,25 @@ public class ApprovalRequestNotifierAsync  {
         String subjectUserName = userApprovalRequest.getSubjectUserName();
         String reason = userApprovalRequest.getRejectionReason();
         String approvalRequestType = String.valueOf(userApprovalRequest.getUserApprovalRequestType());
+        HashMap<String, Object> model = new HashMap<>();
+        model.put("userName", subjectUserName);
+        model.put("date", presentDateString);
+        //Updated 29/08/2019 Bolaji Salau
+        logger.info("This is the Rejection reason: " + reason);
+        model.put("reason", reason);
+        //\/
+        model.put("approvalType", approvalRequestType);
+        model.put("frontEndUrl", frontEndUrl);
+        return mailContentBuilderService.build(model, "approval-request/RejectedUserApprovalRequest");
+    }
+
+    //Notify for Rejected Offline Payment Approval Request
+    private String buildRejectedOfflinePaymentApprovalRequestEmailContent(PaymentConfirmationApprovalRequest approvalRequest) {
+        String frontEndUrl = String.format("%s/user-approval-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), approvalRequest.getId());
+        String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
+        String subjectUserName = "Test"; //approvalRequest.getSubjectUserName();
+        String reason = approvalRequest.getRejectionReason();
+        String approvalRequestType = String.valueOf(approvalRequest.getApprovalRequestTypeId());
         HashMap<String, Object> model = new HashMap<>();
         model.put("userName", subjectUserName);
         model.put("date", presentDateString);
