@@ -223,7 +223,7 @@ public class OutsideSystemPaymentService {
             approvalRequest.setPaymentRecordDetailId(paymentRecordDetail.getId());
             approvalRequest.setAmountPaid(confirmationRequest.getAmount());
             approvalRequest.setPaymentRecordId(paymentRecord.getId());
-            if(paymentRecord.getPaymentConfirmationApprovalRequestType() == "1") {
+            if(confirmationRequest.getPaymentConfirmationApprovalRequestType() == "01") {
                 approvalRequest.setApprovalRequestTypeId(CONFIRM_FULL_PAYMENT_ID);
             }else{
                 approvalRequest.setApprovalRequestTypeId(CONFIRM_PARTIAL_PAYMENT_ID);
