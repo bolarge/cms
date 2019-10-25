@@ -111,7 +111,9 @@ public class OutsideSystemPaymentService {
             paymentRecord.setGamingTerminalIds(paymentConfirmationRequest.getGamingTerminalIds());
             paymentRecord.setLicenseTransferId(paymentConfirmationRequest.getLicenseTransferId());
             paymentRecord.setCreationDate(LocalDate.now());
+            paymentRecord.setPaymentConfirmationApprovalRequestType(paymentConfirmationRequest.getPaymentConfirmationApprovalRequestType());
             mongoRepositoryReactive.saveOrUpdate(paymentRecord);
+            //
             PaymentRecordDetail detail = new PaymentRecordDetail();
             detail.setId(UUID.randomUUID().toString());
             detail.setPaymentStatusId(UNPAID_STATUS_ID);
@@ -120,7 +122,7 @@ public class OutsideSystemPaymentService {
             detail.setAmount(paymentConfirmationRequest.getAmountPaid());
             detail.setInvoiceNumber(generateInvoiceNumber());
             mongoRepositoryReactive.saveOrUpdate(detail);
-
+            //
             String gameTypeName = gameTypeService.findNameById(paymentConfirmationRequest.getGameTypeId());
             String feePaymentTypeName = FeePaymentTypeReferenceData.getFeePaymentTypeNameById(mongoRepositoryReactive, paymentConfirmationRequest.getFeePaymentTypeId());
             String licenseTypeName = LicenseTypeReferenceData.getLicenseTypeNameById(mongoRepositoryReactive, paymentConfirmationRequest.getLicenseTypeId());
@@ -181,8 +183,8 @@ public class OutsideSystemPaymentService {
                 return BadRequestResponse("Invalid Payment Record");
             }
             if (paymentRecordDetail != null && !StringUtils.equals(UNPAID_STATUS_ID, paymentRecordDetail.getPaymentStatusId())) {
-                //String ownerName = getOwnerName(paymentRecordDetailUpdateDto);
-                return Mono.just(new ResponseEntity<>(String.format("Payment %s is pending payment approval", paymentRecord.getId()), HttpStatus.BAD_REQUEST));
+                //return Mono.just(new ResponseEntity<>(String.format("Payment %s is pending payment approval", paymentRecord.getId()), HttpStatus.BAD_REQUEST));
+                return BadRequestResponse("Payment is pending approval");
             }
             if (paymentRecord.isCompletedPayment()) {
                 return BadRequestResponse("Payment already completed");
@@ -211,7 +213,7 @@ public class OutsideSystemPaymentService {
             paymentRecordDetail.setId(paymentRecordDetail.getId());  //Update with existing same object PK
             paymentRecordDetail.setAmount(confirmationRequest.getAmount());
             paymentRecordDetail.setPaymentRecordId(paymentRecord.getId());
-            paymentRecordDetail.setPaymentConfirmationApprovalRequestType(confirmationRequest.getPaymentConfirmationApprovalRequestType());
+            paymentRecordDetail.setPaymentConfirmationApprovalRequestType(paymentRecord.getPaymentConfirmationApprovalRequestType());
             paymentRecordDetail.setModeOfPaymentId(OFFLINE_CONFIRMATION_ID);
             paymentRecordDetail.setPaymentStatusId(PENDING_PAYMENT_STATUS_ID);
             mongoRepositoryReactive.saveOrUpdate(paymentRecordDetail);
