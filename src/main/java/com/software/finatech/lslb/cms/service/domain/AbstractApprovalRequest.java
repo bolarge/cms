@@ -161,7 +161,6 @@ public abstract class AbstractApprovalRequest extends AbstractFact {
         this.approvalRequestStatusId = ApprovalRequestStatusReferenceData.REJECTED_ID;
     }
 
-
     public boolean canBeApprovedByUser(String userId) {
         return !StringUtils.equals(this.initiatorId, userId);
     }

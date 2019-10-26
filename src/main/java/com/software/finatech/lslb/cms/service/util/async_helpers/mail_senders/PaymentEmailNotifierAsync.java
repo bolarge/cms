@@ -36,11 +36,11 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             }
         }
         //isSuccessFullPayment() will be UNPAID(05) PaymentStatusIS for OfflinePayment after initiation
-        if (paymentRecordDetail.isSuccessfulPayment()) {
+        /*if (paymentRecordDetail.isSuccessfulPayment()) {
             sendPaymentNotificationToLSLBUsers(paymentRecordDetail, paymentRecord);
         } else {
             sendFailedPaymentToVGGAdminAndUsers(paymentRecordDetail, paymentRecord);
-        }
+        }*/
     }
 
     @Async

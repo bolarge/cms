@@ -110,9 +110,9 @@ public class ApprovalRequestNotifierAsync  {
     }
 
     @Async
-    public void sendRejectedPaymentConfirmationApprovalRequestEmailToInitiator(PaymentConfirmationApprovalRequest approvalRequest) {
-        AuthInfo initiator = approvalRequest.getInitiator();
-        String mailContent = buildRejectedOfflinePaymentApprovalRequestEmailContent(approvalRequest);
+    public void sendRejectedPaymentConfirmationApprovalRequestEmailToInitiator(PaymentConfirmationApprovalRequest paymentApprovalRequest) {
+        AuthInfo initiator = paymentApprovalRequest.getInitiator();
+        String mailContent = buildRejectedOfflinePaymentApprovalRequestEmailContent(paymentApprovalRequest);
         String userEmail = initiator.getEmailAddress();
         logger.info("Sending rejected payment confirmation email to {}", userEmail);
         emailService.sendEmail(mailContent, "Update on your Payment Confirmation Approval Request on LSLB CMS", userEmail);
@@ -205,10 +205,9 @@ public class ApprovalRequestNotifierAsync  {
         HashMap<String, Object> model = new HashMap<>();
         model.put("userName", subjectUserName);
         model.put("date", presentDateString);
-        //Updated 29/08/2019 Bolaji Salau
         logger.info("This is the Rejection reason: " + reason);
         model.put("reason", reason);
-        //\/
+        //
         model.put("approvalType", approvalRequestType);
         model.put("frontEndUrl", frontEndUrl);
         return mailContentBuilderService.build(model, "approval-request/RejectedUserApprovalRequest");
@@ -216,9 +215,9 @@ public class ApprovalRequestNotifierAsync  {
 
     //Notify for Rejected Offline Payment Approval Request
     private String buildRejectedOfflinePaymentApprovalRequestEmailContent(PaymentConfirmationApprovalRequest approvalRequest) {
-        String frontEndUrl = String.format("%s/user-approval-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), approvalRequest.getId());
+        String frontEndUrl = String.format("%s/offline-approval-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), approvalRequest.getId());
         String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
-        String subjectUserName = "Test"; //approvalRequest.getSubjectUserName();
+        String subjectUserName = approvalRequest.getPaymentOwnerName();
         String reason = approvalRequest.getRejectionReason();
         String approvalRequestType = String.valueOf(approvalRequest.getApprovalRequestTypeId());
         HashMap<String, Object> model = new HashMap<>();
@@ -227,9 +226,9 @@ public class ApprovalRequestNotifierAsync  {
         //Updated 29/08/2019 Bolaji Salau
         logger.info("This is the Rejection reason: " + reason);
         model.put("reason", reason);
-        //\/
+        //
         model.put("approvalType", approvalRequestType);
-        model.put("frontEndUrl", frontEndUrl);
+        //model.put("frontEndUrl", frontEndUrl);
         return mailContentBuilderService.build(model, "approval-request/OfflineRejectedPaymentApprovalRequest");
     }
 
