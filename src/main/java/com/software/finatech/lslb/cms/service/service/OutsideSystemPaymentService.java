@@ -195,7 +195,7 @@ public class OutsideSystemPaymentService {
             if (paymentRecord.getAmountOutstanding() < confirmationRequest.getAmount()) {
                 return BadRequestResponse("The amount entered is more than the outstanding amount on the payment");
             }
-           //
+            //
             //Check if Full or Partial Payment  //Calculate payment balance
             if(confirmationRequest.getPaymentConfirmationApprovalRequestType() == "1"){
                 //paymentRecord.setAmount(confirmationRequest.getAmount());
