@@ -27,12 +27,12 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
     public void sendOfflinePaymentNotificationForPaymentRecordDetail(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
         if (paymentRecord.isAgentPayment() || paymentRecord.isGamingTerminalPayment()) {
             Agent agent = paymentRecord.getAgent();
-            sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, agent.getEmailAddress(), "payment-notifications/PaymentNotificationExternalUser");
+            sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, agent.getEmailAddress(), "payment-notifications/OfflinePaymentNotificationExternalUser");
         }
         if (paymentRecord.isInstitutionPayment() || paymentRecord.isGamingMachinePayment()) {
             ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(paymentRecord.getInstitutionId());
             for (AuthInfo institutionAdmin : institutionAdmins) {
-                sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, institutionAdmin.getEmailAddress(), "payment-notifications/PaymentNotificationExternalUser");
+                sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, institutionAdmin.getEmailAddress(), "payment-notifications/OfflinePaymentNotificationExternalUser");
             }
         }
         //isSuccessFullPayment() will be UNPAID(05) PaymentStatusIS for OfflinePayment after initiation

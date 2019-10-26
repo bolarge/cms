@@ -579,8 +579,7 @@
                                                                                     Sir/Madam,
                                                                                 </h3>
                                                                                 <div mc:edit="body" style="text-align:justify;font-family:Helvetica,Arial,sans-serif;font-size:18px;margin-bottom:0;color:rgb(0, 0, 0);line-height:135%;">
-                                                                                        <span>This is to inform you that your payment initiation on our platform was   <span th:if="${isSuccessPayment == false}">not</span> successful.</span>
-                                                                                        The details of the payment are stated below.
+                                                                                        <span>This is to inform you that you have initiated an offline payment, See details of the initiated payment below:</span>
                                                                                     <br/>
                                                                                     <br/>
                                                                                     <table id="customers">
@@ -603,15 +602,8 @@
                                                                                                             <td>Amount</td>
                                                                                                             <td>NGN<span th:text="${amount}"></span></td>
                                                                                                         </tr>
-                                                                                                        <tr>
-                                                                                                            <td>Payment Date</td>
-                                                                                                            <td><span th:text="${paymentDate}"></span></td>
-                                                                                                        </tr>
-                    
-                                                                                                        <tr>
-                                                                                                            <td>Revenue Name</td>
-                                                                                                            <td><span th:text="${revenueName}"></span></td>
-                                                                                                        </tr>
+                                                                                                    </tr>
+
                                                                                                         <tr>
                                                                                                             <td>Mode Of Payment</td>
                                                                                                             <td><span th:text="${modeOfPayment}"></span></td>
@@ -623,18 +615,13 @@
                                                                                                                 <span th:if="${isPartPayment == true}">Partial Payment</span>
                                                                                                             </td>
                                                                                                         </tr>
-                    
-                                                                                                        <tr>
-                                                                                                            <td>Completed Payment </td>
-                                                                                                            <td><span th:if="${isCompletePayment == false}">NO</span>
-                                                                                                                <span th:if="${isCompletePayment == true}">YES</span>
-                                                                                                            </td>
-                                                                                                        </tr>
+
                                                                                             </tbody>
                                                                                     </table>
                                                                                     <br/>
                                                                                     <br/>
-                                                                                    Kindly click the link below to upload payment evidence and to compplete your payment.</div>
+                                                                                    kindly proceed to the bank to make payment then upload your payment evidence and submit for approval,
+                                                                                    after which your payment will be updated on the system.</div>
                                                                             </td>
                                                                         </tr>
                                                                     </table>
