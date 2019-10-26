@@ -230,7 +230,7 @@ public class ApprovalRequestNotifierAsync  {
         //\/
         model.put("approvalType", approvalRequestType);
         model.put("frontEndUrl", frontEndUrl);
-        return mailContentBuilderService.build(model, "approval-request/RejectedUserApprovalRequest");
+        return mailContentBuilderService.build(model, "approval-request/OfflineRejectedPaymentApprovalRequest");
     }
 
     private ArrayList<AuthInfo> findAllOtherActiveUsersForApproval(AuthInfo initiator) {
