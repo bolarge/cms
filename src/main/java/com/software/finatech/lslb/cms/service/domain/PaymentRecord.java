@@ -42,6 +42,7 @@ public class PaymentRecord extends AbstractFact {
     /*
     Added to meet implementation logic of Offline Payment Processing
      */
+    private String invoiceNumber;
     private String modeOfPaymentId;
     private String tellerNumber;
     private String bankName;
@@ -195,6 +196,14 @@ public class PaymentRecord extends AbstractFact {
     public boolean isFullPayment() { return isFullPayment; }
 
     public void setFullPayment(boolean fullPayment) { isFullPayment = fullPayment; }
+
+    public String getInvoiceNumber() {
+        return invoiceNumber;
+    }
+
+    public void setInvoiceNumber(String invoiceNumber) {
+        this.invoiceNumber = invoiceNumber;
+    }
 
     public Institution getInstitution() {
         if (StringUtils.isEmpty(this.institutionId)) {
@@ -372,7 +381,7 @@ public class PaymentRecord extends AbstractFact {
     public PaymentRecordDto convertToDto() {
         PaymentRecordDto paymentRecordDto = new PaymentRecordDto();
         paymentRecordDto.setId(getId());
-        //paymentRecordDto.setInvoiceNumber(getInvoiceNumber());
+        paymentRecordDto.setInvoiceNumber(getInvoiceNumber());
         paymentRecordDto.setBankName(getBankName());
         paymentRecordDto.setTellerNumber(getTellerNumber());
         paymentRecordDto.setFeeId(getFeeId());

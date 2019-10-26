@@ -95,6 +95,7 @@ public class OutsideSystemPaymentService {
             if (validateOutsidePaymentResponse != null) {
                 return validateOutsidePaymentResponse;
             }
+            String invoiceNumber = generateInvoiceNumber();
             PaymentRecord paymentRecord = new PaymentRecord();
             paymentRecord.setAmountOutstanding(paymentConfirmationRequest.getAmountPaid());
             paymentRecord.setAmount(paymentConfirmationRequest.getAmountPaid());
@@ -110,6 +111,7 @@ public class OutsideSystemPaymentService {
             paymentRecord.setGamingMachineIds(paymentConfirmationRequest.getGamingMachineIds());
             paymentRecord.setGamingTerminalIds(paymentConfirmationRequest.getGamingTerminalIds());
             paymentRecord.setLicenseTransferId(paymentConfirmationRequest.getLicenseTransferId());
+            paymentRecord.setInvoiceNumber(invoiceNumber);
             paymentRecord.setCreationDate(LocalDate.now());
             logger.info("WHAT U SUI SOO " + paymentConfirmationRequest.getPaymentConfirmationApprovalRequestType());
             paymentRecord.setPaymentConfirmationApprovalRequestType(paymentConfirmationRequest.getPaymentConfirmationApprovalRequestType());
@@ -121,7 +123,7 @@ public class OutsideSystemPaymentService {
             detail.setModeOfPaymentId(OFFLINE_CONFIRMATION_ID);
             detail.setPaymentRecordId(paymentRecord.getId());
             detail.setAmount(paymentConfirmationRequest.getAmountPaid());
-            detail.setInvoiceNumber(generateInvoiceNumber());
+            detail.setInvoiceNumber(invoiceNumber);
             mongoRepositoryReactive.saveOrUpdate(detail);
             //
             String gameTypeName = gameTypeService.findNameById(paymentConfirmationRequest.getGameTypeId());
@@ -156,7 +158,7 @@ public class OutsideSystemPaymentService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(PAYMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName, true, getClientIpAddr(request), verbiage));
             //Trigger Notification
-            //paymentEmailNotifierAsync.sendOfflinePaymentNotificationForPaymentRecordDetail(detail, paymentRecord);
+            paymentEmailNotifierAsync.sendOfflinePaymentNotificationForPaymentRecordDetail(detail, paymentRecord);
             return OKResponse(paymentRecord.convertToDto());
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while making outside payment", e);
@@ -197,13 +199,17 @@ public class OutsideSystemPaymentService {
             //Check if Full or Partial Payment  //Calculate payment balance
             if(confirmationRequest.getPaymentConfirmationApprovalRequestType() == "1"){
                 //paymentRecord.setAmount(confirmationRequest.getAmount());
-                paymentRecord.setAmountPaid(confirmationRequest.getAmount());
+                logger.info("PaymentRecord Amount Paid is: " +  confirmationRequest.getAmount());
+                paymentRecord.setAmountPaid(paymentRecord.getAmount());
                 paymentRecord.setAmountOutstanding(0);
                 mongoRepositoryReactive.saveOrUpdate(paymentRecord);
             }
             if(confirmationRequest.getPaymentConfirmationApprovalRequestType() == "2"){
+                logger.info("PaymentRecord Amount is: " + paymentRecord.getAmount());
                 double amountOutstanding = paymentRecord.getAmount() - confirmationRequest.getAmount();
+                logger.info("PaymentRecord Amount Paid is: " +  confirmationRequest.getAmount());
                 paymentRecord.setAmountPaid(confirmationRequest.getAmount());
+                logger.info("PaymentRecord Amount Outstanding is: " + (paymentRecord.getAmount() - confirmationRequest.getAmount()));
                 paymentRecord.setAmountOutstanding(amountOutstanding);
                 mongoRepositoryReactive.saveOrUpdate(paymentRecord);
             }
