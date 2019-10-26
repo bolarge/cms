@@ -15,15 +15,6 @@ public class PaymentConfirmationApprovalRequest extends AbstractApprovalRequest 
     private String approvalRequestTypeId;
     private String paymentRecordDetailId;
     private String paymentOwnerName;
-    /*
-    Added to meet implementation logic of Offline Payment Processing
-     */
-    private String invoiceNumber;
-    private String licenseTypeId;
-    private String tellerNumber;
-    private String bankName;
-    private double amountPaid;
-    private String tellerDate;
 
     public String getPaymentOwnerName() {
         return paymentOwnerName;
@@ -45,12 +36,8 @@ public class PaymentConfirmationApprovalRequest extends AbstractApprovalRequest 
         return approvalRequestTypeId;
     }
 
-    public void setApprovalRequestTypeId(String approvalRequestTypeId) { this.approvalRequestTypeId = approvalRequestTypeId; }
-
-    public String getTellerDate() { return tellerDate; }
-
-    public void setTellerDate(String tellerDate) {
-        this.tellerDate = tellerDate;
+    public void setApprovalRequestTypeId(String approvalRequestTypeId) {
+        this.approvalRequestTypeId = approvalRequestTypeId;
     }
 
     public String getPaymentRecordDetailId() {
@@ -63,7 +50,7 @@ public class PaymentConfirmationApprovalRequest extends AbstractApprovalRequest 
 
     public PaymentConfirmationApprovalRequestDto convertToDto() {
         PaymentConfirmationApprovalRequestDto dto = new PaymentConfirmationApprovalRequestDto();
-        dto.setId(getId()); //Internal Object Identity
+        dto.setId(getId());
         dto.setInitiatorId(getInitiatorId());
         dto.setDateCreated(getDateCreatedString());
         dto.setInitiatorName(getAuthInfoName(getInitiatorId()));
@@ -71,9 +58,6 @@ public class PaymentConfirmationApprovalRequest extends AbstractApprovalRequest 
         dto.setRequestStatusId(getApprovalRequestStatusId());
         dto.setRequestStatusName(getApprovalRequestStatus() != null ? getApprovalRequestStatus().getName() : "");
         dto.setRequestTypeName(getTypeNameById(mongoRepositoryReactive, getApprovalRequestTypeId()));
-        dto.setTellerNumber(getTellerNumber());
-        dto.setBankName(getBankName());
-        dto.setInvoiceNumber(getInvoiceNumber());
         dto.setRequestTypeId(getApprovalRequestTypeId());
         return dto;
     }
@@ -115,42 +99,6 @@ public class PaymentConfirmationApprovalRequest extends AbstractApprovalRequest 
 
     public boolean isConfirmPartialPayment() {
         return StringUtils.equals(CONFIRM_PARTIAL_PAYMENT_ID, this.approvalRequestTypeId);
-    }
-
-    public String getInvoiceNumber() { return invoiceNumber; }
-
-    public void setInvoiceNumber(String invoiceNumber) { this.invoiceNumber = invoiceNumber; }
-
-    public String getLicenseTypeId() {
-        return licenseTypeId;
-    }
-
-    public void setLicenseTypeId(String licenseTypeId) {
-        this.licenseTypeId = licenseTypeId;
-    }
-
-    public String getTellerNumber() {
-        return tellerNumber;
-    }
-
-    public void setTellerNumber(String tellerNumber) {
-        this.tellerNumber = tellerNumber;
-    }
-
-    public String getBankName() {
-        return bankName;
-    }
-
-    public void setBankName(String bankName) {
-        this.bankName = bankName;
-    }
-
-    public double getAmountPaid() {
-        return amountPaid;
-    }
-
-    public void setAmountPaid(double amountPaid) {
-        this.amountPaid = amountPaid;
     }
 
     @Override

@@ -45,7 +45,7 @@ public class PaymentRecord extends AbstractFact {
     private String modeOfPaymentId;
     private String tellerNumber;
     private String bankName;
-    private boolean isFullPayment = false;
+    private boolean isFullPayment;
     private String paymentConfirmationApprovalRequestType;
 
     public boolean isForOutsideSystemPayment() {
@@ -416,6 +416,7 @@ public class PaymentRecord extends AbstractFact {
         paymentRecordDto.setPaymentReference(getPaymentReference());
         paymentRecordDto.setCreationDate(getCreationDateString());
         paymentRecordDto.setCompletionDate(getCompletionDateString());
+        paymentRecordDto.setPaymentConfirmationApprovalRequestType(getPaymentConfirmationApprovalRequestType());
         paymentRecordDto.setForOutsideSystemPayment(isForOutsideSystemPayment());
         return paymentRecordDto;
     }
