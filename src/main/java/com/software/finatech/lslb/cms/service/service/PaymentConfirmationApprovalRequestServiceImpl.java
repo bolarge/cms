@@ -161,15 +161,12 @@ public class PaymentConfirmationApprovalRequestServiceImpl implements PaymentCon
             return BadRequestResponse(String.format("Approval request with id %s not found", approvalRequestId));
         }
         if (approvalRequest.isApprovedRequest() || approvalRequest.isRejectedRequest() || !approvalRequest.canBeApprovedByUser(user.getId())) {
-            logger.info("Approval isApp: " + approvalRequest.isApprovedRequest() + "  Approval isRej:" + approvalRequest.isRejectedRequest() + "  UserIs "  + !approvalRequest.canBeApprovedByUser(user.getId()));
             return BadRequestResponse("Invalid Request");
         }
         try {
             if (approvalRequest.isConfirmFullPayment()) {
-                logger.info("WAHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH: ");
                 approveConfirmFullPaymentRequest(approvalRequest, request);
             } else if (approvalRequest.isConfirmPartialPayment()) {
-                logger.info("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB: ");
                 approveConfirmPartialPaymentRequest(approvalRequest, request);
             } else {
                 return BadRequestResponse("Invalid Request supplied");

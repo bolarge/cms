@@ -27,6 +27,7 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
     public void sendOfflinePaymentNotificationForPaymentRecordDetail(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
         if (paymentRecord.isAgentPayment() || paymentRecord.isGamingTerminalPayment()) {
             Agent agent = paymentRecord.getAgent();
+            logger.info("WHERE MAIL IS TO BE SENT TO AGENT XXXXXXXXXXXXXXXXXX " + agent.getEmailAddress());
             sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, agent.getEmailAddress(), "payment-notifications/OfflinePaymentNotificationExternalUser");
         }
         if (paymentRecord.isInstitutionPayment() || paymentRecord.isGamingMachinePayment()) {
@@ -57,13 +58,12 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
         }
         if (paymentRecordDetail.isSuccessfulPayment()) {
             sendPaymentNotificationToLSLBUsers(paymentRecordDetail, paymentRecord);
-        } else {
+        } else if(paymentRecordDetail.isFailedPayment()){
             sendFailedPaymentToVGGAdminAndUsers(paymentRecordDetail, paymentRecord);
         }
     }
 
-    @Async
-    public void sendPaymentNotificationToLSLBUsers(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
+    private void sendPaymentNotificationToLSLBUsers(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
         ArrayList<AuthInfo> lslbMembersForPaymentNotification = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_PAYMENT_NOTIFICATION_ID);
         if (lslbMembersForPaymentNotification == null || lslbMembersForPaymentNotification.isEmpty()) {
             logger.info("No LSLB finance admin found, skipping email");
@@ -75,13 +75,9 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
     }
 
     private void sendPaymentNotificationToUser(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord, String userEmail, String templateName) {
-        logger.info(" What is invoice date " + paymentRecord.getCreationDate().toString() + " XXXXXXXX " + paymentRecord.getPaymentStatusId());
+        logger.info(" What is invoice date " + templateName);
         try {
             boolean isSuccessPayment = false;
-            if (StringUtils.equals(PaymentStatusReferenceData.UNPAID_STATUS_ID, paymentRecordDetail.getPaymentStatusId())) {
-                isSuccessPayment = true;
-            }
-
             if (StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, paymentRecordDetail.getPaymentStatusId())) {
                 isSuccessPayment = true;
             }
@@ -111,6 +107,7 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             String modeOfPaymentName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecordDetail.getModeOfPaymentName());
             String revenueName = StringCapitalizer.convertToTitleCaseIteratingChars(String.valueOf(paymentRecord.getLicenseType()));
             String gameTypeName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getGameTypeName());
+            //String paymentDate = paymentRecordDetail.getPaymentDate().toString("dd-MM-yyyy");
             String paymentDate = paymentRecordDetail.getCreatedAt().toString("dd-MM-yyyy");
             boolean isPartPayment = paymentRecord.getAmount() > paymentRecordDetail.getAmount();
             boolean isCompletePayment = paymentRecord.isCompletedPayment();

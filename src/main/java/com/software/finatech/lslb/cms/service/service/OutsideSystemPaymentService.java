@@ -113,7 +113,6 @@ public class OutsideSystemPaymentService {
             paymentRecord.setLicenseTransferId(paymentConfirmationRequest.getLicenseTransferId());
             paymentRecord.setInvoiceNumber(invoiceNumber);
             paymentRecord.setCreationDate(LocalDate.now());
-            logger.info("WHAT U SUI SOO " + paymentConfirmationRequest.getPaymentConfirmationApprovalRequestType());
             paymentRecord.setPaymentConfirmationApprovalRequestType(paymentConfirmationRequest.getPaymentConfirmationApprovalRequestType());
             mongoRepositoryReactive.saveOrUpdate(paymentRecord);
             //
@@ -130,25 +129,7 @@ public class OutsideSystemPaymentService {
             String feePaymentTypeName = FeePaymentTypeReferenceData.getFeePaymentTypeNameById(mongoRepositoryReactive, paymentConfirmationRequest.getFeePaymentTypeId());
             String licenseTypeName = LicenseTypeReferenceData.getLicenseTypeNameById(mongoRepositoryReactive, paymentConfirmationRequest.getLicenseTypeId());
             String ownerName = getOwnerName(paymentConfirmationRequest);
-
-            /*PaymentConfirmationApprovalRequest approvalRequest = new PaymentConfirmationApprovalRequest();
-            approvalRequest.setId(UUID.randomUUID().toString());
-            approvalRequest.setPaymentRecordId(paymentRecord.getId());
-            approvalRequest.setPaymentRecordDetailId(detail.getId());
-            approvalRequest.setApprovalRequestTypeId(CONFIRM_FULL_PAYMENT_ID);
-            approvalRequest.setInitiatorId(loggedInUser.getId());
-            approvalRequest.setPaymentOwnerName(ownerName);
-            mongoRepositoryReactive.saveOrUpdate(approvalRequest);*/
             //
-            /*String verbiage = String.format("Created Payment Confirmation Approval Request:" +
-                            " Payment Owner -> %s , " +
-                            "Category -> %s, " +
-                            "Payment Type -> %s, for -> %s, Reference -> %s, " +
-                            "Request Type -> %s", ownerName, gameTypeName,
-                    feePaymentTypeName, licenseTypeName,
-                    paymentRecord.getPaymentReference(),
-                    getTypeNameById(mongoRepositoryReactive, approvalRequest.getApprovalRequestTypeId()));*/
-
             String verbiage = "";
             if (paymentRecord.isInstitutionPayment() || paymentRecord.isAgentPayment()) {
                 verbiage = String.format("Created offline payment record detail -> License Type -> %s, Amount -> %s, Fee Payment Type -> %s,Category -> %s, Id -> %s",
@@ -157,7 +138,8 @@ public class OutsideSystemPaymentService {
             //
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(PAYMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName, true, getClientIpAddr(request), verbiage));
-            //Trigger Notification
+            //Trigger Notification sendOfflinePaymentNotificationForPaymentRecordDetail
+            //paymentEmailNotifierAsync.sendPaymentNotificationForPaymentRecordDetail(detail, paymentRecord);
             paymentEmailNotifierAsync.sendOfflinePaymentNotificationForPaymentRecordDetail(detail, paymentRecord);
             return OKResponse(paymentRecord.convertToDto());
         } catch (Exception e) {
@@ -200,17 +182,26 @@ public class OutsideSystemPaymentService {
             if(confirmationRequest.getPaymentConfirmationApprovalRequestType() == "1"){
                 //paymentRecord.setAmount(confirmationRequest.getAmount());
                 logger.info("PaymentRecord Amount Paid is: " +  confirmationRequest.getAmount());
-                paymentRecord.setAmountPaid(paymentRecord.getAmount());
-                paymentRecord.setAmountOutstanding(0);
+                double amountPaid = paymentRecord.getAmountPaid();
+                amountPaid = amountPaid + paymentRecordDetail.getAmount();
+                paymentRecord.setAmountPaid(amountPaid);
+
+                double amountOutstanding = paymentRecord.getAmountOutstanding();
+                amountOutstanding = amountOutstanding - paymentRecordDetail.getAmount();
+                paymentRecord.setAmountOutstanding(amountOutstanding);
+
                 mongoRepositoryReactive.saveOrUpdate(paymentRecord);
             }
             if(confirmationRequest.getPaymentConfirmationApprovalRequestType() == "2"){
                 logger.info("PaymentRecord Amount is: " + paymentRecord.getAmount());
-                double amountOutstanding = paymentRecord.getAmount() - confirmationRequest.getAmount();
-                logger.info("PaymentRecord Amount Paid is: " +  confirmationRequest.getAmount());
-                paymentRecord.setAmountPaid(confirmationRequest.getAmount());
-                logger.info("PaymentRecord Amount Outstanding is: " + (paymentRecord.getAmount() - confirmationRequest.getAmount()));
+                double amountPaid = paymentRecord.getAmountPaid();
+                amountPaid = amountPaid + paymentRecordDetail.getAmount();
+                paymentRecord.setAmountPaid(amountPaid);
+
+                double amountOutstanding = paymentRecord.getAmountOutstanding();
+                amountOutstanding = amountOutstanding - paymentRecordDetail.getAmount();
                 paymentRecord.setAmountOutstanding(amountOutstanding);
+
                 mongoRepositoryReactive.saveOrUpdate(paymentRecord);
             }
             //
@@ -231,11 +222,9 @@ public class OutsideSystemPaymentService {
             if(paymentRecord.getPaymentConfirmationApprovalRequestType().equals("1")) {
                 logger.info("Full CONFIRMATION Approval Request ID IS: " + paymentRecord.getPaymentConfirmationApprovalRequestType());
                 approvalRequest.setApprovalRequestTypeId(paymentRecord.getPaymentConfirmationApprovalRequestType());
-                //approvalRequest.setPaymentConfirmationApprovalRequestType("1");
             }else if(paymentRecord.getPaymentConfirmationApprovalRequestType().equals("2")){
                 logger.info("PARTIAL CONFIRMATION Approval Request ID IS: " + paymentRecord.getPaymentConfirmationApprovalRequestType());
                 approvalRequest.setApprovalRequestTypeId(paymentRecord.getPaymentConfirmationApprovalRequestType());
-                //approvalRequest.setPaymentConfirmationApprovalRequestType("2");
             }
             approvalRequest.setInitiatorId(loggedInUser.getId());
             approvalRequest.setPaymentOwnerName(ownerName);
@@ -249,8 +238,8 @@ public class OutsideSystemPaymentService {
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName,
                     true, getClientIpAddr(request), verbiage));
             //Trigger notification upon update of Payment Information on an existing Invoice to Business Users
-            paymentEmailNotifierAsync.sendPaymentNotificationToLSLBUsers(paymentRecordDetail, paymentRecord);
-            logger.info("FINAL LAP IS : " + approvalRequest.getApprovalRequestTypeId());
+            //paymentEmailNotifierAsync.sendPaymentNotificationToLSLBUsers(paymentRecordDetail, paymentRecord);
+            paymentEmailNotifierAsync.sendPaymentNotificationForPaymentRecordDetail(paymentRecordDetail, paymentRecord);
             return OKResponse(approvalRequest.convertToDto());
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while creating existing payment confirmation request", e);
