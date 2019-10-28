@@ -15,6 +15,7 @@ public class PaymentRecordDto {
     private double amountPaid;
     private double amountOutstanding;
     private double amount;
+    private double amountToBePaid;
     private String id;
     private String parentLicenseId;
     private String agentId;
@@ -88,6 +89,14 @@ public class PaymentRecordDto {
 
     public String getPaymentReference() {
         return paymentReference;
+    }
+
+    public double getAmountToBePaid() {
+        return amountToBePaid;
+    }
+
+    public void setAmountToBePaid(double amountToBePaid) {
+        this.amountToBePaid = amountToBePaid;
     }
 
     public List<MachineDto> getGamingMachines() {

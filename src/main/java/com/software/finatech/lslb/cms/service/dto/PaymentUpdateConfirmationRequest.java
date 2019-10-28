@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.dto;
 public class PaymentUpdateConfirmationRequest {
     private String paymentRecordId;
     private double amount;
+    private double amountToBePaid;
     private String tellerNumber;
     private String bankName;
     private String tellerDate;
@@ -46,6 +47,14 @@ public class PaymentUpdateConfirmationRequest {
     public void setTellerDate(String tellerDate) { this.tellerDate = tellerDate; }
 
     public String getInvoiceNumber() { return invoiceNumber; }
+
+    public double getAmountToBePaid() {
+        return amountToBePaid;
+    }
+
+    public void setAmountToBePaid(double amountToBePaid) {
+        this.amountToBePaid = amountToBePaid;
+    }
 
     public void setInvoiceNumber(String invoiceNumber) { this.invoiceNumber = invoiceNumber; }
 

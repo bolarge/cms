@@ -97,15 +97,23 @@ public class OutsideSystemPaymentService {
             }
             String invoiceNumber = generateInvoiceNumber();
             PaymentRecord paymentRecord = new PaymentRecord();
-            paymentRecord.setAmountOutstanding(paymentConfirmationRequest.getAmountPaid());
-            paymentRecord.setAmount(paymentConfirmationRequest.getAmountPaid());
+            //
+            paymentRecord.setFeePaymentTypeId(paymentConfirmationRequest.getFeePaymentTypeId());
+            //Get Fees Amount using feePaymentTypeId
+            Fee totalAmount =  (Fee) mongoRepositoryReactive.find(Query.query(Criteria.where("feePaymentTypeId").is(paymentConfirmationRequest.getFeePaymentTypeId())), Fee.class).block();
+            logger.info("Fee Amount is:  " + totalAmount.getAmount());
+            //
+            paymentRecord.setAmount(totalAmount.getAmount()); //Obtained from Fee amount value
+            paymentRecord.setAmountOutstanding(totalAmount.getAmount() - paymentRecord.getAmountPaid()); //Submit totalSumpaid from TotalAmount
+            paymentRecord.setAmountToBePaid(paymentConfirmationRequest.getAmountToBePaid());
+            paymentRecord.setAmountPaid(0); //Requires Confirmation  Approval
+            //
             paymentRecord.setPaymentStatusId(UNPAID_STATUS_ID);
             paymentRecord.setGameTypeId(paymentConfirmationRequest.getGameTypeId());
             paymentRecord.setLicenseTypeId(paymentConfirmationRequest.getLicenseTypeId());
             paymentRecord.setAgentId(paymentConfirmationRequest.getAgentId());
             paymentRecord.setInstitutionId(paymentConfirmationRequest.getInstitutionId());
-            paymentRecord.setFeePaymentTypeId(paymentConfirmationRequest.getFeePaymentTypeId());
-            paymentRecord.setAmountPaid(0);
+
             paymentRecord.setForOutsideSystemPayment(true);
             paymentRecord.setPaymentReference(NumberUtil.generateTransactionReferenceForPaymentRecord());
             paymentRecord.setGamingMachineIds(paymentConfirmationRequest.getGamingMachineIds());
@@ -122,6 +130,7 @@ public class OutsideSystemPaymentService {
             detail.setModeOfPaymentId(OFFLINE_CONFIRMATION_ID);
             detail.setPaymentRecordId(paymentRecord.getId());
             detail.setAmount(paymentConfirmationRequest.getAmountPaid());
+            detail.setPaymentConfirmationApprovalRequestType(paymentRecord.getPaymentConfirmationApprovalRequestType());
             detail.setInvoiceNumber(invoiceNumber);
             mongoRepositoryReactive.saveOrUpdate(detail);
             //
@@ -163,10 +172,11 @@ public class OutsideSystemPaymentService {
             }
             PaymentRecord paymentRecord = paymentRecordService.findById(confirmationRequest.getPaymentRecordId());
             PaymentRecordDetail paymentRecordDetail =  (PaymentRecordDetail) mongoRepositoryReactive.find(Query.query(Criteria.where("invoiceNumber").is(confirmationRequest.getInvoiceNumber())), PaymentRecordDetail.class).block();
-            logger.info("AMOUNT TO BE PAID : " + paymentRecordDetail.getAmount());
+            //
             if (paymentRecord == null) {
                 return BadRequestResponse("Invalid Payment Record");
             }
+            logger.info("AMOUNT TO BE PAID : " + paymentRecordDetail.getAmount());
             if (paymentRecordDetail != null && !StringUtils.equals(UNPAID_STATUS_ID, paymentRecordDetail.getPaymentStatusId())) {
                 //return Mono.just(new ResponseEntity<>(String.format("Payment %s is pending payment approval", paymentRecord.getId()), HttpStatus.BAD_REQUEST));
                 return BadRequestResponse("Payment is pending approval");
@@ -177,10 +187,8 @@ public class OutsideSystemPaymentService {
             if (paymentRecord.getAmountOutstanding() < confirmationRequest.getAmount()) {
                 return BadRequestResponse("The amount entered is more than the outstanding amount on the payment");
             }
-            //
             //Check if Full or Partial Payment  //Calculate payment balance
-            if(confirmationRequest.getPaymentConfirmationApprovalRequestType() == "1"){
-                //paymentRecord.setAmount(confirmationRequest.getAmount());
+            /*if(confirmationRequest.getPaymentConfirmationApprovalRequestType() == "1"){
                 logger.info("PaymentRecord Amount Paid is: " +  confirmationRequest.getAmount());
                 double amountPaid = paymentRecord.getAmountPaid();
                 amountPaid = amountPaid + paymentRecordDetail.getAmount();
@@ -191,8 +199,9 @@ public class OutsideSystemPaymentService {
                 paymentRecord.setAmountOutstanding(amountOutstanding);
 
                 mongoRepositoryReactive.saveOrUpdate(paymentRecord);
-            }
-            if(confirmationRequest.getPaymentConfirmationApprovalRequestType() == "2"){
+
+            }*/
+            /*if(confirmationRequest.getPaymentConfirmationApprovalRequestType() == "2"){
                 logger.info("PaymentRecord Amount is: " + paymentRecord.getAmount());
                 double amountPaid = paymentRecord.getAmountPaid();
                 amountPaid = amountPaid + paymentRecordDetail.getAmount();
@@ -203,7 +212,8 @@ public class OutsideSystemPaymentService {
                 paymentRecord.setAmountOutstanding(amountOutstanding);
 
                 mongoRepositoryReactive.saveOrUpdate(paymentRecord);
-            }
+
+            }*/
             //
             String ownerName = paymentRecord.getOwnerName();
             //paymentRecordDetail.setId(UUID.randomUUID().toString());
@@ -218,12 +228,10 @@ public class OutsideSystemPaymentService {
             approvalRequest.setId(UUID.randomUUID().toString());
             approvalRequest.setPaymentRecordDetailId(paymentRecordDetail.getId());
             approvalRequest.setPaymentRecordId(paymentRecord.getId());
-            logger.info("WHAT IS APPROVAL REQUEST ID IN PaymentRecord : " + paymentRecord.getPaymentConfirmationApprovalRequestType());
+           //
             if(paymentRecord.getPaymentConfirmationApprovalRequestType().equals("1")) {
-                logger.info("Full CONFIRMATION Approval Request ID IS: " + paymentRecord.getPaymentConfirmationApprovalRequestType());
                 approvalRequest.setApprovalRequestTypeId(paymentRecord.getPaymentConfirmationApprovalRequestType());
             }else if(paymentRecord.getPaymentConfirmationApprovalRequestType().equals("2")){
-                logger.info("PARTIAL CONFIRMATION Approval Request ID IS: " + paymentRecord.getPaymentConfirmationApprovalRequestType());
                 approvalRequest.setApprovalRequestTypeId(paymentRecord.getPaymentConfirmationApprovalRequestType());
             }
             approvalRequest.setInitiatorId(loggedInUser.getId());

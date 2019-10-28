@@ -11,6 +11,7 @@ public class PaymentConfirmationApprovalRequestDto extends AbstractApprovalReque
     private String licenseTypeId;
     private String tellerNumber;
     private String bankName;
+    private double amountToBePaid;
     private double amountPaid;
 
     public PaymentRecordDetailDto getPaymentRecordDetail() {
@@ -19,6 +20,14 @@ public class PaymentConfirmationApprovalRequestDto extends AbstractApprovalReque
 
     public void setPaymentRecordDetail(PaymentRecordDetailDto paymentRecordDetail) {
         this.paymentRecordDetail = paymentRecordDetail;
+    }
+
+    public double getAmountToBePaid() {
+        return amountToBePaid;
+    }
+
+    public void setAmountToBePaid(double amountToBePaid) {
+        this.amountToBePaid = amountToBePaid;
     }
 
     public String getPaymentOwnerName() {

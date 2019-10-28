@@ -154,7 +154,6 @@ public class PaymentConfirmationApprovalRequestServiceImpl implements PaymentCon
             return ErrorResponse("Cannot find logged in user");
         }
         String approvalRequestId = requestOperationtDto.getApprovalRequestId();
-        logger.info("Approval Request ID is: " + requestOperationtDto.getApprovalRequestId());
         PaymentConfirmationApprovalRequest approvalRequest = findApprovalRequestById(approvalRequestId);
         logger.info("Found Approval Request ID is: " + approvalRequest.getId());
         if (approvalRequest == null) {

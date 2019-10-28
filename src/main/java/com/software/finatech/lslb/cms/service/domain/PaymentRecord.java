@@ -24,6 +24,7 @@ public class PaymentRecord extends AbstractFact {
     private String agentId;
     private double amount;
     private double amountPaid;
+    private double amountToBePaid;
     private double amountOutstanding;
     private List<String> paymentRecordDetailIds = new ArrayList<>();
     private String gameTypeId;
@@ -107,6 +108,14 @@ public class PaymentRecord extends AbstractFact {
 
     public Set<String> getGamingMachineIds() {
         return gamingMachineIds;
+    }
+
+    public double getAmountToBePaid() {
+        return amountToBePaid;
+    }
+
+    public void setAmountToBePaid(double amountToBePaid) {
+        this.amountToBePaid = amountToBePaid;
     }
 
     public void setGamingMachineIds(Set<String> gamingMachineIds) {

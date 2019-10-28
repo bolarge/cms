@@ -13,6 +13,7 @@ public class PaymentRecordDetailUpdateDto {
     private LocalDate tellerPaymentDate;
     private String bankName;
     private double amount;
+    private double amountToBePaid;
     private String paymentRecordId;
     private String paymentConfirmationApprovalRequestType;
     @NotEmpty(message = "Please provide payment status id")
@@ -65,6 +66,14 @@ public class PaymentRecordDetailUpdateDto {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public double getAmountToBePaid() {
+        return amountToBePaid;
+    }
+
+    public void setAmountToBePaid(double amountToBePaid) {
+        this.amountToBePaid = amountToBePaid;
     }
 
     public String getTellerNumber() { return tellerNumber; }

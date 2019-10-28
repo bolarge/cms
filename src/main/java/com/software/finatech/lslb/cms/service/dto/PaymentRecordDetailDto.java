@@ -2,6 +2,7 @@ package com.software.finatech.lslb.cms.service.dto;
 
 public class PaymentRecordDetailDto {
     private Double amount;
+    private double amountToBePaid;
     private String paymentStatus;
     private String creationDate;
     private String paymentDate;
@@ -67,6 +68,14 @@ public class PaymentRecordDetailDto {
 
     public String getModeOfPaymentName() {
         return modeOfPaymentName;
+    }
+
+    public double getAmountToBePaid() {
+        return amountToBePaid;
+    }
+
+    public void setAmountToBePaid(double amountToBePaid) {
+        this.amountToBePaid = amountToBePaid;
     }
 
     public void setModeOfPaymentName(String modeOfPaymentName) {
