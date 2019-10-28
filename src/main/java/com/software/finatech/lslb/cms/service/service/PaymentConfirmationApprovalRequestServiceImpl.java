@@ -207,8 +207,14 @@ public class PaymentConfirmationApprovalRequestServiceImpl implements PaymentCon
                 return BadRequestResponse("Invalid Request");
             }
             //Update Payment Status ID to FAILED when Rejected
-            PaymentRecord paymentRecord = (PaymentRecord) mongoRepositoryReactive.find(Query.query(Criteria.where("Id").is(approvalRequest.getPaymentRecordId())), PaymentRecord.class).block();
-            PaymentRecordDetail paymentRecordDetail =  (PaymentRecordDetail) mongoRepositoryReactive.find(Query.query(Criteria.where("paymentRecordId").is(approvalRequest.getPaymentRecordId())), PaymentRecordDetail.class).block();
+            PaymentRecord paymentRecord = approvalRequest.getPaymentRecord();
+            if (paymentRecord == null){
+                return BadRequestResponse("Invalid Payment record for approval request");
+            }
+            PaymentRecordDetail paymentRecordDetail =  approvalRequest.getPaymentRecordDetail();
+            if (paymentRecordDetail == null){
+                return BadRequestResponse("Invalid Payment Record Detail for approval request");
+            }
             logger.info("Payment Status ID is: " + paymentRecord.getPaymentStatusId());
             logger.info("Approval Request Invoice is: " + paymentRecordDetail.getInvoiceNumber());
             paymentRecordDetail.setPaymentStatusId(FAILED_PAYMENT_STATUS_ID);

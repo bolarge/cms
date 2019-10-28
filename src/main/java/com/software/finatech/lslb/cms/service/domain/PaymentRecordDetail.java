@@ -30,7 +30,7 @@ public class PaymentRecordDetail extends AbstractFact {
         Added to meet implementation logic of Offline Payment Processing
     */
     private String tellerNumber;
-    private LocalDateTime tellerDate;
+    private LocalDate tellerDate;
     private String bankName;
 
 
@@ -104,8 +104,6 @@ public class PaymentRecordDetail extends AbstractFact {
 
     public void setBankName(String bankName) { this.bankName = bankName; }
 
-    public LocalDateTime getTellerDate() { return tellerDate; }
-
     public double getAmountToBePaid() {
         return amountToBePaid;
     }
@@ -113,8 +111,13 @@ public class PaymentRecordDetail extends AbstractFact {
     public void setAmountToBePaid(double amountToBePaid) {
         this.amountToBePaid = amountToBePaid;
     }
+public LocalDate getTellerDate(){
+        return this.tellerDate;
+}
 
-    public void setTellerDate(LocalDateTime tellerDate) { this.tellerDate = tellerDate; }
+    public void setTellerDate(LocalDate tellerDate) {
+        this.tellerDate = tellerDate;
+    }
 
     public String getPaymentConfirmationApprovalRequest() { return paymentConfirmationApprovalRequest; }
 
@@ -144,6 +147,7 @@ public class PaymentRecordDetail extends AbstractFact {
         paymentRecordDetailDto.setBankName(getBankName());
         paymentRecordDetailDto.setVigiPayReference(getVigiPayTransactionReference());
         paymentRecordDetailDto.setPaymentConfirmationApprovalRequest(getPaymentConfirmationApprovalRequest());
+        paymentRecordDetailDto.setTellerDate(getTellerDate() != null ? getTellerDate().toString("dd-MM-yyyy") : null);
         return paymentRecordDetailDto;
     }
 

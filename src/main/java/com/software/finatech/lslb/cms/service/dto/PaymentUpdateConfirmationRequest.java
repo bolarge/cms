@@ -1,29 +1,21 @@
 package com.software.finatech.lslb.cms.service.dto;
 
 public class PaymentUpdateConfirmationRequest {
-    private String paymentRecordId;
-    private double amount;
-    private double amountToBePaid;
+    private String paymentRecordDetailId;
     private String tellerNumber;
     private String bankName;
     private String tellerDate;
     private String invoiceNumber;
     private String paymentConfirmationApprovalRequestType;
 
-    public String getPaymentRecordId() {
-        return paymentRecordId;
+
+
+    public String getPaymentRecordDetailId(){
+        return paymentRecordDetailId;
     }
 
-    public void setPaymentRecordId(String paymentRecordId) {
-        this.paymentRecordId = paymentRecordId;
-    }
-
-    public double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(double amount) {
-        this.amount = amount;
+    public void setPaymentRecordDetailId(String paymentRecordDetailId) {
+        this.paymentRecordDetailId = paymentRecordDetailId;
     }
 
     public String getTellerNumber() {
@@ -47,14 +39,6 @@ public class PaymentUpdateConfirmationRequest {
     public void setTellerDate(String tellerDate) { this.tellerDate = tellerDate; }
 
     public String getInvoiceNumber() { return invoiceNumber; }
-
-    public double getAmountToBePaid() {
-        return amountToBePaid;
-    }
-
-    public void setAmountToBePaid(double amountToBePaid) {
-        this.amountToBePaid = amountToBePaid;
-    }
 
     public void setInvoiceNumber(String invoiceNumber) { this.invoiceNumber = invoiceNumber; }
 

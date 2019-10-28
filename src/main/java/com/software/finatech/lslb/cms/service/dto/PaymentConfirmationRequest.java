@@ -17,6 +17,9 @@ public class PaymentConfirmationRequest {
     private String licenseTransferId;
     private Set<String> gamingMachineIds;
     private Set<String> gamingTerminalIds;
+    private String paymentRecordId;
+
+
     /*
      *   Added to meet implementation logic of Offline Payment Processing
      */
@@ -25,6 +28,15 @@ public class PaymentConfirmationRequest {
     private String tellerDate;
     private String modeOfPayment;
     private String paymentConfirmationApprovalRequestType;
+
+
+    public String getPaymentRecordId(){
+        return paymentRecordId;
+    }
+
+    public void setPaymentRecordId(String paymentRecordId) {
+        this.paymentRecordId = paymentRecordId;
+    }
 
     public String getLicenseTransferId() {
         return licenseTransferId;
@@ -132,6 +144,10 @@ public class PaymentConfirmationRequest {
 
     public boolean isBeingPaidByAgent() {
         return StringUtils.isNotEmpty(this.agentId);
+    }
+
+    public boolean isForExistingPayment() {
+        return StringUtils.isNotEmpty(this.paymentRecordId);
     }
 
     public String getModeOfPayment() { return modeOfPayment; }

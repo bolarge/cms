@@ -16,7 +16,15 @@ public class PaymentRecordDetailDto {
     private String tellerNumber;
     private String bankName;
     private String paymentConfirmationApprovalRequest;
+    private String tellerDate;
 
+    public String getTellerDate() {
+        return tellerDate;
+    }
+
+    public void setTellerDate(String tellerDate) {
+        this.tellerDate = tellerDate;
+    }
 
     public String getPaymentStatusId() {
         return paymentStatusId;
@@ -114,15 +122,27 @@ public class PaymentRecordDetailDto {
         this.invoiceNumber = invoiceNumber;
     }
 
-    public String getTellerNumber() { return tellerNumber; }
+    public String getTellerNumber() {
+        return tellerNumber;
+    }
 
-    public void setTellerNumber(String tellerNumber) { this.tellerNumber = tellerNumber; }
+    public void setTellerNumber(String tellerNumber) {
+        this.tellerNumber = tellerNumber;
+    }
 
-    public String getBankName() { return bankName; }
+    public String getBankName() {
+        return bankName;
+    }
 
-    public void setBankName(String bankName) { this.bankName = bankName; }
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
 
-    public String getPaymentConfirmationApprovalRequest() { return paymentConfirmationApprovalRequest; }
+    public String getPaymentConfirmationApprovalRequest() {
+        return paymentConfirmationApprovalRequest;
+    }
 
-    public void setPaymentConfirmationApprovalRequest(String paymentConfirmationApprovalRequest) { this.paymentConfirmationApprovalRequest = paymentConfirmationApprovalRequest; }
+    public void setPaymentConfirmationApprovalRequest(String paymentConfirmationApprovalRequest) {
+        this.paymentConfirmationApprovalRequest = paymentConfirmationApprovalRequest;
+    }
 }
