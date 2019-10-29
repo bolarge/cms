@@ -13,7 +13,9 @@ import com.software.finatech.lslb.cms.service.referencedata.PaymentConfirmationA
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
 import com.software.finatech.lslb.cms.service.service.contracts.*;
 import com.software.finatech.lslb.cms.service.util.AuditTrailUtil;
+import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
 import com.software.finatech.lslb.cms.service.util.NumberUtil;
+import com.software.finatech.lslb.cms.service.util.RequestAddressUtil;
 import com.software.finatech.lslb.cms.service.util.async_helpers.AuditLogHelper;
 import com.software.finatech.lslb.cms.service.util.async_helpers.mail_senders.PaymentEmailNotifierAsync;
 import org.apache.commons.lang3.StringUtils;
@@ -134,7 +136,7 @@ public class OutsideSystemPaymentService {
                 logger.info("Fee Amount is:  " + feeDto.getAmount());
                 //
                 paymentRecord.setAmount(feeDto.getAmount()); //Obtained from Fee amount value
-                paymentRecord.setAmountOutstanding(feeDto.getAmount()); //Submit totalSumpaid from TotalAmount
+                paymentRecord.setAmountOutstanding(feeDto.getAmount()); //Subtract totalSumpaid from TotalAmount
                 paymentRecord.setAmountPaid(0); //Requires Confirmation  Approval
                 //
                 paymentRecord.setPaymentStatusId(UNPAID_STATUS_ID);
@@ -194,6 +196,56 @@ public class OutsideSystemPaymentService {
      * @param request
      * @return
      */
+    public Mono<ResponseEntity> createPartialPaymentConfirmationRequest(PaymentConfirmationRequest confirmationRequest, HttpServletRequest request) {
+        try {
+            AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
+            if (loggedInUser == null) {
+                return ErrorResponse("Could not find logged in user");
+            }
+            PaymentRecord paymentRecord = paymentRecordService.findById(confirmationRequest.getPaymentRecordId());
+            if (paymentRecord == null) {
+                return BadRequestResponse("Invalid Payment Record");
+            }
+            if (paymentRecord.isCompletedPayment()) {
+                return BadRequestResponse("Payment already completed");
+            }
+            if (paymentRecord.getAmountOutstanding() < confirmationRequest.getAmountPaid()) {
+                return BadRequestResponse("The amount entered is more than the outstanding amount on the payment");
+            }
+            String ownerName = paymentRecord.getOwnerName();
+            PaymentRecordDetail recordDetail = new PaymentRecordDetail();
+            recordDetail.setId(UUID.randomUUID().toString());
+            recordDetail.setAmount(confirmationRequest.getAmountPaid());
+            recordDetail.setPaymentRecordId(paymentRecord.getId());
+            recordDetail.setModeOfPaymentId(OFFLINE_CONFIRMATION_ID);
+            recordDetail.setInvoiceNumber(generateInvoiceNumber());
+            recordDetail.setPaymentStatusId(UNPAID_STATUS_ID);
+            mongoRepositoryReactive.saveOrUpdate(recordDetail);
+            //
+            PaymentConfirmationApprovalRequest approvalRequest = new PaymentConfirmationApprovalRequest();
+            approvalRequest.setId(UUID.randomUUID().toString());
+            approvalRequest.setPaymentRecordDetailId(recordDetail.getId());
+            approvalRequest.setPaymentRecordId(paymentRecord.getId());
+            approvalRequest.setApprovalRequestTypeId(CONFIRM_PARTIAL_PAYMENT_ID);
+            approvalRequest.setInitiatorId(loggedInUser.getId());
+            approvalRequest.setPaymentOwnerName(ownerName);
+            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+
+            String verbiage = String.format("Created Payment Confirmation Approval Request:" +
+                            " Payment Owner -> %s , Reference -> %s, Invoice Number -> %s, Id -> %s" +
+                            "", ownerName, paymentRecord.getPaymentReference(),
+                    recordDetail.getInvoiceNumber(), approvalRequest.getId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(PAYMENT_ID,
+                    springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName,
+                    true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+            return OKResponse(approvalRequest.convertToDto());
+        } catch (Exception e) {
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while creating existing payment confirmation request", e);
+        }
+    }
+
+
+
     public Mono<ResponseEntity> updateOfflinePaymentRecordDetail(PaymentUpdateConfirmationRequest confirmationRequest, HttpServletRequest request) {
         try {
             AuthInfo loggedInUser = springSecurityAuditorAware.getLoggedInUser();
@@ -224,7 +276,7 @@ public class OutsideSystemPaymentService {
             if (paymentRecord.getAmountOutstanding() < paymentRecordDetail.getAmount()) {
                 return BadRequestResponse("The amount entered is more than the outstanding amount on the payment");
             }
-          
+
             //
             String ownerName = paymentRecord.getOwnerName();
             //paymentRecordDetail.setId(UUID.randomUUID().toString());

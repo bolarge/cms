@@ -12,14 +12,11 @@ public class PaymentConfirmationRequest {
     private String feePaymentTypeId;
     private String licenseTypeId;
     private double amountPaid;
-    private double amountToBePaid;
     private String gameTypeId;
     private String licenseTransferId;
     private Set<String> gamingMachineIds;
     private Set<String> gamingTerminalIds;
     private String paymentRecordId;
-
-
     /*
      *   Added to meet implementation logic of Offline Payment Processing
      */
@@ -88,14 +85,6 @@ public class PaymentConfirmationRequest {
 
     public String getGameTypeId() {
         return gameTypeId;
-    }
-
-    public double getAmountToBePaid() {
-        return amountToBePaid;
-    }
-
-    public void setAmountToBePaid(double amountToBePaid) {
-        this.amountToBePaid = amountToBePaid;
     }
 
     public void setGameTypeId(String gameTypeId) {

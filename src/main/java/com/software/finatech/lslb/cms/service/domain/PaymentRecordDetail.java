@@ -20,7 +20,6 @@ public class PaymentRecordDetail extends AbstractFact {
     private LocalDateTime paymentDate;
     private String paymentStatusId;
     private double amount;
-    private double amountToBePaid;
     private String modeOfPaymentId;
     private String paymentRecordId;
     private String vigiPayTransactionReference;
@@ -104,16 +103,9 @@ public class PaymentRecordDetail extends AbstractFact {
 
     public void setBankName(String bankName) { this.bankName = bankName; }
 
-    public double getAmountToBePaid() {
-        return amountToBePaid;
-    }
-
-    public void setAmountToBePaid(double amountToBePaid) {
-        this.amountToBePaid = amountToBePaid;
-    }
-public LocalDate getTellerDate(){
+    public LocalDate getTellerDate(){
         return this.tellerDate;
-}
+    }
 
     public void setTellerDate(LocalDate tellerDate) {
         this.tellerDate = tellerDate;

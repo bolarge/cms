@@ -52,4 +52,16 @@ public class OutsideSystemPaymentsController {
     public Mono<ResponseEntity> updateOfflinePayment(@RequestBody @Valid PaymentUpdateConfirmationRequest paymentUpdateConfirmationRequest, org.apache.catalina.servlet4preview.http.HttpServletRequest request) {
         return outsideSystemPaymentService.updateOfflinePaymentRecordDetail(paymentUpdateConfirmationRequest, request);
     }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/initiate-partial-payment")
+    @ApiOperation(value = "Initiate Partial Payment", response = PaymentConfirmationApprovalRequestDto.class, consumes = "application/json",
+            notes = "Used to create partial payment confirmations for payments made outside of the system")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK"),
+            @ApiResponse(code = 401, message = "You are not authorized access the resource"),
+            @ApiResponse(code = 400, message = "Bad request"),
+            @ApiResponse(code = 404, message = "Not Found")})
+    public Mono<ResponseEntity> createNewPartialPayment(@RequestBody PaymentConfirmationRequest partialPaymentConfirmationRequest, HttpServletRequest request) {
+        return outsideSystemPaymentService.createPartialPaymentConfirmationRequest(partialPaymentConfirmationRequest, request);
+    }
 }

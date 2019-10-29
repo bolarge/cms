@@ -46,21 +46,24 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
 
     @Async
     public void sendPaymentNotificationForPaymentRecordDetail(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
-        if (paymentRecord.isAgentPayment() || paymentRecord.isGamingTerminalPayment()) {
-            Agent agent = paymentRecord.getAgent();
-            sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, agent.getEmailAddress(), "payment-notifications/PaymentNotificationExternalUser");
-        }
-        if (paymentRecord.isInstitutionPayment() || paymentRecord.isGamingMachinePayment()) {
-            ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(paymentRecord.getInstitutionId());
-            for (AuthInfo institutionAdmin : institutionAdmins) {
-                sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, institutionAdmin.getEmailAddress(), "payment-notifications/PaymentNotificationExternalUser");
+
+        if(!paymentRecord.isForOutsideSystemPayment()) {
+            if (paymentRecord.isAgentPayment() || paymentRecord.isGamingTerminalPayment()) {
+                Agent agent = paymentRecord.getAgent();
+                sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, agent.getEmailAddress(), "payment-notifications/PaymentNotificationExternalUser");
+            }
+            if (paymentRecord.isInstitutionPayment() || paymentRecord.isGamingMachinePayment()) {
+                ArrayList<AuthInfo> institutionAdmins = authInfoService.getAllActiveGamingOperatorUsersForInstitution(paymentRecord.getInstitutionId());
+                for (AuthInfo institutionAdmin : institutionAdmins) {
+                    sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, institutionAdmin.getEmailAddress(), "payment-notifications/PaymentNotificationExternalUser");
+                }
             }
         }
-        if (paymentRecordDetail.isSuccessfulPayment()) {
-            sendPaymentNotificationToLSLBUsers(paymentRecordDetail, paymentRecord);
-        } else if(paymentRecordDetail.isFailedPayment()){
-            sendFailedPaymentToVGGAdminAndUsers(paymentRecordDetail, paymentRecord);
-        }
+            if (paymentRecordDetail.isSuccessfulPayment()) {
+                sendPaymentNotificationToLSLBUsers(paymentRecordDetail, paymentRecord);
+            } else if (paymentRecordDetail.isFailedPayment()) {
+                sendFailedPaymentToVGGAdminAndUsers(paymentRecordDetail, paymentRecord);
+            }
     }
 
     private void sendPaymentNotificationToLSLBUsers(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
