@@ -222,6 +222,7 @@ public class OutsideSystemPaymentService {
             recordDetail.setPaymentStatusId(UNPAID_STATUS_ID);
             mongoRepositoryReactive.saveOrUpdate(recordDetail);
             //
+            /*
             PaymentConfirmationApprovalRequest approvalRequest = new PaymentConfirmationApprovalRequest();
             approvalRequest.setId(UUID.randomUUID().toString());
             approvalRequest.setPaymentRecordDetailId(recordDetail.getId());
@@ -230,17 +231,19 @@ public class OutsideSystemPaymentService {
             approvalRequest.setInitiatorId(loggedInUser.getId());
             approvalRequest.setPaymentOwnerName(ownerName);
             mongoRepositoryReactive.saveOrUpdate(approvalRequest);
+            */
 
-            String verbiage = String.format("Created Payment Confirmation Approval Request:" +
+            String verbiage = String.format("Created Partial Payment Request:" +
                             " Payment Owner -> %s , Reference -> %s, Invoice Number -> %s, Id -> %s" +
                             "", ownerName, paymentRecord.getPaymentReference(),
-                    recordDetail.getInvoiceNumber(), approvalRequest.getId());
+                    recordDetail.getInvoiceNumber(), paymentRecord.getId());
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(PAYMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName,
                     true, RequestAddressUtil.getClientIpAddr(request), verbiage));
+            paymentEmailNotifierAsync.sendOfflinePaymentNotificationForPaymentRecordDetail(recordDetail, paymentRecord);
             return OKResponse(paymentRecord.convertToDto());
         } catch (Exception e) {
-            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while creating existing payment confirmation request", e);
+            return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while initiating partial payment request", e);
         }
     }
 
