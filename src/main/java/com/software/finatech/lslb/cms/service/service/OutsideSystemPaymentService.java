@@ -206,6 +206,22 @@ public class OutsideSystemPaymentService {
             if (paymentRecord == null) {
                 return BadRequestResponse("Invalid Payment Record");
             }
+            //
+            ResponseEntity<FeeDto> feeResponse = (ResponseEntity<FeeDto>) feeService.findActiveFeeByGameTypeAndPaymentTypeAndRevenueName(confirmationRequest.getGameTypeId(), confirmationRequest.getFeePaymentTypeId(), confirmationRequest.getLicenseTypeId()).block();
+            if (feeResponse == null) {
+                return BadRequestResponse("Invalid response while getting fee");
+            }
+            if (feeResponse.getStatusCode() == HttpStatus.NOT_FOUND) {
+                return BadRequestResponse("No  active Fee found for payment");
+            }
+            if (feeResponse.getStatusCode() != HttpStatus.OK) {
+                return ErrorResponse("An error occurred while determining fee");
+            }
+            FeeDto feeDto = feeResponse.getBody();
+            if (feeDto == null) {
+                return ErrorResponse("An error occurred while getting fee");
+            }
+            logger.info("Fee Amount is:  " + feeDto.getAmount());
             if (paymentRecord.isCompletedPayment()) {
                 return BadRequestResponse("Payment already completed");
             }
@@ -215,7 +231,12 @@ public class OutsideSystemPaymentService {
             String ownerName = paymentRecord.getOwnerName();
             PaymentRecordDetail recordDetail = new PaymentRecordDetail();
             recordDetail.setId(UUID.randomUUID().toString());
-            recordDetail.setAmount(confirmationRequest.getAmountPaid());
+            //Payment Calculation
+            //recordDetail.setAmount(confirmationRequest.getAmountPaid());
+            paymentRecord.setAmount(feeDto.getAmount()); //Obtained from Fee amount value
+            paymentRecord.setAmountOutstanding(feeDto.getAmount()); //Subtract totalSumpaid from TotalAmount
+            paymentRecord.setAmountPaid(0); //Requires Confirmation  Approval
+            //
             recordDetail.setPaymentRecordId(paymentRecord.getId());
             recordDetail.setModeOfPaymentId(OFFLINE_CONFIRMATION_ID);
             recordDetail.setInvoiceNumber(generateInvoiceNumber());
