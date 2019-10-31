@@ -232,7 +232,6 @@ public class PaymentConfirmationApprovalRequestServiceImpl implements PaymentCon
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), approvalRequest.getPaymentOwnerName(),
                     true, RequestAddressUtil.getClientIpAddr(request), verbiage));
             //Trigger Notification
-            //paymentEmailNotifierAsync.sendOfflinePaymentNotificationForPaymentRecordDetail(detail, paymentRecord);
             approvalRequestNotifierAsync.sendRejectedPaymentConfirmationApprovalRequestEmailToInitiator(approvalRequest);
             return OKResponse(approvalRequest.convertToDto());
         } catch (Exception e) {

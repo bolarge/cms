@@ -238,13 +238,11 @@ public class OutsideSystemPaymentService {
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(PAYMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName,
                     true, RequestAddressUtil.getClientIpAddr(request), verbiage));
-            return OKResponse(approvalRequest.convertToDto());
+            return OKResponse(paymentRecord.convertToDto());
         } catch (Exception e) {
             return ErrorResponseUtil.logAndReturnError(logger, "An error occurred while creating existing payment confirmation request", e);
         }
     }
-
-
 
     public Mono<ResponseEntity> updateOfflinePaymentRecordDetail(PaymentUpdateConfirmationRequest confirmationRequest, HttpServletRequest request) {
         try {
