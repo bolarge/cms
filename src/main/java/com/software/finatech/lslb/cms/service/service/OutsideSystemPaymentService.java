@@ -232,28 +232,17 @@ public class OutsideSystemPaymentService {
             PaymentRecordDetail recordDetail = new PaymentRecordDetail();
             recordDetail.setId(UUID.randomUUID().toString());
             //Payment Calculation
-            //recordDetail.setAmount(confirmationRequest.getAmountPaid());
             paymentRecord.setAmount(feeDto.getAmount()); //Obtained from Fee amount value
             paymentRecord.setAmountOutstanding(feeDto.getAmount()); //Subtract totalSumpaid from TotalAmount
             paymentRecord.setAmountPaid(0); //Requires Confirmation  Approval
             //
+            recordDetail.setAmount(confirmationRequest.getAmountPaid());
             recordDetail.setPaymentRecordId(paymentRecord.getId());
             recordDetail.setModeOfPaymentId(OFFLINE_CONFIRMATION_ID);
             recordDetail.setInvoiceNumber(generateInvoiceNumber());
             recordDetail.setPaymentStatusId(UNPAID_STATUS_ID);
             mongoRepositoryReactive.saveOrUpdate(recordDetail);
             //
-            /*
-            PaymentConfirmationApprovalRequest approvalRequest = new PaymentConfirmationApprovalRequest();
-            approvalRequest.setId(UUID.randomUUID().toString());
-            approvalRequest.setPaymentRecordDetailId(recordDetail.getId());
-            approvalRequest.setPaymentRecordId(paymentRecord.getId());
-            approvalRequest.setApprovalRequestTypeId(CONFIRM_PARTIAL_PAYMENT_ID);
-            approvalRequest.setInitiatorId(loggedInUser.getId());
-            approvalRequest.setPaymentOwnerName(ownerName);
-            mongoRepositoryReactive.saveOrUpdate(approvalRequest);
-            */
-
             String verbiage = String.format("Created Partial Payment Request:" +
                             " Payment Owner -> %s , Reference -> %s, Invoice Number -> %s, Id -> %s" +
                             "", ownerName, paymentRecord.getPaymentReference(),
