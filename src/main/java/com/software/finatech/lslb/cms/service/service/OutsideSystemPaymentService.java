@@ -137,7 +137,7 @@ public class OutsideSystemPaymentService {
                 //
                 paymentRecord.setAmount(feeDto.getAmount()); //Obtained from Fee amount value
                 paymentRecord.setAmountOutstanding(feeDto.getAmount()); //Subtract totalSumpaid from TotalAmount
-                paymentRecord.setAmountPaid(0); //Requires Confirmation  Approval
+                paymentRecord.setAmountPaid(paymentConfirmationRequest.getAmountPaid()); //Requires Confirmation  Approval
                 //
                 paymentRecord.setPaymentStatusId(UNPAID_STATUS_ID);
                 paymentRecord.setGameTypeId(paymentConfirmationRequest.getGameTypeId());
