@@ -91,18 +91,13 @@ public class PaymentRecordDto {
         return paymentReference;
     }
 
-    public double getAmountToBePaid() {
-        return amountToBePaid;
-    }
+    public double getAmountToBePaid() { return amountToBePaid; }
 
-    public void setAmountToBePaid(double amountToBePaid) {
-        this.amountToBePaid = amountToBePaid;
-    }
+    public void setAmountToBePaid(double amountToBePaid) { this.amountToBePaid = amountToBePaid; }
 
     public List<MachineDto> getGamingMachines() {
         return gamingMachines;
     }
-
 
     public void setPaymentReference(String paymentReference) {
         this.paymentReference = paymentReference;

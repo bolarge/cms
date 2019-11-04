@@ -234,7 +234,7 @@ public class OutsideSystemPaymentService {
             //Payment Calculation
             paymentRecord.setAmount(feeDto.getAmount()); //Obtained from Fee amount value
             paymentRecord.setAmountOutstanding(feeDto.getAmount()); //Subtract totalSumpaid from TotalAmount
-            paymentRecord.setAmountPaid(0); //Requires Confirmation  Approval
+            paymentRecord.setAmountPaid(confirmationRequest.getAmountPaid()); //Requires Confirmation  Approval
             //
             recordDetail.setAmount(confirmationRequest.getAmountPaid());
             recordDetail.setPaymentRecordId(paymentRecord.getId());

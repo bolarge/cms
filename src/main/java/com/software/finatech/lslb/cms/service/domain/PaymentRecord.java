@@ -235,9 +235,7 @@ public class PaymentRecord extends AbstractFact {
         this.amount = amount;
     }
 
-    public double getAmountPaid() {
-        return amountPaid;
-    }
+    public double getAmountPaid() { return amountPaid; }
 
     public void setAmountPaid(double amountPaid) {
         this.amountPaid = amountPaid;
@@ -385,6 +383,7 @@ public class PaymentRecord extends AbstractFact {
         paymentRecordDto.setBankName(getBankName());
         paymentRecordDto.setTellerNumber(getTellerNumber());
         paymentRecordDto.setFeeId(getFeeId());
+        paymentRecordDto.setAmountToBePaid(getAmountPaid());
         String ownerName = "";
         LicenseType licenseType = getLicenseType();
         if (licenseType != null) {

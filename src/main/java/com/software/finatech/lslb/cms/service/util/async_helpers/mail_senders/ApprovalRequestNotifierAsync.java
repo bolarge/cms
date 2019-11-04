@@ -184,7 +184,6 @@ public class ApprovalRequestNotifierAsync  {
         return mailContentBuilderService.build(model, "approval-request/RejectedDocumentApprovalRequest");
     }
 
-
     private String buildRejectedFeeApprovalRequestEmailContent(FeeApprovalRequest feeApprovalRequest) {
         String frontEndUrl = String.format("%s/fee-configurations-details/%s", frontEndPropertyHelper.getFrontEndUrl(), feeApprovalRequest.getId());
         String presentDateString = LocalDate.now().toString("dd-MM-yyyy");
