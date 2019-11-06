@@ -25,6 +25,7 @@ public class PaymentRecord extends AbstractFact {
     private double amount;
     private double amountPaid;
     private double amountOutstanding;
+    private double amountToBePaid;
     private List<String> paymentRecordDetailIds = new ArrayList<>();
     private String gameTypeId;
     private String feePaymentTypeId;
@@ -261,6 +262,10 @@ public class PaymentRecord extends AbstractFact {
         this.tellerNumber = tellerNumber;
     }
 
+    public double getAmountToBePaid() { return amountToBePaid; }
+
+    public void setAmountToBePaid(double amountToBePaid) { this.amountToBePaid = amountToBePaid; }
+
     public void setPaymentRecordDetailIds(List<String> paymentRecordDetailIds) {
         this.paymentRecordDetailIds = paymentRecordDetailIds;
     }
@@ -383,7 +388,6 @@ public class PaymentRecord extends AbstractFact {
         paymentRecordDto.setBankName(getBankName());
         paymentRecordDto.setTellerNumber(getTellerNumber());
         paymentRecordDto.setFeeId(getFeeId());
-        paymentRecordDto.setAmountToBePaid(getAmountPaid());
         String ownerName = "";
         LicenseType licenseType = getLicenseType();
         if (licenseType != null) {
@@ -409,6 +413,7 @@ public class PaymentRecord extends AbstractFact {
         paymentRecordDto.setAmount(getAmount());
         paymentRecordDto.setAmountPaid(getAmountPaid());
         paymentRecordDto.setAmountOutstanding(getAmountOutstanding());
+        paymentRecordDto.setAmountToBePaid(getAmountToBePaid());
         Institution institution = getInstitution();
         if (institution != null) {
             paymentRecordDto.setInstitutionId(getInstitutionId());

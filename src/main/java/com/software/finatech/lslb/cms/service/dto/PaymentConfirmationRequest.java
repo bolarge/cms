@@ -25,6 +25,7 @@ public class PaymentConfirmationRequest {
     private String tellerDate;
     private String modeOfPayment;
     private String paymentConfirmationApprovalRequestType;
+    private double amountToBePaid;
 
 
     public String getPaymentRecordId(){
@@ -105,6 +106,14 @@ public class PaymentConfirmationRequest {
 
     public void setGamingTerminalIds(Set<String> gamingTerminalIds) {
         this.gamingTerminalIds = gamingTerminalIds;
+    }
+
+    public double getAmountToBePaid() {
+        return amountToBePaid;
+    }
+
+    public void setAmountToBePaid(double amountToBePaid) {
+        this.amountToBePaid = amountToBePaid;
     }
 
     public boolean isLicenseTransferPayment() {
