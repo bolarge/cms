@@ -236,7 +236,7 @@ public class OutsideSystemPaymentService {
             paymentRecord.setAmountPaid(0); //Requires Confirmation  Approval
             paymentRecord.setAmountToBePaid(confirmationRequest.getAmountToBePaid());
             //
-            recordDetail.setAmount(confirmationRequest.getAmountPaid());
+            recordDetail.setAmount(confirmationRequest.getAmountToBePaid());
             recordDetail.setPaymentRecordId(paymentRecord.getId());
             recordDetail.setModeOfPaymentId(OFFLINE_CONFIRMATION_ID);
             recordDetail.setInvoiceNumber(generateInvoiceNumber());
