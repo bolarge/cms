@@ -298,7 +298,7 @@ public class PaymentConfirmationApprovalRequestServiceImpl implements PaymentCon
         }
     }
 
-    private PaymentConfirmationApprovalRequest findApprovalRequestById(String approvalRequestId) {
+    public PaymentConfirmationApprovalRequest findApprovalRequestById(String approvalRequestId) {
         if (StringUtils.isEmpty(approvalRequestId)) {
             return null;
         }

@@ -4,11 +4,13 @@ import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.PaymentRecordDetailCreateDto;
 import com.software.finatech.lslb.cms.service.referencedata.LSLBAuthPermissionReferenceData;
 import com.software.finatech.lslb.cms.service.referencedata.PaymentStatusReferenceData;
+import com.software.finatech.lslb.cms.service.service.PaymentConfirmationApprovalRequestServiceImpl;
 import com.software.finatech.lslb.cms.service.util.StringCapitalizer;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -19,15 +21,19 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.BadRequestResponse;
+
 @Component
 public class PaymentEmailNotifierAsync extends AbstractMailSender {
     private static final Logger logger = LoggerFactory.getLogger(PaymentEmailNotifierAsync.class);
+
+    //@Autowired
+    //private PaymentConfirmationApprovalRequestServiceImpl approvalConfirmation;
 
     @Async
     public void sendOfflinePaymentNotificationForPaymentRecordDetail(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
         if (paymentRecord.isAgentPayment() || paymentRecord.isGamingTerminalPayment()) {
             Agent agent = paymentRecord.getAgent();
-            logger.info("WHERE MAIL IS TO BE SENT TO AGENT XXXXXXXXXXXXXXXXXX " + agent.getEmailAddress());
             sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, agent.getEmailAddress(), "payment-notifications/OfflinePaymentNotificationExternalUser");
         }
         if (paymentRecord.isInstitutionPayment() || paymentRecord.isGamingMachinePayment()) {
@@ -78,7 +84,6 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
     }
 
     private void sendPaymentNotificationToUser(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord, String userEmail, String templateName) {
-        logger.info(" What is invoice date " + templateName);
         try {
             boolean isSuccessPayment = false;
             if (StringUtils.equals(PaymentStatusReferenceData.COMPLETED_PAYMENT_STATUS_ID, paymentRecordDetail.getPaymentStatusId())) {
@@ -103,6 +108,10 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
                 }
             }
 
+            //XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+            PaymentConfirmationApprovalRequest approvalRequest = (PaymentConfirmationApprovalRequest) mongoRepositoryReactive.findById(paymentRecordDetail.getId(), PaymentConfirmationApprovalRequest.class).block();
+            logger.info("Approval Request ID: " + approvalRequest.getId());
+            String frontEndUrl = String.format("%s/payment-confirmation-approval-requests/%s", frontEndPropertyHelper.getFrontEndUrl(), approvalRequest.getId());
             HashMap<String, Object> model = new HashMap<>();
             String presentDateString = DateTime.now().toString("dd-MM-yyyy");
             String feePaymentTypeName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getFeePaymentTypeName());
@@ -110,7 +119,6 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             String modeOfPaymentName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecordDetail.getModeOfPaymentName());
             String revenueName = StringCapitalizer.convertToTitleCaseIteratingChars(String.valueOf(paymentRecord.getLicenseType()));
             String gameTypeName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getGameTypeName());
-            //String paymentDate = paymentRecordDetail.getPaymentDate().toString("dd-MM-yyyy");
             String paymentDate = paymentRecordDetail.getCreatedAt().toString("dd-MM-yyyy");
             boolean isPartPayment = paymentRecord.getAmount() > paymentRecordDetail.getAmount();
             boolean isCompletePayment = paymentRecord.isCompletedPayment();
@@ -126,6 +134,7 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             model.put("paymentInitiator", paymentInitiator);
             model.put("isPartPayment", isPartPayment);
             model.put("isCompletePayment", isCompletePayment);
+            model.put("frontEndUrl", frontEndUrl);
 
             String content = mailContentBuilderService.build(model, templateName);
             emailService.sendEmail(content, "LSLB Payment Notification", userEmail);

@@ -162,7 +162,7 @@ public class OutsideSystemPaymentService {
             detail.setPaymentStatusId(UNPAID_STATUS_ID);
             detail.setModeOfPaymentId(OFFLINE_CONFIRMATION_ID);
             detail.setPaymentRecordId(paymentRecord.getId());
-            detail.setAmount(paymentConfirmationRequest.getAmountPaid());
+            detail.setAmount(paymentConfirmationRequest.getAmountToBePaid());
             detail.setPaymentConfirmationApprovalRequestType(paymentRecord.getPaymentConfirmationApprovalRequestType());
             detail.setInvoiceNumber(invoiceNumber);
             mongoRepositoryReactive.saveOrUpdate(detail);
@@ -180,8 +180,6 @@ public class OutsideSystemPaymentService {
             //
             auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(PAYMENT_ID,
                     springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName, true, getClientIpAddr(request), verbiage));
-            //Trigger Notification sendOfflinePaymentNotificationForPaymentRecordDetail
-            //paymentEmailNotifierAsync.sendPaymentNotificationForPaymentRecordDetail(detail, paymentRecord);
             paymentEmailNotifierAsync.sendOfflinePaymentNotificationForPaymentRecordDetail(detail, paymentRecord);
             return OKResponse(paymentRecord.convertToDto());
         } catch (Exception e) {
@@ -276,7 +274,6 @@ public class OutsideSystemPaymentService {
                 return BadRequestResponse("Invalid Payment Record for detail");
             }
             if (!StringUtils.equals(UNPAID_STATUS_ID, paymentRecordDetail.getPaymentStatusId())) {
-                //return Mono.just(new ResponseEntity<>(String.format("Payment %s is pending payment approval", paymentRecord.getId()), HttpStatus.BAD_REQUEST));
                 return BadRequestResponse("Payment is pending approval");
             }
             if (paymentRecord.isCompletedPayment()) {

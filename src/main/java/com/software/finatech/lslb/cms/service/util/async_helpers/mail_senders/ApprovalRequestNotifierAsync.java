@@ -222,8 +222,6 @@ public class ApprovalRequestNotifierAsync  {
         HashMap<String, Object> model = new HashMap<>();
         model.put("userName", subjectUserName);
         model.put("date", presentDateString);
-        //Updated 29/08/2019 Bolaji Salau
-        logger.info("This is the Rejection reason: " + reason);
         model.put("reason", reason);
         //
         model.put("approvalType", approvalRequestType); //OfflineRejectedPaymentApprovalRequest
