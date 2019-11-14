@@ -25,10 +25,8 @@ import static com.software.finatech.lslb.cms.service.util.ErrorResponseUtil.BadR
 
 @Component
 public class PaymentEmailNotifierAsync extends AbstractMailSender {
-    private static final Logger logger = LoggerFactory.getLogger(PaymentEmailNotifierAsync.class);
 
-    //@Autowired
-    //private PaymentConfirmationApprovalRequestServiceImpl approvalConfirmation;
+    private static final Logger logger = LoggerFactory.getLogger(PaymentEmailNotifierAsync.class);
 
     @Async
     public void sendOfflinePaymentNotificationForPaymentRecordDetail(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
@@ -42,12 +40,6 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
                 sendPaymentNotificationToUser(paymentRecordDetail, paymentRecord, institutionAdmin.getEmailAddress(), "payment-notifications/OfflinePaymentNotificationExternalUser");
             }
         }
-        //isSuccessFullPayment() will be UNPAID(05) PaymentStatusIS for OfflinePayment after initiation
-        /*if (paymentRecordDetail.isSuccessfulPayment()) {
-            sendPaymentNotificationToLSLBUsers(paymentRecordDetail, paymentRecord);
-        } else {
-            sendFailedPaymentToVGGAdminAndUsers(paymentRecordDetail, paymentRecord);
-        }*/
     }
 
     @Async
@@ -113,7 +105,7 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             PaymentConfirmationApprovalRequest approvalRequest = (PaymentConfirmationApprovalRequest) mongoRepositoryReactive.find(Query.query(Criteria.where("paymentRecordDetailId").is(paymentRecordDetail.getId())), PaymentConfirmationApprovalRequest.class).block();
             if(paymentRecordDetail.getVersion() > 0){
                 logger.info(" Payment Approval Request  Record ID XXXX : " + approvalRequest.getId());
-                frontEndUrl = String.format("%s/payment-confirmation-approval-requests/%s", frontEndPropertyHelper.getFrontEndUrl(), approvalRequest.getId());
+                frontEndUrl = String.format("%s/offline-payment-approval-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), approvalRequest.getId());
                 logger.info("Front End URL is: " + frontEndUrl);
                 model.put("frontEndUrl", frontEndUrl);
             }
@@ -138,7 +130,6 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             model.put("paymentInitiator", paymentInitiator);
             model.put("isPartPayment", isPartPayment);
             model.put("isCompletePayment", isCompletePayment);
-            //model.put("frontEndUrl", frontEndUrl);
 
             String content = mailContentBuilderService.build(model, templateName);
             emailService.sendEmail(content, "LSLB Payment Notification", userEmail);
