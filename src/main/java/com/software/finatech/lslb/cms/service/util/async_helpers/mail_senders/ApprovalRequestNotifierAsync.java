@@ -224,7 +224,7 @@ public class ApprovalRequestNotifierAsync  {
         model.put("date", presentDateString);
         model.put("reason", reason);
         //
-        model.put("approvalType", approvalRequestType); //OfflineRejectedPaymentApprovalRequest
+        model.put("approvalType", approvalRequestType);
         model.put("frontEndUrl", frontEndUrl);
         return mailContentBuilderService.build(model, "approval-request/RejectedOfflinePaymentApprovalRequest");
     }

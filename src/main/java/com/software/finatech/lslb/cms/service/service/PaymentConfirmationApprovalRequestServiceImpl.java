@@ -155,7 +155,6 @@ public class PaymentConfirmationApprovalRequestServiceImpl implements PaymentCon
         }
         String approvalRequestId = requestOperationtDto.getApprovalRequestId();
         PaymentConfirmationApprovalRequest approvalRequest = findApprovalRequestById(approvalRequestId);
-        logger.info("Found Approval Request ID is: " + approvalRequest.getId());
         if (approvalRequest == null) {
             return BadRequestResponse(String.format("Approval request with id %s not found", approvalRequestId));
         }
@@ -215,8 +214,6 @@ public class PaymentConfirmationApprovalRequestServiceImpl implements PaymentCon
             if (paymentRecordDetail == null){
                 return BadRequestResponse("Invalid Payment Record Detail for approval request");
             }
-            logger.info("Payment Status ID is: " + paymentRecord.getPaymentStatusId());
-            logger.info("Approval Request Invoice is: " + paymentRecordDetail.getInvoiceNumber());
             paymentRecordDetail.setPaymentStatusId(FAILED_PAYMENT_STATUS_ID);
             //Reject Approval Request
             approvalRequest.setAsRejectedByUserWithReason(user.getId(), requestOperationtDto.getReason());

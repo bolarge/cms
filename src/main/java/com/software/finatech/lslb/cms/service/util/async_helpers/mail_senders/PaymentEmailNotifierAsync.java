@@ -67,12 +67,12 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
         }
             if (paymentRecordDetail.isSuccessfulPayment()) {
                 sendPaymentNotificationToLSLBUsers(paymentRecordDetail, paymentRecord);
-            } else if (paymentRecordDetail.isFailedPayment()) {
+            } else {
                 sendFailedPaymentToVGGAdminAndUsers(paymentRecordDetail, paymentRecord);
             }
     }
-
-    private void sendPaymentNotificationToLSLBUsers(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
+    //Update to Public Visibility
+    public void sendPaymentNotificationToLSLBUsers(PaymentRecordDetail paymentRecordDetail, PaymentRecord paymentRecord) {
         ArrayList<AuthInfo> lslbMembersForPaymentNotification = authInfoService.findAllLSLBMembersThatHasPermission(LSLBAuthPermissionReferenceData.RECEIVE_PAYMENT_NOTIFICATION_ID);
         if (lslbMembersForPaymentNotification == null || lslbMembersForPaymentNotification.isEmpty()) {
             logger.info("No LSLB finance admin found, skipping email");
@@ -108,11 +108,15 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
                 }
             }
 
-            //XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-            PaymentConfirmationApprovalRequest approvalRequest = (PaymentConfirmationApprovalRequest) mongoRepositoryReactive.findById(paymentRecordDetail.getId(), PaymentConfirmationApprovalRequest.class).block();
-            logger.info("Approval Request ID: " + approvalRequest.getId());
-            String frontEndUrl = String.format("%s/payment-confirmation-approval-requests/%s", frontEndPropertyHelper.getFrontEndUrl(), approvalRequest.getId());
             HashMap<String, Object> model = new HashMap<>();
+            String frontEndUrl = null;
+            PaymentConfirmationApprovalRequest approvalRequest = (PaymentConfirmationApprovalRequest) mongoRepositoryReactive.find(Query.query(Criteria.where("paymentRecordDetailId").is(paymentRecordDetail.getId())), PaymentConfirmationApprovalRequest.class).block();
+            if(paymentRecordDetail.getVersion() > 0){
+                logger.info(" Payment Approval Request  Record ID XXXX : " + approvalRequest.getId());
+                frontEndUrl = String.format("%s/payment-confirmation-approval-requests/%s", frontEndPropertyHelper.getFrontEndUrl(), approvalRequest.getId());
+                logger.info("Front End URL is: " + frontEndUrl);
+                model.put("frontEndUrl", frontEndUrl);
+            }
             String presentDateString = DateTime.now().toString("dd-MM-yyyy");
             String feePaymentTypeName = StringCapitalizer.convertToTitleCaseIteratingChars(paymentRecord.getFeePaymentTypeName());
             String amount = NumberFormat.getInstance().format(paymentRecordDetail.getAmount());
@@ -134,7 +138,7 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             model.put("paymentInitiator", paymentInitiator);
             model.put("isPartPayment", isPartPayment);
             model.put("isCompletePayment", isCompletePayment);
-            model.put("frontEndUrl", frontEndUrl);
+            //model.put("frontEndUrl", frontEndUrl);
 
             String content = mailContentBuilderService.build(model, templateName);
             emailService.sendEmail(content, "LSLB Payment Notification", userEmail);

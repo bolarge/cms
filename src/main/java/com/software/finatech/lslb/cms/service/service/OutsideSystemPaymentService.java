@@ -310,12 +310,11 @@ public class OutsideSystemPaymentService {
 
             String verbiage = String.format("Created Payment Confirmation Approval Request:" +
                             " Payment Owner -> %s , Reference -> %s, Invoice Number -> %s, Id -> %s" +
-                            "", ownerName, paymentRecord.getPaymentReference(),
-                    paymentRecordDetail.getInvoiceNumber(), approvalRequest.getId());
-            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(PAYMENT_ID,
-                    springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName,
-                    true, getClientIpAddr(request), verbiage));
-            paymentEmailNotifierAsync.sendPaymentNotificationForPaymentRecordDetail(paymentRecordDetail, paymentRecord);
+                            "", ownerName, paymentRecord.getPaymentReference(), paymentRecordDetail.getInvoiceNumber(), approvalRequest.getId());
+            auditLogHelper.auditFact(AuditTrailUtil.createAuditTrail(PAYMENT_ID, springSecurityAuditorAware.getCurrentAuditorNotNull(), ownerName, true, getClientIpAddr(request), verbiage));
+            //Trigger notification upon update of Payment Information on an existing Invoice to Business Users
+            paymentEmailNotifierAsync.sendPaymentNotificationToLSLBUsers(paymentRecordDetail, paymentRecord);
+            //paymentEmailNotifierAsync.sendPaymentNotificationForPaymentRecordDetail(paymentRecordDetail, paymentRecord);
             return OKResponse(approvalRequest.convertToDto());
         } catch (Exception e) {
             return logAndReturnError(logger, "An error occurred while creating existing payment confirmation request", e);
