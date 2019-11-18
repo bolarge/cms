@@ -148,7 +148,7 @@ public class FeeController extends BaseController {
                                                         @RequestParam("agentId") String agentId,
                                                         @RequestParam("gameTypeId")String gameTypeId) {
     //Point of Failure
-        Mono<ResponseEntity> aa = feeService.findLicenseTypeByParams(institutionId, agentId, gameTypeId);
+        //Mono<ResponseEntity> aa = feeService.findLicenseTypeByParams(institutionId, agentId, gameTypeId);
 
         return feeService.findLicenseTypeByParams(institutionId, agentId, gameTypeId);
     }

@@ -31,13 +31,20 @@ public class ReferenceDataUtil {
 
     public static Mono<ResponseEntity> getAllEnumeratedEntity(String entityMapName, Class clazz) {
         try {
-            Map<String, FactObject> entityMap = Mapstore.STORE.get(entityMapName);
+            /*Map<String, FactObject> entityMap = Mapstore.STORE.get(entityMapName);
             Collection<FactObject> factObjects;
             if (entityMap == null) {
                 factObjects = (Collection<FactObject>) mongoRepositoryReactive.findAll(new Query(), clazz).toStream().collect(Collectors.toList());
             } else {
                 factObjects = entityMap.values();
-            }
+            }*/
+            //Source of Failure. Collection type enumeratedFacts is uninitialized from the call to ReferenceDataUtil.getAllEnumeratedFacts("DocumentPurpose")
+            //Issues is that the Cache did not return the Cached DocumentPurpose as earlier stored in the ConcurrentHashMap instance. BIG ISSUE
+
+
+            Collection<FactObject> factObjects = (Collection<FactObject>) mongoRepositoryReactive.findAll(new Query(), clazz).toStream().collect(Collectors.toList());
+
+
             if (factObjects.isEmpty()) {
                 return Mono.just(new ResponseEntity<>("No Record Found", HttpStatus.NOT_FOUND));
             }

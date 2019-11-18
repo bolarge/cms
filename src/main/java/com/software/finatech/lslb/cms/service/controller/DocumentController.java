@@ -30,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.HttpServletRequest;
@@ -576,8 +577,16 @@ public class DocumentController extends BaseController {
             @ApiResponse(code = 404, message = "Not Found")})
     public Mono<ResponseEntity> getDocumentPurpose() {
         try {
-            Map documentMap = Mapstore.STORE.get("DocumentPurpose");
-            ArrayList<DocumentPurpose> documentPurposes = new ArrayList<DocumentPurpose>(documentMap.values());
+            //Map documentMap = Mapstore.STORE.get("DocumentPurpose");
+            //ArrayList<DocumentPurpose> documentPurposes = new ArrayList<DocumentPurpose>(documentMap.values());
+
+            //Source of Failure. Collection type enumeratedFacts is uninitialized from the call to ReferenceDataUtil.getAllEnumeratedFacts("DocumentPurpose")
+            //Issues is that the Cache did not return the Cached DocumentPurpose as earlier stored in the ConcurrentHashMap instance. BIG ISSUE
+
+            ArrayList<DocumentPurpose> documentPurposes = (ArrayList<DocumentPurpose>)mongoRepositoryReactive.findAll(new Query(),DocumentPurpose.class).toStream().collect(Collectors.toList());
+
+
+
             List<DocumentPurposeDto> documentPurposeDtoLists = new ArrayList<>();
             documentPurposes.forEach(factObject -> {
                 DocumentPurpose documentPurpose = factObject;

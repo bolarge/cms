@@ -37,17 +37,17 @@ security:
 
 #Pointing to Test Environment
 mongodb:
-  hosts: db2.mlnx.test.vggdev.com:27017
-  username: useradmin
-  password: f1nat3ch
-  database: LslbCMSDb
-
-  #hosts: 127.0.0.1
-  #username: cmsadmin
-  #password: finat3ch
+  #hosts: db2.mlnx.test.vggdev.com:27017
+  #username: useradmin
+  #password: f1nat3ch
   #database: LslbCMSDb
-  #authDb:  LslbCMSDb
-  authDb:   admin
+
+  hosts: 127.0.0.1
+  username: cmsadmin
+  password: finat3ch
+  database: LslbCMSDb
+  authDb:  LslbCMSDb
+  #authDb:   admin
   replicaSet:
 
 logging:

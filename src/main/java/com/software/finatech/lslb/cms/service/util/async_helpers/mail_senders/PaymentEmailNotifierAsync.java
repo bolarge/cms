@@ -104,9 +104,7 @@ public class PaymentEmailNotifierAsync extends AbstractMailSender {
             String frontEndUrl = null;
             PaymentConfirmationApprovalRequest approvalRequest = (PaymentConfirmationApprovalRequest) mongoRepositoryReactive.find(Query.query(Criteria.where("paymentRecordDetailId").is(paymentRecordDetail.getId())), PaymentConfirmationApprovalRequest.class).block();
             if(paymentRecordDetail.getVersion() > 0){
-                logger.info(" Payment Approval Request  Record ID XXXX : " + approvalRequest.getId());
                 frontEndUrl = String.format("%s/offline-payment-approval-detail/%s", frontEndPropertyHelper.getFrontEndUrl(), approvalRequest.getId());
-                logger.info("Front End URL is: " + frontEndUrl);
                 model.put("frontEndUrl", frontEndUrl);
             }
             String presentDateString = DateTime.now().toString("dd-MM-yyyy");
