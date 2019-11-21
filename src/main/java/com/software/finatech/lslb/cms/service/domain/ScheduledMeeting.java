@@ -226,7 +226,7 @@ public class ScheduledMeeting extends AbstractFact {
         }
         if (scheduledMeetingPurpose == null) {
             //scheduledMeetingPurpose = (ScheduledMeetingPurpose) mongoRepositoryReactive.findById(this.meetingPurposeId, ScheduledMeetingStatus.class).block();
-            //BUG: java.lang.ClassCastException: com.software.finatech.lslb.cms.service.domain.ScheduledMeetingStatus cannot be cast to com.software.finatech.lslb.cms.service.domain.ScheduledMeetingPurpose (An error occurred while finding scheduled meetings)
+            //BUG: java.lang.ClassCastException: com.software.finatech.lslb.cms.service.domain.ScheduledMeetingStatus cannot be cast to com.software.finatech.lslb.cms.service.domain.ScheduledMeetingPurpose
             scheduledMeetingPurpose = (ScheduledMeetingPurpose) mongoRepositoryReactive.findById(this.meetingPurposeId, ScheduledMeetingPurpose.class).block();
             if (scheduledMeetingPurpose != null && scheduledMeetingPurposeMap != null) {
                 scheduledMeetingPurposeMap.put(this.meetingPurposeId, scheduledMeetingPurpose);

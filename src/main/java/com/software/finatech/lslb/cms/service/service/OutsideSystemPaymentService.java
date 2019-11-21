@@ -135,6 +135,7 @@ public class OutsideSystemPaymentService {
                 }
                 logger.info("Fee Amount is:  " + feeDto.getAmount());
                 //
+                paymentRecord.setId(UUID.randomUUID().toString());
                 paymentRecord.setAmount(feeDto.getAmount()); //Obtained from Fee amount value
                 paymentRecord.setAmountOutstanding(feeDto.getAmount()); //Subtract totalSumpaid from TotalAmount
                 paymentRecord.setAmountPaid(0); //Requires Confirmation  Approval

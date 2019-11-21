@@ -3,6 +3,7 @@ package com.software.finatech.lslb.cms.service.controller;
 import com.software.finatech.lslb.cms.service.domain.AuditAction;
 import com.software.finatech.lslb.cms.service.domain.AuditTrail;
 import com.software.finatech.lslb.cms.service.domain.FactObject;
+import com.software.finatech.lslb.cms.service.domain.LicenseType;
 import com.software.finatech.lslb.cms.service.dto.AuditActionDto;
 import com.software.finatech.lslb.cms.service.dto.AuditTrailDto;
 import com.software.finatech.lslb.cms.service.util.ErrorResponseUtil;
@@ -49,8 +50,8 @@ public class AuditTrailController extends BaseController {
     )
     @RequestMapping(method = RequestMethod.GET, value = "/auditActions", produces = "application/json")
     public Mono<ResponseEntity> getAllAuditAction() {
-        List<FactObject> auditAction = Mapstore.STORE.get("AuditAction").values().stream().collect(Collectors.toList());
-        //ArrayList<FactObject> authRoles = (ArrayList<FactObject>) mongoRepositoryReactive.findAll(AuthRole.class).toStream().collect(Collectors.toList());
+        //List<FactObject> auditAction = Mapstore.STORE.get("AuditAction").values().stream().collect(Collectors.toList());
+        ArrayList<AuditAction> auditAction = (ArrayList<AuditAction>) mongoRepositoryReactive.findAll(new Query(), AuditAction.class).toStream().collect(Collectors.toList());
         ArrayList<AuditActionDto> dto = new ArrayList<>();
         auditAction.forEach(entry -> {
             dto.add(((AuditAction) entry).convertToDto());
