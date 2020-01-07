@@ -53,7 +53,7 @@ public class MigrationController {
      * @param type
      * @return
      */
-    @Deprecated
+    //@Deprecated
     @RequestMapping(method = RequestMethod.POST, value = "/load-existing-operators")
     public Mono<ResponseEntity> create(@RequestParam("file") MultipartFile multipartFile,
                                        @RequestParam("type") String type) {

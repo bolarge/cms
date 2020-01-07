@@ -318,6 +318,12 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
             if (!canUpdateCase(loggedInUser)) {
                 return Mono.just(new ResponseEntity<>("User cannot make outcome on logged case,please check user role and user status", HttpStatus.BAD_REQUEST));
             }
+            //: Point of Failure :
+            //Source of Failure. Collection type enumeratedFacts is uninitialized from the call to ReferenceDataUtil.getAllEnumeratedFacts("LicenseTypes")
+            //Issues is that the Cache did not return the Cached LicenseType as earlier stored in the ConcurrentHashMap instance. BIG ISSUE
+
+            //LoggedCaseOutcome loggedCaseOutcome = findLoggedCaseOutcome(caseActionRequest.getCaseOutcomeId());
+
             LoggedCaseOutcome loggedCaseOutcome = findLoggedCaseOutcome(caseActionRequest.getCaseOutcomeId());
             if (loggedCaseOutcome == null) {
                 return Mono.just(new ResponseEntity<>(String.format("Logged case outcome with id %s not found",
@@ -417,7 +423,11 @@ public class LoggedCaseServiceImpl implements LoggedCaseService {
     }
 
     private LoggedCaseOutcome findLoggedCaseOutcome(String id) {
-        Collection<EnumeratedFact> factObjects = ReferenceDataUtil.getAllEnumeratedFacts("LoggedCaseOutcome");
+
+        //Collection<EnumeratedFact> factObjects = ReferenceDataUtil.getAllEnumeratedFacts("LoggedCaseOutcome");
+
+        ArrayList<LicenseType> factObjects = (ArrayList<LicenseType>)mongoRepositoryReactive.findAll(new Query(),LoggedCaseOutcome.class).toStream().collect(Collectors.toList());
+
         if (!factObjects.isEmpty()) {
             for (FactObject factObject : factObjects) {
                 LoggedCaseOutcome loggedCaseOutcome = (LoggedCaseOutcome) factObject;
