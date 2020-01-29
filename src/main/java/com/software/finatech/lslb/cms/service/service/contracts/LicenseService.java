@@ -1,11 +1,9 @@
 package com.software.finatech.lslb.cms.service.service.contracts;
 
-import com.software.finatech.lslb.cms.service.domain.ApplicationForm;
-import com.software.finatech.lslb.cms.service.domain.License;
-import com.software.finatech.lslb.cms.service.domain.LoggedCase;
-import com.software.finatech.lslb.cms.service.domain.PaymentRecord;
+import com.software.finatech.lslb.cms.service.domain.*;
 import com.software.finatech.lslb.cms.service.dto.EnumeratedFactDto;
 import com.software.finatech.lslb.cms.service.dto.LicenseRequestDto;
+import org.joda.time.LocalDate;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
@@ -94,5 +92,12 @@ public interface LicenseService {
                                         String gameTypeId,
                                         String licenseTypeId);
 
+    License findMostRecentGameTypeLicense(String institution, String gameType);
+
     ApplicationForm getApprovedApplicationFormForInstitution(String institutionId, String gameTypeId);
+
+    //Access modified to Public
+    public void generateLegacyLicenses(License license, int duration);
+
+    public LocalDate getNewLicenseEndDate(License latestLicense, GameType gameType) throws Exception;
 }

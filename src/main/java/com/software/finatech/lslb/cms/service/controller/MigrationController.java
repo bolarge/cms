@@ -55,13 +55,13 @@ public class MigrationController {
      */
     //@Deprecated
     @RequestMapping(method = RequestMethod.POST, value = "/load-existing-operators")
-    public Mono<ResponseEntity> create(@RequestParam("file") MultipartFile multipartFile,
+    public Mono<ResponseEntity> migrateExistingOperatorsFromCSV(@RequestParam("file") MultipartFile multipartFile,
                                        @RequestParam("type") String type) {
         try {
             if (StringUtils.equalsIgnoreCase("licenced", type)) {
                 existingOperatorLoader.loadFromCsv(multipartFile);
             }
-            if (StringUtils.equalsIgnoreCase("aip", type) || StringUtils.equalsIgnoreCase("suspended", type)) {
+            if (StringUtils.equalsIgnoreCase("aip", type) || StringUtils.equalsIgnoreCase("suspended", type)) { // Operators in AIP or SUSPENDED status processed outside of the system
                 existingOperatorLoader.loadAIPOrSuspendedFromCsv(multipartFile);
             }
             return Mono.just(new ResponseEntity<>("Done", HttpStatus.OK));
@@ -157,7 +157,7 @@ public class MigrationController {
      * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/upload-operator-from-json")
-    public Mono<ResponseEntity> uploadInstitution(@RequestBody MigratedInstitutionUpload migratedInstitutionUpload) {
+    public Mono<ResponseEntity> migrateAnOperatorFromJSON(@RequestBody MigratedInstitutionUpload migratedInstitutionUpload) {
         try {
             Institution institution = existingOperatorLoader.loadMigratedInstitutionUpload(migratedInstitutionUpload);
             return OKResponseUtil.OKResponse(institution.convertToFullDto());

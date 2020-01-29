@@ -142,7 +142,7 @@ public class ExistingOperatorLoader {
             String completeData = new String(bytes);
             String[] rows = completeData.split("\\r?\\n");
 
-            for (int i = 2; i < rows.length; i++) {
+            for (int i = 1; i < rows.length; i++) {
                 // String[] columns = rows[i].split(",");
                 String[] columns = rows[i].split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
 

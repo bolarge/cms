@@ -1320,7 +1320,7 @@ public class LicenseServiceImpl implements LicenseService {
         }
     }
 
-    private LocalDate getNewLicenseEndDate(License latestLicense, GameType gameType) throws Exception {
+    public LocalDate getNewLicenseEndDate(License latestLicense, GameType gameType) throws Exception {
         LocalDate newLicenseStartDate = latestLicense.getExpiryDate();
         String licenseTypeId = latestLicense.getLicenseTypeId();
         if (StringUtils.equals(LicenseTypeReferenceData.AGENT_ID, licenseTypeId)) {
@@ -1460,6 +1460,14 @@ public class LicenseServiceImpl implements LicenseService {
         return (License) mongoRepositoryReactive.find(query, License.class).block();
     }
 
+    public License findMostRecentGameTypeLicense(String institution, String gameType) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("institutionId").is(institution));
+        query.addCriteria(Criteria.where("gameTypeId").is(gameType));
+        Sort sort = new Sort(Sort.Direction.DESC, "expiryDate");
+        query.with(sort);
+        return (License) mongoRepositoryReactive.find(query, License.class).block();
+    }
 
     public String getApprovedApplicationTradeNameForOperator(String institutionId, String gameTypeId) {
         ApplicationForm applicationForm = getApprovedApplicationFormForInstitution(institutionId, gameTypeId);
@@ -1482,7 +1490,7 @@ public class LicenseServiceImpl implements LicenseService {
     }
 
 
-    protected void generateLegacyLicenses(License license, int duration) {
+    public void generateLegacyLicenses(License license, int duration) {
         int days_diff;
         days_diff = Days.daysBetween(license.getExpiryDate(), LocalDate.now()).getDays();
         String licenseNumber = "";

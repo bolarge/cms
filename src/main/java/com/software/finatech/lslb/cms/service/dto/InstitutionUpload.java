@@ -9,6 +9,7 @@ public class InstitutionUpload extends BaseInstitutionUpload {
     private String description;
     private String line;
     private InstitutionLoadDetails loadDetails;
+    private String gameType;
 
     public InstitutionLoadDetails getLoadDetails() {
         return loadDetails;
@@ -56,5 +57,13 @@ public class InstitutionUpload extends BaseInstitutionUpload {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getGameType() {
+        return gameType;
+    }
+
+    public void setGameType(String gameType) {
+        this.gameType = gameType;
     }
 }
