@@ -45,7 +45,7 @@ mongodb:
   hosts: 127.0.0.1
   username: cmsadmin
   password: finat3ch
-  database: LslbCMSDb
+  database: LslbCMSDb_JAN24
   authDb:  LslbCMSDb
   #authDb:   admin
   replicaSet:
